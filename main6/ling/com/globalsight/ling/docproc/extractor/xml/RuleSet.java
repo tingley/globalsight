@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,8 +37,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import com.globalsight.ling.common.srccomment.SrcCmtXmlTag;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.ExtractorExceptionConstants;
+import com.globalsight.ling.docproc.extractor.xml.xmlrule.CommentRuleItem;
 import com.globalsight.ling.docproc.extractor.xml.xmlrule.RuleItemManager;
 
 /**
@@ -45,6 +48,9 @@ import com.globalsight.ling.docproc.extractor.xml.xmlrule.RuleItemManager;
  */
 public class RuleSet implements EntityResolver, ErrorHandler
 {
+	static private final Logger logger = Logger
+            .getLogger(RuleSet.class);
+	
     private DOMParser m_parser = null;
     private boolean m_useEmptyTag = true;
     public static final String INTERNAL = "internal";
@@ -96,7 +102,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
             XmlFilterTags xmlFilterTags, String format)
             throws ExtractorException
     {
-        Map ruleMap = buildRules(toBeExtracted);
+        Map ruleMap = buildRules(toBeExtracted, format);
 
         try
         {
@@ -109,6 +115,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     .getContentInclTags();
             List<XmlFilterSidTag> sidTags = xmlFilterTags.getSidTags();
             List<XmlFilterTag> internalTag = xmlFilterTags.getInternalTag();
+            List<SrcCmtXmlTag> srcCmtXmlTags = xmlFilterTags.getSrcCmtXmlTag();
 
             ruleMap = buildPreserveWhitespaceTags(toBeExtracted, ruleMap,
                     wsPreserveTags);
@@ -118,6 +125,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     contentInclTags);
             ruleMap = buildSidTags(toBeExtracted, ruleMap, sidTags);
             ruleMap = buildInternalTag(toBeExtracted, ruleMap, internalTag);
+            ruleMap = buildSrcCmtXmlTag(toBeExtracted, ruleMap, srcCmtXmlTags);
 
             // comment this to translate filter data
             // if (IFormatNames.FORMAT_OPENOFFICE_XML.equals(format))
@@ -131,6 +139,9 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     ExtractorExceptionConstants.XML_EXTRACTOR_RULES_ERROR,
                     e.toString());
         }
+        
+        // call GC here to free some memory used in building rule
+        System.gc();
 
         return ruleMap;
     }
@@ -163,6 +174,83 @@ public class RuleSet implements EntityResolver, ErrorHandler
                     }
 
                     ruleMap.put(node, newRule);
+                }
+            }
+        }
+
+        return ruleMap;
+    }
+    
+    private Map buildSrcCmtXmlTag(Document toBeExtracted, Map ruleMap,
+            List<SrcCmtXmlTag> srcCmtXmlTags) throws Exception
+    {
+        if (srcCmtXmlTags != null && srcCmtXmlTags.size() > 0)
+        {
+            if (ruleMap == null)
+            {
+                ruleMap = new HashMap();
+            }
+
+            for (SrcCmtXmlTag srcCmtXmlTag : srcCmtXmlTags)
+            {
+                List<Node> matchedNodes = srcCmtXmlTag.getMatchedNodeList(toBeExtracted);
+                
+                // set src comment nodes' properties
+                for (int i = 0; i < matchedNodes.size(); i++)
+                {
+                    Node node = matchedNodes.get(i);
+                    if (srcCmtXmlTag.isFromAttribute())
+                    {
+                        String atName = srcCmtXmlTag.getAttributeName();
+                        Node at = node.getAttributes().getNamedItem(atName);
+                        
+                        CommentRuleItem.setSrcCommentNodeProperties(at, ruleMap);
+                    }
+                    else
+                    {
+                        
+                        CommentRuleItem.setSrcCommentNodeProperties(node, ruleMap);
+                    }
+                }
+                
+                // set src comments for other nodes
+                for (int i = 0; i < matchedNodes.size(); i++)
+                {
+                    Node node = matchedNodes.get(i);
+                    String srcComment = null;
+                    if (srcCmtXmlTag.isFromAttribute())
+                    {
+                        String atName = srcCmtXmlTag.getAttributeName();
+                        Node at = node.getAttributes().getNamedItem(atName);
+
+                        if (at != null)
+                        {
+                            srcComment = at.getNodeValue();
+                        }
+
+                        if (srcComment != null)
+                        {
+                            CommentRuleItem.updateCommendForChildTextNode(ruleMap, node,
+                                    srcComment);
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            srcComment = node.getChildNodes().item(0).getNodeValue();
+                        }
+                        catch (Exception e)
+                        {
+                            // ignore e
+                            srcComment = null;
+                        }
+
+                        if (srcComment != null)
+                        {
+                            CommentRuleItem.updateCommendForNextTextNode(ruleMap, node, srcComment);
+                        }
+                    }
                 }
             }
         }
@@ -766,7 +854,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
      * Returns a hashmap containing nodes (as keys) and the rule matching a node
      * (as value).
      */
-    public Map buildRules(Document toBeExtracted) throws ExtractorException
+    private Map buildRules(Document toBeExtracted, String format) throws ExtractorException
     {
         Document ruleDocument = m_parser.getDocument();
 
@@ -795,7 +883,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 nl = XPathAPI.selectNodeList(root, rulesetXpath);
             }
 
-            return getRuleMap(nl, toBeExtracted);
+            return getRuleMap(nl, toBeExtracted, format);
         }
         catch (Exception e)
         {
@@ -805,7 +893,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
         }
     }
 
-    private Map getRuleMap(NodeList nl, Document toBeExtracted)
+    private Map getRuleMap(NodeList nl, Document toBeExtracted, String format)
             throws Exception
     {
         Map ruleMap = new HashMap();
@@ -821,7 +909,7 @@ public class RuleSet implements EntityResolver, ErrorHandler
                 if (ruleNode.getNodeType() == Node.ELEMENT_NODE)
                 {
                     RuleItemManager.applyRule(ruleNode, toBeExtracted, ruleMap,
-                            namespaces);
+                            namespaces, format);
                 }
             }
         }

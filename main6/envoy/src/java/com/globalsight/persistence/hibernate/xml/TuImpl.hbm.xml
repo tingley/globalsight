@@ -76,6 +76,9 @@
     
     <property name="repeated" column="IS_REPEATED" type="yes_no"
 		not-null="false" />
-		
+
+    <property name="translate" column="TRANSLATE" type="string"
+		not-null="false" />
+
 	</class>
 </hibernate-mapping>

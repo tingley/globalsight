@@ -287,7 +287,8 @@ function checkAnalysisError()
         node = dom.selectSingleNode("/importOptions/fileOptions/fileType");
 
         if (node.text == "<%=ImportOptions.TYPE_XML%>" ||
-            node.text == "<%=ImportOptions.TYPE_MTF%>")
+            node.text == "<%=ImportOptions.TYPE_MTF%>" ||
+            node.text == "<%=ImportOptions.TYPE_TBX%>")
         {
             url = "<%=urlPrevXml%>";
         }

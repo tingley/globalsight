@@ -16,20 +16,16 @@
  */
 package com.globalsight.ling.tm2.indexer;
 
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.ling.tm2.population.SegmentsForSave;
-import com.globalsight.ling.tm2.BaseTmTu;
-import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
-import com.globalsight.everest.util.system.SystemConfiguration;
-
-import java.util.Collection;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.sql.Connection;
+import java.util.Map;
+
+import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
+import com.globalsight.ling.tm2.population.SegmentsForSave;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * TmSegmentIndexer class is responsible for saving index tokens to
@@ -44,9 +40,11 @@ public class TmSegmentIndexer
     {
         try
         {
-            SystemConfiguration sc = SystemConfiguration.getInstance();
-            c_indexesTarget
-                = sc.getBooleanParameter("leverager.targetIndexing");
+            // Fix for GBS-2448
+            // SystemConfiguration sc = SystemConfiguration.getInstance();
+            // c_indexesTarget=
+            // sc.getBooleanParameter("leverager.targetIndexing");
+            c_indexesTarget = true;
         }
         catch(Exception e)
         {

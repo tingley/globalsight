@@ -58,7 +58,8 @@ public interface PermissionManager
     **/
     public Collection<PermissionGroup> getAllPermissionGroups()
     throws PermissionException, RemoteException;
-
+    public Collection getPermissionGroupsBycondition(String condition)
+            throws PermissionException, RemoteException;
     /**
      ** Get a list of all existing PermissionGroup objects in the database with
      *  specified company id.
@@ -74,6 +75,16 @@ public interface PermissionManager
      * @return Collection of PermissionGroups
      */
     public Collection<PermissionGroup> getAllPermissionGroupsForUser(String p_userId)
+    throws PermissionException, RemoteException;
+    
+    /**
+     * Queries all permissiongroup or project names for this user
+     * 
+     * @param tableName project or permission
+     * @return Collection of PermissionGroup name or project name
+     */
+    
+    public  Collection<Object[]> getAlltableNameForUser(String tableName)
     throws PermissionException, RemoteException;
 
     /**

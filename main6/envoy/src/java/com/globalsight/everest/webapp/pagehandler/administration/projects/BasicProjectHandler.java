@@ -265,12 +265,20 @@ public class BasicProjectHandler extends PageHandler
         while (iter.hasNext())
         {
             String username = (String) iter.next();
-            User u = ServerProxy.getUserManager().getUser(username);
-            if (companyName.equalsIgnoreCase(u.getCompanyName()))
+            try
             {
-                pms.add(u); 
-            } else if (UserUtil.isSuperPM(u.getUserId())) {
-                    pms.add(u);
+                User u = ServerProxy.getUserManager().getUser(username);
+                if (companyName.equalsIgnoreCase(u.getCompanyName()))
+                {
+                    pms.add(u); 
+                }
+                else if (UserUtil.isSuperPM(u.getUserId()))
+                {
+                	pms.add(u);
+                }
+            }
+            catch (Exception ignore) {
+
             }
         }
         Collections.sort(pms, userComparator);

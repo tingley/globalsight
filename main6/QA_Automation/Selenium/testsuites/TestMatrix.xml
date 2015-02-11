@@ -6,7 +6,7 @@
   
   <test name="testMatrixJobPrepare" preserve-order="true">
     <classes>
-      <class name="com.globalsight.selenium.testcases.testmatrix.testMatrixJobPrepare"/>
+      <class name="com.globalsight.selenium.testcases.testmatrix.TestMatrixJobPrepare"/>
     </classes>
   </test> 
   
@@ -19,6 +19,12 @@
   <test name="ExcelFilterTest" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.testmatrix.ExcelFilterTest"/>
+    </classes>
+  </test> 
+  
+    <test name="TBMaintenanceSearchFieldTest" preserve-order="true">
+    <classes>
+      <class name="com.globalsight.selenium.testcases.testmatrix.TBMaintenanceSearchFieldTest"/>
     </classes>
   </test> 
   

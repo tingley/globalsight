@@ -1,20 +1,18 @@
 package com.globalsight.selenium.testcases.smoketest;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
+import org.testng.Reporter;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.BasicFuncs;
 import com.globalsight.selenium.functions.CVSFuncs;
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.CVSFileProfiles;
 import com.globalsight.selenium.pages.CVSModule;
 import com.globalsight.selenium.pages.CVSModuleMapping;
 import com.globalsight.selenium.pages.CVSServer;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /**
  * This class is used for testing
@@ -24,11 +22,10 @@ import com.thoughtworks.selenium.Selenium;
  * @author leon
  * 
  */
-public class CVSBasic
+public class CVSBasic extends BaseTestCase
 {
-    private Selenium selenium;
-    private BasicFuncs basicFuncs;
-    private CVSFuncs cvsFuncs;
+    private BasicFuncs basicFuncs = new BasicFuncs();
+    private CVSFuncs cvsFuncs = new CVSFuncs();
     private String cvsServerName = "cvsSeverTest";
 
     private String CVSServerNameInCVSMapping = "cvsSeverTest-CVSTest";
@@ -40,21 +37,6 @@ public class CVSBasic
     private String srcLocale = "English (United States) [en_US]";
     private String htmlFileProfile = "HTMLSmoke";
 
-    @BeforeClass
-    public void beforeClass()
-    {
-        selenium = CommonFuncs.initSelenium();
-        CommonFuncs.loginSystemWithAdmin(selenium);
-        basicFuncs = new BasicFuncs();
-        cvsFuncs = new CVSFuncs();
-    }
-
-    @AfterClass
-    public void afterClass()
-    {
-        selenium.stop();
-    }
-
     /**
      * Create and edit CVS Server
      */
@@ -63,13 +45,14 @@ public class CVSBasic
     {
         // Create
         cvsFuncs.createCVSServer(selenium, "null");
+
         // Check the CVS Server have been created
         String CVSServer_HOST = ConfigUtil.getConfigData("CVSServer_HOST");
         String CVSServerRepositoryName = ConfigUtil
                 .getConfigData("CVSServerRepositoryName");
         String CVSServerUserName = ConfigUtil
                 .getConfigData("CVSServerUserName");
-        String Sandbox = ConfigUtil.getConfigData("Sandbox");
+        String Sandbox = ConfigUtil.getConfigData("sandbox");
         try
         {
             Assert.assertTrue(basicFuncs.isPresentInTable(selenium,
@@ -85,8 +68,8 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic. " + e.getMessage());
+            return;
         }
 
         // Edit
@@ -97,15 +80,13 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic. " + e.getMessage());
+            return;
         }
-        selenium.click(CVSServer.EDIT_BUTTON);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        clickAndWait(selenium, CVSServer.EDIT_BUTTON);
         selenium.getConfirmation();
         selenium.type(CVSServer.SERVERNAME, cvsServerName);
-        selenium.click(CVSServer.SAVE_BUTTON);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        clickAndWait(selenium, CVSServer.SAVE_BUTTON);
         try
         {
             Assert.assertTrue(basicFuncs.isPresentInTable(selenium,
@@ -113,16 +94,14 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic. " + e.getMessage());
         }
     }
 
     /**
      * Create CVS Module
      */
-    @Test(dependsOnMethods =
-    { "cvsServer" })
+    @Test(dependsOnMethods = { "cvsServer" })
     public void cvsModule()
     {
         // Create
@@ -139,16 +118,15 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.cvsModule(). "
+                    + e.getMessage());
         }
     }
 
     /**
      * Create/Edit CVS module Mapping
      */
-    @Test(dependsOnMethods =
-    { "cvsModule" })
+    @Test(dependsOnMethods = { "cvsModule" })
     public void cvsModuleMapping()
     {
         String sourceModule = "sandBox\\module01\\GSCVSAutomation\\moduleTest\\en_US";
@@ -171,15 +149,14 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.cvsModuleMapping(). "
+                    + e.getMessage());
+            return;
         }
-        selenium.click(CVSModuleMapping.EDIT_BUTTON);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        clickAndWait(selenium, CVSModuleMapping.EDIT_BUTTON);
         selenium.type(CVSModuleMapping.SOURCEMODULE, "edit");
         selenium.type(CVSModuleMapping.TARGETMODULE, "edit");
-        selenium.click(CVSModuleMapping.SAVE_BUTTON);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        clickAndWait(selenium, CVSModuleMapping.SAVE_BUTTON);
         try
         {
             Assert.assertTrue(basicFuncs.isPresentInTable(selenium,
@@ -189,16 +166,15 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.cvsModuleMapping(). "
+                    + e.getMessage());
         }
     }
 
     /**
      * Create/Edit CVS File Profile
      */
-    @Test(dependsOnMethods =
-    { "cvsModuleMapping" })
+    @Test(dependsOnMethods = { "cvsModuleMapping" })
     public void createCVSFileProfiles()
     {
         cvsFuncs.createCVSFileProfiles(selenium, project, serverInFileProfile,
@@ -216,93 +192,84 @@ public class CVSBasic
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.createCVSFileProfiles(). "
+                    + e.getMessage());
         }
     }
 
     /**
      * Delete test
      */
-    @Test(dependsOnMethods =
-    { "createCVSFileProfiles" })
+    @Test(dependsOnMethods = { "createCVSFileProfiles" })
     public void delete()
     {
         // delete file profile
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSFILEPROFILES_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.CVS_FILE_PROFILES_SUBMENU);
         try
         {
             basicFuncs.selectRadioButtonFromTable(selenium,
                     CVSFileProfiles.CVSFILEPROFILE_TABLE, project);
-            selenium.click(CVSFileProfiles.REMOVE_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            clickAndWait(selenium, CVSFileProfiles.REMOVE_BUTTON);
             selenium.getConfirmation();
             Assert.assertFalse(basicFuncs.isPresentInTable(selenium,
                     CVSFileProfiles.CVSFILEPROFILE_TABLE, project));
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.delete(). " + e.getMessage());
+            return;
         }
         // delete module mapping
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSMODULEMAPPINGS_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.CVS_MODULE_MAPPINGS_SUBMENU);
         try
         {
             basicFuncs.selectRadioButtonFromTable(selenium,
                     CVSModuleMapping.CVSMODULEMAPPINGS_TABLE, "edit", 3);
-            selenium.click(CVSModuleMapping.REMOVE_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            clickAndWait(selenium, CVSModuleMapping.REMOVE_BUTTON);
             selenium.getConfirmation();
             Assert.assertFalse(basicFuncs.isPresentInTable(selenium,
                     CVSModuleMapping.CVSMODULEMAPPINGS_TABLE, "edit", 3));
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.delete(). " + e.getMessage());
+            return;
         }
         // delete module
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSMODULES_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.CVS_MODULES_SUBMENU);
         try
         {
             basicFuncs.selectRadioButtonFromTable(selenium,
                     CVSModule.CVSMODULE_TABLE, moduleForGS);
-            selenium.click(CVSModule.REMOVE_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            clickAndWait(selenium, CVSModule.REMOVE_BUTTON);
             selenium.getConfirmation();
             Assert.assertFalse(basicFuncs.isPresentInTable(selenium,
                     CVSModule.CVSMODULE_TABLE, moduleForGS));
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.delete(). " + e.getMessage());
+            return;
         }
         // delete cvs server
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSSERVERS_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.CVS_SERVERS_SUBMENU);
         try
         {
             basicFuncs.selectRadioButtonFromTable(selenium,
                     CVSServer.CVSServer_Table, cvsServerName);
-            selenium.click(CVSServer.REMOVE_BUTTON);
-            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+            clickAndWait(selenium, CVSServer.REMOVE_BUTTON);
             selenium.getConfirmation();
             Assert.assertFalse(basicFuncs.isPresentInTable(selenium,
                     CVSServer.CVSServer_Table, cvsServerName));
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Reporter.log("Error found in CVSBasic.delete(). " + e.getMessage());
+            return;
         }
     }
 }

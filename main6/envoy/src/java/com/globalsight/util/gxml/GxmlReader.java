@@ -186,7 +186,7 @@ public class GxmlReader
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
             throw new GxmlException(GxmlException.MSG_FAILED_TO_GET_PARSER,
                 null, e);
         }
@@ -353,7 +353,7 @@ public class GxmlReader
         catch (Exception e)
         {
             CATEGORY.error("Unexpected error in element " + name, e);
-            throw new SAXException(GeneralException.getStackTraceString(e));
+            throw new SAXException(e);
         }
     }
 
@@ -402,7 +402,7 @@ public class GxmlReader
         catch (Exception e)
         {
             CATEGORY.error("Unexpected error in element " + name, e);
-            throw new SAXException(GeneralException.getStackTraceString(e));
+            throw new SAXException(e);
         }
     }
 
@@ -540,8 +540,7 @@ public class GxmlReader
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
-            e.printStackTrace();
+            CATEGORY.error(e.getMessage(), e);
         }
     }
 

@@ -1,0 +1,14 @@
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\WindowsPEConverter.exe.config
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\obj\Debug\ResolveAssemblyReference.cache
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\GSIcon.ico
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\WindowsPEConverter.exe
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\WindowsPEConverter.pdb
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\GlobalSight.Common.dll
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\GlobalSight.Common.pdb
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\obj\Debug\WindowsPEConverter.exe
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\obj\Debug\WindowsPEConverter.pdb
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\obj\Debug\GlobalSight.WinPEConverter.MainForm.resources
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\obj\Debug\GenerateResource.read.1.tlog
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\obj\Debug\GenerateResource.write.1.tlog
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\Mono.Cecil.dll
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\WindowsPEConverter\bin\Debug\ILSpy.BamlDecompiler.Plugin.dll

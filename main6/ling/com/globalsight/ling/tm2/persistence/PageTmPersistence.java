@@ -214,15 +214,15 @@ public class PageTmPersistence
         String tuv = p_translatable ? PAGE_TM_TUV_T : PAGE_TM_TUV_L;
 
         StringBuffer sf = new StringBuffer();
-        sf.append("DELETE from tuv WHERE exists ");
-        sf.append("(SELECT 'X' FROM tu_table ");
-        sf.append("WHERE tu_table.tm_id = ? AND tuv.tu_id = tu_table.id) ");
-        sf.append("AND locale_id IN ");
+        sf.append("delete _tuv_ from _tuv_, _tu_ ");
+        sf.append("where _tuv_.tu_id = _tu_.id ");
+        sf.append("and _tu_.tm_id = ? ");
+        sf.append("and _tuv_.locale_id in ");
         sf.append(p_localeList);
 
         String sql = sf.toString();
-        sql = sql.replaceAll("tuv", tuv);
-        sql = sql.replaceAll("tu_table", tu);
+        sql = sql.replaceAll("_tuv_", tuv);
+        sql = sql.replaceAll("_tu_", tu);
 
         return sql;
     }

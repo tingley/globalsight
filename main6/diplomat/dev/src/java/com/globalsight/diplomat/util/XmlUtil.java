@@ -17,6 +17,7 @@
 package com.globalsight.diplomat.util;
 
 import java.util.Vector;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.InputStream;
@@ -29,6 +30,7 @@ import org.apache.xerces.parsers.DOMParser;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -368,8 +370,14 @@ public class XmlUtil
 
     public static String format(String xml)
     {
-        XmlParser parser = XmlParser.hire();
+        return format(xml, null);
+    }
 
+    public static String format(String xml, EntityResolver entityResolver) {
+        XmlParser parser = XmlParser.hire();
+        if (entityResolver != null) {
+            parser.setEntityResolver(entityResolver);
+        }
         org.dom4j.Document dom = parser.parseXml(xml);
         OutputFormat format = new OutputFormat();
         format.setNewlines(true);
@@ -394,11 +402,11 @@ public class XmlUtil
             }
             catch (IOException e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
 
-        return writer.getBuffer().toString();
+        return writer.getBuffer().toString();        
     }
 
     /**
@@ -416,5 +424,25 @@ public class XmlUtil
         // validate
         parser.parse(is);
         return parser.getDocument().getDocumentElement();
+    }
+    
+    /**
+     * Construct an empty entity resolver to avoid invalid entity link problem
+     * in DOCTYPE.
+     */
+    public static EntityResolver getNullEntityResolver() {
+        EntityResolver result = new EntityResolver() {
+            String emptyDtd = "";
+            ByteArrayInputStream byteIs = new ByteArrayInputStream(emptyDtd
+                    .getBytes());
+
+            public InputSource resolveEntity(String publicId, String systemId)
+                    throws IOException
+            {
+                return new InputSource(byteIs);
+            }
+        };
+        
+        return result;
     }
 }

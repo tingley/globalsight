@@ -122,6 +122,11 @@ namespace GlobalSight.Office2007Converters
 			return m_fileExtensionSearchPattern;
 		}
 
+        public string GetTestFileToWatch()
+        {
+            return "pptx*.test";
+        }
+
 		/// <summary>
 		/// Quits the PowerPoint Application.
 		/// </summary>

@@ -13,6 +13,7 @@
                 com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.administration.vendors.VendorConstants,
                 com.globalsight.util.GlobalSightLocale,
+                com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
                 java.util.Iterator,
                 java.util.Locale,
                 java.util.ResourceBundle" 
@@ -81,7 +82,7 @@
         access = lbNotAllowed;
     String status = vendor.getStatus();
     
-    String userName  = vendor.getUserId();
+    String userName  = UserUtil.getUserNameById(vendor.getUserId());
     if (userName == null) userName = "";
 %>
 <!-- This JSP is envoy/administration/vendors/viewBasic.jsp -->

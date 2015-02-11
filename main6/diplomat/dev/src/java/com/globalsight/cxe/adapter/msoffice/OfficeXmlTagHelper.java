@@ -110,6 +110,14 @@ public class OfficeXmlTagHelper
     private void mergeTag(File f, String content, List<String> wrs,
             List<Integer> indexes) throws IOException
     {
+        // ignore slide notes files
+        if (f.getName().startsWith("notesSlide")
+                || f.getName().startsWith("slideLayout"))
+        {
+            return;
+        }
+
+        StringBuffer contentSB = new StringBuffer(content);
         List<Integer> mergeindexes = getMergeindexes(wrs, indexes);
 
         for (int i = wrs.size() - 1; i > 0; i--)
@@ -123,92 +131,222 @@ public class OfficeXmlTagHelper
                 if (mergedTag != last)
                 {
                     wrs.set(i - 1, mergedTag);
-                    content = content.replace(last + wr, mergedTag);
+                    String oldStr = last + wr;
+                    String newStr = mergedTag;
+
+                    int oldLen = oldStr.length();
+                    int index = contentSB.lastIndexOf(oldStr);
+                    if (index > -1)
+                    {
+                        contentSB = contentSB.replace(index, index + oldLen,
+                                newStr);
+                    }
                 }
             }
         }
 
-        FileUtil.writeFile(f, content, "utf-8");
+        FileUtil.writeFile(f, contentSB.toString(), "utf-8");
+    }
+
+    private static boolean isSameSyle(String f1, String f2, String style)
+    {
+        if (f1.indexOf(style) > 0 && f2.indexOf(style) < 0)
+        {
+            return false;
+        }
+
+        if (f2.indexOf(style) > 0 && f1.indexOf(style) < 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean needMergeWRStyle(String f1, String f2)
+    {
+        List<String> styles1 = getStyle(f1);
+        List<String> styles2 = getStyle(f2);
+
+        if (styles1.size() != styles2.size())
+            return false;
+
+        for (int i = 0; i < styles1.size(); i++)
+        {
+            String s1 = styles1.get(i);
+            String s2 = styles2.get(i);
+
+            if (!s1.equals(s2))
+                return false;
+        }
+
+        return true;
+    }
+
+    private static List<String> getStyle(String s)
+    {
+        List<String> styles = new ArrayList<String>();
+        Pattern p = Pattern.compile("<w:rStyle [^>]*?>");
+        Matcher m = p.matcher(s);
+
+        while (m.find())
+        {
+            styles.add(m.group());
+        }
+
+        return styles;
     }
 
     public static String getMergedTags(int filetype, String f1, String f2)
     {
         if (filetype == OfficeXmlHelper.OFFICE_DOCX)
         {
-            if (f1.indexOf("<w:br/>") > 0 || f2.indexOf("<w:br/>") > 0)
+        	if (!needMergeWRStyle(f1, f2))
+            {
                 return f1;
+            }
+        	
+            boolean isOrderChanged = false;
+            boolean matched = false;
 
-            if (f1.indexOf("<w:b/>") > 0 && f2.indexOf("<w:b/>") < 0)
-                return f1;
-
-            if (f2.indexOf("<w:b/>") > 0 && f1.indexOf("<w:b/>") < 0)
-                return f1;
-
-            if (f1.indexOf("</w:t>") > 0 && f2.indexOf("</w:t>") < 0)
-                return f1;
-
-            if (f2.indexOf("</w:t>") > 0 && f1.indexOf("</w:t>") < 0)
-                return f1;
+            String s1 = f1.replaceAll("<[^>]*>", "");
+            String s2 = f2.replaceAll("<[^>]*>", "");
 
             String firstTemp = f1;
             String secondTemp = f2;
             String first = f1;
             String second = f2;
 
-            firstTemp = firstTemp.replaceAll("<w:r>", "");
-            firstTemp = firstTemp.replaceAll("<w:r [^>]*>", "");
-            firstTemp = firstTemp.replaceAll("<w:t>[^<]*?</w:t>", "");
-            firstTemp = firstTemp.replaceAll("<w:t [^>]*>[^<]*?</w:t>", "");
+            boolean isSpace1 = s1.length() != 0 && s1.trim().length() == 0;
+            boolean isSpace2 = s2.length() != 0 && s2.trim().length() == 0;
 
-            secondTemp = secondTemp.replaceAll("<w:r>", "");
-            secondTemp = secondTemp.replaceAll("<w:r [^>]*>", "");
-            secondTemp = secondTemp.replaceAll("<w:t>[^<]*?</w:t>", "");
-            secondTemp = secondTemp.replaceAll("<w:t [^>]*>[^<]*?</w:t>", "");
-
-            boolean isOrderChanged = false;
-            if ("</w:r>".equals(firstTemp))
+            if (isSpace1 || isSpace2)
             {
-                isOrderChanged = true;
-            }
+                matched = true;
 
-            if (!isOrderChanged)
-            {
-                String temp = secondTemp.replaceAll(
-                        "<w:rFonts w:hint=\"[^\"]*\"/>", "");
-                temp = temp.replaceAll(" w:hint=\"[^\"]*\"", "");
-                if (temp.equals(firstTemp))
+                if (isSpace1)
                 {
+                    first = f2;
+                    second = f1;
                     isOrderChanged = true;
                 }
             }
-
-            if (isOrderChanged)
+            else
             {
-                String temp = firstTemp;
-                firstTemp = secondTemp;
-                secondTemp = temp;
+                if (f1.indexOf("<w:br/>") > 0 || f2.indexOf("<w:br/>") > 0)
+                    return f1;
 
-                first = f2;
-                second = f1;
-            }
+                // do not merge if have diffrent styles
+                // b
+                if (!isSameSyle(f1, f2, "<w:b/>"))
+                    return f1;
 
-            boolean matched = secondTemp.equals(firstTemp) || isOrderChanged;
+                // strike out line
+                if (!isSameSyle(f1, f2, "<w:strike/>"))
+                    return f1;
 
-            if (!matched && "</w:r>".equals(secondTemp))
-            {
-                matched = true;
-            }
+                // italic style
+                if (!isSameSyle(f1, f2, "<w:i/>"))
+                    return f1;
 
-            if (!matched)
-            {
-                String temp = firstTemp.replaceAll(
-                        "<w:rFonts w:hint=\"[^\"]*\"/>", "");
-                if (temp.equals(secondTemp))
+                // under line
+                if (!isSameSyle(f1, f2, "<w:u "))
+                    return f1;
+
+                // vertAlign
+                if (!isSameSyle(f1, f2, "<w:vertAlign "))
+                    return f1;
+
+                // color
+                if (!isSameSyle(f1, f2, "<w:color "))
+                    return f1;
+
+                // highlight
+                if (!isSameSyle(f1, f2, "<w:highlight "))
+                    return f1;
+
+                // rStyle
+                if (!isSameSyle(f1, f2, "<w:rStyle "))
+                    return f1;
+
+                // sz
+                if (!isSameSyle(f1, f2, "<w:sz "))
+                    return f1;
+
+                // vanish
+                if (!isSameSyle(f1, f2, "<w:vanish"))
+                    return f1;
+
+                // make sure include text both in f1 and f2
+                if (f1.indexOf("</w:t>") > 0 && f2.indexOf("</w:t>") < 0)
+                    return f1;
+
+                if (f2.indexOf("</w:t>") > 0 && f1.indexOf("</w:t>") < 0)
+                    return f1;
+
+                // do not merge if f2 has <w:tab/>
+                if (f2.indexOf("<w:tab/>") > 0)
+                    return f1;
+
+                firstTemp = firstTemp.replaceAll("<w:r>", "");
+                firstTemp = firstTemp.replaceAll("<w:r [^>]*>", "");
+                firstTemp = firstTemp.replaceAll("<w:t>[^<]*?</w:t>", "");
+                firstTemp = firstTemp.replaceAll("<w:t [^>]*>[^<]*?</w:t>", "");
+                firstTemp = firstTemp.replaceAll(
+                        "<w:spacing w:val=\"[^\"]*\"/>", "");
+
+                secondTemp = secondTemp.replaceAll("<w:r>", "");
+                secondTemp = secondTemp.replaceAll("<w:r [^>]*>", "");
+                secondTemp = secondTemp.replaceAll("<w:t>[^<]*?</w:t>", "");
+                secondTemp = secondTemp.replaceAll("<w:t [^>]*>[^<]*?</w:t>",
+                        "");
+                secondTemp = secondTemp.replaceAll(
+                        "<w:spacing w:val=\"[^\"]*\"/>", "");
+
+                if ("</w:r>".equals(firstTemp))
+                {
+                    isOrderChanged = true;
+                }
+
+                if (!isOrderChanged)
+                {
+                    String temp = secondTemp.replaceAll(
+                            "<w:rFonts w:hint=\"[^\"]*\"/>", "");
+                    temp = temp.replaceAll(" w:hint=\"[^\"]*\"", "");
+                    if (temp.equals(firstTemp))
+                    {
+                        isOrderChanged = true;
+                    }
+                }
+
+                if (isOrderChanged)
+                {
+                    String temp = firstTemp;
+                    firstTemp = secondTemp;
+                    secondTemp = temp;
+
+                    first = f2;
+                    second = f1;
+                }
+
+                matched = secondTemp.equals(firstTemp) || isOrderChanged;
+
+                if (!matched && "</w:r>".equals(secondTemp))
                 {
                     matched = true;
                 }
-            }
 
+                if (!matched)
+                {
+                    String temp = firstTemp.replaceAll(
+                            "<w:rFonts w:hint=\"[^\"]*\"/>", "");
+                    if (temp.equals(secondTemp))
+                    {
+                        matched = true;
+                    }
+                }
+
+            }
             if (matched)
             {
                 String content1 = getContent(filetype, first);
@@ -227,8 +365,41 @@ public class OfficeXmlTagHelper
                 if (first.indexOf("xml:space=\"preserve\"") < 0
                         && second.indexOf("xml:space=\"preserve\"") > 0)
                 {
-                    first = first
-                            .replace("<w:t", "<w:t xml:space=\"preserve\"");
+                    // fix replace error for <w:tab/><w:t>text</w:t>
+                    // first = first.replace("<w:t",
+                    // "<w:t xml:space=\"preserve\"");
+                    int index = first.indexOf("<w:t");
+                    int len = first.length();
+                    String before = null;
+                    String after = first;
+                    StringBuffer sb = new StringBuffer();
+
+                    while (index != -1 && index + 4 < len)
+                    {
+                        char nextChar = after.charAt(index + 4);
+                        before = after.substring(0, index);
+                        sb.append(before);
+                        after = after.substring(index + 4);
+
+                        if (nextChar == ' ' || nextChar == '>')
+                        {
+                            sb.append("<w:t xml:space=\"preserve\"");
+                        }
+                        else
+                        {
+                            sb.append("<w:t");
+                        }
+
+                        index = after.indexOf("<w:t");
+                        len = after.length();
+                    }
+
+                    if (after != null)
+                    {
+                        sb.append(after);
+                    }
+
+                    first = sb.toString();
                 }
 
                 if (first.indexOf("<w:r>") > 0 && second.indexOf("<w:r>") < 0)
@@ -267,30 +438,38 @@ public class OfficeXmlTagHelper
 
             boolean isOrderChanged = false;
 
-            // a:rPr attributes : b blank, u under-line, sz size, base line, i incline, strike 
+            // a:rPr attributes : b blank, u under-line, sz size, base line, i
+            // incline, strike
             String regex_b = " b=\"([^\"]*)\"";
             String regex_u = " u=\"([^\"]*)\"";
             String regex_sz = " sz=\"([^\"]*)\"";
             String regex_baseline = " baseline=\"([^\"]*)\"";
             String regex_i = " i=\"([^\"]*)\"";
             String regex_strike = " strike=\"([^\"]*)\"";
-            boolean isBSame = isArPrAttributeSame(firstTemp, secondTemp, regex_b);
-            boolean isUSame = isArPrAttributeSame(firstTemp, secondTemp, regex_u);
-            boolean isSZSame = isArPrAttributeSame(firstTemp, secondTemp, regex_sz);
-            boolean isBaselineSame = isArPrAttributeSame(firstTemp, secondTemp, regex_baseline);
-            boolean isISame = isArPrAttributeSame(firstTemp, secondTemp, regex_i);
-            boolean isStrikeSame = isArPrAttributeSame(firstTemp, secondTemp, regex_strike);
+            boolean isBSame = isArPrAttributeSame(firstTemp, secondTemp,
+                    regex_b);
+            boolean isUSame = isArPrAttributeSame(firstTemp, secondTemp,
+                    regex_u);
+            boolean isSZSame = isArPrAttributeSame(firstTemp, secondTemp,
+                    regex_sz);
+            boolean isBaselineSame = isArPrAttributeSame(firstTemp, secondTemp,
+                    regex_baseline);
+            boolean isISame = isArPrAttributeSame(firstTemp, secondTemp,
+                    regex_i);
+            boolean isStrikeSame = isArPrAttributeSame(firstTemp, secondTemp,
+                    regex_strike);
 
-
-            if (isBSame && isUSame && isSZSame && isBaselineSame && isISame && isStrikeSame)
+            if (isBSame && isUSame && isSZSame && isBaselineSame && isISame
+                    && isStrikeSame)
             {
                 String arPr1 = getARPR(firstTemp);
                 String arPr2 = getARPR(secondTemp);
                 firstTemp = firstTemp.replaceAll(arPr1, "");
                 secondTemp = secondTemp.replaceAll(arPr2, "");
             }
-            
-            if ("</a:r>".equals(firstTemp) && isSameColor(firstTemp, secondTemp, first, second))
+
+            if ("</a:r>".equals(firstTemp)
+                    && isSameColor(firstTemp, secondTemp, first, second))
             {
                 isOrderChanged = true;
             }
@@ -301,7 +480,8 @@ public class OfficeXmlTagHelper
                         "<a:solidFill>[\\s\\S]*</a:solidFill>", "");
                 temp = temp.replaceAll("<a:latin [^>]*/>", "");
                 temp = temp.replaceAll("<a:cs [^>]*/>", "");
-                if (temp.equals(firstTemp) && isSameColor(firstTemp, secondTemp, first, second))
+                if (temp.equals(firstTemp)
+                        && isSameColor(firstTemp, secondTemp, first, second))
                 {
                     isOrderChanged = true;
                 }
@@ -325,7 +505,8 @@ public class OfficeXmlTagHelper
                         "<a:solidFill>[\\s\\S]*</a:solidFill>", "");
                 temp = temp.replaceAll("<a:latin [^>]*/>", "");
                 temp = temp.replaceAll("<a:cs [^>]*/>", "");
-                if (temp.equals(secondTemp) && isSameColor(firstTemp, secondTemp, first, second))
+                if (temp.equals(secondTemp)
+                        && isSameColor(firstTemp, secondTemp, first, second))
                 {
                     matched = true;
                 }
@@ -336,29 +517,31 @@ public class OfficeXmlTagHelper
                 String content1 = getContent(filetype, first);
                 String content2 = getContent(filetype, second);
                 String c1trim = content1.trim();
-                String c2trim = content2.trim();                
+                String c2trim = content2.trim();
                 boolean isC1trimEmpty = "".equals(c1trim);
                 boolean isC2trimEmpty = "".equals(c2trim);
 
                 String at1 = getTextTag(filetype, first);
-                if (at1.length() == 0 && !isC1trimEmpty)
+                if (at1.length() == 0)
                 {
-                    return first;
+                    return f1;
                 }
 
                 String at2 = getTextTag(filetype, second);
-                if (at2.length() == 0 && !isC2trimEmpty)
+                if (at2.length() == 0)
                 {
-                    return first;
+                    return f1;
                 }
 
-                String newContent = isOrderChanged ? content2 + content1 : content1 + content2;
+                String newContent = isOrderChanged ? content2 + content1
+                        : content1 + content2;
 
                 if (isC1trimEmpty || isC2trimEmpty)
                 {
                     if (isC1trimEmpty)
                     {
-                        first = second.replace(at2 + content2, at2 + newContent);
+                        first = second
+                                .replace(at2 + content2, at2 + newContent);
                     }
                     else
                     {
@@ -370,7 +553,8 @@ public class OfficeXmlTagHelper
 
                     first = first.replace(at1 + content1, at1 + newContent);
 
-                    if (first.indexOf("<a:r>") > 0 && second.indexOf("<a:r>") < 0)
+                    if (first.indexOf("<a:r>") > 0
+                            && second.indexOf("<a:r>") < 0)
                     {
                         Pattern p1 = Pattern.compile("<a:r[^>]*>");
                         Matcher m = p1.matcher(second);
@@ -381,45 +565,48 @@ public class OfficeXmlTagHelper
                     }
                 }
             }
-            
+
             return first;
         }
         return f1;
     }
-    
+
     /**
      * Check if these two tag have same color, and other style, e.g. link
      */
-    private static boolean isSameColor(String firstTemp, String secondTemp, String f1, String f2)
+    private static boolean isSameColor(String firstTemp, String secondTemp,
+            String f1, String f2)
     {
         String content1 = getContent(OfficeXmlHelper.OFFICE_PPTX, f1);
         String content2 = getContent(OfficeXmlHelper.OFFICE_PPTX, f2);
         String c1trim = content1.trim();
-        String c2trim = content2.trim();                
+        String c2trim = content2.trim();
         boolean isC1trimEmpty = "".equals(c1trim);
         boolean isC2trimEmpty = "".equals(c2trim);
-        
+
         if (isC1trimEmpty || isC2trimEmpty)
         {
             return true;
         }
-        
+
         // color
         String colorkey = "<a:srgbClr val=";
         if (firstTemp.contains(colorkey) && !secondTemp.contains(colorkey)
-                || secondTemp.contains(colorkey) && !firstTemp.contains(colorkey))
+                || secondTemp.contains(colorkey)
+                && !firstTemp.contains(colorkey))
         {
             return false;
         }
-        
+
         // link
         String hlinkkey = "<a:hlinkClick ";
         if (firstTemp.contains(hlinkkey) && !secondTemp.contains(hlinkkey)
-                || secondTemp.contains(hlinkkey) && !firstTemp.contains(hlinkkey))
+                || secondTemp.contains(hlinkkey)
+                && !firstTemp.contains(hlinkkey))
         {
             return false;
         }
-        
+
         return true;
     }
 
@@ -437,7 +624,8 @@ public class OfficeXmlTagHelper
         return arPr1;
     }
 
-    private static boolean isArPrAttributeSame(String firstTemp, String secondTemp, String regex_b)
+    private static boolean isArPrAttributeSame(String firstTemp,
+            String secondTemp, String regex_b)
     {
         Pattern p = Pattern.compile(REGEX_ARPR_PPTX);
         Matcher m1 = p.matcher(firstTemp);
@@ -472,14 +660,17 @@ public class OfficeXmlTagHelper
 
         if (!isBSame)
         {
-            isBSame = b1 == null && b2 == null && arPr1 != null && arPr2 != null;
+            isBSame = b1 == null && b2 == null && arPr1 != null
+                    && arPr2 != null;
         }
 
-        if (!isBSame)
-        {
-            isBSame = (b1 == null && "0".equals(b2)) || ("0".equals(b1) && b2 == null)
-                    && arPr1 != null && arPr2 != null;
-        }
+        // Some times, b="0" is not same as b is null.
+        // if (!isBSame)
+        // {
+        // isBSame = (b1 == null && "0".equals(b2)) || ("0".equals(b1) && b2 ==
+        // null)
+        // && arPr1 != null && arPr2 != null;
+        // }
 
         return isBSame;
     }
@@ -533,6 +724,8 @@ public class OfficeXmlTagHelper
             temp = temp.replace("<w:proofErr w:type=\"gramStart\"/>", "");
             temp = temp.replace("<w:proofErr w:type=\"gramEnd\"/>", "");
             temp = temp.replace("<w:lastRenderedPageBreak/>", "");
+            // temp = temp.replaceAll("<w:bookmarkStart [^>]*/>", "");
+            // temp = temp.replaceAll("<w:bookmarkEnd [^>]*/>", "");
             return temp;
         }
         return content;

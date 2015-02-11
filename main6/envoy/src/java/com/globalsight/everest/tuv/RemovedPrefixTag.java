@@ -23,16 +23,27 @@ public class RemovedPrefixTag extends PersistentObject
 {
     private static final long serialVersionUID = 8394101654198460932L;
     private TuImpl tu;
+    private long tuId;
     private String string;
 
-    public TuImpl getTu()
+    public void setTu(TuImpl p_tu)
     {
-        return tu;
+        tuId = p_tu.getId();
+        tu = p_tu;
+        if (tu != null)
+        {
+            tuId = tu.getId();
+        }
     }
 
-    public void setTu(TuImpl tu)
+    public long getTuId()
     {
-        this.tu = tu;
+        return tuId;
+    }
+
+    public void setTuId(long tuId)
+    {
+        this.tuId = tuId;
     }
 
     public String getString()

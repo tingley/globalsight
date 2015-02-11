@@ -183,7 +183,6 @@ public class PageHandler
        sessionMgr.setAttribute(p_key + TableConstants.SORTING, sortType);
        sessionMgr.setAttribute(p_key + TableConstants.REVERSE_SORT, reverseSort);
        sessionMgr.setAttribute(p_key + TableConstants.LAST_PAGE_NUM, lastPage);
-        
     }
 
     /**
@@ -279,6 +278,9 @@ public class PageHandler
     {
         SessionManager sessionManager = (SessionManager)session
             .getAttribute(WebAppConstants.SESSION_MANAGER);
+
+        int numOfPages = getNumOfPages(data.size(), numItemsDisplayed);
+
         Integer lastPageNumber = (Integer)sessionManager.getAttribute(
             lastPageNumStr);
         String pageStr = (String) request.getParameter(thisPageNumStr);
@@ -309,6 +311,10 @@ public class PageHandler
                     pageNum = 1;
                 }
             }
+        }
+        if (pageNum > numOfPages){
+//            pageNum = numOfPages;
+            pageNum = 1;
         }
             
         String sortType = (String) request.getParameter(thisSortChoiceStr);
@@ -413,7 +419,6 @@ public class PageHandler
         else
             request.setAttribute(listStr, new ArrayList(subList));
         request.setAttribute(thisPageNumStr, new Integer(pageNum));
-        int numOfPages = getNumOfPages(size, numItemsDisplayed);
         request.setAttribute(numOfPagesStr, new Integer(numOfPages));
         request.setAttribute(numPerPageStr, new Integer(numItemsDisplayed));
         request.setAttribute(sizeStr, new Integer(size));
@@ -661,7 +666,7 @@ public class PageHandler
         }
         catch (Exception e)
         {
-            s_category.error(e);
+            s_category.error(e.getMessage(), e);
         }
 
         return refreshMetaTag.toString();
@@ -696,7 +701,7 @@ public class PageHandler
         }
         catch (Exception e)
         {
-            s_category.error(e);
+            s_category.error(e.getMessage(), e);
         }
 
         return refreshMetaTag.toString();
@@ -848,7 +853,7 @@ public class PageHandler
         if (p_perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS) ||
             p_perms.getPermissionFor(Permission.PROJECTS_MANAGE))
         {
-            List wfOwners = p_workflow.getWorkflowOwnerIds();
+            List<String> wfOwners = p_workflow.getWorkflowOwnerIds();
             boolean isWorkflowOwner = wfOwners.contains(p_userId);
             if (isWorkflowOwner)
                 isInvalid = false;
@@ -865,211 +870,138 @@ public class PageHandler
             String p_param)
     {
         String value = (String) sessionMgr.getAttribute(p_param);
-        if (value != null && value.equals(p_value))
-        {
+        if (value != null && value.equals(p_value)) {
             return true;
         }
+
         return false;
     }
     
     public static boolean isInContextMatch(Job job, TranslationMemoryProfile tmProfile)
     {
-        if(tmProfile == null)
-        {
+        if(tmProfile == null) {
             return false;
         }
-        try
-        {
+
+        try {
             return isInContextMatch(job, tmProfile.getIsContextMatchLeveraging());
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             s_category.error("Can not get the value of in context match", e);
         }
+
         return false;
     }
     
     public static boolean isInContextMatch(Request request)
     {
-        if(request == null)
-        {
+        if(request == null) {
             return false;
         }
-        FileProfile fileProfile = ServerProxy.getRequestHandler().getFileProfile(request);
-        TranslationMemoryProfile tmProfile = request.getL10nProfile().getTranslationMemoryProfile();
+        
+        FileProfile fileProfile = ServerProxy.getRequestHandler()
+                .getFileProfile(request);
+        TranslationMemoryProfile tmProfile = request.getL10nProfile()
+                .getTranslationMemoryProfile();
+
         return isInContextMatch(fileProfile, tmProfile);
     }
-    
-    public static boolean isInContextMatch(FileProfile fileProfile, TranslationMemoryProfile tmProfile)
+
+    public static boolean isInContextMatch(FileProfile fileProfile,
+            TranslationMemoryProfile tmProfile)
     {
-        if(fileProfile == null || tmProfile == null)
-        {
+        if(fileProfile == null || tmProfile == null) {
             return false;
         }
 
         long knowFormatId = fileProfile.getKnownFormatTypeId();
         KnownFormatType kf = null;
-        try
-        {
+        try {
             kf = ServerProxy.getFileProfilePersistenceManager().
                 getKnownFormatTypeById(knowFormatId,false);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             s_category.error("Can not get the value of known format type", e);
         }
-        if("xml".equalsIgnoreCase(kf.getFormatType()))
-        {
-            if(fileProfile.getXmlRuleFileId() > 0L)
-            {
+        
+        if("xml".equalsIgnoreCase(kf.getFormatType())) {
+            if(fileProfile.getXmlRuleFileId() > 0L) {
                 return true;
-            }
-            else
-            {
+            } else {
                 return tmProfile.getIsContextMatchLeveraging();
             }
-            
-        }
-        else
-        {
-            if(kf.getFormatType().startsWith("javaprop"))
-            {
-                if(fileProfile.getSupportSid())
-                {
+        } else {
+            if(kf.getFormatType().startsWith("javaprop")) {
+                if(fileProfile.getSupportSid()) {
                     return true;
-                }
-                else
-                {
+                } else {
                     return tmProfile.getIsContextMatchLeveraging();
                 }
-            }
-            else
-            {
+            } else {
                 return tmProfile.getIsContextMatchLeveraging();
             }
         }
     }
-    public static boolean isInContextMatch(Job job, boolean isUseInContext) throws FileProfileEntityException, RemoteException, GeneralException, NamingException
+
+    public static boolean isInContextMatch(Job job, boolean isUseInContext)
+            throws FileProfileEntityException, RemoteException,
+            GeneralException, NamingException
     {
-        if(job == null)
-        {
+        if(job == null) {
             return false;
         }
+
         job = ServerProxy.getJobHandler().getJobById(job.getId());
-        if(Job.IN_CONTEXT.equals(job.getLeverageOption()))
-        {
+        if(Job.IN_CONTEXT.equals(job.getLeverageOption())) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
-//        FileProfile fileProfile = job.getFileProfile();
-//        if(fileProfile == null)
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            long knowFormatId = fileProfile.getKnownFormatTypeId();
-//            KnownFormatType kf = ServerProxy.getFileProfilePersistenceManager().
-//                getKnownFormatTypeById(knowFormatId,false);
-//            if("xml".equalsIgnoreCase(kf.getFormatType()))
-//            {
-//                if(fileProfile.getXmlRuleFileId() > 0L)
-//                {
-//                    return true;
-//                }
-//                else
-//                {
-//                    return false;
-//                }
-//                
-//            }
-//            else
-//            {
-//                if(kf.getFormatType().startsWith("javaprop"))
-//                {
-//                    if(fileProfile.getSupportSid())
-//                    {
-//                        return true;
-//                    }
-//                }
-//                else
-//                {
-//                    return isUseInContext;
-//                }
-//            }
-//        }
-//        return false;
     }
 
     public static boolean isInContextMatch(Job job)
     {
-        if(job == null)
-        {
+        if(job == null) {
             return false;
         }
-        return isInContextMatch(job, job.getL10nProfile().getTranslationMemoryProfile());
+
+        return isInContextMatch(job, job.getL10nProfile()
+                .getTranslationMemoryProfile());
     }
-    
+
     public static boolean isDefaultContextMatch(TargetPage target)
     {
-        if(target == null)
-        {
+        if(target == null) {
             return false;
         }
+
         return isDefaultContextMatch(target.getSourcePage());
     }
     
     public static boolean isDefaultContextMatch(SourcePage source)
     {
-        if(source == null || source.getRequest() == null)
-        {
+        if(source == null || source.getRequest() == null) {
             return false;
         }
+
         return isDefaultContextMatch(source.getRequest().getJob());
     }
     
     public static boolean isDefaultContextMatch(Job job)
     {
-        if(job == null)
-        {
+        if(job == null) {
             return false;
         }
-        try
-        {
+        
+        try {
             job = ServerProxy.getJobHandler().getJobById(job.getId());
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             s_category.error("Can not get job:", e);
         }
-        if(Job.DEFAULT_CONTEXT.equals(job.getLeverageOption()))
-        {
+        
+        if(Job.DEFAULT_CONTEXT.equals(job.getLeverageOption())) {
             return true;
-        }
-        else
-        {
+        } else {
             return false;
         }
-//        if(isInContextMatch(job))
-//        {
-//            return false;
-//        }
-//        else
-//        {
-//            if(job.getL10nProfile() == null ||
-//                    job.getL10nProfile().getTranslationMemoryProfile() == null ||
-//                    job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging())
-//            {
-//                return false;
-//            }
-//            else
-//            {
-//                return true;
-//            }
-//        }
     }
     
     public static boolean isDefaultContextMatch(Request request)
@@ -1078,11 +1010,14 @@ public class PageHandler
         {
             return false;
         }
+        
         if(isInContextMatch(request))
         {
             return false;
         }
-        TranslationMemoryProfile tmProfile = request.getL10nProfile().getTranslationMemoryProfile();
+        
+        TranslationMemoryProfile tmProfile = 
+                request.getL10nProfile().getTranslationMemoryProfile();
         if(tmProfile == null || tmProfile.getIsExactMatchLeveraging())
         {
             return false;

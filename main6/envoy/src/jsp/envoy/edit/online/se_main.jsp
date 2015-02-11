@@ -494,6 +494,14 @@ function doErrorCheck()
 
     if (msg == "" || msg == null || msg == "null")
     {
+    	var newTarget = applet.getNewPTagTargetString();
+    	
+    	if (newTarget != null && newTarget != "")
+    	{
+    		newTarget = applet.getTargetDiplomat(newTarget);
+    		SetSegment(newTarget);
+    	}
+    	
         return null;
     }
     else
@@ -562,7 +570,7 @@ function HasFormattingTags()
 function openPtags()
 {
 	if (datatype == "xlf" || datatype == "mif" || datatype == "fm" 
-		|| datatype == "po")
+		|| datatype == "po" || "office-xml" == datatype)
 	{
 		return true;
 	}
@@ -575,6 +583,11 @@ function openPtags()
 // PTags are all segment-internal tags, including formatting tags
 function HasPTags()
 {
+  if ("office-xml" == datatype)
+  {
+	  return false;
+  }
+	
   if (datatype.indexOf("html") >= 0 ||
       datatype == "cfm" ||
       datatype == "asp" ||

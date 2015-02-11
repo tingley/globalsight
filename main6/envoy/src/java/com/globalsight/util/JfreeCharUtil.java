@@ -82,7 +82,7 @@ public class JfreeCharUtil
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
     }
 
@@ -116,7 +116,7 @@ public class JfreeCharUtil
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
     }
 }

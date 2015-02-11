@@ -6,7 +6,7 @@
       com.globalsight.everest.webapp.pagehandler.PageHandler, 
       com.globalsight.everest.webapp.pagehandler.administration.localepairs.LocalePairConstants, 
       com.globalsight.everest.util.comparator.LocalePairComparator,
-      com.globalsight.everest.servlet.util.ServerProxy,
+      com.globalsight.everest.company.CompanyWrapper,
       java.lang.Boolean,
       java.util.ArrayList,
       java.util.Locale,
@@ -122,7 +122,7 @@ function enableRemove()
                 <% if (isSuperAdmin) { %>
     					  <amb:column label="lb_company_name" width="120" 
     					       sortBy="<%=LocalePairComparator.ASC_COMPANY%>">
-                    <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(lp.getCompanyId())).getCompanyName()%>
+				 <%=CompanyWrapper.getCompanyNameById(lp.getCompanyId())%>
                 </amb:column>
                 <% } %>
               </amb:table>

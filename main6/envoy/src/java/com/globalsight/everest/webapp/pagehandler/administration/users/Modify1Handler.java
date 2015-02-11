@@ -17,71 +17,75 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
-import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupsHandler;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.securitymgr.FieldSecurity;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.foundation.SSOUserMapping;
-import com.globalsight.everest.foundation.SSOUserUtil;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.calendar.UserFluxCalendar;
+import java.io.IOException;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Hashtable;
+import com.globalsight.calendar.UserFluxCalendar;
+import com.globalsight.everest.foundation.SSOUserMapping;
+import com.globalsight.everest.foundation.SSOUserUtil;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.securitymgr.FieldSecurity;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
-public class Modify1Handler
-    extends PageHandler
+public class Modify1Handler extends PageHandler
 {
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor pageDescriptor,
-        HttpServletRequest request, HttpServletResponse response,
-        ServletContext context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = request.getSession(false);
 
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         String action = (String) request.getParameter(CalendarConstants.ACTION);
         if ("edit".equals(action))
         {
-            User loggedInUser = (User)sessionMgr.getAttribute(WebAppConstants.USER);
+            User loggedInUser = (User) sessionMgr
+                    .getAttribute(WebAppConstants.USER);
             String userId = request.getParameter("radioBtn");
             if (userId == null || request.getMethod().equalsIgnoreCase("get"))
             {
                 response.sendRedirect("/globalsight/ControlServlet?activityName=users");
                 return;
             }
-            
+
             User user = UserHandlerHelper.getUser(userId);
-            ModifyUserWrapper muw = UserHandlerHelper.createModifyUserWrapper(loggedInUser, user);
+            ModifyUserWrapper muw = UserHandlerHelper.createModifyUserWrapper(
+                    loggedInUser, user);
             SSOUserMapping ssoMapping = SSOUserUtil.getUserMapping(user);
-            muw.setSsoUserName(ssoMapping == null ? "" : ssoMapping.getSsoUserId());
+            if (ssoMapping != null)
+            {
+                muw.setSsoUserId(ssoMapping.getSsoUserId());
+            }
             sessionMgr.setAttribute(MODIFY_USER_WRAPPER, muw);
             // Also put field level securities hash table in the session
             sessionMgr.setAttribute("securitiesHash",
-                            UserHandlerHelper.getSecurity(user, loggedInUser, true));
+                    UserHandlerHelper.getSecurity(user, loggedInUser, true));
         }
         else if (CalendarConstants.SAVE_ACTION.equals(action))
         {
@@ -91,46 +95,54 @@ public class Modify1Handler
         else if (WebAppConstants.USER_ACTION_MODIFY_USER_CONTACT.equals(action))
         {
             // Get the user wrapper off the session manager.
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)
-                 sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             UserUtil.extractContactInfoData(request, wrapper);
         }
         else if (WebAppConstants.USER_ACTION_MODIFY_USER.equals(action))
         {
             // Got here from hitting done on roles page.
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)
-                 sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             wrapper.saveRoles();
         }
         else if (WebAppConstants.USER_ACTION_CANCEL_LOCALES.equals(action))
         {
             sessionMgr.removeElement("rolesList");
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)
-                 sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             wrapper.cancelRoles();
         }
-        else if (WebAppConstants.USER_ACTION_MODIFY_USER_PROJECTS.equals(action))
+        else if (WebAppConstants.USER_ACTION_MODIFY_USER_PROJECTS
+                .equals(action))
         {
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)
-                 sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             UserUtil.extractProjectData(request, wrapper);
         }
         else if ("doneSecurity".equals(action))
         {
-            FieldSecurity fs = (FieldSecurity)sessionMgr.getAttribute("fieldSecurity");
+            FieldSecurity fs = (FieldSecurity) sessionMgr
+                    .getAttribute("fieldSecurity");
             UserUtil.extractSecurity(fs, request);
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)
-                 sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             wrapper.setFieldSecurity(fs);
         }
         else if ("donePermission".equals(action))
         {
             UserUtil.extractPermissionData(request);
-        } else if ("doneDefaultRole".equals(action)) {
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+        }
+        else if ("doneDefaultRole".equals(action))
+        {
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             wrapper.saveDefaultRoles();
-        } else if ("cancelDefaultRole".equals(action)) {
-            ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+        }
+        else if ("cancelDefaultRole".equals(action))
+        {
+            ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                    .getAttribute(MODIFY_USER_WRAPPER);
             wrapper.cancelDefaultRoles();
         }
 
@@ -138,27 +150,26 @@ public class Modify1Handler
         sessionMgr.setAttribute("companyNames", companies);
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(pageDescriptor, request,
-            response, context);
+        super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
     /**
      * Perform modify user and user calendar.
      */
     private void modifyUserCal(HttpServletRequest p_request)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-            (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         // Get the user wrapper off the session manager.
-        ModifyUserWrapper wrapper =
-            (ModifyUserWrapper)sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+        ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                .getAttribute(MODIFY_USER_WRAPPER);
 
         // Modify the user's calendar
-        UserFluxCalendar cal = (UserFluxCalendar)
-            sessionMgr.getAttribute(CalendarConstants.CALENDAR);
+        UserFluxCalendar cal = (UserFluxCalendar) sessionMgr
+                .getAttribute(CalendarConstants.CALENDAR);
         CalendarHelper.modifyUserCalendar(p_request, session, cal);
         sessionMgr.removeElement(CalendarConstants.CALENDAR);
     }
@@ -167,16 +178,15 @@ public class Modify1Handler
      * Save the calendar data to the session
      */
     private void saveCalData(HttpSession session, HttpServletRequest request)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
-        SessionManager sessionMgr =
-             (SessionManager)session.getAttribute(SESSION_MANAGER);
-        ModifyUserWrapper wrapper =
-            (ModifyUserWrapper)sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                .getAttribute(MODIFY_USER_WRAPPER);
 
-        UserFluxCalendar cal =
-             UserUtil.extractCalendarData(request, wrapper.getUserId());
+        UserFluxCalendar cal = UserUtil.extractCalendarData(request,
+                wrapper.getUserId());
         wrapper.setCalendar(cal);
     }
 }
-

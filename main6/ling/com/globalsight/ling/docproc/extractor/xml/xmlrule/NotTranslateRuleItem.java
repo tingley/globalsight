@@ -26,21 +26,21 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import com.globalsight.ling.docproc.extractor.xml.Rule;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 
 public class NotTranslateRuleItem extends XmlRuleItem
 {
-    private final String NAME = "dont-translate";
+    public static final String NAME = "dont-translate";
 
     @Override
     public void applyRule(Node ruleNode, Document toBeExtracted, Map ruleMap,
-            Object[] namespaces) throws SAXException
+            Object[] namespaces) throws Exception
     {
         boolean isInline = false;
+        int priority = new Rule().getPriority();
+        
         String xpath = ruleNode.getAttributes().getNamedItem("path")
                 .getNodeValue();
-        NodeList affectedNodes = XPathAPI.selectNodeList(toBeExtracted
-                .getDocumentElement(), xpath);
+        NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         NamedNodeMap attributes = ruleNode.getAttributes();
         for (int i = 0; i < attributes.getLength(); ++i)
         {
@@ -49,6 +49,10 @@ public class NotTranslateRuleItem extends XmlRuleItem
             if (attrName.equals("inline"))
             {
                 isInline = (!attr.getNodeValue().equals("no"));
+            }
+            else if (attrName.equals("priority"))
+            {
+                priority = Integer.parseInt(attr.getNodeValue());
             }
         }
         
@@ -59,6 +63,7 @@ public class NotTranslateRuleItem extends XmlRuleItem
                 Rule rule = new Rule();
                 rule.setTranslate(false);
                 rule.setInline(isInline);
+                rule.setPriority(priority);
                 String temp = xpath;
                 String[] s = temp.split("XMLNS");
                 int count = s.length - 1;
@@ -80,6 +85,7 @@ public class NotTranslateRuleItem extends XmlRuleItem
                 Rule rule = new Rule();
                 rule.setTranslate(false);
                 rule.setInline(isInline);
+                rule.setPriority(priority);
                 
                 if (ruleMap.containsKey(n))
                 {

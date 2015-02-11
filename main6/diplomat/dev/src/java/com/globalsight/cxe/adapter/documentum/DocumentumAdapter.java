@@ -79,7 +79,7 @@ public class DocumentumAdapter extends BaseAdapter
             s_username = props.getProperty("username");
             s_password = props.getProperty("password");
             s_docbase = props.getProperty("docbase");
-            s_logger.info("Using username '" + s_username
+            s_logger.debug("Using username '" + s_username
                     + "' to connect to docbase '" + s_docbase
                     + "' in Documentum.");
         }

@@ -64,7 +64,7 @@ public class Plug_7_1_4_1 implements Plug
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     ui.error(e.getMessage());
                     System.out.println();
                 }

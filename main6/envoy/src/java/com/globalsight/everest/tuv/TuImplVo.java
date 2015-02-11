@@ -29,14 +29,12 @@ import org.apache.log4j.Logger;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.util.gxml.GxmlElement;
 
-
-public final class TuImplVo
-    extends PersistentObject
-    implements Tu, Serializable
+public final class TuImplVo extends PersistentObject implements Tu,
+        Serializable
 {
     private static final long serialVersionUID = -729123162750067474L;
-    private static Logger c_category = 
-        Logger.getLogger(TuImplVo.class);
+    private static Logger logger = Logger.getLogger(TuImplVo.class);
+
     private long m_tmId;
     private String m_dataType = "unknown";
     private String m_tuType = TuType.UNSPECIFIED.getName();
@@ -44,14 +42,15 @@ public final class TuImplVo
     private char m_localizableType = 'U';
     // backpointer used for topLink
     private long m_leverageGroupId;
-    private HashMap m_tuvs = new HashMap();
-    
+    private HashMap<Long, Tuv> m_tuvs = new HashMap<Long, Tuv>();
+
     private String m_sourceTmName = null;
     private long m_repetitionOfId;
     private boolean repeated = false;
+    private String translate = null;
 
     /**
-     *  TU orders range from 1 - n. The default value is 0.
+     * TU orders range from 1 - n. The default value is 0.
      */
     private long m_order = 0;
 
@@ -110,8 +109,7 @@ public final class TuImplVo
     }
 
     /**
-     * Add a Tuv to a Tu.  Also add this Tu to the Tuv as a back
-     * pointer.
+     * Add a Tuv to a Tu. Also add this Tu to the Tuv as a back pointer.
      */
     public void addTuv(Tuv p_tuv)
     {
@@ -122,28 +120,27 @@ public final class TuImplVo
     /**
      * Get a tuv based on the specified locale id.
      */
-    public Tuv getTuv(long p_localeId)
+    public Tuv getTuv(long p_localeId, String companyId)
     {
-        return (Tuv)m_tuvs.get(new Long(p_localeId));
+        return (Tuv) m_tuvs.get(new Long(p_localeId));
     }
-
 
     public Tuv getTuv(Long p_localeIdAsLong)
     {
-        return (Tuv)m_tuvs.get(p_localeIdAsLong);
+        return (Tuv) m_tuvs.get(p_localeIdAsLong);
     }
 
-
     /**
-     * Get a collection of all Tuvs.  This is a combination of tuvs
-     * that belong to a source page and target page(s).
+     * Get a collection of all Tuvs. This is a combination of tuvs that belong
+     * to a source page and target page(s).
+     * 
      * @return A collection of Tuvs of this Tu.
      */
     public Collection getTuvs()
     {
         return m_tuvs.values();
     }
-    
+
     public HashMap getTuvMap()
     {
         return m_tuvs;
@@ -173,7 +170,6 @@ public final class TuImplVo
         return m_tmId;
     }
 
-
     /**
      * Get Leverage group id.
      */
@@ -182,10 +178,9 @@ public final class TuImplVo
         return m_leverageGroupId;
     }
 
-
     /**
-     * Set the leverage group that this tu belongs to. It sets only
-     * leverage group id.
+     * Set the leverage group that this tu belongs to. It sets only leverage
+     * group id.
      */
     public void setLeverageGroup(LeverageGroup p_leverageGroup)
     {
@@ -205,25 +200,17 @@ public final class TuImplVo
         return m_localizableType;
     }
 
-    //
-    // TuLing interface method
-    //
-
-    /**
-     * @see com.globalsight.ling.tm.TuLing#isLocalizable()
-     */
     public boolean isLocalizable()
     {
         return m_localizableType == 'L' ? true : false;
     }
 
-
     /**
-     * Get the LeverageGroup associated with this Tu. This method
-     * creates a new LeverageGroup object, assuming that the object
-     * won't be used any more. By doing this, we can eliminate a huge
-     * collection of Tu objects in LeverageGroup object. We probably
-     * should eliminate LeverageGroup class altogether.
+     * Get the LeverageGroup associated with this Tu. This method creates a new
+     * LeverageGroup object, assuming that the object won't be used any more. By
+     * doing this, we can eliminate a huge collection of Tu objects in
+     * LeverageGroup object. We probably should eliminate LeverageGroup class
+     * altogether.
      */
     public LeverageGroup getLeverageGroup()
     {
@@ -233,26 +220,24 @@ public final class TuImplVo
         return levGrp;
     }
 
-
     //
     // other public methods
     //
 
-
     /**
      * Return a string representation of the object.
+     * 
      * @return a string representation of the object.
      */
     public String toString()
     {
-        return super.toString() + " m_dataType=" + m_dataType +
-            " m_tuType=" + m_tuType + " m_pid=" + m_pid + " m_order=" + m_order;
+        return super.toString() + " m_dataType=" + m_dataType + " m_tuType="
+                + m_tuType + " m_pid=" + m_pid + " m_order=" + m_order;
     }
 
     //
     // package methods
     //
-
 
     /**
      * Set the TmId.
@@ -261,7 +246,6 @@ public final class TuImplVo
     {
         m_tmId = p_tmId;
     }
-
 
     /**
      * Set the DataType.
@@ -279,10 +263,11 @@ public final class TuImplVo
         m_localizableType = p_localizableType;
     }
 
-
     /**
-     * Set the TuType.  Don't expose this in Tu.
-     * @param p_tuType the TuType.
+     * Set the TuType. Don't expose this in Tu.
+     * 
+     * @param p_tuType
+     *            the TuType.
      */
     public void setTuType(TuType p_tuType)
     {
@@ -294,61 +279,71 @@ public final class TuImplVo
         m_tuType = p_tuType;
     }
 
-	public String getSourceTmName()
-	{
-		return m_sourceTmName;
-	}
+    public String getSourceTmName()
+    {
+        return m_sourceTmName;
+    }
 
-	public void setSourceTmName(String p_sourceTmName)
-	{
-		m_sourceTmName = p_sourceTmName;
-	}
-	
-    public GxmlElement getXliffTargetGxml() 
+    public void setSourceTmName(String p_sourceTmName)
+    {
+        m_sourceTmName = p_sourceTmName;
+    }
+
+    public GxmlElement getXliffTargetGxml()
     {
         return null;
     }
-    
+
     public String getXliffTarget()
     {
         return null;
     }
-    
-    public void setXliffTarget(String p_target){}
-    
-    public String getXliffAlt() 
+
+    public void setXliffTarget(String p_target)
+    {
+    }
+
+    public String getXliffAlt()
     {
         return null;
     }
-    
-    public GxmlElement getXliffAltGxml() 
+
+    public GxmlElement getXliffAltGxml()
     {
         return null;
     }
-    
-    public void setXliffAlt(String p_alt) {}
-    
-    public String getXliffTargetLanguage() 
+
+    public void setXliffAlt(String p_alt)
+    {
+    }
+
+    public String getXliffTargetLanguage()
     {
         return null;
     }
-    
-    public void setXliffTargetLanguage(String p_lan) {}
-    
-    public String getGenerateFrom() 
+
+    public void setXliffTargetLanguage(String p_lan)
+    {
+    }
+
+    public String getGenerateFrom()
     {
         return null;
     }
-    
-    public void setGenerateFrom(String p_generator) {}
+
+    public void setGenerateFrom(String p_generator)
+    {
+    }
 
     public String getSourceContent()
     {
         return null;
     }
 
-    public void setSourceContent(String p_sourceContent) {}
-    
+    public void setSourceContent(String p_sourceContent)
+    {
+    }
+
     public boolean isRepeated()
     {
         return repeated;
@@ -358,7 +353,7 @@ public final class TuImplVo
     {
         this.repeated = repeated;
     }
-    
+
     public long getRepetitionOfId()
     {
         return m_repetitionOfId;
@@ -367,5 +362,15 @@ public final class TuImplVo
     public void setRepetitionOfId(long repetitionOfId)
     {
         this.m_repetitionOfId = repetitionOfId;
+    }
+
+    public String getTranslate()
+    {
+        return translate;
+    }
+
+    public void setTranslate(String translate)
+    {
+        this.translate = translate;
     }
 }

@@ -4,6 +4,7 @@
                   com.globalsight.everest.webapp.WebAppConstants,
                   com.globalsight.everest.workflowmanager.Workflow,
                   com.globalsight.everest.webapp.javabean.NavigationBean,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                   com.globalsight.everest.webapp.pagehandler.PageHandler,
                   com.globalsight.everest.util.comparator.JobComparator,
                   com.globalsight.everest.util.comparator.LocaleComparator,
@@ -28,6 +29,10 @@
     stateList.add(Job.DISPATCHED);
     stateList.add(Job.LOCALIZED);
     stateList.add(Job.EXPORTED);
+    stateList.add(Job.READY_TO_BE_DISPATCHED);
+    stateList.add(Job.EXPORT_FAIL);
+    stateList.add(Job.ARCHIVED);
+
     // get jobs by a state list
     Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
    	List jobList = null;
@@ -37,13 +42,22 @@
 	    Collections.sort(jobList, new JobComparator(JobComparator.NAME,uiLocale));
     }
    	ResourceBundle bundle = PageHandler.getBundle(session);
+   	String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
+        + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp-->
 <head>
 <title><%=bundle.getString("language_web_form")%></title>
+<script type="text/javascript">
+function doSubmit()
+{
+	document.getElementById("inputJobIDS").value = lisaQAForm.jobId.value;
+	lisaQAForm.submit();
+}
+</script>
 </head>
-<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
+<BODY leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
 bgcolor="LIGHTGREY">
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
@@ -56,7 +70,9 @@ bgcolor="LIGHTGREY">
 <%=bundle.getString("optionally_select_a_job")%></SPAN>
 </TD></TR></TABLE>
 
-<form name="lisaQAForm" method="post" action="/globalsight/envoy/administration/reports/LisaQATranslationsEditReport.jsp">
+<form name="lisaQAForm" method="post" action="<%=formAction%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.TRANSLATIONS_EDIT_REPORT%>">
+<input type="hidden" id="inputJobIDS" name="inputJobIDS">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
 <tr>
@@ -89,7 +105,7 @@ bgcolor="LIGHTGREY">
 <tr>
 <td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="targetLang">
+<select name="targetLocalesList">
 <%
 	if (jobList == null)
 	{
@@ -107,7 +123,7 @@ bgcolor="LIGHTGREY">
 		while (it.hasNext())
 		{
 		 	GlobalSightLocale gsl = (GlobalSightLocale) it.next();
-            %><option VALUE="<%=gsl.getDisplayName()%>"><%=gsl.getDisplayName(uiLocale)%></option><%
+            %><option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option><%
 		}
 	}
 %>
@@ -134,10 +150,10 @@ bgcolor="LIGHTGREY">
 </td>
 </tr>
 <tr>
-<td><input type="submit" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>"></td>
+<TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></TD>
 <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
 </tr>
 </table>
 </form>
-<BODY>
+</BODY>
 </HTML>

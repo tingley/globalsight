@@ -307,7 +307,7 @@ public class FileUtils
 		}
 		catch (Exception e)
 		{
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
 		finally
 		{
@@ -326,7 +326,7 @@ public class FileUtils
 		}
 		catch (Exception e)
 		{
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
 		finally
 		{
@@ -341,6 +341,18 @@ public class FileUtils
 	public static String concatPath(String parent, String child)
 	{
 		return new File(parent, child).getAbsolutePath();
+	}
+	
+	// Create File, include parent folder.
+	public static File createFile(String p_filePath)
+	{
+	    File file = new File(p_filePath);
+	    File parent = new File(file.getParent());
+	    if(!parent.exists())
+	    {
+	        parent.mkdirs();
+	    }
+	    return file;
 	}
 
 	public static void main(String[] args) throws Exception

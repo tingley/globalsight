@@ -283,7 +283,8 @@ public class PageEventObserverLocal implements PageEventObserver
                 Collection tuvs = getNonDeletedTuvsOfTargetPage(updatedPage);
 
                 // notify and update the state of the TUVs that are not deleted
-                getTuvEventObserver().notifyPageExportedEvent(tuvs);
+                Long companyId = Long.parseLong(p_targetPage.getSourcePage().getCompanyId());
+                getTuvEventObserver().notifyPageExportedEvent(tuvs, companyId);
             }
 
             // if it's the last page, let WorkflowEventObserver know...
@@ -386,8 +387,11 @@ public class PageEventObserverLocal implements PageEventObserver
             PagePersistenceAccessor.updateStateOfPages(p_sourcePages,
                     PageState.EXPORTED);
 
-            getTuvEventObserver().notifyJobExportedEvent(
-                    getTuvsOfSourcePages(p_sourcePages));
+            for (Iterator it = p_sourcePages.iterator(); it.hasNext();) {
+                SourcePage sp = (SourcePage) it.next();
+                getTuvEventObserver().notifyJobExportedEvent(
+                        getTuvsOfSourcePage(sp), Long.parseLong(sp.getCompanyId()));
+            }
         }
         catch (Exception e)
         {
@@ -777,20 +781,20 @@ public class PageEventObserverLocal implements PageEventObserver
     }
 
     // get the tuvs of a collection of pages.
-    private List getTuvsOfSourcePages(Collection p_pages) throws Exception
-    {
-        Object[] sourcePages = p_pages.toArray();
-        int size = sourcePages.length;
-        List tuvs = new ArrayList();
-
-        for (int i = 0; i < size; i++)
-        {
-            SourcePage page = (SourcePage) sourcePages[i];
-            tuvs.addAll(getTuvsOfSourcePage(page));
-        }
-
-        return tuvs;
-    }
+//    private List getTuvsOfSourcePages(Collection p_pages) throws Exception
+//    {
+//        Object[] sourcePages = p_pages.toArray();
+//        int size = sourcePages.length;
+//        List tuvs = new ArrayList();
+//
+//        for (int i = 0; i < size; i++)
+//        {
+//            SourcePage page = (SourcePage) sourcePages[i];
+//            tuvs.addAll(getTuvsOfSourcePage(page));
+//        }
+//
+//        return tuvs;
+//    }
 
     // get the tuvs of a collection of pages.
     private List getTuvsOfTargetPages(Collection p_pages) throws Exception
@@ -808,7 +812,7 @@ public class PageEventObserverLocal implements PageEventObserver
         return tuvs;
     }
 
-    // get a collection of tuvs for a page (tuvs are retieved based on
+    // get a collection of tuvs for a page (tuvs are retrieved based on
     // the page id).
     private Collection getTuvsOfSourcePage(SourcePage p_page) throws Exception
     {
@@ -848,7 +852,7 @@ public class PageEventObserverLocal implements PageEventObserver
                     // if it can't find th TU the TUV is associated with - then
                     // remove from the
                     // collection
-                    if (!tuIds.contains(t.getTu().getIdAsLong()))
+                    if (!tuIds.contains(t.getTuId()))
                     {
                         // remove the current one
                         tuvi.remove();

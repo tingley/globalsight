@@ -22,6 +22,7 @@ import com.globalsight.config.UserParameter;
 import com.globalsight.config.UserParamNames;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.edit.online.PreviewPDFPageHandler;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -31,6 +32,7 @@ import com.globalsight.util.modules.Modules;
 
 import java.rmi.RemoteException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -90,7 +92,7 @@ public class AccountOptionsHelper
             WebAppConstants.USER_NAME);
 
         // first set the main notification flag
-        setParameter(p_session, optionsHash, userName, NOTIFICATION_ENABLED);
+        setParameter(p_session, optionsHash, userName, NOTIFICATION_ENABLED, null);
 
         // now set the options
         SessionManager sessionMgr =
@@ -104,7 +106,7 @@ public class AccountOptionsHelper
             for (int i = 0; i < size; i++)
             {
                 String option = (String)availableOptions.get(i);
-                setParameter(p_session, optionsHash, userName, option);
+                setParameter(p_session, optionsHash, userName, option, null);
             }
         }
     }
@@ -115,33 +117,43 @@ public class AccountOptionsHelper
     {
         String userName = (String)p_session.getAttribute(
             WebAppConstants.USER_NAME);
+        ArrayList tempList = new ArrayList();
 
-        setParameter(p_session, optionsHash, userName, PAGENAME_DISPLAY);
-        setParameter(p_session, optionsHash, userName, EDITOR_SELECTION);
-        setParameter(p_session, optionsHash, userName, EDITOR_SEGMENTS_MAX_NUM);
-        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_SAVE_SEGMENT);
-        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_UNLOCK);
-        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_SYNC); 
-        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_ADJUST_WHITESPACE);
-        setParameter(p_session, optionsHash, userName, EDITOR_LAYOUT);
-        setParameter(p_session, optionsHash, userName, EDITOR_VIEWMODE);
-        setParameter(p_session, optionsHash, userName, EDITOR_PTAGMODE);
-        setParameter(p_session, optionsHash, userName, TM_MATCHING_THRESHOLD);
-        setParameter(p_session, optionsHash, userName, TB_MATCHING_THRESHOLD);
-        setParameter(p_session, optionsHash, userName, HYPERLINK_COLOR_OVERRIDE);
-        setParameter(p_session, optionsHash, userName, HYPERLINK_COLOR);
-        setParameter(p_session, optionsHash, userName, ACTIVE_HYPERLINK_COLOR);
-        setParameter(p_session, optionsHash, userName, VISITED_HYPERLINK_COLOR);
-        setParameter(p_session, optionsHash, userName, EDITOR_SHOW_CLOSEALLCOMMENT);
+        setParameter(p_session, optionsHash, userName, PAGENAME_DISPLAY, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_SELECTION, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_SEGMENTS_MAX_NUM, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_SAVE_SEGMENT, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_UNLOCK, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_SYNC, tempList); 
+        setParameter(p_session, optionsHash, userName, EDITOR_AUTO_ADJUST_WHITESPACE, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_LAYOUT, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_VIEWMODE, tempList);
+        setParameter(p_session, optionsHash, userName, EDITOR_PTAGMODE, tempList);
+        setParameter(p_session, optionsHash, userName, TM_MATCHING_THRESHOLD, tempList);
+        setParameter(p_session, optionsHash, userName, TB_MATCHING_THRESHOLD, tempList);
+        setParameter(p_session, optionsHash, userName, HYPERLINK_COLOR_OVERRIDE, tempList);
+        setParameter(p_session, optionsHash, userName, HYPERLINK_COLOR, tempList);
+        setParameter(p_session, optionsHash, userName, ACTIVE_HYPERLINK_COLOR, tempList);
+        setParameter(p_session, optionsHash, userName, VISITED_HYPERLINK_COLOR, tempList);
+        setParameter(p_session, optionsHash, userName, PREVIEW_100MATCH_COLOR, tempList);
+        setParameter(p_session, optionsHash, userName, PREVIEW_ICEMATCH_COLOR, tempList);
+        setParameter(p_session, optionsHash, userName, PREVIEW_NONMATCH_COLOR, tempList);
+        
+        setParameter(p_session, optionsHash, userName, EDITOR_SHOW_CLOSEALLCOMMENT, tempList);
         for(int i = 0; i < DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS.size(); i++)
         {
         	String downloadOption = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS.get(i);
-        	setParameter(p_session, optionsHash, userName, downloadOption);
+        	setParameter(p_session, optionsHash, userName, downloadOption, tempList);
+        }
+        
+        if (tempList.size() > 0)
+        {
+            PreviewPDFPageHandler.deleteOldPdfByUser(userName);
         }
     }
 
     private static void setParameter(HttpSession p_session,
-        HashMap optionsHash, String p_userName, String p_name)
+        HashMap optionsHash, String p_userName, String p_name, ArrayList tempList)
         throws EnvoyServletException
     {
         String newValue = (String)optionsHash.get(p_name);
@@ -150,6 +162,17 @@ public class AccountOptionsHelper
         {
             UserParameter param = PageHandler.getUserParameter(p_session, p_name);
 
+            if (p_name.equals(PREVIEW_100MATCH_COLOR)
+                    || p_name.equals(PREVIEW_ICEMATCH_COLOR)
+                    || p_name.equals(PREVIEW_NONMATCH_COLOR))
+            {
+                String oldValue = param.getValue();
+                if (!newValue.equals(oldValue))
+                {
+                    tempList.add(new Object());
+                }
+            }
+            
             param.setValue(newValue);
             param = updateParameter(param);
 

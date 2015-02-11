@@ -19,6 +19,9 @@ package com.globalsight.ling.docproc.extractor.xml;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.globalsight.ling.common.srccomment.SrcCmtXmlComment;
+import com.globalsight.ling.common.srccomment.SrcCmtXmlTag;
+
 public class XmlFilterTags
 {
     private List<XmlFilterTag> whiteSpacePreserveTags = new ArrayList<XmlFilterTag>();
@@ -30,6 +33,18 @@ public class XmlFilterTags
     private List<XmlFilterEntity> entities = new ArrayList<XmlFilterEntity>();
     private List<XmlFilterProcessIns> processIns = new ArrayList<XmlFilterProcessIns>();
     private List<XmlFilterSidTag> sidTags = new ArrayList<XmlFilterSidTag>();
+    private List<SrcCmtXmlComment> srcCmtXmlComment = new ArrayList<SrcCmtXmlComment>();
+    private List<SrcCmtXmlTag> srcCmtXmlTag = new ArrayList<SrcCmtXmlTag>();
+
+    public List<SrcCmtXmlTag> getSrcCmtXmlTag()
+    {
+        return srcCmtXmlTag;
+    }
+
+    public void setSrcCmtXmlTag(List<SrcCmtXmlTag> srcCmtXmlTag)
+    {
+        this.srcCmtXmlTag = srcCmtXmlTag;
+    }
 
     public XmlFilterTags()
     {
@@ -125,5 +140,15 @@ public class XmlFilterTags
     public void setSidTags(List<XmlFilterSidTag> sidTags)
     {
         this.sidTags = sidTags;
+    }
+
+    public List<SrcCmtXmlComment> getSrcCmtXmlComment()
+    {
+        return srcCmtXmlComment;
+    }
+
+    public void setSrcCmtXmlComment(List<SrcCmtXmlComment> srcCmtXmlComment)
+    {
+        this.srcCmtXmlComment = srcCmtXmlComment;
     }
 }

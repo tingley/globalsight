@@ -58,16 +58,20 @@ public class Rule implements Cloneable, ErrorMessages
 {
     private boolean translate = true;
     private boolean translatable = true; // if false, it's "localizable"
-    private String dataFormat = null;
-    private String type = null;
     private boolean inline = false;
     private boolean movable = false;
     private boolean erasable = false;
     private boolean containedInHtml = false;
     private boolean internal = false;
+    private String dataFormat = null;
+    private String type = null;
     private String preserveWhiteSpace = null;
     private String sid = null;
     private Set words = new HashSet();
+    private String srcComment = null;
+    private boolean isSrcCommentNode = false;
+    
+    private int priority = 10;
 
     public void setTranslate(boolean translate)
     {
@@ -214,6 +218,104 @@ public class Rule implements Cloneable, ErrorMessages
      */
     public Rule merge(Rule that)
     {
+        if (priority == that.priority)
+            return mergeWithSamePriority(that);
+        
+        Rule newObj = null;
+
+        try
+        {
+            newObj = (Rule) clone();
+        }
+        catch (CloneNotSupportedException e)
+        {
+            // Shouldn't reach here
+        }
+        
+        if (newObj.dataFormat == null
+                || (that.dataFormat != null && that.priority < newObj.priority))
+        {
+            newObj.dataFormat = that.dataFormat;
+        }
+        
+        if (newObj.type == null
+                || (that.type != null && that.priority < newObj.priority))
+        {
+            newObj.type = that.type;
+        }
+        
+        if (newObj.sid == null
+                || (that.sid != null && that.priority < newObj.priority))
+        {
+            newObj.sid = that.sid;
+        }
+        
+        if (newObj.srcComment == null
+                || (that.srcComment != null && that.priority < newObj.priority))
+        {
+            newObj.srcComment = that.srcComment;
+        }
+        
+        if (that.isSrcCommentNode)
+        {
+            newObj.isSrcCommentNode = that.isSrcCommentNode;
+        }
+        
+        if (newObj.preserveWhiteSpace == null
+                || (that.preserveWhiteSpace != null && that.priority < newObj.priority))
+        {
+            newObj.preserveWhiteSpace = that.preserveWhiteSpace;
+        }
+
+        if (priority > that.priority)
+        {
+            newObj.translate = that.translate;
+            newObj.translatable = that.translatable;
+            newObj.inline = that.inline;
+            newObj.containedInHtml = that.containedInHtml;
+            newObj.movable = that.movable;
+            newObj.erasable = that.erasable;
+        }
+
+        Set words = that.getWords();
+        if (words != null && words.size() > 0)
+        {
+            newObj.words.addAll(words);
+        }
+
+        if (that.isInternal())
+        {
+            newObj.setInternal(true);
+        }
+        
+        return newObj;
+    }
+
+    /**
+     * <p>
+     * Merges two Rule objects.
+     * </p>
+     * 
+     * <p>
+     * The purpose of this method is to merge multiple rules matching on a node
+     * into a single rule.
+     * </p>
+     * 
+     * <p>
+     * A new rule object is created by cloning <em>this</em> rule, the
+     * properties of the <em>new</em> object are set to the properties of the
+     * <em>other</em> rule, but only if these properties are different from
+     * their default values. The <em>new</em> rule object is returned and
+     * neither <em>this</em> nor the <em>other</em> rule are modified.
+     * </p>
+     * 
+     * <p>
+     * The "translate" attribute will never be merged, its value will always be
+     * derived from <code>this</code> rule.
+     * </p>
+     */
+    public Rule mergeWithSamePriority(Rule that)
+    {
         Rule newObj = null;
 
         try
@@ -256,6 +358,11 @@ public class Rule implements Cloneable, ErrorMessages
         {
             newObj.movable = that.movable;
         }
+        
+        if (that.isSrcCommentNode)
+        {
+            newObj.isSrcCommentNode = that.isSrcCommentNode;
+        }
 
         if (that.erasable != false)
         {
@@ -285,7 +392,7 @@ public class Rule implements Cloneable, ErrorMessages
         
         return newObj;
     }
-
+    
     public static String getSid(Map ruleMap, Node node)
     {
         Rule rule = null;
@@ -301,6 +408,23 @@ public class Rule implements Cloneable, ErrorMessages
         }
 
         return sid;
+    }
+    
+    public static String getSrcComment(Map ruleMap, Node node)
+    {
+        Rule rule = null;
+        String cmt = null;
+
+        if (ruleMap != null)
+        {
+            rule = (Rule) ruleMap.get(node);
+            if (rule != null)
+            {
+                cmt = rule.getSrcComment();
+            }
+        }
+
+        return cmt;
     }
 
     /**
@@ -512,6 +636,27 @@ public class Rule implements Cloneable, ErrorMessages
         }
         return ret;
     }
+    
+    public static boolean isSrcCommentNode(Map ruleMap, Node node)
+    {
+        boolean ret = false;
+
+        Rule rule = null;
+        if (ruleMap != null)
+        {
+            rule = (Rule) ruleMap.get(node);
+        }
+
+        if (rule != null)
+        {
+            ret = rule.isSrcCommentNode;
+        }
+        else
+        {
+            ret = false;
+        }
+        return ret;
+    }
 
     /**
      * Returns the data format (or datatype in DiplomatXML) as which a node is
@@ -647,5 +792,35 @@ public class Rule implements Cloneable, ErrorMessages
                 return arg0.toString().length() - arg1.toString().length();
             }
         };
+    }
+
+    public int getPriority()
+    {
+        return priority;
+    }
+
+    public void setPriority(int priority)
+    {
+        this.priority = priority;
+    }
+
+    public String getSrcComment()
+    {
+        return srcComment;
+    }
+
+    public void setSrcComment(String srcComment)
+    {
+        this.srcComment = srcComment;
+    }
+
+    public boolean isSrcCommentNode()
+    {
+        return isSrcCommentNode;
+    }
+
+    public void setIsSrcCommentNode(boolean isSrcCommentNode)
+    {
+        this.isSrcCommentNode = isSrcCommentNode;
     }
 }

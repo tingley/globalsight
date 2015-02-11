@@ -11,79 +11,25 @@ package com.globalsight.selenium.testcases.smoketest;
  */
 
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
-import com.thoughtworks.selenium.Selenium;
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.RatesFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
-public class CreateRates {
+public class CreateRates extends BaseTestCase
+{
 
-	private Selenium selenium;
-	private RatesFuncs iRatesFuncs = new RatesFuncs();
-	String testCaseName = getClass().getName();
+    private RatesFuncs ratesFuncs = new RatesFuncs();
 
-	@Test
-	public void createRates() throws Exception {
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.Rates_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    @Test
+    public void createRates() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.RATES_SUBMENU);
 
-		iRatesFuncs.newRate(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "FIXEDRATE"));
-		iRatesFuncs.newRate(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "HOURLYRATE"));
-		iRatesFuncs.newRate(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "PAGERATE"));
-		iRatesFuncs.newRate(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "WORDCOUNTRATE"));
-		iRatesFuncs.newRate(selenium, 
-				ConfigUtil.getDataInCase(testCaseName, "WORDCOUNTByPERCENT"));
-	}
-
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithAdmin(selenium);
-	}
-
-	@AfterMethod
-	public void afterMethod() {
-		CommonFuncs.logoutSystem(selenium);
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
+        ratesFuncs.newRate(selenium, getProperty("rate.fixedRate"));
+        ratesFuncs.newRate(selenium, getProperty("rate.hourlyRate"));
+        ratesFuncs.newRate(selenium, getProperty("rate.pageRate"));
+        ratesFuncs.newRate(selenium, getProperty("rate.wordCountRate"));
+        ratesFuncs.newRate(selenium, getProperty("rate.WordCountByPercent"));
+    }
 }

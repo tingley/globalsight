@@ -228,15 +228,13 @@ public class SnippetLibraryServlet
         }
         catch (SnippetException ex)
         {
-            CATEGORY.warn(ex.toString() + "\n" +
-                GeneralException.getStackTraceString(ex));
+            CATEGORY.warn(ex.getMessage(), ex);
 
             returnError(response, ex);
         }
         catch (Throwable ex)
         {
-            CATEGORY.warn(ex.toString() + "\n" +
-                GeneralException.getStackTraceString(ex));
+            CATEGORY.warn(ex.getMessage(), ex);
 
             returnError(response, ex);
         }

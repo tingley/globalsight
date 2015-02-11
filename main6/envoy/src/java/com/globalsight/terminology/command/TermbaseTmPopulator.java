@@ -30,7 +30,6 @@ import com.globalsight.terminology.TermbaseManager;
 import com.globalsight.terminology.java.*;
 import com.globalsight.terminology.util.Sortkey;
 import com.globalsight.terminology.util.SqlUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.UTC;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
@@ -41,7 +40,7 @@ public class TermbaseTmPopulator implements ITermbaseTmPopulator
 
     private static final Logger CATEGORY = Logger
             .getLogger(TermbaseManager.class);
-    private ArrayList<String> termImgType = new ArrayList();
+    private ArrayList<String> termImgType = new ArrayList<String>();
     
     public TermbaseTmPopulator() {
         termImgType.add("jpg");
@@ -79,8 +78,7 @@ public class TermbaseTmPopulator implements ITermbaseTmPopulator
                 hql.append("select tt.tbLanguage.concept from TbTerm tt");
                 hql.append(" where tt.termContent='").append(sourceTerm);
                 hql.append("' and tt.tbLanguage.name='").append(sourceLanguage);
-                hql.append("' and tt.tbLanguage.concept.termbase.id=").append(
-                        TBId);
+                hql.append("' and tt.tbid=").append(TBId);
 
                 Iterator ite = HibernateUtil.search(hql.toString()).iterator();
 
@@ -112,7 +110,7 @@ public class TermbaseTmPopulator implements ITermbaseTmPopulator
                                         targetLanguage))
                         {
                             isHaveLan = true;
-                            tl.getTerms().clear();
+//                            tl.getTerms().clear();
                             TbTerm targetTbTerm = getTbTermByTuv(tuvTarget,
                                     creator, tl);
                             tl.getTerms().add(targetTbTerm);
@@ -265,8 +263,7 @@ public class TermbaseTmPopulator implements ITermbaseTmPopulator
         }
         catch (Exception e)
         {
-            throw new RuntimeException("generate term by tuv error: "
-                    + GeneralException.getStackTraceString(e));
+            throw new RuntimeException("generate term by tuv error: ", e);
         }
         finally
         {

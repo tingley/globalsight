@@ -7,6 +7,7 @@
          com.globalsight.everest.util.comparator.UserInfoComparator,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.foundation.User,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          com.globalsight.everest.projecthandler.Project,
          com.globalsight.util.FormUtil,
          java.text.MessageFormat,
@@ -186,6 +187,11 @@ function addUser()
             }
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+
+			//for GBS-1995,by fan
+		    //set the selected element of left list is empty
+		    from.options[i] = null;
+            i--;
         }
     }
     saveUserIds();
@@ -193,6 +199,7 @@ function addUser()
 
 function removeUser()
 {
+	var from = projectForm.from;
     var to = projectForm.to;
 
     if (to.selectedIndex == -1)
@@ -204,6 +211,12 @@ function removeUser()
     {
         if (to.options[i].selected)
         {
+			
+			//for GBS-1995,by fan
+		    //add selected element to left list
+		    var len = from.options.length;
+            from.options[len] = new Option(to.options[i].text, to.options[i].value);
+
             to.options[i] = null;
             i--;
         }
@@ -230,6 +243,12 @@ function saveUserIds()
         options_string += to.options[loop].value;
     }
     projectForm.toField.value = options_string;
+}
+
+//adjust select tag width, by fan 
+function changeSelectWidth(selected){
+	if(selected.options[selected.selectedIndex].text.length*7 >= 220)  selected.style.width=selected.options[selected.selectedIndex].text.length*7 + 'px';
+	else selected.style.width=200;
 }
 
 </SCRIPT>
@@ -370,7 +389,7 @@ function saveUserIds()
                 <tr style="padding-bottom:5px; padding-top:5px;"
                   valign=top bgcolor="<%=color%>">
                   <td><span class="standardText">
-                    <%=userInfo.getUserId()%>
+                    <%=userInfo.getUserName()%>
                   </td>
                   <td><span class="standardText">
                     <%=userInfo.getFirstName()%>
@@ -389,7 +408,7 @@ function saveUserIds()
 </TD>
 </TR>
 </TABLE>
-<table border="0" cellpadding="0" cellspacing="0" width="50%">
+<table border="0" cellpadding="0" cellspacing="0">
   <tr><td>&nbsp;</td></tr>
   <tr><td>&nbsp;</td></tr>
   <tr>
@@ -408,19 +427,45 @@ function saveUserIds()
     </td>
   </tr>
     <tr>
-        <td width="40%">
-        <select name="from" multiple class="standardText" size=15>
+        <td>
+        <select name="from" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">
 <%
-            if (possibleUsers != null)
-            {
-                for (int i = 0; i < possibleUsers.size(); i++)
-                {
-                   UserInfo userInfo = (UserInfo)possibleUsers.get(i);
+		if (possibleUsers != null)
+		{
+			for (int i = 0; i < possibleUsers.size(); i++)
+			{
+				UserInfo userInfo = (UserInfo)possibleUsers.get(i);
+
+				//for GBS-1995,by fan
+				//don't display the element in the left list ,if the the element is existed in the right list.
+				if (!addedUsersIds.isEmpty())
+				{
+					boolean isExist = false;  //if the user is existed in the right list, return true.
+
+					Iterator<String> iter = addedUsersIds.iterator();
+
+					while(iter.hasNext())
+					{
+						String userId = iter.next();
+						if(userId.equals(userInfo.getUserId())) isExist = true;
+
+					}
+					if(!isExist)
+					{		
 %>
-                   <option value="<%=userInfo.getUserId()%>" ><%=userInfo.getUserId()%></option>
+						<option value="<%=userInfo.getUserId()%>" ><%=userInfo.getUserName()%></option>
 <%
-                }
-            }
+					}
+
+				}
+				else
+				{
+%>
+						<option value="<%=userInfo.getUserId()%>" ><%=userInfo.getUserName()%></option>
+<%
+				}
+			}
+		}
 %>
         </select>
         </td>
@@ -441,8 +486,8 @@ function saveUserIds()
             </tr>
           </table>
         </td>
-        <td width="40%">
-            <select name="to" multiple class="standardText" size=15>
+        <td>
+            <select name="to" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">
 <%
                 if (!addedUsersIds.isEmpty())
                 {
@@ -452,7 +497,7 @@ function saveUserIds()
                        String userId = iter.next();
 
 %>
-                       <option value="<%=userId%>" ><%=userId%></option>
+                       <option value="<%=userId%>" ><%=UserUtil.getUserNameById(userId)%></option>
 <%
                     }
                 }

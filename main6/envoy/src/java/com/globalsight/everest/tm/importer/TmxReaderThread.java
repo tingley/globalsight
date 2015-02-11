@@ -33,6 +33,8 @@ import org.dom4j.ElementPath;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
 
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.util.DtdResolver;
 import com.globalsight.everest.tm.util.Tmx;
@@ -212,7 +214,7 @@ public class TmxReaderThread
                                 }
                                 else
                                 {
-                                    CATEGORY.warn(msg);
+                                    CATEGORY.warn(msg, ex);
                                 }
                             }
 
@@ -478,6 +480,17 @@ public class TmxReaderThread
         {
             result.setLocalizable();
         }
+        
+        // prop with Att::
+        List propNodes = p_root.elements("prop");
+        for (int i = 0; i < propNodes.size(); i++)
+        {
+            Element elem = (Element) propNodes.get(i);
+            ProjectTmTuTProp prop = createProp(result, elem);
+
+            if (prop != null)
+                result.addProp(prop);
+        }
 
         // TUVs
         List nodes = p_root.elements("tuv");
@@ -532,7 +545,7 @@ public class TmxReaderThread
         }
         catch (Throwable ex)
         {
-            throw new Exception("unknown locale " + lang);
+            throw new Exception("unknown locale " + lang + ",you can create it in system then retry.");
         }
 
         // Creation user - always set to a known value
@@ -631,6 +644,37 @@ public class TmxReaderThread
         result.setSid(p_tu.getSID());
         //End of Added
         result.setSegment(segment.toString());
+
+        return result;
+    }
+    
+    private ProjectTmTuTProp createProp(SegmentTmTu p_tu, Element p_root) throws Exception
+    {
+        ProjectTmTuTProp result = null;
+        String type = p_root.attributeValue("type");
+
+        if (type != null && type.startsWith(ProjectTmTuTProp.TYPE_ATT_PREFIX))
+        {
+            result = new ProjectTmTuTProp();
+            result.setPropType(type);
+            result.setPropValue(p_root.getText());
+        }
+        
+        // When a TM is imported: for each TUV: for each TUV attribute defined on the TM: 
+        // if the attribute exists in the imported TMX file, then the attribute is created 
+        // and the value is set from the imported TM. 
+        if (result != null && m_database instanceof ProjectTM)
+        {
+            String attName = result.getAttributeName();
+            ProjectTM ptm = (ProjectTM) m_database;
+            List<String> tmAttNames = ptm.getAllTMAttributenames();
+            
+            // ignore the tu attributes if not defined in TM.
+            if (!tmAttNames.contains(attName))
+            {
+                result = null;
+            }
+        }
 
         return result;
     }

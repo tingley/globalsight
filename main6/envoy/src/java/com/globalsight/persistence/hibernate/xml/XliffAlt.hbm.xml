@@ -11,11 +11,13 @@
         <id name="id" column="ID" type="long">
             <generator class="native" />
         </id>
-
+<!-- 
         <many-to-one name="tuv" column="TUV_ID"
             class="com.globalsight.everest.tuv.TuvImpl"
             not-null="true" lazy="false" />
-
+ -->
+		<property name="tuvId" length="20" column="TUV_ID" type="long"
+			not-null="true" />
         <property name="sourceSegment" length="1000"
             column="SOURCE_SEGMENT" type="string"/>
 

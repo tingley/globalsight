@@ -66,7 +66,7 @@ public class ExtractionRules
     private String s_spacerGif = "";
     private boolean s_extractSSIInclude = true;
     private String fileProfileId;
-    private long filterId;
+    private long filterId = -1;
 
     private boolean useContentPostFilter = false;
     private boolean useInternalTextFilter = false;
@@ -236,10 +236,14 @@ public class ExtractionRules
     {
         try
         {
-            boolean altTranslate = false;
+            Boolean altTranslate = null;
             HtmlFilter htmlFilter = null;
             HtmlFilter contentPostFilter = null;
             BaseFilter bf = null; // internal text post-filter
+            if (fileProfileId == null && filterId > -1)
+            {
+                htmlFilter = FilterHelper.getHtmlFilter(filterId);
+            }
             if (fileProfileId != null && !"".equals(fileProfileId)
                     && Long.parseLong(this.fileProfileId) > 0)
             {
@@ -252,8 +256,8 @@ public class ExtractionRules
                         .equalsIgnoreCase(mainFilterTableName))
                 {
                     htmlFilter = FilterHelper.getHtmlFilter(mainFilterId);
-                    bf = BaseFilterManager.getBaseFilterByMapping(htmlFilter.getId(),
-                            FilterConstants.HTML_TABLENAME);
+                    bf = BaseFilterManager.getBaseFilterByMapping(
+                            htmlFilter.getId(), FilterConstants.HTML_TABLENAME);
                 }
                 else if (FilterConstants.MSOFFICEDOC_TABLENAME
                         .equalsIgnoreCase(mainFilterTableName))
@@ -314,8 +318,7 @@ public class ExtractionRules
                     long secondFilterId = proFilter.getSecondFilterId();
                     if (secondFilterId > 0)
                     {
-                        htmlFilter = FilterHelper
-                                .getHtmlFilter(secondFilterId);
+                        htmlFilter = FilterHelper.getHtmlFilter(secondFilterId);
                     }
                 }
             }
@@ -346,7 +349,6 @@ public class ExtractionRules
                 {
                     if (htmlFilter != null && tmp.endsWith("_html"))
                     {
-                        // Only for pure Html file.
                         fillEmbeddableTags(htmlFilter, s_mapInlineTags);
                     }
                     else
@@ -452,13 +454,19 @@ public class ExtractionRules
                     setDebugFlag(res, key);
                 }
             }
-            if (altTranslate)
+            if (altTranslate != null)
             {
-                s_mapTranslatableAttrs.put("alt", null);
-            }
-            else
-            {
-                s_mapTranslatableAttrs.remove("alt");
+                if (altTranslate)
+                {
+                    if (s_mapTranslatableAttrs.get("alt") == null)
+                    {
+                        s_mapTranslatableAttrs.put("alt", null);
+                    }
+                }
+                else
+                {
+                    s_mapTranslatableAttrs.remove("alt");
+                }
             }
             if (useContentPostFilter)
             {
@@ -717,7 +725,7 @@ public class ExtractionRules
 
         return true;
     }
-    
+
     public boolean isInternalTextCharStyle(String p_style)
     {
         if (m_rules != null)

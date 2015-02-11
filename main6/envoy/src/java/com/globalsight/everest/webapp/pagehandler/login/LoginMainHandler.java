@@ -20,6 +20,7 @@ package com.globalsight.everest.webapp.pagehandler.login;
 import org.apache.log4j.Logger;
 
 // Envoy packages
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
@@ -68,6 +69,10 @@ public class LoginMainHandler extends PageHandler
         session.invalidate();
 
         initialize();
+        
+        // Trigger to clear cached Tu/Tuv objects to reduce memory.
+        SegmentTuTuvCacheManager.clearUnTouchedTuTuvs();
+
         // turn off cache.  do both.  "pragma" for the older browsers.
         p_response.setHeader("Pragma", "no-cache"); //HTTP 1.0
         p_response.setHeader("Cache-Control", "no-cache"); //HTTP 1.1

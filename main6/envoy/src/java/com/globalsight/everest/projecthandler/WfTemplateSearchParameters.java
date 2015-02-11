@@ -29,11 +29,10 @@ public class WfTemplateSearchParameters extends SearchCriteriaParameters
 {
     public static final int WF_TEMPLATE_NAME = 0;
     public static final int WF_NAME_CONDITION = 1;
-    public static final int PROJECT_ID = 2;
-    public static final int PROJECT_MANAGER_ID = 3;
-    public static final int PM_ID_CONDITION = 4;
-    public static final int SOURCE_LOCALE = 5;
-    public static final int TARGET_LOCALE = 6;    
+    public static final int PROJECT = 2;
+    public static final int SOURCE_LOCALE = 3;
+    public static final int TARGET_LOCALE = 4;    
+    public static final int COMPANY_NAME = 5;    
     
     /**
      *  Default constructor.
@@ -63,35 +62,19 @@ public class WfTemplateSearchParameters extends SearchCriteriaParameters
         addElement(WF_NAME_CONDITION, p_key);
     }
 
-    /**
-     * Set the workflow template's project manager username to be searched.
-     */
-    public void setPmUsername(String p_pmUsername) 
-    {
-        addElement(PROJECT_MANAGER_ID, p_pmUsername);
-    }
 
-    /**
-     * Set the search condition for the workflow template's project 
-     * manager username (i.e. begins with, contains, and etc.)
-     */
-    public void setPmUsernameCondition(String p_key)
-    {
-        addElement(PM_ID_CONDITION, p_key);
-    }
-    
     /**
      * Set the project id used for the workflow template search.
      */
-    public void setProjectId(String p_projectId)
+    public void setProject(String p_projectId)
     {
-        addElement(PROJECT_ID, p_projectId);
+        addElement(PROJECT, p_projectId);
     }
 
     /**
      * Set the source locale to be searched.
      */
-    public void setSourceLocale(GlobalSightLocale p_sourceLocale)
+    public void setSourceLocale(String p_sourceLocale)
     {
         addElement(SOURCE_LOCALE, p_sourceLocale);
     }
@@ -99,9 +82,14 @@ public class WfTemplateSearchParameters extends SearchCriteriaParameters
     /**
      * Set the target locale to be searched.
      */
-    public void setTargetLocale(GlobalSightLocale p_targetLocale)
+    public void setTargetLocale(String p_targetLocale)
     {
         addElement(TARGET_LOCALE, p_targetLocale);
+    }
+    
+    public void setCompanyName(String p_companyName)
+    {
+        addElement(COMPANY_NAME, p_companyName);
     }
 }
 

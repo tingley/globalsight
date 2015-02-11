@@ -18,21 +18,18 @@
 package com.globalsight.everest.webapp.pagehandler.administration.comment;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Vector;
 
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,18 +40,15 @@ import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.Comment;
-import com.globalsight.everest.comment.CommentException;
 import com.globalsight.everest.comment.CommentFile;
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.TaskCommentInfo;
 import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.edit.offline.download.JobPackageZipper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
@@ -68,12 +62,10 @@ import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.util.comparator.TaskCommentInfoComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -130,34 +122,42 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
-    {   
-    	CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
-    	String action             = p_request.getParameter(ACTION_PARAMETER);
-    	String[] jobComments      = p_request.getParameterValues(JOB_COMMENT_CHECKBOX);
-    	String[] activityComments = p_request.getParameterValues(ACTIVITY_COMMENT_CHECKBOX);
-    	String selectedLocale     = p_request.getParameter("localeValue");
-    	activityComments    = commentFilesDownload.removeUnrelatedIds(activityComments, selectedLocale);
-    	String[] commentIds = commentFilesDownload.mergeCommentIds(jobComments, activityComments);
-    	
-    	if(DOWNLOAD_COMMENT_FILES.equals(action))
-    	{
-    		try
-			{
-    			commentFilesDownload.downloadCommentFiles(commentIds, p_request, p_response);
-			} catch (Exception e)
-			{
-				CATEGORY.error(e);
-			}
-    	}else{
-    		handleRequest(p_pageDescriptor, p_request, p_response, p_context);
-        	
+    {
+        CommentFilesDownLoad commentFilesDownload = new CommentFilesDownLoad();
+        String action = p_request.getParameter(ACTION_PARAMETER);
+        String[] jobComments = p_request
+                .getParameterValues(JOB_COMMENT_CHECKBOX);
+        String[] activityComments = p_request
+                .getParameterValues(ACTIVITY_COMMENT_CHECKBOX);
+        String selectedLocale = p_request.getParameter("localeValue");
+        activityComments = commentFilesDownload.removeUnrelatedIds(
+                activityComments, selectedLocale);
+        String[] commentIds = commentFilesDownload.mergeCommentIds(jobComments,
+                activityComments);
+
+        if (DOWNLOAD_COMMENT_FILES.equals(action))
+        {
+            try
+            {
+                commentFilesDownload.downloadCommentFiles(commentIds,
+                        p_request, p_response);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e.getMessage(), e);
+            }
+        }
+        else
+        {
+            handleRequest(p_pageDescriptor, p_request, p_response, p_context);
+
             super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                     p_context);
-    	}
-    	
+        }
+
     }
 
-	public void handleRequest(WebPageDescriptor descriptor,
+    public void handleRequest(WebPageDescriptor descriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
             ServletContext p_context) throws EnvoyServletException,
             ServletException, IOException
@@ -187,36 +187,37 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             try
             {
                 // Get task
-                wo = TaskHelper.getTask(user.getUserId(),
-                        taskId, taskState);
+                wo = TaskHelper.getTask(user.getUserId(), taskId, taskState);
             }
             catch (Exception e)
             {
+                CATEGORY.info(e);
+
                 ResourceBundle bundle = getBundle(session);
                 String stateLabel = "";
                 switch (taskState)
                 {
-                case Task.STATE_ACCEPTED:
-                    stateLabel = bundle.getString("lb_accepted");
-                    break;
-                case Task.STATE_COMPLETED:
-                    stateLabel = bundle.getString("lb_finished");
-                    break;
-                case Task.STATE_REJECTED:
-                    stateLabel = bundle.getString("lb_rejected");
-                    break;
-                case Task.STATE_ACTIVE:
-                    stateLabel = bundle.getString("lb_available");
-                    break;
+                    case Task.STATE_ACCEPTED:
+                        stateLabel = bundle.getString("lb_accepted");
+                        break;
+                    case Task.STATE_COMPLETED:
+                        stateLabel = bundle.getString("lb_finished");
+                        break;
+                    case Task.STATE_REJECTED:
+                        stateLabel = bundle.getString("lb_rejected");
+                        break;
+                    case Task.STATE_ACTIVE:
+                        stateLabel = bundle.getString("lb_available");
+                        break;
                 }
-                Object[] args = { p_request.getParameter("jobname"), stateLabel };
+                Object[] args =
+                { p_request.getParameter("jobname"), stateLabel };
                 p_request.setAttribute("badresults", MessageFormat.format(
                         bundle.getString("msg_bad_task"), args));
                 // remove the task from the most recently used list
                 String menuName = (String) p_request.getParameter("cookie");
                 TaskHelper.removeMRUtask(p_request, session, menuName,
                         p_response);
-
                 // forward to the jsp page.
                 TaskSearchHandler.setup(p_request);
                 RequestDispatcher dispatcher = p_context
@@ -228,9 +229,10 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         }
         if (wo == null)
         {
+            CATEGORY.info("Can not found work object");
             EnvoyServletException e = new EnvoyServletException(
                     "WorkObjectNotFound", null, null);
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
             throw e;
         }
 
@@ -279,7 +281,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             // + tmpDir + "/" ;
             String path = AmbFileStoragePathUtils.getCommentReferenceDirPath()
                     + File.separator + tmpDir + File.separator;
-            String[] dirs = { GENERAL, RESTRICTED };
+            String[] dirs =
+            { GENERAL, RESTRICTED };
             for (int h = 0; h < dirs.length; h++)
             {
                 String dir = "";
@@ -320,6 +323,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         {
             access = GENERAL;
         }
+
         // Now reload the list
         refreshCommentReferences(commentId, access);
 
@@ -351,6 +355,7 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                             comments.addAll(t.getTaskComments());
                         }
                     }
+
                     // comments filter
                     for (int i = 0; i < comments.size();)
                     {
@@ -376,19 +381,18 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     // comments =
                     // ServerProxy.getCommentManager().getTaskComments(job.getId(),glocales);
                     // method 2 end
-
                     dataForTable(p_request, session, TASK_COMMENT_LIST,
                             TASK_COMMENT_KEY, new CommentComparator(locale),
                             comments);
 
                     // Also get job comments (new in release 6.5)
                     dataForTable(p_request, session, JOB_COMMENT_LIST,
-                            JOB_COMMENT_KEY, new CommentComparator(locale), job
-                                    .getJobComments());
+                            JOB_COMMENT_KEY, new CommentComparator(locale),
+                            job.getJobComments());
 
                     // Get Segment comment summary info.
-                    ArrayList segments = getTaskSegmentSummary(job, p_request,
-                            sessionMgr, perms, task);
+					ArrayList<LocaleCommentsSummary> segments = getSegmentSummaryForTask(
+							task, p_request, sessionMgr, perms);
                     dataForTable(p_request, session, SEGMENT_COMMENT_LIST,
                             SEGMENT_COMMENT_KEY, new LocaleCommentsComparator(
                                     locale), segments);
@@ -402,13 +406,13 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     Job job = (Job) wo;
                     // refresh the job from the cache
                     job = ServerProxy.getJobHandler().getJobById(job.getId());
-                    dataForTable(p_request, session, JOB_COMMENT_LIST,
-                            JOB_COMMENT_KEY, new CommentComparator(locale), job
-                                    .getJobComments());
 
+                    dataForTable(p_request, session, JOB_COMMENT_LIST,
+                            JOB_COMMENT_KEY, new CommentComparator(locale),
+                            job.getJobComments());
                     // Get list of target locales
-                    List targLocales = getValidTargetLocales(job, p_request,
-                            perms);
+					List<GlobalSightLocale> targLocales = getValidTargetLocales(
+							job, p_request, perms);
 
                     // Get all activity comments for Job
                     ArrayList taskComments = (ArrayList) getTaskCommentsForJob(
@@ -423,8 +427,9 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     setTargetLocales(taskComments, sessionMgr, locale);
 
                     // Get Segment comment summary info.
-                    ArrayList segments = getSegmentSummary(job, p_request,
-                            sessionMgr, perms);
+					ArrayList<LocaleCommentsSummary> segments = getSegmentSummaryForJob(
+							job, p_request, sessionMgr, perms);
+
                     dataForTable(p_request, session, SEGMENT_COMMENT_LIST,
                             SEGMENT_COMMENT_KEY, new LocaleCommentsComparator(
                                     locale), segments);
@@ -477,89 +482,91 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
      * Get the total # open comments count for each target page. Set it in the
      * request.
      */
-    private ArrayList getSegmentSummary(Job job, HttpServletRequest request,
-            SessionManager sessionMgr, PermissionSet perms)
-            throws EnvoyServletException
+	private ArrayList<LocaleCommentsSummary> getSegmentSummaryForJob(Job job,
+			HttpServletRequest request, SessionManager sessionMgr,
+			PermissionSet perms) throws EnvoyServletException
     {
         CommentManager manager = null;
-        try
-        {
+        try {
             manager = ServerProxy.getCommentManager();
-        }
-        catch (GeneralException ex)
-        {
+        } catch (GeneralException ex) {
             throw new EnvoyServletException(ex);
         }
 
         // Set the selected locale in the request
-        String localeName = request
-                .getParameter(SEGMENT_COMMENT_KEY + "Filter");
+        String localeName = request.getParameter(SEGMENT_COMMENT_KEY + "Filter");
         if (localeName != null)
         {
             int idx = localeName.indexOf(',');
             String language = localeName.substring(0, idx);
             String country = localeName.substring(idx + 1);
             Locale locale = new Locale(language, country);
-            request.setAttribute("segmentSelectedLocale", locale
-                    .getDisplayName());
+            request.setAttribute("segmentSelectedLocale",
+                    locale.getDisplayName());
         }
 
-        // Loop through the workflows. If the user has permission to the
-        // workflow,
-        // check it's target pages for segment comments.
-        ArrayList workflows = new ArrayList(job.getWorkflows());
-        ArrayList summary = new ArrayList();
-        for (int i = 0; i < workflows.size(); i++)
+        // get just the number of issues in OPEN state
+        // query is also considered a subset of the OPEN state
+        List<String> statesOpen = new ArrayList<String>();
+        statesOpen.add(Issue.STATUS_OPEN);
+        statesOpen.add(Issue.STATUS_QUERY);
+        statesOpen.add(Issue.STATUS_REJECTED);
+
+        List<String> statesClosed = new ArrayList<String>();
+        statesClosed.add(Issue.STATUS_CLOSED);
+
+        ArrayList<LocaleCommentsSummary> summary = new ArrayList<LocaleCommentsSummary>();
+        for (Workflow wf : job.getWorkflows())
         {
-            Workflow wf = (Workflow) workflows.get(i);
             if (wf.getState().equals(Workflow.CANCELLED))
                 continue;
 
-            ArrayList pageSummaries = new ArrayList();
             GlobalSightLocale targLocale = wf.getTargetLocale();
-            List pages = wf.getTargetPages();
-            boolean found = false;
+            List<TargetPage> pages = wf.getTargetPages();
+            List<Long> tpIds = new ArrayList<Long>();
             for (int j = 0; j < pages.size(); j++)
             {
                 TargetPage tPage = (TargetPage) pages.get(j);
-                int countOpen = 0;
-                int countClosed = 0;
-                try
-                {
-                    List statesOpen = new ArrayList();
-                    List statesClosed = new ArrayList();
-                    // get just the number of issues in OPEN state
-                    // query is also considered a subset of the OPEN state
-                    statesOpen.add(Issue.STATUS_OPEN);
-                    statesOpen.add(Issue.STATUS_QUERY);
-                    statesClosed.add(Issue.STATUS_CLOSED);
-                    countOpen = manager.getIssueCount(Issue.TYPE_SEGMENT, tPage
-                            .getId()
-                            + "_", statesOpen);
-                    countClosed = manager.getIssueCount(Issue.TYPE_SEGMENT, tPage
-                            .getId()
-                            + "_", statesClosed);
-                }
-                catch (Exception ex)
-                {
-                    throw new EnvoyServletException(ex);
-                }
-                if((countOpen+countClosed)>0)
+                tpIds.add(tPage.getIdAsLong());
+            }
+
+            HashMap<Long, Integer> openCounts = null;
+            HashMap<Long, Integer> closedCounts = null;
+			try {
+				openCounts = manager.getIssueCountPerTargetPage(
+						Issue.TYPE_SEGMENT, tpIds, statesOpen);
+				closedCounts = manager.getIssueCountPerTargetPage(
+						Issue.TYPE_SEGMENT, tpIds, statesClosed);
+			} catch (Exception e) {
+				throw new EnvoyServletException(e);
+			}
+
+			if (openCounts.size() == 0 && closedCounts.size() == 0) {
+            	continue;
+            }
+
+			ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
+            for (int k = 0; k < pages.size(); k++)
+            {
+            	TargetPage tPage = (TargetPage) pages.get(k);
+				int countOpen = (openCounts.get(tPage.getIdAsLong()) == null ? 0
+						: openCounts.get(tPage.getIdAsLong()));
+				int countClosed = (closedCounts.get(tPage.getIdAsLong()) == null ? 0
+						: closedCounts.get(tPage.getIdAsLong()));
+                if ((countOpen + countClosed) > 0)
                 {
                     PageCommentsSummary ps = new PageCommentsSummary(tPage);
                     ps.setOpenCommentsCount(countOpen);
                     ps.setClosedCommentsCount(countClosed);
                     pageSummaries.add(ps);
-                    found = true;
                 }
             }
-            if (found)
-            {
-                LocaleCommentsSummary ls = new LocaleCommentsSummary(targLocale);
-                ls.setPageCommentsSummary(pageSummaries);
-                summary.add(ls);
-            }
+
+            LocaleCommentsSummary ls = new LocaleCommentsSummary(targLocale);
+            ls.setPageCommentsSummary(pageSummaries);
+            summary.add(ls);
         }
+
         return summary;
     }
 
@@ -567,19 +574,16 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
      * Get the total # open comments count for each target page. Set it in the
      * request.
      */
-    private ArrayList getTaskSegmentSummary(Job job,
-            HttpServletRequest request, SessionManager sessionMgr,
-            PermissionSet perms, Task p_task) throws EnvoyServletException
+	private ArrayList<LocaleCommentsSummary> getSegmentSummaryForTask(
+			Task p_task, HttpServletRequest request, SessionManager sessionMgr,
+			PermissionSet perms) throws EnvoyServletException
     {
         CommentManager manager = null;
-        try
-        {
-            manager = ServerProxy.getCommentManager();
-        }
-        catch (GeneralException ex)
-        {
-            throw new EnvoyServletException(ex);
-        }
+		try {
+			manager = ServerProxy.getCommentManager();
+		} catch (GeneralException ex) {
+			throw new EnvoyServletException(ex);
+		}
 
         // Set the selected locale in the request
         String localeName = request
@@ -590,79 +594,87 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             String language = localeName.substring(0, idx);
             String country = localeName.substring(idx + 1);
             Locale locale = new Locale(language, country);
-            request.setAttribute("segmentSelectedLocale", locale
-                    .getDisplayName());
+            request.setAttribute("segmentSelectedLocale",
+                    locale.getDisplayName());
         }
 
-        ArrayList summary = new ArrayList();
+        ArrayList<LocaleCommentsSummary> summary = new ArrayList<LocaleCommentsSummary>();
         Workflow wf = (Workflow) p_task.getWorkflow();
-        if (wf.getState().equals(Workflow.CANCELLED))
+        if (Workflow.CANCELLED.equals(wf.getState()))
         {
             return summary;
         }
         else
         {
-            ArrayList pageSummaries = new ArrayList();
+            // get just the number of issues in OPEN state
+            // query is also considered a subset of the OPEN state
+        	List<String> statesOpen = new ArrayList<String>();
+        	statesOpen.add(Issue.STATUS_OPEN);
+            statesOpen.add(Issue.STATUS_QUERY);
+            statesOpen.add(Issue.STATUS_REJECTED);
+
+            List<String> statesClosed = new ArrayList<String>();
+            statesClosed.add(Issue.STATUS_CLOSED);
+
             GlobalSightLocale targLocale = wf.getTargetLocale();
-            List pages = wf.getTargetPages();
-            boolean found = false;
+            List<TargetPage> pages = wf.getTargetPages();
+            List<Long> tpIds = new ArrayList<Long>();
             for (int j = 0; j < pages.size(); j++)
             {
                 TargetPage tPage = (TargetPage) pages.get(j);
-                int countOpen = 0;
-                int countClosed = 0;
-                try
-                {
-                    List statesOpen = new ArrayList();
-                    List statesClosed = new ArrayList();
-                    // get just the number of issues in OPEN state
-                    // query is also considered a subset of the OPEN state
-                    statesOpen.add(Issue.STATUS_OPEN);
-                    statesOpen.add(Issue.STATUS_QUERY);
-                    statesClosed.add(Issue.STATUS_CLOSED);
-                    countOpen = manager.getIssueCount(Issue.TYPE_SEGMENT, tPage
-                            .getId()
-                            + "_", statesOpen);
-                    countClosed = manager.getIssueCount(Issue.TYPE_SEGMENT, tPage
-                            .getId()
-                            + "_", statesClosed);
-                    
-                }
-                catch (Exception ex)
-                {
-                    throw new EnvoyServletException(ex);
-                }
-                if ((countOpen+countClosed) > 0)
+                tpIds.add(tPage.getIdAsLong());
+            }
+
+            HashMap<Long, Integer> openCounts = null;
+            HashMap<Long, Integer> closedCounts = null;
+			try {
+				openCounts = manager.getIssueCountPerTargetPage(
+						Issue.TYPE_SEGMENT, tpIds, statesOpen);
+				closedCounts = manager.getIssueCountPerTargetPage(
+						Issue.TYPE_SEGMENT, tpIds, statesClosed);
+			} catch (Exception e) {
+				throw new EnvoyServletException(e);
+			}
+
+			if (openCounts.size() == 0 && closedCounts.size() == 0) {
+            	return summary;
+            }
+
+			ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
+            for (int k = 0; k < pages.size(); k++)
+            {
+            	TargetPage tPage = (TargetPage) pages.get(k);
+				int countOpen = (openCounts.get(tPage.getIdAsLong()) == null ? 0
+						: openCounts.get(tPage.getIdAsLong()));
+				int countClosed = (closedCounts.get(tPage.getIdAsLong()) == null ? 0
+						: closedCounts.get(tPage.getIdAsLong()));
+                if ((countOpen + countClosed) > 0)
                 {
                     PageCommentsSummary ps = new PageCommentsSummary(tPage);
                     ps.setOpenCommentsCount(countOpen);
                     ps.setClosedCommentsCount(countClosed);
                     pageSummaries.add(ps);
-                    found = true;
                 }
             }
-            if (found)
-            {
-                LocaleCommentsSummary ls = new LocaleCommentsSummary(targLocale);
-                ls.setPageCommentsSummary(pageSummaries);
-                summary.add(ls);
-            }
+
+            LocaleCommentsSummary ls = new LocaleCommentsSummary(targLocale);
+            ls.setPageCommentsSummary(pageSummaries);
+            summary.add(ls);
         }
+
         return summary;
     }
 
-    private List getValidTargetLocales(Job job, HttpServletRequest request,
-            PermissionSet perms)
+	private List<GlobalSightLocale> getValidTargetLocales(Job job,
+			HttpServletRequest request, PermissionSet perms)
     {
         HttpSession session = request.getSession();
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
         User user = (User) sessionMgr.getAttribute(USER);
-        List workflows = new ArrayList(job.getWorkflows());
-        List validLocales = new ArrayList();
-        for (int i = 0; i < workflows.size(); i++)
+        List<GlobalSightLocale> validLocales = new ArrayList<GlobalSightLocale>();
+        for (Workflow wf : job.getWorkflows())
         {
-            Workflow wf = (Workflow) workflows.get(i);
             if (wf.getState().equals(Workflow.CANCELLED)
                     || invalidForWorkflowOwner(user.getUserId(), perms, wf))
             {
@@ -692,8 +704,8 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         for (int i = 0; i < taskComments.size(); i++)
         {
             TaskCommentInfo info = (TaskCommentInfo) taskComments.get(i);
-            locales.put(info.getTargetLocale().getDisplayName(), info
-                    .getTargetLocale());
+            locales.put(info.getTargetLocale().getDisplayName(),
+                    info.getTargetLocale());
         }
         ArrayList localesList = new ArrayList(locales.values());
         JavaLocaleComparator comp = new JavaLocaleComparator(locale);
@@ -785,44 +797,36 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     Task task = (Task) wo;
                     if (isNewComment)
                     {
-                    	//GBS-1012: Added for create job comment from Task/Activity
-                    	String saveCommStatus = (String) p_request.getParameter(SAVE_COMMENT_STATUS);
-                    	if(SAVE_COMMENT_STATUS_JT.equals(saveCommStatus))
-                    	{
-                    		Job tempJob = null;
-							try {
-								tempJob = ServerProxy.getJobHandler().getJobById(task.getJobId());
-								comment = TaskHelper.saveComment(
-										tempJob, tempJob.getId(),p_user.getUserName(), commentText);
-							} catch (JobException e) {
-							} catch (GeneralException e) {
-							} catch (NamingException e) {
-							}                    		
-                    	}//GBS-1012:end
-                    	else
-                    	{
-                    		comment = TaskHelper.saveComment(wo, task.getId(),
-                                p_user.getUserName(), commentText);	
-                    	}
+                        // GBS-1012: Added for create job comment from
+                        // Task/Activity
+                        String saveCommStatus = (String) p_request
+                                .getParameter(SAVE_COMMENT_STATUS);
+                        if (SAVE_COMMENT_STATUS_JT.equals(saveCommStatus))
+                        {
+                            Job tempJob = null;
+                            try
+                            {
+                                tempJob = ServerProxy.getJobHandler()
+                                        .getJobById(task.getJobId());
+                                comment = TaskHelper.saveComment(tempJob,
+                                        tempJob.getId(), p_user.getUserId(),
+                                        commentText);
+                            }
+                            catch (Exception e)
+                            {
+                            }
+                        }// GBS-1012:end
+                        else
+                        {
+                            comment = TaskHelper.saveComment(wo, task.getId(),
+                                    p_user.getUserId(), commentText);
+                        }
                     }
                     else
                     {
                         comment = TaskHelper.updateComment(commentObj.getId(),
-                                p_user.getUserName(), commentText);
+                                p_user.getUserId(), commentText);
                     }
-
-                    // refresh the task work object since the comment has been
-                    // added or updated
-                    // try
-                    // {
-                    // wo = ServerProxy.getTaskManager().getTask(task.getId());
-                    // TaskHelper.storeObject(p_session, WORK_OBJECT, wo);
-                    // } catch (Exception e)
-                    // {
-                    // // ignore if couldn't retrieve or store since
-                    // // it already exists in the session
-                    // }
-
                 }
                 else if (wo instanceof Job)
                 {
@@ -831,13 +835,13 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
                     {
                         // new comment
                         comment = TaskHelper.saveComment(wo, job.getId(),
-                                p_user.getUserName(), commentText);
+                                p_user.getUserId(), commentText);
                     }
                     else
                     {
                         // update comment
                         comment = TaskHelper.updateComment(commentObj.getId(),
-                                p_user.getUserName(), commentText);
+                                p_user.getUserId(), commentText);
                     }
 
                     // refresh the job work object since the comment has been
@@ -877,10 +881,10 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
         // String dir = CommentUpload.UPLOAD_BASE_DIRECTORY +
         // CommentUpload.UPLOAD_DIRECTORY + commentId;
         // File finalPath = new File(dir);
-        File tmpPath = new File(AmbFileStoragePathUtils
-                .getCommentReferenceDir(), tmpDir);
-        File finalPath = new File(AmbFileStoragePathUtils
-                .getCommentReferenceDir(), commentId);
+        File tmpPath = new File(
+                AmbFileStoragePathUtils.getCommentReferenceDir(), tmpDir);
+        File finalPath = new File(
+                AmbFileStoragePathUtils.getCommentReferenceDir(), commentId);
         if (newComment)
         {
             tmpPath.renameTo(finalPath);
@@ -930,9 +934,9 @@ public class CommentMainHandler extends PageHandler implements CommentConstants
             // CommentUpload.UPLOAD_DIRECTORY + commentId +
             // "/" + p_subDir;
             // File finalPath = new File(finalDir);
-            File finalPath = new File(AmbFileStoragePathUtils
-                    .getCommentReferenceDir(), commentId + File.separator
-                    + p_subDir);
+            File finalPath = new File(
+                    AmbFileStoragePathUtils.getCommentReferenceDir(), commentId
+                            + File.separator + p_subDir);
             if (!finalPath.exists())
                 finalPath.mkdirs();
             String[] list = dir.list();

@@ -18,20 +18,22 @@ package com.globalsight.everest.webapp.pagehandler.administration.customer;
 
 
 //GlobalSight
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import org.apache.log4j.Logger;
-import com.globalsight.ling.common.URLDecoder;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
 import java.util.Vector;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -39,15 +41,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.fileupload.DiskFileUpload;
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.foundation.Timestamp;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -55,12 +54,13 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.createJobs.CreateJobsMainHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.EventNotificationHelper;
+import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.mail.MailerConstants;
-import com.globalsight.util.resourcebundle.LocaleWrapper;
 import com.globalsight.util.zip.ZipIt;
 
 /**
@@ -128,20 +128,34 @@ public class FileSystemViewHandler extends PageHandler
     public Vector invokePageHandlerForApplet(
         boolean p_isDoGet,
         WebPageDescriptor p_thePageDescriptor,
-        HttpServletRequest p_theRequest,
+        HttpServletRequest request,
         HttpServletResponse p_theResponse,
         ServletContext p_context,
-        HttpSession p_session)
+        HttpSession session)
         throws ServletException, IOException, EnvoyServletException
     {
-        Vector retVal = null;                 
+        Vector retVal = null;
         if (p_isDoGet)
         {
-            retVal = getDisplayData(p_theRequest, p_session);            
+            retVal = getDisplayData(request, session);            
         }
         else
         {
-            retVal = saveData(p_theRequest, p_session);
+            String create = request.getParameter("createJob");
+            // this code will not be run since 8.3.1 since GBS-2694
+            if (create != null && create.equals("true"))
+            {
+                retVal = uploadTmpFiles(request, session);
+            }
+            // this code will not be run since 8.3.1 since GBS-2694
+            else if (create != null && create.equals("attachment")) 
+            {
+                retVal = uploadTmpAttachmentFile(request, session);
+            }
+            else 
+            {
+                retVal = saveData(request, session);
+            }
         }
         return retVal;
     }
@@ -161,11 +175,9 @@ public class FileSystemViewHandler extends PageHandler
     throws EnvoyServletException
     {
         ResourceBundle bundle = getBundle(p_session);
-        SessionManager sessionMgr = 
-            (SessionManager)p_session.getAttribute(SESSION_MANAGER);
-        Vector objs = new Vector();
+        Vector<HashMap<String, Object>> objs = new Vector<HashMap<String, Object>>();
 
-        HashMap uiObjects = new HashMap();
+        HashMap<String, Object> uiObjects = new HashMap<String, Object>();
         // UI labels/messages
         uiObjects.put("addAllForUpload",bundle.getString("lb_add_all_upload"));
         uiObjects.put("addForUpload",bundle.getString("lb_add_upload"));
@@ -218,49 +230,168 @@ public class FileSystemViewHandler extends PageHandler
         sb.append(p_jobName);
         return sb.toString();
     }
-
-    /**
-     * Get the source locale's display name in the form of language/country.
-     */
-    private String getDisplaySourceLocale(SessionManager p_sessionMgr, Locale uiLocale)
+    
+    private Vector uploadTmpAttachmentFile(HttpServletRequest request,
+            HttpSession session)
     {
-        Locale srcLocale = LocaleWrapper.getLocale(
-            (String)p_sessionMgr.getAttribute("srcLocale"));
-        String displayName = srcLocale.getDisplayName((uiLocale == null) ? Locale.US : uiLocale);
-        
-        p_sessionMgr.setAttribute("srcLocale", displayName);
-        return displayName;
-    }
-
-    /**
-     * Get the display name of the selected target locales.
-     */
-    private String getDisplayTargetLocale(SessionManager p_sessionMgr)
-    {
-        String value = (String)p_sessionMgr.
-            getAttribute("targLocales");
-
-        String[] targetLocales = value.split(",");
-
-        StringBuffer sb = new StringBuffer();
-
-        for (int i = 0; i < targetLocales.length; i++)
+        String tmpFoler = request.getParameter("folder");
+        String uploadPath = AmbFileStoragePathUtils.getFileStorageDirPath()
+                + File.separator + "GlobalSight" + File.separator
+                + "CommentReference" + File.separator + "tmp" + File.separator
+                + tmpFoler;
+        try
         {
-            if (sb.length() > 0)
+            boolean isMultiPart = ServletFileUpload.isMultipartContent(request);
+            if (isMultiPart)
             {
-                sb.append(", ");
-            }
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setSizeThreshold(1024000);
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                @SuppressWarnings("unchecked")
+                List<DiskFileItem> items = upload.parseRequest(request);
 
-            Locale l = LocaleWrapper.getLocale(targetLocales[i]);
-            sb.append(l.getDisplayName(Locale.US));
+                for (int i = 0; i < items.size(); i++)
+                {
+                    DiskFileItem item = (DiskFileItem) items.get(i);
+                    if (!item.isFormField())
+                    {
+                        String fileName = item.getFieldName();
+                        String filePath = uploadPath + File.separator
+                                + fileName;
+                        File f = new File(filePath);
+                        f.getParentFile().mkdirs();
+                        item.write(f);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
         }
 
-        value = sb.toString();
-
-        p_sessionMgr.setAttribute("targLocales", value);
-        return value;
+        return new Vector();
     }
+    
+    private Vector uploadTmpFiles(HttpServletRequest request,
+            HttpSession session)
+    {
+        String tmpFoler = request.getParameter("folder");
+        String uploadPath = AmbFileStoragePathUtils.getCxeDocDir()
+                + File.separator + CreateJobsMainHandler.TMP_FOLDER_NAME
+                + File.separator + tmpFoler;
+        try
+        {
+            boolean isMultiPart = ServletFileUpload.isMultipartContent(request);
+            if (isMultiPart)
+            {
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setSizeThreshold(1024000);
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                @SuppressWarnings("unchecked")
+                List<DiskFileItem> items = upload.parseRequest(request);
 
+                for (int i = 0; i < items.size(); i++)
+                {
+                    DiskFileItem item = (DiskFileItem) items.get(i);
+                    if (!item.isFormField())
+                    {
+                        String filePath = item.getFieldName();
+                        if (filePath.contains(":"))
+                        {
+                            filePath = filePath.substring(filePath.indexOf(":") + 1);
+                        }
+                        String originalFilePath = filePath.replace("\\",
+                                File.separator).replace("/", File.separator);
+                        String fileName = uploadPath + File.separator
+                                + originalFilePath;
+                        File f = new File(fileName);
+                        f.getParentFile().mkdirs();
+                        item.write(f);
+                        
+                        String extension = FileUtils.getFileExtension(f);
+                        if (extension != null && extension.equalsIgnoreCase("zip"))
+                        {
+                            unzipFile(f);
+                            f.delete();
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
+
+        return new Vector();
+    }
+    
+    private void unzipFile(File file)
+    {
+        String zipFileFullPath = file.getPath();// path contains file name
+        String zipFilePath = zipFileFullPath.substring(0,
+                zipFileFullPath.indexOf(file.getName()));// path without file name
+        ZipInputStream zin = null;
+        try
+        {
+            zin = new ZipInputStream(new FileInputStream(zipFileFullPath));
+            ZipEntry zipEntry = null;
+            byte[] buf = new byte[1024];
+            
+            while ((zipEntry = zin.getNextEntry()) != null)
+            {
+                String zipEntryName = zipEntry.getName();
+                String newPath = zipFilePath
+                        + File.separator
+                        + file.getName().substring(0,
+                                file.getName().lastIndexOf("."))
+                        + File.separator
+                        + zipEntryName;// original path + zipfile Name + entry name
+                File outfile = new File(newPath);
+                if (zipEntry.isDirectory())
+                {
+                    outfile.mkdirs();
+                    continue;
+                }
+                else 
+                {
+                    if (!outfile.getParentFile().exists())
+                    {
+                        outfile.getParentFile().mkdirs();                        
+                    }
+                }
+                
+                OutputStream os = new BufferedOutputStream(
+                        new FileOutputStream(outfile)); 
+                int readLen = 0;
+                while ((readLen = zin.read(buf, 0, 1024)) != -1)
+                {
+                    os.write(buf, 0, readLen);  
+                }  
+                os.close();  
+            }
+        }
+        catch (IOException e)
+        {
+            s_logger.error("unzip file error.", e);
+        }
+        finally
+        {
+            if (zin != null)
+            {
+                try
+                {
+                    zin.close();
+                }
+                catch (IOException e)
+                {
+                    s_logger.error("Error occurs.", e);
+                }
+            }
+        }
+    }
+    
     /**
      * Save the files to the docs directory.
      */
@@ -281,22 +412,20 @@ public class FileSystemViewHandler extends PageHandler
         String uploadPath = getUploadPath(jobName, srcLocale, uploadDate);
         try
         {
-            boolean isMultiPart = FileUpload.isMultipartContent(p_request);
+            boolean isMultiPart = ServletFileUpload.isMultipartContent(p_request);
             if (isMultiPart)
             {
-                DiskFileUpload upload = new DiskFileUpload();
-                List items = upload.parseRequest(p_request);
+                DiskFileItemFactory factory = new DiskFileItemFactory();
+                factory.setSizeThreshold(1024000);
+                ServletFileUpload upload = new ServletFileUpload(factory);
+                @SuppressWarnings("unchecked")
+                List<DiskFileItem> items = upload.parseRequest(p_request);
                 
-                List files = null;
-                Iterator iter = items.iterator();
-                while (iter.hasNext())
+                List<String> files = null;
+                for (int i = 0; i < items.size(); i++)
                 {
-                    FileItem item = (FileItem) iter.next();
-                    if (item.isFormField())
-                    {                        
-                        // not used for now...
-                    }
-                    else
+                    DiskFileItem item = (DiskFileItem) items.get(i);
+                    if (!item.isFormField())
                     {
                         StringBuffer sb = new StringBuffer();
                         sb.append(uploadPath);
@@ -310,7 +439,7 @@ public class FileSystemViewHandler extends PageHandler
                         item.write(f);
                         files = ZipIt.unpackZipPackage(fileName);
 
-                        boolean deleted = f.delete();
+                        f.delete();
                         sessionMgr.setAttribute(
                             "numOfFiles", String.valueOf(files.size()));
                     }
@@ -378,7 +507,7 @@ public class FileSystemViewHandler extends PageHandler
     /**
      * Notify the uploader and customer's default PM about the new upload.
      */
-    private void sendUploadCompletedEmail(List p_fileNames,
+    private void sendUploadCompletedEmail(List<String> p_fileNames,
                                           SessionManager p_sessionMgr,
                                           Date p_uploadDate,
                                           TimeZone p_userTimeZone,
@@ -485,64 +614,6 @@ public class FileSystemViewHandler extends PageHandler
     }
     
     /**
-     * Returns projects which are associated with the list of file profile IDs
-     *
-     * @param p_fps List of file profile IDs
-     * @return Object[] Projects which are associated with the specified list of file profile IDs
-     * @throws Exception
-     */
-    private Object[] getProjectsFromFPIds(List p_fps) throws Exception
-    {
-        List projects = new ArrayList();
-        int len = p_fps.size();
-        for (int i = 0; i < len; i++)
-        {
-            String fileProfileId = (String) p_fps.get(i);
-            long fpid = Long.parseLong(fileProfileId);
-            FileProfilePersistenceManager fppm = ServerProxy
-                    .getFileProfilePersistenceManager();
-            FileProfile fp = fppm.readFileProfile(fpid);
-            Project p = getProject(fp);
-            boolean add = true;
-            for (Iterator iter = projects.iterator(); iter.hasNext();)
-            {
-                Project e = (Project) iter.next();
-                if (e.getId() == p.getId())
-                    add = false;
-            }
-            if (add)
-                projects.add(p);
-        }
-
-        return projects.toArray();
-    }
-    
-    /**
-     * Get the project that the file profile is associated with.
-     *
-     * @param p_fp File profile information
-     * @return Project Project information which is associated with specified file profile
-     */
-    private Project getProject(FileProfile p_fp)
-    {
-        Project p = null;
-        try
-        {
-            long l10nProfileId = p_fp.getL10nProfileId();
-            L10nProfile lp = ServerProxy.getProjectHandler().getL10nProfile(
-                    l10nProfileId);
-            p = lp.getProject();
-        }
-        catch (Exception e)
-        {
-            s_logger.error("Failed to get the project that file profile "
-                    + p_fp.toString() + " is associated with.", e);
-            // just leave and return NULL
-        }
-        return p;
-    }
-
-    /**
      * Save the data from the basic info page into the session.
      */
     private void saveBasicInfo(HttpServletRequest p_request)
@@ -572,7 +643,7 @@ public class FileSystemViewHandler extends PageHandler
         sessionMgr.setAttribute("isUpload", Boolean.valueOf(true));
     }
 
-    private void writeResultToLogFile(List p_fileNames, String[] p_messageArguments)
+    private void writeResultToLogFile(List<String> p_fileNames, String[] p_messageArguments)
     {
         StringBuffer sb = new StringBuffer();
         int i = 0;

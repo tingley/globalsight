@@ -31,10 +31,10 @@ import com.globalsight.everest.foundation.Timestamp;
  * within JDK 1.1, all collection classes are choosen from JDK 1.1.
  */
 public class WorkflowTaskInstance extends WorkflowTask implements Serializable
-{   
-	private static final long serialVersionUID = -7048278139866486606L;
+{
+    private static final long serialVersionUID = -7048278139866486606L;
 
-	private static final long MILLIS_PER_SEC = 1000;
+    private static final long MILLIS_PER_SEC = 1000;
 
     private long m_taskInstanceId = ID_UNSET;
 
@@ -55,18 +55,18 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
     private Vector m_conditionNodeTargetInfos = null;
 
     private String[] m_initialRoles = null;
-    
+
     /* the user accept the task */
-    private String acceptUser = null;
+    private String m_acceptUser = null;
 
     /**
      * Constructor used in UI for creating a new Task Instance.
      * 
-     * @param p_name -
-     *            The default name of the taks instance. Used for
+     * @param p_name
+     *            - The default name of the taks instance. Used for
      *            non_ActivityNode.
-     * @param p_taskType -
-     *            The type of this task.
+     * @param p_taskType
+     *            - The type of this task.
      */
     public WorkflowTaskInstance(String p_name, int p_taskType)
     {
@@ -381,6 +381,11 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
                 && !areSameRoles(m_initialRoles, getRoles());
     }
 
+    public boolean isAccepted()
+    {
+        return m_acceptUser != null;
+    }
+
     /**
      * Return a string representation of the object appropriate for logging.
      * 
@@ -397,9 +402,8 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
         sb.append(WorkflowHelper
                 .toDebugStringWorkflowTaskInstanceState(m_wfTaskInstanceState));
         sb.append(", getTaskStateForAssignee=");
-        sb
-                .append(WorkflowHelper
-                        .toDebugStringWorkflowTaskInstanceState(getTaskStateForAssignee()));
+        sb.append(WorkflowHelper
+                .toDebugStringWorkflowTaskInstanceState(getTaskStateForAssignee()));
         sb.append(", m_creationTime=");
         sb.append(m_creationTime);
         sb.append(", m_workItems=[");
@@ -412,8 +416,8 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
     /**
      * Set the role of this task to be the specified value.
      * 
-     * @param p_roles -
-     *            The roles to be set.
+     * @param p_roles
+     *            - The roles to be set.
      */
     @Override
     public void setRoles(String[] p_roles)
@@ -503,8 +507,7 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
         // the first one.
         if (size > 0)
         {
-            workItemState = m_workItems.elementAt(0)
-                    .getWorkItemState();
+            workItemState = m_workItems.elementAt(0).getWorkItemState();
         }
 
         return workItemState;
@@ -536,13 +539,13 @@ public class WorkflowTaskInstance extends WorkflowTask implements Serializable
         m_allAssignees = new Vector<String>();
     }
 
-	public String getAcceptUser()
-	{
-		return acceptUser;
-	}
+    public String getAcceptUser()
+    {
+        return m_acceptUser;
+    }
 
-	public void setAcceptUser(String acceptUser)
-	{
-		this.acceptUser = acceptUser;
-	}
+    public void setAcceptUser(String acceptUser)
+    {
+        m_acceptUser = acceptUser;
+    }
 }

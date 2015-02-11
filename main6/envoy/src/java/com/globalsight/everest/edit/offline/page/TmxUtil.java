@@ -221,6 +221,12 @@ public class TmxUtil
         result.append(">\r\n");
         result.append(convertToTmxLevel(p_source, p_tmxLevel));
         result.append("</tuv>\r\n");
+        
+        if (p_source == null || "null".equalsIgnoreCase(p_source.trim()))
+            s_logger.warn(getEmptySourceSegmentInfo(p_source, p_sourceLocale,
+                    p_target, p_targetLocale, p_userId,
+                    p_date, p_tmxLevel, sid));
+        
         // Target TUV
         result.append("<tuv xml:lang=\"");
         result.append(p_targetLocale.replace("_", "-"));
@@ -232,6 +238,21 @@ public class TmxUtil
         result.append("</tu>\r\n");
 
         return result.toString();
+    }
+
+    private static String getEmptySourceSegmentInfo(String p_source,
+            String p_sourceLocale, String p_target, String p_targetLocale,
+            String p_userId, Date p_date, int p_tmxLevel, String sid)
+    {
+        StringBuilder emptySourceSegmentInfo = new StringBuilder();
+        emptySourceSegmentInfo.append("Empty source segment. [source::")
+                .append(p_source).append(", sourceLocale::")
+                .append(p_sourceLocale).append(", target::").append(p_target)
+                .append(", targetLocale::").append(p_targetLocale)
+                .append(", userId::").append(p_userId).append(", date::")
+                .append(p_date.toLocaleString()).append(", tmxLevel::")
+                .append(p_tmxLevel).append(", sid::").append(sid).append("]");
+        return emptySourceSegmentInfo.toString();
     }
 
     private static String convertToTmxLevel(String p_xml, int p_tmxLevel)

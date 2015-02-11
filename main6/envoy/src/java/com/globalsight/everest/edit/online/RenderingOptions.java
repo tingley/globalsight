@@ -28,6 +28,7 @@ public class RenderingOptions
 {
     private TranslationMemoryProfile tmProfile = null;
     private String userName;
+    private boolean needShowPTags = false;
 
     /**
      * Default constructor
@@ -69,6 +70,16 @@ public class RenderingOptions
 
     public TranslationMemoryProfile getTmProfile(){
         return this.tmProfile;
+    }
+    
+    public boolean getNeedShowPTags()
+    {
+        return needShowPTags;
+    }
+
+    public void setNeedShowPTags(boolean needShowPTags)
+    {
+        this.needShowPTags = needShowPTags;
     }
 }
 

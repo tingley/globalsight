@@ -125,7 +125,7 @@ import com.globalsight.util.edit.SegmentUtil;
  * </p>
  */
 public class Extractor extends AbstractExtractor implements ExtractorInterface,
-        EntityResolver, ExtractorExceptionConstants, ErrorHandler
+        EntityResolver, ExtractorExceptionConstants, ErrorHandler, WSConstants
 {
     private ExtractorAdmin m_admin = new ExtractorAdmin(null);
 
@@ -163,18 +163,6 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     // value, should set the current index value to the pre-trans-unit index
     // value.
     private int lastIndex = 1;
-
-    private final String IWS_SEGMENT_DATA = "iws:segment-metadata";
-    private final String IWS_STATUS = "iws:status";
-    static public final String IWS_TRANSLATION_TYPE = "translation_type";
-    static public final String IWS_TRANSLATION_MT = "machine_translation_mt";
-    static public final String IWS_TRANSLATION_MANUAL = "manual_translation";
-    static public final String IWS_TM_SCORE = "tm_score";
-    private final String IWS_SID = "sid";
-    static public final String IWS_SOURCE_CONTENT = "source_content";
-    static public final String IWS_REPETITION = "repetition";
-    static public final String IWS_REPEATED = "repeated";
-    static public final String IWS_WORDCOUNT = "ws_word_count";
     
     // key
     static public final String XLIFF_PART = "xliffPart";
@@ -186,6 +174,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     static public final String XLIFF_PART_ALT_SOURCE = "altSource";
     // value4 : Indicate this is alt-target section
     static public final String XLIFF_PART_ALT_TARGET = "altTarget";
+    
+    private boolean isFromWorldServer = false;
 
     //
     // Constructors
@@ -494,6 +484,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         HashMap<String, String> map = getNodeTierInfo(p_node);
         String stuff = null;
         
+        judgeIsFromWorldServer(p_node);
+
         if(name.toLowerCase().equals("trans-unit")) {
             lastIndex = m_admin.getBptIndex();
             
@@ -505,7 +497,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 {
                     n = n.getNextSibling();
                 }
-                
+                /*
                 if (n != null)
                 {
                     Node sNode = n.getAttributes().getNamedItem("state");
@@ -520,6 +512,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         }
                     }
                 }
+                */
             }
         }
 
@@ -1130,33 +1123,41 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 if (end > 0 && end > begin)
                 {
                     String str = p_str.substring(begin + 4, end);
-                    StringBuffer sb = new StringBuffer();
-
-                    if (xliffPart.equals("source"))
+                    if (str.equals("Fragment") || str.equals("/Fragment"))
                     {
-                        bptIndex = m_admin.incrementBptIndex();
-                        sourceIndex.add(bptIndex);
+						newStr = newStr + p_str.substring(lastEnd, begin)
+								+ "&lt;" + str + "&gt;";
                     }
-                    else if (xliffPart.equals("target"))
+                    else
                     {
-                        if (sourceIndex.size() > 0)
-                        {
-                            bptIndex = (Integer) sourceIndex.get(0);
-                            sourceIndex.remove(0);
-                        }
-                        else
+                        StringBuffer sb = new StringBuffer();
+
+                        if (xliffPart.equals("source"))
                         {
                             bptIndex = m_admin.incrementBptIndex();
+                            sourceIndex.add(bptIndex);
                         }
+                        else if (xliffPart.equals("target"))
+                        {
+                            if (sourceIndex.size() > 0)
+                            {
+                                bptIndex = (Integer) sourceIndex.get(0);
+                                sourceIndex.remove(0);
+                            }
+                            else
+                            {
+                                bptIndex = m_admin.incrementBptIndex();
+                            }
+                        }
+
+                        sb = sb.append("<ph type=\"ltgt\" id=\"");
+
+                        sb = sb.append(bptIndex).append("\" x=\"").append(bptIndex);
+                        sb = sb.append("\">&amp;lt;").append(str).append(
+                                "&amp;gt;</ph>");
+                        newStr = newStr + p_str.substring(lastEnd, begin)
+                                + sb.toString();
                     }
-
-                    sb = sb.append("<ph type=\"ltgt\" id=\"");
-
-                    sb = sb.append(bptIndex).append("\" x=\"").append(bptIndex);
-                    sb = sb.append("\">&amp;lt;").append(str).append(
-                            "&amp;gt;</ph>");
-                    newStr = newStr + p_str.substring(lastEnd, begin)
-                            + sb.toString();
                     
                     if (xliffPart.equals("source"))
                     {
@@ -1284,7 +1285,22 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         
         return false;
     }
-
+    
+    private HashMap<String, String> getNodeTierInfo(Node node)
+    {
+        INodeInfo nodeInfo;
+        
+        if(isFromWorldServer) {
+            nodeInfo = new WSNodeInfo(getMainFormat());
+        }
+        else {
+            nodeInfo = new NodeInfo(getMainFormat());
+        }
+        
+        return nodeInfo.getNodeTierInfo(node);
+    }
+    
+/*
     private HashMap<String, String> getNodeTierInfo(Node node)
     {
         HashMap<String, String> map = new HashMap<String, String>();
@@ -1365,7 +1381,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                     if (attname.equals("state"))
                                     {
                                         map.put("passoloState", value);
-                                    }       
+                                    }
                                 }
                             }
                         }
@@ -1470,7 +1486,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
         return map;
     }
-
+*/
     /*
      * Some trans-unit or alt-trans does not have target part. This method used to check if
      * the source part have the responsible target part. If have not, just treat
@@ -1856,5 +1872,20 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     @Override
     public void loadRules() throws ExtractorException
     {
+    }
+    
+    /*
+     * Judge if the xliff generated from worldserver
+     */
+    private void judgeIsFromWorldServer(Node p_node) {
+        if(p_node.getNodeName().toLowerCase().equals("file")) {
+            Node sNode = p_node.getAttributes().getNamedItem("tool");
+            if(sNode != null) {
+                String value = sNode.getNodeValue();
+                if(value.indexOf("WorldServer") > -1) {
+                    isFromWorldServer = true;
+                }
+            }
+        }
     }
 }

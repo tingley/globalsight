@@ -25,25 +25,27 @@ import com.globalsight.ling.tm2.leverage.SidComparable;
 
 /**
  * This class is used as return value from
- * com.globalsight.ling.tm.LeverageMatchLingManager#getExactMatches(List,
- * long). It holds a segment string to copy into a Tuv and a match type.
+ * com.globalsight.ling.tm.LeverageMatchLingManager#getExactMatches(List, long).
+ * It holds a segment string to copy into a Tuv and a match type.
  */
-public class LeverageSegment
-    implements Serializable, SidComparable, ModifyDateComparable
+public class LeverageSegment implements Serializable, SidComparable,
+        ModifyDateComparable
 {
     private static final long serialVersionUID = -3231007266035477757L;
-    private String m_segment = null; 
+    private String m_segment = null;
     private String m_matchType = null;
     private Timestamp modifyDate = null;
     private int tmIndex;
     private String orgSid = null;
     private String sid = null;
     private long matchedTuvId;
+
     public LeverageSegment()
     {
     }
 
-    public LeverageSegment(String p_segment, String p_matchType, Date modifyDate, int tmIndex, String sid, long matchedTuvId)
+    public LeverageSegment(String p_segment, String p_matchType,
+            Date modifyDate, int tmIndex, String sid, long matchedTuvId)
     {
         m_segment = p_segment;
         m_matchType = p_matchType;
@@ -52,7 +54,7 @@ public class LeverageSegment
         this.matchedTuvId = matchedTuvId;
         if (modifyDate != null)
         {
-            this.modifyDate = new Timestamp(modifyDate.getTime()); 
+            this.modifyDate = new Timestamp(modifyDate.getTime());
         }
     }
 
@@ -86,12 +88,10 @@ public class LeverageSegment
         m_segment = p_segment;
     }
 
-
     public String getMatchType()
     {
         return m_matchType;
     }
-
 
     public void setMatchType(String p_matchType)
     {
@@ -119,12 +119,12 @@ public class LeverageSegment
     }
 
     @Override
-    public String getOrgSid() 
+    public String getOrgSid(String companyId)
     {
         return orgSid;
     }
 
-    public void setOrgSid(String orgSid) 
+    public void setOrgSid(String orgSid)
     {
         this.orgSid = orgSid;
     }

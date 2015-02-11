@@ -23,7 +23,9 @@
         com.globalsight.everest.company.CompanyWrapper,
         jxl.write.Number,
         java.text.SimpleDateFormat,
-        java.util.*,java.io.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
+        java.util.*,
+        java.io.*,
+        com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportsMainHandler,
                 com.globalsight.everest.webapp.pagehandler.administration.reports.CustomExternalReportInfoBean,
                 com.globalsight.everest.webapp.WebAppConstants,
@@ -411,7 +413,7 @@
                    EnvoyWorkItem ewi = (EnvoyWorkItem) workItems.get(i);
                    if (WorkflowConstants.TASK_DECLINED == ewi.getWorkItemState()) {
                      wasRejected=true;
-                     rejectorName = ewi.getAssignee();
+                     rejectorName = UserUtil.getUserNameById(ewi.getAssignee());
                      break;
                    }
                }
@@ -449,7 +451,7 @@
         else if (revAccepted)
         {
           //get accepter somehow
-          sheet.addCell(new Label(c++,r, revTask.getAcceptor()));
+          sheet.addCell(new Label(c++,r, UserUtil.getUserNameById(revTask.getAcceptor())));
         }
         else
         {
@@ -468,7 +470,7 @@
           while (iter.hasNext())
           {
            TaskAssignee assignee = (TaskAssignee) iter.next();
-            assignees.append(assignee.getUserId());
+            assignees.append(UserUtil.getUserNameById(assignee.getUserId()));
             if (count++ == 10) {
               break;
             }

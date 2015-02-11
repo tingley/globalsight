@@ -43,8 +43,6 @@ public class XMLRulesFuncs extends BasicFuncs {
 			selenium.getAlert();
 			selenium.click(XMLRules.Cancel_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		} else {
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
 
 		// Check if the Rule has been exists.
@@ -77,13 +75,10 @@ public class XMLRulesFuncs extends BasicFuncs {
 			if (selenium.isAlertPresent()) {
 				selenium.getAlert();
 				selenium.click(XMLRules.Cancel_BUTTON);
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-			} else {
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+	            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			}
 		} catch (Exception e) {
 			Reporter.log(e.getMessage());
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
 
 		// Check if the rule has been edited.
@@ -105,7 +100,6 @@ public class XMLRulesFuncs extends BasicFuncs {
 					XMLRules.XMLRules_TABLE, iRuleName), false);
 			}catch (Exception e) {
 				Reporter.log(e.getMessage());
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			}
 		
 		

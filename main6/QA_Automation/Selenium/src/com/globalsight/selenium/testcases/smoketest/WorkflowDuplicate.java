@@ -1,47 +1,31 @@
 package com.globalsight.selenium.testcases.smoketest;
 
-
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
+import org.testng.Assert;
 import org.testng.annotations.Test;
-import com.globalsight.selenium.functions.CommonFuncs;
+
+import com.globalsight.selenium.functions.BasicFuncs;
 import com.globalsight.selenium.functions.WorkflowsFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.pages.Workflows;
 import com.globalsight.selenium.testcases.BaseTestCase;
-import com.thoughtworks.selenium.Selenium;
 
 public class WorkflowDuplicate extends BaseTestCase
 {
-    private Selenium selenium;
-    private WorkflowsFuncs iWorkflowsFuncs = new WorkflowsFuncs();
+    private WorkflowsFuncs workflowsFuncs = new WorkflowsFuncs();
+    private BasicFuncs basicFuncs = new BasicFuncs();
+
     @Test
-    public void duplicateWorkflow() throws Exception {
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.Workflows_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-        iWorkflowsFuncs.duplicateWorkFlow(selenium, ConfigUtil.getDataInCase(getClassName(), "DUPLICATEPROFILE"), ConfigUtil.getDataInCase(getClassName(), "workflowTemplate"));
-    }
-    @BeforeMethod
-    public void beforeMethod() {
-        CommonFuncs.loginSystemWithAdmin(selenium);
-    }
+    public void duplicateWorkflow() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.WORKFLOWS_SUBMENU);
 
-    @AfterMethod
-    public void afterMethod() {
-        CommonFuncs.logoutSystem(selenium);
-    }
+        workflowsFuncs.duplicateWorkFlow(selenium,
+                getProperty("workflow.duplicate.prefix"),
+                getProperty("workflow.export.workflowTemplate"));
 
-    @BeforeTest
-    public void beforeTest() {
-        selenium=CommonFuncs.initSelenium();
-    }
-
-    @AfterTest
-    public void afterTest() {
-        CommonFuncs.endSelenium(selenium);
-        
+        Assert.assertTrue(basicFuncs.isPresentInTable(selenium,
+                Workflows.Workflows_TABLE,
+                getProperty("workflow.duplicate.newName")));
     }
 }

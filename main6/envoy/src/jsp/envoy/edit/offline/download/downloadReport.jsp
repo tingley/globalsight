@@ -10,6 +10,7 @@
                 com.globalsight.everest.util.system.SystemConfiguration,
                 com.globalsight.everest.webapp.WebAppConstants,
                 com.globalsight.everest.webapp.javabean.NavigationBean,
+                com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                 com.globalsight.everest.webapp.pagehandler.PageHandler,
                 com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
                 com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
@@ -59,22 +60,19 @@
     String downloadInstruction = null;
     String downloadHelper = null;
     String workOfflineUrl = null;
-    String reportAction = null;
     if (review_only)
     {
-       reportType = bundle.getString("lb_download_language_report");
-       downloadInstruction = bundle.getString("helper_text_download_language_instruction");
-       downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_LSO"));
-       workOfflineUrl = downloadReportUrl;
-       reportAction = "createLanguageSignOffReport()";
+       	reportType = ReportConstants.REVIEWERS_COMMENTS_REPORT;
+       	downloadInstruction = bundle.getString("helper_text_download_language_instruction");
+       	downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_LSO"));
+       	workOfflineUrl = downloadReportUrl;
     }
     else
     {
-        reportType = bundle.getString("lb_download_translation_report");
+		reportType = ReportConstants.TRANSLATIONS_EDIT_REPORT;
         downloadInstruction = bundle.getString("helper_text_download_translation_instruction");
         downloadHelper = EditUtil.toJavascript(bundle.getString("helper_text_download_TER"));
         workOfflineUrl = downloadUrl;
-        reportAction = "createTranslationsEditReport()";
     }
 
     String title = bundle.getString("lb_download_report");
@@ -84,8 +82,8 @@
     String lbDetails = bundle.getString("lb_details");
     String lbWorkoffline = bundle.getString("lb_work_offline");
     String lbComments = bundle.getString("lb_comments");
-    String lbDownload = bundle.getString("lb_download");
-    String lbUpload = bundle.getString("lb_upload");
+    String lbDownload = bundle.getString("lb_tab_download");
+    String lbUpload = bundle.getString("lb_tab_upload");
 
     String lbDownloadReport = bundle.getString("lb_download_report");
     String lbUploadReport = bundle.getString("lb_upload_report");
@@ -103,29 +101,121 @@
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 
 <SCRIPT LANGUAGE="JavaScript">
+
+function showProgressBar()
+{
+  var div = dojo.byId('loadingDiv');
+  div.style.visibility = "visible";
+}
+
 var WIDTH = 400;
 var needWarning = false;
 var guideNode = "myActivitiesUpload";
 var helpFile = "<%=bundle.getString("help_download")%>";
-function createTranslationsEditReport()
-{
-  ReportForm.action = "/globalsight/envoy/administration/reports/LisaQATranslationsEditReport.jsp";
-  ReportForm.submit();
-}
 
-function createLanguageSignOffReport()
-{
-  ReportForm.action = "/globalsight/envoy/administration/reports/LisaQALanguageSignOffReport.jsp";
-  ReportForm.submit();
-}
+var finished = false;
+var msg = "";
 
 function doOnLoad()
 {
   loadGuides();
 }
 
+function download()
+{
+	finished = false;
+	
+	var downloadButton = dojo.byId('downloadButton');
+	downloadButton.disabled = true;
+	showProgressBar();
+	
+	var obj = {
+			inputJobIDS : "<%=task.getJobId()%>",
+			targetLocalesList: "<%=task.getTargetLocale().getId()%>",
+			reportType:"<%=reportType%>"
+	}	
+	
+    dojo.xhrPost(
+    {
+       url:"/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=generateReport",
+       handleAs: "text", 
+       content:obj,
+       load:function(data)
+       {
+    	    finished = true;
+    	   
+    	    var downloadButton = dojo.byId('downloadButton');
+    	    downloadButton.disabled = false;
+    			
+    		var div = dojo.byId('loadingDiv');
+    		div.style.visibility = "hidden";
+
+    		ReportForm.submit();
+       },
+       error:function(error)
+       {
+    	   finished = true;
+       }
+   });
+
+	msg = '<%=bundle.getString("helper_test_download_report_generate")%>';
+	changeWait();
+}
+
+var i = 0;
+
+function changeWait()
+{
+	if (!finished)
+	{
+		var div = dojo.byId('loadingDiv');
+		i++;
+		if (i == 10)
+	    {
+		    i = 0;
+		}
+
+	    var txt = msg;
+	    for (j = 0; j < i; j++)
+		{
+	    	txt += ".";				
+		}
+
+	    div.innerHTML = txt;
+
+	    setTimeout(changeWait, 1000);
+	}
+}
+
+function cancelReport()
+{	
+	msg = '<%=bundle.getString("helper_test_download_report_cancel")%>';
+	changeWait();
+	
+	var obj = {
+			inputJobIDS : "<%=task.getJobId()%>",
+			targetLocalesList: "<%=task.getTargetLocale().getId()%>",
+			reportType:"<%=reportType%>"
+		}
+
+    dojo.xhrPost(
+    {
+       url:"/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=cancelReport",
+       handleAs: "text", 
+       content:obj,
+       load:function(data)
+       {
+    	   location.replace('<%=cancelUrl%>');
+       },
+       error:function(error)
+       {
+           alert(error.message);
+       }
+   });
+}
 </SCRIPT>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 </HEAD>
@@ -138,8 +228,10 @@ function doOnLoad()
 
 <iframe id="idReport" name="idReport" src="about:blank" style="display:none"></iframe>
 <FORM name="ReportForm" METHOD="POST" TARGET="idReport"
- ACTION="/globalsight/envoy/administration/reports/LisaQATranslationsEditReport.jsp">
-<INPUT TYPE="hidden" NAME="a" VALUE="">
+ ACTION="/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=getReport">
+<input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=task.getJobId()%>">
+<input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=task.getTargetLocale().getId()%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=reportType%>">
 </FORM>
 
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
@@ -222,21 +314,25 @@ if (!review_only)
 
 <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText">
     <TD></TD>
-    <TD><%=downloadInstruction%></TD>
+    <TD ><%=downloadInstruction%></TD>
   </TR>
+    <TR>
+    <TD>&nbsp;</TD>
+    <TD></TD>
+     </TR>
   <TR>
     <TD>&nbsp;</TD>
-    <TD>
-
+    <TD id="loadingDiv">
+        
     </TD>
   </TR>
 </TABLE>
 <P>
 		
 <INPUT TYPE="BUTTON" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>"
-    ONCLICK="location.replace('<%=cancelUrl%>')">   
-<INPUT TYPE="BUTTON" NAME="<%=lbStartDownload%>"
-	VALUE="<%=lbStartDownload%>" onclick="<%=reportAction%>" >
+    ONCLICK="cancelReport()">   
+<INPUT id="downloadButton" TYPE="BUTTON" NAME="<%=lbStartDownload%>" VALUE="<%=lbStartDownload%>"
+	ONCLICK="download()">
 
 </TD>
 </TR>

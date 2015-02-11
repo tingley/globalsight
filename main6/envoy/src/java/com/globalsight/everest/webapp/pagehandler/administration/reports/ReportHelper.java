@@ -1,0 +1,724 @@
+/**
+ *  Copyright 2011 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
+
+package com.globalsight.everest.webapp.pagehandler.administration.reports;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import javax.naming.NamingException;
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+
+import jxl.write.NumberFormat;
+import jxl.write.WritableCellFormat;
+
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.JobException;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReportUtil;
+import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.resourcebundle.ResourceBundleConstants;
+import com.globalsight.util.resourcebundle.SystemResourceBundle;
+import com.globalsight.util.zip.ZipIt;
+
+public class ReportHelper
+{
+    public static List<String> allJobStatusList;
+    
+    /**
+     * Get the job info which report need. Because maybe there are a lot of
+     * jobs, so here use the projective query, that can get a good performance.
+     */
+    public static Map<String, ReportJobInfo> getJobInfo(
+            ArrayList<String> stateList)
+    {
+        Map<String, ReportJobInfo> reportJobInfosMap = new HashMap<String, ReportJobInfo>();
+
+        StringBuffer hql = new StringBuffer();
+        hql.append("select distinct j.id, j.jobName, j.state, b.project.id,w.targetLocale.id");
+        hql.append(" from JobImpl j , WorkflowImpl w , RequestImpl r , BasicL10nProfile b");
+        hql.append(" where w.job.id = j.id and r.job.id = j.id ");
+        hql.append(" and r.l10nProfile.id = b.id and j.state ");
+        hql.append(addClause(stateList));
+
+        String currentId = CompanyThreadLocal.getInstance().getValue();
+
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
+        {
+            hql.append(" and j.companyId = ");
+            hql.append(currentId);
+        }
+
+        Iterator it = HibernateUtil.search(hql.toString()).iterator();
+
+        while (it.hasNext())
+        {
+            Object[] row = (Object[]) it.next();
+            Long jobId = (Long) row[0];
+            String name = (String) row[1];
+            String state = (String) row[2];
+            Long projectId = (Long) row[3];
+            Long targetId = (Long) row[4];
+
+            if (reportJobInfosMap.get(jobId.toString()) == null)
+            {
+                List<String> targetLocaleIdList = new ArrayList<String>();
+                if (targetId != null)
+                    targetLocaleIdList.add(targetId.toString());
+
+                ReportJobInfo rj = new ReportJobInfo(jobId.toString(), name,
+                        state, projectId.toString(), targetLocaleIdList);
+                reportJobInfosMap.put(jobId.toString(), rj);
+            }
+            else
+            {
+                if (targetId != null)
+                    reportJobInfosMap.get(jobId.toString()).addTargetLocale(
+                            targetId.toString());
+            }
+        }
+
+        return reportJobInfosMap;
+    }
+
+    private static String addClause(ArrayList p_list)
+    {
+        StringBuffer p_sb = new StringBuffer();
+        p_sb.append(" in (");
+
+        for (int i = 0; i < p_list.size(); i++)
+        {
+            p_sb.append("'");
+            p_sb.append(p_list.get(i));
+            p_sb.append("'");
+
+            if (i < p_list.size() - 1)
+            {
+                p_sb.append(", ");
+            }
+        }
+
+        p_sb.append(")");
+
+        return p_sb.toString();
+    }
+
+    /**
+     * Only get the jobs
+     */
+    /*
+     * public static List getJobs(ArrayList<String> stateList) { Map<String,
+     * ReportJobInfo> reportJobInfosMap = new HashMap<String, ReportJobInfo>();
+     * 
+     * StringBuffer hql = new StringBuffer(); hql.append("from JobImpl j");
+     * hql.append(" where j.state "); hql.append(addClause(stateList));
+     * 
+     * String currentId = CompanyThreadLocal.getInstance().getValue();
+     * 
+     * if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId)) {
+     * hql.append(" and j.companyId = "); hql.append(currentId); }
+     * 
+     * return HibernateUtil.search(hql.toString()); }
+     */
+
+    /**
+     * Splits the string by comma, return List<Long>.
+     */
+    public static List<Long> getListOfLong(String p_str)
+    {
+        if (p_str == null || p_str.trim().length() == 0)
+            return null;
+
+        return getListOfLong(p_str, ",");
+    }
+
+    /**
+     * Splits this string around matches of the given regular expression
+     * 
+     * @param p_str
+     *            string
+     * @param p_regex
+     *            regular expression
+     * @return List<Long>
+     */
+    public static List<Long> getListOfLong(String p_str, String p_regex)
+    {
+        if (p_str == null || p_str.trim().length() == 0)
+            return null;
+
+        List<Long> result = new ArrayList<Long>();
+        String[] array = p_str.split(p_regex);
+        for (String str : array)
+        {
+            if (str != null && str.trim().length() > 0)
+            {
+                long id = Long.valueOf(str.trim());
+                if (!result.contains(id))
+                {
+                    result.add(id);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Splits this string around matches of the given regular expression
+     * 
+     * @param p_str
+     *            string
+     * @param p_regex
+     *            regular expression
+     * @return List<String>
+     */
+    public static List<String> getListOfStr(String p_str, String p_regex)
+    {
+        if (p_str == null || p_str.trim().length() == 0)
+            return null;
+
+        List<String> result = new ArrayList<String>();
+        for (String str : p_str.split(p_regex))
+        {
+            if (str != null && str.trim().length() > 0)
+            {
+                result.add(str);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets Sorted Target Locale list from String array, and sorted by ISO_CODE.
+     * 
+     * @param p_array
+     *            target language string array
+     * @param p_comparator
+     *            GlobalSightLocale Comparator which is used for sort the
+     *            resturn list.
+     * @return
+     * @throws Exception
+     */
+    public static List<GlobalSightLocale> getTargetLocaleList(String[] p_array,
+            GlobalSightLocaleComparator p_comparator) throws Exception
+    {
+        if (p_array == null)
+        {
+            return null;
+        }
+        else if (p_array.length == 1)
+        {
+            p_array = p_array[0].split(",");
+        }
+
+        List<GlobalSightLocale> result = new ArrayList<GlobalSightLocale>();
+        for (String str : p_array)
+        {
+            if ("*".equals(str))
+            {
+                result = new ArrayList<GlobalSightLocale>(ServerProxy
+                        .getLocaleManager().getAllTargetLocales());
+                break;
+            }
+            else if (str != null && str.trim().length() > 0)
+            {
+                String localeString = str.trim();
+                GlobalSightLocale tl;
+                if (localeString.contains("_"))
+                {
+                    tl = ServerProxy.getLocaleManager().getLocaleByString(
+                            localeString);
+                }
+                else
+                {
+                    tl = ServerProxy.getLocaleManager().getLocaleById(
+                            Long.valueOf(str.trim()));
+                }
+                if (!result.contains(tl))
+                {
+                    result.add(tl);
+                }
+            }
+        }
+
+        if (p_comparator != null)
+        {
+            Collections.sort(result, p_comparator);
+        }
+
+        return result;
+    }
+
+//    public static Locale getLocale(Locale p_locale)
+//    {
+//        return p_locale == null ? Locale.US : p_locale;
+//    }
+
+    /**
+     * Gets the Excel Report File, such as
+     * {FileStorage}/{CompanyName}/GlobalSight/Reports/
+     * {ReportType}-[jobName][jobId].xls.
+     */
+    public static File getXLSReportFile(String p_reportType, Job p_job)
+    {
+        return getReportFile(p_reportType, p_job, ".xls");
+    }
+
+    /**
+     * Gets the Report File, such as
+     * {FileStorage}/{CompanyName}/GlobalSight/Reports
+     * /{ReportType}-[jobName][jobId].xls.
+     * 
+     * @param p_reportType
+     *            Report Type
+     * @param p_job
+     * @param p_extension
+     *            Report File Extension, such as .xls/.csv
+     * @return
+     */
+    public static File getReportFile(String p_reportType, Job p_job,
+            String p_extension)
+    {
+        String companyId = p_job != null ? p_job.getCompanyId()
+                : CompanyWrapper.getCurrentCompanyId();
+
+        int maxLen = 50;
+        StringBuffer result = new StringBuffer();
+        result.append(AmbFileStoragePathUtils.getFileStorageDirPath(companyId))
+                .append(File.separator);
+        result.append(ReportConstants.REPORTS_SUB_DIR).append(File.separator);
+        new File(result.toString()).mkdirs();
+        if (p_job != null)
+        {
+            String jobName = p_job.getJobName();
+            if (jobName != null && jobName.length() > maxLen)
+            {
+                jobName = jobName.substring(0, maxLen);
+            }
+            result.append(p_reportType + "-[" + jobName + "]["
+                    + p_job.getJobId() + "]" + p_extension);
+        }
+        else
+        {
+            result.append(p_reportType + p_extension);
+        }
+
+        return new File(result.toString());
+    }
+
+    public static void deleteFiles(File[] files)
+    {
+        for (File file : files)
+        {
+            file.delete();
+        }
+    }
+
+    /**
+     * Send File to Client
+     * 
+     * @param p_file
+     *            file
+     * @param p_contentType
+     *            response content type
+     * @param p_response
+     *            response
+     * @throws IOException
+     * @throws ServletException
+     */
+    protected static void sendFile(File p_file, HttpServletResponse p_response)
+            throws IOException, ServletException
+    {
+        BufferedInputStream buf = null;
+        ServletOutputStream out = p_response.getOutputStream();
+        try
+        {
+            p_response.setContentType(getMINEType(p_file));
+            p_response.setHeader("Content-Disposition", "attachment; filename="
+                    + p_file.getName().replace(" ", ""));
+            p_response.setHeader("Expires", "0");
+            p_response.setHeader("Cache-Control",
+                    "must-revalidate, post-check=0,pre-check=0");
+            p_response.setHeader("Pragma", "public");
+            p_response.setContentLength((int) p_file.length());
+            FileInputStream fis = new FileInputStream(p_file);
+            buf = new BufferedInputStream(fis);
+            int readBytes = 0;
+            while ((readBytes = buf.read()) != -1)
+            {
+                out.write(readBytes);
+            }
+        }
+        catch (IOException ioe)
+        {
+            throw new ServletException(ioe.getMessage());
+        }
+        finally
+        {
+            if (buf != null)
+                buf.close();
+            if (out != null)
+                out.close();
+            p_file.delete();
+        }
+    }
+
+    public static void sendFiles(List<File> p_reports, String p_zipFileName,
+            HttpServletResponse p_response) throws FileNotFoundException,
+            IOException, ServletException
+    {
+        File[] files = p_reports.toArray(new File[p_reports.size()]);
+        sendFiles(files, p_zipFileName, p_response);
+    }
+
+    /**
+     * Sends Files to Client.
+     * 
+     * @param p_files
+     *            The Files will send to Client's Browser.
+     * @param p_zipFileName
+     *            ZIP File Name.
+     * @param p_response
+     */
+    public static void sendFiles(File[] p_files, String p_zipFileName,
+            HttpServletResponse p_response) throws FileNotFoundException,
+            IOException, ServletException
+    {
+        File file = null;
+        if (p_files == null || p_files.length == 0)
+        {
+            return;
+        }
+        else if (p_files.length == 1)
+        {
+            file = p_files[0];
+        }
+        else
+        {
+            if (p_zipFileName == null || p_zipFileName.trim().length() == 0)
+            {
+                p_zipFileName = ReportConstants.REPORTS_NAME;
+            }
+            file = new File(p_zipFileName + ".zip");
+            ZipIt.addEntriesToZipFile(file, p_files, true, "");
+            ReportHelper.deleteFiles(p_files);
+        }
+
+        sendFile(file, p_response);
+    }
+
+    /**
+     * Get MINE type from file extension.
+     */
+    public static String getMINEType(File file)
+    {
+        if (file == null)
+            return "";
+
+        String fileName = file.getName().toLowerCase();
+        if (fileName.endsWith(".zip"))
+        {
+            return "application/zip";
+        }
+        else if (fileName.endsWith(".xls") || fileName.endsWith(".csv"))
+        {
+            return "application/msexcel";
+        }
+        else if (fileName.endsWith(".ppt"))
+        {
+            return "application/mspowerpoint";
+        }
+        else if (fileName.endsWith(".doc"))
+        {
+            return "application/msword";
+        }
+        else if (fileName.endsWith(".xlsx"))
+        {
+            return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        }
+        else if (fileName.endsWith(".pptx"))
+        {
+            return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+        }
+        else if (fileName.endsWith(".docx"))
+        {
+            return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        }
+
+        return "";
+    }
+
+    /**
+     * Gets the Job List by jobID List.
+     * 
+     * @param p_jobIDS
+     *            jobID List
+     */
+    public static ArrayList<Job> getJobListByIDS(List<Long> p_jobIDS)
+            throws JobException, RemoteException, GeneralException,
+            NamingException
+    {
+        ArrayList<Job> jobs = new ArrayList<Job>();
+        for (long jobId : p_jobIDS)
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(jobId);
+            if (job != null)
+            {
+                jobs.add(job);
+            }
+        }
+        return jobs;
+    }
+
+    /**
+     * Adds p_files to File List.
+     * 
+     * @param p_reports
+     *            File List
+     * @param p_files
+     *            File Array
+     */
+    public static void addFiles(List<File> p_reports, File[] p_files)
+    {
+        for (File file : p_files)
+        {
+            p_reports.add(file);
+        }
+    }
+
+    public static List<GlobalSightLocale> getTargetLocals(Job p_job)
+    {
+        List<GlobalSightLocale> list = new ArrayList<GlobalSightLocale>();
+        Iterator<Workflow> it = p_job.getWorkflows().iterator();
+        while (it.hasNext())
+        {
+            Workflow wf = it.next();
+            GlobalSightLocale wfTargetLocale = wf.getTargetLocale();
+            String wfStatus = wf.getState();
+            if (!Workflow.CANCELLED.equals(wfStatus))
+                list.add(wfTargetLocale);
+        }
+        return list;
+    }
+    
+    // Get all target Locale, and sorted by ISO_CODE.
+    public static List<GlobalSightLocale> getAllTargetLocales()
+            throws EnvoyServletException
+    {
+        return getAllTargetLocales(Locale.US, GlobalSightLocaleComparator.ISO_CODE);
+    }
+    
+    // Gets all sorted target locale.
+    public static List<GlobalSightLocale> getAllTargetLocales(Locale p_locale, int p_sortedType)
+            throws EnvoyServletException
+    {
+        List<GlobalSightLocale> locales = new ArrayList<GlobalSightLocale>();
+
+        try
+        {
+            locales = ServerProxy.getLocaleManager().getAllTargetLocales();
+        }
+        catch (RemoteException re)
+        {
+            throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
+        }
+        catch (GeneralException ge)
+        {
+            throw new EnvoyServletException(ge.getExceptionId(), ge);
+        }
+
+        if(p_locale != null && p_sortedType >= 0)
+        {
+            Collections.sort(locales, new GlobalSightLocaleComparator(p_sortedType, p_locale));
+        }
+        
+        return locales;
+    }
+
+    public static ArrayList<String> getAllJobStatusList()
+    {
+        if(allJobStatusList == null || allJobStatusList.size() == 0)
+        {
+            allJobStatusList = new ArrayList<String>();
+            allJobStatusList.add(Job.PENDING);
+            allJobStatusList.add(Job.READY_TO_BE_DISPATCHED);
+            allJobStatusList.add(Job.DISPATCHED);
+            allJobStatusList.add(Job.LOCALIZED);
+            allJobStatusList.add(Job.EXPORTED);
+            allJobStatusList.add(Job.EXPORT_FAIL);
+            allJobStatusList.add(Job.ARCHIVED);
+        }
+        
+        return (ArrayList<String>) ((ArrayList<String>) allJobStatusList).clone();
+    }
+    
+    public static WritableCellFormat getMoneyFormat(String p_currencyName)
+    {
+        String symbol = ReportUtil.getCurrencySymbol(p_currencyName);
+        NumberFormat moneyFormat = new NumberFormat(
+                symbol + "###,###,##0.000", NumberFormat.COMPLEX_FORMAT);
+        return new WritableCellFormat(moneyFormat);
+    }
+    
+    public static String getJobStatusDisplayName(String p_jobState)
+    {
+        return getJobStatusDisplayName(p_jobState, Locale.US);
+    }
+    
+    public static String getJobStatusDisplayName(String p_jobState, Locale p_userLocale)
+    {
+        String propertyKey = "";
+        String defaultName = "";
+        if ((p_jobState.equals(Job.PENDING))
+                || (p_jobState.equals(Job.BATCHRESERVED))
+                || (p_jobState.equals(Job.IMPORTFAILED)))
+        {
+            defaultName = "Pending";
+            propertyKey = "lb_pending";
+        }
+        else if (p_jobState.equals(Job.READY_TO_BE_DISPATCHED))
+        {
+            defaultName = "Ready";
+            propertyKey = "lb_ready";
+        }
+        else if (p_jobState.equals(Job.ADD_FILE))
+        {
+            defaultName = "Adding Files";
+            propertyKey = "lb_addfiles";
+        }
+        else if (p_jobState.equals(Job.DISPATCHED))
+        {
+            defaultName = "In Progress";
+            propertyKey = "lb_inprogress";
+        }
+        else if (p_jobState.equals(Job.LOCALIZED))
+        {
+            defaultName = "Localized";
+            propertyKey = "lb_localized";
+        }
+        else if (p_jobState.equals(Job.DTPINPROGRESS))
+        {
+            defaultName = "DTP In Progress";
+            propertyKey = "lb_dtpinprogress";
+        }
+        else if (p_jobState.equals(Job.EXPORTING))
+        {
+            defaultName = "Exporting";
+            propertyKey = "lb_state_exporting";
+        }
+        else if ((p_jobState.equals(Job.EXPORTED))
+                || (p_jobState.equals(Job.EXPORT_FAIL)))
+        {
+            defaultName = "Exported";
+            propertyKey = "lb_exported";
+        }
+        else if (p_jobState.equals(Job.UPLOADING))
+        {
+            defaultName = "Uploading";
+            propertyKey = "lb_state_uploading";
+        }
+        else if (p_jobState.equals(Job.IN_QUEUE))
+        {
+            defaultName = "In Queue";
+            propertyKey = "lb_state_inqueue";
+        }
+        else if (p_jobState.equals(Job.EXTRACTING))
+        {
+            defaultName = "Extracting";
+            propertyKey = "lb_state_extracting";
+        }
+        else if (p_jobState.equals(Job.LEVERAGING))
+        {
+            defaultName = "Leveraging";
+            propertyKey = "lb_state_leveraging";
+        }
+        /*
+        else if (p_jobState.equals(Job.PROCESSING))
+        {
+            long fileCount = 0;
+            Collection<Request> requests = getRequestList();
+            Set<Long> pageNumbers = new HashSet<Long>(requests.size());
+            for (Request r : requests)
+            {
+                if (fileCount == 0)
+                {
+                    fileCount = r.getBatchInfo().getPageCount();
+                }
+                long pageNumber = r.getBatchInfo().getPageNumber();
+                if (!pageNumbers.contains(pageNumber))
+                {
+                    pageNumbers.add(pageNumber);
+                }
+            }
+            int fileNumber = pageNumbers.size();
+            defaultName = "Processing (" + fileNumber + " of " + fileCount
+                    + ")";
+        }   */
+        else if (p_jobState.equals(Job.SKIPPING))
+        {
+            defaultName = "Skipping";
+            propertyKey = "lb_state_skipping";
+        }
+        else
+        {
+            defaultName = "Archived";
+            propertyKey = "lb_archived";
+        }
+
+        // get value from resource bundle
+        if(p_userLocale == null)
+        {
+            p_userLocale = Locale.US;
+        }
+        SystemResourceBundle srb = SystemResourceBundle.getInstance();
+        ResourceBundle rb = srb.getResourceBundle(
+                ResourceBundleConstants.LOCALE_RESOURCE_NAME, p_userLocale);
+        String result = null;
+        try
+        {
+            result = rb.getString(propertyKey);
+        }
+        catch (MissingResourceException e)
+        {
+            result = defaultName;
+        }
+
+        return result;
+    }
+}

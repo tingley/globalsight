@@ -21,6 +21,7 @@ package com.globalsight.everest.request.reimport;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -130,8 +131,7 @@ public class ActivePageReimporter
         catch (Exception e)
         {
             // just log an error
-            s_logger
-                    .error("Failed to get the number of minutes to delay reimiport.");
+            s_logger.error("Failed to get the number of minutes to delay reimiport.");
         }
         return timeInMillisecs;
     }
@@ -148,9 +148,8 @@ public class ActivePageReimporter
         }
         catch (Exception e)
         {
-            s_logger
-                    .error("Failed to retrive the value that specifies if reimport of an active "
-                            + "page is allowed.");
+            s_logger.error("Failed to retrive the value that specifies if reimport of an active "
+                    + "page is allowed.");
             // if it can't find it then return 0 - safest not to allow
             // re-import.
             return NO_REIMPORT;
@@ -199,8 +198,8 @@ public class ActivePageReimporter
             s_logger.error(
                     "Failed to find the job associated with active page "
                             + p_page.getId(), ex);
-            String[] args = { Long.toString(p_page.getId()),
-                    p_page.getExternalPageId() };
+            String[] args =
+            { Long.toString(p_page.getId()), p_page.getExternalPageId() };
             throw new ReimporterException(
                     ReimporterException.MSG_FAILED_TO_FIND_JOB_OF_PAGE, args,
                     ex);
@@ -248,8 +247,8 @@ public class ActivePageReimporter
                     .getId());
             oldJob = loadJobFromDbIntoCache(id);
             List jobComments = oldJob.getJobComments();
-            Hashtable workflowComments = handlePreviousPage(r, p_delayedRequest
-                    .getPreviousPage());
+            Hashtable workflowComments = handlePreviousPage(r,
+                    p_delayedRequest.getPreviousPage());
             ServerProxy.getRequestHandler().importPage(r);
             RequestImpl updatedRequest = (RequestImpl) ServerProxy
                     .getRequestHandler().findRequest(r.getId());
@@ -266,9 +265,9 @@ public class ActivePageReimporter
                         Comment tc = (Comment) jobComments.get(y);
                         String oldCommentId = (new Long(tc.getId())).toString();
                         Comment newComment = TaskHelper.saveComment(
-                                (WorkObject) newJob, newJob.getJobId(), tc
-                                        .getCreatorId(), tc.getComment(), tc
-                                        .getCreatedDateAsDate());
+                                (WorkObject) newJob, newJob.getJobId(),
+                                tc.getCreatorId(), tc.getComment(),
+                                tc.getCreatedDateAsDate());
                         String commentId = new Long(newComment.getId())
                                 .toString();
                         // String path = CommentUpload.UPLOAD_BASE_DIRECTORY +
@@ -277,10 +276,14 @@ public class ActivePageReimporter
                         // CommentUpload.UPLOAD_DIRECTORY + commentId;
                         // File savedDir = new File(path);
                         // File finalPath = new File(f);
-                        File savedDir = new File(AmbFileStoragePathUtils
-                                .getCommentReferenceDir(), oldCommentId);
-                        File finalPath = new File(AmbFileStoragePathUtils
-                                .getCommentReferenceDir(), commentId);
+                        File savedDir = new File(
+                                AmbFileStoragePathUtils
+                                        .getCommentReferenceDir(),
+                                oldCommentId);
+                        File finalPath = new File(
+                                AmbFileStoragePathUtils
+                                        .getCommentReferenceDir(),
+                                commentId);
                         savedDir.renameTo(finalPath);
                     }
                 }
@@ -414,7 +417,8 @@ public class ActivePageReimporter
             s_logger.error("Failed to delay the import of request "
                     + p_request.getRequest().getId()
                     + " A timer exception was thrown.", tte);
-            String[] args = { Long.toString(p_request.getRequest().getId()) };
+            String[] args =
+            { Long.toString(p_request.getRequest().getId()) };
             throw new ReimporterException(
                     ReimporterException.MSG_FAILED_TO_DELAY_REIMPORT, args, tte);
         }
@@ -425,14 +429,12 @@ public class ActivePageReimporter
     // new job (delayed reimport)
     private Hashtable getComments(Job p_job)
     {
-        List workflows = new ArrayList(p_job.getWorkflows());
+        Collection<Workflow> workflows = p_job.getWorkflows();
         Hashtable workflowComments = new Hashtable();
 
         int wfSize = workflows.size();
-        for (int i = 0; i < wfSize; i++)
+        for (Workflow curWF : workflows)
         {
-            Workflow curWF = (Workflow) workflows.get(i);
-
             // if the workflow is canceled, then don't display
             // information about it
             if (curWF.getState().equals(Workflow.CANCELLED))
@@ -472,13 +474,11 @@ public class ActivePageReimporter
             return;
         }
         // Get all the workflows for the job
-        List workflows = new ArrayList(p_job.getWorkflows());
+        Collection<Workflow> workflows = p_job.getWorkflows();
 
         int wfSize = workflows.size();
-        for (int i = 0; i < wfSize; i++)
+        for (Workflow curWF : workflows)
         {
-            Workflow curWF = (Workflow) workflows.get(i);
-
             // get the target locale
             GlobalSightLocale target = curWF.getTargetLocale();
 
@@ -515,16 +515,15 @@ public class ActivePageReimporter
                                         {
                                             Comment tc = (Comment) comments
                                                     .get(y);
-                                            String oldCommentId = (new Long(tc
-                                                    .getId())).toString();
+                                            String oldCommentId = (new Long(
+                                                    tc.getId())).toString();
                                             Comment comment = TaskHelper
                                                     .saveComment(
                                                             (WorkObject) t,
                                                             t.getId(),
                                                             tc.getCreatorId(),
                                                             tc.getComment(),
-                                                            tc
-                                                                    .getCreatedDateAsDate());
+                                                            tc.getCreatedDateAsDate());
                                             String commentId = (new Long(
                                                     comment.getId()))
                                                     .toString();
@@ -599,12 +598,11 @@ public class ActivePageReimporter
                 // just log the error - no exception thrown
                 if (j == null)
                 {
-                    s_logger
-                            .error("Failed to find the job associated with active page "
-                                    + p_previousPage.getId()
-                                    + ": "
-                                    + p_previousPage.getExternalPageId()
-                                    + " while starting to re-import the page");
+                    s_logger.error("Failed to find the job associated with active page "
+                            + p_previousPage.getId()
+                            + ": "
+                            + p_previousPage.getExternalPageId()
+                            + " while starting to re-import the page");
                 }
                 else
                 {
@@ -633,8 +631,8 @@ public class ActivePageReimporter
                                     + p_previousPage.getId() + ": "
                                     + p_previousPage.getExternalPageId()
                                     + " when starting to reimport the page.");
-                            String args[] = { Long.toString(j.getId()),
-                                    j.getJobName(),
+                            String args[] =
+                            { Long.toString(j.getId()), j.getJobName(),
                                     Long.toString(p_previousPage.getId()),
                                     p_previousPage.getExternalPageId() };
                             throw new ReimporterException(
@@ -687,7 +685,7 @@ public class ActivePageReimporter
         try
         {
             WorkflowServer ws = ServerProxy.getWorkflowServer();
-            
+
             String pmId = p_request.getL10nProfile().getProject()
                     .getProjectManagerId();
 
@@ -701,8 +699,7 @@ public class ActivePageReimporter
 
                 TaskEmailInfo emailInfo = new TaskEmailInfo(
                         pmId,
-                        w
-                                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+                        w.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                         wfti.notifyProjectManager(), p_job.getPriority());
                 emailInfo.setPageName(p_page.getExternalPageId());
                 emailInfo.setTime(p_time);
@@ -747,8 +744,8 @@ public class ActivePageReimporter
             // there is an order to these arguments
             // activity name, job name, priority, page name, time, comments,
             // url)
-            String[] args = { null, p_job.getJobName(),
-                    Integer.toString(p_job.getPriority()),
+            String[] args =
+            { null, p_job.getJobName(), Integer.toString(p_job.getPriority()),
                     p_page == null ? "" : p_page.getExternalPageId(),
                     p_time.toString(), null, capLoginUrl };
 
@@ -866,11 +863,9 @@ public class ActivePageReimporter
         }
         catch (Exception ex)
         {
-            s_logger
-                    .error(
-                            "Failed to remove the delayed import request with id "
-                                    + p_delayedRequest.getId()
-                                    + " from the queue.", ex);
+            s_logger.error(
+                    "Failed to remove the delayed import request with id "
+                            + p_delayedRequest.getId() + " from the queue.", ex);
         }
 
         try

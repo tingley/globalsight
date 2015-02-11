@@ -170,7 +170,6 @@ public class RatesFuncs extends BasicFuncs {
 					newRateName, 6), newRateType);
 		} catch (Exception e) {
 			Reporter.log(e.getMessage());
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
 	}
 
@@ -179,7 +178,7 @@ public class RatesFuncs extends BasicFuncs {
 	public void addUserNewRate(Selenium selenium, String iUserName)
 			throws Exception {
 		boolean selected = selectRadioButtonFromTable(selenium,
-				Users.User_TABLE, iUserName);
+				Users.USER_LIST_TABLE, iUserName);
 
 		// if(this.getColumnText(selenium, Users.NewRole_TABLE, iRateName,
 		// 1)==);
@@ -188,11 +187,11 @@ public class RatesFuncs extends BasicFuncs {
 			return;
 		}
 		try {
-			selenium.click(Users.User_Edit_BUTTON);
+			selenium.click(Users.EDIT_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-			selenium.click(Users.Roles_BUTTON);
+			selenium.click(Users.ROLES_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-			selenium.click(Users.New_BUTTON);
+			selenium.click(Users.NEW_VALUE_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		} catch (Exception e) {
 			Reporter.log(e.getMessage());

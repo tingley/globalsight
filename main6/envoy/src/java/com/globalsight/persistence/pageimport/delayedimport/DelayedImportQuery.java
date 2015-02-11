@@ -24,6 +24,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 
 public class DelayedImportQuery
 {
@@ -31,8 +32,8 @@ public class DelayedImportQuery
             + "where j.id = r.job_id and r.page_id = ? ";
     private String m_selectJobIdOfPage = "select j.id from job j, request r "
             + "where j.id = r.job_id and r.page_id =  ?";
-    private PreparedStatement m_psJobOfPage;
-    private PreparedStatement m_psJobIdOfPage;
+    private PreparedStatement m_psJobOfPage = null;
+    private PreparedStatement m_psJobIdOfPage = null;
 
     public DelayedImportQuery()
     {
@@ -46,7 +47,7 @@ public class DelayedImportQuery
         long jobId = 0;
         try
         {
-            connection = PersistenceService.getInstance().getConnection();
+            connection = DbUtil.getConnection();
             m_psJobIdOfPage = connection.prepareStatement(m_selectJobIdOfPage);
             m_psJobIdOfPage.setLong(1, p_sourcePageId);
             rs = m_psJobIdOfPage.executeQuery();
@@ -61,40 +62,11 @@ public class DelayedImportQuery
         }
         finally
         {
-            if (m_psJobIdOfPage != null)
-            {
-                try
-                {
-                    m_psJobIdOfPage.close();
-                }
-                catch (Exception e)
-                {
-                }
-            }
-
-            if (rs != null)
-            {
-                try
-                {
-                    rs.close();
-                }
-                catch (Exception e)
-                {
-                }
-            }
-
-            try
-            {
-                if (connection != null)
-                {
-                    PersistenceService.getInstance().returnConnection(
-                            connection);
-                }
-            }
-            catch (Exception e)
-            {
-            }
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(m_psJobIdOfPage);
+        	DbUtil.silentReturnConnection(connection);
         }
+
         return jobId;
     }
 
@@ -105,7 +77,7 @@ public class DelayedImportQuery
         Job job = null;
         try
         {
-            connection = PersistenceService.getInstance().getConnection();
+            connection = DbUtil.getConnection();
             m_psJobOfPage = connection.prepareStatement(m_selectJobOfPage);
             m_psJobOfPage.setLong(1, p_sourcePageId);
             rs = m_psJobOfPage.executeQuery();
@@ -117,28 +89,11 @@ public class DelayedImportQuery
         }
         finally
         {
-            try
-            {
-                if (m_psJobOfPage != null)
-                {
-                    m_psJobOfPage.close();
-                }
-            }
-            catch (Exception e)
-            {
-            }
-            try
-            {
-                if (connection != null)
-                {
-                    PersistenceService.getInstance().returnConnection(
-                            connection);
-                }
-            }
-            catch (Exception e)
-            {
-            }
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(m_psJobOfPage);
+        	DbUtil.silentReturnConnection(connection);
         }
+
         return job;
     }
 

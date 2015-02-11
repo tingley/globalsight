@@ -21,6 +21,7 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.administration.users.ModifyUserWrapper,
             com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
             com.globalsight.util.GlobalSightLocale,
@@ -107,6 +108,9 @@ User user = (User)sessionMgr.getAttribute(WebAppConstants.USER);
 //available UI languages
 String[] uiLocales = UserHandlerHelper.getUILocales();
 
+String[] userNames = UserUtil.getAllUserNames();
+int size = userNames == null ? 0 : userNames.length;
+
 //User UI locale
 Locale userUiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
@@ -114,8 +118,13 @@ Locale userUiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(
   WebAppConstants.MODIFY_USER_WRAPPER);
 
-String userName = wrapper.getUserId();
-String ssoUserName = wrapper.getSsoUserName();
+String userName = wrapper.getUserName();
+String ssoUserName = null;
+String ssoUserId = wrapper.getSsoUserId();
+if (ssoUserId != null)
+{
+	ssoUserName = UserUtil.getUserNameById(ssoUserId);
+}
 String firstName = wrapper.getFirstName();
 String lastName = wrapper.getLastName();
 String password = wrapper.getPassword();
@@ -229,6 +238,35 @@ function submitForm(btnName)
 
 function confirmForm(formSent)
 {
+	var theUserName = formSent.userName.value;
+	theUserName = stripBlanks(theUserName);
+    if (isEmptyString(theUserName))
+    {
+        alert("<%= jsmsgUserName %>");
+        formSent.userName.value = "";
+        formSent.userName.focus();
+        return false;
+    }
+    
+    <% for (int i = 0; i < size; i++) { 
+        if (userName.equals(userNames[i]))
+        {
+     	   continue;
+        }
+     %>
+        if(theUserName.toLowerCase() == "<%= userNames[i].toLowerCase() %>")
+        {
+           alert('<%=bundle.getString("jsmsg_duplicate_users")%>');
+           return false;
+        }
+     <% } %>
+
+    if (hasSomeSpecialChars(theUserName))
+    {
+        alert("<%= lbUserName %>" + "<%= bundle.getString("msg_invalid_entry3") %>");
+        return false;
+    }
+    
     if (formSent.password)
     {
         var thePassword = formSent.password.value;
@@ -326,7 +364,9 @@ function doLoad()
   <input type="hidden" name="vgroup">
   <TR>
     <TD VALIGN="TOP"><%= lbUserName %><SPAN CLASS="asterisk">*</SPAN>:</TD>
-    <TD ><%= userName %></TD>
+    <TD >
+      <amb:textfield maxlength="40" size="40" name="userName" value="<%= userName %>" />
+    </TD>
   </TR>
   <% if (enableSSO) { %>
   <TR>
@@ -353,7 +393,7 @@ function doLoad()
   <TR style="display:none;">
     <TD></TD>
     <TD>
-      <input type="text" name="userName" value="<%= userName %>"/>
+      <input type="text" name="aliasUserName" value="<%= userName %>"/>
     </TD>
   </TR>
   <!-- End Added for alias name,...  -->

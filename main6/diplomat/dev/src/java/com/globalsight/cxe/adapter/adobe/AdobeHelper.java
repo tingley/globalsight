@@ -28,8 +28,8 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
@@ -40,7 +40,6 @@ import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
@@ -287,7 +286,12 @@ public class AdobeHelper
 					m_eventFlow.getSource().getFormatType() :
 						m_eventFlow.getDiplomatAttribute("formatType").getValue();
             String IndesignConverterDir = "";
-            if ("indd_cs5".equals(sourceFormat))
+            if ("indd_cs5.5".equals(sourceFormat))
+            {
+                IndesignConverterDir = m_sc
+                        .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5);
+            }
+            else if ("indd_cs5".equals(sourceFormat))
             {
                 IndesignConverterDir = m_sc
                         .getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5);
@@ -454,7 +458,7 @@ public class AdobeHelper
 		}
 		
         FileUtil.writeFileAtomically(
-            new File(p_commandFileName), text.toString(), "US-ASCII");
+            new File(commandFileName), text.toString(), "US-ASCII");
 	}
 	
 	private InddFilter getMainFilter()
@@ -936,17 +940,17 @@ public class AdobeHelper
 	private void writeStatusToTargetLocales(String p_extectedFile) 
 		throws IOException
 	{
-		String l10nProfileId = m_eventFlow.getBatchInfo().getL10nProfileId();
-		ArrayList targetLocales = findTargetLocales(l10nProfileId);
-		String splitChar = File.separator;
-		if ("\\".equalsIgnoreCase(splitChar))
+        String l10nProfileId = m_eventFlow.getBatchInfo().getL10nProfileId();
+        ArrayList targetLocales = findTargetLocales(l10nProfileId);
+        String splitChar = File.separator;
+        if ("\\".equalsIgnoreCase(splitChar))
 		{
 		    splitChar = "\\\\";
 		}
 		String[] srcDisplayName = m_eventFlow.getDisplayName().split(splitChar); 
-		for(int i = 0; i < targetLocales.size(); i++)
+        for (int i = 0; i < targetLocales.size(); i++)
 		{
-			String locale = (String)targetLocales.get(i);
+            String locale = (String) targetLocales.get(i);
 			StringBuffer tarDir = new StringBuffer(
 				AmbFileStoragePathUtils.getPdfPreviewDir().getAbsolutePath());
 			tarDir.append(File.separator).append(locale);
@@ -974,12 +978,10 @@ public class AdobeHelper
 
 	private void doCopyToTargetLocales(File expectedFile)
 	{
-		String l10nProfileId = this.m_eventFlow.getBatchInfo()
-				.getL10nProfileId();
-		ArrayList targetLocales = findTargetLocales(l10nProfileId);
-		for (int i = 0; i < targetLocales.size(); i++)
+        String[] targetLocales = this.m_eventFlow.getTargetLocale().split(",");
+        for (int i = 0; i < targetLocales.length; i++)
 		{
-			String locale = (String) targetLocales.get(i);
+            String locale = (String) targetLocales[i];
 			StringBuffer targetDir = new StringBuffer(m_convDir);
 			targetDir.append(File.separator).append(locale);
 
@@ -987,67 +989,6 @@ public class AdobeHelper
 			targetDirF.mkdirs();
 			FileCopier.copy(expectedFile, targetDir.toString());
 		}
-	}
-
-	private ArrayList findTargetLocales(String p_l10nProfileId)
-	{
-		ArrayList targetLocales = new ArrayList();
-
-		if (p_l10nProfileId == null || p_l10nProfileId.equals("null"))
-		{
-			// May be null for aligner import.
-			return targetLocales;
-		}
-
-		Connection connection = null;
-		PreparedStatement query = null;
-		StringBuffer sql = new StringBuffer(
-				"select loc.iso_lang_code, loc.iso_country_code ");
-		sql.append("from l10n_profile_wftemplate_info lpwf, ");
-		sql.append("  workflow_template wft, locale loc ");
-		sql.append("where lpwf.l10n_profile_id=? ");
-		sql.append("and lpwf.wf_template_id=wft.id ");
-		sql.append("and loc.id=wft.target_locale_id");
-		try
-		{
-			connection = ConnectionPool.getConnection();
-			query = connection.prepareStatement(sql.toString());
-			query.setString(1, p_l10nProfileId);
-			ResultSet results = query.executeQuery();
-			while (results.next())
-			{
-				String lang = results.getString(1);
-				String country = results.getString(2);
-				String locale = lang + "_" + country;
-				if(!targetLocales.contains(locale))
-				{
-					targetLocales.add(locale);
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			throw new RuntimeException("findTargetLocales error " + sql);
-		}
-		finally
-		{
-			try
-			{
-				query.close();
-			}
-			catch (Throwable e)
-			{
-			}
-			try
-			{
-				ConnectionPool.returnConnection(connection);
-			}
-			catch (ConnectionPoolException cpe)
-			{
-			}
-		}
-		return targetLocales;
 	}
 
 	private static boolean isExportFileComplete(String p_filekey,
@@ -1136,4 +1077,65 @@ public class AdobeHelper
 			return p_xmpRdfFileData;
 		}
 	}
+
+    private ArrayList findTargetLocales(String p_l10nProfileId)
+    {
+        ArrayList targetLocales = new ArrayList();
+
+        if (p_l10nProfileId == null || p_l10nProfileId.equals("null"))
+        {
+            // May be null for aligner import.
+            return targetLocales;
+        }
+
+        Connection connection = null;
+        PreparedStatement query = null;
+        StringBuffer sql = new StringBuffer(
+                "select loc.iso_lang_code, loc.iso_country_code ");
+        sql.append("from l10n_profile_wftemplate_info lpwf, ");
+        sql.append("  workflow_template wft, locale loc ");
+        sql.append("where lpwf.l10n_profile_id=? ");
+        sql.append("and lpwf.wf_template_id=wft.id ");
+        sql.append("and loc.id=wft.target_locale_id");
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            query = connection.prepareStatement(sql.toString());
+            query.setString(1, p_l10nProfileId);
+            ResultSet results = query.executeQuery();
+            while (results.next())
+            {
+                String lang = results.getString(1);
+                String country = results.getString(2);
+                String locale = lang + "_" + country;
+                if (!targetLocales.contains(locale))
+                {
+                    targetLocales.add(locale);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException("findTargetLocales error " + sql);
+        }
+        finally
+        {
+            try
+            {
+                query.close();
+            }
+            catch (Throwable e)
+            {
+            }
+            try
+            {
+                ConnectionPool.returnConnection(connection);
+            }
+            catch (ConnectionPoolException cpe)
+            {
+            }
+        }
+        return targetLocales;
+    }
 }

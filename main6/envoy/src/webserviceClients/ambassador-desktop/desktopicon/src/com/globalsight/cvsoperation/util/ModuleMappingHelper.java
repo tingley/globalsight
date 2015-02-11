@@ -138,7 +138,7 @@ public class ModuleMappingHelper {
 				exist = false;
 			stmt.close();
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 		return exist;
 	}
@@ -196,7 +196,7 @@ public class ModuleMappingHelper {
 			}
 			return mappings;
 		} catch (Exception e) {
-			log.error(e.toString());
+			log.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -245,7 +245,7 @@ public class ModuleMappingHelper {
 			
 			return smp;
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -282,7 +282,7 @@ public class ModuleMappingHelper {
 			
 			return t;
 		} catch (Exception e) {
-			log.error(e.toString());
+			log.error(e.getMessage(), e);
 			return null;
 		}
 	}
@@ -307,7 +307,7 @@ public class ModuleMappingHelper {
 			}
 			return mm;
 		} catch (Exception e) {
-			log.error(e.toString());
+			log.error(e.getMessage(), e);
 			return null;
 		}
 	}

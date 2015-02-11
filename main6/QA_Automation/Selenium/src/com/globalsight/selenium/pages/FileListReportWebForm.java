@@ -1,6 +1,6 @@
 package com.globalsight.selenium.pages;
 
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 /**
  * FileList Report
@@ -11,7 +11,7 @@ import com.globalsight.selenium.properties.ConfigUtil;
 public class FileListReportWebForm
 {
     public static final String REPORT_LINK = "link="
-            + ConfigUtil.getConfigData("COMPANY_NAME") + " Detailed Word Counts by Job";
+            + ConfigUtil.getConfigData("company") + " Detailed Word Counts by Job";
     public static final String POPUP_WINDOW_NAME = "FileListundefined1";
 
     public static final String PROJECT_SELECTOR = "projectNameList";

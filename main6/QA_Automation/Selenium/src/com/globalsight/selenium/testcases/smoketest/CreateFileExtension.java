@@ -12,79 +12,29 @@ package com.globalsight.selenium.testcases.smoketest;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.FileExtensionFuncs;
+import com.globalsight.selenium.pages.FileExtensions;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
-public class CreateFileExtension {
+public class CreateFileExtension extends BaseTestCase
+{
 
-	/*
-	 * Common variables initialization.
-	 */
-	private Selenium selenium;
-	private FileExtensionFuncs iFileExtensionFuncs = new FileExtensionFuncs();
-	String testCaseName = getClass().getName();
+    /*
+     * Common variables initialization.
+     */
+    private FileExtensionFuncs fileExtensionFuncs = new FileExtensionFuncs();
 
-	@Test
-	public void createFileExtension() throws Exception {
+    @Test
+    public void createFileExtension() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.DATA_SOURCES_MENU,
+                MainFrame.FILE_EXTENSION_SUBMENU);
 
-		selenium.click(MainFrame.DataSources_MENU);
-		selenium.click(MainFrame.FileExtension_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        String extension = getProperty("file.extension");
+        fileExtensionFuncs.newFileExtension(selenium, extension);
 
-		iFileExtensionFuncs.newFileExtension(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "EXTENSION"));
-		Assert.assertEquals(iFileExtensionFuncs.isPresentInTable(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "FILEEXTENSIONTABLE"),
-				ConfigUtil.getDataInCase(testCaseName, "EXTENSION")), true);
-	}
-
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithAdmin(selenium);
-
-	}
-
-	@AfterMethod
-	public void afterMethod() {
-		selenium.click(MainFrame.LogOut_LINK);
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
+        Assert.assertEquals(fileExtensionFuncs.isPresentInTable(selenium,
+                FileExtensions.MAIN_TABLE, extension), true);
+    }
 }

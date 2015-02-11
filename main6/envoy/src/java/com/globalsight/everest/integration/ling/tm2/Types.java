@@ -17,45 +17,78 @@
 
 package com.globalsight.everest.integration.ling.tm2;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm2.leverage.MatchState;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Container of match types of a leveraged target page.
  */
 public class Types
 {
-    private boolean m_isSubLevMatch = false;
-    private int m_statisticsType;
-    private int m_lingManagerType;
-    private String sid;
+    static private final Logger logger = Logger.getLogger(Types.class);
+    private boolean isSubLevMatch = false;
+    private int statisticsType;// Threshold not-related
+    private int statisticsTypeByThreshold;// Adjusted by threshold
+    private int lingManagerMatchType;
     private MatchState matchState;
+    private String sid;
 
     // Constructor
     public Types(boolean p_isSubLevMatch, int p_statisticsType,
-            int p_lingManagerType, MatchState p_matchState)
+            int p_statisticsTypeByThreshold, int p_lingManagerMatchType,
+            MatchState p_matchState)
     {
-        m_isSubLevMatch = p_isSubLevMatch;
-        m_statisticsType = p_statisticsType;
-        m_lingManagerType = p_lingManagerType;
+        isSubLevMatch = p_isSubLevMatch;
+        statisticsType = p_statisticsType;
+        statisticsTypeByThreshold = p_statisticsTypeByThreshold;
+        lingManagerMatchType = p_lingManagerMatchType;
         matchState = p_matchState;
+    }
+
+    public void setStatisticsMatchType(int p_statisticsType)
+    {
+        this.statisticsType = p_statisticsType;
     }
 
     public int getStatisticsMatchType()
     {
-        return m_statisticsType;
+        return statisticsType;
+    }
+
+    public void setStatisticsMatchTypeByThreshold(
+            int p_statisticsTypeByThreshold)
+    {
+        this.statisticsTypeByThreshold = p_statisticsTypeByThreshold;
+    }
+
+    public int getStatisticsMatchTypeByThreshold()
+    {
+        return statisticsTypeByThreshold;
+    }
+
+    public void setLingManagerMatchType(int p_lingManagerMatchType)
+    {
+        this.lingManagerMatchType = p_lingManagerMatchType;
     }
 
     public int getLingManagerMatchType()
     {
-        return m_lingManagerType;
+        return lingManagerMatchType;
     }
 
+    /**
+     * @deprecated -- this means current leverage match score is between
+     *             50(included) and 75(excluded),no special purpose,so no need
+     *             to keep one special flag for this.
+     * @author YorkJin
+     */
     public boolean isSubLevMatch()
     {
-        return m_isSubLevMatch;
+        return isSubLevMatch;
     }
 
     public String getSid()
@@ -68,6 +101,16 @@ public class Types
         this.sid = sid;
     }
 
+    public MatchState getMatchState()
+    {
+        return matchState;
+    }
+
+    public void setMatchState(MatchState matchState)
+    {
+        this.matchState = matchState;
+    }
+
     /**
      * There are four kinds of format to show exact match, judge use which one.
      * It is also used to count in-context match.
@@ -78,36 +121,35 @@ public class Types
      *         PO_EXACT_MATCH or XLIFF_EXACT_MATCH(for WS XLF "locked"
      *         segments).
      */
-    public boolean isExactMatchLocalized(long p_tuvId)
+    public boolean isExactMatchLocalized(long p_tuvId, String companyId)
     {
         // Judge if it is "XLIFF_EXACT_MATCH" and "isXliffLocked" first.
         if (MatchState.XLIFF_EXACT_MATCH.equals(matchState))
         {
-            TuvImpl tuv = HibernateUtil.get(TuvImpl.class, p_tuvId);
+            TuvImpl tuv = null;
+            try
+            {
+                tuv = SegmentTuvUtil.getTuvById(p_tuvId, companyId);
+            }
+            catch (Exception e)
+            {
+                logger.error(e.getMessage(), e);
+            }
             if (tuv != null)
             {
-                TuImpl tu = (TuImpl) tuv.getTu();
+                TuImpl tu = (TuImpl) tuv.getTu(companyId);
                 if (tu != null)
                 {
                     // If it is WorldServer XLIFF file,and current TU has
                     // 'lock_status="locked' attribute, can count it as ICE.
-                    return tu.isXliffLocked();
+                    return tu.isXliffLocked()
+                            || "no".equalsIgnoreCase(tu.getTranslate());
                 }
             }
         }
-        
-        return (matchState.equals(MatchState.PAGE_TM_EXACT_MATCH)
-                || matchState.equals(MatchState.SEGMENT_TM_EXACT_MATCH) 
-                || matchState.equals(MatchState.PO_EXACT_MATCH));
-    }
-    
-    public MatchState getMatchState()
-    {
-        return matchState;
-    }
 
-    public void setMatchState(MatchState matchState)
-    {
-        this.matchState = matchState;
+        return (matchState.equals(MatchState.PAGE_TM_EXACT_MATCH)
+                || matchState.equals(MatchState.SEGMENT_TM_EXACT_MATCH) || matchState
+                    .equals(MatchState.PO_EXACT_MATCH));
     }
 }

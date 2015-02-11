@@ -27,6 +27,8 @@ import com.globalsight.everest.workflowmanager.Workflow;
 */
 public class WorkflowComparator extends StringComparator
 {
+    private static final long serialVersionUID = -1449607179643674302L;
+    
     //types of Workflow comparison
     public static final int TARG_LOCALE         = 0;
     public static final int COMPLETE            = 1;
@@ -50,7 +52,7 @@ public class WorkflowComparator extends StringComparator
     
     public static final int IN_CONTEXT          = 17;
     public static final int NO_USE_IN_CONTEXT   = 18;
-    public static final int NO_USE_EXACT        = 19;
+    public static final int TOTAL_EXACT        = 19;
     public static final int DEFAULT_CONTEXT_EXACT = 20;
     
     public static final int HIFUZZYREPETITION   = 21;
@@ -234,9 +236,9 @@ public class WorkflowComparator extends StringComparator
                 else
                     rv = -1;
                 break;  
-            case NO_USE_EXACT:  
-                aInt = a.getNoUseExactMatchWordCount();
-                bInt = b.getNoUseExactMatchWordCount();
+            case TOTAL_EXACT:
+                aInt = a.getTotalExactMatchWordCount();
+                bInt = b.getTotalExactMatchWordCount();
                 if (aInt > bInt)
                     rv = 1;
                 else if (aInt == bInt)

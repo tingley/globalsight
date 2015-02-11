@@ -61,7 +61,9 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
      * ie. PageId_TuId_TuvId_SubId (if work object type = SEGMENT)
      * JobId_WfId_TaskId (if work object type = TASK)
      */
-    private String m_logicalKey;
+    private String m_logicalKey = null;
+
+    private long targetPageId = 0;
 
     // contains the type and id of the object the issue is assigned to
     private int m_levelObjectType = TYPE_SEGMENT; // default is segment
@@ -113,6 +115,11 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
         this(p_levelObjectType, p_levelObjectId, p_title, p_priority, p_status,
                 p_category, p_creatorId, p_commentText);
         setLogicalKey(p_logicalKey);
+        if (p_logicalKey != null && p_logicalKey.indexOf("_") > -1)
+        {
+        	int index = p_logicalKey.indexOf("_");
+        	setTargetPageId(Long.parseLong(p_logicalKey.substring(0, index)));
+        }
     }
 
     /**
@@ -239,6 +246,16 @@ public class IssueImpl extends CommentImpl implements Issue, Comparable
     public void setLogicalKey(String p_key)
     {
         m_logicalKey = p_key;
+    }
+
+    public long getTargetPageId()
+    {
+    	return this.targetPageId;
+    }
+
+    public void setTargetPageId(long p_targetPageId)
+    {
+    	this.targetPageId = p_targetPageId;
     }
 
     /**

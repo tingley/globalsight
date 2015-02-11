@@ -102,7 +102,7 @@ public class WorkflowTemplateDependencyChecker
             message.append(trg);
             */
 
-            c_logger.error(message.toString());
+            c_logger.error(message.toString(), e);
 
             String args[] = { wfName };
             throw new DependencyCheckException(

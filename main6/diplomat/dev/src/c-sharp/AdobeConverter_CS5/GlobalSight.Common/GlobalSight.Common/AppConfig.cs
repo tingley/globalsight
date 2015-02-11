@@ -38,5 +38,51 @@ namespace GlobalSight.Common
             // Force a reload of a changed section.
             ConfigurationManager.RefreshSection("appSettings");
         }
+
+        public static bool GetAppConfigBool(String key, bool defaultValue)
+        {
+            bool result = defaultValue;
+
+            try
+            {
+                string v = GetAppConfig(key);
+                result = Boolean.Parse(v);
+            }
+            catch
+            {
+                result = defaultValue;
+            }
+
+            return result;
+        }
+
+        public static bool IsDebugEnabled()
+        {
+            return GetAppConfigBool("Log.Debug", false);
+        }
+
+        public static bool AutoStart
+        {
+            set
+            {
+                try
+                {
+                    UpdateAppConfig("AutoStart", "" + value);
+                }
+                catch { }
+            }
+            get
+            {
+                try
+                {
+                    string v = GetAppConfig("AutoStart");
+                    return "true".Equals(v, StringComparison.CurrentCultureIgnoreCase);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

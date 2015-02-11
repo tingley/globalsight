@@ -18,6 +18,7 @@ package com.globalsight.everest.util.comparator;
 
 import java.util.Locale;
 
+import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -31,7 +32,13 @@ public class TMProfileComparator extends StringComparator
 	public static final int NAME = 0;
 	public static final int DESCRIPTION = 1;
 	public static final int ASC_COMPANY = 2;
-        
+	public static final int LEVERAGE_MATCH_THRESHOLD = 3;
+	public static final int STORAGE_TM = 4;
+	public static final int REFERENCE_TMS = 5;
+	public static final int MT_ENGINE = 6;
+	public static final int MT_CONFIDENCE_SCORE = 7;
+	public static final int SRX = 8;
+
 	/**
 	* Creates a TMProfileComparator with the given type and locale.
 	* If the type is not a valid type, then the default comparison
@@ -75,10 +82,81 @@ public class TMProfileComparator extends StringComparator
 			aValue = null;
 			bValue = null;
 			try {
-				aValue = CompanyWrapper.getCompanyNameById(
-						ServerProxy.getProjectHandler().getProjectTMById(a.getProjectTmIdForSave(), false).getCompanyId());
-				bValue = CompanyWrapper.getCompanyNameById(
-						ServerProxy.getProjectHandler().getProjectTMById(b.getProjectTmIdForSave(), false).getCompanyId());
+				aValue = CompanyWrapper.getCompanyNameById(ServerProxy
+						.getProjectHandler()
+						.getProjectTMById(a.getProjectTmIdForSave(), false)
+						.getCompanyId());
+				bValue = CompanyWrapper.getCompanyNameById(ServerProxy
+						.getProjectHandler()
+						.getProjectTMById(b.getProjectTmIdForSave(), false)
+						.getCompanyId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			rv = this.compareStrings(aValue,bValue);
+			break;
+		case LEVERAGE_MATCH_THRESHOLD:
+            long aThreshold = a.getFuzzyMatchThreshold();
+            long bThreshold = b.getFuzzyMatchThreshold();
+            if (aThreshold > bThreshold)
+                rv = 1;
+            else if (aThreshold == bThreshold)
+                rv = 0;
+            else
+                rv = -1;
+            break;
+		case STORAGE_TM:
+			aValue = null;
+			bValue = null;
+			try {
+				aValue = ServerProxy.getProjectHandler()
+						.getProjectTMById(a.getProjectTmIdForSave(), false)
+						.getName();
+				bValue = ServerProxy.getProjectHandler()
+						.getProjectTMById(b.getProjectTmIdForSave(), false)
+						.getName();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			rv = this.compareStrings(aValue,bValue);
+			break;
+		case REFERENCE_TMS:
+			aValue = null;
+			bValue = null;
+			try {
+				aValue = a.getProjectTMNamesToLeverageFrom();
+				bValue = b.getProjectTMNamesToLeverageFrom();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			rv = this.compareStrings(aValue,bValue);
+			break;
+		case MT_ENGINE:
+        	aValue = null;
+        	bValue = null;
+			// If "useMT" is disabled, should display and compare with empty string.
+        	aValue = (a.getUseMT() == true ? a.getMtEngine() : "");
+        	bValue = (b.getUseMT() == true ? b.getMtEngine() : "");
+        	rv = this.compareStrings(aValue,bValue);
+        	break;
+		case MT_CONFIDENCE_SCORE:
+            long aMtConfidenceScore = (a.getUseMT() == true ? a.getMtConfidenceScore() : 0);
+            long bMtConfidenceScore = (b.getUseMT() == true ? b.getMtConfidenceScore() : 0);
+            if (aMtConfidenceScore > bMtConfidenceScore)
+                rv = 1;
+            else if (aMtConfidenceScore == bMtConfidenceScore)
+                rv = 0;
+            else
+                rv = -1;
+            break;
+		case SRX:
+			aValue = null;
+			bValue = null;
+			try {
+				SegmentationRuleFile aRuleFile = ServerProxy.getSegmentationRuleFilePersistenceManager().getSegmentationRuleFileByTmpid(String.valueOf(a.getId()));
+				aValue = (aRuleFile != null? aRuleFile.getName() : "Default");
+				SegmentationRuleFile bRuleFile = ServerProxy.getSegmentationRuleFilePersistenceManager().getSegmentationRuleFileByTmpid(String.valueOf(b.getId()));
+				bValue = (bRuleFile != null? bRuleFile.getName() : "Default");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

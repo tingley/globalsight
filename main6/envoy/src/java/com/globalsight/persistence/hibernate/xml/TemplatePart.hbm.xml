@@ -23,9 +23,12 @@
 
         <many-to-one name="pageTemplate" column="TEMPLATE_ID" not-null="true"
             class="com.globalsight.everest.page.PageTemplate"/>
-
+		<!-- 
         <many-to-one name="tu" column="TU_ID"
             class="com.globalsight.everest.tuv.TuImpl" />
+         -->
+		<property name="tuId" length="20" type="long" column="TU_ID"
+			not-null="false" />
 
     </class>
 

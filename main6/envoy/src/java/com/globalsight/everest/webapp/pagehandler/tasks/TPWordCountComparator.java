@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
-import java.util.Comparator;
 import java.util.Locale;
 import com.globalsight.everest.util.comparator.StringComparator;
 import com.globalsight.everest.page.PageWordCounts;
@@ -27,8 +26,7 @@ import com.globalsight.everest.page.UnextractedFile;
 /**
  * This class can be used to compare TargetPage objects
  */
-public class TPWordCountComparator
-    extends StringComparator
+public class TPWordCountComparator extends StringComparator
 {
     //types of Task comparison
     public static final int FILE_NAME           = 0;
@@ -44,7 +42,7 @@ public class TPWordCountComparator
     public static final int TOTAL_FUZZY         = 10;
     public static final int IN_CONTEXT          = 11;
     public static final int NO_USE_IN_CONTEXT   = 12;
-    public static final int NO_USE_EXACT        = 13;
+    public static final int TOTAL_EXACT        = 13;
     public static final int DEFAULT_CONTEXT_EXACT = 14;
     
     public TPWordCountComparator(Locale p_locale)
@@ -215,9 +213,9 @@ public class TPWordCountComparator
                 rv = -1;
             break;
 
-        case NO_USE_EXACT:  // JPF- fix when have back end
-            aInt = aCounts.getNoUseExactMatchWordCount();
-            bInt = bCounts.getNoUseExactMatchWordCount();
+        case TOTAL_EXACT:  // JPF- fix when have back end
+            aInt = aCounts.getTotalExactMatchWordCount();
+            bInt = bCounts.getTotalExactMatchWordCount();
             if (aInt > bInt)
                 rv = 1;
             else if (aInt == bInt)

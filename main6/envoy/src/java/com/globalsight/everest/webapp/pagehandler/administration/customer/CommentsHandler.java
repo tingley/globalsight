@@ -17,51 +17,37 @@
 
 package com.globalsight.everest.webapp.pagehandler.administration.customer;
 
-import com.globalsight.everest.comment.CommentManager;
-import com.globalsight.everest.comment.Issue;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.page.SourcePage;
-import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.comment.PageCommentsSummary;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.tags.TableConstants;
-import com.globalsight.util.GeneralException;
-import com.globalsight.util.GlobalSightLocale;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.StringTokenizer;
-import java.util.Vector;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.rmi.RemoteException;
+import com.globalsight.everest.comment.CommentManager;
+import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.comment.PageCommentsSummary;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflowmanager.Workflow;
 
 
 /**
  * This is the handler for displaying total number of open segment comments for a page
  */
-public class CommentsHandler
-    extends PageHandler
+public class CommentsHandler extends PageHandler
 {
-
     /**
      * Invokes this PageHandler
      *
@@ -81,14 +67,14 @@ public class CommentsHandler
         SessionManager sessionMgr = 
             (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        ArrayList pageSummaries = new ArrayList();
+        ArrayList<PageCommentsSummary> pageSummaries = new ArrayList<PageCommentsSummary>();
         try
         {
             String value = (String)p_request.getParameter("value");
             if (value == null)
             {
                 // returning from segment comments.  get list from session
-                pageSummaries = (ArrayList)sessionMgr.getAttribute("pageSummaries");
+                pageSummaries = (ArrayList) sessionMgr.getAttribute("pageSummaries");
                 dataForTable(p_request, session, SourceFile.FILE_LIST,
                              SourceFile.FILE_KEY, null, pageSummaries);
                 super.invokePageHandler(p_pageDescriptor, p_request, 
@@ -101,45 +87,59 @@ public class CommentsHandler
             st.nextToken();  // skip source locale
             sessionMgr.setAttribute("jobName", jobName);
             sessionMgr.setAttribute("targLocale", targLocale);
-            ArrayList pages = new ArrayList();
+
             CommentManager manager = ServerProxy.getCommentManager();
             while (st.hasMoreTokens())
             {
                 Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(st.nextToken()));
                 // Get the workflows and search for the workflow with this target locale
-                List workflows = (List)job.getWorkflows();
-                for (int i=0; i < workflows.size(); i++)
+                for (Workflow wf : job.getWorkflows())
                 {
-                    Workflow wf = (Workflow)workflows.get(i);
                     if (!wf.getState().equals(Workflow.CANCELLED) && 
                         wf.getTargetLocale().toString().equals(targLocale))
                     {
-                        List tpages = wf.getTargetPages();
+                        List<TargetPage> tpages = wf.getTargetPages();
+
+                        List<Long> tpIds = new ArrayList<Long>();
                         for (int j = 0; j < tpages.size(); j++)
                         {
-                            TargetPage tPage = (TargetPage)tpages.get(j);
-                            int count = 0;
-                            List states = new ArrayList();
-                            // get just the number of issues in OPEN state
-                            // query is a subset of the open state
+                            TargetPage tPage = (TargetPage) tpages.get(j);
+                        	tpIds.add(tPage.getIdAsLong());
+                        }
+
+                        HashMap<Long, Integer> openCounts = null;
+                        try {
+                            List<String> states = new ArrayList<String>();
                             states.add(Issue.STATUS_OPEN);
                             states.add(Issue.STATUS_QUERY);
-                            count =
-                                manager.getIssueCount(Issue.TYPE_SEGMENT,
-                                 tPage.getId()+"_", states);
-                            if (count > 0)
-                            {
-                                PageCommentsSummary ps = new PageCommentsSummary(tPage);
-                                ps.setOpenCommentsCount(count);
-                                ps.setJobId(job.getJobId());
-                                pageSummaries.add(ps);
-                            }
+                            states.add(Issue.STATUS_REJECTED);
+							openCounts = manager.getIssueCountPerTargetPage(
+									Issue.TYPE_SEGMENT, tpIds, states);
+                        } catch (Exception ex) {
+                        	throw new EnvoyServletException(ex);
                         }
+
+                        if (openCounts == null || openCounts.size() == 0)
+                        	continue;
+
+                    	for (int k = 0; k < tpages.size(); k++)
+                    	{
+                    		TargetPage tPage = (TargetPage) tpages.get(k);
+                    		Integer count = openCounts.get(tPage.getIdAsLong());
+                    		if (count != null && count > 0)
+                    		{
+                    			PageCommentsSummary ps = new PageCommentsSummary(tPage);
+                    			ps.setOpenCommentsCount(count);
+                    			ps.setJobId(job.getJobId());
+                    			pageSummaries.add(ps);
+                    		}
+                    	}
                     }
                 }
             }
-            dataForTable(p_request, session, SourceFile.FILE_LIST, SourceFile.FILE_KEY,
-                         null, pageSummaries);
+
+			dataForTable(p_request, session, SourceFile.FILE_LIST,
+					SourceFile.FILE_KEY, null, pageSummaries);
             sessionMgr.setAttribute("pageSummaries", pageSummaries);
         }
         catch (Exception e)

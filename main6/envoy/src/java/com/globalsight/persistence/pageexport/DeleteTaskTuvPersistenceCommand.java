@@ -17,27 +17,19 @@
 
 package com.globalsight.persistence.pageexport;
 
-import com.globalsight.persistence.PersistenceCommand;
-
-import com.globalsight.everest.persistence.PersistenceException;
-
-import com.globalsight.everest.tuv.TaskTuv;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-
 import java.util.Iterator;
 import java.util.List;
 
+import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.tuv.TaskTuv;
+import com.globalsight.persistence.PersistenceCommand;
 
-public class DeleteTaskTuvPersistenceCommand
-    extends PersistenceCommand
+public class DeleteTaskTuvPersistenceCommand extends PersistenceCommand
 {
-    static private final String s_deleteTaskTuv =
-        "delete from task_tuv where id=?";
-    static private final String s_deletePrevTuv =
-        "delete from translation_unit_variant where id=?";
+    static private final String s_deleteTaskTuv = "delete from task_tuv where id=?";
+    static private final String s_deletePrevTuv = "delete from translation_unit_variant where id=?";
 
     private PreparedStatement m_psTaskTuv;
     private PreparedStatement m_psTuv;
@@ -49,7 +41,7 @@ public class DeleteTaskTuvPersistenceCommand
     }
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -69,18 +61,17 @@ public class DeleteTaskTuvPersistenceCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
         m_psTaskTuv = p_connection.prepareStatement(s_deleteTaskTuv);
-        m_psTuv =     p_connection.prepareStatement(s_deletePrevTuv);
+        m_psTuv = p_connection.prepareStatement(s_deletePrevTuv);
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
-        for (Iterator it = m_taskTuvList.iterator(); it.hasNext(); )
+        for (Iterator it = m_taskTuvList.iterator(); it.hasNext();)
         {
-            TaskTuv taskTuv = (TaskTuv)it.next();
+            TaskTuv taskTuv = (TaskTuv) it.next();
 
             long taskTuvId = taskTuv.getId();
             m_psTaskTuv.setLong(1, taskTuvId);
@@ -92,8 +83,7 @@ public class DeleteTaskTuvPersistenceCommand
         }
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         m_psTaskTuv.executeBatch();
         m_psTuv.executeBatch();

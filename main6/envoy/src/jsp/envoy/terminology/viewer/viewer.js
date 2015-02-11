@@ -1401,7 +1401,8 @@ function execute(){
 
 function getHtml(xmlDoc, xsltFile){
     var text;
- 
+    var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
+    var isChrome = window.navigator.userAgent.indexOf("Chrome")>0;
     if(typeof(window.ActiveXObject) != 'undefined'){
         //IE
         try{
@@ -1411,8 +1412,7 @@ function getHtml(xmlDoc, xsltFile){
             alert(e.name + ": " + e.message);          
         }
         
-    }else if(document.implementation && document.implementation.createDocument){  
-        // Mozilla
+    }else if(isFirefox){  
         try {
             var oParser = new DOMParser();       
             var xslDoc = document.implementation.createDocument("", "", null);
@@ -1432,7 +1432,23 @@ function getHtml(xmlDoc, xsltFile){
            if (isDebug) alert(e.name + ": " + e.message);
            alert("Unable to do xml/xsl processing");           
         }
-    }    
+    }else if(isChrome){  
+	    try {
+	    	var xslDoc = loadXML(xsltFile);
+	        // define XSLTProcessor object
+	        var xsltProcessor = new XSLTProcessor();
+	        xsltProcessor.importStylesheet(xslDoc);  
+	
+	        var result = xsltProcessor.transformToDocument(xmlDoc);
+	        var xmls = new XMLSerializer();
+	        text = xmls.serializeToString(result);
+	        text = text.replace('<?xml version="1.0" encoding="UTF-8"?>','');
+	    }
+	    catch(e)  {
+	       if (isDebug) alert(e.name + ": " + e.message);
+	       alert("Unable to do xml/xsl processing");           
+	    }
+	} 
     
     return text;
 }

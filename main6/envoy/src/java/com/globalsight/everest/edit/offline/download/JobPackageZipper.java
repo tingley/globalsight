@@ -28,10 +28,10 @@ import java.util.Locale;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
 
+import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.download.BinaryResource.ParaViewResWriter;
@@ -104,7 +104,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -120,7 +120,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -135,7 +135,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -151,27 +151,34 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
     }
 
     public void writeTmxPage(OfflinePageData p_writer, DownloadParams p_params,
-            int p_tmxLevel) throws AmbassadorDwUpException
+            int p_tmxLevel, boolean isConvertLf) throws AmbassadorDwUpException
     {
         try
         {
+        	p_writer.setIsConvertLf(isConvertLf);
             p_writer.writeOfflineTmxFile(m_zipOutputStream, p_params,
                     p_tmxLevel);
             m_zipOutputStream.closeEntry();
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
+    }
+    
+    public void writeTmxPage(OfflinePageData p_writer, DownloadParams p_params,
+            int p_tmxLevel) throws AmbassadorDwUpException
+    {
+    	writeTmxPage(p_writer, p_params, p_tmxLevel, false);
     }
 
     private List<TermLeverageMatchResult> getTermMatchs(OfflinePageData page)
@@ -180,7 +187,7 @@ public class JobPackageZipper
         Vector<OfflineSegmentData> segments = page.getSegmentList();
         for (OfflineSegmentData segment : segments)
         {
-            if(segment.getTermLeverageMatchList() != null)
+            if (segment.getTermLeverageMatchList() != null)
             {
                 matches.addAll(segment.getTermLeverageMatchList());
             }
@@ -197,21 +204,25 @@ public class JobPackageZipper
         {
             TerminologyHelp help = TermHelpFactory.newInstance(format);
             help.setUserName(downloadParams.getUser().getUserId());
-            
-            Locale srclocale = GlobalSightLocale.makeLocaleFromString(page.getSourceLocaleName());
-            Locale trglocale = GlobalSightLocale.makeLocaleFromString(page.getTargetLocaleName());
-            String content = help.convert(getTermMatchs(page), srclocale, trglocale);
-            
+
+            Locale srclocale = GlobalSightLocale.makeLocaleFromString(page
+                    .getSourceLocaleName());
+            Locale trglocale = GlobalSightLocale.makeLocaleFromString(page
+                    .getTargetLocaleName());
+            String content = help.convert(getTermMatchs(page), srclocale,
+                    trglocale);
+
             try
             {
-                OutputStreamWriter write = new OutputStreamWriter(m_zipOutputStream, "utf-8");
+                OutputStreamWriter write = new OutputStreamWriter(
+                        m_zipOutputStream, "utf-8");
                 write.write(content);
                 write.flush();
                 m_zipOutputStream.closeEntry();
             }
             catch (IOException e)
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
                 throw new AmbassadorDwUpException(
                         AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, e);
             }
@@ -224,19 +235,19 @@ public class JobPackageZipper
     {
         try
         {
-            p_writer.writeRTF(p_page, m_zipOutputStream, p_downloadParams
-                    .isDownloadForTrados());
+            p_writer.writeRTF(p_page, m_zipOutputStream,
+                    p_downloadParams.isDownloadForTrados());
             m_zipOutputStream.closeEntry();
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
         catch (RegExException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_FATAL_ERROR, ex);
         }
@@ -253,6 +264,10 @@ public class JobPackageZipper
             {
                 writer.setTradosOutput();
             }
+            if (p_downloadParams.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED)
+            {
+                writer.setTradosOutputOptimized();
+            }
             writer.setResInsertOption(p_downloadParams.getResInsOption());
             writer.setUser(p_downloadParams.getUser());
 
@@ -265,7 +280,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -290,8 +305,8 @@ public class JobPackageZipper
             String p_uniqueResIdxFname) throws AmbassadorDwUpException
     {
         ParaViewWorkDocWriter writer = new ParaViewWorkDocWriter(
-                p_uniqueBinResFname, p_uniqueResIdxFname, p_downloadParams
-                        .getUser());
+                p_uniqueBinResFname, p_uniqueResIdxFname,
+                p_downloadParams.getUser());
 
         try
         {
@@ -304,7 +319,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -336,7 +351,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -368,7 +383,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -414,7 +429,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -443,7 +458,7 @@ public class JobPackageZipper
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             return DownLoadApi.MSGID_FAILED_TO_WRITE_INDEX;
         }
     }
@@ -472,7 +487,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -502,7 +517,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -532,7 +547,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -561,7 +576,7 @@ public class JobPackageZipper
      *            the Offline Page (OfflinePageData)
      * @param p_downloadParams
      *            the download parameters
-     *            
+     * 
      * @exception com.globalsight.everest.edit.offline.AmbassadorDwUpException
      */
     public void writeUnicodeXliffPage(OfflinePageData p_page,
@@ -577,7 +592,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -589,12 +604,11 @@ public class JobPackageZipper
             }
             catch (IOException e)
             {
-                CATEGORY.error(e);
-                e.printStackTrace();
+                CATEGORY.error(e.getMessage(), e);
             }
         }
     }
-    
+
     public void writeUnicodeTTXPage(OfflinePageData p_page,
             DownloadParams p_downloadParams) throws AmbassadorDwUpException
     {
@@ -608,7 +622,7 @@ public class JobPackageZipper
         }
         catch (IOException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
@@ -620,8 +634,7 @@ public class JobPackageZipper
             }
             catch (IOException e)
             {
-                CATEGORY.error(e);
-                e.printStackTrace();
+                CATEGORY.error(e.getMessage(), e);
             }
         }
     }

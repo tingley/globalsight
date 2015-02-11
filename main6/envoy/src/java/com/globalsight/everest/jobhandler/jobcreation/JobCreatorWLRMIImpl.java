@@ -21,21 +21,19 @@ import org.apache.log4j.Logger;
 // globalsight
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.util.system.RemoteServer;
+import com.globalsight.everest.util.system.SystemStartupException;
 
 import java.rmi.RemoteException;
 
-public class JobCreatorWLRMIImpl
-    extends RemoteServer
-    implements JobCreatorWLRemote
+public class JobCreatorWLRMIImpl extends RemoteServer implements
+        JobCreatorWLRemote
 {
-    private static final Logger c_logger =
-        Logger.getLogger(
-            JobCreatorWLRMIImpl.class);
+    private static final Logger c_logger = Logger
+            .getLogger(JobCreatorWLRMIImpl.class);
 
     private JobCreator m_localReference;
 
-    public JobCreatorWLRMIImpl()
-        throws RemoteException
+    public JobCreatorWLRMIImpl() throws RemoteException
     {
         super(JobCreator.SERVICE_NAME);
 
@@ -43,7 +41,7 @@ public class JobCreatorWLRMIImpl
         {
             m_localReference = new JobCreatorLocal();
         }
-        catch(JobCreationException jce)
+        catch (JobCreationException jce)
         {
             c_logger.error("Failed to create JobCreatorLocal", jce);
 
@@ -56,9 +54,16 @@ public class JobCreatorWLRMIImpl
         return m_localReference;
     }
 
-    public void addRequestToJob(Request param1)
-        throws RemoteException, JobCreationException
+    public void addRequestToJob(Request param1) throws RemoteException,
+            JobCreationException
     {
         m_localReference.addRequestToJob(param1);
+    }
+
+    public void init() throws SystemStartupException
+    {
+        super.init();
+        // from GBS-2137
+        // JobCreationMonitor.cleanupIncompleteJobs();
     }
 }

@@ -17,8 +17,6 @@
 package com.globalsight.cxe.adapter.ling;
 
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.GeneralExceptionConstants;
-
 
 /**
  * Package level exception for the LingAdapter
@@ -26,16 +24,23 @@ import com.globalsight.util.GeneralExceptionConstants;
 public class LingAdapterException extends GeneralException
 {
     /**
+     * 
+     */
+    private static final long serialVersionUID = -9097677135564905962L;
+
+    /**
      * Creates a LingAdapterException
      * 
-     * @param p_key  msg key
-     * @param p_args msg args
+     * @param p_key
+     *            msg key
+     * @param p_args
+     *            msg args
      * @param p_exception
-     *               wrapped exception
+     *            wrapped exception
      */
-    public LingAdapterException(String p_key, String[] p_args, Exception p_exception)
+    public LingAdapterException(String p_key, String[] p_args,
+            Exception p_exception)
     {
-	super(p_key,p_args,p_exception,"LingAdapterMsg");
+        super(p_key, p_args, p_exception, "LingAdapterMsg");
     }
 }
-

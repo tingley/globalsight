@@ -8,11 +8,15 @@
 
 		<property name="prefixString" column="PREFIX_STRING" type="string"
 			not-null="true" unique="false" />
-			
+
 		<property name="suffixString" column="SUFFIX_STRING" type="string"
 			not-null="true" unique="false" />
 
-		<many-to-one name="tu" column="TU_ID"
-			class="com.globalsight.everest.tuv.TuImpl" not-null="true" />
+		<!--
+		<many-to-one name="tu" column="TU_ID" class="com.globalsight.everest.tuv.TuImpl" 
+			not-null="true" />
+		-->
+		<property name="tuId" column="TU_ID" type="long" length="20"
+			not-null="true" unique="false" />
 	</class>
 </hibernate-mapping>

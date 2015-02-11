@@ -62,13 +62,14 @@ public interface IFormatNames
     public static final String FORMAT_EBAY_PRJ  = "ebay-prj";
     
     public static final String FORMAT_XLIFF  = "xlf";
-    
+    public static final String FORMAT_XLIFF_NAME = "Xliff";
+
     public static final String FORMAT_OPENOFFICE_XML = "openoffice-xml";
     public static final String FORMAT_RC = "rc";
     public static final String FORMAT_PO = "po";
-    public static final String FORMAT_XLIFF_NAME = "Xliff";
     public static final String FORMAT_TDA = "TDA";
     public static final String FORMAT_MIF = "mif";
     public static final String FORMAT_IDML = "idml";
     public static final String FORMAT_PASSOLO = "passolo";
+    public static final String FORMAT_WINDOWSPE = "windows_pe";
 }

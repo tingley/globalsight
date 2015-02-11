@@ -96,7 +96,7 @@ public final class NamingService
         }
         catch (NamingException ne) 
         {
-            CATEGORY.error(ne);
+            CATEGORY.error(ne.getMessage(), ne);
             throw ne;
         }
         return dump.toString();
@@ -126,7 +126,7 @@ public final class NamingService
         }
         catch (NamingException ne) 
         {
-            CATEGORY.error(ne);
+            CATEGORY.error(ne.getMessage(), ne);
             throw ne;
         }
         return dump.toString();

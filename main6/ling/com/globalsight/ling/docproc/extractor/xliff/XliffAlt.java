@@ -1,36 +1,57 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.docproc.extractor.xliff;
 
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 
 public class XliffAlt extends PersistentObject
 {
-
-    /**
-     * 
-     */
     private static final long serialVersionUID = 1L;
 
     private String altSource = "";
     private String altSegment = "";
-    private TuvImpl tuv;
+    private TuvImpl tuv = null;
+    private long tuvId = -1;
     private GxmlElement m_gxmlElement = null;
     private GxmlElement m_gxmlElementSource = null;
     private String language = null;
     private String quality = null;
 
-    public TuvImpl getTuv()
-    {
-        return tuv;
-    }
-
     public void setTuv(TuvImpl tuvimpl)
     {
         tuv = tuvimpl;
+        if (tuvimpl != null)
+        {
+            tuvId = tuvimpl.getId();
+        }
+    }
+
+    public long getTuvId()
+    {
+        return tuvId;
+    }
+
+    public void setTuvId(long tuvId)
+    {
+        this.tuvId = tuvId;
     }
 
     public String getSourceSegment()
@@ -91,8 +112,7 @@ public class XliffAlt extends PersistentObject
             {
                 // Can't have Tuv in inconsistent state, throw runtime
                 // exception.
-                throw new RuntimeException("Error in XliffAlt: "
-                        + GeneralException.getStackTraceString(e));
+                throw new RuntimeException("Error in XliffAlt: ", e);
             }
             finally
             {
@@ -103,7 +123,7 @@ public class XliffAlt extends PersistentObject
 
         return m_gxmlElement;
     }
-    
+
     public GxmlElement getGxmlElementSource()
     {
         if (m_gxmlElementSource == null)
@@ -122,8 +142,7 @@ public class XliffAlt extends PersistentObject
             {
                 // Can't have Tuv in inconsistent state, throw runtime
                 // exception.
-                throw new RuntimeException("Error in XliffAlt: "
-                        + GeneralException.getStackTraceString(e));
+                throw new RuntimeException("Error in XliffAlt: ", e);
             }
             finally
             {

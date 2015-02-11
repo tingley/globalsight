@@ -17,7 +17,6 @@
 package com.globalsight.reports.handler;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-import javax.naming.NamingException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -40,11 +38,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-
 import org.jbpm.JbpmContext;
+import org.jbpm.graph.exe.ProcessInstance;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
-import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
@@ -58,23 +55,20 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.workflow.WorkflowConfiguration;
-import com.globalsight.everest.workflow.WorkflowProcessAdapter;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.BaseDataWrap;
 import com.globalsight.reports.util.ReportsPackage;
-import com.globalsight.util.GeneralException;
 
-public abstract class BasicReportHandler 
+public abstract class BasicReportHandler
 {
-    static final Logger s_category = 
-        Logger.getLogger(
-                                                BasicReportHandler.class );
+    static final Logger s_category = Logger.getLogger(BasicReportHandler.class);
 
-    public static final String[] SUPPORTED_UI_LOCALES = new String[] { "en_US",
-            "fr_FR", "es_ES", "de_DE", "ja_JP" };
+    public static final String[] SUPPORTED_UI_LOCALES = new String[]
+    { "en_US", "fr_FR", "es_ES", "de_DE", "ja_JP" };
 
     public static final String DEFAULT_LOCALE = "en_US";
     public static final String UI_LOCALE_PARAM_NAME = "uilocale";
@@ -101,14 +95,15 @@ public abstract class BasicReportHandler
     private static boolean s_jobRevenueIsOn = false;
     private HashMap<String, Currency> currency_map = null;
     protected String reportKey = "BasicReport";
-    
+
     private boolean useInContext = false;
     private boolean useDefaultContext = false;
 
     // for pagination
     public static final int PAGE_CONTENT_HEIGTH_PX = 700;
 
-    static {
+    static
+    {
         findIfJobCostingisOn();
         findIfJobRevenueisOn();
     }
@@ -116,7 +111,7 @@ public abstract class BasicReportHandler
     /**
      * Creates the common parameters including the UI Locale <br>
      */
-    public void init() 
+    public void init()
     {
         // Need to get these information from session.
         if (theUiLocale == null)
@@ -128,28 +123,27 @@ public abstract class BasicReportHandler
         loadCommonBundle();
     }
 
-    public void invokeHandler( HttpServletRequest req, HttpServletResponse res, 
-                               ServletContext p_context ) 
-    throws Exception 
+    public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
+            ServletContext p_context) throws Exception
     {
-        theSession = req.getSession( false );
-        if( theSession == null )
+        theSession = req.getSession(false);
+        if (theSession == null)
         {
             ReportsPackage.logError("Cannot get the session for current user");
-            String sendTo = WebAppConstants.PROTOCOL_HTTP + "://" +
-                            req.getServerName() + ":" +  
-                            WebAppConstants.HTTP_PORT + 
-                            "/globalsight/ControlServlet";
-            res.sendRedirect( sendTo );
+            String sendTo = WebAppConstants.PROTOCOL_HTTP + "://"
+                    + req.getServerName() + ":" + WebAppConstants.HTTP_PORT
+                    + "/globalsight/ControlServlet";
+            res.sendRedirect(sendTo);
         }
         else
         {
-            Locale locale = (Locale)req.getSession().getAttribute(WebAppConstants.UILOCALE);
+            Locale locale = (Locale) req.getSession().getAttribute(
+                    WebAppConstants.UILOCALE);
             if (locale == null)
             {
                 locale = Locale.getDefault();
             }
-            
+
             if (locale != null && !locale.equals(theUiLocale))
             {
                 theUiLocale = locale;
@@ -159,8 +153,8 @@ public abstract class BasicReportHandler
     }
 
     public void dispatcherForward(String jspURL, HttpServletRequest p_request,
-                     HttpServletResponse p_response, ServletContext p_context )
-    throws ServletException, IOException 
+            HttpServletResponse p_response, ServletContext p_context)
+            throws ServletException, IOException
     {
         s_category.debug("Will dispatch to URL: " + jspURL);
         RequestDispatcher dispatcher = p_context.getRequestDispatcher(jspURL);
@@ -171,13 +165,13 @@ public abstract class BasicReportHandler
      * Returns a DB connection without throwing any exceptions. Errors are
      * logged out using the ReportsPackage.logError()
      */
-    protected void returnConnection(Connection p_connection) 
+    protected void returnConnection(Connection p_connection)
     {
-        try 
+        try
         {
             ConnectionPool.returnConnection(p_connection);
-        } 
-        catch (Exception cpe) 
+        }
+        catch (Exception cpe)
         {
             ReportsPackage.logError(cpe);
         }
@@ -187,22 +181,22 @@ public abstract class BasicReportHandler
      * Closes the statement without throwing any exceptions. Errors are logged
      * out using the ReportsPackage.logError() <br>
      */
-    protected void closeStatement(Statement p_statement) 
+    protected void closeStatement(Statement p_statement)
     {
-        try 
+        try
         {
             if (p_statement != null)
             {
                 p_statement.close();
             }
-        } 
-        catch (Exception ex) 
+        }
+        catch (Exception ex)
         {
-            ReportsPackage.logError( ex );
+            ReportsPackage.logError(ex);
         }
     }
 
-    protected void loadCommonBundle() 
+    protected void loadCommonBundle()
     {
         commonBundle = ResourceBundle.getBundle(COMMON_MESSAGES, theUiLocale);
     }
@@ -212,60 +206,62 @@ public abstract class BasicReportHandler
      * pivot currency as the default.
      */
     protected void addCurrencyParameter(ResourceBundle p_bundle,
-            HttpServletRequest req) throws Exception 
+            HttpServletRequest req) throws Exception
     {
-        Collection<?> currencies = ServerProxy.getCostingEngine().getCurrencies();
-        Currency pivotCurrency = 
-            ServerProxy.getCostingEngine().getPivotCurrency();
+        Collection<?> currencies = ServerProxy.getCostingEngine()
+                .getCurrencies();
+        Currency pivotCurrency = ServerProxy.getCostingEngine()
+                .getPivotCurrency();
 
         ArrayList<String> labeledCurrencies = new ArrayList<String>();
         ArrayList<String> valueCurrencies = new ArrayList<String>();
         Iterator<?> iter = currencies.iterator();
         currency_map = new HashMap<String, Currency>();
 
-        while ( iter.hasNext() ) 
+        while (iter.hasNext())
         {
             Currency c = (Currency) iter.next();
-            currency_map.put( c.getDisplayName(), c );
-            if (!valueCurrencies.contains(c.getDisplayName())) {
-                valueCurrencies.add( c.getDisplayName() );
+            currency_map.put(c.getDisplayName(), c);
+            if (!valueCurrencies.contains(c.getDisplayName()))
+            {
+                valueCurrencies.add(c.getDisplayName());
             }
-            if ( c.equals(pivotCurrency) ) 
+            if (c.equals(pivotCurrency))
             {
                 s_category.debug("Will set PIVOT_CURRENCY_PM_DEFVALUE: "
                         + c.getDisplayName());
-                req.setAttribute(Constants.PIVOT_CURRENCY_PM_DEFVALUE, c
-                        .getDisplayName());
+                req.setAttribute(Constants.PIVOT_CURRENCY_PM_DEFVALUE,
+                        c.getDisplayName());
             }
         }
-        
+
         Collections.sort(valueCurrencies);
-        
+
         for (String value : valueCurrencies)
         {
             Currency c = currency_map.get(value);
             labeledCurrencies.add(c.getDisplayName(theUiLocale));
         }
-        
+
         req.setAttribute(Constants.CURRENCY_ARRAY, valueCurrencies);
         req.setAttribute(Constants.CURRENCY_ARRAY_LABEL, labeledCurrencies);
-        req.setAttribute(Constants.CURRENCY_DISPLAYNAME_LABEL, ReportsPackage
-                .getMessage(p_bundle, Constants.CURRENCY));
+        req.setAttribute(Constants.CURRENCY_DISPLAYNAME_LABEL,
+                ReportsPackage.getMessage(p_bundle, Constants.CURRENCY));
     }
 
-    protected Currency getCurrencyByDisplayname(String displayName) 
+    protected Currency getCurrencyByDisplayname(String displayName)
     {
-        if ( currency_map != null ) 
+        if (currency_map != null)
         {
             return (Currency) currency_map.get(displayName);
-        } 
-        else 
+        }
+        else
         {
             return null;
         }
     }
 
-    protected void setCommonMessages(BaseDataWrap baseDataWrap) 
+    protected void setCommonMessages(BaseDataWrap baseDataWrap)
     {
         baseDataWrap.setTxtFooter(commonBundle
                 .getString(Constants.REPORT_TXT_FOOT));
@@ -279,15 +275,16 @@ public abstract class BasicReportHandler
     /**
      * Sets s_jobCostingIsOn based on whether job costing is enabled <br>
      */
-    private static void findIfJobCostingisOn() 
+    private static void findIfJobCostingisOn()
     {
         s_jobCostingIsOn = false;
-        try 
+        try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            s_jobCostingIsOn = 
-                sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
-        } catch (Throwable e) 
+            s_jobCostingIsOn = sc
+                    .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
+        }
+        catch (Throwable e)
         {
             ReportsPackage.logError(
                     "Problem getting costing parameter from database ", e);
@@ -297,16 +294,16 @@ public abstract class BasicReportHandler
     /**
      * Sets s_jobRevenueIsOn based on whether job revenue is enabled <br>
      */
-    private static void findIfJobRevenueisOn() 
+    private static void findIfJobRevenueisOn()
     {
         s_jobRevenueIsOn = false;
-        try 
+        try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
             s_jobRevenueIsOn = sc
                     .getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED);
-        } 
-        catch (Throwable e) 
+        }
+        catch (Throwable e)
         {
             ReportsPackage.logError(
                     "Problem getting costing parameter from database ", e);
@@ -318,16 +315,17 @@ public abstract class BasicReportHandler
      * 
      * @return true|false
      */
-    public static boolean isJobCostingOn() 
+    public static boolean isJobCostingOn()
     {
         return s_jobCostingIsOn;
     }
 
     /**
-     * Returns true if job revenue is on <br> false otherwise
+     * Returns true if job revenue is on <br>
+     * false otherwise
      * 
      */
-    public static boolean isJobRevenueOn() 
+    public static boolean isJobRevenueOn()
     {
         return s_jobRevenueIsOn;
     }
@@ -335,74 +333,82 @@ public abstract class BasicReportHandler
     /**
      * Calculates the job cost. Logs out errors. <br>
      * 
-     * @param p_job -- the Job
-     * @param p_currency -- the chosen currency
+     * @param p_job
+     *            -- the Job
+     * @param p_currency
+     *            -- the chosen currency
      * @return Cost
      */
-    public static Cost calculateJobCost( Job p_job, 
-                                         Currency p_currency, int p_costType) 
+    public static Cost calculateJobCost(Job p_job, Currency p_currency,
+            int p_costType)
     {
         Cost cost = null;
-        try 
+        try
         {
             cost = ServerProxy.getCostingEngine().calculateCost(p_job,
                     p_currency, false, p_costType);
-        } 
-        catch (Exception e) 
+        }
+        catch (Exception e)
         {
             ReportsPackage.logError(e);
         }
-        
+
         return cost;
     }
 
     /**
      * Returns the cost of this workflow using the current currency. <br>
      * 
-     * @param p_workflow -- the workflow
-     * @param p_currency -- the Currency
-     * @param p_costType -- the cost type
+     * @param p_workflow
+     *            -- the workflow
+     * @param p_currency
+     *            -- the Currency
+     * @param p_costType
+     *            -- the cost type
      * @return Cost
      */
     public static Cost calculateWorkflowCost(Workflow p_workflow,
-                                        Currency p_currency, int p_costType) 
+            Currency p_currency, int p_costType)
     {
         Cost cost = null;
-        try 
+        try
         {
             cost = ServerProxy.getCostingEngine().calculateCost(p_workflow,
                     p_currency, false, p_costType);
-        } 
-        catch (Exception e) 
+        }
+        catch (Exception e)
         {
             ReportsPackage.logError("Problem getting workflow cost", e);
         }
-        
+
         return cost;
     }
 
     /**
      * Returns the cost of this task using the current currency. <br>
      * 
-     * @param p_task -- the task
-     * @param p_currency -- the Currency
-     * @param p_costType -- the cost type
+     * @param p_task
+     *            -- the task
+     * @param p_currency
+     *            -- the Currency
+     * @param p_costType
+     *            -- the cost type
      * @return Cost How do I make this class work? Is it needed?
      */
-    public static Cost calculateTaskCost( Task p_task, Currency p_currency,
-                                          int p_costType ) 
+    public static Cost calculateTaskCost(Task p_task, Currency p_currency,
+            int p_costType)
     {
         Cost cost = null;
-        try 
+        try
         {
             cost = ServerProxy.getCostingEngine().calculateCost(p_task,
                     p_currency, false, p_costType);
-        } 
-        catch (Exception e) 
+        }
+        catch (Exception e)
         {
             ReportsPackage.logError("Problem getting activity cost", e);
         }
-        
+
         return cost;
     }
 
@@ -410,19 +416,22 @@ public abstract class BasicReportHandler
      * Given a list of data, this method sorts it and creates a sublist to be
      * displayed in a jsp.
      * 
-     * @param data --- Data for the table
-     * @param comp --- Comparator for sorting table data
-     * @param numItemsDisplayed --- Number of displayed items per page
-     * @param listname --- A name for the list to be used in the jsp (via useBean)
-     * @param key --- A unique id which is used to pass hidden data between here and
-     * jsp so the jsp knows which column is sorted, etc.
+     * @param data
+     *            --- Data for the table
+     * @param comp
+     *            --- Comparator for sorting table data
+     * @param numItemsDisplayed
+     *            --- Number of displayed items per page
+     * @param listname
+     *            --- A name for the list to be used in the jsp (via useBean)
+     * @param key
+     *            --- A unique id which is used to pass hidden data between here
+     *            and jsp so the jsp knows which column is sorted, etc.
      * @param baseDataWrap
      */
-    public void setTableNavigation( HttpServletRequest request,
-                                    HttpSession session, int numItemsDisplayed,
-                                    String listname,
-                                    String key, BaseDataWrap baseDataWrap ) 
-    throws EnvoyServletException 
+    public void setTableNavigation(HttpServletRequest request,
+            HttpSession session, int numItemsDisplayed, String listname,
+            String key, BaseDataWrap baseDataWrap) throws EnvoyServletException
     {
         setTableNavigation(request, session, numItemsDisplayed, key
                 + TableConstants.NUM_PER_PAGE_STR, key
@@ -435,73 +444,71 @@ public abstract class BasicReportHandler
      * Set request and session information needed in the UI for displaying the
      * navigation of tables. ie: Displaying 1-10 of 15
      */
-    public void setTableNavigation( HttpServletRequest request,
-                                    HttpSession session, int numItemsDisplayed,
-                                    String numPerPageStr,String numOfPagesStr, 
-                                    String listStr, String thisPageNumStr,
-                                    String lastPageNumStr, String sizeStr, 
-                                    BaseDataWrap baseDataWrap )
-   throws EnvoyServletException 
-   {
+    public void setTableNavigation(HttpServletRequest request,
+            HttpSession session, int numItemsDisplayed, String numPerPageStr,
+            String numOfPagesStr, String listStr, String thisPageNumStr,
+            String lastPageNumStr, String sizeStr, BaseDataWrap baseDataWrap)
+            throws EnvoyServletException
+    {
         List<?> data = baseDataWrap.getDataList();
-        Integer lastPageNumber = (Integer) 
-                            getSessionAttribute( session, lastPageNumStr );
-        String pageStr = (String) request.getParameter( thisPageNumStr );
+        Integer lastPageNumber = (Integer) getSessionAttribute(session,
+                lastPageNumStr);
+        String pageStr = (String) request.getParameter(thisPageNumStr);
 
         int pageNum = 1;
-        if ( pageStr != null ) 
+        if (pageStr != null)
         {
-            if ( pageStr.matches("[0-9]+") ) 
+            if (pageStr.matches("[0-9]+"))
             {
-            	try 
+                try
                 {
-                	pageNum = Integer.parseInt( pageStr );
-            	} 
-                catch (Exception ex) 
+                    pageNum = Integer.parseInt(pageStr);
+                }
+                catch (Exception ex)
                 {
-            		pageNum = baseDataWrap.getCurrentPageNum();
-            	}
-            } 
-            else 
+                    pageNum = baseDataWrap.getCurrentPageNum();
+                }
+            }
+            else
             {
                 pageNum = -1;
             }
-            
-            if ( pageNum < 1 || pageNum > baseDataWrap.getTotalPageNum()) 
+
+            if (pageNum < 1 || pageNum > baseDataWrap.getTotalPageNum())
             {
                 pageNum = baseDataWrap.getCurrentPageNum();
             }
-        } 
-        else if (lastPageNumber != null) 
+        }
+        else if (lastPageNumber != null)
         {
             pageNum = lastPageNumber.intValue();
         }
-        
+
         Integer currentPageNumber = new Integer(pageNum);
-        if (lastPageNumber == null) 
+        if (lastPageNumber == null)
         {
             lastPageNumber = currentPageNumber;
             setSessionAttribute(session, lastPageNumStr, lastPageNumber);
         }
-        
+
         List<?> subList = null;
         int size = 0;
-        if ( data != null ) 
+        if (data != null)
         {
             size = data.size();
-            if (size > numItemsDisplayed) 
+            if (size > numItemsDisplayed)
             {
                 int start = getStartIndex(pageNum, size, numItemsDisplayed);
                 int end = getEndingIndex(pageNum, size, numItemsDisplayed);
                 subList = data.subList(start, end);
-            } 
-            else 
+            }
+            else
             {
                 subList = data;
             }
         }
 
-        if (subList == null) 
+        if (subList == null)
         {
             request.setAttribute(listStr, new ArrayList<Object>());
         }
@@ -520,22 +527,23 @@ public abstract class BasicReportHandler
 
         // remember the and pageNumber
         int current = currentPageNumber.intValue();
-        if (current > numOfPages && numOfPages != 0) {
-            setSessionAttribute( session, lastPageNumStr, 
-                                 new Integer(current - 1) );
+        if (current > numOfPages && numOfPages != 0)
+        {
+            setSessionAttribute(session, lastPageNumStr, new Integer(
+                    current - 1));
             baseDataWrap.setCurrentPageNum(current - 1);
-        } 
+        }
         else
         {
             setSessionAttribute(session, lastPageNumStr, currentPageNumber);
         }
-        
-        baseDataWrap.setCurrentPageNum( current );
+
+        baseDataWrap.setCurrentPageNum(current);
     }
 
-    public void cleanSession(HttpSession session) 
+    public void cleanSession(HttpSession session)
     {
-        if ( session != null ) 
+        if (session != null)
         {
             SessionManager sessionManager = (SessionManager) session
                     .getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -545,9 +553,9 @@ public abstract class BasicReportHandler
     }
 
     @SuppressWarnings("unchecked")
-    public void setSessionAttribute(HttpSession session, String key, Object obj) 
+    public void setSessionAttribute(HttpSession session, String key, Object obj)
     {
-        if ( session != null ) 
+        if (session != null)
         {
             SessionManager sessionManager = (SessionManager) session
                     .getAttribute(WebAppConstants.SESSION_MANAGER);
@@ -561,9 +569,10 @@ public abstract class BasicReportHandler
             }
             else
             {
-                s_category.debug("Will set " + key
+                s_category
+                        .debug("Will set " + key
                                 + " in a new hashmap in the session under "
-                                + reportKey );
+                                + reportKey);
                 HashMap<String, Object> sessionMap = new HashMap<String, Object>();
                 sessionMap.put(key, obj);
                 sessionManager.setReportAttribute(reportKey, sessionMap);
@@ -572,18 +581,18 @@ public abstract class BasicReportHandler
 
     }
 
-    public Object getSessionAttribute(HttpSession session, String key) 
+    public Object getSessionAttribute(HttpSession session, String key)
     {
-        if (session != null) 
+        if (session != null)
         {
             SessionManager sessionManager = (SessionManager) session
                     .getAttribute(WebAppConstants.SESSION_MANAGER);
             Object map = sessionManager.getReportAttribute(reportKey);
-            if (map != null) 
+            if (map != null)
             {
                 return ((HashMap<?, ?>) map).get(key);
             }
-            else 
+            else
             {
                 ReportsPackage.logError("Cannot get " + key + " from "
                         + reportKey + " map in session");
@@ -593,15 +602,15 @@ public abstract class BasicReportHandler
     }
 
     // get total number of pages that can be displayed.
-    private int getNumOfPages(int numOfItems, int perPage) 
+    private int getNumOfPages(int numOfItems, int perPage)
     {
         // List of templates
-        int pageNum = (numOfItems + perPage -1) / perPage;
+        int pageNum = (numOfItems + perPage - 1) / perPage;
         return pageNum == 0 ? 1 : pageNum;
     }
 
     // get the start index of the collection (this is inclusive)
-    private int getStartIndex(int pageNum, int collectionSize, int perPage) 
+    private int getStartIndex(int pageNum, int collectionSize, int perPage)
     {
         int startIndex = (pageNum - 1) * perPage;
         startIndex = (startIndex < collectionSize) ? startIndex
@@ -613,7 +622,7 @@ public abstract class BasicReportHandler
     }
 
     // get the ending index for this page (this is exclusive).
-    private int getEndingIndex(int pageNum, int collectionSize, int perPage) 
+    private int getEndingIndex(int pageNum, int collectionSize, int perPage)
     {
         int endIndex = pageNum * perPage;
         endIndex = (endIndex < collectionSize) ? endIndex : collectionSize;
@@ -621,40 +630,47 @@ public abstract class BasicReportHandler
         endIndex = (endIndex > 0) ? endIndex : 0;
         return endIndex;
     }
-    
+
     protected HashMap<Long, Object[]> findCompletedActivities(Job job)
-    throws Exception
+            throws Exception
     {
         HashMap<Long, Object[]> map = new HashMap<Long, Object[]>();
-        for (Workflow wf : job.getWorkflows())
+        
+        JbpmContext ctx = null;
+        try
         {
-            long instanceId = wf.getId();
-            Collection<?> taskCollection = WorkflowProcessAdapter
-                    .getTaskInstances(instanceId);
-            for (Iterator<?> taskIt = taskCollection.iterator(); taskIt
-                    .hasNext();)
+        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            for (Workflow wf : job.getWorkflows())
             {
-                TaskInstance taskInstance = (TaskInstance) taskIt.next();
-                Long taskId = new Long(taskInstance.getTask().getTaskNode()
-                        .getId());
-                String activityName = taskInstance.getName();
-                String userResponsible = taskInstance.getActorId();
-                Object[] values = new Object[] { taskId, activityName,
-                        userResponsible };
-                map.put(taskId, values);
+                long instanceId = wf.getId();
+                ProcessInstance instance = ctx.getProcessInstance(instanceId);
+				Collection<?> taskCollection = instance.getTaskMgmtInstance()
+						.getTaskInstances();
+				for (Iterator<?> taskIt = taskCollection.iterator(); taskIt
+						.hasNext();)
+                {
+                    TaskInstance taskInstance = (TaskInstance) taskIt.next();
+					Long taskId = new Long(taskInstance.getTask().getTaskNode()
+							.getId());
+                    String activityName = taskInstance.getName();
+					String userResponsible = UserUtil
+							.getUserNameById(taskInstance.getActorId());
+                    Object[] values = new Object[]
+                    		{ taskId, activityName, userResponsible };
+                    map.put(taskId, values);
+                }
             }
         }
-        JbpmContext ctx = WorkflowConfiguration.getInstance()
-                .getCurrentContext();
-        if (ctx != null)
+        finally
         {
-            ctx.close();
+        	ctx.close();
         }
+
         return map;
     }
 
     protected HashMap<?, ?> findCompletedActivities(long p_jobid)
-    throws Exception
+            throws Exception
     {
         Job job = ServerProxy.getJobHandler().getJobById(p_jobid);
         return findCompletedActivities(job);
@@ -669,7 +685,7 @@ public abstract class BasicReportHandler
     {
         useInContext = isUseInContext;
     }
-    
+
     protected boolean isUseDefaultContext()
     {
         return useDefaultContext;
@@ -681,8 +697,9 @@ public abstract class BasicReportHandler
     }
 
     /**
-     * This method judges if the In Context Match Information should display 
+     * This method judges if the In Context Match Information should display
      * according to the list iterator passed in.
+     * 
      * @param iter
      */
     protected void setUseInContext(Iterator<?> iter)
@@ -700,68 +717,82 @@ public abstract class BasicReportHandler
             }
             else if (o instanceof Workflow)
             {
-                    Workflow workflow = (Workflow) iter.next();
-                    job = workflow.getJob();
-                    tmProfile = job.getL10nProfile()
-                            .getTranslationMemoryProfile();
+                Workflow workflow = (Workflow) iter.next();
+                job = workflow.getJob();
+                tmProfile = job.getL10nProfile().getTranslationMemoryProfile();
             }
             else
             {
                 throw new IllegalArgumentException("The argument is not right");
             }
             boolean isInContextMatch = PageHandler.isInContextMatch(job);
-            boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
+            boolean isDefaultContextMatch = PageHandler
+                    .isDefaultContextMatch(job);
             if (isInContextMatch)
             {
                 useInContext = true;
-            }else if(isDefaultContextMatch){
-                useDefaultContext = true;
             }
-        }
-    }
-    
-    /**
-     * This method judges if the In Context Match Information should display 
-     * according to the jobs passed in.
-     * @param jobs
-     */
-    protected void setUseInContext(ArrayList<Job> jobs)
-    {
-        for (Job job : jobs)
-        {
-//            boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile()
-//            .getIsContextMatchLeveraging();
-            boolean isInContextMatch = PageHandler.isInContextMatch(job);
-            boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
-            if (isInContextMatch)
+            else if (isDefaultContextMatch)
             {
-                useInContext = true;
-            }else if(isDefaultContextMatch){
                 useDefaultContext = true;
             }
         }
     }
 
     /**
-     * This method judges if the In Context Match Information should display 
+     * This method judges if the In Context Match Information should display
+     * according to the jobs passed in.
+     * 
+     * @param jobs
+     */
+    protected void setUseInContext(ArrayList<Job> jobs)
+    {
+        for (Job job : jobs)
+        {
+            // boolean isUseInContext =
+            // job.getL10nProfile().getTranslationMemoryProfile()
+            // .getIsContextMatchLeveraging();
+            boolean isInContextMatch = PageHandler.isInContextMatch(job);
+            boolean isDefaultContextMatch = PageHandler
+                    .isDefaultContextMatch(job);
+            if (isInContextMatch)
+            {
+                useInContext = true;
+            }
+            else if (isDefaultContextMatch)
+            {
+                useDefaultContext = true;
+            }
+        }
+    }
+
+    /**
+     * This method judges if the In Context Match Information should display
      * according to the job passed in.
+     * 
      * @param job
      */
     protected void setUseInContext(Job job)
     {
-//        boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile()
-//        .getIsContextMatchLeveraging();
+        // boolean isUseInContext =
+        // job.getL10nProfile().getTranslationMemoryProfile()
+        // .getIsContextMatchLeveraging();
         boolean isInContextMatch = PageHandler.isInContextMatch(job);
         boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(job);
         if (isInContextMatch)
         {
             useInContext = true;
-        }else{
+        }
+        else
+        {
             useInContext = false;
         }
-        if(isDefaultContextMatch){
+        if (isDefaultContextMatch)
+        {
             useDefaultContext = true;
-        }else{
+        }
+        else
+        {
             useDefaultContext = false;
         }
     }

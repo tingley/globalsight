@@ -30,10 +30,12 @@ import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.pageimport.InsertLeverageMatchPersistenceCommand;
 
-public class StoredProcCaller
+public class StoredProcCaller implements TuvQueryConstants
 {
     private static final Logger CATEGORY = Logger
             .getLogger(StoredProcCaller.class);
@@ -50,7 +52,7 @@ public class StoredProcCaller
     private static final String CREATE_TEMPORARY_TABLE_LEV_MATCH = " create temporary table tmp_lev_match ( "
             + "                  orig_src_id int, "
             + "                  match_tgt_id int )";
-    
+
     private static final String DROP_TABLE_LEV_MATCH = "DROP TABLE IF EXISTS tmp_lev_match";
 
     /**
@@ -64,8 +66,15 @@ public class StoredProcCaller
             + "        trg.segment_string as segment_string, trg.state as state, "
             + "        tu.data_type as `format`, tu.tu_type as `type`, "
             + "        tu.localize_type as localize_type, trg.timestamp as `timestamp` "
-            + " FROM   translation_unit_variant src, translation_unit_variant trg, "
-            + "        translation_unit tu, "
+            + " FROM   "
+            + TUV_TABLE_PLACEHOLDER
+            + " src, "
+            + "        "
+            + TUV_TABLE_PLACEHOLDER
+            + " trg, "
+            + "        "
+            + TU_TABLE_PLACEHOLDER
+            + " tu, "
             + "        tmp_lev_match lev "
             + " WHERE     lev.match_tgt_id = trg.id "
             + "       AND src.locale_id = :src_loc_id "
@@ -75,9 +84,15 @@ public class StoredProcCaller
             + " ORDER BY lev.orig_src_id ";
 
     private static String SELECT_SQL = " SELECT :src_tuv_id, MIN(trg.id) "
-            + "          FROM  translation_unit_variant src, "
-            + "                translation_unit_variant trg, "
-            + "                translation_unit tu "
+            + "          FROM  "
+            + TUV_TABLE_PLACEHOLDER
+            + " src, "
+            + "          "
+            + TUV_TABLE_PLACEHOLDER
+            + " trg, "
+            + "          "
+            + TU_TABLE_PLACEHOLDER
+            + " tu "
             + "          WHERE tu.leverage_group_id IN "
             + "                   (:lev_grp_ids)"
             + "                AND tu.localize_type = :src_type "
@@ -90,7 +105,7 @@ public class StoredProcCaller
             + "                AND trg.tu_id = tu.id "
             + "                AND src.tu_id = trg.tu_id "
             + "           GROUP BY trg.exact_match_key, trg.locale_id ";
-    
+
     private static String INSERT_SQL = "INSERT INTO tmp_lev_match(orig_src_id, match_tgt_id) values (?, ?)";
 
     /**
@@ -103,7 +118,7 @@ public class StoredProcCaller
      * @throws PersistenceException
      */
     public static ResultSet findReimportMatches(Connection p_connection,
-            Vector p_numberArgs, Vector p_stringArgs)
+            Vector p_numberArgs, Vector p_stringArgs, String companyId)
             throws PersistenceException
     {
         Collection vectors = splitParamForReimport(p_numberArgs);
@@ -119,7 +134,7 @@ public class StoredProcCaller
             }
 
             ResultSet result = excuteProcFindLgemMatch(p_connection,
-                    (Vector) vectors.iterator().next(), p_stringArgs);
+                    (Vector) vectors.iterator().next(), p_stringArgs, companyId);
 
             if (CATEGORY.isDebugEnabled())
             {
@@ -135,12 +150,12 @@ public class StoredProcCaller
     }
 
     private static ResultSet excuteProcFindLgemMatch(Connection p_connection,
-            Vector numberParams, Vector stringParams)
+            Vector numberParams, Vector stringParams, String companyId)
             throws PersistenceException
     {
         Statement statement = null;
         ResultSet resultSet = null;
-        int src_tuv_id;
+        int src_tuv_id = 0;
         int src_loc_id;
         int src_crc;
         char src_type;
@@ -184,10 +199,15 @@ public class StoredProcCaller
             }
 
             num_array_ptr++;
-            
-            PreparedStatement insertStatement = p_connection.prepareStatement(INSERT_SQL);
+
+            PreparedStatement insertStatement = p_connection
+                    .prepareStatement(INSERT_SQL);
             ResultSet values = null;
-            
+
+            String tuTableName = SegmentTuTuvCacheManager
+                    .getTuTableName(companyId);
+            String tuvTableName = SegmentTuTuvCacheManager
+                    .getTuvTableName(companyId);
             while (num_array_ptr < numberParams.size() - 1)
             {
                 src_tuv_id = getIntAt(numberParams, num_array_ptr);
@@ -207,43 +227,51 @@ public class StoredProcCaller
                 }
                 num_array_ptr = num_array_ptr + 4;
 
-                String selectSql = SELECT_SQL.replaceAll(":src_tuv_id", String
-                        .valueOf(src_tuv_id));
+                String selectSql = SELECT_SQL.replaceAll(TU_TABLE_PLACEHOLDER,
+                        tuTableName);
+                selectSql = selectSql.replaceAll(TUV_TABLE_PLACEHOLDER,
+                        tuvTableName);
+                selectSql = selectSql.replaceAll(":src_tuv_id",
+                        String.valueOf(src_tuv_id));
                 selectSql = selectSql.replaceAll(":lev_grp_ids",
                         convertCollectionToSql(lev_grp_ids, null));
-                selectSql = selectSql.replaceAll(":src_type", String
-                        .valueOf(src_type));
-                selectSql = selectSql.replaceAll(":src_loc_id", String
-                        .valueOf(src_loc_id));
-                selectSql = selectSql.replaceAll(":src_crc", String
-                        .valueOf(src_crc));
+                selectSql = selectSql.replaceAll(":src_type",
+                        String.valueOf(src_type));
+                selectSql = selectSql.replaceAll(":src_loc_id",
+                        String.valueOf(src_loc_id));
+                selectSql = selectSql.replaceAll(":src_crc",
+                        String.valueOf(src_crc));
                 selectSql = selectSql.replaceAll(":loc_list",
                         convertCollectionToSql(loc_list, null));
 
                 values = statement.executeQuery(selectSql);
-                
-                while (values.next()) {
-                	insertStatement.setLong(1, values.getLong(1));
-                	insertStatement.setLong(2, values.getLong(2));
-                	
-                	insertStatement.execute();
+
+                while (values.next())
+                {
+                    insertStatement.setLong(1, values.getLong(1));
+                    insertStatement.setLong(2, values.getLong(2));
+
+                    insertStatement.execute();
                 }
             }
-            
-            if (values != null) {
-            	values.close();
-            }
-            
-            if (insertStatement != null) {
-            	insertStatement.close();
+
+            if (values != null)
+            {
+                values.close();
             }
 
-            String query = FIND_LGEM_MATCH_SQL.replaceAll(":src_loc_id", String
-                    .valueOf(src_loc_id));
+            if (insertStatement != null)
+            {
+                insertStatement.close();
+            }
+
+            String query = FIND_LGEM_MATCH_SQL.replaceAll(TU_TABLE_PLACEHOLDER,
+                    tuTableName);
+            query = query.replaceAll(TUV_TABLE_PLACEHOLDER, tuvTableName);
+            query = query.replaceAll(":src_loc_id", String.valueOf(src_loc_id));
             resultSet = statement.executeQuery(query);
-
         }
-        catch (SQLException e)
+        catch (Exception e)
         {
             throw new PersistenceException("Excute procedure " + LGEM_SP
                     + " failed.", e);
@@ -335,17 +363,20 @@ public class StoredProcCaller
             }
 
             cid_list = new ArrayList(numberParams);
-            
+
             if (!cid_list.isEmpty())
             {
                 StringBuffer sb = new StringBuffer();
                 sb.append("select tt from TbTerm tt where tt.language in (");
-                sb.append(StoredProcCaller.convertCollectionToSql(tgt_lang_list,"string"));
-                sb.append(") and tt.tbConcept.id in (");
-                sb.append(StoredProcCaller.convertCollectionToSql(cid_list,"integer"));
+                sb.append(StoredProcCaller.convertCollectionToSql(
+                        tgt_lang_list, "string"));
                 sb.append(") and tt.tbid = ");
                 sb.append(tbid);
-                
+                sb.append(" and tt.tbConcept.id in (");
+                sb.append(StoredProcCaller.convertCollectionToSql(cid_list,
+                        "integer"));
+                sb.append(")");
+
                 List list = HibernateUtil.search(sb.toString());
                 return list;
             }
@@ -435,7 +466,7 @@ public class StoredProcCaller
             // Empty string in sql statement.
             return "null";
         }
-                
+
         Iterator iterator = new HashSet(collection).iterator();
 
         StringBuffer sql = new StringBuffer(getObject(iterator, type));
@@ -452,13 +483,14 @@ public class StoredProcCaller
     {
         return "'" + iterator.next() + "'";
     }
-    
+
     private static String getObject(Iterator iterator, String type)
     {
-        if(type == null) {
+        if (type == null)
+        {
             return getObject(iterator);
         }
-        
+
         if (type.equals("string"))
         {
             return "'" + iterator.next() + "'";
@@ -467,7 +499,7 @@ public class StoredProcCaller
         {
             return String.valueOf(iterator.next());
         }
-        
+
         return String.valueOf(iterator.next());
     }
 

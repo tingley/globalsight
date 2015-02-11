@@ -32,7 +32,7 @@ public class TbTerm implements Serializable
 
     private long id;
     private long tbid;
-    private long cid;
+//    private long cid;
     private TbLanguage tblanguage;
     private TbConcept tbconcept;
     private String language;

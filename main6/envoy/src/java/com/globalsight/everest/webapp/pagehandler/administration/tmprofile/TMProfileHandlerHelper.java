@@ -18,12 +18,14 @@ package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.projecthandler.TMProfileMTInfo;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -53,6 +55,34 @@ public class TMProfileHandlerHelper implements TMProfileConstants
         {
             return ServerProxy.getProjectHandler().getTMProfileById(
                     p_tmProfileId, true);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
+    }
+    
+    public static List<?> getMtInfoByTMProflieId(long tmProfileId)
+            throws EnvoyServletException
+    {
+        try
+        {
+            return ServerProxy.getProjectHandler().getMtInfoByTMProflieId(
+                    tmProfileId);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
+    }
+    
+    public static List<?> getMtinfoByTMProfileIdAndEngine(long tmProfileId,
+            String engine) throws EnvoyServletException
+    {
+        try
+        {
+            return ServerProxy.getProjectHandler()
+                    .getMtinfoByTMProfileIdAndEngine(tmProfileId, engine);
         }
         catch (Exception e)
         {
@@ -134,5 +164,37 @@ public class TMProfileHandlerHelper implements TMProfileConstants
             throw new EnvoyServletException(e);
         }
     }
+    
+    /**
+     * Checks the input password
+     */
+    public static boolean checkPassword(String p_pass)
+    {
+        if(p_pass == null)
+        {
+            return false;
+        }
+        
+        Pattern pattern = Pattern.compile("\\*+");
+        Matcher matcher = pattern.matcher(p_pass);
+        return !matcher.matches();
+    }
+    
+    // Get TMProfileMTInfo from TMProfileMTInfo List.
+    public static TMProfileMTInfo getMTInfo(List<TMProfileMTInfo> p_mstInfos,
+            long p_tmProfileId, String p_mtEngine, String p_mtKey)
+    {
+        for (TMProfileMTInfo mt : p_mstInfos)
+        {
+            if (mt != null
+                    && mt.getTmProfileID() == p_tmProfileId
+                    && mt.getMtEngine().equalsIgnoreCase(p_mtEngine)
+                    && mt.getMtKey().equals(p_mtKey))
+            {
+                return mt;
+            }
+        }
 
+        return null;
+    }
 }

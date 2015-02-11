@@ -46,6 +46,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -66,8 +67,8 @@ public class VendorManagementLocal implements VendorManagement
         {
             String expectedKey = "VM-" + "GS".hashCode() + "-"
                     + "VENDORS".hashCode();
-            c_isInstalled = SystemConfiguration.isKeyValid(
-                    SystemConfigParamNames.VENDOR_MANAGEMENT_INSTALL_KEY);
+            c_isInstalled = SystemConfiguration
+                    .isKeyValid(SystemConfigParamNames.VENDOR_MANAGEMENT_INSTALL_KEY);
         }
         catch (Throwable t)
         {
@@ -145,11 +146,14 @@ public class VendorManagementLocal implements VendorManagement
                         e1.printStackTrace();
                     }
 
-                    c_logger.error("Failed to create the new vendor "
-                            + p_newVendor.getFirstName() + " "
-                            + p_newVendor.getLastName() + " because "
-                            + " the field security couldn't be saved.", e);
-                    String args[] = { p_newVendor.getFirstName() + " "
+                    c_logger.error(
+                            "Failed to create the new vendor "
+                                    + p_newVendor.getFirstName() + " "
+                                    + p_newVendor.getLastName() + " because "
+                                    + " the field security couldn't be saved.",
+                            e);
+                    String args[] =
+                    { p_newVendor.getFirstName() + " "
                             + p_newVendor.getLastName() };
                     throw new VendorException(
                             VendorException.MSG_FAILED_TO_ADD_VENDOR_SECURITY,
@@ -160,11 +164,12 @@ public class VendorManagementLocal implements VendorManagement
                         UpdatedDataEvent.CREATE_EVENT, p_userPerformingAdd));
 
                 c_logger.info("Vendor " + p_newVendor.getFullName()
-                        + " added by user" + p_userPerformingAdd.getUserId());
+                        + " added by user" + p_userPerformingAdd.getUserName());
             }
             else
             {
-                String[] args = { p_newVendor.getCustomVendorId() };
+                String[] args =
+                { p_newVendor.getCustomVendorId() };
                 throw new VendorException(
                         VendorException.MSG_REQUIRED_FIELDS_MISSING, args, null);
             }
@@ -175,7 +180,8 @@ public class VendorManagementLocal implements VendorManagement
             // return different error message
             c_logger.error("Failed to add a new vendor with name "
                     + p_newVendor.getFullName(), pe);
-            String[] args = { p_newVendor.getFullName() };
+            String[] args =
+            { p_newVendor.getFullName() };
             throw new VendorException(VendorException.MSG_FAILED_TO_ADD_VENDOR,
                     args, pe);
         }
@@ -192,24 +198,28 @@ public class VendorManagementLocal implements VendorManagement
         checkIfAuthorized(p_userPerformingSearch.getUserId(),
                 Permission.VENDORS_VIEW);
         List vendors = null;
-		try {
-			vendors = new VendorSearchCriteria().search(p_searchParameters);
-		} catch (Exception e) {
-			String[] args = {};
-			throw new VendorException(
-                    VendorException.MSG_FAILED_TO_GET_VENDOR,
+        try
+        {
+            vendors = new VendorSearchCriteria().search(p_searchParameters);
+        }
+        catch (Exception e)
+        {
+            String[] args =
+            {};
+            throw new VendorException(VendorException.MSG_FAILED_TO_GET_VENDOR,
                     args, e);
-		}
+        }
 
         List vendorInfos = new ArrayList(vendors.size());
 
         for (int i = 0; i < vendors.size(); i++)
         {
             Vendor vendor = (Vendor) vendors.get(i);
-            VendorInfo vi = new VendorInfo(vendor.getId(), vendor
-                    .getCustomVendorId(), vendor.getPseudonym(), vendor
-                    .getFirstName(), vendor.getLastName(), vendor
-                    .getCompanyName(), vendor.getUserId(), vendor.getStatus());
+            VendorInfo vi = new VendorInfo(vendor.getId(),
+                    vendor.getCustomVendorId(), vendor.getPseudonym(),
+                    vendor.getFirstName(), vendor.getLastName(),
+                    vendor.getCompanyName(), vendor.getUserId(),
+                    vendor.getStatus());
             vendorInfos.add(vi);
         }
 
@@ -249,7 +259,8 @@ public class VendorManagementLocal implements VendorManagement
                     // and stop modification
                     c_logger.error("Failed to update the field security on "
                             + "the vendor " + p_modifiedVendor.getId(), e);
-                    String args[] = { Long.toString(p_modifiedVendor.getId()) };
+                    String args[] =
+                    { Long.toString(p_modifiedVendor.getId()) };
                     throw new VendorException(
                             VendorException.MSG_FAILED_TO_MODIFY_VENDOR_SECURITY,
                             args, e);
@@ -265,20 +276,22 @@ public class VendorManagementLocal implements VendorManagement
 
                 c_logger.info("Vendor " + p_modifiedVendor.getFullName()
                         + " modified by user "
-                        + p_userPerformingMod.getUserId());
+                        + p_userPerformingMod.getUserName());
             }
             else
             {
-                String[] args = { p_modifiedVendor.getCustomVendorId() };
+                String[] args =
+                { p_modifiedVendor.getCustomVendorId() };
                 throw new VendorException(
                         VendorException.MSG_REQUIRED_FIELDS_MISSING, args, null);
             }
         }
         catch (PersistenceException pe)
         {
-            c_logger.error("Failed to modify vendor. "
-                    + p_modifiedVendor.getId(), pe);
-            String[] args = { Long.toString(p_modifiedVendor.getId()) };
+            c_logger.error(
+                    "Failed to modify vendor. " + p_modifiedVendor.getId(), pe);
+            String[] args =
+            { Long.toString(p_modifiedVendor.getId()) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_MODIFY_VENDOR, args, pe);
         }
@@ -298,7 +311,7 @@ public class VendorManagementLocal implements VendorManagement
         removeVendor(p_userPerformingRemoval, vendor);
 
         c_logger.info("Vendor with id " + p_id + " removed by user "
-                + p_userPerformingRemoval.getUserId());
+                + p_userPerformingRemoval.getUserName());
     }
 
     /**
@@ -315,7 +328,7 @@ public class VendorManagementLocal implements VendorManagement
         removeVendor(p_userPerformingRemoval, vendor);
 
         c_logger.info("Vendor with custom vendor id " + p_customVendorId
-                + " removed by user " + p_userPerformingRemoval.getUserId());
+                + " removed by user " + p_userPerformingRemoval.getUserName());
     }
 
     /**
@@ -334,10 +347,11 @@ public class VendorManagementLocal implements VendorManagement
         for (int i = 0; i < vendors.size(); i++)
         {
             Vendor vendor = (Vendor) vendors.get(i);
-            VendorInfo vi = new VendorInfo(vendor.getId(), vendor
-                    .getCustomVendorId(), vendor.getPseudonym(), vendor
-                    .getFirstName(), vendor.getLastName(), vendor
-                    .getCompanyName(), vendor.getUserId(), vendor.getStatus());
+            VendorInfo vi = new VendorInfo(vendor.getId(),
+                    vendor.getCustomVendorId(), vendor.getPseudonym(),
+                    vendor.getFirstName(), vendor.getLastName(),
+                    vendor.getCompanyName(), vendor.getUserId(),
+                    vendor.getStatus());
             vendorInfos.add(vi);
         }
 
@@ -378,7 +392,8 @@ public class VendorManagementLocal implements VendorManagement
         catch (Exception pe)
         {
             c_logger.error("Failed to get the vendor with id " + p_id, pe);
-            String[] args = { Long.toString(p_id) };
+            String[] args =
+            { Long.toString(p_id) };
             throw new VendorException(VendorException.MSG_FAILED_TO_GET_VENDOR,
                     args, pe);
         }
@@ -443,7 +458,8 @@ public class VendorManagementLocal implements VendorManagement
             VendorException
     {
         checkIfInstalled();
-        return new String[] { Vendor.PENDING_STATUS, Vendor.APPROVED_STATUS,
+        return new String[]
+        { Vendor.PENDING_STATUS, Vendor.APPROVED_STATUS,
                 Vendor.REJECTED_STATUS, Vendor.ON_HOLD_STATUS };
     }
 
@@ -467,7 +483,8 @@ public class VendorManagementLocal implements VendorManagement
             {
                 c_logger.error("Failed to save the resume for vendor "
                         + p_vendor.getCustomVendorId(), e);
-                String args[] = { p_vendor.getCustomVendorId() };
+                String args[] =
+                { p_vendor.getCustomVendorId() };
                 throw new VendorException(
                         VendorException.MSG_FAILED_TO_SAVE_RESUME, args, e);
             }
@@ -625,9 +642,10 @@ public class VendorManagementLocal implements VendorManagement
                 // throw exception so no vendor to update
                 c_logger.error("Failed to modify the vendor that is "
                         + "associated with updated user "
-                        + p_modUser.getUserId()
+                        + p_modUser.getUserName()
                         + ". The vendor could not be found.");
-                String args[] = { p_modUser.getUserId() };
+                String args[] =
+                { p_modUser.getUserName() };
                 throw new VendorException(
                         VendorException.MSG_FAILED_TO_MODIFY_VENDOR_WITH_USERINFO,
                         args, null);
@@ -637,8 +655,9 @@ public class VendorManagementLocal implements VendorManagement
         catch (Exception e)
         {
             c_logger.error("Failed to modify the vendor that is associated "
-                    + "with updated user " + p_modUser.getUserId(), e);
-            String args[] = { p_modUser.getUserId() };
+                    + "with updated user " + p_modUser.getUserName(), e);
+            String args[] =
+            { p_modUser.getUserName() };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_MODIFY_VENDOR_WITH_USERINFO,
                     args, e);
@@ -665,8 +684,9 @@ public class VendorManagementLocal implements VendorManagement
         catch (Exception e)
         {
             c_logger.error("Failed to deassociate the vendor with user "
-                    + p_user.getUserId());
-            String args[] = { p_user.getUserId() };
+                    + p_user.getUserName());
+            String args[] =
+            { p_user.getUserName() };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_DEASSOCIATE_USER_VENDOR,
                     args, e);
@@ -702,7 +722,8 @@ public class VendorManagementLocal implements VendorManagement
             c_logger.error("The project was added, however it failed to "
                     + "add the vendors to the new project" + p_proj.getName(),
                     e);
-            String errorArgs[] = { p_proj.getName() };
+            String errorArgs[] =
+            { p_proj.getName() };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_ADD_VENDORS_TO_PROJECT,
                     errorArgs, e);
@@ -743,7 +764,8 @@ public class VendorManagementLocal implements VendorManagement
         {
             c_logger.error("Failed to remove the vendors from project "
                     + p_proj.getName(), e);
-            String args[] = { p_proj.getName() };
+            String args[] =
+            { p_proj.getName() };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_REMOVE_VENDORS_FROM_PROJECT,
                     args, e);
@@ -773,8 +795,8 @@ public class VendorManagementLocal implements VendorManagement
         }
         catch (Exception e)
         {
-            String args[] = { p_userAddingRate.getUserId(),
-                    p_vendor.getFullName() };
+            String args[] =
+            { p_userAddingRate.getUserName(), p_vendor.getFullName() };
             throw new VendorException(VendorException.MSG_FAILED_TO_ADD_RATING,
                     args, e);
         }
@@ -836,7 +858,8 @@ public class VendorManagementLocal implements VendorManagement
         }
         catch (Exception e)
         {
-            String args[] = { p_userQueryingRate.getUserId() };
+            String args[] =
+            { p_userQueryingRate.getUserName() };
 
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_GET_RATINGS_BY_TASK_IDS,
@@ -862,19 +885,19 @@ public class VendorManagementLocal implements VendorManagement
             // if associated with a task remove from the task too.
             if (t != null)
             {
-                t.removeRating(rating);     
+                t.removeRating(rating);
                 HibernateUtil.update(t);
             }
-            
+
             try
             {
                 HibernateUtil.delete(rating);
             }
             catch (Exception e)
             {
-                c_logger.error(e);
+                c_logger.error(e.getMessage(), e);
                 throw new RemoteException(e.getMessage());
-            }   
+            }
         }
     }
 
@@ -895,15 +918,15 @@ public class VendorManagementLocal implements VendorManagement
             List ratings = clonedVendor.getRatings();
             Rating clonedRating = (Rating) ratings.get(ratings
                     .indexOf(p_rating));
-            clonedRating.updateRating(p_rating.getValue(), p_rating
-                    .getComment(), p_userUpdatingRate.getUserId());
+            clonedRating.updateRating(p_rating.getValue(),
+                    p_rating.getComment(), p_userUpdatingRate.getUserId());
 
             HibernateUtil.update(clonedRating);
         }
         catch (Exception e)
         {
-            String args[] = { String.valueOf(p_rating.getId()),
-                    p_vendor.getFullName() };
+            String args[] =
+            { String.valueOf(p_rating.getId()), p_vendor.getFullName() };
 
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_UPDATE_RATING, args, e);
@@ -1016,7 +1039,8 @@ public class VendorManagementLocal implements VendorManagement
         catch (Exception pe)
         {
             c_logger.error("Failed to delete vendor " + p_vendor.getId(), pe);
-            String[] args = { Long.toString(p_vendor.getId()) };
+            String[] args =
+            { Long.toString(p_vendor.getId()) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_REMOVE_VENDOR, args, pe);
 
@@ -1048,7 +1072,8 @@ public class VendorManagementLocal implements VendorManagement
                     .getPermissionSetForUser(p_username);
             if (ps.getPermissionFor(p_permission) == false)
             {
-                String args[] = { p_username };
+                String args[] =
+                { p_username };
                 throw new VendorException(VendorException.MSG_NOT_AUTHORIZED,
                         args, null);
             }
@@ -1061,7 +1086,8 @@ public class VendorManagementLocal implements VendorManagement
         {
             c_logger.error("Failed to find permission set for user "
                     + p_username, e);
-            String args[] = { p_username };
+            String args[] =
+            { p_username };
             throw new VendorException(VendorException.MSG_NOT_AUTHORIZED, args,
                     null);
         }
@@ -1082,11 +1108,16 @@ public class VendorManagementLocal implements VendorManagement
         }
         catch (Exception e)
         {
-            c_logger.error("Failed to get the user " + p_vendor.getUserId()
-                    + " that vendor " + p_vendor.getCustomVendorId()
-                    + " is associated with.", e);
-            String args[] = { p_vendor.getUserId(),
-                    p_vendor.getCustomVendorId() };
+            c_logger.error(
+                    "Failed to get the user "
+                            + UserUtil.getUserNameById(p_vendor.getUserId())
+                            + " that vendor "
+                            + UserUtil.getUserNameById(p_vendor
+                                    .getCustomVendorId())
+                            + " is associated with.", e);
+            String args[] =
+            { UserUtil.getUserNameById(p_vendor.getUserId()),
+                    UserUtil.getUserNameById(p_vendor.getCustomVendorId()) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_ASSOCIATE_USER, args, e);
         }
@@ -1118,8 +1149,9 @@ public class VendorManagementLocal implements VendorManagement
             c_logger.error("Failed to set up the project manager for a "
                     + "project that vendor " + p_vendor.getId()
                     + " is associated with.", e);
-            String args[] = { p_vendor.getUserId(),
-                    p_vendor.getCustomVendorId() };
+            String args[] =
+            { UserUtil.getUserNameById(p_vendor.getUserId()),
+                    UserUtil.getUserNameById(p_vendor.getCustomVendorId()) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_ASSOCIATE_USER, args, e);
         }
@@ -1178,8 +1210,9 @@ public class VendorManagementLocal implements VendorManagement
         }
         catch (Exception e)
         {
-            c_logger.error(e);
-            String args[] = { String.valueOf(p_ratingId) };
+            c_logger.error(e.getMessage(), e);
+            String args[] =
+            { String.valueOf(p_ratingId) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_GET_RATING_BY_ID, args, e);
         }

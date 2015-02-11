@@ -153,7 +153,7 @@ public class AnonymousTerminologyServlet
             }
             catch (Throwable ex)
             {
-                CATEGORY.error(ex);
+                CATEGORY.error(ex.getMessage(), ex);
                 p_request.setAttribute(WebAppConstants.TERMBASE_TB_NAMELIST,
                     "<notermbases/>");
             }

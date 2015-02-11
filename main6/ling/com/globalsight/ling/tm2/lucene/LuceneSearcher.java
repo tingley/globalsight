@@ -16,28 +16,25 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
-
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Collection;
-import java.util.Collections;
 
+import org.apache.log4j.Logger;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.Hits;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MultiSearcher;
-import org.apache.lucene.search.Searcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.search.Hits;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.search.Searcher;
+
+import com.globalsight.ling.tm2.segmenttm.TMidTUid;
+import com.globalsight.util.GlobalSightLocale;
 
 
 /**
@@ -145,10 +142,20 @@ public class LuceneSearcher
         
         // due to indexing anomalies, it's possible for the same TUV to be
         // indexed twice, so eliminate dups with a Set
-        Set<TMidTUid> result = new HashSet<TMidTUid>();
-
+        List<TMidTUid> result = new ArrayList<TMidTUid>();
         Query query = TuvDocument.makeQuery(m_analyzer, p_searchPattern,
             m_targetLocale);
+        if (query == null)
+        {
+            return Collections.EMPTY_LIST;
+        }
+        // For special search, only with reserved word and stop words
+        String queryStr = query.toString();
+        if (queryStr.startsWith("+target_locales:") || "".equals(queryStr))
+        {
+            return Collections.EMPTY_LIST;
+        }
+
         if(c_logger.isDebugEnabled())
         {
             c_logger.debug("Searching for: "
@@ -158,11 +165,18 @@ public class LuceneSearcher
         Hits hits = m_indexSearcher.search(query);
         for(int i = 0; i < hits.length(); i++)
         {
+            Document document = hits.doc(i);
+            float score = hits.score(i);
             TuvDocument tuvDoc = new TuvDocument(hits.doc(i));
-            result.add(new TMidTUid(tuvDoc.getTmId(), tuvDoc.getTuId()));
+            TMidTUid tt = new TMidTUid(tuvDoc.getTmId(), tuvDoc.getTuId(),
+                    score);
+            if (!result.contains(tt))
+            {
+                result.add(tt);
+            }
         }
 
-        return new ArrayList<TMidTUid>(result);
+        return result;
     }
 
 
@@ -174,6 +188,4 @@ public class LuceneSearcher
             m_indexSearcher.close();
         }
     }
-
-
 }

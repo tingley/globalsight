@@ -130,8 +130,8 @@ function submitForm()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("optionally_select_generate_report")%>
-<%=bundle.getString("the_all_multi_select")%></SPAN>
+<%=bundle.getString("optionally_submit_generate")%><%=bundle.getString("hold_the_shift")%>
+</SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/onlineRevStatusXlsReport.jsp">
@@ -147,6 +147,10 @@ function submitForm()
          stateList.add(Job.DISPATCHED);
          stateList.add(Job.LOCALIZED);
          stateList.add(Job.EXPORTED);
+         stateList.add(Job.READY_TO_BE_DISPATCHED);
+         stateList.add(Job.EXPORT_FAIL);
+         stateList.add(Job.ARCHIVED);
+
          Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
          ArrayList jobList = new ArrayList(jobs);
          Collections.sort(jobList, new JobComparator(JobComparator.NAME,uiLocale));

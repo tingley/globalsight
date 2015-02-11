@@ -16,123 +16,107 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.workflowmanager.Workflow;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.StringTokenizer;
 import java.util.Vector;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.rmi.RemoteException;
 
-public class JobControlAllStatusHandler
-extends JobManagementHandler
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.javabean.NavigationBean;
+import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+
+public class JobControlAllStatusHandler extends JobManagementHandler
 {
     private static final String BASE_BEAN = "allStatus";
 
     /**
      * Invokes this EntryPageHandler object
      * <p>
-     * @param p_ageDescriptor the description of the page to be produced.
-     * @param p_request original request sent from the browser.
-     * @param p_response original response object.
-     * @param p_context the Servlet context.
+     * 
+     * @param p_ageDescriptor
+     *            the description of the page to be produced.
+     * @param p_request
+     *            original request sent from the browser.
+     * @param p_response
+     *            original response object.
+     * @param p_context
+     *            the Servlet context.
      */
     public void myInvokePageHandler(WebPageDescriptor p_thePageDescriptor,
-                                  HttpServletRequest p_request,
-                                  HttpServletResponse p_response,
-                                  ServletContext p_context)
-    throws ServletException, IOException, RemoteException, EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            RemoteException, EnvoyServletException
     {
-        HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request, BASE_BEAN);
-        p_request.setAttribute("searchType", p_request.getParameter("searchType"));
-                
-        Vector jobStates = new Vector();
-        // Pending
-        jobStates.add(Job.PENDING);
-        jobStates.add(Job.BATCHRESERVED);
-        jobStates.add(Job.IMPORTFAILED);
-        // Ready
-        jobStates.add(Job.READY_TO_BE_DISPATCHED);
-        // In progress
-        jobStates.add(Job.DISPATCHED);
-        // Localized
-        jobStates.add(Job.LOCALIZED);
-        // Exported
-        jobStates.add(Job.EXPORTED);
-        jobStates.add(Job.EXPORT_FAIL);
-        // Archived
-        jobStates.add(Job.ARCHIVED);
-        jobStates.add(Job.ADD_FILE);
-        
-        p_request.setAttribute(JOB_SCRIPTLET,
-					              getJobText(p_request,
-					                         ((NavigationBean)beanMap.get(BASE_BEAN)).getPageURL(),
-					                         null,
-					                         ((NavigationBean)beanMap.get(DETAILS_BEAN)).getPageURL(),
-					                         ((NavigationBean)beanMap.get(PLANNED_COMPLETION_DATE_BEAN)).getPageURL(),
-					                         getExpJobListing(p_request), jobStates, false, false, true));
+        HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
+                BASE_BEAN);
+        p_request.setAttribute("searchType",
+                p_request.getParameter("searchType"));
 
-        p_request.setAttribute(JOB_ID, 
-                               JOB_ID);
-        p_request.setAttribute(JOB_LIST_START_PARAM, 
-                               p_request.getParameter(JOB_LIST_START_PARAM));
-        p_request.setAttribute(PAGING_SCRIPTLET, 
-                               getPagingText(p_request, 
-                                             ((NavigationBean)beanMap.get(BASE_BEAN)).getPageURL(),
-                                             jobStates));
+        Vector jobStates = new Vector();
+        jobStates.addAll(Job.ALLSTATUSLIST);
+
+        p_request.setAttribute(
+                JOB_SCRIPTLET,
+                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
+                        .getPageURL(), null, ((NavigationBean) beanMap
+                        .get(DETAILS_BEAN)).getPageURL(),
+                        ((NavigationBean) beanMap
+                                .get(PLANNED_COMPLETION_DATE_BEAN))
+                                .getPageURL(), getExpJobListing(p_request),
+                        jobStates, false, false, true));
+
+        p_request.setAttribute(JOB_ID, JOB_ID);
+        p_request.setAttribute(JOB_LIST_START_PARAM,
+                p_request.getParameter(JOB_LIST_START_PARAM));
+        p_request.setAttribute(
+                PAGING_SCRIPTLET,
+                getPagingText(p_request,
+                        ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
+                        jobStates));
 
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-                (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         sessionMgr.setAttribute("destinationPage", "allStatus");
 
-        // turn on cache.  do both.  "pragma" for the older browsers.
-        p_response.setHeader("Pragma", "yes-cache"); //HTTP 1.0
-        p_response.setHeader("Cache-Control", "yes-cache"); //HTTP 1.1
-        p_response.addHeader("Cache-Control", "yes-store"); // tell proxy not to cache
+        // turn on cache. do both. "pragma" for the older browsers.
+        p_response.setHeader("Pragma", "yes-cache"); // HTTP 1.0
+        p_response.setHeader("Cache-Control", "yes-cache"); // HTTP 1.1
+        p_response.addHeader("Cache-Control", "yes-store"); // tell proxy not to
+                                                            // cache
         // forward to the jsp page.
-        RequestDispatcher dispatcher = 
-            p_context.getRequestDispatcher(p_thePageDescriptor.getJspURL());
+        RequestDispatcher dispatcher = p_context
+                .getRequestDispatcher(p_thePageDescriptor.getJspURL());
         dispatcher.forward(p_request, p_response);
     }
 
     /**
-     * Overide getControlFlowHelper so we can do processing
-     * and redirect the user correctly.
-     *
+     * Overide getControlFlowHelper so we can do processing and redirect the
+     * user correctly.
+     * 
      * @return the name of the link to follow
      */
-    public ControlFlowHelper getControlFlowHelper(
-        HttpServletRequest p_request, HttpServletResponse p_response)
+    public ControlFlowHelper getControlFlowHelper(HttpServletRequest p_request,
+            HttpServletResponse p_response)
     {
 
         return new JobSearchControlFlowHelper(p_request, p_response);
     }
 
     protected void performAppropriateOperation(HttpServletRequest p_request)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
-    	// No appropriate operation for this all status page
+        // No appropriate operation for this all status page
     }
 }

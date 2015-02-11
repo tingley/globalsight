@@ -19,6 +19,7 @@
             com.globalsight.util.resourcebundle.SystemResourceBundle,
             com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper,
             com.globalsight.everest.foundation.User,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.io.File,
             java.util.*"
     session="true"
@@ -38,7 +39,7 @@ EditorState state =
   (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
 
 String str_userId =
-  ((User)sessionMgr.getAttribute(WebAppConstants.USER)).getUserId();
+  ((User)sessionMgr.getAttribute(WebAppConstants.USER)).getUserName();
 
 CommentView view =
   (CommentView)sessionMgr.getAttribute(WebAppConstants.COMMENTVIEW);
@@ -70,7 +71,7 @@ if (issue != null)
     cmtStatus   = issue.getStatus();
     cmtPriority = issue.getPriority();
     cmtCategory = issue.getCategory();
-    cmtCreator  = issue.getCreatorId();
+    cmtCreator  = UserUtil.getUserNameById(issue.getCreatorId());
     histories   = issue.getHistory();
     
     if (issue.isOverwrite())
@@ -132,6 +133,7 @@ String lb_heading = b_create ? bundle.getString("lb_editor_create_segment_commen
 String lb_saveTheChanges = bundle.getString("jsmsg_editor_pls_save_comment");
 
 String uploadUrl = imageUploader.getPageURL() + "&commentUpload=true";
+
 %>
 <!-- This JSP is: envoy/edit/online/ce_main.jsp -->
 <html>
@@ -313,6 +315,21 @@ function selectValue(select, value)
         }
     }
 }
+//Fix for GBS-2383, add no-existing option user uploaded
+function selectCategory(select, value)
+{
+	for (var i = 0; i < select.length; ++i)
+	{
+		if (select.options[i].value == value)
+		{
+			select.selectedIndex = i;
+			return;
+		}
+	}	
+	select.options.add(new Option(value, value));
+	select.selectedIndex = i;
+}
+
 
 function getSelectedValue(select)
 {
@@ -367,7 +384,7 @@ function doOnLoad()
     }
         selectValue(document.getElementById("idStatus"), g_cmt_status);
         selectValue(document.getElementById("idPriority"), g_cmt_priority);
-        selectValue(document.getElementById("idCategory"), g_cmt_category);
+        selectCategory(document.getElementById("idCategory"), g_cmt_category);
         document.getElementById("idTitle").value = g_cmt_title;
 
         if (g_edit || g_create)
@@ -529,7 +546,7 @@ function doOnLoad()
          IssueHistory history = (IssueHistory)histories.get(j);
 %>
     <DIV>
-    <SPAN class="commentBy"><%=EditUtil.encodeHtmlEntities(history.reportedBy())%></SPAN>
+    <SPAN class="commentBy"><%=EditUtil.encodeHtmlEntities(UserUtil.getUserNameById(history.reportedBy()))%></SPAN>
     <SPAN class="commentDate"><%=history.dateReported()%></SPAN>
     <DIV class="comment"><%=EditUtil.encodeHtmlEntities(history.getComment())%></DIV>
     </DIV>

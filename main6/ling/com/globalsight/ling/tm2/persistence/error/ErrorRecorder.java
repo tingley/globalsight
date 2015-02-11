@@ -98,7 +98,7 @@ public class ErrorRecorder
         }
         catch (IOException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 

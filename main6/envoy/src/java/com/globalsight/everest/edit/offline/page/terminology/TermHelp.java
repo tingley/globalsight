@@ -17,7 +17,8 @@
 
 package com.globalsight.everest.edit.offline.page.terminology;
 
-import java.text.MessageFormat;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,6 +26,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
 
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.terminology.Hitlist;
@@ -234,6 +238,11 @@ public abstract class TermHelp
     public void setFormat(boolean isFormat)
     {
         format = isFormat;
+    }
+    
+    public boolean getFormat()
+    {
+        return format;
     }
 
     /**

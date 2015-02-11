@@ -106,22 +106,33 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
 
     private Date m_completedDate = null;
 
-    private Hashtable m_tasks = new Hashtable();
+    private Set<Task> m_tasks = new HashSet<Task>();
+    private Hashtable<Long, Task> m_taskMap = new Hashtable<Long, Task>();
+    private boolean m_taskMapNeedsBuilding = true;
 
-    // private Collection m_targetPages = new ArrayList();
-    private Vector m_targetPages = new Vector();
+    private Set<TargetPage> m_targetPages = new HashSet<TargetPage>();
+    private Vector<TargetPage> m_sortedTargetPages = new Vector<TargetPage>();
+    // Do the target pages need sorting?
+    private boolean m_needsSorting = true;
 
-    private List m_secondaryTargetFiles = new ArrayList();
+    private Set<SecondaryTargetFile> m_secondaryTargetFiles = 
+                            new HashSet<SecondaryTargetFile>();
 
     private String m_dispatchType;
+    
+    // the duration of the workflow in days
+    private Long m_duration = new Long(0L);
 
-    private Long m_duration = new Long(0L); // the duration of the
-
-    // workflow in days
-    private Integer m_contextMatchWordCount = new Integer(0);
-
-    private Integer m_segmentTmWordCount = new Integer(0);
-
+    private Integer contextMatchWordCount = new Integer(0);
+    private Integer segmentTmWordCount = new Integer(0);
+    private Integer incontextmatch = new Integer(0);
+    /**
+     * This includes ALL exact match word counts(segment-TM,context,MT,XLF and
+     * PO exact matches etc).
+     */
+    private Integer totalExactMatchWordCount = new Integer(0);
+    private Integer noUseInContextMatchWordCount = new Integer(0);
+    
     private Integer m_lowFuzzyMatchWordCount = new Integer(0);
 
     private Integer m_medFuzzyMatchWordCount = new Integer(0);
@@ -158,21 +169,13 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     
     private Date m_plannedCompletionDate = null;
 
-    private List m_workflowOwners = new ArrayList();
+    private Set<WorkflowOwner> m_workflowOwners = new HashSet<WorkflowOwner>();
 
-    private Collection m_workflowComments = new ArrayList();
+    private Set<Comment> m_workflowComments = new HashSet<Comment>();
 
     private List m_sortedWorkflowComments;
 
     private boolean m_workflowCommentsNeedSorting = true;
-
-    private boolean m_needsSorting = true;
-    
-    private Integer m_incontextmatch = new Integer(0);
-    
-    private Integer m_noUseInContextMatchWordCount = new Integer(0);
-
-    private Integer m_noUseExactMatchWordCount = new Integer(0);
 
     // id of the company which this activity belong to
     private String m_companyId;
@@ -261,10 +264,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         ArrayList targetPages = new ArrayList();
         // loop through the current target page collection
         // and gather ones of the particular type
-        for (int i = 0; i < m_targetPages.size(); i++)
+        for (TargetPage targetPage : m_sortedTargetPages)
         {
-            TargetPage targetPage = (TargetPage) m_targetPages.get(i);
-
             if ((targetPage.getPrimaryFileType() == p_primaryFileType)
                     && (!targetPage.getPageState()
                             .equals(PageState.IMPORT_FAIL)))
@@ -282,9 +283,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     {
         sortTargetPages();
         Vector<TargetPage> tps = new Vector<TargetPage>();
-        for (int i = 0; i < m_targetPages.size(); i++)
+        for (TargetPage tp : m_sortedTargetPages)
         {
-            TargetPage tp = (TargetPage) m_targetPages.get(i);
             // if the target page is not of an IMPORT_FAIL add to list
             if (!tp.getPageState().equals(PageState.IMPORT_FAIL))
             {
@@ -297,41 +297,28 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.getAllTargetPages
      */
-    public Vector getAllTargetPages()
+    public Vector<TargetPage> getAllTargetPages()
     {
         sortTargetPages();
-        return m_targetPages;
+        return m_sortedTargetPages;
     }
 
     /**
      * @see Workflow.getSecondaryTargetFiles()
      */
-    public List getSecondaryTargetFiles()
+    public Set<SecondaryTargetFile> getSecondaryTargetFiles()
+    {
+        return getSecondaryTargets();
+    }
+
+    public Set<SecondaryTargetFile> getSecondaryTargets()
     {
         return m_secondaryTargetFiles;
     }
 
-    public Set getSecondaryTargets()
+    public void setSecondaryTargets(Set<SecondaryTargetFile> targets)
     {
-        Set targets = null;
-        if (m_secondaryTargetFiles != null)
-        {
-            targets = new HashSet(m_secondaryTargetFiles);
-        }
-        return targets;
-    }
-
-    public void setSecondaryTargets(Set targets)
-    {
-        if (targets == null)
-        {
-            m_secondaryTargetFiles = new ArrayList();
-
-        }
-        else
-        {
-            m_secondaryTargetFiles = new ArrayList(targets);
-        }
+        m_secondaryTargetFiles = targets;
     }
 
     /**
@@ -351,31 +338,31 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public Hashtable getTasks()
     {
-        return m_tasks;
+        buildTaskMap();
+        return m_taskMap;
     }
 
     public Set getTaskSet()
     {
-        Set tasks = null;
-        if (m_tasks != null)
-        {
-            tasks = new HashSet(m_tasks.values());
-        }
-        return tasks;
+        return m_tasks;
     }
 
     public void setTaskSet(Set tasks)
     {
-        m_tasks = new Hashtable();
-        if (tasks != null)
+        m_tasks = tasks;
+        m_taskMapNeedsBuilding = true;
+    }
+
+    private void buildTaskMap()
+    {
+        if (m_taskMapNeedsBuilding)
         {
-            Iterator taskI = tasks.iterator();
-            while (taskI.hasNext())
+            m_taskMap = new Hashtable<Long, Task>();
+            for (Task task : m_tasks)
             {
-                Task task = (Task) taskI.next();
-                addTask(task);
+                m_taskMap.put(task.getId(), task);
             }
-            tasks = new HashSet(m_tasks.values());
+            m_taskMapNeedsBuilding = false;
         }
     }
 
@@ -387,7 +374,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public void addTask(Task p_task)
     {
-        m_tasks.put(new Long(p_task.getId()), p_task);
+        m_tasks.add(p_task);
+        m_taskMapNeedsBuilding = true;
     }
 
     /**
@@ -400,9 +388,10 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     {
         if (p_task != null)
         {
-            m_tasks.remove(new Long(p_task.getId()));
+            m_tasks.remove(p_task);
             p_task.setWorkflow(null);
             p_task.removeAmountOfWork();
+            m_taskMapNeedsBuilding = true;
         }
     }
 
@@ -451,7 +440,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public void setContextMatchWordCount(int p_contextMatchWordCount)
     {
-        m_contextMatchWordCount = new Integer(p_contextMatchWordCount);
+        contextMatchWordCount = new Integer(p_contextMatchWordCount);
     }
 
     /*
@@ -459,19 +448,19 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getContextMatchWordCount()
     {
-        return m_contextMatchWordCount == null ? 0 : m_contextMatchWordCount
+        return contextMatchWordCount == null ? 0 : contextMatchWordCount
                 .intValue();
     }
 
     public void setContextMatchWordCountAsInteger(
             Integer p_contextMatchWordCount)
     {
-        m_contextMatchWordCount = p_contextMatchWordCount;
+        contextMatchWordCount = p_contextMatchWordCount;
     }
 
     public Integer getContextMatchWordCountAsInteger()
     {
-        return m_contextMatchWordCount;
+        return contextMatchWordCount;
     }
 
     /*
@@ -479,7 +468,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public void setSegmentTmWordCount(int p_segmentTmWordCount)
     {
-        m_segmentTmWordCount = new Integer(p_segmentTmWordCount);
+        segmentTmWordCount = new Integer(p_segmentTmWordCount);
     }
 
     /*
@@ -487,18 +476,18 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public int getSegmentTmWordCount()
     {
-        return m_segmentTmWordCount == null ? 0 : m_segmentTmWordCount
+        return segmentTmWordCount == null ? 0 : segmentTmWordCount
                 .intValue();
     }
 
     public void setSegmentTmWordCountAsInteger(Integer p_segmentTmWordCount)
     {
-        m_segmentTmWordCount = p_segmentTmWordCount;
+        segmentTmWordCount = p_segmentTmWordCount;
     }
 
     public Integer getSegmentTmWordCountAsInteger()
     {
-        return m_segmentTmWordCount;
+        return segmentTmWordCount;
     }
 
     /*
@@ -636,51 +625,51 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     }
 
     public void setInContextMatchWordCount(int inContextMatchWord){
-        this.m_incontextmatch = new Integer(inContextMatchWord);
+        this.incontextmatch = new Integer(inContextMatchWord);
     }
 
     public int getInContextMatchWordCount(){
-        return this.m_incontextmatch == null ? 0 : m_incontextmatch.intValue();
+        return this.incontextmatch == null ? 0 : incontextmatch.intValue();
     }
 
     public void setNoUseInContextMatchWordCountAsInteger(Integer noUseInContextMatchWordCount) {
-        this.m_noUseInContextMatchWordCount = noUseInContextMatchWordCount;
+        this.noUseInContextMatchWordCount = noUseInContextMatchWordCount;
     }
 
     public void setNoUseInContextMatchWordCount(int noUseInContextMatchWordCount) {
-        this.m_noUseInContextMatchWordCount = new Integer(noUseInContextMatchWordCount);
+        this.noUseInContextMatchWordCount = new Integer(noUseInContextMatchWordCount);
     }
     
     public Integer getNoUseInContextMatchWordCountAsInteger(){
-        return this.m_noUseInContextMatchWordCount == null ? 0: m_noUseInContextMatchWordCount;
+        return this.noUseInContextMatchWordCount == null ? 0: noUseInContextMatchWordCount;
     }
     
     public int getNoUseInContextMatchWordCount(){
-        return this.m_noUseInContextMatchWordCount == null ? 0: m_noUseInContextMatchWordCount.intValue();
+        return this.noUseInContextMatchWordCount == null ? 0: noUseInContextMatchWordCount.intValue();
     }
     
-    public void setNoUseExactMatchWordCountAsInteger(Integer noUseExactMatchWordCount) {
-        this.m_noUseExactMatchWordCount = noUseExactMatchWordCount;
+    public void setTotalExactMatchWordCountAsInteger(Integer totalExactMatchWordCount) {
+        this.totalExactMatchWordCount = totalExactMatchWordCount;
     }
     
-    public void setNoUseExactMatchWordCount(int noUseExactMatchWordCount) {
-        this.m_noUseExactMatchWordCount = new Integer(noUseExactMatchWordCount);
+    public void setTotalExactMatchWordCount(int totalExactMatchWordCount) {
+        this.totalExactMatchWordCount = new Integer(totalExactMatchWordCount);
     }
 
-    public Integer getNoUseExactMatchWordCountAsInteger(){
-        return this.m_noUseExactMatchWordCount == null ? 0: m_noUseExactMatchWordCount;
+    public Integer getTotalExactMatchWordCountAsInteger(){
+        return this.totalExactMatchWordCount == null ? 0: totalExactMatchWordCount;
     }
 
-    public int getNoUseExactMatchWordCount(){
-        return this.m_noUseExactMatchWordCount == null ? 0: m_noUseExactMatchWordCount.intValue();
+    public int getTotalExactMatchWordCount(){
+        return this.totalExactMatchWordCount == null ? 0: totalExactMatchWordCount.intValue();
     }
 
     public void setInContextMatchWordCountAsInteger(Integer inContextMatchWord){
-        m_incontextmatch = inContextMatchWord;
+        incontextmatch = inContextMatchWord;
     }
 
     public Integer getInContextMatchWordCountAsInteger(){
-        return m_incontextmatch;
+        return incontextmatch;
     }
 
     public void setHiFuzzyMatchWordCountAsInteger(
@@ -1032,18 +1021,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         m_workflowOwners.add(p_workflowOwner);
     }
 
-    public void setWorkflowOwnerSet(Set owers)
+    public void setWorkflowOwnerSet(Set owners)
     {
-        m_workflowOwners = new ArrayList();
-        if (owers != null)
-        {
-            Iterator owerI = owers.iterator();
-            while (owerI.hasNext())
-            {
-                WorkflowOwner ownwe = (WorkflowOwner) owerI.next();
-                addWorkflowOwner(ownwe);
-            }
-        }
+        m_workflowOwners = owners;
     }
 
     /**
@@ -1051,17 +1031,12 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public List getWorkflowOwners()
     {
-        return m_workflowOwners;
+        return new ArrayList<WorkflowOwner>(m_workflowOwners);
     }
 
-    public Set getWorkflowOwnerSet()
+    public Set<WorkflowOwner> getWorkflowOwnerSet()
     {
-        Set owers = null;
-        if (m_workflowOwners != null)
-        {
-            owers = new HashSet(m_workflowOwners);
-        }
-        return owers;
+        return m_workflowOwners;
     }
 
     /**
@@ -1078,19 +1053,11 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     /**
      * @see Workflow.getWorkflowOwnerIds()
      */
-    public List getWorkflowOwnerIds()
+    public List<String> getWorkflowOwnerIds()
     {
-        int size = m_workflowOwners.size();
-
-        if (size == 0)
+        List<String> owners = new ArrayList<String>();
+        for (WorkflowOwner wfo : m_workflowOwners)
         {
-            return m_workflowOwners;
-        }
-
-        List owners = new ArrayList();
-        for (int i = 0; i < size; i++)
-        {
-            WorkflowOwner wfo = (WorkflowOwner) m_workflowOwners.get(i);
             owners.add(wfo.getOwnerId());
         }
 
@@ -1102,17 +1069,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     public List getWorkflowOwnerIdsByType(String p_ownerType)
     {
-        int size = m_workflowOwners.size();
-
-        if (size == 0)
-        {
-            return m_workflowOwners;
-        }
-
         List owners = new ArrayList();
-        for (int i = 0; i < size; i++)
+        for (WorkflowOwner wfo : m_workflowOwners)
         {
-            WorkflowOwner wfo = (WorkflowOwner) m_workflowOwners.get(i);
             if (p_ownerType.equals(wfo.getOwnerType()))
             {
                 owners.add(wfo.getOwnerId());
@@ -1131,8 +1090,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     private void writeObject(java.io.ObjectOutputStream out) throws IOException
     {
-        m_targetPages.size();
-        m_tasks.size();
+        //We think the 2 lines are not necessary any more (since 8.2.1)
+//        m_targetPages.size();
+//        m_tasks.size();
         // call the default writeObject
         out.defaultWriteObject();
     }
@@ -1167,24 +1127,15 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      * @param p_comments -
      *            The task comments to be set.
      */
-    public void setWorkflowComments(List p_comments)
+    public void setWorkflowComments(Set<Comment> p_comments)
     {
         m_workflowComments = p_comments;
         m_workflowCommentsNeedSorting = true;
     }
 
-    public void setWorkflowCommentSet(Set p_comments)
+    public void setWorkflowCommentSet(Set<Comment> p_comments)
     {
-        List comments;
-        if (p_comments == null)
-        {
-            comments = new ArrayList();
-        }
-        else
-        {
-            comments = new ArrayList(p_comments);
-        }
-        setWorkflowComments(comments);
+        setWorkflowComments(p_comments);
     }
 
     private void sortWorkflowComments()
@@ -1235,14 +1186,9 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return m_sortedWorkflowComments;
     }
 
-    public Set getWorkflowCommentSet()
+    public Set<Comment> getWorkflowCommentSet()
     {
-        List comments = getWorkflowComments();
-        if (comments == null)
-        {
-            comments = new ArrayList();
-        }
-        return new HashSet(comments);
+        return m_workflowComments;
     }
 
     /**
@@ -1491,26 +1437,15 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         return idAsLong.hashCode();
     }
 
-    public Set getTargetPagesSet()
+    public Set<TargetPage> getTargetPagesSet()
     {
-        Set pages = null;
-        if (m_targetPages != null)
-        {
-            pages = new HashSet(m_targetPages);
-        }
-        return pages;
+        return m_targetPages;
     }
 
-    public void setTargetPagesSet(Set p_targetPages)
+    public void setTargetPagesSet(Set<TargetPage> p_targetPages)
     {
-        if (p_targetPages == null)
-        {
-            m_targetPages = new Vector();
-        }
-        else
-        {
-            m_targetPages = new Vector(p_targetPages);
-        }
+        m_targetPages = p_targetPages;
+        m_needsSorting = true;
     }
 
     /**
@@ -1520,7 +1455,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
      */
     private void sortTargetPages()
     {
-        if (m_targetPages == null || m_needsSorting == false)
+        if (!m_needsSorting)
         {
             return;
         }
@@ -1528,7 +1463,8 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
         {
             Comparator comparator = new PageComparator(
                     PageComparator.EXTERNAL_PAGE_ID, Locale.US);
-            Collections.sort(m_targetPages, comparator);
+            m_sortedTargetPages = new Vector<TargetPage>(m_targetPages);
+            Collections.sort(m_sortedTargetPages, comparator);
             m_needsSorting = false;
         }
         catch (Exception e)
@@ -1550,6 +1486,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
     // For sla report issue
     private void setTranslateActivity()
     {
+        buildTaskMap();
         try
         {
             List taskInfos = ServerProxy.getWorkflowManager()
@@ -1560,7 +1497,7 @@ public class WorkflowImpl extends PersistentObject implements Workflow,
                 for (int i = taskInfos.size() - 1; i >= 0; i--)
                 {
                     TaskInfo taskInfo = (TaskInfo) taskInfos.get(i);
-                    Task task = (Task) m_tasks.get(new Long(taskInfo.getId()));
+                    Task task = (Task) m_taskMap.get(new Long(taskInfo.getId()));
                     Activity act = ServerProxy.getJobHandler().getActivity(
                             task.getTaskName());
                     if (Activity.isTranslateActivity(act.getType()))

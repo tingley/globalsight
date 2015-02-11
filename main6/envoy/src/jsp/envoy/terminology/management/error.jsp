@@ -28,7 +28,7 @@ String lb_system_error = bundle.getString("lb_system_error");
 BODY          { margin: 5px; }
 
 #idStackTrace { border-style: inset; border-width: 3px; }
-.link         { color: blue; cursor: hand; text-decoration: underline; }
+.link         { color: blue; cursor: pointer; text-decoration: underline; }
 </style>
 <script language="Javascript">
 var str_stacktrace;
@@ -69,11 +69,6 @@ function copyToClipboard()
   window.clipboardData.setData("Text", str_stacktrace);
 }
 
-function closeWindow()
-{
-  window.close();
-}
-
 function doOnLoad()
 {
   window.dialogHeight = "300px";
@@ -97,8 +92,6 @@ function doOnLoad()
     idStackTrace.innerText = str_stacktrace;
     enableStackTrace();
   }
-
-  idClose.onclick = closeWindow;
 }
 </script>
 </head>
@@ -111,7 +104,7 @@ function doOnLoad()
 <BR>
 
 <div>
-<span id="idClose" class="link"><%=lb_close%></span>
+<span id="idClose" class="link" onclick="window.close()"><%=lb_close%></span>
 &nbsp;&nbsp;
 <span id="idLink" class="link" style="display:none"></span>
 &nbsp;&nbsp;

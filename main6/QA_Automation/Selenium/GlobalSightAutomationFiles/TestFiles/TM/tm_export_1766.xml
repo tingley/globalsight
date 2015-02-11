@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tmx SYSTEM "tmx-gs.dtd" >
+<tmx version="1.0 GS">
+<header creationtool="Welocalize GlobalSight" creationtoolversion="6.0" segtype="sentence" o-tmf="gxml" adminlang="EN-US" srclang="EN-US" datatype="html" creationdate="20120214T170911Z" creationid="test6admin" changedate="20120223T164432Z" >
+</header>
+<body>
+<tu tuid="1652" datatype="office-xml">
+<prop type="x-sourcetmname">OfficeTestTM</prop>
+<tuv xml:lang="EN-US" creationdate="20120223T163209Z" creationid="gstest6pm" >
+<prop type="x-creationproject">OfficeTestProject</prop>
+<seg>Owner –</seg>
+</tuv>
+<tuv xml:lang="DE-DE" creationdate="20120223T163234Z" creationid="test6anyone" >
+<prop type="x-creationproject">OfficeTestProject</prop>
+<seg>Proprietario -</seg>
+</tuv>
+</tu>
+</body>
+</tmx>

@@ -98,7 +98,9 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             JSONArray preserveWsTags, JSONArray embTags,
             JSONArray transAttrTags, JSONArray contentInclTags,
             JSONArray cdataPostfilterTags, JSONArray entities,
-            JSONArray processIns, JSONArray internalTag) throws Exception
+            JSONArray processIns, JSONArray internalTag,
+            JSONArray srcCmtXmlComment, JSONArray srcCmtXmlTag)
+            throws Exception
     {
         StringBuffer sb = new StringBuffer();
         sb.append("<").append(NODE_ROOT).append(">");
@@ -169,6 +171,12 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         sb.append("<").append(NODE_INTERNAL_TAG).append(">");
         sb.append(jsonArrayToXml(internalTag));
         sb.append("</").append(NODE_INTERNAL_TAG).append(">");
+        sb.append("<").append(NODE_SRCCMT_XMLCOMMENT).append(">");
+        sb.append(jsonArrayToXml(srcCmtXmlComment));
+        sb.append("</").append(NODE_SRCCMT_XMLCOMMENT).append(">");
+        sb.append("<").append(NODE_SRCCMT_XMLTAG).append(">");
+        sb.append(jsonArrayToXml(srcCmtXmlTag));
+        sb.append("</").append(NODE_SRCCMT_XMLTAG).append(">");
         sb.append("</").append(NODE_ROOT).append(">");
 
         return sb.toString();
@@ -284,7 +292,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
     {
         if (m_emptyTagFormat == -1)
         {
-            int result = EMPTY_TAG_FORMAT_CLOSE;
+            int result = EMPTY_TAG_FORMAT_PRESERVE;
             String v = getSingleElementValue(NODE_EMPTY_TAG_FORMAT);
             try
             {
@@ -292,7 +300,7 @@ public class XmlFilterConfigParser implements XmlFilterConstants
             }
             catch (Exception e)
             {
-                result = EMPTY_TAG_FORMAT_CLOSE;
+                result = EMPTY_TAG_FORMAT_PRESERVE;
             }
 
             m_emptyTagFormat = result;
@@ -504,6 +512,38 @@ public class XmlFilterConfigParser implements XmlFilterConstants
         try
         {
             Element element = getSingleElement(NODE_INTERNAL_TAG);
+            String[] toArray =
+            { "\"attributes\":{" };
+            return tagsXmlToJsonArray(element, toArray);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error occur when xml to json", e);
+            return "[]";
+        }
+    }
+
+    public String getSrcCmtXmlCommentJson()
+    {
+        try
+        {
+            Element element = getSingleElement(NODE_SRCCMT_XMLCOMMENT);
+            String[] toArray =
+            { "\"attributes\":{" };
+            return tagsXmlToJsonArray(element, toArray);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error occur when xml to json", e);
+            return "[]";
+        }
+    }
+
+    public String getSrcCmtXmlTagJson()
+    {
+        try
+        {
+            Element element = getSingleElement(NODE_SRCCMT_XMLTAG);
             String[] toArray =
             { "\"attributes\":{" };
             return tagsXmlToJsonArray(element, toArray);

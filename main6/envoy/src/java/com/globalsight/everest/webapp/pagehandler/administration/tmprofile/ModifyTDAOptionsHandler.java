@@ -78,23 +78,21 @@ public class ModifyTDAOptionsHandler extends PageHandler implements
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-        if (p_request.getParameter(WebAppConstants.RADIO_BUTTON) == null
-                || p_request.getMethod().equalsIgnoreCase(
-                        WebAppConstants.REQUEST_METHOD_GET))
+		if (p_request.getMethod().equalsIgnoreCase(
+				WebAppConstants.REQUEST_METHOD_GET))
         {
             p_response
                     .sendRedirect("/globalsight/ControlServlet?activityName=tmProfiles");
             return;
         }
-        
+
         HttpSession sess = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) sess
                 .getAttribute(SESSION_MANAGER);
-        
-        String tmProfileId = p_request.getParameter(WebAppConstants.RADIO_BUTTON);
+
         TranslationMemoryProfile tmProfile = null;
         String errorInfo = "";
-
+        String tmProfileId = p_request.getParameter(TMProfileConstants.TM_PROFILE_ID);
         if (tmProfileId != null)
         {
             tmProfile = (TranslationMemoryProfile) TMProfileHandlerHelper

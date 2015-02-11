@@ -1,28 +1,37 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.naming.NamingException;
@@ -32,19 +41,31 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jdom.Document;
+import org.jdom.Element;
+import org.jdom.output.XMLOutputter;
 
 import com.globalsight.calendar.FluxCalendar;
 import com.globalsight.calendar.UserFluxCalendar;
+import com.globalsight.config.UserParameterImpl;
+import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.SSOUserUtil;
 import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.User.PhoneType;
+import com.globalsight.everest.foundation.UserRoleImpl;
+import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionGroup;
 import com.globalsight.everest.permission.PermissionManager;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
+import com.globalsight.everest.securitymgr.FieldSecurity;
+import com.globalsight.everest.securitymgr.UserSecureFields;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -52,122 +73,132 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupsHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.everest.workflow.Activity;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.modules.Modules;
 
 /*
  * Page handler for display list of Users.
  */
-public class UserMainHandler
-    extends PageHandler
+public class UserMainHandler extends PageHandler
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            UserMainHandler.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(UserMainHandler.class);
 
     public static final String CREATE_USER_WRAPPER = "createUserWrapper";
     public static final String MODIFY_USER_WRAPPER = "modifyUserWrapper";
     public static final String ADD_ANOTHER = "addAnother";
     public static final String SEARCH_PARAMS = "searchParams";
 
+    private Map<Long, Company> companyMap = null;
+
+    private static int NUM_PER_PAGE = 10;
 
     /**
      * Invokes this PageHandler.
      */
-    public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-        HttpServletRequest p_request, HttpServletResponse p_response,
-        ServletContext p_context)
-        throws ServletException, IOException, EnvoyServletException
+    public void invokePageHandler(WebPageDescriptor pageDescriptor,
+            HttpServletRequest request, HttpServletResponse response,
+            ServletContext context) throws ServletException, IOException,
+            EnvoyServletException
     {
-        HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-                (SessionManager) session.getAttribute(SESSION_MANAGER);
-        String action = p_request.getParameter("action");
-        UserSearchParams params = (UserSearchParams)sessionMgr.getAttribute("fromSearch");
-
+        HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        String action = request.getParameter("action");
+        UserSearchParams params = (UserSearchParams) sessionMgr
+                .getAttribute("fromSearch");
 
         if (action != null)
         {
             if (action.equals(USER_ACTION_CREATE_USER))
             {
-                createUser(p_request);
+                createUser(request);
             }
             else if (action.equals(USER_ACTION_MODIFY_USER))
             {
-                modifyUser(p_request, false);
+                modifyUser(request, false);
             }
             else if (action.equals(USER_ACTION_MODIFY2_USER))
             {
-                modifyUser(p_request, true);
+                modifyUser(request, true);
             }
             else if (action.equals("remove"))
             {
-                removeUser(p_request);
+                removeUser(request);
             }
             else if (action.equals("search"))
             {
-                params = searchUsers(p_request);
+                // params = searchUsers(request);
+                handleFilters(params, request, sessionMgr, action);
+            }
+            else if (action.equals(USER_ACTION_EXPORT))
+            {
+                exportUsers(request, response, sessionMgr);
+                return;
             }
         }
         else
         {
-            checkPreReqData(p_request, session );
+            checkPreReqData(request, session);
         }
 
         try
         {
-            if (p_request.getParameter("linkName") != null &&
-                !p_request.getParameter("linkName").equals("self"))
-                    sessionMgr.clear();
-
-            //add the searcher's permissions and company name to the params
-            //so that they're always used to filter results
-            PermissionSet perms = (PermissionSet) session.getAttribute(
-                WebAppConstants.PERMISSIONS);
-            User thisUser = (User) sessionMgr.getAttribute(WebAppConstants.USER);
-            if (params==null)
+            PermissionSet perms = (PermissionSet) session
+                    .getAttribute(WebAppConstants.PERMISSIONS);
+            User thisUser = (User) sessionMgr
+                    .getAttribute(WebAppConstants.USER);
+            if (params == null
+                    || (request.getParameter("linkName") != null && !request
+                            .getParameter("linkName").startsWith("se")))
+            {
                 params = new UserSearchParams();
+                sessionMgr.clear();
+            }
             params.setPermissionSetOfSearcher(perms);
             params.setCompanyOfSearcher(thisUser.getCompanyName());
 
-            dataForTable(p_request, p_request.getSession(), params);
+            dataForTable(request, request.getSession(), params);
         }
         catch (NamingException ne)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ne);
         }
         catch (RemoteException re)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    re);
         }
         catch (GeneralException ge)
         {
-            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL,
+                    ge);
         }
 
-        //Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+        // Call parent invokePageHandler() to set link beans and invoke JSP
+        super.invokePageHandler(pageDescriptor, request, response, context);
     }
-
 
     /**
      * Perform create user action
      */
     private void createUser(HttpServletRequest p_request)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         // Get the session manager.
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-            (SessionManager) session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         // Get the user wrapper off the session manager.
-        CreateUserWrapper wrapper =
-            (CreateUserWrapper) sessionMgr.getAttribute(CREATE_USER_WRAPPER);
+        CreateUserWrapper wrapper = (CreateUserWrapper) sessionMgr
+                .getAttribute(CREATE_USER_WRAPPER);
 
         if (wrapper != null)
         {
@@ -180,28 +211,37 @@ public class UserMainHandler
                 if (Modules.isCalendaringInstalled())
                 {
                     // Create the user's calendar
-                    cal = (UserFluxCalendar)
-                        sessionMgr.getAttribute(CalendarConstants.CALENDAR);
+                    cal = (UserFluxCalendar) sessionMgr
+                            .getAttribute(CalendarConstants.CALENDAR);
                 }
                 else
                 {
                     // Create a user calendar based on the system calendar.
-//                    FluxCalendar baseCal = CalendarHelper.getDefaultCalendar();
-                    String companyId = CompanyWrapper.getCompanyIdByName(wrapper.getCompanyName());
-                    FluxCalendar baseCal = CalendarHelper.getDefaultCalendar(companyId);
+                    // FluxCalendar baseCal =
+                    // CalendarHelper.getDefaultCalendar();
+                    String companyId = CompanyWrapper
+                            .getCompanyIdByName(wrapper.getCompanyName());
+                    FluxCalendar baseCal = CalendarHelper
+                            .getDefaultCalendar(companyId);
                     cal = new UserFluxCalendar(baseCal.getId(),
-                        wrapper.getUserId(), baseCal.getTimeZoneId());
+                            wrapper.getUserId(), baseCal.getTimeZoneId());
                     CalendarHelper.updateUserCalFieldsFromBase(baseCal, cal);
                 }
             }
-            catch(EnvoyServletException e)
+            catch (EnvoyServletException e)
             {
                 // Don't create the user if calendar can't be created.
                 throw e;
             }
 
-            // Now commit the wrapper
+            wrapper.setUserId(UserUtil.newUserId(wrapper.getUserName()));
+            if (cal.getOwnerUserId() == null)
+            {
+                cal.setOwnerUserId(wrapper.getUserId());
+            }
             wrapper.setCalendar(cal);
+
+            // Now commit the wrapper
             wrapper.commitWrapper();
 
             // Add permissions groups is necessary
@@ -215,41 +255,45 @@ public class UserMainHandler
 
     /**
      * Perform modify user action.
-     *
-     * @param getUserData - true if the user hit save from the first
-     * page.  Need to get the data from the request.
+     * 
+     * @param getUserData
+     *            - true if the user hit save from the first page. Need to get
+     *            the data from the request.
      */
-    private void modifyUser(HttpServletRequest p_request,
-        boolean getUserData)
-        throws EnvoyServletException
+    private void modifyUser(HttpServletRequest p_request, boolean getUserData)
+            throws EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-            (SessionManager) session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
 
         // Get the user wrapper off the session manager.
-        ModifyUserWrapper wrapper =
-            (ModifyUserWrapper) sessionMgr.getAttribute(MODIFY_USER_WRAPPER);
+        ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr
+                .getAttribute(MODIFY_USER_WRAPPER);
 
         if (getUserData)
         {
             UserUtil.extractUserData(p_request, wrapper, false);
         }
 
+        UserUtil.updateUserIdUserName(wrapper.getUserId(),
+                wrapper.getUserName());
         // Commit the wrapper
         wrapper.commitWrapper(session);
 
         // Check for changes in Permissiong Groups
         updatePermissionGroups(wrapper, sessionMgr);
-        
+
         // save sso user mapping
         updateSSOUserMapping(wrapper);
 
         clearSessionExceptTableInfo(session, UserConstants.USER_KEY);
-        
+
         // If modify the current user, also need reset the session.
-        String currentUserID = ((User) sessionMgr.getAttribute(WebAppConstants.USER)).getUserId();
-        if (currentUserID != null && currentUserID.equalsIgnoreCase(wrapper.getUserId()))
+        String currentUserID = ((User) sessionMgr
+                .getAttribute(WebAppConstants.USER)).getUserId();
+        if (currentUserID != null
+                && currentUserID.equalsIgnoreCase(wrapper.getUserId()))
         {
             try
             {
@@ -262,55 +306,353 @@ public class UserMainHandler
         }
     }
 
+    private void exportUsers(HttpServletRequest request,
+            HttpServletResponse response, SessionManager sessionMgr)
+    {
+        try
+        {
+            Element root = new Element("UserInfo");
+            Document Doc = new Document(root);
+
+            String[] userIds = request.getParameterValues("radioBtn");
+            for (String userId : userIds)
+            {
+                User user = ServerProxy.getUserManager().getUser(userId);
+                Element userNode = new Element("User");
+                // ==========================basic info=======================
+                Element basicInfoNode = new Element("BasicInfo");
+                basicInfoNode.addContent(new Element("UserName").setText(user
+                        .getUserName()));
+                basicInfoNode.addContent(new Element("FirstName").setText(user
+                        .getFirstName()));
+                basicInfoNode.addContent(new Element("LastName").setText(user
+                        .getLastName()));
+                basicInfoNode.addContent(new Element("Password").setText(user
+                        .getPassword()));
+                basicInfoNode.addContent(new Element("Title").setText(user
+                        .getTitle() == null ? "" : user.getTitle()));
+                basicInfoNode.addContent(new Element("CompanyName")
+                        .setText(user.getCompanyName()));
+                userNode.addContent(basicInfoNode);
+                // ======================== contact info =====================
+                Element contactInfoNode = new Element("ContactInfo");
+                contactInfoNode.addContent(new Element("Address").setText(user
+                        .getAddress() == null ? "" : user.getAddress()));
+                contactInfoNode
+                        .addContent(new Element("HomePhone").setText(user
+                                .getPhoneNumber(PhoneType.HOME) == null ? ""
+                                : user.getPhoneNumber(PhoneType.HOME)));
+                contactInfoNode
+                        .addContent(new Element("WorkPhone").setText(user
+                                .getPhoneNumber(PhoneType.OFFICE) == null ? ""
+                                : user.getPhoneNumber(PhoneType.OFFICE)));
+                contactInfoNode
+                        .addContent(new Element("CellPhone").setText(user
+                                .getPhoneNumber(PhoneType.CELL) == null ? ""
+                                : user.getPhoneNumber(PhoneType.CELL)));
+                contactInfoNode.addContent(new Element("Fax").setText(user
+                        .getPhoneNumber(PhoneType.FAX) == null ? "" : user
+                        .getPhoneNumber(PhoneType.FAX)));
+                contactInfoNode
+                        .addContent(new Element("EmailAddress").setText(user
+                                .getEmail() == null ? "" : user.getEmail()));
+                contactInfoNode.addContent(new Element("CCEmailAddress")
+                        .setText(user.getCCEmail() == null ? "" : user
+                                .getCCEmail()));
+                contactInfoNode.addContent(new Element("BCCEmailAddress")
+                        .setText(user.getBCCEmail() == null ? "" : user
+                                .getBCCEmail()));
+                contactInfoNode.addContent(new Element("EmailLanguage")
+                        .setText(user.getDefaultUILocale()));
+                userNode.addContent(contactInfoNode);
+                // ======================= default roles
+                // ==========================
+                List<UserDefaultRole> defaultRoles = SetDefaultRoleUtil
+                        .getDefaultRolesByUser(userId);
+                if (defaultRoles != null && defaultRoles.size() > 0)
+                {
+                    Element defaultRolesNode = new Element("DefaultRoles");
+                    for (UserDefaultRole userDefaultRole : defaultRoles)
+                    {
+                        Element defaultRoleNode = new Element("DefaultRole");
+                        defaultRoleNode.addContent(new Element("SourceLocale")
+                                .setText(String.valueOf(userDefaultRole
+                                        .getSourceLocaleId())));
+                        defaultRoleNode.addContent(new Element("TargetLocale")
+                                .setText(String.valueOf(userDefaultRole
+                                        .getTargetLocaleId())));
+
+                        Set activitys = userDefaultRole.getActivities();
+                        for (Iterator iterator = activitys.iterator(); iterator
+                                .hasNext();)
+                        {
+                            UserDefaultActivity defaultActivity = (UserDefaultActivity) iterator
+                                    .next();
+                            defaultRoleNode.addContent(new Element(
+                                    "ActivityName").setText(defaultActivity
+                                    .getActivityName()));
+                        }
+                        defaultRolesNode.addContent(defaultRoleNode);
+                    }
+                    userNode.addContent(defaultRolesNode);
+                }
+                // ======================= roles ==========================
+                Element rolesNode = new Element("Roles");
+                Collection userRoles = ServerProxy.getUserManager()
+                        .getUserRoles(user);
+                if (userRoles != null)
+                {
+                    for (Iterator it = userRoles.iterator(); it.hasNext();)
+                    {
+                        UserRoleImpl userRole = (UserRoleImpl) it.next();
+                        Element activityNode = new Element("Activity");
+                        Activity activity = userRole.getActivity();
+                        activityNode.addContent(new Element("CompanyName")
+                                .setText(CompanyWrapper
+                                        .getCompanyNameById(activity
+                                                .getCompanyId())));
+                        activityNode.addContent(new Element("SourceLocale")
+                                .setText(userRole.getSourceLocale()));
+                        activityNode.addContent(new Element("TargetLocale")
+                                .setText(userRole.getTargetLocale()));
+                        String activityName = activity.getActivityName();
+                        activityNode.addContent(new Element("ActivityName")
+                                .setText(activityName.substring(0,
+                                        activityName.lastIndexOf("_"))));
+                        activityNode.addContent(new Element("Rate")
+                                .setText(userRole.getRate()));
+                        rolesNode.addContent(activityNode);
+                    }
+                    userNode.addContent(rolesNode);
+                }
+                // ========================== projects
+                // ============================
+                Element projectsNode = new Element("Projects");
+                try
+                {
+                    projectsNode.addContent(new Element("IsInAllProjects")
+                            .setText(String.valueOf(user.isInAllProjects())));
+                    List<?> projects = ServerProxy.getProjectHandler()
+                            .getProjectsByUser(userId);
+                    for (int i = 0; i < projects.size(); i++)
+                    {
+                        Project project = (Project) projects.get(i);
+                        Element projectNode = new Element("Project");
+                        projectNode.addContent(new Element("ProjectId")
+                                .setText(String.valueOf(project.getId())));
+                        projectNode.addContent(new Element("ProjectName")
+                                .setText(project.getName()));
+                        projectNode
+                                .addContent(new Element("ProjectCompanyName")
+                                        .setText(CompanyWrapper
+                                                .getCompanyNameById(project
+                                                        .getCompanyId())));
+                        projectsNode.addContent(projectNode);
+                    }
+                }
+                catch (NamingException e)
+                {
+                    throw new EnvoyServletException(
+                            EnvoyServletException.EX_GENERAL, e);
+                }
+                userNode.addContent(projectsNode);
+                // ========================= security ==========================
+                Element securityNode = new Element("Security");
+                User operator = (User) sessionMgr
+                        .getAttribute(WebAppConstants.USER);
+                FieldSecurity fs = UserHandlerHelper.getSecurity(user,
+                        operator, false);
+                securityNode.addContent(new Element("AccessLevel").setText(fs
+                        .get(UserSecureFields.ACCESS_GROUPS)));
+                securityNode.addContent(new Element("Address").setText(fs
+                        .get(UserSecureFields.ADDRESS)));
+                securityNode.addContent(new Element("Security").setText(fs
+                        .get(UserSecureFields.SECURITY)));
+                securityNode.addContent(new Element("Calendar").setText(fs
+                        .get(UserSecureFields.CALENDAR)));
+                securityNode.addContent(new Element("CellPhone").setText(fs
+                        .get(UserSecureFields.CELL_PHONE)));
+                securityNode.addContent(new Element("CompanyName").setText(fs
+                        .get(UserSecureFields.COMPANY)));
+                securityNode.addContent(new Element("Country").setText(fs
+                        .get(UserSecureFields.COUNTRY)));
+                securityNode.addContent(new Element("EmailAddress").setText(fs
+                        .get(UserSecureFields.EMAIL_ADDRESS)));
+                securityNode.addContent(new Element("CCEmailAddress")
+                        .setText(fs.get(UserSecureFields.CC_EMAIL_ADDRESS)));
+                securityNode.addContent(new Element("BCCEmailAddress")
+                        .setText(fs.get(UserSecureFields.BCC_EMAIL_ADDRESS)));
+                securityNode.addContent(new Element("EmailLanguage").setText(fs
+                        .get(UserSecureFields.EMAIL_LANGUAGE)));
+                securityNode.addContent(new Element("Fax").setText(fs
+                        .get(UserSecureFields.FAX)));
+                securityNode.addContent(new Element("FirstName").setText(fs
+                        .get(UserSecureFields.FIRST_NAME)));
+                securityNode.addContent(new Element("HomePhone").setText(fs
+                        .get(UserSecureFields.HOME_PHONE)));
+                securityNode.addContent(new Element("LastName").setText(fs
+                        .get(UserSecureFields.LAST_NAME)));
+                securityNode.addContent(new Element("Password").setText(fs
+                        .get(UserSecureFields.PASSWORD)));
+                securityNode.addContent(new Element("Projects").setText(fs
+                        .get(UserSecureFields.PROJECTS)));
+                securityNode.addContent(new Element("Roles").setText(fs
+                        .get(UserSecureFields.ROLES)));
+                securityNode.addContent(new Element("Status").setText(fs
+                        .get(UserSecureFields.STATUS)));
+                securityNode.addContent(new Element("Title").setText(fs
+                        .get(UserSecureFields.TITLE)));
+                securityNode.addContent(new Element("WorkPhone").setText(fs
+                        .get(UserSecureFields.WORK_PHONE)));
+                userNode.addContent(securityNode);
+                // ======================= permission =========================
+                Element permissionGroupsNode = new Element("PermissionGroups");
+                Collection permList = PermissionHelper
+                        .getAllPermissionGroupsForUser(userId);
+                for (Iterator iterator = permList.iterator(); iterator
+                        .hasNext();)
+                {
+                    Element permissionGroupNode = new Element("PermissionGroup");
+                    PermissionGroup pg = (PermissionGroup) iterator.next();
+                    permissionGroupNode.addContent(new Element("CompanyName")
+                            .setText(CompanyWrapper.getCompanyNameById(pg
+                                    .getCompanyId())));
+                    permissionGroupNode.addContent(new Element(
+                            "PermissionGroupId").setText(String.valueOf(pg
+                            .getId())));
+                    permissionGroupNode.addContent(new Element(
+                            "PermissionGroupName").setText(pg.getName()));
+                    permissionGroupsNode.addContent(permissionGroupNode);
+                }
+                userNode.addContent(permissionGroupsNode);
+                // ======================= user parameter
+                // =========================
+                Element userParametersNode = new Element("UserParameters");
+                Collection userConfig = ServerProxy.getUserParameterManager()
+                        .getUserParameters(userId);
+                for (Iterator it = userConfig.iterator(); it.hasNext();)
+                {
+                    UserParameterImpl up = (UserParameterImpl) it.next();
+
+                    Element userParameterNode = new Element("UserParameter");
+                    userParameterNode.addContent(new Element("Name").setText(up
+                            .getName()));
+                    userParameterNode.addContent(new Element("Value")
+                            .setText(up.getValue()));
+                    userParametersNode.addContent(userParameterNode);
+                }
+                userNode.addContent(userParametersNode);
+
+                // add to root
+                root.addContent(userNode);
+            }
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
+            String fileName = "User_information_" + sdf.format(new Date())
+                    + ".xml";
+            XMLOutputter XMLOut = new XMLOutputter();
+            XMLOut.output(Doc, new FileOutputStream(fileName));
+
+            ExportUtil.writeToResponse(response, new File(fileName), fileName);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, e);
+        }
+    }
+
+    private Company getCompanyById(long companyId) throws JobException,
+            RemoteException, GeneralException, NamingException
+    {
+        if (companyMap == null)
+        {
+            companyMap = new HashMap<Long, Company>();
+        }
+        if (companyMap.get(companyId) != null)
+        {
+            return (Company) companyMap.get(companyId);
+        }
+        else
+        {
+            Company company = ServerProxy.getJobHandler().getCompanyById(
+                    companyId);
+            companyMap.put(companyId, company);
+            return company;
+        }
+    }
+
     /**
      * For sso user mapping
+     * 
      * @param wrapper
      */
     private void updateSSOUserMapping(CreateUserWrapper wrapper)
     {
-        String ssoUserName = wrapper.getSsoUserName();
+        String ssoUserId = wrapper.getSsoUserId();
 
-        if (ssoUserName != null)
+        if (ssoUserId != null)
         {
             String companyName = wrapper.getCompanyName();
-            long companyId = CompanyWrapper.getCompanyByName(companyName).getId();
-            String userName = wrapper.getUserId();
-            
-            SSOUserUtil.saveUserMapping(companyId, userName, ssoUserName);
+            long companyId = CompanyWrapper.getCompanyByName(companyName)
+                    .getId();
+            String userId = wrapper.getUserId();
+            SSOUserUtil.saveUserMapping(companyId, userId, ssoUserId);
         }
     }
 
     /**
      * Remove a user.
      */
-    private void removeUser(HttpServletRequest p_request)
-        throws EnvoyServletException
+    private void removeUser(HttpServletRequest request)
+            throws EnvoyServletException
     {
-        HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-            (SessionManager) session.getAttribute(SESSION_MANAGER);
-        User loggedInUser = (User)sessionMgr.getAttribute(WebAppConstants.USER);
-        String userId = p_request.getParameter("radioBtn");
-        if (userId == null || p_request.getMethod().equalsIgnoreCase("get"))
+        HttpSession session = request.getSession();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        User loggedInUser = (User) sessionMgr
+                .getAttribute(WebAppConstants.USER);
+
+        String[] userIds = request.getParameterValues("radioBtn");
+        if (userIds == null || request.getMethod().equalsIgnoreCase("get"))
         {
             return;
         }
-        
-        String deps = UserHandlerHelper.checkForDependencies(userId, session);
-        if (deps == null)
+
+        for (String userId : userIds)
         {
-            // removes the user
-            UserHandlerHelper.removeUser(loggedInUser, userId);
-            SetDefaultRoleUtil.removeDefaultRoles(userId);
-            ProjectTMTBUsers ptu = new ProjectTMTBUsers();
-            ptu.deleteAllTMTB(userId);
-        }
-        else
-        {
-            CATEGORY.warn("Cannot delete user " + userId +
-                          " because of the following dependencies:\r\n" +
-                          deps);
-            p_request.setAttribute(UserConstants.DEPENDENCIES, deps);
+            if (loggedInUser.getUserId().equals(userId))
+            {
+                CATEGORY.warn(loggedInUser.getUserName()
+                        + " is trying to delete himself, which is not allowed in the system");
+                continue;
+            }
+            String deps = UserHandlerHelper.checkForDependencies(userId,
+                    session);
+            if (deps == null)
+            {
+                // removes the user
+                UserHandlerHelper.removeUser(loggedInUser, userId);
+                SetDefaultRoleUtil.removeDefaultRoles(userId);
+                ProjectTMTBUsers ptu = new ProjectTMTBUsers();
+                ptu.deleteAllTMTB(userId);
+                try
+                {
+                    Collection<?> userParameters = ServerProxy
+                            .getUserParameterManager()
+                            .getUserParameters(userId);
+                    HibernateUtil.delete(userParameters);
+                }
+                catch (Exception e)
+                {
+                    CATEGORY.error("Failed to remove user parameters.", e);
+                }
+            }
+            else
+            {
+                CATEGORY.warn("Cannot delete user " + userId
+                        + " because of the following dependencies:\r\n" + deps);
+                request.setAttribute(UserConstants.DEPENDENCIES, deps);
+            }
         }
     }
 
@@ -318,7 +660,7 @@ public class UserMainHandler
      * Search for users with certain criteria.
      */
     private UserSearchParams searchUsers(HttpServletRequest p_request)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         String buf = p_request.getParameter("nameTypeOptions");
         UserSearchParams params = new UserSearchParams();
@@ -328,50 +670,56 @@ public class UserMainHandler
         params.setNameParam(p_request.getParameter("nameField"));
         params.setSourceLocaleParam(p_request.getParameter("srcLocale"));
         params.setTargetLocaleParam(p_request.getParameter("targLocale"));
-        params.setPermissionGroupParam(p_request.getParameter("permissionGroup"));
+        params.setPermissionGroupParam(p_request
+                .getParameter("permissionGroup"));
         return params;
     }
 
     /**
-     * Before being able to create a User, certain objects must exist.
-     * Check that here.
+     * Before being able to create a User, certain objects must exist. Check
+     * that here.
      */
-    private void checkPreReqData(HttpServletRequest p_request, HttpSession p_session)
-        throws EnvoyServletException
+    private void checkPreReqData(HttpServletRequest p_request,
+            HttpSession p_session) throws EnvoyServletException
     {
-        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
+        String userId = (String) p_session
+                .getAttribute(WebAppConstants.USER_NAME);
         boolean isSuperAdmin = false;
-        try {
+        try
+        {
             isSuperAdmin = UserUtil.isSuperAdmin(userId);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
-        } 
+        }
         if (isSuperAdmin)
         {
             return;
         }
-        
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                                    WebAppConstants.UILOCALE);
+
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
         Vector allSourceLocales = UserHandlerHelper.getAllSourceLocales();
         Vector allActivities = UserHandlerHelper.getAllActivities(uiLocale);
 
         if (allActivities == null || allActivities.size() < 1
-            || allSourceLocales == null || allSourceLocales.size() < 1)
+                || allSourceLocales == null || allSourceLocales.size() < 1)
         {
             ResourceBundle bundle = getBundle(p_session);
             StringBuffer message = new StringBuffer();
             boolean addcomma = false;
             message.append(bundle.getString("msg_prereq_warning_1"));
             message.append(":  ");
-            if(allActivities == null || allActivities.size() < 1)
+            if (allActivities == null || allActivities.size() < 1)
             {
                 message.append(bundle.getString("lb_activity_types"));
                 addcomma = true;
             }
-            if(allSourceLocales == null || allSourceLocales.size() < 1)
+            if (allSourceLocales == null || allSourceLocales.size() < 1)
             {
-                if (addcomma) message.append(", ");
+                if (addcomma)
+                    message.append(", ");
                 message.append(bundle.getString("lb_locale_pairs"));
             }
             message.append(".  ");
@@ -384,37 +732,83 @@ public class UserMainHandler
     /**
      * Get list of all users, sorted appropriately
      */
-    private void dataForTable(HttpServletRequest p_request, HttpSession p_session,
-                              UserSearchParams params)
-        throws RemoteException, NamingException, GeneralException
+    private void dataForTable(HttpServletRequest p_request,
+            HttpSession p_session, UserSearchParams params)
+            throws RemoteException, NamingException, GeneralException
     {
-        Vector users =  UserUtil.getUsersForSearchParams(params);
-        
-        String userId = (String) p_session.getAttribute(WebAppConstants.USER_NAME);
+
+        Vector users = UserUtil.getUsersForSearchParams(params);
+
+        filtrateSuperAdmin(p_session, params, users);
+        SessionManager sessionMgr = (SessionManager) p_session
+                .getAttribute(SESSION_MANAGER);
+        filtrateUsers(users, sessionMgr);
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
+
+        String numOfPerPage = p_request.getParameter("numOfPageSize");
+        if (StringUtil.isNotEmpty(numOfPerPage))
+        {
+            try
+            {
+                NUM_PER_PAGE = Integer.parseInt(numOfPerPage);
+            }
+            catch (Exception e)
+            {
+                NUM_PER_PAGE = Integer.MAX_VALUE;
+            }
+        }
+
+        setTableNavigation(p_request, p_session, users, new UserComparator(
+                uiLocale, getBundle(p_session)), NUM_PER_PAGE,
+                UserConstants.USER_LIST, UserConstants.USER_KEY);
+        User loggedInUser = (User) sessionMgr
+                .getAttribute(WebAppConstants.USER);
+
+        // for GBS-1155.
+        if (!CompanyThreadLocal.getInstance().fromSuperCompany())
+        {
+            p_request.setAttribute("securities",
+                    UserHandlerHelper.getSecurities(users, loggedInUser));
+        }
+
+        sessionMgr.setAttribute("fromSearch", params);
+    }
+
+    private void filtrateSuperAdmin(HttpSession p_session,
+            UserSearchParams params, Vector users) throws RemoteException,
+            NamingException
+    {
+        String userId = (String) p_session
+                .getAttribute(WebAppConstants.USER_NAME);
         boolean isSuperAdmin = false;
         boolean isSuperPM = false;
-        try {
+        try
+        {
             isSuperAdmin = UserUtil.isSuperAdmin(userId);
             if (!isSuperAdmin)
             {
                 isSuperPM = UserUtil.isSuperPM(userId);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
-        } 
+        }
         if (!isSuperAdmin)
         {
             String companyName = null;
             if (isSuperPM)
             {
-                long companyId = Long.parseLong(CompanyThreadLocal.getInstance().getValue());
-                companyName = ServerProxy.getJobHandler().getCompanyById(companyId).getName();
+                companyName = CompanyWrapper
+                        .getCompanyNameById(CompanyThreadLocal.getInstance()
+                                .getValue());
             }
-            else 
+            else
             {
                 companyName = params.getCompanyOfSearcher();
             }
-            
+
             for (Iterator iter = users.iterator(); iter.hasNext();)
             {
                 User user = (User) iter.next();
@@ -424,68 +818,100 @@ public class UserMainHandler
                 }
             }
         }
+    }
 
-        Locale uiLocale = (Locale)p_session.getAttribute(
-                                    WebAppConstants.UILOCALE);
-
-        setTableNavigation(p_request, p_session, users,
-                       new UserComparator(uiLocale, getBundle(p_session)),
-                       10,
-                       UserConstants.USER_LIST, UserConstants.USER_KEY);
-        SessionManager sessionMgr =
-            (SessionManager) p_session.getAttribute(SESSION_MANAGER);
-        User loggedInUser = (User)sessionMgr.getAttribute(WebAppConstants.USER);
-        
-        // for GBS-1155.
-        if (!CompanyThreadLocal.getInstance().fromSuperCompany())
+    private void filtrateUsers(Vector users, SessionManager sessionMgr)
+    {
+        String uProjectFilter = (String) sessionMgr
+                .getAttribute("uProjectFilter");
+        String uPermissionFilter = (String) sessionMgr
+                .getAttribute("uPermissionFilter");
+        String uCompanyFilter = (String) sessionMgr
+                .getAttribute("uCompanyFilter");
+        HashMap<String, String> ProjectNameMap = UserHandlerHelper
+                .getAllPerAndProNameForUser(UserHandlerHelper.PROJECT);
+        HashMap<String, String> PermissionGroupNamesMap = UserHandlerHelper
+                .getAllPerAndProNameForUser(UserHandlerHelper.PERMISSIONGROUP);
+        for (Iterator iter = users.iterator(); iter.hasNext();)
         {
-            p_request.setAttribute("securities",
-                    UserHandlerHelper.getSecurities(users, loggedInUser));
+            User user = (User) iter.next();
+            String pName = user.getCompanyName();
+            if (matchCondition(uCompanyFilter, pName))
+            {
+                iter.remove();
+                continue;
+            }
+
+            pName = ProjectNameMap.get(user.getUserId());
+
+            if (matchCondition(uProjectFilter, pName))
+            {
+                iter.remove();
+                continue;
+            }
+            user.setProjectNames(pName);
+            pName = PermissionGroupNamesMap.get(user.getUserId());
+
+            if (matchCondition(uPermissionFilter, pName))
+            {
+                iter.remove();
+                continue;
+            }
+
+            user.setPermissiongNames(pName);
         }
-        
-        sessionMgr.setAttribute("fromSearch", params);
+    }
+
+    private boolean matchCondition(String uCompanyFilter, String pName)
+    {
+        return StringUtils.isNotEmpty(uCompanyFilter)
+                && !StringUtils
+                        .containsIgnoreCase(pName, uCompanyFilter.trim());
     }
 
     /**
-     * If there have been changes to the Permission Groups for a user,
-     * do the update.
+     * If there have been changes to the Permission Groups for a user, do the
+     * update.
      */
-    private void updatePermissionGroups(ModifyUserWrapper p_wrapper, SessionManager p_sessionMgr)
-        throws EnvoyServletException
+    private void updatePermissionGroups(ModifyUserWrapper p_wrapper,
+            SessionManager p_sessionMgr) throws EnvoyServletException
     {
         ArrayList changed = (ArrayList) p_sessionMgr.getAttribute("userPerms");
-        if (changed == null) return;
-        ArrayList existing = (ArrayList)PermissionHelper.getAllPermissionGroupsForUser(
-                                    p_wrapper.getUserId());
-        if (existing == null && changed.size() ==0) return;
-        
+        if (changed == null)
+            return;
+        ArrayList existing = (ArrayList) PermissionHelper
+                .getAllPermissionGroupsForUser(p_wrapper.getUserId());
+        if (existing == null && changed.size() == 0)
+            return;
+
         User user = p_wrapper.getUser();
         ArrayList list = new ArrayList(1);
         list.add(user.getUserId());
-        try {
+        try
+        {
             PermissionManager manager = Permission.getPermissionManager();
-            if (existing == null) 
+            if (existing == null)
             {
                 // just adding new perm groups
                 for (int i = 0; i < changed.size(); i++)
                 {
-                    PermissionGroup pg = (PermissionGroup)changed.get(i);
+                    PermissionGroup pg = (PermissionGroup) changed.get(i);
                     manager.mapUsersToPermissionGroup(list, pg);
                 }
             }
             else
             {
                 // need to determine what to add and what to remove.
-                // Loop thru old list and see if perm is in new list.  If not,
+                // Loop thru old list and see if perm is in new list. If not,
                 // remove it.
                 for (int i = 0; i < existing.size(); i++)
                 {
-                    PermissionGroup pg = (PermissionGroup)existing.get(i);
+                    PermissionGroup pg = (PermissionGroup) existing.get(i);
                     boolean found = false;
                     for (int j = 0; j < changed.size(); j++)
                     {
-                        PermissionGroup cpg = (PermissionGroup)changed.get(j);
-                        if (pg.getId() == cpg.getId()) 
+                        PermissionGroup cpg = (PermissionGroup) changed.get(j);
+                        if (pg.getId() == cpg.getId())
                         {
                             found = true;
                             break;
@@ -495,16 +921,16 @@ public class UserMainHandler
                         manager.unMapUsersFromPermissionGroup(list, pg);
                 }
 
-                // Loop thru new list and see if perm is in old list.  If not,
+                // Loop thru new list and see if perm is in old list. If not,
                 // add it.
                 for (int i = 0; i < changed.size(); i++)
                 {
                     boolean found = false;
-                    PermissionGroup pg = (PermissionGroup)changed.get(i);
+                    PermissionGroup pg = (PermissionGroup) changed.get(i);
                     for (int j = 0; j < existing.size(); j++)
                     {
-                        PermissionGroup cpg = (PermissionGroup)existing.get(j);
-                        if (pg.getId() == cpg.getId()) 
+                        PermissionGroup cpg = (PermissionGroup) existing.get(j);
+                        if (pg.getId() == cpg.getId())
                         {
                             found = true;
                             break;
@@ -514,7 +940,9 @@ public class UserMainHandler
                         manager.mapUsersToPermissionGroup(list, pg);
                 }
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
         }
     }
@@ -523,23 +951,72 @@ public class UserMainHandler
      * Add Permission Groups to new user.
      */
     private void addPermissionGroups(CreateUserWrapper p_wrapper,
-                         SessionManager p_sessionMgr)
-        throws EnvoyServletException
+            SessionManager p_sessionMgr) throws EnvoyServletException
     {
-        ArrayList userPerms = (ArrayList) p_sessionMgr.getAttribute("userPerms");
-        if (userPerms == null && userPerms.size() ==0) return;
+        ArrayList userPerms = (ArrayList) p_sessionMgr
+                .getAttribute("userPerms");
+        if (userPerms == null && userPerms.size() == 0)
+            return;
         User user = p_wrapper.getUser();
         ArrayList list = new ArrayList(1);
         list.add(user.getUserId());
-        try {
+        try
+        {
             PermissionManager manager = Permission.getPermissionManager();
             for (int i = 0; i < userPerms.size(); i++)
             {
-                PermissionGroup pg = (PermissionGroup)userPerms.get(i);
+                PermissionGroup pg = (PermissionGroup) userPerms.get(i);
                 manager.mapUsersToPermissionGroup(list, pg);
             }
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
         }
     }
+
+    private void handleFilters(UserSearchParams params,
+            HttpServletRequest p_request, SessionManager sessionMgr,
+            String action)
+    {
+        String uNameFilter = (String) p_request.getParameter("uNameFilter");
+        String ufNameFilter = (String) p_request.getParameter("ufNameFilter");
+        String ulNameFilter = (String) p_request.getParameter("ulNameFilter");
+        String uEmailFilter = (String) p_request.getParameter("uEmailFilter");
+        String uCompanyFilter = (String) p_request
+                .getParameter("uCompanyFilter");
+        String uProjectFilter = (String) p_request
+                .getParameter("uProjectFilter");
+        String uPermissionFilter = (String) p_request
+                .getParameter("uPermissionFilter");
+        if (!"search".equals(action)
+                || p_request.getMethod().equalsIgnoreCase(
+                        WebAppConstants.REQUEST_METHOD_GET))
+        {
+            uNameFilter = (String) sessionMgr.getAttribute("uNameFilter");
+            ufNameFilter = (String) sessionMgr.getAttribute("ufNameFilter");
+            ulNameFilter = (String) sessionMgr.getAttribute("ulNameFilter");
+            uEmailFilter = (String) sessionMgr.getAttribute("uEmailFilter");
+            uCompanyFilter = (String) sessionMgr.getAttribute("uCompanyFilter");
+            uProjectFilter = (String) sessionMgr.getAttribute("uProjectFilter");
+            uPermissionFilter = (String) sessionMgr
+                    .getAttribute("uPermissionFilter");
+        }
+        // sessionMgr.setAttribute("tmNameFilter", name == null ? "" : name);
+        // sessionMgr.setAttribute("tmCompanyFilter", company == null ? "" :
+        // company);
+        sessionMgr.setAttribute("uNameFilter", uNameFilter);
+        params.setIdName(uNameFilter);
+        sessionMgr.setAttribute("ufNameFilter", ufNameFilter);
+        params.setFirstName(ufNameFilter);
+        sessionMgr.setAttribute("ulNameFilter", ulNameFilter);
+        params.setLastName(ulNameFilter);
+        sessionMgr.setAttribute("uEmailFilter", uEmailFilter);
+        params.setEmail(uEmailFilter);
+        sessionMgr.setAttribute("uCompanyFilter", uCompanyFilter);
+        // params.setCompany((uCompanyFilter));
+        sessionMgr.setAttribute("uProjectFilter", uProjectFilter);
+        sessionMgr.setAttribute("uPermissionFilter", uPermissionFilter);
+    }
+
 }

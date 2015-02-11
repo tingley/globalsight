@@ -16,17 +16,15 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import com.globalsight.everest.page.SourcePage;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.persistence.PageTmPersistence;
-
-import java.util.Collection;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.sql.Connection;
-
+import com.globalsight.util.GlobalSightLocale;
 
 /**
  * PageTmLeverager is responsible for leveraging Page Tm segments
@@ -36,40 +34,40 @@ class PageTmLeverager
 {
     /**
      * leverage a page from Page Tm
-     *
-     * @param p_sourcePage source page
-     * @param p_leverageDataCenter LeverageDataCenter that contains
-     *        segments that are leveraged.
+     * 
+     * @param p_sourcePage
+     *            source page
+     * @param p_leverageDataCenter
+     *            LeverageDataCenter that contains segments that are leveraged.
      * @return LeverageMatchResults that contains leverage results
      */
-    public LeverageMatchResults leverage(
-        Connection p_connection, SourcePage p_sourcePage,
-        LeverageDataCenter p_leverageDataCenter)
-        throws Exception
+    public LeverageMatchResults leverage(Connection p_connection,
+            SourcePage p_sourcePage, LeverageDataCenter p_leverageDataCenter)
+            throws Exception
     {
         LeverageMatchResults levMatchResults = new LeverageMatchResults();
-        GlobalSightLocale sourceLocale
-            = p_leverageDataCenter.getSourceLocale();
-        
+        GlobalSightLocale sourceLocale = p_leverageDataCenter.getSourceLocale();
+
         PageTmPersistence ptPersistence = new PageTmPersistence(p_connection);
 
         // check if the page has been imported before
-        long tmId = ptPersistence.getPageTmId(
-            p_sourcePage.getExternalPageId(), sourceLocale);
-                
-        if(tmId != 0)
+        long tmId = ptPersistence.getPageTmId(p_sourcePage.getExternalPageId(),
+                sourceLocale);
+
+        if (tmId != 0)
         {
             // classify original source segments to translatable
             // and localizable
             Collection trSegments = new ArrayList();
             Collection loSegments = new ArrayList();
             Iterator itOriginalSegment = p_leverageDataCenter
-                .getOriginalWholeSegments().iterator();
-            while(itOriginalSegment.hasNext())
+                    .getOriginalWholeSegments(p_sourcePage.getCompanyId())
+                    .iterator();
+            while (itOriginalSegment.hasNext())
             {
-                BaseTmTuv originalSegment
-                    = (BaseTmTuv)itOriginalSegment.next();
-                if(originalSegment.isTranslatable())
+                BaseTmTuv originalSegment = (BaseTmTuv) itOriginalSegment
+                        .next();
+                if (originalSegment.isTranslatable())
                 {
                     trSegments.add(originalSegment);
                 }
@@ -79,95 +77,102 @@ class PageTmLeverager
                 }
             }
 
-            LeverageOptions leverageOptions
-                = p_leverageDataCenter.getLeverageOptions();
-                
+            LeverageOptions leverageOptions = p_leverageDataCenter
+                    .getLeverageOptions();
+
             // leverage translatable
-            levMatchResults
-                = leverageTranslatable(ptPersistence, tmId,
+            levMatchResults = leverageTranslatable(ptPersistence, tmId,
                     sourceLocale, trSegments, leverageOptions);
 
             // leverage localizable if the user choose to do so
-            if(leverageOptions.isLeveragingLocalizables())
+            if (leverageOptions.isLeveragingLocalizables())
             {
-                LeverageMatchResults loLevMatchResults
-                    = leverageLocalizable(
-                        ptPersistence, tmId, sourceLocale,
-                        loSegments, leverageOptions);
+                LeverageMatchResults loLevMatchResults = leverageLocalizable(
+                        ptPersistence, tmId, sourceLocale, loSegments,
+                        leverageOptions);
                 levMatchResults.merge(loLevMatchResults);
             }
         }
-        
+
         return levMatchResults;
     }
-    
 
     /**
      * Leverage translatable segments from Page Tm
-     *
-     * @param p_ptPersistence PageTmPersistence 
-     * @param p_tmId Tm id from which segments are leveraged
-     * @param p_sourceLocale source locale
-     * @param p_trSegments Collection of original segments (BaseTmTuv)
+     * 
+     * @param p_ptPersistence
+     *            PageTmPersistence
+     * @param p_tmId
+     *            Tm id from which segments are leveraged
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_trSegments
+     *            Collection of original segments (BaseTmTuv)
      * @return LeverageMatchResults object
      */
     private LeverageMatchResults leverageTranslatable(
-        PageTmPersistence p_ptPersistence, long p_tmId,
-        GlobalSightLocale p_sourceLocale,
-        Collection p_trSegments, LeverageOptions p_leverageOptions)
-        throws Exception
+            PageTmPersistence p_ptPersistence, long p_tmId,
+            GlobalSightLocale p_sourceLocale, Collection p_trSegments,
+            LeverageOptions p_leverageOptions) throws Exception
     {
         return leverageSegments(p_ptPersistence, p_tmId, p_sourceLocale,
-            p_trSegments, true, p_leverageOptions);
+                p_trSegments, true, p_leverageOptions);
     }
-    
+
     /**
      * Leverage localizable segments from Page Tm
-     *
-     * @param p_ptPersistence PageTmPersistence 
-     * @param p_tmId Tm id from which segments are leveraged
-     * @param p_sourceLocale source locale
-     * @param p_loSegments Collection of original segments (BaseTmTuv)
+     * 
+     * @param p_ptPersistence
+     *            PageTmPersistence
+     * @param p_tmId
+     *            Tm id from which segments are leveraged
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_loSegments
+     *            Collection of original segments (BaseTmTuv)
      * @return LeverageMatchResults object
      */
     private LeverageMatchResults leverageLocalizable(
-        PageTmPersistence p_ptPersistence, long p_tmId,
-        GlobalSightLocale p_sourceLocale,
-        Collection p_loSegments, LeverageOptions p_leverageOptions)
-        throws Exception
+            PageTmPersistence p_ptPersistence, long p_tmId,
+            GlobalSightLocale p_sourceLocale, Collection p_loSegments,
+            LeverageOptions p_leverageOptions) throws Exception
     {
         return leverageSegments(p_ptPersistence, p_tmId, p_sourceLocale,
-            p_loSegments, false, p_leverageOptions);
+                p_loSegments, false, p_leverageOptions);
     }
-    
-            
+
     /**
      * Leverage segments from Page Tm
-     *
-     * @param p_ptPersistence PageTmPersistence 
-     * @param p_tmId Tm id from which segments are leveraged
-     * @param p_sourceLocale source locale
-     * @param p_segments Collection of original segments (BaseTmTuv)
-     * @param p_isTranslatable indicates if leverage translatable segments
+     * 
+     * @param p_ptPersistence
+     *            PageTmPersistence
+     * @param p_tmId
+     *            Tm id from which segments are leveraged
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_segments
+     *            Collection of original segments (BaseTmTuv)
+     * @param p_isTranslatable
+     *            indicates if leverage translatable segments
      * @return LeverageMatchResults object
      */
     private LeverageMatchResults leverageSegments(
-        PageTmPersistence p_ptPersistence, long p_tmId,
-        GlobalSightLocale p_sourceLocale, Collection p_segments,
-        boolean p_isTranslatable, LeverageOptions p_leverageOptions)
-        throws Exception
+            PageTmPersistence p_ptPersistence, long p_tmId,
+            GlobalSightLocale p_sourceLocale, Collection p_segments,
+            boolean p_isTranslatable, LeverageOptions p_leverageOptions)
+            throws Exception
     {
         LeverageMatchResults levResults = new LeverageMatchResults();
-        Iterator itLevMatches = p_ptPersistence.leverage(
-            p_tmId, p_sourceLocale, p_segments,
-            p_isTranslatable, p_leverageOptions);
-        while(itLevMatches.hasNext())
+        Iterator itLevMatches = p_ptPersistence
+                .leverage(p_tmId, p_sourceLocale, p_segments, p_isTranslatable,
+                        p_leverageOptions);
+        while (itLevMatches.hasNext())
         {
-            LeverageMatches levMatches = (LeverageMatches)itLevMatches.next();
+            LeverageMatches levMatches = (LeverageMatches) itLevMatches.next();
             levResults.add(levMatches);
         }
-        
+
         return levResults;
     }
-    
+
 }

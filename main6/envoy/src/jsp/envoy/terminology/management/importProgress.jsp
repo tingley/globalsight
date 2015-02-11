@@ -196,7 +196,7 @@ function showProgress(entryCount, percentage, message)
 
   //idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
   {
     idProgressBar.style.minHeight = '15px';
 	idProgressBar.innerHTML='&nbsp';    
@@ -215,7 +215,7 @@ function showProgressReindex(entryCount, percentage, message)
 
   idProgressBar_reindex.style.width = Math.round((percentage / 100) * WIDTH);
   
-  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
   {
     idProgressBar_reindex.style.height = 15;
   }
@@ -232,7 +232,7 @@ function showProgress2Reindex(desc2, percentage2)
 
   idProgressBar2_reindex.style.width = Math.round((percentage2 / 100) * WIDTH);
   
-  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
   {
     idProgressBar2_reindex.style.height = 15;
   }

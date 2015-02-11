@@ -38,7 +38,7 @@ public class TbConcept extends PersistentObject
     private String created_by;
     private Timestamp modify_date;
     private String modify_by;
-    private Set languages = new HashSet();
+    private Set<TbLanguage> languages = new HashSet<TbLanguage>();
     
     public void setId(long p_id)
     {
@@ -129,11 +129,11 @@ public class TbConcept extends PersistentObject
         this.modify_by = modify_by;
     }
     
-    public Set getLanguages() {
+    public Set<TbLanguage> getLanguages() {
         return this.languages;
     }
     
-    public void setLanguages(Set languages) {
+    public void setLanguages(Set<TbLanguage> languages) {
         this.languages = languages;
     }
 }

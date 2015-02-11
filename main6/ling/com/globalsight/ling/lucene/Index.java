@@ -20,6 +20,9 @@ package com.globalsight.ling.lucene;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import org.apache.log4j.Logger;
 
@@ -36,12 +39,15 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.RAMDirectory;
 
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.ling.lucene.analysis.AnalyzerFactory;
 import com.globalsight.ling.lucene.highlight.Highlighter;
 import com.globalsight.ling.lucene.highlight.QueryScorer;
 import com.globalsight.ling.lucene.highlight.SimpleFormatter;
 import com.globalsight.ling.lucene.locks.WriterPreferenceReadWriteLock;
 import com.globalsight.ling.lucene.search.DictionarySimilarity;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 
 /**
@@ -728,9 +734,16 @@ abstract public class Index
     {
         StringBuffer result = new StringBuffer();
 
-        // This constructs "BASE/CATEGORY-dbname/langname-locale-TYPE/"
+        String fileStorageDir = null;
+        if (AmbFileStoragePathUtils.getFileStorageDir() != null){
+            fileStorageDir = AmbFileStoragePathUtils.getFileStorageDir().toString();
+        } else {
+            // When startup server, above invoking can't get file storage,have
+            // to get that manually (GBS-2641).
+            fileStorageDir = getFileStorageDirForLoggingUser();
+        }
 
-        result.append(AmbFileStoragePathUtils.getFileStorageDir())
+        result.append(fileStorageDir)
               .append(File.separatorChar)
               .append(m_category).append('-').append(p_dbname)
               .append(File.separatorChar)
@@ -748,6 +761,41 @@ abstract public class Index
         result.append(File.separatorChar);
 
         return result.toString();
+    }
+    
+    private String getFileStorageDirForLoggingUser()
+    {
+        String fileStorageDir = null;
+
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            connection = DbUtil.getConnection();
+            String companyId = CompanyThreadLocal.getInstance().getValue();
+            String sql = "select value from system_parameter "
+                    + "where name = ? "
+                    + "and company_id = ? ";
+            ps = connection.prepareStatement(sql);
+            ps.setString(1, SystemConfigParamNames.FILE_STORAGE_DIR);
+            ps.setLong(2, Long.parseLong(companyId));
+            rs = ps.executeQuery();
+            if (rs.next()){
+                fileStorageDir = rs.getString(1);
+            }
+            if (fileStorageDir != null){
+                File file = new File(fileStorageDir);
+                file.mkdirs();
+            }
+        } catch (Exception ignore) {
+            
+        } finally {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        return fileStorageDir;
     }
 
     /** Adds a new document to the Lucene index. */

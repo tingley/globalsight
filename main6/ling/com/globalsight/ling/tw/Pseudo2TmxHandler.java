@@ -77,10 +77,25 @@ public class Pseudo2TmxHandler
             return;
         }
 
+        String prefixString = "";
+        String sufferString = "";
+        
         tmxString = m_PseudoData.getInternalTexts().get("["+tagName+"]");
+        
+        while (tmxString == null && tagName.startsWith("[[") && tagName.endsWith("]"))
+        {
+            prefixString += "[";
+            tagName = tagName.substring(2, tagName.length() - 1);
+            sufferString += "]";
+            
+            tmxString = (String)m_PseudoData.m_hPseudo2TmxMap.get(tagName);
+            if (tmxString == null)
+                tmxString = m_PseudoData.getInternalTexts().get("["+tagName+"]");
+        }
+        
         if (tmxString != null)
         {
-            resultTmx.append(tmxString);
+            resultTmx.append(prefixString).append(tmxString).append(sufferString);
             return;
         }
 

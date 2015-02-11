@@ -24,21 +24,21 @@ import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 /**
- * DynamicLeveragedSegment represents a leveraged segment by the
- * dynamic leveraging.
+ * DynamicLeveragedSegment represents a leveraged segment by the dynamic
+ * leveraging.
  */
-public class DynamicLeveragedSegment
-    implements Serializable, SidComparable
+public class DynamicLeveragedSegment implements Serializable, SidComparable
 {
     private static final long serialVersionUID = -2695320949652700166L;
-    
+
     // match category definition
     public static final int FROM_GOLD_TM = 1;
     public static final int FROM_IN_PROGRESS_TM_SAME_JOB = 2;
     public static final int FROM_IN_PROGRESS_TM_OTHER_JOB = 3;
-    
+
     // matched source and target text in GXML
     private String m_matchedSourceText;
     private String m_matchedTargetText;
@@ -47,7 +47,7 @@ public class DynamicLeveragedSegment
     private GlobalSightLocale m_sourceLocale;
     private GlobalSightLocale m_targetLocale;
 
-    // match type: 
+    // match type:
     private MatchState m_matchType;
 
     private Date modifyDate;
@@ -63,7 +63,7 @@ public class DynamicLeveragedSegment
     private long m_matchedTuvId;
     private int m_orderNum;
     private String mtName = null;
-     
+
     private long m_tmId;
     private String orgSid = null;
     private String sid = null;
@@ -71,18 +71,28 @@ public class DynamicLeveragedSegment
     // These are used for saving the match TUV information
     private String matchedTuvJobName = null;
     private TuvBasicInfo matchedTuvBasicInfo = null;
+
     /**
      * Constructor
-     *
-     * @param p_matchedSourceText matched source text
-     * @param p_matchedTargetText matched target text
-     * @param p_sourceLocale source locale
-     * @param p_targetLocale target locale
-     * @param p_matchType match type
-     * @param p_score match score
-     * @param p_matchCategory match category
-     * @param p_tmId id of TM that contained the matched TUV
-     * @param p_matchedTuvId matched TUV id
+     * 
+     * @param p_matchedSourceText
+     *            matched source text
+     * @param p_matchedTargetText
+     *            matched target text
+     * @param p_sourceLocale
+     *            source locale
+     * @param p_targetLocale
+     *            target locale
+     * @param p_matchType
+     *            match type
+     * @param p_score
+     *            match score
+     * @param p_matchCategory
+     *            match category
+     * @param p_tmId
+     *            id of TM that contained the matched TUV
+     * @param p_matchedTuvId
+     *            matched TUV id
      */
     public DynamicLeveragedSegment(String p_matchedSourceText,
             String p_matchedTargetText, GlobalSightLocale p_sourceLocale,
@@ -98,27 +108,23 @@ public class DynamicLeveragedSegment
         m_matchCategory = p_matchCategory;
         m_tmId = p_tmId;
         m_matchedTuvId = p_matchedTuvId;
-//        m_tmIndex = tmIndex;
+        // m_tmIndex = tmIndex;
     }
-
 
     public String getMtName()
     {
         return mtName;
     }
 
-
     public void setMtName(String mtName)
     {
         this.mtName = mtName;
     }
 
-
     public String getMatchedSourceText()
     {
         return m_matchedSourceText;
     }
-
 
     public String getMatchedTargetText()
     {
@@ -129,63 +135,64 @@ public class DynamicLeveragedSegment
     {
         return m_sourceLocale;
     }
-    
+
     public GlobalSightLocale getTargetLocale()
     {
         return m_targetLocale;
     }
-    
+
     public MatchState getMatchType()
     {
         return m_matchType;
     }
-    
+
     public float getScore()
     {
         return m_score;
     }
-    
+
     public int getMatchCategory()
     {
         return m_matchCategory;
     }
-    
-    public long getTmId() 
+
+    public long getTmId()
     {
         return m_tmId;
     }
-    
+
     public long getMatchedTuvId()
     {
         return m_matchedTuvId;
     }
-    
+
     public Date getModifyDate()
     {
         if (modifyDate == null)
         {
             if (m_matchCategory == FROM_GOLD_TM)
             {
-                modifyDate = TmUtil.getModifyDateForTuv(m_tmId, getMatchedTuvId());
+                modifyDate = TmUtil.getModifyDateForTuv(m_tmId,
+                        getMatchedTuvId());
             }
         }
         return modifyDate;
     }
-    
+
     public int getTmIndex()
     {
-    	return m_tmIndex;
+        return m_tmIndex;
     }
-    
+
     public void setTmIndex(int tmIndex)
     {
-    	m_tmIndex = tmIndex;
+        m_tmIndex = tmIndex;
     }
-    
+
     public String toDebugString()
     {
         StringBuffer sb = new StringBuffer();
-        
+
         sb.append("Score: " + m_score + "\n");
         sb.append("Matched source: " + m_matchedSourceText + "\n");
         sb.append("Matched target: " + m_matchedTargetText + "\n");
@@ -194,11 +201,11 @@ public class DynamicLeveragedSegment
         sb.append("Match type: " + m_matchType.getName() + "\n");
         sb.append("TM Index: " + m_tmIndex);
         String matchCategory = null;
-        if(m_matchCategory == FROM_GOLD_TM)
+        if (m_matchCategory == FROM_GOLD_TM)
         {
             matchCategory = "FROM_GOLD_TM";
         }
-        else if(m_matchCategory == FROM_IN_PROGRESS_TM_SAME_JOB)
+        else if (m_matchCategory == FROM_IN_PROGRESS_TM_SAME_JOB)
         {
             matchCategory = "FROM_IN_PROGRESS_TM_SAME_JOB";
         }
@@ -206,13 +213,12 @@ public class DynamicLeveragedSegment
         {
             matchCategory = "FROM_IN_PROGRESS_TM_OTHER_JOB";
         }
-        
+
         sb.append("Match category: " + matchCategory + "\n");
         sb.append("Matched TUV id: " + m_matchedTuvId + "\n");
 
         return sb.toString();
     }
-
 
     public boolean equals(Object obj)
     {
@@ -220,22 +226,23 @@ public class DynamicLeveragedSegment
 
         if (obj instanceof DynamicLeveragedSegment)
         {
-            DynamicLeveragedSegment that = (DynamicLeveragedSegment)obj;
-            
-            ret = (this.m_score == that.m_score)
-                && this.m_matchedTargetText.equals(that.m_matchedTargetText) 
-                && (this.m_tmIndex == that.m_tmIndex);
+            DynamicLeveragedSegment that = (DynamicLeveragedSegment) obj;
+            String thisScore = StringUtil.formatPercent(this.m_score, 2);
+            String thatScore = StringUtil.formatPercent(that.m_score, 2);
+            ret = thisScore.equalsIgnoreCase(thatScore)
+                    && this.m_matchedTargetText
+                            .equals(that.m_matchedTargetText)
+                    && (this.m_tmIndex == that.m_tmIndex);
         }
 
         return ret;
     }
 
-
     public int hashCode()
     {
-        return (int)(m_score + m_matchedTargetText.hashCode() + m_tmIndex);
+        return (int) (m_score + m_matchedTargetText.hashCode() + m_tmIndex);
     }
-    
+
     public String getSid()
     {
         if (sid == null)
@@ -246,7 +253,7 @@ public class DynamicLeveragedSegment
         return sid;
     }
 
-    public String getOrgSid()
+    public String getOrgSid(String companyId)
     {
         return orgSid;
     }
@@ -255,15 +262,15 @@ public class DynamicLeveragedSegment
     {
         this.orgSid = orgSid;
     }
-    
+
     public int getOrderNum()
     {
-    	return this.m_orderNum;
+        return this.m_orderNum;
     }
-    
+
     public void setOrderNum(int p_orderNum)
     {
-    	this.m_orderNum = p_orderNum;
+        this.m_orderNum = p_orderNum;
     }
 
     public String getMatchedTuvJobName()

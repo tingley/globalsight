@@ -44,8 +44,7 @@ public class PatchUtil extends InstallUtil
             }
             catch (IOException e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
 

@@ -38,6 +38,7 @@ namespace GlobalSight.Office2007Converters
 	/// HTML->DOC
 	/// RTF->HTML
 	/// HTML->RTF
+    /// HTML->PDF
 	/// </summary>
 	public class WordConverterImpl : GlobalSight.Common.Converter
 	{
@@ -59,6 +60,7 @@ namespace GlobalSight.Office2007Converters
 		public const string RTF = "rtf";
         public const string DOC = "doc";
         public const string DOCX = "docx";
+        public const string PDF = "pdf";
 
 		//
 		// Members
@@ -112,6 +114,12 @@ namespace GlobalSight.Office2007Converters
 					0, p_fileName.Length - FILE_EXT_LEN) + "status";
 				DetermineConversionValues(p_fileName);
 
+                if (m_newFileName.EndsWith(PDF))
+                {
+                    m_statusFileName = p_fileName.Substring(
+                        0, p_fileName.Length - FILE_EXT_LEN) + "pdf.status";
+                }
+
 				m_log.Log("Processing file " + m_originalFileName);
 
 				CreateWordAppClass();
@@ -145,6 +153,11 @@ namespace GlobalSight.Office2007Converters
 		{
 			return m_fileExtensionSearchPattern;
 		}
+
+        public string GetTestFileToWatch()
+        {
+            return "docx*.test";
+        }
 
 		/// <summary>
 		/// Saves the document out with the appropriate new filename and format.
@@ -214,10 +227,18 @@ namespace GlobalSight.Office2007Converters
                 ref missing, ref missing, ref noEncodingDialog, ref missing);
 
 			m_wordDoc.Activate();
-			m_wordDoc.WebOptions.Encoding = Office_Core.MsoEncoding.msoEncodingUTF8;
-			m_wordDoc.WebOptions.BrowserLevel =
-				Word_Class.WdBrowserLevel.wdBrowserLevelMicrosoftInternetExplorer5;
-			m_wordDoc.WebOptions.OptimizeForBrowser = false;
+
+            try
+            {
+                m_wordDoc.WebOptions.Encoding = Office_Core.MsoEncoding.msoEncodingUTF8;
+                m_wordDoc.WebOptions.BrowserLevel =
+                    Word_Class.WdBrowserLevel.wdBrowserLevelMicrosoftInternetExplorer5;
+                m_wordDoc.WebOptions.OptimizeForBrowser = false;
+            }
+            catch (Exception ex)
+            {
+                m_log.Log("[Warn] Get web options of word document failed : " + ex.ToString());
+            }
 		}
 
 		/// <summary>
@@ -377,6 +398,11 @@ namespace GlobalSight.Office2007Converters
 				m_newFormatType = Word_Class.WdSaveFormat.wdFormatRTF;
 				m_newFileName = baseFileName + RTF;
 			}
+            else if (p_convertTo.Equals(PDF))
+            {
+                m_newFormatType = Word_Class.WdSaveFormat.wdFormatPDF;
+                m_newFileName = baseFileName + PDF;
+            }
 		}
 
 		/// <summary>

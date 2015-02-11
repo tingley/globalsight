@@ -7,7 +7,7 @@ public class JobEditors {
 
 	
 	//Main Editor
-	public static final String MainEditor_TAG="MainEditor";
+	public static final String MAIN_EDITOR_TAG="MainEditor";
 	public static final String Unlock_LINK="link=Unlock";
 	public static final String Lock_LINK="link=Lock";
 	public static final String Search_BUTTON="link=Search";
@@ -22,12 +22,12 @@ public class JobEditors {
 	public static final String Translation_TABLE="//body[@id='idBody']/table[1]/tbody[1]";
 
 	public static final String Content_WINDOW="name=content";
-	public static final String Menu_WINDOW="name=menu";
+	public static final String MENU_WINDOW="name=menu";
 	public static final String Source_FRAME="source";
-	public static final String Target_FRAME="target";
-	public static final String content_FRAME="content";
+	public static final String TARGET_FRAME="target";
+	public static final String CONTENT_FRAME="content";
     public static final String RelativeUp_FRAME="relative=up";
-    public static final String RelativeTop_FRAME="relative=top";
+    public static final String RELATIVE_TOP_FRAME="relative=top";
     public static final String Review_FRAME="review";
     
     public static final String Segments_TABLE="//tbody[@id='idPageHtml']";
@@ -38,19 +38,19 @@ public class JobEditors {
 	public static final String Layout3_IMG="//div[@id='main']/table/tbody/tr/td[1]/table/tbody/tr/td[2]/a[3]/img";
 	
 	//Segment Editor
-	public static final String SegmentEditor_TAG="SegmentEditor";
+	public static final String SEGMENT_EDITOR_TAG="SegmentEditor";
 	public static final String PreviousSegment_LINK="link=Previous Segment";
 	public static final String NextSegment_LINK="link=Next Segment";
 	public static final String Save_LINK="link=Save";
 	
-	public static final String Edit_FRAME="edit";
+	public static final String EDITOR_FRAME="edit";
 	
-	public static final String Edit_TextFiled="idBody";
+	public static final String EDIT_TEXT= "name=targetText";//"idBody";
 	
 	public static final String Revert_LINK="link=Revert";
 	public static final String Details_LINK="link=Details";
 	public static final String Options_LINK_Segment="link=Options";
-	public static final String Close_LINK_Segment="link=Close";
+	public static final String SEGMENT_CLOSE_LINK="link=Close";
 	public static final String Help_LINK_Segment="link=Help";
 	
 	//CommentEditor
@@ -67,9 +67,9 @@ public class JobEditors {
 	
 	
 	//Inline Editor
-	public static final String InlineEditor_TAG="topFrame";
-	public static final String SaveChanges_BUTTON="idImgSetClose";
-	public static final String Close_BUTTON_Inline="idCloseEditor";
-	public static final String Segments_TABLE_Inline="//div[@id='idSegments']";
-	public static final String iEditor_FRAME="idEditor2";
+	public static final String INLINE_EDITOR_TAG="topFrame";
+	public static final String CHANGE_SAVE_BUTTON="idImgSetClose";
+	public static final String INLINE_CLOSE_BUTTON="idCloseEditor";
+	public static final String INLINE_SEGMENT_TABLE="//div[@id='idSegments']";
+	public static final String INLINE_EDITOR_FRAME="idEditor2";
 }

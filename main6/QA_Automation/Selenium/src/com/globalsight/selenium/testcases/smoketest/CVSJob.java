@@ -4,8 +4,8 @@ import java.io.File;
 import junit.framework.Assert;
 import org.testng.annotations.Test;
 import com.globalsight.selenium.functions.DownloadFileRead.FileRead;
-import com.globalsight.selenium.properties.ConfigUtil;
-
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /**
  * This class is used for test the job result, depend on the Prepare Creating
@@ -17,10 +17,10 @@ import com.globalsight.selenium.properties.ConfigUtil;
  * @author leon
  * 
  */
-public class CVSJob
-{ 
+public class CVSJob extends BaseTestCase
+{
     @Test
-    public void CVSJobCheck()
+    public void checkCVSJob()
     {
         String cvsServerHost = ConfigUtil.getConfigData("CVSServer_HOST");
         String cvsSharedDirectory = "\\\\" + cvsServerHost
@@ -78,7 +78,6 @@ public class CVSJob
         subfolder2subfolder02.delete();
         folder2folderdifferentmodule.delete();
         subfolder2subfolderdifferentmodule01.delete();
-        subfolder2subfolderdifferentmodule02.delete();            
+        subfolder2subfolderdifferentmodule02.delete();
     }
-
 }

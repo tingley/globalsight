@@ -25,6 +25,8 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -32,10 +34,12 @@ import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.OfflineEditHelper;
+import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tw.HtmlTableWriter;
-import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.SegmentUtil2;
 
 /**
@@ -69,6 +73,7 @@ public class OfflineSegmentData implements Serializable
     private boolean m_targetHasBeenEdited = false;
     private boolean m_hasTerminology = false;
     private boolean m_hasTMMatches = false;
+    private boolean m_hasMTMatches = false;
 
     // values for a target entry (parent or subflow)
     private Long m_trgTuvId = null;
@@ -80,8 +85,11 @@ public class OfflineSegmentData implements Serializable
     private int m_matchTypeId = AmbassadorDwUpConstants.MATCH_TYPE_UNDEFINED;
     private boolean m_touched = false;
     private boolean m_isCopyOfSource = false;
+    private boolean m_isLastSegment = false;
     private boolean m_isTuStartOfNewPara = false;
     private boolean m_refFound = false;
+    private String displayPageName = null;
+    private long pageId = -1;
 
     // list of trailing segments that are merged to this - the first segment.
     private ArrayList m_mergedSegIds = null;
@@ -102,7 +110,7 @@ public class OfflineSegmentData implements Serializable
 
     // For downloading tmx file
     private Tuv m_targetTuv = null;
-    
+
     // For in-context match
     private Tuv m_sourceTuv = null;
 
@@ -349,7 +357,24 @@ public class OfflineSegmentData implements Serializable
     public void setOriginalFuzzyLevergeMatchList(List p_list)
     {
         m_originalFuzzyLeverageMatchList = p_list;
-        m_hasTMMatches = (p_list != null && p_list.size() > 0);
+        if (p_list != null && p_list.size() > 0)
+        {
+			for (int i = 0; i < p_list.size(); i++)
+        	{
+        		LeverageMatch lm = (LeverageMatch) p_list.get(i);
+        		if (!StringUtil.isEmpty(lm.getMtName()))
+        		{
+        			m_hasMTMatches = true;
+        		}
+        		else
+        		{
+        			m_hasTMMatches = true;
+        		}
+        		// break for performance.
+				if (m_hasTMMatches && m_hasMTMatches)
+					break;
+        	}
+        }
     }
 
     /**
@@ -428,7 +453,42 @@ public class OfflineSegmentData implements Serializable
      */
     public void setDisplayTargetText(String p_newTargetText)
     {
+        Pattern p = Pattern
+                .compile("^\\s*0\\s*>.*?<\\s*\\}\\s*\\d+\\s*\\{\\s*>.*?<\\s*0\\s*\\}");
+        Matcher m = p.matcher(p_newTargetText);
+        if (m.find())
+            p_newTargetText = "{" + p_newTargetText;
+
+        p_newTargetText = changeLF(p_newTargetText, "[LF]");
+        p_newTargetText = changeLF(p_newTargetText, "[lF]");
+        p_newTargetText = changeLF(p_newTargetText, "[Lf]");
+        p_newTargetText = changeLF(p_newTargetText, "[lf]");
         m_displayTargetText = new StringBuffer(p_newTargetText);
+    }
+
+    private String changeLF(String s, String lf)
+    {
+        int i = s.indexOf(lf);
+        while (i > -1)
+        {
+            int x = i - 1;
+            for (; x > -1; x--)
+            {
+                if ('[' != s.charAt(x))
+                {
+                    break;
+                }
+            }
+
+            if ((i - x) % 2 != 0)
+            {
+                s = s.substring(0, i) + '\n' + s.substring(i + 4);
+            }
+
+            i = s.indexOf(lf, i + 1);
+        }
+
+        return s;
     }
 
     /**
@@ -451,8 +511,8 @@ public class OfflineSegmentData implements Serializable
     /**
      * Sets the PTag to native hashtable.
      * 
-     * @param p_Map -
-     *            the map as a {PTag - Native} hash.
+     * @param p_Map
+     *            - the map as a {PTag - Native} hash.
      */
     public void setPTag2NativeMap(Hashtable p_Map)
     {
@@ -488,6 +548,11 @@ public class OfflineSegmentData implements Serializable
         m_isCopyOfSource = p_isCopy;
     }
 
+    public void setLastSegment(boolean p_isLastSegment)
+    {
+        m_isLastSegment = p_isLastSegment;
+    }
+
     public void setIsStartOfNewPara(boolean p_isStartOfNewPara)
     {
         m_isTuStartOfNewPara = p_isStartOfNewPara;
@@ -496,6 +561,11 @@ public class OfflineSegmentData implements Serializable
     public boolean isCopyOfSource()
     {
         return m_isCopyOfSource;
+    }
+
+    public boolean isLastSegment()
+    {
+        return m_isLastSegment;
     }
 
     public boolean isStartOfNewPara()
@@ -706,6 +776,11 @@ public class OfflineSegmentData implements Serializable
     public boolean hasTMMatches()
     {
         return m_hasTMMatches;
+    }
+
+    public boolean hasMTMatches()
+    {
+    	return m_hasMTMatches;
     }
 
     /**
@@ -979,23 +1054,51 @@ public class OfflineSegmentData implements Serializable
     {
         m_sourceTuv = tuv;
     }
-    
-    public Date getTargetTuvModifyDate()
+
+    public Date getTargetTuvModifyDate(String companyId)
     {
         if (m_targetTuv != null)
         {
             return m_targetTuv.getLastModified();
         }
-        
+
         if (m_trgTuvId > 0)
         {
-            TuvImpl tuv = HibernateUtil.get(TuvImpl.class, m_trgTuvId);
+            TuvImpl tuv = null;
+            try
+            {
+                tuv = SegmentTuvUtil.getTuvById(m_trgTuvId, companyId);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e.getMessage(), e);
+            }
             if (tuv != null)
             {
                 return tuv.getLastModified();
             }
         }
-        
+
         return new Date();
+    }
+    
+    public void setDisplayPageName(String pagename)
+    {
+        displayPageName = pagename;
+    }
+
+    public String getDisplayPageName()
+    {
+        return displayPageName;
+    }
+    
+    public void setPageId(long pageid)
+    {
+        pageId = pageid;
+    }
+
+    public long getPageId()
+    {
+        return pageId;
     }
 }

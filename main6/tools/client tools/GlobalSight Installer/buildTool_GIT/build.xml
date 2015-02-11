@@ -1,0 +1,5 @@
+<project name="Installer" default="build" basedir=".">
+	<target name="build">
+		<javac encoding="ISO-8859-1"  debug="on" target="1.6" classpath=".:lib/log4j.jar:lib/commons-codec-1.3.jar" srcdir="src" destdir="." includes="**" />
+	</target>
+</project>

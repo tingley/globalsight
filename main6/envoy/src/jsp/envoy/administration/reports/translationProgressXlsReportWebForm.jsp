@@ -156,6 +156,10 @@ function submitForm()
 				stateList.add(Job.DISPATCHED);
 				stateList.add(Job.LOCALIZED);
 				stateList.add(Job.EXPORTED);
+		        stateList.add(Job.READY_TO_BE_DISPATCHED);
+		        stateList.add(Job.EXPORT_FAIL);
+		        stateList.add(Job.ARCHIVED);
+
 				Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(
 						stateList);
 				ArrayList jobList = new ArrayList(jobs);

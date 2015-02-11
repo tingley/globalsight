@@ -134,51 +134,29 @@ public class ModifyAoMtInfoHandler extends PageHandler implements
         String engine = p_request.getParameter(TMProfileConstants.MT_ENGINE);
         tmProfile.setMtEngine(engine);
         // mt override non-exact matches under threshold
-        String overrideNonExactMatches = p_request
-                .getParameter(TMProfileConstants.MT_OVERRIDE_MATCHES);
-        if (overrideNonExactMatches == null
-                || !"on".equals(overrideNonExactMatches))
+        String useMT = p_request.getParameter(TMProfileConstants.MT_USE_MT);
+        if (useMT == null
+                || !"on".equals(useMT))
         {
-            tmProfile.setOverrideNonExactMatches(false);
+            tmProfile.setUseMT(false);
         }
         else
         {
-            tmProfile.setOverrideNonExactMatches(true);
+            tmProfile.setUseMT(true);
         }
-        // auto commit to tm
-        String autoCommitToTM = p_request
-                .getParameter(TMProfileConstants.MT_AUTOCOMMIT_TO_TM);
-        if (autoCommitToTM == null || !"on".equals(autoCommitToTM))
-        {
-            tmProfile.setAutoCommitToTM(false);
+
+        // MtConfidenceScore
+        String mtConfidenceScore = p_request.getParameter("mtConfidenceScore");
+        long long_mtConfidenceScore = 0;
+        try {
+        	long_mtConfidenceScore = Long.parseLong(mtConfidenceScore);
+        	if (long_mtConfidenceScore < 0 || long_mtConfidenceScore > 100) {
+        		long_mtConfidenceScore = 0;
+        	}
+        } catch (Exception ex) {
+
         }
-        else
-        {
-            tmProfile.setAutoCommitToTM(true);
-        }
-        // isMtSensitiveLeveraging
-        String isMtSensitiveLeveraging = p_request.getParameter("mtLeveraging");
-        if (isMtSensitiveLeveraging == null
-                || !"on".equals(isMtSensitiveLeveraging))
-        {
-            tmProfile.setIsMTSensitiveLeveraging(false);
-        }
-        else
-        {
-            tmProfile.setIsMTSensitiveLeveraging(true);
-        }
-        // MtSensitivePenalty
-        String mtSensitivePenalty = p_request
-                .getParameter("mtSensitivePenalty");
-        long long_mtSensitivePenalty = 1;
-        try
-        {
-            long_mtSensitivePenalty = Long.parseLong(mtSensitivePenalty);
-        }
-        catch (Exception ex)
-        {
-        }
-        tmProfile.setMtSensitivePenalty(long_mtSensitivePenalty);
+        tmProfile.setMtConfidenceScore(long_mtConfidenceScore);
 
         // show in segment editor
         String showInEditor = p_request
@@ -234,7 +212,8 @@ public class ModifyAoMtInfoHandler extends PageHandler implements
 
             String aoMtPassword = p_request
                     .getParameter(TMProfileConstants.MT_AO_PASSWORD);
-            if (aoMtPassword != null && !"".equals(aoMtPassword.trim()))
+            if (aoMtPassword != null && !"".equals(aoMtPassword.trim())
+                    && TMProfileHandlerHelper.checkPassword(aoMtPassword))
             {
                 tmProfile.setAoMtPassword(aoMtPassword);
             }

@@ -15,6 +15,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.SkipActivityVo;
+import com.globalsight.util.FormUtil;
 
 public class WorkflowSkipHandler extends PageHandler
 {
@@ -46,6 +47,7 @@ public class WorkflowSkipHandler extends PageHandler
                 .getLocalActivity(workflowIds, uiLocale);
 
         p_request.setAttribute("skiplist", list);
+        FormUtil.addSubmitToken(p_request, FormUtil.Forms.SKIP_ACTIVITIES);
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);

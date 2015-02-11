@@ -61,6 +61,9 @@
 
         <property name="companyId" length="22" column="COMPANY_ID"
             type="string" not-null="true" unique="false" />
+         
+        <property name="isUploading" length="1" column="IS_UPLOADING"
+            type="character" not-null="false" unique="false" />
 
         <bag name="ratings" inverse="true" cascade="save-update">
             <key column="TASK_ID" />

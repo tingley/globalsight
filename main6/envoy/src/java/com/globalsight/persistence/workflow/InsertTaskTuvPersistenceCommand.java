@@ -96,7 +96,7 @@ public class InsertTaskTuvPersistenceCommand
             m_psInsertTaskTuv.setLong(1, taskTuv.getCurrentTuvId());
             m_psInsertTaskTuv.setLong(2, taskTuv.getTaskId());
             m_psInsertTaskTuv.setLong(3, taskTuv.getVersion());
-            m_psInsertTaskTuv.setLong(4, taskTuv.getPreviousTuv().getId());
+            m_psInsertTaskTuv.setLong(4, taskTuv.getPreviousTuvId());
             m_psInsertTaskTuv.setString(5, taskTuv.getTaskName());
 
             m_psInsertTaskTuv.addBatch();

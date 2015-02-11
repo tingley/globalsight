@@ -98,13 +98,15 @@ function getText(node)
 function setProgressData(
     counter, percentage, error, replacingMessage, appendingMessage)
 {
+	var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
+	var isChrome = window.navigator.userAgent.indexOf("Chrome")>0;
     // set data to the page
     c_progressBarText.innerHTML = c_progressTextFunc(counter, percentage);
 
     c_progressBar.style.width
         = Math.round((percentage / 100) * c_progressBarWidth);
         
-    if(window.navigator.userAgent.indexOf("Firefox")>0) {
+    if(isFirefox || isChrome) {
      c_progressBar.style.height = 16;
     }     
 

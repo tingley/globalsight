@@ -15,13 +15,14 @@
 .mainHeadingWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:18pt; font-weight:bold; color:#FFFFFF}
 
 .standardText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt}
+.standardTextNew {font-family:Verdana,Arial;font-size: 9pt;}
 .standardTextItalic {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; font-style:italic}
 .standardTextWhite {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#FFFFFF}
 
 .helpText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 7pt}
 .helpTitle {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 8pt; font-weight:bold}
 
-.warningText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#FF0000}
+.warningText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#FF0000;font-family: Arial, Helvetica, sans-serif;font-size: 9pt;}
 .greenText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 9pt; color:#009966}
 
 .readingText {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 10pt}
@@ -40,7 +41,8 @@
 
 .iconHREF {text-decoration:none}
 
-.editorSegment {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; color:blue}
+
+.editorSegment, .editorSegmentRepetition{font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; color:blue}
 .editorSegment:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; color:blue}
 .editorSegmentExact {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#CCFFCC; color:blue}
 .editorSegmentExact:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#CCFFCC; color:blue}
@@ -52,3 +54,4 @@
 
 .glossaryDateSize {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size: 8pt; font-style:italic}
 .smallSelectHREFBlue {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:7pt; color:blue}
+.tip{position:absolute;border:1px solid #000000;display:none;background:#FFFFE1}

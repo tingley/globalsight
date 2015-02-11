@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
+import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
+import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
@@ -75,7 +77,7 @@ public class ModifyTMProfileHandler extends PageHandler implements
         HttpSession session = p_request.getSession();
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        if (p_request.getParameter(WebAppConstants.RADIO_BUTTON) == null
+        if (p_request.getParameter(TMProfileConstants.TM_PROFILE_ID) == null
                 || p_request.getMethod().equalsIgnoreCase(
                         WebAppConstants.REQUEST_METHOD_GET))
         {
@@ -180,7 +182,7 @@ public class ModifyTMProfileHandler extends PageHandler implements
             throws EnvoyServletException
     {
         // get the template id first (for edit, or duplicate actions)
-        String id = (String) p_request.getParameter(WebAppConstants.RADIO_BUTTON);
+        String id = (String) p_request.getParameter(TMProfileConstants.TM_PROFILE_ID);
         if (id != null)
         {
             addTMProfileToRequest(p_request, id);
@@ -223,5 +225,11 @@ public class ModifyTMProfileHandler extends PageHandler implements
         // Action type (edit or duplicate)
         String actionType = (String) p_request.getParameter(ACTION);
         sessionMgr.setAttribute(ACTION, actionType);
+        
+        List<TMPAttribute> tmpas = tmProfile.getAllTMPAttributes();
+        List<String> allAtt = TMPAttributeManager.getAvailableAttributenames(tmProfile);
+        
+        p_request.setAttribute(TMP_AVAILABLE_ATTS, TMPAttributeManager.toOneStr(allAtt));
+        p_request.setAttribute(TMP_TMP_ATTS, TMPAttributeManager.toOne(tmpas));
     }
 }

@@ -73,7 +73,7 @@ public class AddSourceFileMDB extends GenericQueueMDB
             }
             catch (JMSException e1)
             {
-                logger.error(e1);
+                logger.error(e1.getMessage(), e1);
                 return;
             }
             
@@ -199,7 +199,7 @@ public class AddSourceFileMDB extends GenericQueueMDB
                 }
                 catch (Exception e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                 }
             }
         }

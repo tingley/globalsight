@@ -33,6 +33,8 @@ import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConstants;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.common.srccomment.SrcCmtXmlComment;
+import com.globalsight.ling.common.srccomment.SrcCmtXmlTag;
 
 public class XmlFilterHelper
 {
@@ -379,6 +381,17 @@ public class XmlFilterHelper
             return m_xmlFilterConfigParser.getEmptyTagFormat() == XmlFilterConstants.EMPTY_TAG_FORMAT_CLOSE;
         }
 
+        return false;
+    }
+
+    public boolean preserveEmptyTag()
+    {
+        if (!isConfigParserNull())
+        {
+            return m_xmlFilterConfigParser.getEmptyTagFormat() == XmlFilterConstants.EMPTY_TAG_FORMAT_PRESERVE;
+        }
+
+        // default preserve empty tag as source if not using a filter
         return true;
     }
 
@@ -546,6 +559,13 @@ public class XmlFilterHelper
                 // internal tag
                 List<XmlFilterTag> internalTag = getXmlFilterTagsFromXml(XmlFilterConstants.NODE_INTERNAL_TAG);
                 tags.setIntenalTag(internalTag);
+
+                // src comment
+                List<SrcCmtXmlComment> srcCmtXmlComment = getSrcCmtXmlCommentFromXml(XmlFilterConstants.NODE_SRCCMT_XMLCOMMENT);
+                tags.setSrcCmtXmlComment(srcCmtXmlComment);
+
+                List<SrcCmtXmlTag> srcCmtXmlTag = getSrcCmtXmlTagFromXml(XmlFilterConstants.NODE_SRCCMT_XMLTAG);
+                tags.setSrcCmtXmlTag(srcCmtXmlTag);
             }
         }
 
@@ -772,6 +792,66 @@ public class XmlFilterHelper
                     if (isEnabledTag(tagElement))
                     {
                         tags.add(new XmlFilterProcessIns(tagElement));
+                    }
+                }
+            }
+        }
+
+        return tags;
+    }
+
+    private List<SrcCmtXmlComment> getSrcCmtXmlCommentFromXml(String nodename)
+    {
+        List<SrcCmtXmlComment> tags = new ArrayList<SrcCmtXmlComment>();
+        Element element = m_xmlFilterConfigParser.getSingleElement(nodename);
+
+        if (element == null)
+        {
+            return tags;
+        }
+
+        NodeList nodes = element.getElementsByTagName("array");
+        if (nodes != null && nodes.getLength() > 0)
+        {
+            for (int i = 0; i < nodes.getLength(); i++)
+            {
+                Node tagNode = nodes.item(i);
+                if (tagNode.getNodeType() == Node.ELEMENT_NODE)
+                {
+                    Element tagElement = (Element) tagNode;
+                    if (isEnabledTag(tagElement))
+                    {
+                        tags.add(SrcCmtXmlComment.initFromElement(tagElement));
+                    }
+                }
+            }
+        }
+
+        return tags;
+    }
+
+    private List<SrcCmtXmlTag> getSrcCmtXmlTagFromXml(String nodename)
+    {
+        List<SrcCmtXmlTag> tags = new ArrayList<SrcCmtXmlTag>();
+        Element element = m_xmlFilterConfigParser.getSingleElement(nodename);
+
+        if (element == null)
+        {
+            return tags;
+        }
+
+        NodeList nodes = element.getElementsByTagName("array");
+        if (nodes != null && nodes.getLength() > 0)
+        {
+            for (int i = 0; i < nodes.getLength(); i++)
+            {
+                Node tagNode = nodes.item(i);
+                if (tagNode.getNodeType() == Node.ELEMENT_NODE)
+                {
+                    Element tagElement = (Element) tagNode;
+                    if (isEnabledTag(tagElement))
+                    {
+                        tags.add(SrcCmtXmlTag.initFromElement(tagElement));
                     }
                 }
             }
@@ -1302,5 +1382,13 @@ public class XmlFilterHelper
                 : (p_node.getFirstChild() == null ? true : false);
 
         return isEmptyTag;
+    }
+
+    public static String encodeSpecifiedEntities(String p_text,
+            char[] p_specXmlEncodeChar)
+    {
+        XmlEntities entities = new XmlEntities();
+        entities.setUseDefaultXmlEncoderChar(false);
+        return entities.encodeString(p_text, p_specXmlEncodeChar);
     }
 }

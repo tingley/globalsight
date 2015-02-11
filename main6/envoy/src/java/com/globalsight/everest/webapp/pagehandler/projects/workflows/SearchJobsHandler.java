@@ -38,6 +38,7 @@ import com.globalsight.everest.permission.PermissionSet;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Iterator;
 import java.util.Locale;
@@ -111,14 +112,12 @@ public class SearchJobsHandler
             if (fromMyJobs == true)
             {
                 Job job = WorkflowHandlerHelper.getJobById(Long.parseLong(id));
-                List workflows = (List)job.getWorkflows();
+                Collection<Workflow> workflows = job.getWorkflows();
                 boolean canAccess = true;
                 boolean canAccessAtLeastOne = true;
 
-                for (int j = 0; j < workflows.size(); j++)
+                for (Workflow wf : workflows)
                 {
-                    Workflow wf = (Workflow)workflows.get(j);
-
                     canAccess = userCanAccessWorkflow(loginUser, wf, request);
 
                     if (canAccess)

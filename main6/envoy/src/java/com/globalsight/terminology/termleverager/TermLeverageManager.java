@@ -29,6 +29,8 @@ import com.globalsight.everest.page.SourcePage;
 //
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import java.rmi.RemoteException;
 
@@ -97,5 +99,17 @@ public interface TermLeverageManager
      */
     ArrayList getTermMatchesForSegment(long p_srcTuvId, long p_subId,
         GlobalSightLocale p_targetPageLocale)
+        throws GeneralException, RemoteException;
+    
+    /**
+     * Retrieves Map<TuvId, Set<TermLeverageMatch>> for given SourcePages.
+     * 
+     * @param p_sourcePages
+     *            source page set
+     * @param p_targetPageLocale
+     *            target page locale
+     */
+    public Map<Long, Set<TermLeverageMatch>> getTermMatchesForPages(
+        Set<SourcePage> p_sourcePages, GlobalSightLocale p_targetPageLocale)
         throws GeneralException, RemoteException;
 }

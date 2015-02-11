@@ -21,13 +21,14 @@ package com.globalsight.everest.tuv;
 // globalsight imports
 //
 import java.io.Serializable;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 
 /**
  * LeverageGroupImpl implements the LeverageGroup interface. It represents a
@@ -39,12 +40,9 @@ public final class LeverageGroupImpl extends PersistentObject implements
         LeverageGroup, Serializable
 {
     private static final long serialVersionUID = 4602235168566799135L;
-    private List m_tus = new ArrayList(100);
+    private List<Tu> m_tus = new ArrayList<Tu>(100);
     private List m_sourcepage = new ArrayList();
 
-    /**
-     * Used by TopLink
-     */
     public LeverageGroupImpl()
     {
     }
@@ -60,15 +58,16 @@ public final class LeverageGroupImpl extends PersistentObject implements
     }
 
     /**
-     * Add a Tu to the LeverageGoup. Also add this leverage group to the Tu as a
-     * back pointer (TopLink Requirement for persistence).
+     * Add a Tu to the LeverageGoup. This should only be used when create job
+     * for maintaining "belong to" relationship.
      * 
      * @param p_tu
-     *            Tu to add.
+     *            -- Tu to add.
      */
     public void addTu(Tu p_tu)
     {
         m_tus.add(p_tu);
+        p_tu.setLeverageGroupId(this.getId());
         p_tu.setLeverageGroup(this);
     }
 
@@ -79,6 +78,26 @@ public final class LeverageGroupImpl extends PersistentObject implements
      */
     public Collection getTus()
     {
+        boolean loadFromDb = true;
+        return getTus(loadFromDb);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public Collection getTus(boolean loadFromDb)
+    {
+        if ((m_tus == null || m_tus.size() == 0) && loadFromDb) {
+            Connection connection = null;
+            try {
+                connection = DbUtil.getConnection();
+                m_tus = new ArrayList(SegmentTuUtil.getTusByLeverageGroupId(
+                        connection, getId()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                DbUtil.silentReturnConnection(connection);
+            }
+        }
+
         return m_tus;
     }
 
@@ -113,15 +132,15 @@ public final class LeverageGroupImpl extends PersistentObject implements
     }
 
     // For Hibernate
-    public void setTusSet(List p_tus)
-    {
-        this.m_tus = p_tus;
-    }
+//    public void setTusSet(List p_tus)
+//    {
+//        this.m_tus = p_tus;
+//    }
 
-    public List getTusSet()
-    {
-        return m_tus;
-    }
+//    public List getTusSet()
+//    {
+//        return m_tus;
+//    }
     
     public void setSourcePageSet(List p_tus)
     {

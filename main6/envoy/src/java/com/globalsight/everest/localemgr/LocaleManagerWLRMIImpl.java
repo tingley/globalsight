@@ -16,13 +16,6 @@
  */
 package com.globalsight.everest.localemgr;
 
-/* Copyright (c) 2000, GlobalSight Corporation. All Rights Preserved. */
-/*
- * This file was automatically generated.
- * Generation date : October 31, 2000
- * Modified: Feb. 11, 2003
- */
-
 import java.rmi.RemoteException;
 import java.util.Vector;
 
@@ -30,8 +23,8 @@ import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.util.GlobalSightLocale;
 
-
-public class LocaleManagerWLRMIImpl extends RemoteServer implements LocaleManagerWLRemote
+public class LocaleManagerWLRMIImpl extends RemoteServer implements
+        LocaleManagerWLRemote
 {
     LocaleManager m_localReference;
 
@@ -41,43 +34,57 @@ public class LocaleManagerWLRMIImpl extends RemoteServer implements LocaleManage
         m_localReference = new LocaleManagerLocal();
     }
 
-    public  GlobalSightLocale addLocale(GlobalSightLocale p_locale)
-    throws LocaleManagerException,java.rmi.RemoteException
+    public GlobalSightLocale addLocale(GlobalSightLocale p_locale)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.addLocale(p_locale);
     }
 
-    public  void addSourceTargetLocalePair(GlobalSightLocale param1,
-                                           GlobalSightLocale param2) throws LocaleManagerException,java.rmi.RemoteException
+    public void addSourceTargetLocalePair(GlobalSightLocale param1,
+            GlobalSightLocale param2) throws LocaleManagerException,
+            java.rmi.RemoteException
     {
-        m_localReference.addSourceTargetLocalePair(param1,
-                                                   param2);
+        m_localReference.addSourceTargetLocalePair(param1, param2);
     }
-    public  java.util.Vector getAllSourceLocalesByCompanyId(String p_companyId) throws LocaleManagerException,java.rmi.RemoteException
+
+    public java.util.Vector getAllSourceLocalesByCompanyId(String p_companyId)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getAllSourceLocalesByCompanyId(p_companyId);
     }
-    public  java.util.Vector getAllSourceLocales() throws LocaleManagerException,java.rmi.RemoteException
+
+    public java.util.Vector getAllSourceLocales()
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getAllSourceLocales();
     }
-    public  java.util.Vector getAllTargetLocales() throws LocaleManagerException,java.rmi.RemoteException
+
+    public java.util.Vector getAllTargetLocales()
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getAllTargetLocales();
     }
-    public  java.util.Vector getAvailableLocales() throws LocaleManagerException,java.rmi.RemoteException
+
+    public java.util.Vector getAvailableLocales()
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getAvailableLocales();
     }
-    public java.util.Vector getSupportedLocalesForUi() throws LocaleManagerException, java.rmi.RemoteException
+
+    public java.util.Vector getSupportedLocalesForUi()
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getSupportedLocalesForUi();
     }
-    public GlobalSightLocale getLocaleById(long p_id) throws LocaleManagerException, java.rmi.RemoteException
+
+    public GlobalSightLocale getLocaleById(long p_id)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getLocaleById(p_id);
     }
-    public GlobalSightLocale getLocaleByString(String p_localeString) throws LocaleManagerException, java.rmi.RemoteException
+
+    public GlobalSightLocale getLocaleByString(String p_localeString)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getLocaleByString(p_localeString);
     }
@@ -86,77 +93,101 @@ public class LocaleManagerWLRMIImpl extends RemoteServer implements LocaleManage
     {
         return m_localReference;
     }
-    public  java.util.Vector getSourceTargetLocalePairs() throws LocaleManagerException,java.rmi.RemoteException
+
+    public Vector getSourceTargetLocalePairs() throws LocaleManagerException,
+            java.rmi.RemoteException
     {
         return m_localReference.getSourceTargetLocalePairs();
     }
 
-
     /**
      * @see LocaleManager.getLocalePairBySourceTargetStrings(String, String)
      */
-    public LocalePair getLocalePairBySourceTargetStrings(String p_sourceLocaleString,
-                                                         String p_targetLocaleString)
-        throws LocaleManagerException, java.rmi.RemoteException
+    public LocalePair getLocalePairBySourceTargetStrings(
+            String p_sourceLocaleString, String p_targetLocaleString)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
-        return m_localReference.getLocalePairBySourceTargetStrings(p_sourceLocaleString,
-                                                                  p_targetLocaleString);
+        return m_localReference.getLocalePairBySourceTargetStrings(
+                p_sourceLocaleString, p_targetLocaleString);
     }
 
     /**
      * Get a source/target locales pair based on the given id.
-     *
+     * 
      * @return A LocalePair object (the source/target locale pair)
-     * @exception LocaleManagerException Specifies the error, probably persistence exception
-     * @exception RemoteException System or network related exception
+     * @exception LocaleManagerException
+     *                Specifies the error, probably persistence exception
+     * @exception RemoteException
+     *                System or network related exception
      */
     public LocalePair getLocalePairById(long p_localePairId)
-        throws LocaleManagerException, java.rmi.RemoteException
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getLocalePairById(p_localePairId);
     }
 
     /**
      * Get a locale pair object based on the given source and target ids.
-     *
+     * 
      * @return A LocalePair object (the source/target locale pair)
-     * @exception LocaleManagerException Specifies the error, probably persistence exception
-     * @exception RemoteException System or network related exception
+     * @exception LocaleManagerException
+     *                Specifies the error, probably persistence exception
+     * @exception RemoteException
+     *                System or network related exception
      */
-    public LocalePair getLocalePairBySourceTargetIds(long p_sourceLocaleId, 
-                                               long p_targetLocaleId)
-        throws LocaleManagerException, java.rmi.RemoteException
+    public LocalePair getLocalePairBySourceTargetIds(long p_sourceLocaleId,
+            long p_targetLocaleId) throws LocaleManagerException,
+            java.rmi.RemoteException
     {
         return m_localReference.getLocalePairBySourceTargetIds(
-            p_sourceLocaleId, p_targetLocaleId);
+                p_sourceLocaleId, p_targetLocaleId);
     }
-    public Vector getTargetLocalesByCompanyId(GlobalSightLocale p_sourceLocale, String p_companyId)
-        throws LocaleManagerException, RemoteException
+
+    public Vector getTargetLocalesByCompanyId(GlobalSightLocale p_sourceLocale,
+            String p_companyId) throws LocaleManagerException, RemoteException
     {
-        return m_localReference.getTargetLocalesByCompanyId(p_sourceLocale, p_companyId);
+        return m_localReference.getTargetLocalesByCompanyId(p_sourceLocale,
+                p_companyId);
     }
-    public  java.util.Vector getTargetLocales(/*java.util.Locale*/GlobalSightLocale param1) throws LocaleManagerException,java.rmi.RemoteException
+
+    public java.util.Vector getTargetLocales(
+    /* java.util.Locale */GlobalSightLocale param1)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getTargetLocales(param1);
     }
-    public  void removeSourceTargetLocalePair(com.globalsight.everest.foundation.LocalePair param1) throws LocaleManagerException,java.rmi.RemoteException
+
+    public void removeSourceTargetLocalePair(
+            com.globalsight.everest.foundation.LocalePair param1)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         m_localReference.removeSourceTargetLocalePair(param1);
     }
-    public  java.util.Vector getAllCodeSets() throws LocaleManagerException,java.rmi.RemoteException
+
+    public java.util.Vector getAllCodeSets() throws LocaleManagerException,
+            java.rmi.RemoteException
     {
         return m_localReference.getAllCodeSets();
     }
 
-    public java.util.Vector getAllCodeSets(long p_localeId) 
-    throws LocaleManagerException, java.rmi.RemoteException
+    public java.util.Vector getAllCodeSets(long p_localeId)
+            throws LocaleManagerException, java.rmi.RemoteException
     {
         return m_localReference.getAllCodeSets(p_localeId);
     }
 
-	@Override
-	public Vector getTargetLocalesByProject(GlobalSightLocale locale,
-			String p_project) throws LocaleManagerException, RemoteException {
+    @Override
+    public Vector getTargetLocalesByProject(GlobalSightLocale locale,
+            String p_project) throws LocaleManagerException, RemoteException
+    {
         return m_localReference.getTargetLocalesByProject(locale, p_project);
-	}
+    }
+
+    public LocalePair getLocalePairBySourceTargetAndCompanyStrings(
+            String p_sourceLocaleString, String p_targetLocaleString,
+            long companyId) throws LocaleManagerException, RemoteException
+    {
+        return m_localReference.getLocalePairBySourceTargetAndCompanyStrings(
+                p_sourceLocaleString, p_targetLocaleString, companyId);
+    }
 }

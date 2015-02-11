@@ -120,7 +120,7 @@
    List chosenWfms = null;
    String chosenLocalePair;
    String chosenTargetEncoding;
-   Vector chosenLeverages = null;
+   Set<GlobalSightLocale> chosenLeverages = null;
    if(wfti == null)
    {
        chosenName = (String)sessionMgr.getAttribute(WorkflowTemplateConstants.CHOSEN_NAME);
@@ -145,7 +145,7 @@
        chosenWfms = wfti.getWorkflowManagerIds();
        chosenLocalePair = (String)sessionMgr.getAttribute(WorkflowTemplateConstants.LOCALE_PAIR);
        chosenTargetEncoding = wfti.getCodeSet();
-       chosenLeverages = (Vector)wfti.getLeveragingLocales();
+       chosenLeverages = wfti.getLeveragingLocales();
 
    }
 
@@ -683,12 +683,12 @@ function updateWFMS(projObj)
                               
                               GlobalSightLocale l= (GlobalSightLocale)leverageObjs.elementAt(h);
                               
-                              if(chosenLeverages != null)
+                              if(chosenLeverages != null && chosenLeverages.size()>0)
                               {
                                  leverage= (String)leverageDisp.elementAt(h);
-                                  for (int i=0; i<chosenLeverages.size(); i++)
+                                  for (Iterator it=chosenLeverages.iterator(); it.hasNext();)
                                   {
-                                      GlobalSightLocale e = (GlobalSightLocale)chosenLeverages.elementAt(i);
+                                      GlobalSightLocale e = (GlobalSightLocale)it.next();
                                       if(l.equals(e))
                                       {
                                           selected = "SELECTED";        

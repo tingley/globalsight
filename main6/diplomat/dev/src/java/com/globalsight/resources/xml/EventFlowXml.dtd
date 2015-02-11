@@ -23,7 +23,7 @@
 <!--     displayName is a meaningful human-readable label                -->
 <!--             for example, filename or acquisition sql label          -->
 <!--     l10nProfileId is the localization profile associated with the data source -->
-<!ELEMENT batchInfo (batchId, fileProfileId, pageCount, pageNumber, docPageCount, docPageNumber, displayName, baseHref?, jobName?, uuid?)>
+<!ELEMENT batchInfo (batchId, fileProfileId, pageCount, pageNumber, docPageCount, docPageNumber, displayName, baseHref?, jobName?, jobId?, uuid?)>
 <!ATTLIST batchInfo
 	l10nProfileId CDATA #REQUIRED
 	processingMode (manual | automatic) "automatic"
@@ -39,6 +39,7 @@
 <!ELEMENT baseHref (#PCDATA)>
 <!-- Optionally, a job prefix name -->
 <!ELEMENT jobName (#PCDATA)>
+<!ELEMENT jobId (#PCDATA)>
 <!ELEMENT uuid (#PCDATA)>
 <!ELEMENT priority (#PCDATA)>
 

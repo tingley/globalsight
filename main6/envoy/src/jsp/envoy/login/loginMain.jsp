@@ -263,11 +263,14 @@ if (logoImage.equals(logoBackgroundImage))
 	var width;
 	width = $(window).width();
 	$("#logoTable").css("width",width);
+	$("#navigationTable").css("width",width);
 	$("#loginTable").css("width",width);
+	
 
 	$(window).resize(function(e){
 		width = $(window).width();
 		$("#logoTable").css("width",width);
+		$("#navigationTable").css("width",width);
 		$("#loginTable").css("width",width);
 	});
 	
@@ -288,21 +291,18 @@ if (logoImage.equals(logoBackgroundImage))
             <TD WIDTH="960"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="960"></TD>
             <%} else {%>
             <TD WIDTH="285"><IMG SRC="<%=logoImage%>" HEIGHT="68" WIDTH="285"></TD>
-            <TD WIDTH="675"><IMG SRC="<%=logoBackgroundImage%>" HEIGHT="68" WIDTH="675"></TD>
-            <%}%>            
-            <TD ALIGN="RIGHT">
-                <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0">
-                    <TR>
-                        <TD CLASS="header1" ALIGN="right"><%= res_loginHeader %>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
-                    </TR>
-                </TABLE>
-            </TD>
-        </TR>
-        <TR>
-            <TD COLSPAN="3" CLASS="header2" HEIGHT="20" ALIGN="RIGHT"><A CLASS="header2" HREF="#" onClick="javascript:aboutWindow = window.open('<%=aboutUrl%>','about','HEIGHT=350,WIDTH=460,scrollbars'); return false;">
-                <%= res_aboutUrl %></A>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+            <TD><IMG SRC="<%=logoBackgroundImage%>" HEIGHT="68" WIDTH="675"></TD>
+            <%}%>  
         </TR>
         </TABLE>
+    </DIV>
+    <DIV ID="" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 68px; LEFT: 0px;">
+    <TABLE id="navigationTable" WIDTH="100%" CELLSPACING="0" CELLPADDING="0" BORDER="0">
+        <TR>
+            <TD CLASS="header2" HEIGHT="20" ALIGN="RIGHT"><A CLASS="header2" HREF="#" onClick="javascript:aboutWindow = window.open('<%=aboutUrl%>','about','HEIGHT=350,WIDTH=460,scrollbars'); return false;">
+                <%= res_aboutUrl %></A>&nbsp;&nbsp;&nbsp;&nbsp;</TD>
+        </TR>
+    </TABLE>
     </DIV>
   
     <!-- "Login Form" info -->

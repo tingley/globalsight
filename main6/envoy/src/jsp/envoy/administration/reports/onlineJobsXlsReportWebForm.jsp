@@ -19,6 +19,7 @@
                   com.globalsight.everest.permission.Permission,
                   com.globalsight.everest.servlet.util.ServerProxy,
                   com.globalsight.everest.projecthandler.Project,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
                   com.globalsight.everest.webapp.pagehandler.administration.vendors.ProjectComparator,
                   com.globalsight.everest.servlet.EnvoyServletException,
                   com.globalsight.everest.util.comparator.GlobalSightLocaleComparator,
@@ -45,6 +46,8 @@
     String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
     String creationEnd = JobSearchConstants.CREATION_END;
     String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
+    String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
+        + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!-- This JSP is: /envoy/administration/reports/onlineJobsXlsReportWebForm.jsp-->
@@ -100,7 +103,8 @@ function submitForm()
     searchForm.submit();
 }
 
-function checkThis(obj){
+function checkThis(obj)
+{
     document.getElementById("detailReport").checked = false;
     document.getElementById("yearReport").checked = false;
     obj.checked = true;
@@ -114,11 +118,11 @@ function checkThis(obj){
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("select_the_appropriate")%>
-</SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
-<form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/onlineJobsXlsReport.jsp">
+<form name="searchForm" method="post" action="<%=formAction%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.ONLINE_JOBS_REPORT%>">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
 <tr>

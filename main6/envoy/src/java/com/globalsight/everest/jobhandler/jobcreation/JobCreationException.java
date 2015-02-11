@@ -32,8 +32,8 @@ package com.globalsight.everest.jobhandler.jobcreation;
 import com.globalsight.util.GeneralException;
 
 /**
- * An exception thrown during the process of creating jobs
- * and adding requests to a job.
+ * An exception thrown during the process of creating jobs and adding requests
+ * to a job.
  */
 public class JobCreationException extends GeneralException
 {
@@ -41,20 +41,13 @@ public class JobCreationException extends GeneralException
     public final static String PROPERTY_FILE_NAME = "JobCreationException";
 
     // message keys in the property file
-    public final static String MSG_FAILED_TO_FIND_WORKFLOW_SERVER = 
-                        "FailedToFindWorkflowServer";
-    public final static String MSG_FAILED_TO_FIND_COSTING_ENGINE = 
-                        "FailedToFindCostingEngine";
-    public final static String MSG_FAILED_TO_FIND_JOB_DISPATCHER = 
-                        "FailedToFindJobDispatcher";
-    public final static String MSG_FAILED_TO_FIND_JOB_EVENT_OBSERVER = 
-                        "FailedToFindJobEventObserver";
-    public final static String MSG_FAILED_TO_FIND_TUV_MANAGER = 
-                        "FailedToFindTuvManager";
-    public final static String MSG_FAILED_TO_FIND_LEVERAGE_MATCH_LING_MANAGER = 
-                        "FailedToFindLeverageMatchLingManager";
-    public final static String MSG_FAILED_TO_FIND_PAGE_EVENT_OBSERVER = 
-                        "FailedToFindPageEventObserver";
+    public final static String MSG_FAILED_TO_FIND_WORKFLOW_SERVER = "FailedToFindWorkflowServer";
+    public final static String MSG_FAILED_TO_FIND_COSTING_ENGINE = "FailedToFindCostingEngine";
+    public final static String MSG_FAILED_TO_FIND_JOB_DISPATCHER = "FailedToFindJobDispatcher";
+    public final static String MSG_FAILED_TO_FIND_JOB_EVENT_OBSERVER = "FailedToFindJobEventObserver";
+    public final static String MSG_FAILED_TO_FIND_TUV_MANAGER = "FailedToFindTuvManager";
+    public final static String MSG_FAILED_TO_FIND_LEVERAGE_MATCH_LING_MANAGER = "FailedToFindLeverageMatchLingManager";
+    public final static String MSG_FAILED_TO_FIND_PAGE_EVENT_OBSERVER = "FailedToFindPageEventObserver";
 
     // Args: 1 = batch id
     public final static String MSG_QUERY_FOR_BATCH_JOB_FAILED = "QueryForBatchJobFailed";
@@ -67,18 +60,18 @@ public class JobCreationException extends GeneralException
     // Args: 1 = request id
     public final static String MSG_IMPORT_PAGE_FAILED = "FailedToImportPage";
     //
-    public final static String MSG_FAILED_TO_IMPORT_ALL_TARGETS_SUCCESSFULLY = 
-        "FailedToImportAllTargetsSuccessfully";
+    public final static String MSG_FAILED_TO_IMPORT_ALL_TARGETS_SUCCESSFULLY = "FailedToImportAllTargetsSuccessfully";
+    public final static String MSG_FAILED_TO_INITIALIZE_NEW_JOB = "FailedToInitializeNewJob";
     // Args: 1 = request id - to add to newly created job
-    public final static String MSG_FAILED_TO_CREATE_NEW_JOB ="FailedToCreateNewJob";
+    public final static String MSG_FAILED_TO_CREATE_NEW_JOB = "FailedToCreateNewJob";
     // Args: 1 = request id - of request to add to found or new job
     public final static String MSG_FAILED_TO_QUERY_JOB_CREATION_RULE = "FailedToQueryJobCreationRule";
     // Args: 1 = request id, 2 = job id
     public final static String MSG_FAILED_TO_ADD_REQUEST_TO_JOB = "FailedToAddRequestToJob";
     // Args: 1 = request id (job id doesn't exist yet when creating these)
-    public final static String MSG_FAILED_TO_CREATE_WORKFLOW_INSTANCES  = "FailedToCreateWorkflowInstances";
+    public final static String MSG_FAILED_TO_CREATE_WORKFLOW_INSTANCES = "FailedToCreateWorkflowInstances";
     // Args: 1 = job id
-    public final static String MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES  = "FailedToCreateDtpWorkflowInstances";    
+    public final static String MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES = "FailedToCreateDtpWorkflowInstances";
     // Args: 1 = job id
     public final static String MSG_FAILED_TO_CREATE_A_JOB_DISPATCHER = "FailedToCreateAJobDispatcher";
     // Args: 1 = source page id
@@ -91,21 +84,24 @@ public class JobCreationException extends GeneralException
     public final static String MSG_FAILED_TO_SET_EXCEPTION_IN_REQUEST = "FailedToSetExceptionInRequest";
 
     public final static String MSG_FAILED_TO_GET_REQUEST_LIST = "FailedToGetRequestList";
-    
+
     public final static String MSG_FAILED_TO_FIND_JOB_IN_DB = "FailedToFindJobInDB";
 
-   /*
-    * Create a JobCreationException with the specified message.
-    * 
-    * @p_messageKey The key to the message located in the property file.
-    * @p_messageArguments An array of arguments needed for the message.
-    *                     This can be null.
-    * @p_originalException The original exception that this one is wrapping.
-    *                      This can be null.
-    */
-    public JobCreationException(String p_messageKey, String[] p_messageArguments, 
-                                Exception p_originalException)
+    /*
+     * Create a JobCreationException with the specified message.
+     * 
+     * @p_messageKey The key to the message located in the property file.
+     * 
+     * @p_messageArguments An array of arguments needed for the message. This
+     * can be null.
+     * 
+     * @p_originalException The original exception that this one is wrapping.
+     * This can be null.
+     */
+    public JobCreationException(String p_messageKey,
+            String[] p_messageArguments, Exception p_originalException)
     {
-        super(p_messageKey, p_messageArguments, p_originalException, PROPERTY_FILE_NAME);
+        super(p_messageKey, p_messageArguments, p_originalException,
+                PROPERTY_FILE_NAME);
     }
 }

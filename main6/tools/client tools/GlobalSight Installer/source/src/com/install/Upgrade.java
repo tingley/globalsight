@@ -68,6 +68,7 @@ public class Upgrade
     private static final String COPY = "copy";
 
     private List<String> ignoreFiles;
+    private List<String> ignoreEndPaths;
 
     private static Map<String, Integer> RATES = new HashMap<String, Integer>();
     static
@@ -90,6 +91,14 @@ public class Upgrade
 
         IGNORE_PROPERTIES.add("Logger.properties");
         IGNORE_PROPERTIES.add("Logger.properties.template");
+    }
+    
+    private static List<String> BACKUP_FILES = new ArrayList<String>();
+    static
+    {
+    	BACKUP_FILES.add("/install");
+    	BACKUP_FILES.add("/jboss");
+    	BACKUP_FILES.add("/logs");
     }
 
     private String getRealPath(String s)
@@ -114,8 +123,13 @@ public class Upgrade
                 return;
             }
         }
-
-        List<File> files = FileUtil.getAllFiles(new File(ServerUtil.getPath()));
+        
+        List<File> files = new ArrayList<File>();
+        for (String bfile : BACKUP_FILES)
+        {
+        	files.addAll(FileUtil.getAllFiles(new File(ServerUtil.getPath()  + bfile)));
+        }
+        
         int size = files.size();
         log.info("Size: " + size);
         int processTotle = RATES.get(BACKUP);
@@ -246,7 +260,7 @@ public class Upgrade
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
             StackTraceElement[] trace = e.getStackTrace();
             for (StackTraceElement msg : trace)
             {
@@ -264,7 +278,20 @@ public class Upgrade
             @Override
             public boolean accept(File pathname)
             {
-                return !getIgnoreFiles().contains(pathname.getName());
+            	if (getIgnoreFiles().contains(pathname.getName()))
+            		return false;
+            	
+            	String path = pathname.getPath();
+            	path = path.replace("\\", "/");
+            	
+            	List<String> ps = getIgnoreEndPath();
+            	for (String p : ps)
+            	{
+            		if (path.endsWith(p))
+            			return false;
+            	}
+            	
+            	return true;
             }
         };
     }
@@ -320,6 +347,22 @@ public class Upgrade
         roots.add(UPGRADE_UTIL.getPath());
         return roots;
     }
+    
+    private List<String> getIgnoreEndPath()
+    {
+    	if (ignoreEndPaths == null)
+    	{
+    		ignoreEndPaths = new ArrayList<String>();
+    		
+    		ignoreEndPaths.add("/jmx-console.war/WEB-INF/jboss-web.xml");
+    		ignoreEndPaths.add("/jmx-console.war/WEB-INF/web.xml");
+    		
+    		ignoreEndPaths.add("/web-console.war/WEB-INF/jboss-web.xml");
+    		ignoreEndPaths.add("/web-console.war/WEB-INF/web.xml");
+    	}
+    	
+    	return ignoreEndPaths;
+    }
 
     private List<String> getIgnoreFiles()
     {
@@ -327,26 +370,30 @@ public class Upgrade
         {
             ignoreFiles = new ArrayList<String>();
 
-            // Ignore propertie files.
-            String sourcePath = ServerUtil.getPath() + PROPERTIES_PATH;
-            List<File> files = FileUtil.getAllFiles(new File(sourcePath),
-                    new FileFilter()
-                    {
-                        @Override
-                        public boolean accept(File pathname)
-                        {
-                            String path = pathname.getName();
-                            return path.endsWith(".properties")
-                                    && !Constants.COPY_PROPERTITES
-                                            .contains(path);
-                        }
-                    });
+//            // Ignore propertie files.
+//            String sourcePath = ServerUtil.getPath() + PROPERTIES_PATH;
+//            List<File> files = FileUtil.getAllFiles(new File(sourcePath),
+//                    new FileFilter()
+//                    {
+//                        @Override
+//                        public boolean accept(File pathname)
+//                        {
+//                            String path = pathname.getName();
+//                            return path.endsWith(".properties")
+//                                    && !Constants.COPY_PROPERTITES
+//                                            .contains(path);
+//                        }
+//                    });
+//            
+//            for (File f : files)
+//            {
+//                ignoreFiles.add(f.getName());
+//            }
+            ignoreFiles.add("jmx-console-users.properties");
+            ignoreFiles.add("jmx-console-roles.properties");
+            ignoreFiles.add("web-console-users.properties");
+            ignoreFiles.add("web-console-roles.properties");
             
-            for (File f : files)
-            {
-                ignoreFiles.add(f.getName());
-            }
-
             ignoreFiles.add("system.xml");
             ignoreFiles.add("jboss-service.xml");
             ignoreFiles.add("GlobalSight-JMS-service.xml");

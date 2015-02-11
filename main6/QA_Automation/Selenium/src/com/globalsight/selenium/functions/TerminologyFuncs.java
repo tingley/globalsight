@@ -221,7 +221,7 @@ public class TerminologyFuncs extends BasicFuncs
     	clickAndWait(selenium,TerminologyElements.IDX_SAVE_BUTTON);
     	clickAndWait(selenium,TerminologyElements.IDX_REINDEX_BUTTON);
     	Thread.sleep(10000);
-    	boolean INPROGRESS = TerminologyElements.IDX_INPROGRESS_TEXT.contains("(100%)");
+    	boolean INPROGRESS = selenium.isTextPresent("(100%)");
     	if (!INPROGRESS)
     	{
     		Reporter.log("Termbase index is wrong.");
@@ -354,7 +354,78 @@ public class TerminologyFuncs extends BasicFuncs
     else Reporter.log("Cannot find the corresponding field content entry.");
     
     }
+   
+ //added by Nicole	2011-09-22
+   public void maintenanceSearchField(Selenium selenium, String iTBName, String searchOption, 
+		   String fieldLevel, String lang, String fieldName, String searchStr)throws Exception
+   {
+	   //Check if Termbase Maintenance is the current page
+	   boolean found = selenium.isElementPresent(TerminologyElements.SEARCHFOR_FIELD);
+	   boolean selected = selectRadioButtonFromTable(selenium, TerminologyElements.MAIN_TABLE, iTBName);
 
+	   if (!found)
+	   {
+		   if (selected)
+		   clickAndWait(selenium, TerminologyElements.MAIN_MAINTENANCE_BUTTON);
+		   else
+			   {
+			   Reporter.log("Cannot find the termbase to maintenance.");
+			   return;
+			   }
+	   }
+		   
+	   selenium.type(TerminologyElements.SEARCHFOR_FIELD, searchStr);
+
+	   //Specify whether case sensitive or search whole word only
+	   if(searchOption.equalsIgnoreCase("Both"))
+	   {
+		   selenium.check(TerminologyElements.MATCH_CASE_CHECK);
+		   selenium.check(TerminologyElements.WHOLE_WORDONLY_CHECK);
+	   }
+	   else if (searchOption.equalsIgnoreCase("Match Case"))
+	   {
+		   selenium.check(TerminologyElements.MATCH_CASE_CHECK);
+		   selenium.uncheck(TerminologyElements.WHOLE_WORDONLY_CHECK);
+	   }
+	   else if (searchOption.equalsIgnoreCase("Word Only"))
+	   { 
+		   selenium.check(TerminologyElements.WHOLE_WORDONLY_CHECK);
+		   selenium.uncheck(TerminologyElements.MATCH_CASE_CHECK);
+	   }
+	   else   
+	   { 
+		   selenium.uncheck(TerminologyElements.WHOLE_WORDONLY_CHECK);
+		   selenium.uncheck(TerminologyElements.MATCH_CASE_CHECK);
+	   }
+	   
+
+	   //Select field level, language and name
+	   if(fieldLevel.equalsIgnoreCase("Concept"))
+	   {
+		   selenium.click(TerminologyElements.CONCEPT_LEVEL_BUTTON);
+		   selenium.select(TerminologyElements.CONCEPT_LEVEL_SELECT, fieldName);
+	   }
+
+	   else if(fieldLevel.equalsIgnoreCase("Language"))
+	   {
+		   selenium.click(TerminologyElements.LANGUAGE_LEVEL_BUTTON);
+		   selenium.select(TerminologyElements.LANGUAGE_LEVEL_LANG_SELECT, lang);
+		   selenium.select(TerminologyElements.LANGUAGE_LEVEL_SELECT, fieldName);
+	   }
+	   else
+	   {
+		   selenium.click(TerminologyElements.TERM_LEVEL_BUTTON);
+		   selenium.select(TerminologyElements.TERM_LEVEL_LANG_SELECT, lang);
+		   selenium.select(TerminologyElements.TERM_LEVEL_SELECT, fieldName);
+	   }
+
+	   selenium.click(TerminologyElements.SEARCH_BUTTON);
+
+   }
+ 		   	
+ 		   	
+ 		   
+ 	   
     // ###################################################################################################
     // ###################################       private methods       ###################################
     // ###################################################################################################

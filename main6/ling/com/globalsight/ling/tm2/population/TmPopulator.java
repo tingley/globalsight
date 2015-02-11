@@ -31,6 +31,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tm.Tm;
@@ -38,6 +39,7 @@ import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTu;
+import com.globalsight.ling.tm2.SegmentTmInfo;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
@@ -144,7 +146,7 @@ public class TmPopulator
             // translation_unit table
             PageJobDataRetriever pageJobDataRetriever
                 = new PageJobDataRetriever(m_session.connection(), p_page.getId(),
-                    sourceLocale);
+                    sourceLocale, p_page.getCompanyId());
             SegmentQueryResult result
                 = pageJobDataRetriever.queryForPopulation(p_targetLocales);
             BaseTmTu tu = null;
@@ -158,9 +160,11 @@ public class TmPopulator
             c_logger.debug("Populating Page TM");
             populatePageTm(pageJobData.getTusToSaveToPageTm(p_options),
                 p_page, p_targetLocales);
+            Job job = null;
 
             try {
-                FileProfile fileProfile = p_page.getRequest().getJob().getFileProfile();
+                job = p_page.getRequest().getJob();
+                FileProfile fileProfile = job.getFileProfile();
                 if(fileProfile.getTerminologyApproval() == 1) {
                     String termbaseName = p_page.getRequest().getL10nProfile()
                             .getProject().getTermbaseName();
@@ -189,10 +193,11 @@ public class TmPopulator
             // populate Segment TM
             c_logger.debug("Populating Segment TM");
             Tm tm = ServerProxy.getProjectHandler().getProjectTMById(p_options.getSaveTmId(), true);
-            mappingHolder = tm.getSegmentTmInfo().saveToSegmentTm(m_session,
-                    pageJobData.getTusToSaveToSegmentTm(p_options),
-                    sourceLocale, tm, p_targetLocales,
-                    TmCoreManager.SYNC_MERGE, false);
+            SegmentTmInfo segtmInfo = tm.getSegmentTmInfo();
+            segtmInfo.setJob(job);
+            mappingHolder = segtmInfo.saveToSegmentTm(m_session,
+                    pageJobData.getTusToSaveToSegmentTm(p_options), sourceLocale, tm,
+                    p_targetLocales, TmCoreManager.SYNC_MERGE, false);
         }
         catch(LingManagerException le)
         {

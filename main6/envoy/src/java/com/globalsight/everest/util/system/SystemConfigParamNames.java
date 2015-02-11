@@ -315,6 +315,7 @@ public interface SystemConfigParamNames
     public static final String ADOBE_CONV_DIR_CS3 = "adobe.cs3.dir";
     public static final String ADOBE_CONV_DIR_CS4 = "adobe.cs4.dir";
     public static final String ADOBE_CONV_DIR_CS5 = "adobe.cs5.dir";
+    public static final String ADOBE_CONV_DIR_CS5_5 = "adobe.cs5.5.dir";
     
     //for the passolo adapters
     public static final String PASSOLO_INSTALL_KEY = "passolo.installKey";
@@ -559,11 +560,22 @@ public interface SystemConfigParamNames
     public static final String OPENOFFICE_INSTALL_KEY = "openoffice.install.key";
     public static final String OPENOFFICE_INSTALL_DIR = "openoffice.install.dir";
     
+    // Add parameters for ms office
+//    public static final String MS_OFFICE_INSTALL_KEY = "msoffice.2010.install.key";
+//    public static final String MS_OFFICE_INSTALL_DIR = "msoffice.2010.install.dir";
+//    
+//    public static final String IDML_INSTALL_KEY = "idml.install.key";
+//    public static final String IDML_INSTALL_DIR = "idml.install.dir";
+    
     // Delay time for download job after exporting and task complete after upload on offline
     public static final String DOWNLOAD_JOB_DELAY_TIME = "download.delay.time.after.exporting";
     public static final String TASK_COMPLETE_DELAY_TIME = "task.complete.delay.time.after.upload";
     
     // Add parameter for Single sign-on
     public static final String ENABLE_SSO = "sso.enabled";
+    
+    // for win pe
+    public static final String WINDOWS_PE_INSTALL_KEY = "winpe.installKey";
+    public static final String WINDOWS_PE_DIR = "winpe.dir";
 }
 

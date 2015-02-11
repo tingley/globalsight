@@ -5,10 +5,12 @@
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
+		<!-- 
 		<bag name="tusSet" inverse="true" cascade="save-update" >
 			<key column="LEVERAGE_GROUP_ID"/>
 			<one-to-many class="com.globalsight.everest.tuv.TuImpl"/>
 		</bag>
+		 -->
 		<bag name="sourcePageSet" cascade="save-update"
                 table="SOURCE_PAGE_LEVERAGE_GROUP" lazy="false">
                 <key column="LG_ID" />
@@ -16,5 +18,5 @@
                     class="com.globalsight.everest.page.SourcePage"
                     column="SP_ID" />
         </bag>
-	</class>	
+	</class>
 </hibernate-mapping>

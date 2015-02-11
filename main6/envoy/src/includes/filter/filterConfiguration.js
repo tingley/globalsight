@@ -17,6 +17,7 @@ allFilterDialogIds[9] = "msOfficePPTFilterDialog";
 allFilterDialogIds[10] = "msoffice2010FilterDialog";
 allFilterDialogIds[11] = "poFilterDialog";
 allFilterDialogIds[12] = "baseFilterDialog";
+allFilterDialogIds[13] = "fmFilterDialog";
 var isBaseFilterSelectChanged = false;
 
 //For HTML
@@ -31,6 +32,7 @@ var checkedLocalizableAttributeMap;
 var checkedLocalizableInlineAttributes;
 
 var checkAllTags = false;
+var checkAll2010Styles = false;
 var checkAllSpecialFilters = false;
 var checkedSpecialFilters = new Array();
 var checkedMap = new Object();
@@ -54,6 +56,7 @@ function loadFilterConfigurations()
 	specialFiltersMap["office2010_filter"] = new MSOffice2010Filter();
 	specialFiltersMap["po_filter"] = new POFilter();
 	specialFiltersMap["base_filter"] = new BaseFilter();
+	specialFiltersMap["frame_maker_filter"] = new FMFilter();
 	
 	sendAjax(null, "loadFilterConfigurations", "loadFilterConfigurationsCallback");
 }
@@ -137,7 +140,7 @@ function generateFilterTable(filterConfigurations)
 		str.append("<td width='15%' class='main_table_head'>");
 		if(hasAddFilter == 'true')
 		{
-			str.append("<input type='button' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
+			str.append("<input type='button' id='" + filter.filterTableName + "_" + jsAdd + "' value='" + jsAdd + "' onclick='addSpecialFilter(\""+filter.filterTableName+"\",\""+filter.id+"\",\""+color+"\");'/>");
 		}
 		str.append("</td>");
 		

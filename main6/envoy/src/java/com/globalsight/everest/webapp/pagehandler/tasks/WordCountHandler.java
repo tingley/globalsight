@@ -33,7 +33,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.persistence.fileprofile.FileProfileEntityException;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -58,6 +57,7 @@ public class WordCountHandler extends PageHandler
     public static String TASK_KEY = "task";
     public static String TP_LIST = "targetPages";
     public static String TP_KEY = "targetPage";
+    public static String LMT = "LevMatchThreshold";
 
     private static final Logger s_logger =
         Logger.getLogger(
@@ -117,7 +117,8 @@ public class WordCountHandler extends PageHandler
             List tasks = new ArrayList();
             tasks.add(task);
             Job job = task.getWorkflow().getJob();
-            
+            p_sessionMgr.setAttribute(LMT, job.getLeverageMatchThreshold());
+
             boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
             boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
             boolean isInContextMatch = isInContextMatch(job, isUseInContext);
@@ -206,7 +207,9 @@ public class WordCountHandler extends PageHandler
                 {
                     sublist.add(task);
                     Job job = task.getWorkflow().getJob();
-                    
+                    sessionMgr.setAttribute(LMT,
+                                job.getLeverageMatchThreshold());
+
                     boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
                     boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();
                     boolean isInContextMatch = isInContextMatch(job);
@@ -246,6 +249,7 @@ public class WordCountHandler extends PageHandler
         Task task = (Task)TaskHelper.retrieveObject(
             session, WebAppConstants.WORK_OBJECT);
         Job job = task.getWorkflow().getJob();
+        sessionMgr.setAttribute(LMT, job.getLeverageMatchThreshold());
         
         boolean isUseInContext = job.getL10nProfile().getTranslationMemoryProfile().getIsContextMatchLeveraging();
         boolean exactMatchOnly = job.getL10nProfile().getTranslationMemoryProfile().getIsExactMatchLeveraging();

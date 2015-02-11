@@ -7,6 +7,7 @@ import java.util.List;
 
 class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     private TM3Locale locale;
+    private int increment = 100; // Load 100 at a time
     
     LocaleDataHandle(BaseTm<T> tm, TM3Locale locale) {
         super(tm);
@@ -48,14 +49,20 @@ class LocaleDataHandle<T extends TM3Data> extends AbstractDataHandle<T> {
     public Iterator<TM3Tu<T>> iterator() throws TM3Exception {
         return new LocaleTusIterator();
     }
+
+    /**
+     * For testing
+     **/
+    void setIncrement(int increment) {
+        this.increment = increment;
+    }
         
     class LocaleTusIterator extends AbstractDataHandle<T>.TuIterator {
         @Override
         protected void loadPage() {
             try {
-                // Load 100 at a time
                 List<TM3Tu<T>> page = getTm().getStorageInfo().getTuStorage()
-                            .getTuPageByLocale(startId, 100, locale, getStart(), getEnd());
+                            .getTuPageByLocale(startId, increment, locale, getStart(), getEnd());
                 if (page.size() > 0) {
                     startId = page.get(page.size() - 1).getId();
                     currentPage = page.iterator();

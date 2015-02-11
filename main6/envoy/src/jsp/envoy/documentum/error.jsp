@@ -1,14 +1,13 @@
 <%@ page isErrorPage="true"
     contentType="text/html; charset=UTF-8"
-    import="org.apache.log4j.Logger"
+    import="com.globalsight.everest.servlet.ControlServlet"
     
 %>
 <%@ page import="java.io.*"%>
 <CENTER><H1>Error:</H1></CENTER>
 <pre>
 <%
-  Logger.getLogger("com.globalsight.everest.webapp.jsp").
-      error("Exception in JSP", exception);
+  ControlServlet.handleJSPException(exception);
 
   // Process Error Message
   String errorMsg = (String) request.getAttribute("JSPErrorMsg");

@@ -438,6 +438,7 @@ void parse() :
     */
     | parseText()
     | parseNewline()
+	| parseSpecialChar()
     )*
 
     <EOF>
@@ -1064,6 +1065,17 @@ void parseText() :
     t=<PCDATA>
         {
         m_handler.handleText(new Text(t.image));
+        }
+}
+
+void parseSpecialChar() :
+{
+    Token t;
+}
+{
+    t=<TAG_CLOSE>
+        {
+        m_handler.handleSpecialChar(new Text(t.image));
         }
 }
 

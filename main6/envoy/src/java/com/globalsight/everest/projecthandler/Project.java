@@ -19,10 +19,8 @@ package com.globalsight.everest.projecthandler;
 // java
 import java.util.Set;
 
-// globalsight
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.tm.Tm;
 
 /**
  * A Project represents the work and resources associated with
@@ -217,5 +215,13 @@ public interface Project
     
     public int getPoRequired();
     public void setPoRequired(int poRequired);
+    
+    // Auto accept task and auto send report option in Project Level.
+    public boolean getReviewOnlyAutoAccept();
+    public void setReviewOnlyAutoAccept(boolean reviewAutoAccept);
+    public boolean getReviewOnlyAutoSend();
+    public void setReviewOnlyAutoSend(boolean reviewAutoSend);
+    public boolean getAutoAcceptPMTask();
+    public void setAutoAcceptPMTask(boolean autoAcceptPMTask);
 }
 

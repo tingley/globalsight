@@ -178,7 +178,8 @@ public class CommentEditorPageHandler
     {
         ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
         List<Select> list = new ArrayList<Select>();
-        
+        Select nullOption = new Select("", "");
+        list.add(nullOption);
         for (String key : categoryList)
         {
             String valueOfSelect = "";

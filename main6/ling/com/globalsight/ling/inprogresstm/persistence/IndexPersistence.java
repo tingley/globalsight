@@ -196,7 +196,7 @@ public class IndexPersistence
         {
             if(ps != null)
             {
-                ps.close();
+            	DbUtil.silentClose(ps);
             }
         }
     }

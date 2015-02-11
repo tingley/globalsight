@@ -100,6 +100,16 @@ public class JarManager
 			+ "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/dbProfile.jar";
 	private static String DB_PROFILE_JAR_NEW_PATH = APPLET_LIB
 			+ "dbProfile.jar";
+	
+	private static String CREATE_JOB_JAR_PATH = BuildUtil.ROOT
+			+ "/main6/tools/build/capclasses/globalsight.ear/globalsight-web.war/applet/lib/createJob.jar";
+	private static String CREATE_JOB_JAR_NEW_PATH = APPLET_LIB
+			+ "createJob.jar";
+	
+	private static String PLUG_IN_JAR_PATH = BuildUtil.ROOT
+			+ "/main6/tools/lib/common/plugin.jar";
+	private static String PLUG_IN_JAR_NEW_PATH = LIB
+			+ "plugin.jar";
     
 
     private static Set<Jar> ADDED_JARS = new HashSet<Jar>();
@@ -144,6 +154,8 @@ public class JarManager
                     "/promtUtil.jar"));
             ALL_JARS.add(new Jar(ONLINE_JAR_PATH, ONLINE_JAR_NEW_PATH,
                     "/ling/com/globalsight/ling"));
+            ALL_JARS.add(new Jar(ONLINE_JAR_PATH, ONLINE_JAR_NEW_PATH,
+                    "/edit/SegmentUtil"));
             ALL_JARS
                     .add(new Jar(AXIS_JAR, AXIS_NEW_JAR, "/ApacheAxis/axis.jar"));
             ALL_JARS.add(new Jar(MAIL_JAR_PATH, MAIL_JAR_NEW_PATH,
@@ -160,6 +172,10 @@ public class JarManager
                     "/main6/tools/lib/ssoLibs"));
 			ALL_JARS.add(new Jar(DB_PROFILE_JAR_PATH, DB_PROFILE_JAR_NEW_PATH,
 					"/applet/admin/dbprofile/"));
+			ALL_JARS.add(new Jar(CREATE_JOB_JAR_PATH, CREATE_JOB_JAR_NEW_PATH,
+					"/applet/createjob/"));
+			ALL_JARS.add(new Jar(PLUG_IN_JAR_PATH, PLUG_IN_JAR_NEW_PATH,
+					"/plugin.jar"));
         }
 
         return ALL_JARS;

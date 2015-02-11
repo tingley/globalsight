@@ -3,7 +3,7 @@ package com.globalsight.selenium.functions;
 import org.testng.Assert;
 import org.testng.Reporter;
 import com.globalsight.selenium.pages.Workflows;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 /*
@@ -91,16 +91,34 @@ public class WorkflowsFuncs extends BasicFuncs {
 			}
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
-		else
-		{
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		}
-		 Assert.assertTrue(isPresentInTable(selenium, Workflows.Workflows_TABLE, verifyname));
+		
+		Assert.assertTrue(isPresentInTable(selenium, Workflows.Workflows_TABLE, verifyname));
 	}
 
 	
 	
-	public void duplicateWorkFlow(Selenium selenium,String iFile, String workflowTemplate) throws Exception 
+	public void duplicateWorkFlow(Selenium selenium,String newName, String workflowTemplate) throws Exception 
+	{
+		
+		boolean check = selectRadioButtonFromTable(selenium,MAIN_TABLE,workflowTemplate);
+		if (!check)
+		{
+			Reporter.log("Cannot find the workflow template to duplicate!");
+            return;
+		}
+		selenium.click(Workflows.Duplicate_BUTTON);
+		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+		selenium.type(Workflows.Name_TEXT_FIELD_DUPLICATE, newName);
+		selenium.select(Workflows.SourceLocle_SELECTION_DUPLICATE,
+                ConfigUtil.getConfigData("en_US"));
+        selenium.addSelection(Workflows.TargetLocale_SELECTION_DUPLICATE,
+                ConfigUtil.getConfigData("fr_FR"));
+		selenium.click(Workflows.Add_BUTTON_DUPLICATE);
+		selenium.click(Workflows.Save_BUTTON_DUPLICATE);
+		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+	}
+	
+	public void duplicateWorkFlow(Selenium selenium, String iFile, String workflowTemplate,String Project, String source, String target) throws Exception 
 	{
 		
 		boolean check = selectRadioButtonFromTable(selenium,MAIN_TABLE,workflowTemplate);
@@ -112,10 +130,13 @@ public class WorkflowsFuncs extends BasicFuncs {
 		selenium.click(Workflows.Duplicate_BUTTON);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		selenium.type(Workflows.Name_TEXT_FIELD_DUPLICATE, iFile);
-        selenium.select(Workflows.SourceLocle_SELECTION_DUPLICATE,
-                ConfigUtil.getConfigData("en_US"));
-        selenium.addSelection(Workflows.TargetLocale_SELECTION_DUPLICATE,
-                ConfigUtil.getConfigData("fr_FR"));
+		selenium.select(Workflows.Project_SELECTION_DUPLICATE, Project);
+        selenium.select(Workflows.SourceLocle_SELECTION_DUPLICATE, source);
+        String[] itargets = target.split(",");
+        for (String itarget :  itargets)
+		{
+			selenium.addSelection(Workflows.TargetLocale_SELECTION_DUPLICATE, itarget);
+		}
 		selenium.click(Workflows.Add_BUTTON_DUPLICATE);
 		selenium.click(Workflows.Save_BUTTON_DUPLICATE);
 		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
@@ -126,6 +147,33 @@ public class WorkflowsFuncs extends BasicFuncs {
 		}
 	}
 	
+	public void duplicateWorkFlow(Selenium selenium,String iFile, String workflowTemplate, String source, String target) throws Exception 
+	{
+		
+		boolean check = selectRadioButtonFromTable(selenium,MAIN_TABLE,workflowTemplate);
+		if (!check)
+		{
+			Reporter.log("Cannot find the workflow template to duplicate!");
+            return;
+		}
+		selenium.click(Workflows.Duplicate_BUTTON);
+		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+		selenium.type(Workflows.Name_TEXT_FIELD_DUPLICATE, iFile);
+        selenium.select(Workflows.SourceLocle_SELECTION_DUPLICATE, source);
+        String[] itargets = target.split(",");
+        for (String itarget :  itargets)
+		{
+			selenium.addSelection(Workflows.TargetLocale_SELECTION_DUPLICATE, itarget);
+		}
+		selenium.click(Workflows.Add_BUTTON_DUPLICATE);
+		selenium.click(Workflows.Save_BUTTON_DUPLICATE);
+		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+		boolean selected = isPresentInTable(selenium, MAIN_TABLE, "workflowDuplicate");		
+		if (selected)
+		{
+			Reporter.log("Duplicated workflow is added.");
+		}
+	}
 	public void removeWorkFlow(Selenium selenium, String workflowDuplicate) throws Exception
 	{
 		boolean check = selectRadioButtonFromTable(selenium,MAIN_TABLE,workflowDuplicate);

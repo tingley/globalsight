@@ -19,7 +19,6 @@ package com.globalsight.everest.usermgr;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
@@ -34,13 +33,11 @@ import javax.naming.directory.Attributes;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchResult;
 
-import org.apache.log4j.Logger;
-
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -91,7 +88,7 @@ public class UserLdapHelper extends LdapHelper
 
     public static final String LDAP_ATTR_TYPE = "employeeType";
 
-    // 
+    //
     // Package constants to hold the User LDAP attribute and key names
     //
     static final String USER_BASE_DN = "ou=People," + LDAP_BASE;
@@ -119,8 +116,8 @@ public class UserLdapHelper extends LdapHelper
     //
 
     // Object type for the User object in LDAP
-    protected static final String[] LDAP_USER_OBJECT_CLASSES = { "top",
-            "person", "organizationalPerson", "inetOrgPerson",
+    protected static final String[] LDAP_USER_OBJECT_CLASSES =
+    { "top", "person", "organizationalPerson", "inetOrgPerson",
             "localizationPerson" };
 
     //
@@ -147,6 +144,14 @@ public class UserLdapHelper extends LdapHelper
     }
 
     /**
+     * Gets user LDAP DN based on given user name.
+     */
+    public static String getUserDNByName(String p_userName)
+    {
+        return LDAP_ATTR_USER_NAME + "=" + p_userName + "," + USER_BASE_DN;
+    }
+
+    /**
      * Get LDAP DNs for a number of users by having the uids
      * 
      * @return a String[] of user DNs
@@ -167,7 +172,7 @@ public class UserLdapHelper extends LdapHelper
 
         return dns;
     }
-    
+
     /**
      * Get LDAP DN of a User for the given email
      */
@@ -179,9 +184,14 @@ public class UserLdapHelper extends LdapHelper
     /**
      * Convert a User object to an Attributes object
      * 
+     * @param user
+     *            The ldap user info.
+     * @param needEncodePwd
+     *            If user password need to be encoded, set this to true.
+     * 
      * @return a Attributes
      */
-    static Attributes convertUserToLDAPEntry(User p_user)
+    static Attributes convertUserToLDAPEntry(User user, boolean needEncodePwd)
     {
 
         BasicAttributes attrSet = new BasicAttributes();
@@ -193,95 +203,101 @@ public class UserLdapHelper extends LdapHelper
         objClass.add(LDAP_USER_OBJECT_CLASSES[4]);
         // add each LDAP attribute
         attrSet.put(objClass);
-        if (isStringValid(p_user.getUserId()))
+        if (isStringValid(user.getUserId()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_USERID, p_user
-                    .getUserId()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_USERID,
+                    user.getUserId()));
         }
-        if (isStringValid(p_user.getUserName()))
+        if (isStringValid(user.getUserName()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_USER_NAME, p_user
-                    .getUserName()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_USER_NAME,
+                    user.getUserName()));
         }
-        if (isStringValid(p_user.getTitle()))
+        if (isStringValid(user.getTitle()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_TITLE, p_user
-                    .getTitle()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_TITLE, user.getTitle()));
         }
-        if (isStringValid(p_user.getLastName()))
+        if (isStringValid(user.getLastName()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_LAST_NAME, p_user
-                    .getLastName()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_LAST_NAME,
+                    user.getLastName()));
         }
-        if (isStringValid(p_user.getFirstName()))
+        if (isStringValid(user.getFirstName()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_FIRST_NAME, p_user
-                    .getFirstName()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_FIRST_NAME,
+                    user.getFirstName()));
         }
 
-        String status = getStateAsString(p_user.getState());
+        String status = getStateAsString(user.getState());
         attrSet.put(generateLDAPAttribute(LDAP_ATTR_STATUS, status));
 
-        if (isStringValid(p_user.getPassword()))
+        if (isStringValid(user.getPassword()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_PASSWORD,
-                    encyptMD5Password(p_user.getPassword())));
+            if (needEncodePwd)
+            {
+                attrSet.put(generateLDAPAttribute(LDAP_ATTR_PASSWORD,
+                        encyptMD5Password(user.getPassword())));
+            }
+            else
+            {
+                attrSet.put(generateLDAPAttribute(LDAP_ATTR_PASSWORD,
+                        user.getPassword()));
+            }
         }
 
-        if (isStringValid(p_user.getEmail()))
+        if (isStringValid(user.getEmail()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_EMAIL, p_user
-                    .getEmail()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_EMAIL, user.getEmail()));
         }
-        if (isStringValid(p_user.getCCEmail()))
+        if (isStringValid(user.getCCEmail()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_CC_EMAIL, p_user
-                    .getCCEmail()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_CC_EMAIL,
+                    user.getCCEmail()));
         }
-        if (isStringValid(p_user.getBCCEmail()))
+        if (isStringValid(user.getBCCEmail()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL, p_user
-                    .getBCCEmail()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL,
+                    user.getBCCEmail()));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.HOME)))
+        if (isStringValid(user.getPhoneNumber(User.PhoneType.HOME)))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_HOME_PHONE, p_user
-                    .getPhoneNumber(User.PhoneType.HOME)));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_HOME_PHONE,
+                    user.getPhoneNumber(User.PhoneType.HOME)));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.OFFICE)))
+        if (isStringValid(user.getPhoneNumber(User.PhoneType.OFFICE)))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE, p_user
-                    .getPhoneNumber(User.PhoneType.OFFICE)));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE,
+                    user.getPhoneNumber(User.PhoneType.OFFICE)));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.FAX)))
+        if (isStringValid(user.getPhoneNumber(User.PhoneType.FAX)))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER, p_user
-                    .getPhoneNumber(User.PhoneType.FAX)));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER,
+                    user.getPhoneNumber(User.PhoneType.FAX)));
         }
-        if (isStringValid(p_user.getPhoneNumber(User.PhoneType.CELL)))
+        if (isStringValid(user.getPhoneNumber(User.PhoneType.CELL)))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER, p_user
-                    .getPhoneNumber(User.PhoneType.CELL)));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER,
+                    user.getPhoneNumber(User.PhoneType.CELL)));
         }
-        if (isStringValid(p_user.getDefaultUILocale()))
+        if (isStringValid(user.getDefaultUILocale()))
         {
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_DEFAULT_UI_LOCALE,
-                    p_user.getDefaultUILocale()));
+                    user.getDefaultUILocale()));
         }
-        if (isStringValid(p_user.getAddress()))
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_ADDRESS, p_user
-                    .getAddress()));
-        if (isStringValid(p_user.getCompanyName()))
+        if (isStringValid(user.getAddress()))
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_ADDRESS,
+                    user.getAddress()));
+        if (isStringValid(user.getCompanyName()))
         {
-            attrSet.put(generateLDAPAttribute(LDAP_ATTR_COMPANY, p_user
-                    .getCompanyName()));
+            attrSet.put(generateLDAPAttribute(LDAP_ATTR_COMPANY,
+                    user.getCompanyName()));
         }
         // vonverts 'boolean' to corresponding 'String' because openldap
         // 'Attribute' need string parameter.
-        attrSet.put(generateLDAPAttribute(LDAP_ATTR_INALLPROJECTS, p_user
-                .isInAllProjects()));
+        attrSet.put(generateLDAPAttribute(LDAP_ATTR_INALLPROJECTS,
+                user.isInAllProjects()));
         // if anonymous then write it out - otherwise just leave NULL
-        if (p_user.getType() == User.UserType.ANONYMOUS)
+        if (user.getType() == User.UserType.ANONYMOUS)
         {
             attrSet.put(generateLDAPAttribute(LDAP_ATTR_TYPE,
                     LDAP_ANONYMOUS_USER_TYPE));
@@ -352,7 +368,7 @@ public class UserLdapHelper extends LdapHelper
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_TITLE, "null")));
         }
 
@@ -365,17 +381,15 @@ public class UserLdapHelper extends LdapHelper
                     generateLDAPAttribute(LDAP_ATTR_PASSWORD, password)));
         }
 
-        attrSet
-                .add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                        generateLDAPAttribute(LDAP_ATTR_USER_NAME, p_user
-                                .getUserName())));
-        attrSet
-                .add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                        generateLDAPAttribute(LDAP_ATTR_LAST_NAME, p_user
-                                .getLastName())));
+        attrSet.add(new ModificationItem(
+                DirContext.REPLACE_ATTRIBUTE,
+                generateLDAPAttribute(LDAP_ATTR_USER_NAME, p_user.getUserName())));
+        attrSet.add(new ModificationItem(
+                DirContext.REPLACE_ATTRIBUTE,
+                generateLDAPAttribute(LDAP_ATTR_LAST_NAME, p_user.getLastName())));
         attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                generateLDAPAttribute(LDAP_ATTR_FIRST_NAME, p_user
-                        .getFirstName())));
+                generateLDAPAttribute(LDAP_ATTR_FIRST_NAME,
+                        p_user.getFirstName())));
 
         String status = getStateAsString(p_user.getState());
         attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
@@ -389,110 +403,111 @@ public class UserLdapHelper extends LdapHelper
         if (isStringValid(p_user.getCCEmail()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_CC_EMAIL, p_user
-                            .getCCEmail())));
+                    generateLDAPAttribute(LDAP_ATTR_CC_EMAIL,
+                            p_user.getCCEmail())));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_CC_EMAIL, "null")));
         }
         if (isStringValid(p_user.getBCCEmail()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL, p_user
-                            .getBCCEmail())));
+                    generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL,
+                            p_user.getBCCEmail())));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_BCC_EMAIL, "null")));
         }
         if (isStringValid(p_user.getPhoneNumber(User.PhoneType.HOME)))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_HOME_PHONE, p_user
-                            .getPhoneNumber(User.PhoneType.HOME))));
+                    generateLDAPAttribute(LDAP_ATTR_HOME_PHONE,
+                            p_user.getPhoneNumber(User.PhoneType.HOME))));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_HOME_PHONE, "null")));
         }
         if (isStringValid(p_user.getPhoneNumber(User.PhoneType.OFFICE)))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE, p_user
-                            .getPhoneNumber(User.PhoneType.OFFICE))));
+                    generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE,
+                            p_user.getPhoneNumber(User.PhoneType.OFFICE))));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_OFFICE_PHONE, "null")));
         }
         if (isStringValid(p_user.getPhoneNumber(User.PhoneType.CELL)))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER, p_user
-                            .getPhoneNumber(User.PhoneType.CELL))));
+                    generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER,
+                            p_user.getPhoneNumber(User.PhoneType.CELL))));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_CELL_NUMBER, "null")));
         }
         if (isStringValid(p_user.getPhoneNumber(User.PhoneType.FAX)))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER, p_user
-                            .getPhoneNumber(User.PhoneType.FAX))));
+                    generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER,
+                            p_user.getPhoneNumber(User.PhoneType.FAX))));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_FAX_NUMBER, "null")));
         }
         if (isStringValid(p_user.getDefaultUILocale()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_DEFAULT_UI_LOCALE, p_user
-                            .getDefaultUILocale())));
+                    generateLDAPAttribute(LDAP_ATTR_DEFAULT_UI_LOCALE,
+                            p_user.getDefaultUILocale())));
         }
         if (isStringValid(p_user.getAddress()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_ADDRESS, p_user
-                            .getAddress())));
+                    generateLDAPAttribute(LDAP_ATTR_ADDRESS,
+                            p_user.getAddress())));
         }
         else
         {
-        	attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
+            attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
                     generateLDAPAttribute(LDAP_ATTR_ADDRESS, "null")));
         }
         if (isStringValid(p_user.getCompanyName()))
         {
             attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_COMPANY, p_user
-                            .getCompanyName())));
+                    generateLDAPAttribute(LDAP_ATTR_COMPANY,
+                            p_user.getCompanyName())));
         }
         attrSet.add(new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-                generateLDAPAttribute(LDAP_ATTR_INALLPROJECTS, p_user
-                        .isInAllProjects())));
+                generateLDAPAttribute(LDAP_ATTR_INALLPROJECTS,
+                        p_user.isInAllProjects())));
         // a user can't be changed from anonymous to GlobalSight and back
         // so just leave the type field alone for now
         // LDAP_ATTR_TYPE, LDAP_ANONYMOUS_USER_TYPE
-        return (ModificationItem[]) attrSet.toArray(new ModificationItem[] {});
+        return (ModificationItem[]) attrSet.toArray(new ModificationItem[]
+        {});
     }
 
     /**
      * Generates a collection of User objects from a NamingEnumeration after a
      * search is carried out.
      */
-    static Vector getUsersFromSearchResults(NamingEnumeration p_SearchResults)
-            throws NamingException
+    static Vector<User> getUsersFromSearchResults(
+            NamingEnumeration p_SearchResults) throws NamingException
     {
 
-        Vector userList = new Vector();
+        Vector<User> userList = new Vector<User>();
         while (p_SearchResults.hasMoreElements())
         {
             /* Next directory entry */
@@ -535,13 +550,45 @@ public class UserLdapHelper extends LdapHelper
     }
 
     /**
-     * Get the Uset ID array from a NamingEnumeration
+     * Get the User ID array from a NamingEnumeration
      */
     static String[] getUIDsFromSearchResults(NamingEnumeration p_SearchResults)
             throws NamingException
     {
-
         return convertVectorToStringArray(getUIDsVectorFromSearchResults(p_SearchResults));
+    }
+
+    /**
+     * Get the User Name array from a NamingEnumeration
+     */
+    static String[] getNamesFromSearchResults(NamingEnumeration p_SearchResults)
+            throws NamingException
+    {
+        return convertVectorToStringArray(getNamesVectorFromSearchResults(p_SearchResults));
+    }
+
+    static Vector getNamesVectorFromSearchResults(
+            NamingEnumeration p_SearchResults) throws NamingException
+    {
+        Vector userNames = new Vector();
+
+        while (p_SearchResults.hasMoreElements())
+        {
+            /* Next directory entry */
+            Object searchResultObj = p_SearchResults.nextElement();
+            if (searchResultObj instanceof SearchResult)
+            {
+                SearchResult tempSearchResult = (SearchResult) searchResultObj;
+                Attributes entry = tempSearchResult.getAttributes();
+                String userName = getSingleAttributeValue(entry
+                        .get(LDAP_ATTR_USER_NAME));
+                userNames.addElement(userName);
+            }
+        }
+
+        p_SearchResults.close();
+
+        return userNames;
     }
 
     /**
@@ -615,31 +662,21 @@ public class UserLdapHelper extends LdapHelper
     static String getSearchFilter()
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        String companyName = null;
-        String superCompanyName = null;
-        try
-        {
-            companyName = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(companyId)).getName();
-            superCompanyName = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(CompanyWrapper.SUPER_COMPANY_ID)).getName();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+        String superCompanyName = CompanyWrapper
+                .getCompanyNameById(CompanyWrapper.SUPER_COMPANY_ID);
 
-        StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(
-                LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(").append(
-                LDAP_ATTR_STATUS).append("=").append(LDAP_DELETED_STATUS)
-                .append("))").append("(!(").append(LDAP_ATTR_TYPE).append("=")
+        StringBuilder buf = new StringBuilder();
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DELETED_STATUS).append("))").append("(!(")
+                .append(LDAP_ATTR_TYPE).append("=")
                 .append(LDAP_ANONYMOUS_USER_TYPE).append("))").append("(!(")
-                .append(LDAP_ATTR_STATUS).append("=").append(
-                        LDAP_DEACTIVE_STATUS).append("))");
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DEACTIVE_STATUS).append("))");
         // If is super user, then no limit in search rang.
-        if (CompanyThreadLocal.getInstance().getValue().equals(
-                CompanyWrapper.SUPER_COMPANY_ID))
+        if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
         {
             buf.append(")");
         }
@@ -647,22 +684,27 @@ public class UserLdapHelper extends LdapHelper
         {
             // for a specific company, two kinds of users will be selected,
             // one kind of users belong to this specific company,
-            // another kind of users belong to the super company, in this case,
-            // is "Welocalize".
-
-            buf.append("(|(").append(LDAP_ATTR_COMPANY).append("=").append(
-                    companyName).append(")").append("(").append(
-                    LDAP_ATTR_COMPANY).append("=").append(superCompanyName)
-                    .append("))").append(")");
+            // another kind of users belong to the super company
+            buf.append("(|(").append(LDAP_ATTR_COMPANY).append("=")
+                    .append(companyName).append(")").append("(")
+                    .append(LDAP_ATTR_COMPANY).append("=")
+                    .append(superCompanyName).append("))").append(")");
         }
 
-        /*
-         * return "(&(" + LDAP_ATTR_OBJECT_CLASS + "=" +
-         * LDAP_USER_END_OBJECT_CLASS + ")" + "(!(" + LDAP_ATTR_STATUS+"=" +
-         * LDAP_DELETED_STATUS +"))" + "(!(" + LDAP_ATTR_TYPE +"=" +
-         * LDAP_ANONYMOUS_USER_TYPE + "))" + "(!(" + LDAP_ATTR_STATUS+"=" +
-         * LDAP_DEACTIVE_STATUS +")))";
-         */
+        return buf.toString();
+    }
+
+    static String getSearchFilterForAllCompanies()
+    {
+        StringBuilder buf = new StringBuilder();
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DELETED_STATUS).append("))").append("(!(")
+                .append(LDAP_ATTR_TYPE).append("=")
+                .append(LDAP_ANONYMOUS_USER_TYPE).append("))").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DEACTIVE_STATUS).append(")))");
 
         return buf.toString();
     }
@@ -723,15 +765,65 @@ public class UserLdapHelper extends LdapHelper
         String companyName = CompanyWrapper.getCurrentCompanyName();
 
         StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(
-                LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(").append(
-                LDAP_ATTR_STATUS).append("=").append(LDAP_DELETED_STATUS)
-                .append("))").append("(!(").append(LDAP_ATTR_TYPE).append("=")
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DELETED_STATUS).append("))").append("(!(")
+                .append(LDAP_ATTR_TYPE).append("=")
                 .append(LDAP_ANONYMOUS_USER_TYPE).append("))").append("(!(")
-                .append(LDAP_ATTR_STATUS).append("=").append(
-                        LDAP_DEACTIVE_STATUS).append("))").append("(|(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DEACTIVE_STATUS).append("))").append("(|(")
                 .append(LDAP_ATTR_COMPANY).append("=").append(companyName)
                 .append(")").append("))");
+
+        return buf.toString();
+    }
+
+    /**
+     * Gets the LDAP search filter for searching all LDAP user entries from
+     * specified company.
+     * 
+     * @param companyId
+     *            - specified company id
+     * @param searchOutOfDateUsers
+     *            - whether to search the users that are in deleted, inactive
+     *            status and of anonymous type.
+     */
+    static String getSearchFilterForUsersFromCompany(String companyId,
+            boolean searchOutOfDateUsers)
+    {
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+
+        StringBuffer buf = new StringBuffer();
+        buf.append("(&(");
+        buf.append(LDAP_ATTR_OBJECT_CLASS);
+        buf.append("=");
+        buf.append(LDAP_USER_END_OBJECT_CLASS);
+        buf.append(")");
+        if (!searchOutOfDateUsers)
+        {
+            buf.append("(!(");
+            buf.append(LDAP_ATTR_STATUS);
+            buf.append("=");
+            buf.append(LDAP_DELETED_STATUS);
+            buf.append("))");
+            buf.append("(!(");
+            buf.append(LDAP_ATTR_TYPE);
+            buf.append("=");
+            buf.append(LDAP_ANONYMOUS_USER_TYPE);
+            buf.append("))");
+            buf.append("(!(");
+            buf.append(LDAP_ATTR_STATUS);
+            buf.append("=");
+            buf.append(LDAP_DEACTIVE_STATUS);
+            buf.append("))");
+        }
+        buf.append("(|(");
+        buf.append(LDAP_ATTR_COMPANY);
+        buf.append("=");
+        buf.append(companyName);
+        buf.append(")");
+        buf.append("))");
 
         return buf.toString();
     }
@@ -743,39 +835,25 @@ public class UserLdapHelper extends LdapHelper
     static String getSearchFilterForActiveUsers()
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        String companyName = null;
-        try
-        {
-            companyName = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(companyId)).getName();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+
         StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(
-                LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(").append(
-                LDAP_ATTR_TYPE).append("=").append(LDAP_ANONYMOUS_USER_TYPE)
-                .append("))").append("(").append(LDAP_ATTR_STATUS).append("=")
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_TYPE).append("=")
+                .append(LDAP_ANONYMOUS_USER_TYPE).append("))").append("(")
+                .append(LDAP_ATTR_STATUS).append("=")
                 .append(LDAP_ACTIVE_STATUS).append(")");
         // If is super user, then no limit in search rang.
-        if (CompanyThreadLocal.getInstance().getValue().equals(
-                CompanyWrapper.SUPER_COMPANY_ID))
+        if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
         {
             buf.append(")");
         }
         else
         {
-            buf.append("(").append(LDAP_ATTR_COMPANY).append("=").append(
-                    companyName).append("))");
+            buf.append("(").append(LDAP_ATTR_COMPANY).append("=")
+                    .append(companyName).append("))");
         }
-        /*
-         * return "(&(" + LDAP_ATTR_OBJECT_CLASS + "=" +
-         * LDAP_USER_END_OBJECT_CLASS + ")" + "(!(" + LDAP_ATTR_TYPE +"=" +
-         * LDAP_ANONYMOUS_USER_TYPE + "))" + "(" + LDAP_ATTR_STATUS+"=" +
-         * LDAP_ACTIVE_STATUS+"))";
-         */
 
         return buf.toString();
     }
@@ -785,21 +863,24 @@ public class UserLdapHelper extends LdapHelper
      */
     static String getSearchFilterForEmail(String p_email)
     {
-    	if (p_email == null)
+        if (p_email == null)
         {
             return null;
         }
 
         StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(LDAP_USER_END_OBJECT_CLASS).append(")")
-        	.append("(!(").append(LDAP_ATTR_STATUS).append("=").append(LDAP_DELETED_STATUS).append("))")
-        	.append("(!(").append(LDAP_ATTR_STATUS).append("=").append(LDAP_DEACTIVE_STATUS).append("))")
-        	.append("(").append(LDAP_ATTR_EMAIL).append("=").append(p_email).append(")")
-        	.append(")");
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DELETED_STATUS).append("))").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DEACTIVE_STATUS).append("))").append("(")
+                .append(LDAP_ATTR_EMAIL).append("=").append(p_email)
+                .append(")").append(")");
 
         return buf.toString();
     }
-    
+
     /**
      * Get the LDAP search filter for searching all LDAP User entries (whether
      * active or deactive).
@@ -817,34 +898,26 @@ public class UserLdapHelper extends LdapHelper
     static String getSearchFilterForActiveUsersInAllProjects()
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        String companyName = null;
-        try
-        {
-            companyName = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(companyId)).getName();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
+
         StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(
-                LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(").append(
-                LDAP_ATTR_TYPE).append("=").append(LDAP_ANONYMOUS_USER_TYPE)
-                .append("))").append("(").append(LDAP_ATTR_STATUS).append("=")
-                .append(LDAP_ACTIVE_STATUS).append(")").append("(").append(
-                        LDAP_ATTR_INALLPROJECTS).append("=").append(
-                        LDAP_ATTR_TRUE).append(")");
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_TYPE).append("=")
+                .append(LDAP_ANONYMOUS_USER_TYPE).append("))").append("(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_ACTIVE_STATUS).append(")").append("(")
+                .append(LDAP_ATTR_INALLPROJECTS).append("=")
+                .append(LDAP_ATTR_TRUE).append(")");
         // If is super user, then no limit in search rang.
-        if (CompanyThreadLocal.getInstance().getValue().equals(
-                CompanyWrapper.SUPER_COMPANY_ID))
+        if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
         {
             buf.append(")");
         }
         else
         {
-            buf.append("(").append(LDAP_ATTR_COMPANY).append("=").append(
-                    companyName).append("))");
+            buf.append("(").append(LDAP_ATTR_COMPANY).append("=")
+                    .append(companyName).append("))");
         }
 
         return buf.toString();
@@ -926,29 +999,29 @@ public class UserLdapHelper extends LdapHelper
         }
     }
 
-    public static void authenticate(String password,
-            String truePassword) throws NamingException
+    public static void authenticate(String password, String truePassword)
+            throws NamingException
     {
-		if (encyptMD5Password(password).equals(truePassword)
-				|| password.equals(truePassword)
-				|| encyptShaPassword(password).equals(truePassword))
-		{
-			return;
-		}
-		else
-		{
-			throw new NamingException();
-		}
-	}
+        if (encyptMD5Password(password).equals(truePassword)
+                || password.equals(truePassword)
+                || encyptShaPassword(password).equals(truePassword))
+        {
+            return;
+        }
+        else
+        {
+            throw new NamingException();
+        }
+    }
 
     /**
-	 * Get the LDAP search filter for searching LDAP Users entries using the
-	 * given LDAP operators and the given Attributes.
-	 * 
-	 * <p>
-	 * The number of Strings in p_userAttrs, p_attrValues, and p_operators must
-	 * all be equal.
-	 */
+     * Get the LDAP search filter for searching LDAP Users entries using the
+     * given LDAP operators and the given Attributes.
+     * 
+     * <p>
+     * The number of Strings in p_userAttrs, p_attrValues, and p_operators must
+     * all be equal.
+     */
     static String getSearchFilter(String[] p_userAttrs, String[] p_attrValues,
             String[] p_operators)
     {
@@ -960,29 +1033,20 @@ public class UserLdapHelper extends LdapHelper
         }
 
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        String companyName = null;
-        try
-        {
-            companyName = ServerProxy.getJobHandler().getCompanyById(
-                    Long.parseLong(companyId)).getName();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        String companyName = CompanyWrapper.getCompanyNameById(companyId);
 
         StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(
-                LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(").append(
-                LDAP_ATTR_STATUS).append("=").append(LDAP_DELETED_STATUS)
-                .append("))").append("(!(").append(LDAP_ATTR_STATUS)
-                .append("=").append(LDAP_DEACTIVE_STATUS).append("))");
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DELETED_STATUS).append("))").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DEACTIVE_STATUS).append("))");
         // If is super user, then no limit in search rang.
-        if (!CompanyThreadLocal.getInstance().getValue().equals(
-                CompanyWrapper.SUPER_COMPANY_ID))
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
         {
-            buf.append("(").append(LDAP_ATTR_COMPANY).append("=").append(
-                    companyName).append(")");
+            buf.append("(").append(LDAP_ATTR_COMPANY).append("=")
+                    .append(companyName).append(")");
         }
 
         for (int i = 0; i < p_userAttrs.length; i++)
@@ -1025,17 +1089,17 @@ public class UserLdapHelper extends LdapHelper
         }
 
         StringBuffer buf = new StringBuffer();
-        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=").append(
-                LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(").append(
-                LDAP_ATTR_STATUS).append("=").append(LDAP_DELETED_STATUS)
-                .append("))").append("(!(").append(LDAP_ATTR_STATUS)
-                .append("=").append(LDAP_DEACTIVE_STATUS).append("))").append(
-                        "(|");
+        buf.append("(&(").append(LDAP_ATTR_OBJECT_CLASS).append("=")
+                .append(LDAP_USER_END_OBJECT_CLASS).append(")").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DELETED_STATUS).append("))").append("(!(")
+                .append(LDAP_ATTR_STATUS).append("=")
+                .append(LDAP_DEACTIVE_STATUS).append("))").append("(|");
 
         for (int i = 0; i < p_uids.length; i++)
         {
-            buf.append("(").append(LDAP_ATTR_USERID).append("=").append(
-                    p_uids[i]).append(")");
+            buf.append("(").append(LDAP_ATTR_USERID).append("=")
+                    .append(p_uids[i]).append(")");
         }
 
         buf.append("))");
@@ -1134,11 +1198,13 @@ public class UserLdapHelper extends LdapHelper
     static UserInfo getUserInfoFromLDAPEntry(Attributes p_entry)
             throws NamingException
     {
-
         UserInfo ui = new UserInfo();
 
         Attribute attr = p_entry.get(LDAP_ATTR_USERID);
         ui.setUserId(getSingleAttributeValue(attr));
+
+        attr = p_entry.get(LDAP_ATTR_USER_NAME);
+        ui.setUserName(getSingleAttributeValue(attr));
 
         attr = p_entry.get(LDAP_ATTR_TITLE);
         ui.setTitle(getSingleAttributeValue(attr));
@@ -1311,7 +1377,7 @@ public class UserLdapHelper extends LdapHelper
 
         attr = p_entry.get(LDAP_ATTR_DEFAULT_UI_LOCALE);
         String uiLocale = getSingleAttributeValue(attr);
-        
+
         attr = p_entry.get(LDAP_ATTR_COMPANY);
         String companyName = getSingleAttributeValue(attr);
 
@@ -1326,7 +1392,7 @@ public class UserLdapHelper extends LdapHelper
 
     }
 
-    // 
+    //
     // Private methods
     //
 

@@ -31,16 +31,17 @@ public class InsertFuzzyIndexPersistenceCommand extends PersistenceCommand
     private PreparedStatement m_psInsertTokens;
     private List m_fuzzyIndexes;
 
-    //TODO Does this table "FUZZY_INDEX" exists? and the sequence "SEQ_FUZZY_INDEX" ?
-    private String m_insertToken = 
-        "insert into fuzzy_index(seq_fuzzy_index.NEXTVAL,?,?,?,?,?)";
-    
+    // TODO Does this table "FUZZY_INDEX" exists? and the sequence
+    // "SEQ_FUZZY_INDEX" ?
+    private String m_insertToken = "insert into fuzzy_index(seq_fuzzy_index.NEXTVAL,?,?,?,?,?)";
+
     public InsertFuzzyIndexPersistenceCommand(List p_fuzzyIndexes)
     {
         m_fuzzyIndexes = p_fuzzyIndexes;
     }
 
-    public void persistObjects(Connection p_connection) throws PersistenceException 
+    public void persistObjects(Connection p_connection)
+            throws PersistenceException
     {
         try
         {
@@ -65,31 +66,29 @@ public class InsertFuzzyIndexPersistenceCommand extends PersistenceCommand
         }
     }
 
-    public void createPreparedStatement(Connection p_connection) throws Exception 
+    public void createPreparedStatement(Connection p_connection)
+            throws Exception
     {
         m_psInsertTokens = p_connection.prepareStatement(m_insertToken);
     }
-    public void setData() throws Exception 
+
+    public void setData() throws Exception
     {
-          Iterator m_fuzzyIterator = m_fuzzyIndexes.iterator();
-          while (m_fuzzyIterator.hasNext())
-          {
-              Atom atom = (Atom)m_fuzzyIterator.next();
-              m_psInsertTokens.setLong(1,atom.getTuvId());
-              m_psInsertTokens.setLong(2,atom.getLocale());
-              m_psInsertTokens.setLong(3,atom.getTmId());
-              m_psInsertTokens.setLong(4,atom.getAtomCrc());
-              m_psInsertTokens.setLong(5,atom.getTokenCount());
-              m_psInsertTokens.addBatch();
-          }
+        Iterator m_fuzzyIterator = m_fuzzyIndexes.iterator();
+        while (m_fuzzyIterator.hasNext())
+        {
+            Atom atom = (Atom) m_fuzzyIterator.next();
+            m_psInsertTokens.setLong(1, atom.getTuvId());
+            m_psInsertTokens.setLong(2, atom.getLocale());
+            m_psInsertTokens.setLong(3, atom.getTmId());
+            m_psInsertTokens.setLong(4, atom.getAtomCrc());
+            m_psInsertTokens.setLong(5, atom.getTokenCount());
+            m_psInsertTokens.addBatch();
+        }
     }
-    public void batchStatements() throws Exception 
+
+    public void batchStatements() throws Exception
     {
         m_psInsertTokens.executeBatch();
     }
 }
-
-
-
-
-

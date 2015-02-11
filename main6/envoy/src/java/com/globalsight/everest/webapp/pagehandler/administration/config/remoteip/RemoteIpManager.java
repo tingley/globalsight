@@ -129,7 +129,7 @@ public class RemoteIpManager
             }
             catch (UnknownHostException e)
             {
-                s_logger.error(e);
+                s_logger.error(e.getMessage(), e);
             }
         }
 

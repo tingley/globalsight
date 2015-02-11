@@ -218,7 +218,7 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
     	}
     	catch (Exception ex)
     	{
-    		CATEGORY.error(ex.getMessage());
+    		CATEGORY.error(ex.getMessage(), ex);
     	}
     	
     	return result;
@@ -267,7 +267,7 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
                             Thread.sleep(5000);
                         }
                         if (CATEGORY.isDebugEnabled()) {
-                            CATEGORY.error(e.getMessage());
+                            CATEGORY.error(e.getMessage(), e);
                         }
                     }
                 }
@@ -284,7 +284,7 @@ public class GoogleProxy extends AbstractTranslator implements MachineTranslator
         catch (Exception ex)
         {
             if (CATEGORY.isDebugEnabled()) {
-                CATEGORY.error(ex.getMessage());                
+                CATEGORY.error(ex.getMessage(), ex);                
             }
         }
 

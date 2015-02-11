@@ -81,7 +81,7 @@ public final class ProMtPts9Invoker
         {
             s_logger
                     .info("Fail to get 'Directions of Translation' info, please check if the proMt server is configured correctly.");
-            s_logger.error(remoteEx);
+            s_logger.error(remoteEx.getMessage(), remoteEx);
             throw new Exception(remoteEx.getMessage());
         }
 
@@ -124,7 +124,7 @@ public final class ProMtPts9Invoker
                     .info("Fail to get 'Topic Template' info for direction id "
                             + dirId
                             + " , please check if the proMt server is configured correctly.");
-            s_logger.error(ex);
+            s_logger.error(ex.getMessage(), ex);
             throw new Exception(ex.getMessage());
         }
 
@@ -165,7 +165,7 @@ public final class ProMtPts9Invoker
         catch (Exception e)
         {
             s_logger.info("Fail to get target translated text!");
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
             throw new Exception(e.getMessage());
         }
 

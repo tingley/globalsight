@@ -68,55 +68,63 @@ public class JobControlReadyHandler extends JobManagementHandler
         p_request.setAttribute("action", p_request.getParameter("action"));
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
-        p_request.setAttribute("searchType", p_request
-                .getParameter("searchType"));
-        
+        p_request.setAttribute("searchType",
+                p_request.getParameter("searchType"));
+
         if ("validateBeforeDispatch".equals(p_request.getParameter("action")))
         {
             String[] ids = p_request.getParameterValues("ids");
             StringBuffer jobName = new StringBuffer();
             for (String id : ids)
             {
-                JobImpl job = HibernateUtil.get(JobImpl.class, Long.parseLong(id));
+                JobImpl job = HibernateUtil.get(JobImpl.class,
+                        Long.parseLong(id));
                 if (!job.hasSetCostCenter())
                 {
                     if (jobName.length() > 0)
                     {
                         jobName.append(", ");
                     }
-                    
+
                     jobName.append(job.getName());
                 }
             }
-            
+
             if (jobName.length() > 0)
             {
-                ResourceBundle bundle = PageHandler.getBundle(p_request.getSession());
+                ResourceBundle bundle = PageHandler.getBundle(p_request
+                        .getSession());
                 ServletOutputStream out = p_response.getOutputStream();
-                out.write((bundle.getString("msg_cost_center_empty_jobs") + "\r\n" + jobName).getBytes());
+                out.write((bundle.getString("msg_cost_center_empty_jobs")
+                        + "\r\n" + jobName).getBytes());
                 out.flush();
                 out.close();
             }
-            
+
             return;
         }
         else
         {
             performAppropriateOperation(p_request);
         }
-        
-        p_request.setAttribute(JOB_SCRIPTLET, getJobText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(MODIFY_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(DETAILS_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(PLANNED_COMPLETION_DATE_BEAN))
-                        .getPageURL(), getExpJobListing(p_request),
-                Job.READY_TO_BE_DISPATCHED, true, true));
-        p_request.setAttribute(JOB_LIST_START_PARAM, p_request
-                .getParameter(JOB_LIST_START_PARAM));
-        p_request.setAttribute(PAGING_SCRIPTLET, getPagingText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
-                Job.READY_TO_BE_DISPATCHED));
+
+        p_request.setAttribute(
+                JOB_SCRIPTLET,
+                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
+                        .getPageURL(), ((NavigationBean) beanMap
+                        .get(MODIFY_BEAN)).getPageURL(),
+                        ((NavigationBean) beanMap.get(DETAILS_BEAN))
+                                .getPageURL(), ((NavigationBean) beanMap
+                                .get(PLANNED_COMPLETION_DATE_BEAN))
+                                .getPageURL(), getExpJobListing(p_request),
+                        Job.READY_TO_BE_DISPATCHED, true, true));
+        p_request.setAttribute(JOB_LIST_START_PARAM,
+                p_request.getParameter(JOB_LIST_START_PARAM));
+        p_request.setAttribute(
+                PAGING_SCRIPTLET,
+                getPagingText(p_request,
+                        ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
+                        Job.READY_TO_BE_DISPATCHED));
 
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
@@ -173,9 +181,8 @@ public class JobControlReadyHandler extends JobManagementHandler
             while (tokenizer.hasMoreTokens())
             {
                 jobId = tokenizer.nextToken();
-                WorkflowHandlerHelper
-                        .dispatchJob(WorkflowHandlerHelper
-                                .getJobById(Long.parseLong(jobId)));
+                WorkflowHandlerHelper.dispatchJob(WorkflowHandlerHelper
+                        .getJobById(Long.parseLong(jobId)));
             }
         }
         else if (p_request.getParameter(DISCARD_JOB_PARAM) != null)
@@ -203,13 +210,13 @@ public class JobControlReadyHandler extends JobManagementHandler
         else if (action != null && action.equals("save"))
         {
             // save the results from a search/replace
-            SearchHandlerHelper.replace((List) sessionMgr
-                    .getAttribute("tuvInfos"));
+            SearchHandlerHelper.replace(
+                    (List) sessionMgr.getAttribute("tuvInfos"),
+                    (String) sessionMgr.getAttribute(COMPANY_ID));
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {
-            WorkflowHandlerHelper.updatePlannedCompletionDates(
-                    p_request);
+            WorkflowHandlerHelper.updatePlannedCompletionDates(p_request);
         }
         else
         {

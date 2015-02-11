@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Threading;
+using GlobalSight.Common;
 
 namespace GlobalSight.AdobeConverter
 {
@@ -14,7 +16,15 @@ namespace GlobalSight.AdobeConverter
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            MainForm mf = new MainForm();
+
+            if (AppConfig.AutoStart)
+            {
+                Thread t = new Thread(new ThreadStart(mf.autoStart));
+                t.Start();
+            }
+
+            Application.Run(mf);
         }
     }
 }

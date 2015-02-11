@@ -59,17 +59,8 @@ public class PaginateInfo implements Serializable
 				}
 			}			
 		}
-
-		if (p_currentPageNum > 0) {
-			if (p_currentPageNum > totalPageNum) {
-				currentPageNum = totalPageNum;
-			} else {
-				currentPageNum = p_currentPageNum;
-			}
-		} else {
-			currentPageNum = 1;
-		}
 		
+		setCurrentPageNum(p_currentPageNum);
 	}
 	
 	public int getTotalSegmentNum() {

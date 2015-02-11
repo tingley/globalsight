@@ -80,24 +80,23 @@ public class ProjectTmTuvT extends PersistentObject
 
     public String getSegmentString()
     {
-        return segmentString;
+        return segmentString == null? segmentClob : segmentString;
     }
 
     public void setSegmentString(String segmentString)
     {
-        this.segmentString = segmentString;
-        ExactMatchFormatHandler handler = new ExactMatchFormatHandler();
-        DiplomatBasicParser diplomatParser = new DiplomatBasicParser(handler);
+        if (segmentString != null)
+        {
+            if (EditUtil.getUTF8Len(segmentString) > CLOB_THRESHOLD)
+            {
+                this.segmentClob = segmentString;
+            }
+            else
+            {
+                this.segmentString = segmentString;
+            }
 
-        try
-        {
-            diplomatParser.parse(segmentString);
-            setExactMatchKey(Long.toString(GlobalSightCrc.calculate(
-                    handler.toString())));
-        }
-        catch (DiplomatBasicParserException e)
-        {
-            s_logger.error(e);
+	        preSetExactMatchKey(segmentString);
         }
     }
 
@@ -108,7 +107,36 @@ public class ProjectTmTuvT extends PersistentObject
 
     public void setSegmentClob(String segmentClob)
     {
-        this.segmentClob = segmentClob;
+        if (segmentClob != null)
+        {
+            if (EditUtil.getUTF8Len(segmentClob) > CLOB_THRESHOLD)
+            {
+                this.segmentClob = segmentClob;
+            }
+            else
+            {
+                this.segmentString = segmentClob;
+            }
+
+			preSetExactMatchKey(segmentClob);
+        }
+    }
+    
+    private void preSetExactMatchKey(String segmentStringOrClob)
+    {
+        ExactMatchFormatHandler handler = new ExactMatchFormatHandler();
+        DiplomatBasicParser diplomatParser = new DiplomatBasicParser(handler);
+
+        try
+        {
+            diplomatParser.parse(segmentStringOrClob);
+            setExactMatchKey(Long.toString(GlobalSightCrc.calculate(
+                    handler.toString())));
+        }
+        catch (DiplomatBasicParserException e)
+        {
+            s_logger.error(e.getMessage(), e);
+        }
     }
 
     public String getExactMatchKey()

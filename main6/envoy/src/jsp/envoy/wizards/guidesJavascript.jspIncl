@@ -70,7 +70,11 @@ function showGuide(guide)
    //alert(guideNode)
    // Push the contentLayer down by 30px (to 138px) to 
    // make room for the guide
-   contentLayer.style.top = 138;
+   if (window.navigator.userAgent.indexOf("Chrome")>0) {
+	contentLayer.style.top = 148;
+   } else {
+	contentLayer.style.top = 138;
+   }
    
    // Load the correct part (part 1 or part 2) of the guide 
    // based on the guideNode when
@@ -85,6 +89,7 @@ function showGuide(guide)
         (guideNode == "fileProfiles") || 
         (guideNode == "filterConfiguration") ||
         (guideNode == "import") ||
+        (guideNode == "createJob") ||
         (guideNode == "finish")))
    {
       guide = "fileSystem2";
@@ -99,6 +104,7 @@ function showGuide(guide)
              (guideNode != "filterConfiguration") ||
              (guideNode != "fileProfiles") || 
              (guideNode != "import") ||
+             (guideNode != "createJob") ||
              (guideNode != "finish")))
    {
       guide = "generic_fileSystem";
@@ -116,6 +122,7 @@ function showGuide(guide)
         (guideNode == "teamsiteServers") || 
         (guideNode == "teamsiteBranches") || 
         (guideNode == "import") ||
+        (guideNode == "createJob") ||
         (guideNode == "finish")))
    {
       guide = "teamSite2";
@@ -132,6 +139,7 @@ function showGuide(guide)
              (guideNode != "teamsiteServers") || 
              (guideNode != "teamsiteBranches") || 
              (guideNode != "import") ||
+             (guideNode != "createJob") ||
              (guideNode != "finish")))
    {
       guide = "generic_teamSite";
@@ -149,6 +157,7 @@ function showGuide(guide)
              (guideNode == "dbPreviewRules") || 
              (guideNode == "dbProfiles") || 
              (guideNode == "import") ||
+             (guideNode == "createJob") ||
              (guideNode == "finish")))
    {
       guide = "database2";
@@ -164,6 +173,7 @@ function showGuide(guide)
              (guideNode != "dbPreviewRules") || 
              (guideNode != "dbProfiles") || 
              (guideNode != "import") ||
+             (guideNode != "createJob") ||
              (guideNode != "finish")))
    {
       guide = "generic_database";
@@ -300,7 +310,6 @@ function activateNodes(obj, guide)
                  obj_tmProfiles,
                  obj_terminology,
                  obj_projects];
-
    }
    else if (guide == 'fileSystem2') {
               obj_workflows = getRef('workflows');
@@ -312,6 +321,7 @@ function activateNodes(obj, guide)
               obj_fileProfiles = getRef('fileProfiles');
               obj_filterConfiguration = getRef('filterConfiguration');
               obj_import = getRef('import');
+              obj_createJob = getRef('createJob');
               obj_finish = getRef('finish');
               objects = [obj_workflows,
                          obj_locProfiles,
@@ -322,6 +332,9 @@ function activateNodes(obj, guide)
                          obj_filterConfiguration,
                          obj_fileProfiles,
                          obj_import,
+    <% if (userPers.getPermissionFor(Permission.CREATE_JOB)) { %>
+                         obj_createJob,
+    <%}%>
                          obj_finish];
     }
    <%if (b_teamsiteGuideJs) {%>

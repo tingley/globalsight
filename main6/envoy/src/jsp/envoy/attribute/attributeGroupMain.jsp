@@ -10,7 +10,7 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.util.comparator.AttributeSetComparator,
             com.globalsight.everest.permission.PermissionSet,
-            com.globalsight.everest.servlet.util.ServerProxy,java.util.*"
+            com.globalsight.everest.company.CompanyWrapper,java.util.*"
     session="true"
 %>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
@@ -170,6 +170,20 @@ function setButtonState()
         }
     }
 }
+
+//for GBS-2599
+function handleSelectAll() {
+	if (attributeForm && attributeForm.selectAll) {
+		if (attributeForm.selectAll.checked) {
+			checkAllWithName('attributeForm', 'selectAttributeSetIds'); 
+			setButtonState();
+	    }
+	    else {
+			clearAll('attributeForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 <style type="text/css">
 @import url(/globalsight/includes/attribute.css);
@@ -201,7 +215,7 @@ function setButtonState()
        dataClass="com.globalsight.cxe.entity.customAttribute.AttributeSet"
        pageUrl="self"
        emptyTableMsg="msg_attribute_group_none" >
-        <amb:column label="">
+        <amb:column label="checkbox">
         <%isSuperAttributeSet = CompanyWrapper.SUPER_COMPANY_ID.equals(attributeSet.getCompanyId());
           if (!(isSuperAttributeSet && !isSuperAdmin)){%>
           <input type="checkbox" name="selectAttributeSetIds" value="<%=attributeSet.getId()%>" 
@@ -247,7 +261,7 @@ function setButtonState()
               <%if (isSuperAttributeSet) {
                 out.print("<div class=\"superAttribute\">");
               } 
-              out.print(ServerProxy.getJobHandler().getCompanyById(Long.parseLong(attributeSet.getCompanyId())).getCompanyName());
+              out.print(CompanyWrapper.getCompanyNameById(attributeSet.getCompanyId()));
               if (isSuperAttributeSet) {
                   out.print("</div>");
               }%>
@@ -255,12 +269,13 @@ function setButtonState()
         <%}%> 
       </amb:table>
       
-      <DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
+      <!--for GBS-2599
+	  DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
         <A CLASS="standardHREF"
            HREF="javascript:checkAllWithName('attributeForm', 'selectAttributeSetIds'); setButtonState()"><%=bundle.getString("lb_check_all")%></A> |
         <A CLASS="standardHREF"
            HREF="javascript:clearAll('attributeForm'); setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
-    </DIV>
+    </DIV-->
     </td>
   </tr>
   <tr>

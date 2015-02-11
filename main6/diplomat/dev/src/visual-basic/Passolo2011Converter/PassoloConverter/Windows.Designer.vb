@@ -31,12 +31,13 @@ Partial Class Windows
         Me.Button3 = New System.Windows.Forms.Button
         Me.FolderBrowserDialog1 = New System.Windows.Forms.FolderBrowserDialog
         Me.TextBox1 = New System.Windows.Forms.TextBox
+        Me.CBAutoStart = New System.Windows.Forms.CheckBox
         Me.SuspendLayout()
         '
         'Panel1
         '
         Me.Panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel1.Location = New System.Drawing.Point(0, 100)
+        Me.Panel1.Location = New System.Drawing.Point(0, 92)
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(550, 1)
         Me.Panel1.TabIndex = 0
@@ -45,8 +46,8 @@ Partial Class Windows
         '
         Me.head.AutoSize = True
         Me.head.Font = New System.Drawing.Font("Microsoft Sans Serif", 15.0!, System.Drawing.FontStyle.Bold)
-        Me.head.Location = New System.Drawing.Point(151, 32)
-        Me.head.MaximumSize = New System.Drawing.Size(1000, 1000)
+        Me.head.Location = New System.Drawing.Point(151, 30)
+        Me.head.MaximumSize = New System.Drawing.Size(1000, 923)
         Me.head.Name = "head"
         Me.head.Size = New System.Drawing.Size(244, 25)
         Me.head.TabIndex = 0
@@ -56,7 +57,7 @@ Partial Class Windows
         '
         Me.Label1.AutoSize = True
         Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!)
-        Me.Label1.Location = New System.Drawing.Point(45, 169)
+        Me.Label1.Location = New System.Drawing.Point(45, 156)
         Me.Label1.Name = "Label1"
         Me.Label1.Size = New System.Drawing.Size(148, 18)
         Me.Label1.TabIndex = 1
@@ -65,9 +66,9 @@ Partial Class Windows
         'Button1
         '
         Me.Button1.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Button1.Location = New System.Drawing.Point(396, 166)
+        Me.Button1.Location = New System.Drawing.Point(396, 153)
         Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(75, 28)
+        Me.Button1.Size = New System.Drawing.Size(75, 26)
         Me.Button1.TabIndex = 3
         Me.Button1.Text = "Browse..."
         Me.Button1.UseVisualStyleBackColor = True
@@ -75,9 +76,9 @@ Partial Class Windows
         'Button2
         '
         Me.Button2.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!)
-        Me.Button2.Location = New System.Drawing.Point(145, 248)
+        Me.Button2.Location = New System.Drawing.Point(199, 228)
         Me.Button2.Name = "Button2"
-        Me.Button2.Size = New System.Drawing.Size(75, 28)
+        Me.Button2.Size = New System.Drawing.Size(75, 26)
         Me.Button2.TabIndex = 4
         Me.Button2.Text = "Start"
         Me.Button2.UseVisualStyleBackColor = True
@@ -86,9 +87,9 @@ Partial Class Windows
         '
         Me.Button3.Enabled = False
         Me.Button3.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.0!)
-        Me.Button3.Location = New System.Drawing.Point(347, 248)
+        Me.Button3.Location = New System.Drawing.Point(347, 229)
         Me.Button3.Name = "Button3"
-        Me.Button3.Size = New System.Drawing.Size(75, 28)
+        Me.Button3.Size = New System.Drawing.Size(75, 26)
         Me.Button3.TabIndex = 5
         Me.Button3.Text = "Stop"
         Me.Button3.UseVisualStyleBackColor = True
@@ -96,16 +97,28 @@ Partial Class Windows
         'TextBox1
         '
         Me.TextBox1.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.TextBox1.Location = New System.Drawing.Point(199, 166)
+        Me.TextBox1.Location = New System.Drawing.Point(199, 153)
         Me.TextBox1.Name = "TextBox1"
         Me.TextBox1.Size = New System.Drawing.Size(181, 24)
         Me.TextBox1.TabIndex = 2
         '
+        'CBAutoStart
+        '
+        Me.CBAutoStart.AutoSize = True
+        Me.CBAutoStart.Font = New System.Drawing.Font("Microsoft Sans Serif", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.CBAutoStart.Location = New System.Drawing.Point(48, 233)
+        Me.CBAutoStart.Name = "CBAutoStart"
+        Me.CBAutoStart.Size = New System.Drawing.Size(92, 22)
+        Me.CBAutoStart.TabIndex = 6
+        Me.CBAutoStart.Text = "Auto Start"
+        Me.CBAutoStart.UseVisualStyleBackColor = True
+        '
         'Windows
         '
-        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 12.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(545, 352)
+        Me.ClientSize = New System.Drawing.Size(545, 325)
+        Me.Controls.Add(Me.CBAutoStart)
         Me.Controls.Add(Me.head)
         Me.Controls.Add(Me.Button3)
         Me.Controls.Add(Me.Button2)
@@ -120,7 +133,7 @@ Partial Class Windows
         Me.Name = "Windows"
         Me.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
-        Me.Text = "Passolo 2011 Converter - Version 8.2"
+        Me.Text = "Passolo 2011 Converter - Version 8.2.1"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -133,5 +146,6 @@ Partial Class Windows
     Friend WithEvents Button2 As System.Windows.Forms.Button
     Friend WithEvents Button3 As System.Windows.Forms.Button
     Friend WithEvents FolderBrowserDialog1 As System.Windows.Forms.FolderBrowserDialog
+    Friend WithEvents CBAutoStart As System.Windows.Forms.CheckBox
 
 End Class

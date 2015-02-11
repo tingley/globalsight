@@ -10,7 +10,7 @@
         </layout>
     </appender>
 
-    <appender name="logfileall" class="org.apache.log4j.RollingFileAppender">
+    <appender name="logfileall" class="com.globalsight.util.MyRollingFileAppender">
             <param name="File" value="./log.txt"/>
             <param name="Threshold" value="INFO"/>
 	 <param name="Append" value="true"/>

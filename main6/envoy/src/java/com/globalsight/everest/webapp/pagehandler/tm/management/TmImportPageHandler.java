@@ -55,6 +55,7 @@ import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm3.integration.MigrateTmCommand;
 import com.globalsight.ling.tm3.integration.Tm3Migrator;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.ProcessStatus;
 import com.globalsight.util.progress.ProgressReporter;
@@ -472,10 +473,14 @@ public class TmImportPageHandler
     @Override
     public void setMessageKey(String messageKey, String defaultMessage)
     {
-        if (bundle != null && bundle.getString(messageKey) != null)
-            this.progressMessage = bundle.getString(messageKey);
-        else
+        if (bundle == null || StringUtil.isEmpty(messageKey))
             this.progressMessage = defaultMessage;
+        else {
+            if (bundle != null && bundle.getString(messageKey) != null)
+                this.progressMessage = bundle.getString(messageKey);
+            else
+                this.progressMessage = defaultMessage;
+        }
     }
 
     @Override

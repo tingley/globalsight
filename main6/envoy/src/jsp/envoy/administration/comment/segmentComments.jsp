@@ -19,6 +19,7 @@
          com.globalsight.everest.webapp.pagehandler.administration.comment.LocaleCommentsComparator,
          com.globalsight.everest.webapp.pagehandler.administration.comment.PageCommentsSummary,
          com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          java.util.Locale, java.util.ResourceBundle" 
          session="true" %>
 <jsp:useBean id="skinbean" scope="application"
@@ -268,7 +269,7 @@ r<%@ include file="/envoy/common/header.jspIncl" %>
                 <%=bundle.getString("issue.priority." + issue.getPriority())%>
             </amb:column>
             <amb:column label="lb_comments" sortBy="<%=IssueComparator.TITLE%>" width="600px" style="word-wrap:break-word;word-break:break-all">
-            <%out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:600px\'>\");}</SCRIPT>"); %>
+            <div style='width:600px'>
                 <b><%=EditUtil.encodeHtmlEntities(issue.getTitle())%></b><br>
                 <%
                  List histories = issue.getHistory();
@@ -281,7 +282,7 @@ r<%@ include file="/envoy/common/header.jspIncl" %>
 
                     IssueHistory history = (IssueHistory)histories.get(i);
                     out.println(userName + ": " +
-	              EditUtil.encodeHtmlEntities(history.reportedBy()) + "<br>");
+	              EditUtil.encodeHtmlEntities(UserUtil.getUserNameById(history.reportedBy())) + "<br>");
                     out.println(date + ": " + history.dateReported() + "<br>");
 
                     String com = history.getComment();
@@ -300,7 +301,7 @@ r<%@ include file="/envoy/common/header.jspIncl" %>
                     }
                  }
                 %>
-                <%out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+            </div>
             </amb:column>
             <amb:column label="lb_view_page" align="center">
                 <a href="#" onclick="openReviewEditor('<%=issue.getLogicalKey()%>'); return false;" onfocus="blur()">
@@ -340,7 +341,7 @@ r<%@ include file="/envoy/common/header.jspIncl" %>
 
                     IssueHistory history = (IssueHistory)histories.get(j);
                     out.println(userName + ": " +
-	              EditUtil.encodeHtmlEntities(history.reportedBy()) + "<br>");
+	              EditUtil.encodeHtmlEntities(UserUtil.getUserNameById(history.reportedBy())) + "<br>");
                     out.println(date + ": " + history.dateReported() + "<br>");
 
                     String com = history.getComment();

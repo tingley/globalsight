@@ -19,13 +19,25 @@ package com.globalsight.ling.tm2.leverage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
+import com.globalsight.cxe.entity.customAttribute.JobAttribute;
+import com.globalsight.cxe.entity.customAttribute.TMAttributeCons;
+import com.globalsight.cxe.entity.customAttribute.TMAttributeManager;
+import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.JobImpl;
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTmTuT;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -34,7 +46,16 @@ import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.indexer.NgramTokenizer;
 import com.globalsight.ling.tm2.indexer.Token;
+import com.globalsight.ling.tm3.core.DefaultManager;
+import com.globalsight.ling.tm3.core.TM3Attribute;
+import com.globalsight.ling.tm3.core.TM3Exception;
+import com.globalsight.ling.tm3.core.TM3Tm;
+import com.globalsight.ling.tm3.core.TM3Tu;
+import com.globalsight.ling.tm3.integration.GSDataFactory;
+import com.globalsight.ling.tm3.integration.segmenttm.TM3Util;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.RuntimeCache;
 
 /**
  * LeverageMatches holds leverage match results for a segment
@@ -42,8 +63,8 @@ import com.globalsight.util.GlobalSightLocale;
 
 public class LeverageMatches
 {
-    private static Logger c_logger = Logger
-            .getLogger(LeverageMatches.class.getName());
+    private static Logger c_logger = Logger.getLogger(LeverageMatches.class
+            .getName());
 
     // leverage options
     private LeverageOptions m_leverageOptions = null;
@@ -58,6 +79,8 @@ public class LeverageMatches
     // built using data in m_leveragedTus after leverage options are
     // applied to the data.
     private OrderedMatchSegments m_orderedMatchSegments = null;
+
+    private Job job = null;
 
     // constructor
     public LeverageMatches(BaseTmTuv p_sourceTuv,
@@ -126,18 +149,20 @@ public class LeverageMatches
      */
     public void applySegmentTmOptions() throws Exception
     {
+        removeInvalidLeveragedTus();
+
         Iterator itLeveragedTu = m_leveragedTus.iterator();
         while (itLeveragedTu.hasNext())
         {
             LeveragedTu tu = (LeveragedTu) itLeveragedTu.next();
-            
+
             if (tu.getScore() == 100)
             {
                 if (m_leverageOptions.isAutoRepair())
                 {
                     repairPlaceholders(tu);
                 }
-                
+
                 String originalFuzzyFormat = m_originalSourceTuv
                         .getFuzzyIndexFormat();
                 String matchedSrcFuzzyFormat = tu.getSourceTuv()
@@ -202,7 +227,225 @@ public class LeverageMatches
             }
 
             setRefTmScores(tu);
+
+            try
+            {
+                setTuvAttributeScores(tu);
+            }
+            catch (Exception e)
+            {
+                c_logger.error("Error when setting tuv attributes scores", e);
+            }
         }
+    }
+
+    /**
+     * If there is no source TUV in one TM TU returned by TM leveraging, these
+     * data will cause error, should be removed.
+     */
+    private void removeInvalidLeveragedTus()
+    {
+        for (Iterator itLeveragedTu = m_leveragedTus.iterator(); itLeveragedTu
+                .hasNext();)
+        {
+            LeveragedTu tu = (LeveragedTu) itLeveragedTu.next();
+            if (tu.getSourceTuv() == null)
+            {
+                itLeveragedTu.remove();
+            }
+        }
+    }
+
+    // for GBS-937, Custom TM attributes
+    private void setTuvAttributeScores(LeveragedTu tu)
+    {
+        float score = tu.getScore();
+        long tmId = tu.getTmId();
+        ProjectTM ptm = HibernateUtil.get(ProjectTM.class, tmId);
+        if (ptm == null)
+        {
+            c_logger.debug("ptm == null");
+            return;
+        }
+
+        boolean isTM3 = ptm.getTm3Id() != null;
+        long tuId = tu.getId();
+        TranslationMemoryProfile tmp = m_leverageOptions.getTmProfile();
+
+        if (tmp == null)
+        {
+            c_logger.debug("tmp == null");
+            return;
+        }
+
+        Set<ProjectTmTuTProp> tuProps = null;
+        List<TMPAttribute> tmpAtts = tmp.getAllTMPAttributes();
+
+        if (!isTM3)
+        {
+            ProjectTmTuT tmTU = HibernateUtil.get(ProjectTmTuT.class, tuId);
+
+            if (tmTU == null)
+            {
+                c_logger.debug("tmTU == null");
+                return;
+            }
+
+            tuProps = tmTU.getProps();
+        }
+        else
+        {
+            tuProps = new HashSet<ProjectTmTuTProp>();
+            TM3Tm tm3tm = null;
+            Session session = TmUtil.getStableSession();
+            try
+            {
+                tm3tm = DefaultManager.create().getTm(session,
+                        new GSDataFactory(), ptm.getTm3Id());
+                if (tm3tm != null)
+                {
+                    TM3Tu tm3tu = tm3tm.getTu(tuId);
+                    if (tm3tu == null)
+                        return;
+
+                    Map<TM3Attribute, Object> tm3Attributes = tm3tu
+                            .getAttributes();
+                    if (tm3Attributes != null && !tm3Attributes.isEmpty())
+                    {
+                        for (Map.Entry<TM3Attribute, Object> tmAt : tm3Attributes
+                                .entrySet())
+                        {
+                            ProjectTmTuTProp prop = TM3Util.toProjectTmTuTProp(
+                                    tmAt.getKey(), tmAt.getValue());
+
+                            if (prop != null)
+                            {
+                                tuProps.add(prop);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new TM3Exception(e);
+            }
+            finally
+            {
+                TmUtil.closeStableSession(session);
+            }
+        }
+
+        // debug some information
+        if (c_logger.isDebugEnabled())
+        {
+            c_logger.debug("tu id " + tuId);
+            c_logger.debug("tmp : " + tmp.getId() + " " + tmp.getName());
+
+            if (tmpAtts != null && tmpAtts.size() > 0)
+            {
+                c_logger.debug("tmpAtts : ");
+                c_logger.debug(tmpAtts.toString());
+            }
+            else
+            {
+                c_logger.debug("tmpAtts is empty.");
+            }
+
+            if (tuProps != null && tuProps.size() > 0)
+            {
+                c_logger.debug("tuProps : ");
+                c_logger.debug(tuProps.toString());
+            }
+            else
+            {
+                c_logger.debug("tuProps is empty.");
+            }
+
+            if (job != null)
+            {
+                List<JobAttribute> jobAtts = job.getAllJobAttributes();
+                if (jobAtts != null && jobAtts.size() > 0)
+                {
+                    c_logger.debug("jobAtts : ");
+                    for (JobAttribute jobAtt : jobAtts)
+                    {
+                        c_logger.debug(jobAtt.getAttribute().getName() + " : "
+                                + jobAtt.getValue());
+                    }
+                }
+                else
+                {
+                    c_logger.debug("jobAtts is empty.");
+                }
+            }
+            else
+            {
+                c_logger.debug("job == null");
+            }
+        }
+
+        if (tmpAtts != null && tmpAtts.size() > 0)
+        {
+            for (TMPAttribute tmpAtt : tmpAtts)
+            {
+                String tmpAttValueType = tmpAtt.getValueType();
+                String tmpAttName = tmpAtt.getAttributename();
+                String tmpAttOp = tmpAtt.getOperator();
+                int penalty = tmpAtt.getPenalty();
+                Object value = null;
+                // get attribute value of TU
+                String tuAttValue = ProjectTmTuTProp.getAttributeValue(tuProps,
+                        tmpAttName);
+
+                // get job attribute value if needed
+                if (tmpAttValueType.equals(TMAttributeCons.VALUE_FROM_JOBATT)
+                        && job != null)
+                {
+                    List<JobAttribute> jobAtts = null;
+                    if (job instanceof JobImpl)
+                    {
+                        String uuid = ((JobImpl) job).getUuid();
+                        jobAtts = RuntimeCache.getJobAttributes(uuid);
+                    }
+                    if (jobAtts == null)
+                    {
+                        jobAtts = job.getAllJobAttributes();
+                    }
+                    if (jobAtts != null)
+                    {
+                        for (JobAttribute jobAtt : jobAtts)
+                        {
+                            if (jobAtt.getAttribute().getName()
+                                    .equalsIgnoreCase(tmpAttName))
+                            {
+                                Object v = jobAtt.getValue();
+                                value = v == null ? "" : v;
+                            }
+                        }
+                    }
+                }
+                else if (tmpAttValueType.equals(TMAttributeCons.VALUE_INPUT))
+                {
+                    value = tmpAtt.getValueData();
+                }
+
+                boolean matched = TMAttributeManager.isTMPAttributeMatched(
+                        tmpAttOp, tuAttValue, value);
+
+                if (matched)
+                {
+                    score = score - penalty;
+
+                    if (score < 0)
+                    {
+                        score = 0;
+                    }
+                }
+            }
+        }
+
+        tu.setScore(score);
     }
 
     public BaseTmTuv getOriginalTuv()
@@ -266,7 +509,8 @@ public class LeverageMatches
         {
             SegmentTmTu brokenUpSourceTu = (SegmentTmTu) itBrokenUpSource
                     .next();
-            brokenUpLevMatches.put(brokenUpSourceTu.getSubId(),
+            brokenUpLevMatches.put(
+                    brokenUpSourceTu.getSubId(),
                     new LeverageMatches(brokenUpSourceTu
                             .getFirstTuv(sourceLocale), m_leverageOptions));
         }
@@ -330,11 +574,11 @@ public class LeverageMatches
      * 
      * @return ExactLeverageMatch object
      */
-    public ExactLeverageMatch getExactLeverageMatch()
+    public ExactLeverageMatch getExactLeverageMatch(String companyId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments();
+            populateOrderedMatchSegments(companyId);
         }
 
         return m_orderedMatchSegments.getExactLeverageMatch();
@@ -346,11 +590,11 @@ public class LeverageMatches
      * @return Set of GlobalSightLocale objects which are target locales that
      *         have an exact match
      */
-    public Set getExactMatchLocales()
+    public Set getExactMatchLocales(String companyId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments();
+            populateOrderedMatchSegments(companyId);
         }
 
         return m_orderedMatchSegments.getExactMatchLocales();
@@ -362,11 +606,12 @@ public class LeverageMatches
      * @return exact match for a given locale. If there is no exact match for
      *         the locale, null is returned.
      */
-    public LeveragedTuv getExactLeverageMatch(GlobalSightLocale p_targetLocale)
+    public LeveragedTuv getExactLeverageMatch(GlobalSightLocale p_targetLocale,
+            String companyId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments();
+            populateOrderedMatchSegments(companyId);
         }
 
         return m_orderedMatchSegments.getExactLeverageMatch(p_targetLocale);
@@ -428,11 +673,11 @@ public class LeverageMatches
      * 
      * @return Iterator
      */
-    public Iterator targetLocaleIterator()
+    public Iterator targetLocaleIterator(String companyId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments();
+            populateOrderedMatchSegments(companyId);
         }
 
         return m_orderedMatchSegments.targetLocaleIterator();
@@ -447,11 +692,12 @@ public class LeverageMatches
      *            target locale
      * @return Iterator
      */
-    public Iterator matchIterator(GlobalSightLocale p_targetLocale)
+    public Iterator matchIterator(GlobalSightLocale p_targetLocale,
+            String companyId)
     {
         if (m_orderedMatchSegments == null)
         {
-            populateOrderedMatchSegments();
+            populateOrderedMatchSegments(companyId);
         }
 
         return m_orderedMatchSegments.matchIterator(p_targetLocale,
@@ -461,10 +707,11 @@ public class LeverageMatches
     }
 
     // build m_orderedMatchSegments
-    private void populateOrderedMatchSegments()
+    private void populateOrderedMatchSegments(String companyId)
     {
         m_orderedMatchSegments = new OrderedMatchSegments();
-        m_orderedMatchSegments.populate(m_leveragedTus, m_leverageOptions);
+        m_orderedMatchSegments.populate(m_leveragedTus, m_leverageOptions,
+                companyId);
     }
 
     private void setOptionAppliedScore(LeveragedTu p_tu) throws Exception
@@ -792,13 +1039,23 @@ public class LeverageMatches
     {
         SegmentTmTuv sourceTuv = (SegmentTmTuv) m_originalSourceTuv;
         SegmentTmTuv matchedTuv = (SegmentTmTuv) tu.getSourceTuv();
-        
+
         if (isCodeDifferent(sourceTuv, matchedTuv))
         {
             PlaceholderHander hander = new PlaceholderHander(
                     (SegmentTmTuv) m_originalSourceTuv, (SegmentTmTu) tu,
                     m_leverageOptions.getSaveTmId());
             hander.repair();
-        }        
+        }
+    }
+
+    public Job getJob()
+    {
+        return job;
+    }
+
+    public void setJob(Job job)
+    {
+        this.job = job;
     }
 }

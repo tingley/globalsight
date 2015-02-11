@@ -27,7 +27,7 @@ String urlCreate = createpackage.getPageURL();
 String urlDownload = downloadpackage.getPageURL();
 String urlUpload = uploadpackage.getPageURL();
 
-String lb_title = bundle.getString("lb_aligner_packages");
+String lb_title = bundle.getString("lb_corpus_aligner");
 String lb_helptext = bundle.getString("helper_text_aligner_packages");
 %>
 <HTML>

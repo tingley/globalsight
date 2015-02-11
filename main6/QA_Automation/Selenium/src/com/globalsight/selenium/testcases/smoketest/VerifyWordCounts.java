@@ -4,19 +4,11 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyActivities;
-import com.globalsight.selenium.properties.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreatedJob;
 
 /*
  * TestCaseName: VerifyWrodCounts.java
@@ -28,92 +20,58 @@ import com.thoughtworks.selenium.Selenium;
  * 2011-6-21  First Version  Jester
  */
 
-public class VerifyWordCounts extends BaseTestCase {
-	/*
-	 * Common Variables.
-	 */
-	private Selenium selenium;
+public class VerifyWordCounts extends BaseTestCase
+{
+    /*
+     * Common Variables.
+     */
+    @Test
+    public void verifyWordCounts()
+    {
+        openMenuItemAndWait(selenium, MainFrame.MY_ACTIVITIES_MENU,
+                MainFrame.MY_ACTIVITIES_AVAILABLE_SUBMENU);
 
-	@Test
-	public void verifyWordCounts() {
-		selenium.click(MainFrame.MyActivities_MENU);
-		selenium.click(MainFrame.Available_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		selenium.click("link="+ConfigUtil.getDataInCase(getClassName(), "ACTIVITYJOBNAME"));
-		
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        String jobName = getDataInCase("activityJobName");
+        jobName = CreatedJob.getCreatedJobName(jobName);
+        clickAndWait(selenium, "link=" + jobName);
 
-		selenium.click(MyActivities.DetailedWordCounts_BUTTON_Job);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        clickAndWait(selenium, MyActivities.DETAILED_WORD_COUNT_IN_JOB_BUTTON);
 
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[3]"),
-				ConfigUtil.getDataInCase(getClassName(), "100%"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[4]"),
-				ConfigUtil.getDataInCase(getClassName(), "95%99%"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[5]"),
-				ConfigUtil.getDataInCase(getClassName(), "85%94%"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[6]"),
-				ConfigUtil.getDataInCase(getClassName(), "75%84%"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[7]"),
-				ConfigUtil.getDataInCase(getClassName(), "50%74%"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[8]"),
-				ConfigUtil.getDataInCase(getClassName(), "NOMATCH"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[9]"),
-				ConfigUtil.getDataInCase(getClassName(), "REPETITIONS"));
-		Assert.assertEquals(
-				selenium.getText(MyActivities.DetailedStatistics_TABLE
-						+ "/tr[2]/td[10]"),
-				ConfigUtil.getDataInCase(getClassName(), "INCONTEXTMATCHES"));
-	}
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[3]"), getDataInCase("100%"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[4]"), getDataInCase("95%99%"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[5]"), getDataInCase("85%94%"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[6]"), getDataInCase("75%84%"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[7]"), getDataInCase("50%74%"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[8]"), getDataInCase("nomatch"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[9]"), getDataInCase("repetitions"));
+        Assert.assertEquals(
+                selenium.getText(MyActivities.DETAILED_STATISTICS_TABLE
+                        + "/tr[2]/td[10]"), getDataInCase("incontextMatch"));
+    }
 
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithAnyone(selenium);
-	}
+    @BeforeMethod
+    public void beforeMethod()
+    {
+        CommonFuncs.loginSystemWithAnyone(selenium);
+    }
 
-	@AfterMethod
-	public void afterMethod() {
-		CommonFuncs.logoutSystem(selenium);
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
+    @AfterMethod
+    public void afterMethod()
+    {
+        CommonFuncs.logoutSystem(selenium);
+    }
 }

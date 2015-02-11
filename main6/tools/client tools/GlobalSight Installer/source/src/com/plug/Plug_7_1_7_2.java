@@ -101,7 +101,7 @@ public class Plug_7_1_7_2 implements Plug
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -111,7 +111,7 @@ public class Plug_7_1_7_2 implements Plug
             }
             catch (IOException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -148,7 +148,7 @@ public class Plug_7_1_7_2 implements Plug
             }
             catch (IOException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -184,7 +184,7 @@ public class Plug_7_1_7_2 implements Plug
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

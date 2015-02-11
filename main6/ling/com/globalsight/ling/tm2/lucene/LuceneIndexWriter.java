@@ -229,7 +229,7 @@ public class LuceneIndexWriter
         }
         catch(Throwable e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
             
             indexReader.undeleteAll();
             throw (e instanceof Exception ? (Exception)e : new Exception(e));

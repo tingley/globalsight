@@ -23,8 +23,7 @@
     String nextUrl = next.getPageURL() + "&action=next";
     String cancelUrl = cancel.getPageURL() + "&action=cancel";
 
-    String title= bundle.getString("lb_customer_upload") + ": " +
-                    bundle.getString("lb_basic_information");
+    String title = bundle.getString("lb_upload");
 
     String projectLabel = (String)sessionMgr.getAttribute(WebAppConstants.PROJECT_LABEL);
     String projectJsMsg = (String)sessionMgr.getAttribute(WebAppConstants.PROJECT_JS_MSG);
@@ -93,7 +92,7 @@ function validateForm()
     
     // Do not allow "\",  "/", ":" and other characters in the job name
     // that are not valid in Windows (or Unix) filenames.
-    var jobNameRegex = /[\\/:;\*\?\|\"\'<>&%]/;
+    var jobNameRegex = /[\\/:;\*\?\|\"<>&%]/;
     if (jobNameRegex.test(customerForm.jobName.value))
     {
        alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_invalid_job_name"))%>");

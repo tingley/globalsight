@@ -21,17 +21,19 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.calendar.FluxCalendar;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.everest.costing.BigDecimalHelper;
 import com.globalsight.everest.costing.Cost;
 import com.globalsight.everest.costing.Currency;
@@ -47,17 +49,17 @@ import com.globalsight.everest.jobhandler.JobEventObserver;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.page.PageStateValidator;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.statistics.StatisticsException;
 import com.globalsight.everest.statistics.StatisticsService;
-import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.WfTaskInfo;
@@ -70,6 +72,7 @@ import com.globalsight.scheduling.FluxEventMap;
 import com.globalsight.scheduling.SchedulerConstants;
 import com.globalsight.scheduling.SchedulingInformation;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.date.DateHelper;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
@@ -89,14 +92,22 @@ public class JobDispatcher
 
     private static final String ANALYZE_PROCEDURE = "ANALYZE_SYS4";
 
+    // determines whether the system-wide notification is enabled
+    private boolean m_systemNotificationEnabled = EventNotificationHelper
+            .systemNotificationEnabled();
+
     /**
      * Constructor creates the TimerServices
      */
     public JobDispatcher(Job p_job)
     {
         Session session = HibernateUtil.getSession();
-        JobImpl job = (JobImpl) session.get(JobImpl.class, new Long(p_job
-                .getId()));
+        JobImpl job = (JobImpl) session.get(JobImpl.class,
+                new Long(p_job.getId()));
+        if (job.getL10nProfile() == null)
+        {
+            return;
+        }
         DispatchCriteria dispatchCriteria = job.getL10nProfile()
                 .getDispatchCriteria();
 
@@ -258,8 +269,8 @@ public class JobDispatcher
      * Cancel the workflows in the job that are of the specified state. Or if
      * the state is null cancel all the workflows and the job.
      */
-    public void cancelJob(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state) throws JobException
+    public void cancelJob(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state) throws JobException
     {
         validateStateOfPagesInJob(p_job);
         cancelWorkflows(p_idOfUserRequestingCancel, p_job, p_state);
@@ -271,14 +282,12 @@ public class JobDispatcher
      * the state is null cancel all the workflows and the job. this takes care
      * of cancellation for reimport page
      */
-    public void cancelJob(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state, boolean p_reimport)
-            throws JobException
+    public void cancelJob(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state, boolean p_reimport) throws JobException
     {
         validateStateOfPagesInJob(p_job);
 
-        cancelWorkflows(p_idOfUserRequestingCancel, p_job,
-                p_state, p_reimport);
+        cancelWorkflows(p_idOfUserRequestingCancel, p_job, p_state, p_reimport);
 
         destroyTimer(p_job);
     }
@@ -287,14 +296,13 @@ public class JobDispatcher
      * Cancel the workflows associated with the given state OR pass NULL for all
      * states and NULL.
      */
-    private void cancelWorkflows(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state, boolean p_reimport)
-            throws JobException
+    private void cancelWorkflows(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state, boolean p_reimport) throws JobException
     {
         try
         {
-            getWorkflowManager().cancel(p_idOfUserRequestingCancel,
-                    p_job, p_state, p_reimport);
+            getWorkflowManager().cancel(p_idOfUserRequestingCancel, p_job,
+                    p_state, p_reimport);
         }
         catch (Exception e)
         {
@@ -349,10 +357,12 @@ public class JobDispatcher
             c_category.error("Failed to calculateWorkflowStatistics", e);
             job = p_job;
         }
-        
-        
+
         if (nextState.equals(Job.DISPATCHED))
         {
+            // Calculate target page word-counts after all source pages are
+            // processed.
+            calculateAllTargetPagesForJob(job);
             if (job.hasSetCostCenter())
             {
                 toDispatch(job);
@@ -365,22 +375,35 @@ public class JobDispatcher
         else if (nextState
                 .equals(Job.READY_TO_BE_DISPATCHED + "_" + Job.MANUAL))
         {
+            calculateAllTargetPagesForJob(job);
             toReady(job);
         }
     }
 
     private void toDispatch(Job job)
     {
-
         // calculateWorkflowStatistics() commits statistics to DB
-        StatisticsService.calculateWorkflowStatistics(new ArrayList(job
-                .getWorkflows()), job.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes());
+        StatisticsService.calculateWorkflowStatistics(
+                new ArrayList(job.getWorkflows()), job.getL10nProfile()
+                        .getTranslationMemoryProfile().getJobExcludeTuTypes());
+
         calculateCost(job);
+        try
+        {
+            sendEmailForJobImportSucc(job);
+        }
+        catch (Exception e)
+        {
+            c_category
+                    .error("Failed to send notification for creating job successfully",
+                            e);
+        }
         dispatchWorkflows(job);
         destroyTimer(job);
+        // Auto accept the activity/task of Job.
+        TaskHelper.autoAcceptTaskInJob(job);
     }
-    
+
     private void toReady(Job job)
     {
         try
@@ -389,18 +412,39 @@ public class JobDispatcher
         }
         catch (Exception e)
         {
-            c_category.error(e);
+            c_category.error(e.getMessage(), e);
         }
-        
+
         // calculateWorkflowStatistics() commits statistics to DB
-        StatisticsService.calculateWorkflowStatistics(new ArrayList(job
-                .getWorkflows()), job.getL10nProfile()
-                .getTranslationMemoryProfile().getJobExcludeTuTypes());
+        StatisticsService.calculateWorkflowStatistics(
+                new ArrayList(job.getWorkflows()), job.getL10nProfile()
+                        .getTranslationMemoryProfile().getJobExcludeTuTypes());
 
         calculateCost(job);
         calculateEstimatedCompletionDate(job);
-        sendEmail(job, MailerConstants.DISPATCH_SUBJECT, MailerConstants.DISPATCH_MESSAGE);
+        try
+        {
+            sendEmailForJobImportSucc(job);
+        }
+        catch (Exception e)
+        {
+            c_category
+                    .error("Failed to send notification for creating job successfully",
+                            e);
+        }
+        sendEmail(job, MailerConstants.DISPATCH_SUBJECT,
+                MailerConstants.DISPATCH_MESSAGE);
         destroyTimer(job);
+    }
+
+    private void calculateAllTargetPagesForJob(Job job)
+    {
+        for (Workflow workflow : job.getWorkflows())
+        {
+            StatisticsService.calculateTargetPagesWordCount(workflow, job
+                    .getL10nProfile().getTranslationMemoryProfile()
+                    .getJobExcludeTuTypes());
+        }
     }
 
     /**
@@ -418,13 +462,14 @@ public class JobDispatcher
         catch (Exception e)
         {
             c_category.error("Cannot dispatch a Job " + e.toString()
-                    + GlobalSightCategory.getLineContinuation() + "p_job=" + p_job, e);
+                    + GlobalSightCategory.getLineContinuation() + "p_job="
+                    + p_job, e);
 
             sendEmail(p_job, MailerConstants.DISPATCH_FAILURE_SUBJECT,
                     DISPATCH_FAILURE);
 
-            throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE, null, e,
-                    JobException.PROPERTY_FILE_NAME);
+            throw new JobException(JobException.MSG_WORKFLOWMANAGER_FAILURE,
+                    null, e, JobException.PROPERTY_FILE_NAME);
         }
     }
 
@@ -440,16 +485,16 @@ public class JobDispatcher
              * constraint violation This is replaced by a non-jms call below.
              * 
              * if
-             * (sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED) ==
-             * true) { // Calculate the Cost of the Job. Currency c =
+             * (sc.getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED)
+             * == true) { // Calculate the Cost of the Job. Currency c =
              * ServerProxy.getCostingEngine().getPivotCurrency(); String curr =
              * c.getIsoCode(); Currency oCurrency =
              * ServerProxy.getCostingEngine().getCurrency(curr); // Calculate
              * Expenses CostCalculator calculator = new
              * CostCalculator(job.getId(), oCurrency, true, Cost.EXPENSE);
              * calculator.sendToCalculateCost(); if
-             * (sc.getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED) ==
-             * true) { // Calculate Revenue calculator = new
+             * (sc.getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED)
+             * == true) { // Calculate Revenue calculator = new
              * CostCalculator(job.getId(), oCurrency, true, Cost.REVENUE);
              * calculator.sendToCalculateCost(); } }
              */
@@ -464,16 +509,17 @@ public class JobDispatcher
                 // Calculate Expenses
                 Cost cost = ServerProxy.getCostingEngine().calculateCost(p_job,
                         oCurrency, true, Cost.EXPENSE);
-                
+
                 if (sc.getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED))
                 {
                     // Calculate Revenues
                     cost = ServerProxy.getCostingEngine().calculateCost(p_job,
                             oCurrency, true, Cost.REVENUE);
 
-                    float PMCost = p_job.getL10nProfile().getProject().getPMCost();
-                    PercentageSurcharge percentageSurcharge = 
-                        new PercentageSurcharge(PMCost);
+                    float PMCost = p_job.getL10nProfile().getProject()
+                            .getPMCost();
+                    PercentageSurcharge percentageSurcharge = new PercentageSurcharge(
+                            PMCost);
                     percentageSurcharge.setName("PM Cost");
                     cost = ServerProxy.getCostingEngine().addSurcharge(
                             cost.getId(), percentageSurcharge, Cost.REVENUE);
@@ -505,8 +551,8 @@ public class JobDispatcher
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
 
-            jobClone = (JobImpl) session.get(JobImpl.class, new Long(p_job
-                    .getId()));
+            jobClone = (JobImpl) session.get(JobImpl.class,
+                    new Long(p_job.getId()));
             Iterator it = jobClone.getWorkflows().iterator();
 
             while (it.hasNext())
@@ -537,7 +583,7 @@ public class JobDispatcher
                     workflowDuration += wfTaskInfo.getTotalDuration();
                     Activity act = ServerProxy.getJobHandler().getActivity(
                             task.getTaskName());
-                    
+
                     if (Activity.isTranslateActivity(act.getType()))
                     {
                         translateDuration = workflowDuration;
@@ -563,8 +609,9 @@ public class JobDispatcher
                 transaction.rollback();
             }
 
-            c_category.error("Failed to calculate ETCD & ECD: "
-                    + p_job.getJobName(), e2);
+            c_category
+                    .error("Failed to calculate ETCD & ECD: "
+                            + p_job.getJobName(), e2);
         }
         finally
         {
@@ -579,20 +626,21 @@ public class JobDispatcher
      * Cancel the workflows associated with the given state OR pass NULL for all
      * states.
      */
-    private void cancelWorkflows(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state) throws JobException
+    private void cancelWorkflows(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state) throws JobException
     {
         try
         {
-            getWorkflowManager().cancel(p_idOfUserRequestingCancel,
-                    p_job, p_state);
+            getWorkflowManager().cancel(p_idOfUserRequestingCancel, p_job,
+                    p_state);
         }
         catch (Exception e)
         {
             // c_category.error("Failure to cancel a workflow", e);
 
             c_category.error("Failure to cancel a workflow: " + e.toString()
-                    + GlobalSightCategory.getLineContinuation() + "p_job=" + p_job, e);
+                    + GlobalSightCategory.getLineContinuation() + "p_job="
+                    + p_job, e);
 
             sendEmail(p_job, MailerConstants.CANCEL_FAILURE_SUBJECT,
                     CANCEL_FAILURE);
@@ -626,10 +674,128 @@ public class JobDispatcher
         }
     }
 
+    /**
+     * Get the No Matches and Repetition Word Count of Job.
+     * 
+     * @param p_user
+     *            uploader
+     * @param p_job
+     *            job data.
+     */
+    private String getNoMatchesAndRepetitionsWordCount(User p_user, Job p_job)
+    {
+        StringBuffer result = new StringBuffer();
+        try
+        {
+            PermissionSet ps = Permission.getPermissionManager()
+                    .getPermissionSetForUser(p_user.getUserId());
+            boolean isNoMatches = ps
+                    .getPermissionFor(Permission.ACCOUNT_NOTIFICATION_NOMATCHES);
+            boolean isRepetitions = ps
+                    .getPermissionFor(Permission.ACCOUNT_NOTIFICATION_REPETITIONS);
+            if (!isNoMatches && !isRepetitions)
+            {
+                return result.toString();
+            }
+
+            Iterator<Workflow> it = p_job.getWorkflows().iterator();
+            if (it.hasNext())
+            {
+                Workflow wf = it.next();
+                if (isNoMatches)
+                {
+                    result.append("No Matches: ")
+                            .append(wf.getThresholdNoMatchWordCount())
+                            .append("\r\n");
+                }
+
+                if (isRepetitions)
+                {
+                    int repetitionCount = wf.getRepetitionWordCount()
+                            + wf.getSubLevRepetitionWordCount()
+                            + wf.getHiFuzzyRepetitionWordCount()
+                            + wf.getMedHiFuzzyRepetitionWordCount()
+                            + wf.getMedFuzzyRepetitionWordCount();
+                    result.append("Repetitions: ").append(repetitionCount)
+                            .append("\r\n");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Sends the notification for creating job successfully
+     */
+    private void sendEmailForJobImportSucc(Job p_job) throws Exception
+    {
+        if (!m_systemNotificationEnabled)
+        {
+            return;
+        }
+
+        String companyIdStr = p_job.getCompanyId();
+        Project project = ServerProxy.getProjectHandler().getProjectById(
+                p_job.getProjectId());
+        GlobalSightLocale sourceLocale = p_job.getSourceLocale();
+        Date createDate = p_job.getCreateDate();
+        User jobUploader = p_job.getCreateUser();
+        String fpNames = "";
+        List<FileProfile> fps = p_job.getAllFileProfiles();
+        Set<String> fpSet = new HashSet<String>();
+        for (FileProfile fp : fps)
+        {
+            String tempFPName = fp.getName();
+            boolean isXLZ = ServerProxy.getFileProfilePersistenceManager()
+                    .isXlzReferenceXlfFileProfile(tempFPName);
+            if (isXLZ)
+            {
+                tempFPName = tempFPName.substring(0, tempFPName.length() - 4);
+            }
+            fpSet.add(tempFPName);
+        }
+        fpNames = fpSet.toString();
+        fpNames = fpNames.substring(1, fpNames.length() - 1);
+
+        String messageArgs[] = new String[9];
+        messageArgs[0] = Long.toString(p_job.getId());
+        messageArgs[1] = p_job.getJobName();
+        messageArgs[2] = project.getName();
+        messageArgs[3] = sourceLocale.getDisplayName();
+        messageArgs[4] = String.valueOf(p_job.getWordCount());
+        messageArgs[6] = jobUploader.getSpecialNameForEmail();
+        messageArgs[7] = fpNames;
+        messageArgs[8] = getNoMatchesAndRepetitionsWordCount(jobUploader, p_job);
+
+        String subject = MailerConstants.JOB_IMPORT_SUCC_SUBJECT;
+        String message = MailerConstants.JOB_IMPORT_SUCC_MESSAGE;
+        List<String> receiverList = new ArrayList<String>();
+        receiverList.add(jobUploader.getUserId());
+        String managerID = project.getProjectManagerId();
+        if (null != managerID && !receiverList.contains(managerID))
+        {
+            receiverList.add(managerID);
+        }
+
+        for (int i = 0; i < receiverList.size(); i++)
+        {
+            User receiver = (User) ServerProxy.getUserManager().getUser(
+                    receiverList.get(i));
+            messageArgs[5] = DateHelper.getFormattedDateAndTimeFromUser(
+                    createDate, receiver);
+            ServerProxy.getMailer().sendMailFromAdmin(receiver, messageArgs,
+                    subject, message, companyIdStr);
+        }
+    }
+
     private void sendEmail(Job p_job, String p_subject, String p_message)
             throws JobException
     {
-        if (!EventNotificationHelper.systemNotificationEnabled())
+        if (!m_systemNotificationEnabled)
         {
             return;
         }
@@ -803,8 +969,7 @@ public class JobDispatcher
                 // from
                 // moving along.
                 c_category
-                        .error(
-                                "Error occurred while calculating additional surchange",
+                        .error("Error occurred while calculating additional surchange",
                                 e);
             }
 
@@ -848,8 +1013,7 @@ public class JobDispatcher
                 // from
                 // moving along.
                 c_category
-                        .error(
-                                "Error occurred while calculating additional surchange",
+                        .error("Error occurred while calculating additional surchange",
                                 e);
             }
             if (!perSurchargeValue.equals("#") && perSurchargeValue != null)

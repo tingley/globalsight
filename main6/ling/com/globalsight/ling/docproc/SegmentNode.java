@@ -25,6 +25,7 @@ public class SegmentNode
     private int     m_iWordCount = 0;
     private boolean isLeadingWS = false;
     private boolean isTrailingWS = false;
+    private String m_srcComment = null;
 
     /**
      * SegmentNode constructor comment.
@@ -135,5 +136,15 @@ public class SegmentNode
         }
         
         return false;
+    }
+
+    public String getSrcComment()
+    {
+        return m_srcComment;
+    }
+
+    public void setSrcComment(String m_srcComment)
+    {
+        this.m_srcComment = m_srcComment;
     }
 }

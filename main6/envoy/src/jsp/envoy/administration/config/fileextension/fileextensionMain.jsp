@@ -9,7 +9,7 @@
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.webapp.pagehandler.administration.config.fileextension.FileExtensionMainHandler,
          com.globalsight.cxe.entity.fileextension.FileExtensionImpl,
-         com.globalsight.everest.servlet.util.ServerProxy,
+         com.globalsight.everest.company.CompanyWrapper,
          java.util.ArrayList,
          java.util.Locale, java.util.ResourceBundle"
          session="true" %>
@@ -113,7 +113,7 @@ function enableButtons()
                 </amb:column>
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" sortBy="<%=FileExtensionComparator.ASC_COMPANY%>">
-                    <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(fe.getCompanyId())).getCompanyName()%>
+                    <%=CompanyWrapper.getCompanyNameById(fe.getCompanyId())%>
                 </amb:column>
                 <% } %>
               </amb:table>

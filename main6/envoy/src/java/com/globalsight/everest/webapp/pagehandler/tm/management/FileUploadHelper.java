@@ -26,8 +26,6 @@ import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Vector;
-import java.util.Vector;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipEntry;
 
@@ -35,12 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
-import javazoom.upload.UploadListener;
-import javazoom.upload.parsing.CfuFileItem;
-import javazoom.upload.parsing.CfuFileItemFactory;
-
-import org.apache.commons.fileupload.DefaultFileItemFactory;
-import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.tm.importer.ImportUtil;
@@ -140,7 +135,7 @@ public class FileUploadHelper implements Runnable
 
     }
 
-    private File saveTmpFile(List<CfuFileItem> fileItems) throws Exception
+    private File saveTmpFile(List<DiskFileItem> fileItems) throws Exception
     {
 
         File file = null;
@@ -156,7 +151,7 @@ public class FileUploadHelper implements Runnable
 
         // Set overall request size constraint
         long uploadTotalSize = 0;
-        for (CfuFileItem item : fileItems)
+        for (DiskFileItem item : fileItems)
         {
             if (!item.isFormField())
             {
@@ -165,7 +160,7 @@ public class FileUploadHelper implements Runnable
         }
         status.setTotalSize(uploadTotalSize);
 
-        for (CfuFileItem item : fileItems)
+        for (DiskFileItem item : fileItems)
         {
             if (!item.isFormField())
             {
@@ -294,19 +289,19 @@ public class FileUploadHelper implements Runnable
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
     }
     
     private void upload(HttpServletRequest p_request) throws Exception
     {
-        CfuFileItemFactory factory = new CfuFileItemFactory();
-        Vector<UploadListener> listeners = new Vector<UploadListener>();
-        listeners.add(status);
-        factory.setListeners(listeners);
-        FileUpload upload = new FileUpload(factory);
-        
-        List<CfuFileItem> fileItems = upload.parseRequest(p_request);
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(1024000);
+        ServletFileUpload upload = new ServletFileUpload(factory);
+
+        @SuppressWarnings("unchecked")
+        List<DiskFileItem> fileItems = upload.parseRequest(p_request);
+
         outFile = saveTmpFile(fileItems);
     }
     
@@ -347,7 +342,7 @@ public class FileUploadHelper implements Runnable
             }
             catch (Exception e)
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
             }
             finally
             {

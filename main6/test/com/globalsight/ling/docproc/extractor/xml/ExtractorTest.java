@@ -448,7 +448,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("samplePhCon.xml".equalsIgnoreCase(name))
         {
@@ -462,7 +462,8 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
                     "-1", "", "", "False", "False", new JSONArray(), embTags,
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray(), new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray(),
+                    new JSONArray(), new JSONArray());
         }
         else if ("samplePhTrim.xml".equalsIgnoreCase(name))
         {
@@ -476,7 +477,8 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
                     "-1", "", "", "False", "False", new JSONArray(), embTags,
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray(), new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray(),
+                    new JSONArray(), new JSONArray());
         }
         else if ("sampleNonAsciiChar.xml".equalsIgnoreCase(name))
         {
@@ -489,7 +491,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleWhiteSpace.xml".equalsIgnoreCase(name))
         {
@@ -502,7 +504,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleEmptyTag.xml".equalsIgnoreCase(name))
         {
@@ -515,7 +517,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleSid.xml".equalsIgnoreCase(name))
         {
@@ -528,7 +530,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "aaa", "id", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleGenerateLan.xml".equalsIgnoreCase(name))
         {
@@ -541,7 +543,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "True", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("samplePreserveWsTags.xml".equalsIgnoreCase(name))
         {
@@ -557,7 +559,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", preserveWsTags,
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleTransAttTags.xml".equalsIgnoreCase(name))
         {
@@ -572,7 +574,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), transAttTags, new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleContentIncTags.xml".equalsIgnoreCase(name))
         {
@@ -587,7 +589,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), contentIncTags,
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleCDATAPostTags.xml".equalsIgnoreCase(name))
         {
@@ -603,7 +605,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     CDATAPostTags, new JSONArray(), new JSONArray(),
-                    new JSONArray());
+                    new JSONArray(), new JSONArray(), new JSONArray());
         }
         else if ("sampleEntities.xml".equalsIgnoreCase(name))
         {
@@ -618,7 +620,8 @@ public class ExtractorTest extends BaseExtractorTestClass
                             "-1", "", "-1", "", "", "False", "False",
                             new JSONArray(), new JSONArray(), new JSONArray(),
                             new JSONArray(), new JSONArray(), entities,
-                            new JSONArray(), new JSONArray());
+                            new JSONArray(), new JSONArray(), new JSONArray(),
+                            new JSONArray());
         }
         else if ("samplePI.xml".equalsIgnoreCase(name))
         {
@@ -632,7 +635,8 @@ public class ExtractorTest extends BaseExtractorTestClass
                     XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE, "", "-1", "",
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    new JSONArray(), new JSONArray(), pis, new JSONArray());
+                    new JSONArray(), new JSONArray(), pis, new JSONArray(),
+                    new JSONArray(), new JSONArray());
         }
         else if ("sampleInternalTag.xml".equalsIgnoreCase(name))
         {
@@ -647,7 +651,7 @@ public class ExtractorTest extends BaseExtractorTestClass
                     "-1", "", "", "False", "False", new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
                     new JSONArray(), new JSONArray(), new JSONArray(),
-                    internalTag);
+                    internalTag, new JSONArray(), new JSONArray());
         }
 
         f.setConfigXml(configXml);

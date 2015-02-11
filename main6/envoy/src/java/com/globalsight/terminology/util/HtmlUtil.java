@@ -17,34 +17,27 @@
 
 package com.globalsight.terminology.util;
 
-import com.globalsight.terminology.util.MappingContext;
-import com.globalsight.terminology.EntryUtils;
-
-import com.globalsight.util.UTC;
-import com.globalsight.util.edit.EditUtil;
-
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.Node;
-
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.dom4j.Element;
+
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.terminology.EntryUtils;
+
 /**
- * This class mirrors the XmlToHtml conversions in the Termbase
- * Viewer's Javascript code (terminology/viewer/entry.js) to format an
- * entry or entry fragment as HTML. The MappingContext provides display
- * strings based on the database definition to the UI.
+ * This class mirrors the XmlToHtml conversions in the Termbase Viewer's
+ * Javascript code (terminology/viewer/entry.js) to format an entry or entry
+ * fragment as HTML. The MappingContext provides display strings based on the
+ * database definition to the UI.
  */
 public class HtmlUtil
 {
     /**
-     * Maps an XML entry to HTML. Internal field types are mapped to
-     * display names using a context object. See management/objects_js.jsp.
+     * Maps an XML entry to HTML. Internal field types are mapped to display
+     * names using a context object. See management/objects_js.jsp.
      */
-    static public String xmlToHtml(Element p_root,
-        MappingContext p_context)
+    static public String xmlToHtml(Element p_root, MappingContext p_context)
     {
         String root = p_root.getName();
 
@@ -69,12 +62,12 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlConceptGrp(Element p_node,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer(
-            "<DIV class=\"vconceptGrp\"><SPAN class=\"vfakeConceptGrp\">");
+                "<DIV class=\"vconceptGrp\"><SPAN class=\"vfakeConceptGrp\">");
 
-        Element temp = (Element)p_node.selectSingleNode("concept");
+        Element temp = (Element) p_node.selectSingleNode("concept");
         String id = temp != null ? temp.getText() : null;
 
         if (id != null && Integer.parseInt(id) > 0)
@@ -92,16 +85,15 @@ public class HtmlUtil
 
         result.append("</SPAN>");
 
-        result.append(xmlToHtmlTransacGrp(
-            p_node.selectNodes("transacGrp"), p_context));
-        result.append(xmlToHtmlDescripGrp(
-            p_node.selectNodes("descripGrp"), p_context));
-        result.append(xmlToHtmlSourceGrp(
-            p_node.selectNodes("sourceGrp"), p_context));
-        result.append(xmlToHtmlNoteGrp(
-            p_node.selectNodes("noteGrp"), p_context));
-        result.append(xmlToHtmlLanguageGrp(
-            p_node.selectNodes("languageGrp"), p_context));
+        result.append(xmlToHtmlTransacGrp(p_node.selectNodes("transacGrp"),
+                p_context));
+        result.append(xmlToHtmlDescripGrp(p_node.selectNodes("descripGrp"),
+                p_context));
+        result.append(xmlToHtmlSourceGrp(p_node.selectNodes("sourceGrp"),
+                p_context));
+        result.append(xmlToHtmlNoteGrp(p_node.selectNodes("noteGrp"), p_context));
+        result.append(xmlToHtmlLanguageGrp(p_node.selectNodes("languageGrp"),
+                p_context));
 
         result.append("</DIV>");
 
@@ -109,13 +101,13 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlTransacGrp(List p_nodes,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0, max = p_nodes.size(); i < max; i++)
         {
-            Element node = (Element)p_nodes.get(i);
+            Element node = (Element) p_nodes.get(i);
 
             result.append("<SPAN class=\"vtransacGrp\" type=\"");
             result.append(node.selectSingleNode("transac/@type").getText());
@@ -126,14 +118,15 @@ public class HtmlUtil
             result.append("\">");
 
             result.append("<SPAN CLASS=\"vtransaclabel\">");
-            result.append(p_context.mapTransac(
-                node.selectSingleNode("transac/@type").getText()));
+            result.append(p_context.mapTransac(node.selectSingleNode(
+                    "transac/@type").getText()));
             result.append("</SPAN>");
 
             result.append("<SPAN CLASS=\"vtransacvalue\">");
             result.append(node.selectSingleNode("date").getText());
             result.append(" (");
-            result.append(node.selectSingleNode("transac").getText());
+            result.append(UserUtil.getUserNameById(node.selectSingleNode(
+                    "transac").getText()));
             result.append(")");
             result.append("</SPAN>");
 
@@ -143,19 +136,18 @@ public class HtmlUtil
         return result.toString();
     }
 
-    static public String xmlToHtmlNoteGrp(List p_nodes,
-        MappingContext p_context)
+    static public String xmlToHtmlNoteGrp(List p_nodes, MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0, max = p_nodes.size(); i < max; i++)
         {
-            Element node = (Element)p_nodes.get(i);
+            Element node = (Element) p_nodes.get(i);
 
             result.append("<DIV class=\"vfieldGrp\">");
 
             result.append(xmlToHtmlNote(
-                (Element)node.selectSingleNode("note"), p_context));
+                    (Element) node.selectSingleNode("note"), p_context));
 
             result.append("</DIV>");
         }
@@ -163,13 +155,12 @@ public class HtmlUtil
         return result.toString();
     }
 
-    static public String xmlToHtmlNote(Element p_node,
-        MappingContext p_context)
+    static public String xmlToHtmlNote(Element p_node, MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
-        result.append("<SPAN class=\"vfieldlabel\" unselectable=\"on\" " +
-            "type=\"note\">");
+        result.append("<SPAN class=\"vfieldlabel\" unselectable=\"on\" "
+                + "type=\"note\">");
         result.append(p_context.mapNote("note"));
         result.append("</SPAN>");
 
@@ -181,20 +172,20 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlSourceGrp(List p_nodes,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0, max = p_nodes.size(); i < max; i++)
         {
-            Element node = (Element)p_nodes.get(i);
+            Element node = (Element) p_nodes.get(i);
 
             result.append("<DIV class=\"vfieldGrp\">");
 
             result.append(xmlToHtmlSource(
-                (Element)node.selectSingleNode("source"), p_context));
-            result.append(xmlToHtmlNoteGrp(
-                node.selectNodes("noteGrp"), p_context));
+                    (Element) node.selectSingleNode("source"), p_context));
+            result.append(xmlToHtmlNoteGrp(node.selectNodes("noteGrp"),
+                    p_context));
 
             result.append("</DIV>");
         }
@@ -203,12 +194,12 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlSource(Element p_node,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
-        result.append("<SPAN class=\"vfieldlabel\" unselectable=\"on\" " +
-            "type=\"source\">");
+        result.append("<SPAN class=\"vfieldlabel\" unselectable=\"on\" "
+                + "type=\"source\">");
         result.append(p_context.mapSource("source"));
         result.append("</SPAN>");
 
@@ -220,22 +211,22 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlDescripGrp(List p_nodes,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0, max = p_nodes.size(); i < max; i++)
         {
-            Element node = (Element)p_nodes.get(i);
+            Element node = (Element) p_nodes.get(i);
 
             result.append("<DIV class=\"vfieldGrp\">");
 
             result.append(xmlToHtmlDescrip(
-                (Element)node.selectSingleNode("descrip"), p_context));
-            result.append(xmlToHtmlSourceGrp(
-                node.selectNodes("sourceGrp"), p_context));
-            result.append(xmlToHtmlNoteGrp(
-                node.selectNodes("noteGrp"), p_context));
+                    (Element) node.selectSingleNode("descrip"), p_context));
+            result.append(xmlToHtmlSourceGrp(node.selectNodes("sourceGrp"),
+                    p_context));
+            result.append(xmlToHtmlNoteGrp(node.selectNodes("noteGrp"),
+                    p_context));
 
             result.append("</DIV>");
         }
@@ -244,16 +235,16 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlDescrip(Element p_node,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
-        result.append("<SPAN class=\"vfieldlabel\" unselectable=\"on\" " +
-            "type=\"");
+        result.append("<SPAN class=\"vfieldlabel\" unselectable=\"on\" "
+                + "type=\"");
         result.append(p_node.selectSingleNode("@type").getText());
         result.append("\">");
-        result.append(p_context.mapDescrip(
-            p_node.selectSingleNode("@type").getText()));
+        result.append(p_context.mapDescrip(p_node.selectSingleNode("@type")
+                .getText()));
         result.append("</SPAN>");
 
         result.append("<SPAN class=\"vfieldvalue\">");
@@ -264,31 +255,32 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlLanguageGrp(List p_nodes,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0, max = p_nodes.size(); i < max; i++)
         {
-            Element node = (Element)p_nodes.get(i);
+            Element node = (Element) p_nodes.get(i);
 
             result.append("<DIV class=\"vlanguageGrp\">");
             result.append("<SPAN class=\"vfakeLanguageGrp\">");
             result.append(xmlToHtmlLanguage(
-                (Element)node.selectSingleNode("language"), p_context));
+                    (Element) node.selectSingleNode("language"), p_context));
             result.append("</SPAN>");
 
-            result.append(xmlToHtmlDescripGrp(
-                node.selectNodes("descripGrp"), p_context));
-            result.append(xmlToHtmlSourceGrp(
-                node.selectNodes("sourceGrp"), p_context));
-            result.append(xmlToHtmlNoteGrp(
-                node.selectNodes("noteGrp"), p_context));
+            result.append(xmlToHtmlDescripGrp(node.selectNodes("descripGrp"),
+                    p_context));
+            result.append(xmlToHtmlSourceGrp(node.selectNodes("sourceGrp"),
+                    p_context));
+            result.append(xmlToHtmlNoteGrp(node.selectNodes("noteGrp"),
+                    p_context));
 
             result.append(xmlToHtmlTermGrp(
-                node.selectNodes("termGrp[term/@search-term]"), p_context));
+                    node.selectNodes("termGrp[term/@search-term]"), p_context));
             result.append(xmlToHtmlTermGrp(
-                node.selectNodes("termGrp[not(term/@search-term)]"), p_context));
+                    node.selectNodes("termGrp[not(term/@search-term)]"),
+                    p_context));
 
             result.append("</DIV>");
         }
@@ -297,14 +289,14 @@ public class HtmlUtil
     }
 
     static public String xmlToHtmlLanguage(Element p_node,
-        MappingContext p_context)
+            MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         result.append("<SPAN class=\"vlanguagelabel\">Language</SPAN>");
 
-        result.append("<SPAN class=\"vlanguage\" unselectable=\"on\" " +
-            "locale=\"");
+        result.append("<SPAN class=\"vlanguage\" unselectable=\"on\" "
+                + "locale=\"");
         result.append(p_node.selectSingleNode("@locale").getText());
         result.append("\">");
 
@@ -315,28 +307,27 @@ public class HtmlUtil
         return result.toString();
     }
 
-    static public String xmlToHtmlTermGrp(List p_nodes,
-        MappingContext p_context)
+    static public String xmlToHtmlTermGrp(List p_nodes, MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 
         for (int i = 0, max = p_nodes.size(); i < max; i++)
         {
-            Element node = (Element)p_nodes.get(i);
+            Element node = (Element) p_nodes.get(i);
             boolean isFirst = (i == 0);
 
             result.append("<DIV class=\"vtermGrp\">");
             result.append("<DIV class=\"vfakeTermGrp\">");
             result.append(xmlToHtmlTerm(
-                (Element)node.selectSingleNode("term"), p_context));
+                    (Element) node.selectSingleNode("term"), p_context));
             result.append("</DIV>");
 
-            result.append(xmlToHtmlDescripGrp(
-                node.selectNodes("descripGrp"), p_context));
-            result.append(xmlToHtmlSourceGrp(
-                node.selectNodes("sourceGrp"), p_context));
-            result.append(xmlToHtmlNoteGrp(
-                node.selectNodes("noteGrp"), p_context));
+            result.append(xmlToHtmlDescripGrp(node.selectNodes("descripGrp"),
+                    p_context));
+            result.append(xmlToHtmlSourceGrp(node.selectNodes("sourceGrp"),
+                    p_context));
+            result.append(xmlToHtmlNoteGrp(node.selectNodes("noteGrp"),
+                    p_context));
 
             result.append("</DIV>");
         }
@@ -344,8 +335,7 @@ public class HtmlUtil
         return result.toString();
     }
 
-    static public String xmlToHtmlTerm(Element p_node,
-        MappingContext p_context)
+    static public String xmlToHtmlTerm(Element p_node, MappingContext p_context)
     {
         StringBuffer result = new StringBuffer();
 

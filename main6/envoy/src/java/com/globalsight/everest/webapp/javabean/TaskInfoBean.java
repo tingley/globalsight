@@ -16,18 +16,16 @@
  */
 package com.globalsight.everest.webapp.javabean;
 
-
 import com.globalsight.everest.costing.Rate;
-import com.globalsight.everest.costing.Cost;
-
 
 /**
- * This is a light-weight version of TaskImpl object used for the 
- * graphical workflow UI.  
+ * This is a light-weight version of TaskImpl object used for the graphical
+ * workflow UI.
  */
 public class TaskInfoBean implements java.io.Serializable
 {
     private long m_taskId;
+    private String m_activityName;
     private String m_estimatedHours = null;
     private String m_actualHours = null;
     private Rate m_expenseRate = null;
@@ -37,21 +35,23 @@ public class TaskInfoBean implements java.io.Serializable
     /**
      * Constructor that leaves the actual amount of hours set to null.
      * 
-     * @param p_taskId   The id of the task this information is about.
-     * @param p_estimatedHours  A string specifying the amount of estimated
-     *                         hours or NULL if not specified yet.
-     * @param p_expenseRate     The expense rate the task is associated with or NULL
-     *                   if no rate is associated with it.
-     * @param p_revenueRate     The revenue rate the task is associated with or NULL
-     *                   if no rate is associated with it.
-     * @param p_rateSelectionCriteria The revenue rate the task is associated with or NULL
-     *                   if no rate is associated with it.
+     * @param p_taskId
+     *            The id of the task this information is about.
+     * @param p_estimatedHours
+     *            A string specifying the amount of estimated hours or NULL if
+     *            not specified yet.
+     * @param p_expenseRate
+     *            The expense rate the task is associated with or NULL if no
+     *            rate is associated with it.
+     * @param p_revenueRate
+     *            The revenue rate the task is associated with or NULL if no
+     *            rate is associated with it.
+     * @param p_rateSelectionCriteria
+     *            The revenue rate the task is associated with or NULL if no
+     *            rate is associated with it.
      */
-    public TaskInfoBean(long p_taskId, 
-                        String p_estimatedHours,
-                        Rate p_expenseRate,
-                        Rate p_revenueRate,
-                        int p_rateSelectionCriteria)
+    public TaskInfoBean(long p_taskId, String p_estimatedHours,
+            Rate p_expenseRate, Rate p_revenueRate, int p_rateSelectionCriteria)
     {
         m_taskId = p_taskId;
         m_estimatedHours = p_estimatedHours;
@@ -60,26 +60,27 @@ public class TaskInfoBean implements java.io.Serializable
         m_rateSelectionCriteria = p_rateSelectionCriteria;
     }
 
-
     /**
      * Constructor
      * 
-     * @param p_taskId   The id of the task this information is about.
-     * @param p_estimatedHours  A string specifying the amount of estimated
-     *                          hours or NULL if not specified yet.
-     * @param p_actualHours     A string specifying the amount of actual
-     *                          hours or NULL if not specified yet.
-     * @param p_expenseRate     The expense rate the task is associated with or NULL
-     *                   if no rate is associated with it.
-     * @param p_revenueRate     The revenue rate the task is associated with or NULL
-     *                   if no rate is associated with it.
+     * @param p_taskId
+     *            The id of the task this information is about.
+     * @param p_estimatedHours
+     *            A string specifying the amount of estimated hours or NULL if
+     *            not specified yet.
+     * @param p_actualHours
+     *            A string specifying the amount of actual hours or NULL if not
+     *            specified yet.
+     * @param p_expenseRate
+     *            The expense rate the task is associated with or NULL if no
+     *            rate is associated with it.
+     * @param p_revenueRate
+     *            The revenue rate the task is associated with or NULL if no
+     *            rate is associated with it.
      */
-    public TaskInfoBean(long p_taskId, 
-                        String p_estimatedHours,
-                        String p_actualHours,
-                        Rate p_expenseRate,
-                        Rate p_revenueRate,
-                        int p_rateSelectionCriteria)
+    public TaskInfoBean(long p_taskId, String p_estimatedHours,
+            String p_actualHours, Rate p_expenseRate, Rate p_revenueRate,
+            int p_rateSelectionCriteria)
     {
         m_taskId = p_taskId;
         m_estimatedHours = p_estimatedHours;
@@ -89,28 +90,40 @@ public class TaskInfoBean implements java.io.Serializable
         m_rateSelectionCriteria = p_rateSelectionCriteria;
     }
 
+    public TaskInfoBean(long p_taskId, String p_estimatedHours,
+            String p_actualHours, Rate p_expenseRate, Rate p_revenueRate,
+            int p_rateSelectionCriteria, String p_activityName)
+    {
+        m_taskId = p_taskId;
+        m_estimatedHours = p_estimatedHours;
+        m_actualHours = p_actualHours;
+        m_expenseRate = p_expenseRate;
+        m_revenueRate = p_revenueRate;
+        m_rateSelectionCriteria = p_rateSelectionCriteria;
+        m_activityName = p_activityName;
+    }
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Helper methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Helper methods
+    // ////////////////////////////////////////////////////////////////////
     /**
-     * Get the estimated number of hours spent on this task.  
-     * This will return the estimated amount of hours for a 
-     * rate with type of Rate.UnitOfWork.HOURLY.
-     * @return The estimated amount of hours spend on this task or NULL
-     *         if not set.
+     * Get the estimated number of hours spent on this task. This will return
+     * the estimated amount of hours for a rate with type of
+     * Rate.UnitOfWork.HOURLY.
+     * 
+     * @return The estimated amount of hours spend on this task or NULL if not
+     *         set.
      */
     public String getEstimatedHours()
     {
         return m_estimatedHours;
     }
-    
+
     /**
-     * Get the actual number of hours spent on this task.  
-     * This will return the actual amount of hours for a 
-     * rate with type of Rate.UnitOfWork.HOURLY.
-     * @return The actual amount of hours spend on this task or NULL
-     *         if not set.
+     * Get the actual number of hours spent on this task. This will return the
+     * actual amount of hours for a rate with type of Rate.UnitOfWork.HOURLY.
+     * 
+     * @return The actual amount of hours spend on this task or NULL if not set.
      */
     public String getActualHours()
     {
@@ -119,9 +132,11 @@ public class TaskInfoBean implements java.io.Serializable
 
     /**
      * Sets the amount of actual hours.
-     * @param p_actualHours  The number of actual hours spent on the task or 
-     *                       NULL if clearing out.
-     *
+     * 
+     * @param p_actualHours
+     *            The number of actual hours spent on the task or NULL if
+     *            clearing out.
+     * 
      */
     public void setActualHours(String p_actualHours)
     {
@@ -130,6 +145,7 @@ public class TaskInfoBean implements java.io.Serializable
 
     /**
      * Get the expense rate object for this task.
+     * 
      * @return The expense rate of the task.
      */
     public Rate getExpenseRate()
@@ -139,6 +155,7 @@ public class TaskInfoBean implements java.io.Serializable
 
     /**
      * Get the revenue rate object for this task.
+     * 
      * @return The revenue rate of the task.
      */
     public Rate getRevenueRate()
@@ -164,14 +181,24 @@ public class TaskInfoBean implements java.io.Serializable
 
     /**
      * Get the task instance id.
+     * 
      * @return The id of the task.
      */
     public long getTaskId()
     {
         return m_taskId;
     }
-    //////////////////////////////////////////////////////////////////////
-    //  End: Helper methods
-    //////////////////////////////////////////////////////////////////////
-}
 
+    public String getActivityName()
+    {
+        return m_activityName;
+    }
+
+    public void setActivityName(String p_activityName)
+    {
+        m_activityName = p_activityName;
+    }
+    // ////////////////////////////////////////////////////////////////////
+    // End: Helper methods
+    // ////////////////////////////////////////////////////////////////////
+}

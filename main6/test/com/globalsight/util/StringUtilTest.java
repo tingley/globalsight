@@ -1,6 +1,9 @@
 package com.globalsight.util;
 
 import static org.junit.Assert.*;
+import static com.globalsight.util.StringUtil.join;
+
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
@@ -135,4 +138,44 @@ public class StringUtilTest
         assertEquals("translation_1000", StringUtil.delSuffix(input, specialStr));
     }
 
+    @Test
+    public void testJoin()
+    {
+        assertEquals("a b c", join(" ", "a", "b", "c"));
+        assertEquals("a", join(" ", "a"));
+        assertEquals("", join(" "));
+    }
+    
+    @Test
+    public void testIsIncludedInArray()
+    {
+        String[] array = null;
+        String value = null;
+        
+        assertEquals(false, StringUtil.isIncludedInArray(array, value));
+        
+        array = new String[]{"111", "222", "333"};
+        value = "444";
+        assertEquals(false, StringUtil.isIncludedInArray(array, value));
+        
+        array = new String[]{"111", "222", "3333"};
+        value = "22";
+        assertEquals(false, StringUtil.isIncludedInArray(array, value));
+        
+        array = new String[]{"111", "aAa", "3333"};
+        value = "aaa";
+        assertEquals(false, StringUtil.isIncludedInArray(array, value));
+        
+        array = new String[]{"111", "aAa", "333"};
+        value = "aAa";
+        assertEquals(true, StringUtil.isIncludedInArray(array, value));
+    }
+    
+    @Test
+    public void testSplit()
+    {
+        String msg = "a,b,a,d,e";
+        Set result = StringUtil.split(msg, ",");
+        assertTrue("Size Error", result.size() == 4);
+    }
 }

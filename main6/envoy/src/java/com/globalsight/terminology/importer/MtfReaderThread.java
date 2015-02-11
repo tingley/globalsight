@@ -123,7 +123,7 @@ public class MtfReaderThread
                                 }
                                 else
                                 {
-                                    CATEGORY.warn(msg);
+                                    CATEGORY.warn(msg, ex);
                                 }
                             }
 

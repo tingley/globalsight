@@ -27,7 +27,9 @@ import java.io.OutputStream;
 public interface DownloadWriterInterface
 {
     static public final String RESOURCE_DIR = "resources";
+    static public final String JOBS_DIR = "resources/jobs";
     static public final String PAGE_LIST_FILE = "pagelist.html";
+    static public final String JOB_LIST_FILE = "joblist.html";
     static public final String SEG_ID_LIST_FILE = "id_list.html";
     static public final String MAP_TABLE_TITLE = "";
     static public final String HTML_RESOURCES_ENCODING = "UTF8";

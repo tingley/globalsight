@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -53,10 +52,10 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.diplomat.util.Logger;
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -71,7 +70,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
-import com.globalsight.util.zip.ZipIt;
+import com.globalsight.util.file.XliffFileUtil;
 
 /**
  * Helper class used by the FileSystemAdapter for exporting
@@ -150,9 +149,9 @@ public class Exporter
      * <li>1. If one selects "UTF-8" for Character Encoding: No Unicode escape
      * for extended characters.</li>
      * <li>2. If one selects others like ISO-8859-1: Only extended characters
-     * will be Unicode escaped. </li>
+     * will be Unicode escaped.</li>
      * <li>3. If one selects Unicode Escape: ALL Characters will be Unicode
-     * escaped. </li>
+     * escaped.</li>
      * </ul>
      * 
      * @return New CxeMessage result
@@ -176,40 +175,43 @@ public class Exporter
             if (m_formatType.equals("xptag"))
             {
                 m_logger.debug("Special export handling for xptag file.");
-                FileMessageData fmd = (FileMessageData) m_cxeMessage.getMessageData();
+                FileMessageData fmd = (FileMessageData) m_cxeMessage
+                        .getMessageData();
                 fmd.operatingSystemSafeCopyTo(finalFile);
             }
             else
             {
                 m_cxeMessage.getMessageData().copyTo(finalFile);
             }
-            
+
             String fileTargetEncoding = "UTF-8";
             Object messageTargetCharset = m_cxeMessage.getParameters().get(
                     "TargetCharset");
-            
+
             if (messageTargetCharset != null)
             {
                 fileTargetEncoding = (String) messageTargetCharset;
             }
-            
-            //added by Walter, In GSEdition, the ServerB's exported xliff file needed
-            //to be uploaded in serverA, if the xliff file have no bom format,
-            //it will throw exception when check.
+
+            // added by Walter, In GSEdition, the ServerB's exported xliff file
+            // needed
+            // to be uploaded in serverA, if the xliff file have no bom format,
+            // it will throw exception when check.
             WorkflowManagerLocal wmanager = new WorkflowManagerLocal();
-            Workflow wf = 
-                wmanager.getWorkflowById((Long.parseLong(m_cxeMessage.getParameters().get("WorkflowId").toString())));
-           
-            if(finalFileName.endsWith(".xlf") || finalFileName.endsWith(".xliff")) 
+            Workflow wf = wmanager.getWorkflowById((Long.parseLong(m_cxeMessage
+                    .getParameters().get("WorkflowId").toString())));
+
+            if ("xlz".equals(m_formatType) || "xlf".equals(m_formatType))
             {
                 String fileEncoding = FileUtil.guessEncoding(finalFile);
                 if (fileEncoding == null)
                 {
                     fileEncoding = fileTargetEncoding;
                 }
-                
-                changeTargetLocale(wf.getTargetLocale().toString(), finalFile, fileEncoding);
-                
+
+                changeTargetLocale(wf.getTargetLocale().toString(), finalFile,
+                        fileEncoding);
+
                 JobEditionInfo je = getGSEditionJobByJobID(wf.getJob().getId());
                 if (je != null)
                 {
@@ -218,8 +220,9 @@ public class Exporter
             }
 
             exportStatusMsg = makeExportSuccessMessage(finalFile);
-            BaseAdapter.preserveOriginalFileContent(m_cxeMessage
-                    .getMessageData(), exportStatusMsg.getParameters());
+            BaseAdapter.preserveOriginalFileContent(
+                    m_cxeMessage.getMessageData(),
+                    exportStatusMsg.getParameters());
 
             m_cxeMessage.setDeleteMessageData(true);
 
@@ -228,17 +231,21 @@ public class Exporter
                     Long.parseLong(m_dataSourceId), false);
 
             // Check if unicode escape for "properties" and "js" files
-            if (finalFileName.endsWith(".properties") || finalFileName.endsWith(".js") ) 
+            if ("javaprop".equals(m_formatType)
+                    || "javascript".equals(m_formatType))
             {
                 String targetEncoding = fileTargetEncoding;
                 targetEncoding = targetEncoding.toLowerCase();
-                
-                //At this moment,only extended characters are unicode escaped
+
+                // At this moment,only extended characters are unicode escaped
                 if (!fp.getUnicodeEscape())
                 {
-                    Object unicodeEscape = m_cxeMessage.getParameters().get("UnicodeEscape");
-                    //the "UnicodeEscape" parameter is from the export page's "Character Encoding"
-                    if (unicodeEscape != null && "true".equalsIgnoreCase((String) unicodeEscape)
+                    Object unicodeEscape = m_cxeMessage.getParameters().get(
+                            "UnicodeEscape");
+                    // the "UnicodeEscape" parameter is from the export page's
+                    // "Character Encoding"
+                    if (unicodeEscape != null
+                            && "true".equalsIgnoreCase((String) unicodeEscape)
                             && finalFileName.endsWith(".properties"))
                     {
                         unicodeAllEscape(finalFileName, targetEncoding);
@@ -246,18 +253,20 @@ public class Exporter
                     else
                     {
                         notUnicodeEscape(finalFileName, targetEncoding);
-                        if (finalFileName.endsWith(".properties")) 
+                        if (finalFileName.endsWith(".properties"))
                         {
-                            handleExtraEscapeCharacter(finalFileName, targetEncoding);
+                            handleExtraEscapeCharacter(finalFileName,
+                                    targetEncoding);
                         }
                     }
                 }
-                else if (finalFileName.endsWith(".properties")) 
+                else if (finalFileName.endsWith(".properties"))
                 {
                     handleExtraEscapeCharacter(finalFileName, targetEncoding);
                 }
             }
-            
+
+            FileInputStream fis = null;
             try
             {
                 if (FileUtil.isNeedBOMProcessing(finalFileName))
@@ -272,7 +281,6 @@ public class Exporter
                     int sourcePageBomType = ((Integer) m_cxeMessage
                             .getParameters().get("SourcePageBomType"))
                             .intValue();
-                    FileInputStream fis = null;
                     byte[] fileContent = null;
                     if (FileUtil.isUTFFormat(fileTargetEncoding))
                     {
@@ -326,10 +334,16 @@ public class Exporter
             }
             catch (Exception e1)
             {
-                logger.error("File output error when exporting file with BOM processing. " + e1.toString());
+                logger.error("File output error when exporting file with BOM processing. "
+                        + e1.toString());
             }
-            
-            //gbs-742
+            finally
+            {
+                if (fis != null)
+                    fis.close();
+            }
+
+            // gbs-742
             KnownFormatType kf = null;
             kf = ServerProxy.getFileProfilePersistenceManager()
                     .getKnownFormatTypeById(fp.getKnownFormatTypeId(), false);
@@ -343,7 +357,7 @@ public class Exporter
                     targetEncoding = (String) targetCharset;
                 }
 
-                if (fp.getEntityEscape()) 
+                if (fp.getEntityEscape())
                 {
                     Object entityEscape = m_cxeMessage.getParameters().get(
                             "EntityEscape");
@@ -368,14 +382,14 @@ public class Exporter
                     }
                 }
             }
-            
+
             String scriptOnExport = fp.getScriptOnExport();
 
             if (scriptOnExport != null && scriptOnExport.length() > 0)
             {
                 // Call the script on export to revert the exported files.
-                String targetFolder = finalFileName.substring(0, finalFileName
-                        .lastIndexOf(File.separator));
+                String targetFolder = finalFileName.substring(0,
+                        finalFileName.lastIndexOf(File.separator));
                 // If all the files were exported in a target folder,
                 // then execute the script on export to revert them back to
                 // original file.
@@ -415,9 +429,8 @@ public class Exporter
                     }
                     catch (Exception e)
                     {
-                        m_logger
-                                .error("Could not revert the exported files back "
-                                        + "with errors when executing the script on export.");
+                        m_logger.error("Could not revert the exported files back "
+                                + "with errors when executing the script on export.");
 
                         String errorArgs[] = new String[1];
                         errorArgs[0] = finalFileName;
@@ -435,14 +448,16 @@ public class Exporter
                     }
                 }
             }
-            
-            //Added by Vincent Yan
-            HashMap<String, String> infos = 
-                CVSUtil.seperateFileInfo(finalFile.getAbsolutePath(), m_exportLocation);
-            if (infos != null && CVSUtil.isCVSJob(infos.get("jobName"))) {
-                CVSUtil.saveCVSFile(infos, 
-                    m_displayName.substring(0, 
-                        m_displayName.indexOf(File.separator)));
+
+            // Added by Vincent Yan
+            HashMap<String, String> infos = CVSUtil.seperateFileInfo(
+                    finalFile.getAbsolutePath(), m_exportLocation);
+            if (infos != null && CVSUtil.isCVSJob(infos.get("jobName")))
+            {
+                CVSUtil.saveCVSFile(
+                        infos,
+                        m_displayName.substring(0,
+                                m_displayName.indexOf(File.separator)));
             }
 
             synchronized (FILE_STATES)
@@ -484,8 +499,8 @@ public class Exporter
                         FileSystemAdapterException fsae = new FileSystemAdapterException(
                                 "XmlDtdValidateEx", errorArgs, e);
 
-                        exportStatusMsg = makeExportErrorMessage(fsae, xmlDtd
-                                .getId());
+                        exportStatusMsg = makeExportErrorMessage(fsae,
+                                xmlDtd.getId());
                     }
                 }
 
@@ -494,12 +509,14 @@ public class Exporter
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
                     
+                    XliffFileUtil.processXliffFiles(wf);
+                    
                     boolean isXLZFP = ServerProxy
                             .getFileProfilePersistenceManager()
                             .isXlzReferenceXlfFileProfile(fp.getName());
                     if (isXLZFP)
                     {
-                        processXLZFiles(wf);
+                        XliffFileUtil.processXLZFiles(wf);
                     }
                 }
             }
@@ -522,7 +539,8 @@ public class Exporter
 
         return exportStatusMsg;
     }
-    
+
+
     private String replaceFileLocale(String content, String targetLocale)
     {
         String regex = "<file[^>]*(target-language=[\"']([^\"']*?)[\"'])[^>]*>";
@@ -537,11 +555,12 @@ public class Exporter
             String rf = f.replace(target, rTarget);
             content = content.replace(f, rf);
         }
-        
+
         return content;
     }
-    
-    private void changeTargetLocale(String targetLocale, File xliffFile, String encoding)
+
+    private void changeTargetLocale(String targetLocale, File xliffFile,
+            String encoding)
     {
         targetLocale = targetLocale.replace("_", "-");
         try
@@ -549,12 +568,12 @@ public class Exporter
             String content = FileUtil.readFile(xliffFile, encoding);
             content = replaceFileLocale(content, targetLocale);
             content = replaceTransUnit(content, targetLocale);
-            
+
             FileUtil.writeFile(xliffFile, content, encoding);
         }
         catch (Exception e)
         {
-            m_logger.error(e);
+            m_logger.error(e.getMessage(), e);
         }
     }
 
@@ -572,7 +591,7 @@ public class Exporter
             String rf = f.replace(target, rTarget);
             content = content.replace(f, rf);
         }
-        
+
         return content;
     }
 
@@ -591,13 +610,16 @@ public class Exporter
         try
         {
             TargetPage tp = ServerProxy.getPageManager().getTargetPage(pageId);
-            Workflow workflow = tp.getWorkflowInstance();
-            Job job = workflow.getJob();
-            XmlDtdManager.addComment(job, files, XmlDtdManager.EXPORT);
+            if (tp != null)
+            {
+                Workflow workflow = tp.getWorkflowInstance();
+                Job job = workflow.getJob();
+                XmlDtdManager.addComment(job, files, XmlDtdManager.EXPORT);
+            }
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -605,8 +627,8 @@ public class Exporter
     {
         if (fileProfile == null && m_fileProfileId != null)
         {
-            fileProfile = HibernateUtil.get(FileProfileImpl.class, Long
-                    .parseLong(m_fileProfileId), false);
+            fileProfile = HibernateUtil.get(FileProfileImpl.class,
+                    Long.parseLong(m_fileProfileId), false);
         }
 
         return fileProfile;
@@ -791,7 +813,8 @@ public class Exporter
         return uStr;
     }
 
-    private void notUnicodeEscape(String fileName, String encoding) throws Exception
+    private void notUnicodeEscape(String fileName, String encoding)
+            throws Exception
     {
         String tempFileName = fileName + ".tmp";
         File sourceFile = new File(fileName);
@@ -810,8 +833,9 @@ public class Exporter
             String fileEncoding = FileUtil.guessEncoding(tempfile);
             if (fileEncoding == null)
                 fileEncoding = encoding;
-            
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(tempfile), fileEncoding));
+
+            reader = new BufferedReader(new InputStreamReader(
+                    new FileInputStream(tempfile), fileEncoding));
             fos = new FileOutputStream(sourceFile);
             String s = reader.readLine();
             while (s != null)
@@ -843,7 +867,7 @@ public class Exporter
             tempfile.delete();
         }
     }
-    
+
     /**
      * Replace the "\ " on the begining of string to " "
      * 
@@ -852,61 +876,69 @@ public class Exporter
      * @throws Exception
      */
     private void handleExtraEscapeCharacter(String fileName, String encoding)
-        throws Exception
+            throws Exception
     {
         String tempFileName = fileName + ".tmp";
         File sourceFile = new File(fileName);
         File tempfile = new File(tempFileName);
 
         sourceFile.renameTo(tempfile);
-        
-        if (sourceFile.exists()) {
+
+        if (sourceFile.exists())
+        {
             sourceFile.delete();
         }
 
         BufferedReader reader = null;
         FileOutputStream fos = null;
-        
-        try {
-            InputStreamReader isr = new InputStreamReader(new FileInputStream(tempfile), encoding);
+
+        try
+        {
+            InputStreamReader isr = new InputStreamReader(new FileInputStream(
+                    tempfile), encoding);
             reader = new BufferedReader(isr);
-            
+
             fos = new FileOutputStream(sourceFile);
             String s = reader.readLine();
-            
+
             while (s != null)
             {
-                if(!s.trim().equals("")) {
+                if (!s.trim().equals(""))
+                {
                     if (!s.startsWith("#") && !s.startsWith("!"))
                     {
-                        if(s.indexOf("=") != (s.length() - 1)) {
-                            //replace the "\ " on the begining of string to " "
+                        if (s.indexOf("=") != (s.length() - 1))
+                        {
+                            // replace the "\ " on the begining of string to " "
                             String tempStr = s.substring(s.indexOf("=") + 1);
                             int num = 0;
-                            
-                            if(tempStr.startsWith("\\ ")) {
-                                
-                                while(tempStr.startsWith("\\ ")) {
+
+                            if (tempStr.startsWith("\\ "))
+                            {
+
+                                while (tempStr.startsWith("\\ "))
+                                {
                                     tempStr = tempStr.substring("\\ ".length());
                                     num++;
                                 }
                             }
-                            
-                            for(int i = 0; i < num; i++) {
+
+                            for (int i = 0; i < num; i++)
+                            {
                                 tempStr = " " + tempStr;
                             }
-                            
+
                             s = s.substring(0, s.indexOf("=") + 1) + tempStr;
                         }
                     }
                 }
-                
+
                 s += lineSeparator;
                 fos.write(s.getBytes(encoding));
                 s = reader.readLine();
             }
 
-        fos.flush();
+            fos.flush();
         }
         finally
         {
@@ -914,15 +946,15 @@ public class Exporter
             {
                 fos.close();
             }
-        
+
             if (reader != null)
             {
                 reader.close();
             }
-        
+
             tempfile.delete();
         }
-    }    
+    }
 
     private String loadConvert(String s)
     {
@@ -952,37 +984,37 @@ public class Exporter
                         aChar = in[off++];
                         switch (aChar)
                         {
-                        case '0':
-                        case '1':
-                        case '2':
-                        case '3':
-                        case '4':
-                        case '5':
-                        case '6':
-                        case '7':
-                        case '8':
-                        case '9':
-                            value = (value << 4) + aChar - '0';
-                            break;
-                        case 'a':
-                        case 'b':
-                        case 'c':
-                        case 'd':
-                        case 'e':
-                        case 'f':
-                            value = (value << 4) + 10 + aChar - 'a';
-                            break;
-                        case 'A':
-                        case 'B':
-                        case 'C':
-                        case 'D':
-                        case 'E':
-                        case 'F':
-                            value = (value << 4) + 10 + aChar - 'A';
-                            break;
-                        default:
-                            throw new IllegalArgumentException(
-                                    "Malformed \\uxxxx encoding.");
+                            case '0':
+                            case '1':
+                            case '2':
+                            case '3':
+                            case '4':
+                            case '5':
+                            case '6':
+                            case '7':
+                            case '8':
+                            case '9':
+                                value = (value << 4) + aChar - '0';
+                                break;
+                            case 'a':
+                            case 'b':
+                            case 'c':
+                            case 'd':
+                            case 'e':
+                            case 'f':
+                                value = (value << 4) + 10 + aChar - 'a';
+                                break;
+                            case 'A':
+                            case 'B':
+                            case 'C':
+                            case 'D':
+                            case 'E':
+                            case 'F':
+                                value = (value << 4) + 10 + aChar - 'A';
+                                break;
+                            default:
+                                throw new IllegalArgumentException(
+                                        "Malformed \\uxxxx encoding.");
                         }
                     }
                     out[outLen++] = (char) value;
@@ -999,10 +1031,13 @@ public class Exporter
                         aChar = '\f';
                     else
                         isConvert = false;
-                    
-                    if (isConvert) {
-                        out[outLen++] = aChar;                        
-                    } else {
+
+                    if (isConvert)
+                    {
+                        out[outLen++] = aChar;
+                    }
+                    else
+                    {
                         out[outLen++] = '\\';
                         out[outLen++] = aChar;
                     }
@@ -1048,23 +1083,24 @@ public class Exporter
         String sourceFolder = determineSourceFolder(p_companyId);
         File filesInTargetFolder = new File(p_targetFolder);
         File filesInSourceFolder = new File(sourceFolder);
-        if (filesInTargetFolder.listFiles() != null 
+        if (filesInTargetFolder.listFiles() != null
                 && filesInSourceFolder.listFiles() != null
                 && filesInTargetFolder.listFiles().length == filesInSourceFolder
-                .listFiles().length)
+                        .listFiles().length)
         {
             return true;
         }
-        
+
         return false;
     }
 
     private String determineSourceFolder(String p_companyId)
     {
-        String sourceFolder = m_displayName.substring(0, m_displayName
-                .lastIndexOf(File.separator));
-        StringBuffer sb = new StringBuffer(AmbFileStoragePathUtils
-                .getCxeDocDirPath(p_companyId));
+        String filteredDispalyName = SourcePage.filtSpecialFile(m_displayName);
+        String sourceFolder = filteredDispalyName
+                .substring(0, filteredDispalyName.lastIndexOf(File.separator));
+        StringBuffer sb = new StringBuffer(
+                AmbFileStoragePathUtils.getCxeDocDirPath(p_companyId));
         sb.append(File.separator).append(sourceFolder);
 
         return sb.toString();
@@ -1197,7 +1233,7 @@ public class Exporter
         Element sourceElement = (Element) nl.item(0);
         m_formatType = sourceElement.getAttribute("formatType");
         m_dataSourceId = sourceElement.getAttribute("dataSourceId");
-        
+
         NodeList sDa = sourceElement.getElementsByTagName("da");
         for (int k = 0; k < sDa.getLength(); k++)
         {
@@ -1210,7 +1246,6 @@ public class Exporter
                 m_sourceFileName = valElement.getFirstChild().getNodeValue();
             }
         }
-
 
         nl = elem.getElementsByTagName("displayName");
         Element e = (Element) nl.item(0);
@@ -1298,9 +1333,10 @@ public class Exporter
         if ("passolo".equals(m_formatType))
         {
             String name = m_sourceFileName.replace("\\", "/");
-            return m_exportLocation + "/passolo" + name.substring(name.indexOf("/"));
+            return m_exportLocation + "/passolo"
+                    + name.substring(name.indexOf("/"));
         }
-        
+
         StringBuffer fullpath = new StringBuffer(m_exportLocation);
         fullpath.append(File.separator).append(m_localeSubDir);
         fullpath.append(File.separator).append(m_filename);
@@ -1310,8 +1346,7 @@ public class Exporter
 
         String finalFileName = fullpath.toString();
 
-        m_logger
-                .info("Writing: " + finalFileName + ", size: " + fileSize + "k");
+        m_logger.info("Writing: " + finalFileName + ", size: " + fileSize + "k");
 
         return finalFileName;
     }
@@ -1341,8 +1376,9 @@ public class Exporter
 
         return newName;
     }
+
     private static void convertToHtmlEntity(String fileName, String encoding)
-    throws Exception
+            throws Exception
     {
         String tempFileName = fileName + ".tmp";
         File sourceFile = new File(fileName);
@@ -1357,11 +1393,12 @@ public class Exporter
         BufferedReader in = null;
         try
         {
-            in = new BufferedReader(new InputStreamReader(new FileInputStream(tempFileName), encoding));
-           // fos = new FileOutputStream(sourceFile);
+            in = new BufferedReader(new InputStreamReader(new FileInputStream(
+                    tempFileName), encoding));
+            // fos = new FileOutputStream(sourceFile);
             pw = new PrintWriter(sourceFile);
             String s1 = null;
-            while((s1 = in.readLine()) != null)
+            while ((s1 = in.readLine()) != null)
             {
                 s1 = MapOfHtmlEntity.escapeHtmlFull(s1);
                 pw.write(s1);
@@ -1384,11 +1421,13 @@ public class Exporter
             tempfile.delete();
         }
     }
-    
-    private JobEditionInfo getGSEditionJobByJobID(long jobID) {
+
+    private JobEditionInfo getGSEditionJobByJobID(long jobID)
+    {
         JobEditionInfo je = new JobEditionInfo();
-        
-        try {
+
+        try
+        {
             String hql = "from JobEditionInfo a where a.jobId = :id";
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("id", Long.toString(jobID));
@@ -1396,122 +1435,13 @@ public class Exporter
             Iterator i = servers.iterator();
             je = i.hasNext() ? (JobEditionInfo) i.next() : null;
         }
-        catch (Exception pe) {
-            //s_logger.error("Persistence Exception when retrieving JobEditionInfo", pe);
+        catch (Exception pe)
+        {
+            // s_logger.error("Persistence Exception when retrieving JobEditionInfo",
+            // pe);
         }
-        
+
         return je;
     }
-    
-    /**
-     * Process the files if the source file is with XLZ file format
-     * @param p_wf
-     * @author Vincent Yan, 2011/01/27
-     */
-    private void processXLZFiles(Workflow p_wf) 
-    {
-        if (p_wf == null || p_wf.getAllTargetPages().size() == 0)
-            return;
 
-        TargetPage tp = null;
-        String externalId = "";
-        String tmp = "", tmpFile = "";
-        String sourceFilename = "", targetFilename = "";
-        String sourceDir = "", targetDir = "";
-        File sourceFile = null, targetFile = null;
-        File sourcePath = null, targetPath = null;
-        ArrayList<String> xlzFiles = new ArrayList<String>();
-
-        logger.info("Begin processing xlz files.");
-        try
-        {
-            Vector targetPages = p_wf.getAllTargetPages();
-            String baseDir = AmbFileStoragePathUtils.getCxeDocDirPath().concat(File.separator);
-            
-            Job job = p_wf.getJob();
-            String companyId = job.getCompanyId();
-            String companyName = CompanyWrapper.getCompanyNameById(companyId);
-            
-            if ("1".equals(CompanyWrapper.getCurrentCompanyId())
-                    && !"1".equals(job.getCompanyId())) 
-            {
-                baseDir += companyName + File.separator;
-            }
-            
-            for (int i = 0; i < targetPages.size(); i++)
-            {
-                tp = (TargetPage) targetPages.get(i);
-                externalId = tp.getSourcePage().getExternalPageId();
-
-                if (externalId.toLowerCase().endsWith(".xlf")
-                        || externalId.toLowerCase().endsWith(".xliff"))
-                {
-                    tmp = externalId.substring(0,
-                            externalId.lastIndexOf(File.separator));
-                    sourceFilename = baseDir + tmp + ".xlz";
-                    sourceFile = new File(sourceFilename);
-                    if (sourceFile.exists() && sourceFile.isFile())
-                    {
-                        // source file is with xlz file format
-                        targetDir = baseDir + tp.getExportSubDir()
-                                + tmp.substring(tmp.indexOf(File.separator));
-                        if (!xlzFiles.contains(targetDir))
-                            xlzFiles.add(targetDir);
-
-                        // Get exported target path
-                        targetPath = new File(targetDir);
-
-                        // Get source path
-                        sourceDir = baseDir + tmp;
-                        sourcePath = new File(sourceDir);
-
-                        // Copy all files extracted from xlz file from source
-                        // path to exported target path
-                        // Because xliff files can be exported by GS
-                        // auotmatically, then ignore them and
-                        // just copy the others file to target path
-                        File[] files = sourcePath.listFiles();
-                        for (File f : files)
-                        {
-                            if (f.isDirectory())
-                                continue;
-                            tmpFile = f.getAbsolutePath().toLowerCase();
-                            if (tmpFile.endsWith(".xlf")
-                                    || tmpFile.endsWith(".xliff"))
-                                continue;
-                            org.apache.commons.io.FileUtils.copyFileToDirectory(f, targetPath);
-                        }
-                    }
-                }
-
-                // Verify if the exported file is generated
-                targetFilename = baseDir + tp.getExportSubDir()
-                        + File.separator;
-                targetFilename += externalId.substring(externalId
-                        .indexOf(File.separator) + 1);
-                targetFile = new File(targetFilename);
-                if (!targetFile.exists())
-                {
-                    logger.error("File " + targetFilename + " is not exist");
-                }
-            }
-
-            // Generate exported XLZ file and remove temporary folders
-            for (int i = 0; i < xlzFiles.size(); i++)
-            {
-                targetDir = xlzFiles.get(i);
-                targetPath = new File(targetDir);
-
-                ZipIt.addEntriesToZipFile(new File(targetDir + ".xlz"),
-                        targetPath.listFiles(), true, "");
-            }
-            
-            logger.info("Processing xlz files finished");
-        }
-        catch (Exception e)
-        {
-            logger.error("Error in WorkflowManagerLocal.processXLZFiles. ");
-            logger.error(e);
-        }
-    }
 }

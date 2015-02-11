@@ -17,16 +17,27 @@
 
 package com.globalsight.everest.projecthandler;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeMap;
 import java.util.Vector;
 
+import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.TDATM;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.util.comparator.StringComparator;
+import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileHandlerHelper;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
+import com.globalsight.util.StringUtil;
 
 public class TranslationMemoryProfile extends PersistentObject
 {
@@ -42,10 +53,10 @@ public class TranslationMemoryProfile extends PersistentObject
 
     // 2 one to many mapping from TM Profile to List of Project TMs to Leverage
     // From
-    private Vector m_projectTMsToLeverageFrom = new Vector();
+    private Vector<LeverageProjectTM> m_projectTMsToLeverageFrom = new Vector<LeverageProjectTM>();
 
     // Use this field for modification only.
-    private Vector m_newProjectTMsToLeverageFrom = new Vector();
+    private Vector<LeverageProjectTM> m_newProjectTMsToLeverageFrom = new Vector<LeverageProjectTM>();
 
     // 3
     private String m_name = null;
@@ -63,7 +74,7 @@ public class TranslationMemoryProfile extends PersistentObject
     private boolean m_isSaveUnLocSegToPageTM = true;
 
     // 8
-    protected Vector m_jobExcludeTuTypes = new Vector();
+    protected Vector<String> m_jobExcludeTuTypes = new Vector<String>();
 
     // 9
     private boolean m_isLeverageLocalizable = true;
@@ -141,8 +152,8 @@ public class TranslationMemoryProfile extends PersistentObject
 
     // machine translation common options
     private String m_mtEngine = null;
-    private boolean m_autoCommitToTM = false;
-    private boolean m_overrideNonExactMatches = false;
+    private boolean m_useMT = false;
+    private long m_mtConfidenceScore = 100;
     private boolean m_showInEditor = false;
     
     // for "PROMT"
@@ -150,12 +161,9 @@ public class TranslationMemoryProfile extends PersistentObject
     private String m_ptsUsername = null;
     private String m_ptsPassword = null;
     private String m_ptsUrlFlag = null;
+
     // For "PROMT" MT engine extra settings
     private Vector m_promtInfos = new Vector();
-    
-    private boolean m_isMTSensitiveLeveraging = false;
-    
-    private long m_mtSensitivePenalty = 1;
 
     public static final String LATEST_EXACT_MATCH = "LATEST";
 
@@ -168,15 +176,14 @@ public class TranslationMemoryProfile extends PersistentObject
     public boolean isTmProcendence = false;
 
     private boolean autoRepair = true;
-
-    private String m_msMTUrl = null;
-
-    private String msMTAppID = null;
     
+    // microsoft translation
+    private String m_msMTUrl = null;
+    private String msMTAppID = null;
+    private String msMTClientID = null;
+    private String msMTClientSecret = null;
     private String msMTCategory = null;
-
     private String msMTUrlFlag = null;
-
     private TDATM tdatm;
     
     // Asia Online MT
@@ -225,7 +232,10 @@ public class TranslationMemoryProfile extends PersistentObject
 
     public void setAoMtPassword(String aoMtPassword)
     {
-        this.aoMtPassword = aoMtPassword;
+        if (TMProfileHandlerHelper.checkPassword(aoMtPassword))
+        {
+            this.aoMtPassword = aoMtPassword;
+        }
     }
 
     public long getAoMtAccountNumber()
@@ -477,7 +487,7 @@ public class TranslationMemoryProfile extends PersistentObject
         return m_isSaveUnLocSegToProjectTM;
     }
 
-    public Vector getJobExcludeTuTypes()
+    public Vector<String> getJobExcludeTuTypes()
     {
         return m_jobExcludeTuTypes;
     }
@@ -489,7 +499,7 @@ public class TranslationMemoryProfile extends PersistentObject
     {
         StringBuffer result = new StringBuffer();
 
-        for (Enumeration enumeration = m_jobExcludeTuTypes.elements(); enumeration
+        for (Enumeration<String> enumeration = m_jobExcludeTuTypes.elements(); enumeration
                 .hasMoreElements();)
         {
             result.append((String) enumeration.nextElement());
@@ -877,6 +887,29 @@ public class TranslationMemoryProfile extends PersistentObject
         m_selectRefTm = refTm;
     }
 
+    public String getMsMTClientID()
+    {
+        return msMTClientID;
+    }
+
+    public void setMsMTClientID(String msMTClientID)
+    {
+        this.msMTClientID = msMTClientID;
+    }
+
+    public String getMsMTClientSecret()
+    {
+        return msMTClientSecret;
+    }
+
+    public void setMsMTClientSecret(String msMTClientSecret)
+    {
+        if (TMProfileHandlerHelper.checkPassword(msMTClientSecret))
+        {
+            this.msMTClientSecret = msMTClientSecret;
+        }
+    }
+
     public void setMtEngine(String p_value)
     {
         this.m_mtEngine = p_value;
@@ -887,24 +920,14 @@ public class TranslationMemoryProfile extends PersistentObject
         return this.m_mtEngine;
     }
 
-    public void setAutoCommitToTM(boolean p_value)
+    public void setUseMT(boolean p_value)
     {
-        this.m_autoCommitToTM = p_value;
+        this.m_useMT = p_value;
     }
 
-    public boolean getAutoCommitToTM()
+    public boolean getUseMT()
     {
-        return this.m_autoCommitToTM;
-    }
-
-    public void setOverrideNonExactMatches(boolean p_value)
-    {
-        this.m_overrideNonExactMatches = p_value;
-    }
-
-    public boolean getOverrideNonExactMatches()
-    {
-        return this.m_overrideNonExactMatches;
+        return this.m_useMT;
     }
 
     public void setShowInEditor(boolean p_value)
@@ -917,24 +940,23 @@ public class TranslationMemoryProfile extends PersistentObject
         return this.m_showInEditor;
     }
 
-    public void setIsMTSensitiveLeveraging(boolean p_isMTSensitiveLeveraging)
+    public void setMtConfidenceScore(long p_mtConfidenceScore)
     {
-        this.m_isMTSensitiveLeveraging = p_isMTSensitiveLeveraging;
+    	this.m_mtConfidenceScore = p_mtConfidenceScore;
+    }
+    
+    public long getMtConfidenceScore()
+    {
+    	return this.m_mtConfidenceScore;
     }
 
-    public boolean getIsMTSensitiveLeveraging()
+    /**
+     * Utility method
+     * @deprecated
+     */
+    public boolean getAutoCommitToTM()
     {
-        return this.m_isMTSensitiveLeveraging;
-    }
-
-    public void setMtSensitivePenalty(long p_mtSensitivePenalty)
-    {
-        this.m_mtSensitivePenalty = p_mtSensitivePenalty;
-    }
-
-    public long getMtSensitivePenalty()
-    {
-        return this.m_mtSensitivePenalty;
+		return (this.m_mtConfidenceScore == 100 ? true : false);
     }
 
     public void setPtsurl(String p_ptsUrl)
@@ -969,7 +991,10 @@ public class TranslationMemoryProfile extends PersistentObject
 
     public void setPtsPassword(String p_ptsPassword)
     {
-        this.m_ptsPassword = p_ptsPassword;
+        if (TMProfileHandlerHelper.checkPassword(p_ptsPassword))
+        {
+            this.m_ptsPassword = p_ptsPassword;
+        }
     }
 
     public String getPtsPassword()
@@ -1125,6 +1150,95 @@ public class TranslationMemoryProfile extends PersistentObject
     public void setTdatm(TDATM P_TDATM)
     {
         this.tdatm = P_TDATM;
+    }
+    
+    private Set<TMPAttribute> attributes;
+    
+    public List<TMPAttribute> getAllTMPAttributes()
+    {
+        List<TMPAttribute> atts = new ArrayList<TMPAttribute>();
+        Set<TMPAttribute> tmAtts = getAttributes();
+        if (tmAtts != null)
+        {
+            atts.addAll(tmAtts);
+        }
+
+        return atts;
+    }
+    
+    public List<String> getAllTMPAttributenames()
+    {
+        List<String> atts = new ArrayList<String>();
+        Set<TMPAttribute> tmAtts = getAttributes();
+        if (tmAtts != null)
+        {
+            Iterator<TMPAttribute> it = tmAtts.iterator();
+            while(it.hasNext())
+            {
+                TMPAttribute tma = it.next();
+                atts.add(tma.getAttributename());
+            }
+        }
+
+        return atts;
+    }
+    
+    public Set<TMPAttribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes(Set<TMPAttribute> attributes)
+    {
+        this.attributes = attributes;
+    }
+
+	/**
+	 * Get all reference TMs' names in order to display on TM profile main list
+	 * UI for "Reference TM(s)" column.
+	 */
+    public String getProjectTMNamesToLeverageFrom()
+    {
+		if (this.m_projectTMsToLeverageFrom == null
+				|| this.m_projectTMsToLeverageFrom.size() == 0) {
+			return "";
+		}
+
+		// Get TreeMap<projectIndex, tmName> sorted by projectIndex.
+		String tmName = null;
+		TreeMap<Integer, String> lmIdTmNameMap = new TreeMap<Integer, String>();
+		for (Iterator<LeverageProjectTM> it = this.m_projectTMsToLeverageFrom
+				.iterator(); it.hasNext();)
+		{
+			LeverageProjectTM levTm = it.next();
+			try
+			{
+				tmName = ServerProxy.getProjectHandler()
+						.getProjectTMById(levTm.getProjectTmId(), false).getName();
+				if (!StringUtil.isEmpty(tmName))
+				{
+					lmIdTmNameMap.put(levTm.getProjectTmIndex(), tmName);
+				}
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
+		// Per TM name one line
+		StringBuilder result = new StringBuilder();
+		for(Integer projectIndex : lmIdTmNameMap.keySet())
+		{
+			tmName = lmIdTmNameMap.get(projectIndex);
+	        if (result.length() > 0) {
+				result.append("<br/>").append(tmName);
+			} else {
+				result.append(tmName);
+			}			
+		}
+
+		return result.toString();
     }
 
 }

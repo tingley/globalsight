@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009, 2011 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.selenium.testcases.smoketest;
 
 /*
@@ -12,85 +28,38 @@ package com.globalsight.selenium.testcases.smoketest;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.PermissionGroupsFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
-public class ChangePermissionGroups {
-	private Selenium selenium;
-	private PermissionGroupsFuncs iPermissionGroupsFuncs = new PermissionGroupsFuncs();
-	String testCaseName = getClass().getName();
+public class ChangePermissionGroups extends BaseTestCase
+{
+    private PermissionGroupsFuncs permissionGroupsFuncs = new PermissionGroupsFuncs();
 
-	@Test
-	public void changePermissionGroups() throws Exception {
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.PermissionGroups_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    @Test
+    public void changePermissionGroups() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.PERMISSION_GROUPS_SUBMENU);
 
-		iPermissionGroupsFuncs.editPermissionGroups(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "GROUP"),
-				ConfigUtil.getDataInCase(testCaseName, "PERMISSONPROFILE"));
+        permissionGroupsFuncs.editPermissionGroups(selenium,
+                getProperty("permission.permissionGroup"), getProperty("permission.permissions"));
 
-		CommonFuncs.logoutSystem(selenium);
-		CommonFuncs.loginSystemWithAdmin(selenium);
-		
-		selenium.click(MainFrame.Setup_MENU);
-		Assert.assertEquals(
-				selenium.isElementPresent(MainFrame.Attributes_SUBMENU), true);
-/*		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.PermissionGroups_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        CommonFuncs.logoutSystem(selenium);
+        CommonFuncs.loginSystemWithAdmin(selenium);
 
-		iPermissionGroupsFuncs.editPermissionGroups(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "GROUP"),
-				ConfigUtil.getDataInCase(testCaseName, "PERMISSONPROFILE"));*/
-	}
-
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithAdmin(selenium);
-	}
-
-	@AfterMethod
-	public void afterMethod() {
-		CommonFuncs.logoutSystem(selenium);
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
+        selenium.click(MainFrame.SETUP_MENU);
+        Assert.assertEquals(
+                selenium.isElementPresent(MainFrame.ATTRIBUTES_SUBMENU), true);
+        /**
+         * selenium.click(MainFrame.Setup_MENU);
+         * selenium.click(MainFrame.PermissionGroups_SUBMENU);
+         * selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+         * 
+         * iPermissionGroupsFuncs.editPermissionGroups(selenium,
+         * ConfigUtil.getDataInCase(testCaseName, "GROUP"),
+         * ConfigUtil.getDataInCase(testCaseName, "PERMISSONPROFILE"));
+         */
+    }
 }

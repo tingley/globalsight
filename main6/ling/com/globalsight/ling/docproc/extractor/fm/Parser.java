@@ -49,7 +49,7 @@ public class Parser
             // Read File Line By Line
             while ((line = m_bufferedReader.readLine()) != null)
             {
-                String result = line.trim();
+                String result = line;
                 list.add(result);
             }
             if (m_bufferedReader != null)
@@ -62,5 +62,52 @@ public class Parser
             throw new ExtractorException(e);
         }
         return list;
+    }
+    
+    /**
+     * Get string line content
+     * 
+     * @param line
+     * @return
+     */
+    public static String getStringContent(String line)
+    {
+        int start = line.indexOf("`");
+        int end = line.indexOf("'");
+        if (start != -1 && end != -1)
+        {
+            String tmp = line.substring(start + 1, end);
+            tmp = tmp.replace("\\>", ">");
+            tmp = tmp.replace("\\Q", "`");
+            tmp = tmp.replace("\\q", "'");
+            tmp = tmp.replace("\\\\", "\\");
+            return tmp;
+        }
+        else
+        {
+            return line;
+        }
+    }
+
+    /**
+     * Get content in line that don't have a ` and '
+     * 
+     * @param line
+     * @param tag
+     * @return
+     */
+    public static String getTagContent(String line, String tag)
+    {
+        try
+        {
+            int start = line.indexOf(tag) + tag.length() + 1;
+            int end = line.indexOf(">");
+            String value = line.substring(start, end);
+            return value;
+        }
+        catch (Exception e)
+        {
+            return line;
+        }
     }
 }

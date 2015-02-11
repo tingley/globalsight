@@ -1,0 +1,458 @@
+QUERY:
+Table [x1]:
+Topic[x2]Page
+Warning:
+Caution:
+Table[x3]-
+Table[x4]-
+Table[x5]-
+Table[x6]-
+(Sheet [x7] of [x8])
+™
+©
+°
+—
+Operator’s Guide
+71500126802IVD
+–
+TQ
+µ
+TQ
+¼
+½
+eProduct Designer Version 2
+Quattro Premier
+¾
+×
+±
+TQ
+B
+Tandem Quad (TQ) Detector
+Marvell Template Revision F
+Waters Micromass Quattro Premier Mass Spectrometer
+Micromass Quattro Premier Mass Spectrometer
+Table of Contents
+step
+page[x9]-
+Chapter
+Appendix
+Attention:
+Table[x10]-
+The instrument is heavy. 
+To avoid injury, Waters recommends that the instrument be lifted using suitable machinery and the supplied harness.
+Contact Waters Technical Service before moving the instrument.
+If you must transport the instrument, or remove it from service, contact Waters Technical Service for recommended cleaning, flushing, and packaging procedures.
+See [x11].
+Contents
+To avoid gas leaks, use the sharp knife to cut the PTFE tubing squarely (that is, perpendicular to its horizontal axis).
+To ensure correct operation of the roughing pump, do not operate the pump with the oil level at less than 30% of the MAX level.
+Instrument analog-out/event-in connections
+Signal connections
+Description
+[x12]Analog (Out)
+Used for analog chart output functionality. 
+The output voltage range is 0 to 2[x13]V. 
+The resolution of the voltage output is 12 bits.
+[x14]Stop Flow (Out)
+Used to stop the solvent flow if the nitrogen gas supply fails. 
+Maximum 30[x15]V, 0.5[x16]A, 10[x17]W.
+[x18]Inject Start (In)
+Signals the start of an injection. 
+Maximum 30[x19]V.
+[x20]Event (In)
+Allows an external device to start data acquisition. 
+Maximum 30[x21]V.
+[x22]Switch 2 (Out)
+Used to send time-based contact closure signals to external devices. 
+Maximum 30[x23]V, 0.5[x24]A, 10[x25]W.
+Switch 3 (Out)
+Used to send time-based contact closure signals to external devices. 
+Maximum 30[x26]V, 0.5[x27]A, 10[x28]W.
+Switch 4 (Out)
+Used to send time-based contact closure signals to external devices. 
+Maximum 30[x29]V, 0.5[x30]A, 10[x31]W.
+To avoid electrical shock, use the SVT-type power cord in the United States and HAR-type (or better) in Europe. 
+For information regarding what cord to use in other countries, contact your local Waters distributor.
+The roughing pump is heavy. 
+To avoid injury, at least two people must lift the pump.
+To avoid gas leaks, use the sharp knife to cut the PVC exhaust tubing squarely (that is, perpendicular to its horizontal axis).
+To avoid distorting the drip tray or causing the drain cup to leak, restrain the drain cup when attaching or removing the waste line.
+To confirm the integrity of the source exhaust system, the following leak test must be performed.
+To avoid damage to the instrument, snoop (or its equivalent) leak detector liquid must be used only for the purpose described in the following step. 
+It must not be used on any other part of the instrument.
+Do not connect the instrument’s power supply cord until you complete the installation procedures in the previous sections.
+To prevent leakage of biologically hazardous materials, ensure that the
+drain line does not crimp or bend. 
+A crimp or bend can impede flow to the waste container.
+waste container is emptied before the lower end of the drain tube is covered by waste solvent.
+To avoid electric shock, all electrical connections to the rear panel must be separated from hazardous voltages by double or reinforced insulation. 
+Circuits of this type are classified as safety extra low voltage (SELV). 
+Examples of circuits that are typically SELV include contact closure inputs and outputs for auto-samplers, and UV, RI, and fluorescence detector signal outputs for LC/MS systems. 
+The electrical connections on the rear panel of this mass spectrometer are all SELV.
+To avoid electric shock and damage to the instrument, do not apply more than
+±30[x32]V d.c. to the Analog (Out) connection.
+30[x33]V d.c. to the Stop Flow (Out), Inject Start (In), Switch 2 (Out), Switch 3 (Out), and Switch 4 (Out) connections.
+Table[x34]-
+The pump and its connections can be contaminated with biohazardous and/or toxic materials. 
+Always wear chemical-resistant, powder-free gloves when performing this procedure.
+To ensure correct operation of the roughing pump, the pump must be installed within 1 degree of horizontal.
+The area where the roughing pump is located must have an ambient temperature of 15 to 40[x35]ºC (59 to 104[x36]ºF).
+To ensure proper ventilation, the pump must be installed with the following minimum [x37]clearances:
+To prevent condensation from forming in the exhaust tubing between the roughing pump and the exhaust trap bottle, you must minimize the length of the tube.
+To avoid gas leaks, use the sharp knife to cut the PVC exhaust tubing squarely (that is, perpendicular to its horizontal axis).
+To avoid gas leaks, use the sharp knife to cut the PTFE tubing squarely (that is, perpendicular to its horizontal axis).
+To avoid gas leaks, use the sharp knife to cut the PTFE tubing squarely (that is, perpendicular to its horizontal axis).
+The waste line and connection can be contaminated with biologically hazardous materials. 
+Always wear chemical-resistant, powder-free gloves while performing this procedure.
+To prevent condensation from draining backward and damaging the pump, the exhaust tubing must be installed with an exhaust trap bottle; the bottle must be positioned at or below the roughing pump exhaust port.
+LC solvents and analytes can be carried in the nitrogen exhaust, which must be vented via the nitrogen exhaust trap bottle and laboratory exhaust system. 
+The [x38]laboratory exhaust system must provide a minimum vacuum of 0.20 kPa (2[x39]mbar, 0.03[x40]psi) below atmospheric pressure (negative pressure).
+The exhaust connections can be contaminated with biohazardous and/or toxic materials. 
+Always wear chemical-resistant, powder-free gloves when performing this procedure.
+To avoid the buildup of hazardous gases, do not place the nitrogen exhaust trap bottle in an enclosed cabinet.
+The instrument requires two separate [x41]exhaust systems: one for nitrogen, the other for the roughing pump. 
+Vent them to atmosphere through separate exhaust lines. 
+Oil mist can seriously damage the instrument if the nitrogen exhaust line connects with the roughing pump exhaust line. 
+Your warranty does not cover damage caused by routing exhaust lines incorrectly.
+The instrument requires two separate [x42]exhaust systems: one for nitrogen, the other for the roughing pump. 
+Vent them to atmosphere through separate exhaust lines. 
+Oil mist can seriously damage the instrument if the nitrogen exhaust line connects with the roughing pump exhaust line. 
+Your warranty does not cover damage caused by routing exhaust lines incorrectly.
+Table[x43]-
+The pump and its connections can be contaminated with biohazardous and/or toxic materials. 
+Always wear chemical-resistant, powder-free gloves when performing this procedure.
+To ensure correct operation of the roughing pump, the pump must be installed within 1 degree of horizontal.
+The area where the roughing pump is located must have an ambient temperature of 15 to 40[x44]ºC (59 to 104[x45]ºF).
+To ensure proper ventilation, the pump must be installed with the following minimum [x46]clearances:
+The roughing pump is heavy. 
+To avoid injury, at least two people must lift the pump.
+To prevent condensation from forming in the exhaust tubing between the roughing pump and the exhaust trap bottle, you must minimize the length of the tube.
+To avoid gas leaks, use the sharp knife to cut the PVC exhaust tubing squarely (that is, perpendicular to its horizontal axis).
+To prevent condensation from draining backward and damaging the pump, the exhaust tubing must be installed with an exhaust trap bottle; the bottle must be positioned at or below the roughing pump exhaust port.
+To avoid gas leaks, use the sharp knife to cut the PVC exhaust tubing squarely (that is, perpendicular to its horizontal axis).
+Left side minimum clearance is 15.24 cm (6 inches)
+Exhaust trap bottle
+Exhaust port
+Right side minimum clearance is 15.24 cm (6 inches)
+Back side minimum clearance is 15.24 cm (6 inches)
+Elbow
+Front side minimum clearance is 35.56 cm (14 inches)
+Left side minimum clearance is 15.24 cm (6 inches)
+Right side minimum clearance is 15.24 cm (6 inches)
+Back side minimum clearance is 15.24 cm (6 inches)
+Noise reduction cover
+Front side minimum clearance is 35.56 cm (14 inches)
+Exhaust port flange
+Drain cup
+Barbed fitting
+Drain line
+Inlet flange
+Correct
+DN 25 nipple
+DN 40 nipple
+Clamps
+Elbow
+Oil filler plug
+Oil-level sight glass
+Drain plug
+Gas ballast valve
+Exhaust port flange
+Incorrect
+External Connections[x47]
+This appendix describes the instrument’s external connections.
+External [x48]wiring and [x49]vacuum connections
+Rear panel connections appear in the figure below.
+[x50]Rear panel
+Connecting the oil-filled [x51]roughing pump
+Note
+To connect the alternative dry roughing pump, see [x52].
+Required materials
+Chemical-resistant, powder-free gloves
+7-mm nut driver
+8-mm Allen wrench
+Sharp knife
+1-L exhaust trap bottle (included in the startup kit)
+Elbows (included in the Waters Rough Pump Connect Kit)
+NW25 tee (included in the startup kit)
+NW25 center rings (included in the startup kit)
+NW25 clamps (included in the startup kit)
+PVC exhaust tubing (included in the Waters Rough Pump Connect Kit)
+PVC hose clamps (included in the Waters Rough Pump Connect Kit)
+1-inch ID vacuum hose (included in the Waters Rough Pump Connect Kit)
+[x53]To connect [x54]the roughing pump
+Requirement
+The pump must be oriented in a way that allows easy daily access to the gas ballast valve and oil-level sight glass.
+Place the PTFE drip tray on the floor, within 5[x55]feet of the instrument.
+Place the pump on the PTFE drip tray.
+Attach the [x56]NW25 tee, included in the startup kit, to the inlet of the pump using the NW25 center ring, and then secure the connection with a clamp.
+Attach the flanged end of a length of 1-inch ID vacuum hose to each open port on the NW25 tee. 
+Use the NW25 center rings and clamps provided in the startup kit. 
+Use the 7-mm nut driver to install the clamps.
+Connect the opposite ends of the two lengths of vacuum hose in [x57] to the two, 1-inch OD, straight, vacuum ports on the instrument’s rear panel. 
+Secure the hose ends with clamps supplied in the startup kit; install 2 clamps on each hose end.
+Connect an approximately 36.4-cm (2.5-inch) length of 12.7-mm clear PVC exhaust tubing to the roughing pump exhaust port NW25 nozzle fitting. 
+Secure the tubing with a hose clamp.
+Connect an elbow to the other end of the PVC exhaust tubing, and connect the elbow to one of the fittings on the exhaust trap bottle (included in the startup kit).
+Connect a length of 12.7-mm clear PVC exhaust tubing to an elbow and connect the elbow to the other fitting on the [x58]exhaust trap bottle. 
+The exit line of the exhaust trap bottle can be at any elevation.
+Secure the exhaust trap bottle in a conspicuous location.
+Route the open end of the exhaust tubing to a suitable exhaust vent.
+Check the oil level in the pump.
+See [x59], and, if needed, [x60].
+Make the electrical connections to the roughing pump.
+If your roughing pump has an external relay box, see [x61].
+If your roughing pump does not have an external relay box, see [x62].
+Making the electrical connections for a roughing pump with an external relay box
+Roughing pump connections with an external relay box
+To make the electrical connections for a roughing pump with an external relay box
+Connect the power cable from the roughing pump relay box connector to the [x63]relay box.
+Connect the relay cable from the relay box to the pump connector on the instrument’s rear panel.
+Connect the relay box power connector to the main power source.
+Making the electrical connections for a roughing pump without an external relay box
+Roughing pump connections without an external relay box
+To make the electrical connections for a roughing pump without an external relay box
+Connect the roughing pump power cord to the main power source.
+Connect the relay cable from the roughing pump d.c. connector to the pump connector on the instrument’s rear panel.
+Connecting the oil-free [x64]roughing pump
+The oil-free roughing pump is an optional alternative to the standard oil-filled roughing pump. 
+To connect the oil-filled roughing pump, see [x65].
+The noise reduction cover must be installed over the pump to minimize operating noise, unless the pump is installed in a cabinet that includes sound dampening and ventilation.
+Required materials
+Chemical-resistant, powder-free gloves
+7-mm nut driver
+8-mm Allen wrench
+Sharp knife
+1-L exhaust trap bottle (included in the startup kit)
+Elbows (included in the Waters Rough Pump Connect Kit)
+NW25 tee (included in the startup kit)
+NW25 center rings (included in the startup kit)
+NW25 clamps (included in the startup kit)
+NW25 full nipple (included in the Alcatel pump kit)
+DN25 reducing nipple (included in the Alcatel pump kit)
+NW40 center rings (included in the Alcatel pump kit)
+NW40 clamps (included in the Alcatel pump kit)
+DN40 full nipple flange (included in the Alcatel pump kit)
+PVC exhaust tubing (included in the Waters Rough Pump Connect Kit)
+PVC hose clamps (included in the Waters Rough Pump Connect Kit)
+1-inch ID vacuum hose (included in the Waters Rough Pump Connect Kit)
+Isolation valve (included in the Alcatel pump kit)
+External silencer (included in the Alcatel pump kit)
+Noise reduction cover (included in the Alcatel pump kit)
+To install the noise reduction cover
+Remove the clamp and blank flange from the pump inlet.
+Attach the DN40 nipple to the top of the inlet filter and o-ring assembly and then secure the connection with a clamp.
+Attach the DN25 nipple to the outlet fitting and secure the connection with a clamp.
+Connect the gray pump control cable to the rear of the pump.
+Connect the power cord to the rear of the pump.
+Install the noise reduction cover.
+[x66]To connect [x67]the oil-free roughing pump
+Place the pump on the floor, within 1.5[x68]m (5 feet) of the instrument.
+Attach the isolation valve, [x69]NW25 tee, and elbows to the DN40 nipple on the pump inlet, and then secure these connections with clamps, as shown in the figure below.
+Attach the flanged end of a length of 1-inch ID vacuum hose to each open port on the NW25 tee.
+Tip: [x70]Use the NW25 center rings and clamps provided in the startup kit. 
+Use the 7-mm nut driver to install the clamps.
+Connect the opposite ends of the two lengths of vacuum hose in [x71] to the two, 1-inch OD, straight, vacuum ports on the instrument’s rear [x72]panel. 
+Secure the hose ends by installing 2 clamps supplied in the startup kit on each hose end.
+Attach the DN25 elbow to the DN25 nipple on the pump exhaust outlet and secure the connection with a clamp.
+Install the external silencer, with the arrow pointing toward the pump, to the open port of the DN25 elbow, and then secure the connection with a clamp.
+Attach the DN25 reducing nipple to the outlet of the external silencer and secure the connection with a clamp.
+Connect an approximately 300 mm (12 inch) length of 12.7-mm clear PVC exhaust tubing to the DN25 reducing nipple, securing the tubing with a hose clamp.
+Connect an elbow to the other end of the PVC exhaust tubing, and connect the elbow to one of the fittings on the exhaust trap bottle (included in the startup kit).
+Connect a length of 12.7-mm clear PVC exhaust tubing to an elbow and connect the elbow to the other fitting on the [x73]exhaust trap bottle. 
+The exit line of the exhaust trap bottle can be at any elevation.
+Secure the exhaust trap bottle in a conspicuous location.
+Route the open end of the exhaust tubing to a suitable exhaust vent.
+Make the electrical connections to the roughing pump.
+Making the electrical connections for an oil-free roughing pump
+Roughing pump connections
+To make the electrical connections for a oil-free roughing pump
+Route the cables through the opening in the rear of the noise reduction cover.
+Connect the gray pump control cable to the pump connector on the instrument’s rear panel.
+Connect the power cable and power-on the instrument.
+Connecting to the nitrogen gas supply
+Required materials
+Chemical-resistant, powder-free gloves
+Sharp knife
+Wrench
+6-mm PTFE tubing (included in the Waters Rough Pump Connect Kit)
+[x74]To connect the nitrogen gas supply
+Use the sharp knife to cut a 3.8 to 5.0-cm (1.5 to 2-inch) length of 6-mm PTFE tubing.
+Connect this piece of tubing to one end of the nitrogen supply in-line filter.
+Connect the remaining length of the 6-mm PTFE tubing to the other end of the filter.
+Connect the free end of the short piece of 6-mm PTFE tubing to the nitrogen inlet port on the rear of the instrument.
+Gas and exhaust connections
+Attach a nitrogen regulator (not provided) to the nitrogen supply.
+Install the 6-mm stud into the regulator outlet.
+Connect the free end of the long piece of 6-mm PTFE tubing to the 6-mm stud.
+Connecting to the collision cell gas supply
+Required materials:
+Chemical-resistant, powder-free gloves
+Wrench
+1/8-inch Swagelok[x75]®[x76] nut and ferrule
+1/8-inch stainless steel tube (supplied with the instrument)
+[x77]To connect the collision cell gas supply
+Use the 1/8-inch Swagelok nut and ferrule to connect the 1/8-inch stainless steel tube to the collision cell gas inlet on the rear of the instrument (see the figure [x78]).
+Use the wrench to tighten the 1/8-inch Swagelok nut.
+Connect the free end of the tube to the collision gas supply.
+Connecting the nitrogen exhaust line
+Required materials
+Chemical-resistant, powder-free gloves
+Sharp knife
+10-mm and 12-mm PTFE tubing (included in the Waters Rough Pump Connect Kit)
+snoop[x79]®[x80] (or equivalent) leak detector liquid
+[x81]To connect the nitrogen exhaust line
+Locate the exhaust trap bottle in an accessible area below the instrument. 
+See the figure [x82].
+Cut a length of 12-mm tubing long enough to connect the instrument to the exhaust trap bottle.
+Connect one end of the tubing to the exhaust port on the rear panel. 
+Connect the other end to one of two ports on the exhaust trap bottle.
+Cut a second length of 10-mm tubing long enough to connect the exhaust trap bottle to the exhaust vent.
+Insert one end of the tubing into the remaining port on the exhaust trap bottle. 
+Route the other end to the exhaust vent.
+Use snoop (or equivalent) [x83]leak detector liquid to ensure that there are no leaks at the instrument exhaust and laboratory exhaust system line connections.
+Exhaust trap bottle[x84]
+Connecting the liquid waste line[x85]
+Required material
+Chemical-resistant, powder-free gloves
+To connect the liquid waste line
+Place a suitable waste container below the instrument.
+Slide a drain line over the barbed fitting of the drain (located at the bottom of the instrument).
+Route the waste line to the waste container. 
+If necessary, shorten the waste tube so that its end is above the surface of the waste solvent.
+[x86]Positioning of drain tube
+Connecting the workstation
+Before connecting the [x87]workstation to the instrument, set up the workstation according to its accompanying instructions. 
+Locate the workstation within 5[x88]meters (16[x89]feet) of the instrument.
+Requirement
+Shielded [x90]network cables must be used with the instrument to ensure compliance with FCC, and other, limits.
+To connect the workstation
+Connect the monitor to the PC.
+Connect one end of the shielded network cable to the appropriate port on the rear panel of the instrument.
+Connect the other end of the shielded network cable to the port labeled instrument LAN on the workstation rear panel.
+To connect the instrument to the [x91]power source
+Select the correct power cord for your location.
+Connect the female end of the power cord to the power port on the rear panel of the instrument.
+Connecting Ethernet cables
+Requirement
+Shielded Ethernet cables must be used with the instrument to ensure compliance with FCC, and other, limits.
+[x92]To make Ethernet connections
+Connect one end of one shielded Ethernet cable to the network switch, and then connect the other end to the Ethernet card on the preconfigured ACQUITY™ workstation.
+Tip
+On preconfigured systems, the Ethernet card is identified as the Instrument [x93]LAN card.
+Connect one end of the other shielded Ethernet cable to the back of the instrument, and then connect the other end to the network switch.
+I/O signal connectors
+[x94]The instrument’s rear panel includes two removable connectors that hold the screw terminals for I/O signals. 
+These connectors are keyed so that they can receive a signal cable inserted only one way.
+I/O signal connectors
+Signal connections
+Requirement
+To meet the regulatory requirements of immunity from external electrical disturbances, you must install [x95]connection covers over the signal connectors.
+[x96]To make signal connections
+Reference the signal connection location from the silk-screened label for inject start or any other input/output connection you plan to use from Connector I or II on the rear panel of each instrument.
+To make the signal connections, attach the positive and negative leads of the signal cable to the connector.
+Slide the clamp (with the bend facing down) into the protective shield.
+Insert the clamp and shield (with the bend facing down) into the connection cover, and loosely tighten with one self-tapping screw.
+Insert the connector with the signal cable into the connection cover, and position the clamp over the cable leads. 
+Tighten the clamp into place with the second self-tapping screw.
+Place the second connection cover over the first cover, and snap it into place.
+Connecting to the electricity source
+The instrument requires a separate, grounded electricity source. 
+The ground connection in the electrical outlet must be common and connected near the system.
+[x97]To connect to the electricity source
+Recommendation
+Use a line conditioner or an uninterruptible power supply (UPS) for optimum long-term input voltage stability.
+Connect the female end of the power cord to the receptacle on the rear panel of the instrument.
+Connect the male end of the instrument power cord to the 200 to 240[x98]V AC wall outlet prepared as described in the instrument [x99]Site Preparation Guide[x100].
+Connect the power cord from the roughing pump relay box to the 200 to 240[x101]V AC wall outlet prepared as described in the instrument [x102]Site Preparation Guide[x103].
+The system software controls electrical power to the pump.
+Pump inlet
+NW25 tee
+1-inch ID vacuum hose
+Flange
+Clamps
+DN40 nipple on pump inlet
+External silencer
+NW25 tee
+1-inch ID vacuum hose
+From instrument exhaust connection (12-mm OD)
+To laboratory exhaust port (10-mm OD)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Analog (Out)
+Analog (Out)
+Ground
+Not Used
+Not Used
+Stop Flow (Out)
+Stop Flow (Out)
+Ground
+Switch 2 (Out)
+Switch 2 (Out)
+Connector I
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+Inject Start (In)
+Inject Start (In)
+Ground
+Event (In)
+Event (In)
+Switch 3 (Out)
+Switch 3 (Out)
+Ground
+Switch 4 (Out)
+Switch 4 (Out)
+Connector II
+Signal cable
+Connector
+Connection cover
+Shield
+Clamp
+Cable leads
+Clamp
+Signal connector
+Connection cover
+Isolation valve
+Event inputs and outputs
+Shielded Ethernet
+Roughing pump relay switch
+Exhaust trap bottle
+Exhaust port
+Elbow
+Source vacuum
+Power cord
+Source vent
+Turbo vacuum
+Nitrogen inlet
+Collision cell gas inlet
+Relay box
+To power source
+Detector rear panel
+Roughing pump main power connector
+Roughing pump main power connector
+To power source
+Detector rear panel
+Roughing pump d.c. connector
+To power source
+Detector rear panel
+Roughing pump control cable
+Source vent
+Nitrogen inlet
+Collision cell gas inlet
+Source vacuum connection
+Turbo-pump vacuum connection

@@ -122,7 +122,10 @@ public class PowerPointExtractorTest extends BaseExtractorTestClass
                             s = SegmentUtil.restoreInvalidUnicodeChar(s);
                             generateFile(roundtripFile, s, UTF8);
                             Assert.assertTrue(roundtripFile.exists());
+                            System.out.println(s);
                             Assert.assertTrue(s.contains("Sample Document"));
+                            // for GBS-2272 lastCR
+                            Assert.assertTrue(s.contains("mso-special-format:lastCR;display:none'>&#13;</span></div>"));
                         }
                         else
                         {

@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
 
@@ -29,23 +28,31 @@ import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 
 /**
- * For GBS-613, there are some performance problem while updating tm profile,
- * because updating leverage match cost some time. So we split the updating
- * leverage match, and use jms to do it.
+ * @deprecated
+ * @since 8.3 
+ * When save TM profile and reference TMs order is changed, system will 
+ * synchronize "project_tm_index" of leverage match DB store, there is 
+ * performance problem when there are large data in leverage match DB store. 
+ * So change to abandon the "synchronize" execution.
  */
-public class UpdateLeverageMatchMDB extends GenericQueueMDB
+public class UpdateLeverageMatchMDB extends GenericQueueMDB implements
+        TuvQueryConstants
 {
     private static final long serialVersionUID = 1L;
     private static Logger CATEGORY = Logger
             .getLogger(UpdateLeverageMatchMDB.class.getName());
-    private static final String SQL = "update leverage_match set "
-            + "project_tm_index = ? where tm_id = ? and tm_profile_id=?";
+    
+    private static final String SQL = "update "
+            + LM_TABLE_PLACEHOLDER + " "
+            + "set project_tm_index = ? where tm_id = ? and tm_profile_id=?";
 
     public UpdateLeverageMatchMDB()
     {
@@ -65,16 +72,20 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB
 
             ArrayList<?> msg = (ArrayList<?>) ((ObjectMessage) p_message)
                     .getObject();
-            Vector<LeverageProjectTM> tms = (Vector<LeverageProjectTM>) msg
-                    .get(0);
+            @SuppressWarnings("unchecked")
+            Vector<LeverageProjectTM> tms = (Vector<LeverageProjectTM>) msg.get(0);
             Long tmprofileId = Long.parseLong((String) msg.get(1));
+            String currentCompanyId = (String) msg.get(2);
 
             Connection connection = null;
             PreparedStatement ps = null;
             try
             {
                 connection = DbUtil.getConnection();
-                ps = connection.prepareStatement(SQL);
+                String lmTableName = SegmentTuTuvCacheManager
+                        .getLeverageMatchTableName(currentCompanyId);
+                String sql = SQL.replace(LM_TABLE_PLACEHOLDER, lmTableName);
+                ps = connection.prepareStatement(sql);
 
                 for (LeverageProjectTM leverageProjectTM : tms)
                 {
@@ -94,23 +105,12 @@ public class UpdateLeverageMatchMDB extends GenericQueueMDB
             finally
             {
                 DbUtil.silentClose(ps);
-                
-                if (connection != null)
-                {
-                    try
-                    {
-                        DbUtil.returnConnection(connection);
-                    }
-                    catch (Exception e)
-                    {
-                        CATEGORY.error("Can not close the connection");
-                    }
-                }
+                DbUtil.silentReturnConnection(connection);
             }
         }
         catch (JMSException e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
     }
 }

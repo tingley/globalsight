@@ -19,11 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.administration.reports;
 // Envoy packages
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
-import java.util.Vector;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -31,12 +29,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
+
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.comparator.JobComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
@@ -50,9 +50,11 @@ import com.globalsight.util.GlobalSightLocale;
 public class ExcelReportsMainHandler extends PageHandler
 {
     private final String REPORTNAME = "activityName";
-    private ArrayList<JobImpl> jobList = null;
     private ArrayList<Project> projectList = null;
     private ArrayList<GlobalSightLocale> targetLocales = null;
+    private Locale uiLocale = null;
+    private static Logger LOGGER = 
+        Logger.getLogger(ExcelReportsMainHandler.class.getName());
 
     @Override
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
@@ -61,16 +63,47 @@ public class ExcelReportsMainHandler extends PageHandler
             EnvoyServletException
     {
         String activityName = (String) p_request.getParameter(REPORTNAME);
+        HttpSession session = p_request.getSession(false);
+        uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);        
+        initData();
+        
         if ("xlsReportFileList".equals(activityName))
         {
             generateFileListReportWebForm(p_request, p_response);
         }
-        // TODO Auto-generated method stub
+        else
+        {
+            prepareData(p_request, p_response);
+        }
+
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
+    
+    /**
+     * Prepare Data(reportJobInfoList/projectList/targetLocales) for Request.
+     * Such as "Reviewers Comments Report", "Comments Analysis Report", 
+     * "Character Count Report".
+     */
+    private void prepareData(HttpServletRequest p_request,
+            HttpServletResponse p_response)
+    {
+        SessionManager sessionMgr = (SessionManager) p_request.getSession(false)
+                .getAttribute(SESSION_MANAGER);
+        
+        ArrayList<String> stateList = ReportHelper.getAllJobStatusList();
+        List<ReportJobInfo> reportJobInfoList = new ArrayList<ReportJobInfo>(ReportHelper.getJobInfo(stateList).values());
+        if (reportJobInfoList != null && !reportJobInfoList.isEmpty())
+        {
+            Collections.sort(reportJobInfoList, new ReportJobInfoComparator(JobComparator.NAME, getUILocale()));
+        }
+        
+        sessionMgr.setAttribute(ReportConstants.REPORTJOBINFO_LIST, reportJobInfoList);
+        sessionMgr.setAttribute(ReportConstants.PROJECT_LIST, projectList);
+        sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST, targetLocales);
+    }
 
-    /*
+    /**
      * Generate file list report web form
      */
     private void generateFileListReportWebForm(HttpServletRequest p_request,
@@ -80,9 +113,7 @@ public class ExcelReportsMainHandler extends PageHandler
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
 
-        Locale uiLocale = (Locale) session
-                .getAttribute(WebAppConstants.UILOCALE);
-        Vector<String> stateList = new Vector<String>();
+        ArrayList<String> stateList = new ArrayList<String>();
         stateList.add(Job.DISPATCHED);
         stateList.add(Job.LOCALIZED);
         stateList.add(Job.EXPORTED);
@@ -90,37 +121,32 @@ public class ExcelReportsMainHandler extends PageHandler
         stateList.add(Job.EXPORT_FAIL);
         stateList.add(Job.ARCHIVED);
         stateList.add(Job.READY_TO_BE_DISPATCHED);
-        Collection<JobImpl> jobs = null;
+
+        sessionMgr.setAttribute("reportJobInfos", ReportHelper.getJobInfo(stateList));
+        sessionMgr.setAttribute("projectList", projectList);
+        sessionMgr.setAttribute("targetLocales", targetLocales);
+    }
+    
+    private void initData()
+    {
         try
         {
-            jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
             targetLocales = new ArrayList<GlobalSightLocale>(ServerProxy
                     .getLocaleManager().getAllTargetLocales());
+            Collections.sort(targetLocales, new GlobalSightLocaleComparator(getUILocale()));
+            
+            projectList = new ArrayList<Project>(ServerProxy
+                    .getProjectHandler().getAllProjects());
+            Collections.sort(projectList, new ProjectComparator(getUILocale()));
         }
         catch (Exception e)
         {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.error("Getting target locales or project error", e);
         }
-        jobList = new ArrayList<JobImpl>(jobs);
-        projectList = new ArrayList<Project>();
-        Iterator<JobImpl> iterJob = jobList.iterator();
-        while (iterJob.hasNext())
-        {
-            Job j = iterJob.next();
-            Project p = j.getL10nProfile().getProject();
-            if (projectList.contains(p) == false)
-            {
-                projectList.add(p);
-            }
-        }
-
-        Collections.sort(jobList, new JobComparator(JobComparator.NAME,
-                uiLocale));
-        Collections.sort(projectList, new ProjectComparator(uiLocale));
-
-        sessionMgr.setAttribute("jobList", jobList);
-        sessionMgr.setAttribute("projectList", projectList);
-        sessionMgr.setAttribute("targetLocales", targetLocales);
+    }
+    
+    protected Locale getUILocale()
+    {
+        return uiLocale == null ? Locale.US : uiLocale;
     }
 }

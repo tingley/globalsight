@@ -13,7 +13,7 @@ import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyJobs;
 import com.globalsight.selenium.pages.RssJobPage;
 import com.globalsight.selenium.pages.RssJobProgress;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 /**
@@ -29,7 +29,7 @@ public class RssJob
     @BeforeClass
     public void beforeClass()
     {
-        selenium = CommonFuncs.initSelenium();
+        selenium = CommonFuncs.getSelenium();
         CommonFuncs.loginSystemWithAdmin(selenium);
     }
 
@@ -53,7 +53,7 @@ public class RssJob
                 "targetLocale");
 
         // Add RSS reader
-        selenium.click(MainFrame.DataSources_MENU);
+        selenium.click(MainFrame.DATA_SOURCES_MENU);
         selenium.click(MainFrame.RSSREADER);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.type(RssJobPage.RSSURL_INPUT, url);
@@ -69,10 +69,10 @@ public class RssJob
             e.printStackTrace();
         }
         selenium.stop();
-        selenium = CommonFuncs.initSelenium();
+        selenium = CommonFuncs.getSelenium();
 
         CommonFuncs.loginSystemWithAdmin(selenium);
-        selenium.click(MainFrame.DataSources_MENU);
+        selenium.click(MainFrame.DATA_SOURCES_MENU);
         selenium.click(MainFrame.RSSREADER);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
@@ -103,13 +103,20 @@ public class RssJob
         CommonFuncs.logoutSystem(selenium);
         // job dispatc and complete
         JobActivityOperationFuncs jFuncs = new JobActivityOperationFuncs();
-        String admin = ConfigUtil.getConfigData("admin_login_name");
-        jFuncs.dispatchJob(selenium, admin, jobName, targetLocale.split(","));
-        String anyone = ConfigUtil.getConfigData("anyone_login_name");
-        jFuncs.acceptActivity(selenium, anyone, jobName);
-        jFuncs.completeActivity(selenium, anyone, jobName);
-        jFuncs.acceptActivity(selenium, anyone, jobName);
-        jFuncs.completeActivity(selenium, anyone, jobName);
+        CommonFuncs.loginSystemWithAdmin(selenium);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        jFuncs.dispatchJob(selenium, jobName, targetLocale.split(","));
+        selenium.click(MainFrame.LOG_OUT_LINK);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        String anyone = ConfigUtil.getConfigData("anyoneName");
+        CommonFuncs.loginSystemWithAnyone(selenium);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        jFuncs.acceptActivity(selenium, jobName);
+        jFuncs.completeActivity(selenium, jobName);
+        jFuncs.acceptActivity(selenium, jobName);
+        jFuncs.completeActivity(selenium, jobName);
+        selenium.click(MainFrame.LOG_OUT_LINK);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         CommonFuncs.loginSystemWithAdmin(selenium);
         selenium.click(MainFrame.Localized_SUBMENU);
         BasicFuncs basicFuncs = new BasicFuncs();

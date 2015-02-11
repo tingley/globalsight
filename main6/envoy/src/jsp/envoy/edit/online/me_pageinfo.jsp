@@ -82,10 +82,8 @@ function doKeyDown()
 <HR>
 <TABLE WIDTH="100%" CELLPADDING="0" CELLSPACING="0" BORDER="0"
   class="standardText" style="table-layout: fixed">
-  <THEAD>
     <COL width="30%" VALIGN="TOP">
     <COL width="70%" VALIGN="TOP">
-  </THEAD>
   <TBODY>
     <TR>
       <TD><%=lb_pageName%></TD>

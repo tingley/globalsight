@@ -14,86 +14,36 @@ import org.testng.Assert;
 
 import org.testng.Reporter;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.ProjectsFuncs;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.Projects;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
-public class CreateProject {
-	/*
-	 * Common variables initialization.
-	 */
-	private Selenium selenium;
-	private ProjectsFuncs iProjectsFuncs = new ProjectsFuncs();
-	String testCaseName = getClass().getName();
+public class CreateProject extends BaseTestCase
+{
+    /*
+     * Common variables initialization.
+     */
+    private ProjectsFuncs projectsFuncs = new ProjectsFuncs();
 
-	@Test
-	public void createProject() throws Exception {
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.Projects_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		selenium.click(Projects.New_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		selenium.select(Projects.ProjectManager_SELECT, ConfigUtil.getConfigData("pm"));
-		
-		String projectname = iProjectsFuncs.newProject(selenium,
-				ConfigUtil.getDataInCase(testCaseName, "PROJECT1"));
-		
-	
-		if (projectname != null) {
-			Assert.assertEquals(iProjectsFuncs.isPresentInTable(selenium,
-					ConfigUtil.getDataInCase(testCaseName, "PROJECTTABLE"),
-					projectname), true);
-		} else {
-			Reporter.log("the project creation failed!");
-		}
-	}
+    @Test
+    public void createProject() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.PROJECTS_SUBMENU);
 
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithAdmin(selenium);
-	}
+        String project = projectsFuncs.newProject(selenium,
+                getProperty("project.project"));
 
-	@AfterMethod
-	public void afterMethod() {
-		selenium.click(MainFrame.LogOut_LINK);
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
+        if (project != null)
+        {
+            Assert.assertEquals(projectsFuncs.isPresentInTable(selenium,
+                    Projects.PROJECT_TABLE, project), true);
+        }
+        else
+        {
+            Reporter.log("the project creation failed!");
+        }
+    }
 }

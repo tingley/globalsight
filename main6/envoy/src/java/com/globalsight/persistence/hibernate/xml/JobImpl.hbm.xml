@@ -4,79 +4,76 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
-    <class name="com.globalsight.everest.jobhandler.JobImpl"
-        table="JOB">
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
+	<class name="com.globalsight.everest.jobhandler.JobImpl" table="JOB">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
 
-        <property name="jobName" length="320" column="NAME"
-            type="string" not-null="true" />
-        <property name="state" length="40" column="STATE" type="string"
-            not-null="false" />
-        <property name="orgState" length="40" column="ORIGINAL_STATE" type="string"
-            not-null="false" />
-        <property name="createDate" column="CREATE_DATE" type="timestamp"
-            not-null="true" />
-        <property name="priority" length="3" column="PRIORITY"
-            type="int" not-null="true" />
-        <property name="isWordCountReached"
-            column="IS_WORDCOUNT_REACHED" type="yes_no" not-null="true" />
-        <property name="timestamp" column="TIMESTAMP" type="timestamp"
-            not-null="true" />
-        <property name="pageCount" column="PAGE_COUNT" type="int"
-            not-null="true" />
-        <property name="leverageMatchThreshold"
-            column="LEVERAGE_MATCH_THRESHOLD" type="int"
-            not-null="false" />
-        <property name="overridenWordCount" length="10"
-            column="OVERRIDEN_WORD_COUNT" type="int" not-null="false" />
-        <property name="quoteDate" length="320" column="QUOTE_DATE"
-            type="string" not-null="false" />
-        <property name="quotePoNumber" length="320"
-            column="QUOTE_PO_NUMBER" type="string" not-null="false" />
-        <property name="quoteApprovedDate" length="320"
-            column="QUOTE_APPROVED_DATE" type="string" not-null="false" />
-        <property name="companyId" column="COMPANY_ID" type="string"
-            not-null="true" />
-        <property name="jauId" length="80" column="AUTHORISER_USER_ID"
-            type="string" not-null="false" />
-        <property name="createUserId" length="80" column="CREATE_USER_ID"
-            type="string" not-null="false" />
+		<property name="jobName" length="320" column="NAME" type="string"
+			not-null="true" />
+		<property name="state" length="40" column="STATE" type="string"
+			not-null="false" />
+		<property name="orgState" length="40" column="ORIGINAL_STATE"
+			type="string" not-null="false" />
+		<property name="createDate" column="CREATE_DATE" type="timestamp"
+			not-null="true" />
+		<property name="priority" length="3" column="PRIORITY" type="int"
+			not-null="true" />
+		<property name="isWordCountReached" column="IS_WORDCOUNT_REACHED"
+			type="yes_no" not-null="true" />
+		<property name="timestamp" column="TIMESTAMP" type="timestamp"
+			not-null="true" />
+		<property name="pageCount" column="PAGE_COUNT" type="int"
+			not-null="true" />
+		<property name="leverageMatchThreshold" column="LEVERAGE_MATCH_THRESHOLD"
+			type="int" not-null="false" />
+		<property name="overridenWordCount" length="10"
+			column="OVERRIDEN_WORD_COUNT" type="int" not-null="false" />
+		<property name="quoteDate" length="320" column="QUOTE_DATE"
+			type="string" not-null="false" />
+		<property name="quotePoNumber" length="320" column="QUOTE_PO_NUMBER"
+			type="string" not-null="false" />
+		<property name="quoteApprovedDate" length="320"
+			column="QUOTE_APPROVED_DATE" type="string" not-null="false" />
+		<property name="companyId" column="COMPANY_ID" type="string"
+			not-null="true" />
+		<property name="l10nProfileId" column="L10N_PROFILE_ID" type="long"
+			not-null="false" />
+		<property name="jauId" length="80" column="AUTHORISER_USER_ID"
+			type="string" not-null="false" />
+		<property name="createUserId" length="80" column="CREATE_USER_ID"
+			type="string" not-null="false" />
 		<property name="leverageOption" length="80" column="LEVERAGE_OPTION"
-            type="string" not-null="false"/>
-        <property name="uuid" length="320" column="UUID"
-            type="string" not-null="false"/>
-            
-        <set name="jobCommentSet" inverse="true"
-            cascade="save-update">
-            <key column="COMMENT_OBJECT_ID" />
-            <one-to-many
-                class="com.globalsight.everest.comment.CommentImpl" />
-        </set>
-        <set name="requestSet" inverse="true" cascade="save-update">
-            <key column="JOB_ID" />
-            <one-to-many
-                class="com.globalsight.everest.request.RequestImpl" />
-        </set>
-        <set name="workflowInstanceSet" inverse="true"
-            cascade="save-update">
-            <key column="JOB_ID" />
-            <one-to-many
-                class="com.globalsight.everest.workflowmanager.WorkflowImpl" />
-        </set>
-        <set name="workflowRequestSet" inverse="true"
-            cascade="save-update">
-            <key column="JOB_ID" />
-            <one-to-many
-                class="com.globalsight.everest.request.WorkflowRequestImpl" />
-        </set>
-        
-        <set name="attributes" inverse="true"
-            cascade="save-update">
-            <key column="JOB_ID" />
-            <one-to-many
-                class="com.globalsight.cxe.entity.customAttribute.JobAttribute" />
-        </set>
-    </class>
+			type="string" not-null="false" />
+		<property name="uuid" length="320" column="UUID" type="string"
+			not-null="false" />
+
+        <property name="startDate" column="START_DATE" type="timestamp"
+            not-null="false" />
+        <property name="completedDate" column="COMPLETED_DATE" type="timestamp"
+            not-null="false" />
+			
+		<set name="jobCommentSet" inverse="true" cascade="save-update">
+			<key column="COMMENT_OBJECT_ID" />
+			<one-to-many class="com.globalsight.everest.comment.CommentImpl" />
+		</set>
+		<set name="requestSet" inverse="true" cascade="save-update">
+			<key column="JOB_ID" />
+			<one-to-many class="com.globalsight.everest.request.RequestImpl" />
+		</set>
+		<set name="workflowInstanceSet" inverse="true" cascade="save-update">
+			<key column="JOB_ID" />
+			<one-to-many class="com.globalsight.everest.workflowmanager.WorkflowImpl" />
+		</set>
+		<set name="workflowRequestSet" inverse="true" cascade="save-update">
+			<key column="JOB_ID" />
+			<one-to-many class="com.globalsight.everest.request.WorkflowRequestImpl" />
+		</set>
+
+		<set name="attributes" inverse="true" cascade="save-update">
+			<key column="JOB_ID" />
+			<one-to-many
+				class="com.globalsight.cxe.entity.customAttribute.JobAttribute" />
+		</set>
+	</class>
 </hibernate-mapping>

@@ -16,15 +16,12 @@
  */
 package com.globalsight.ling.tw;
 
+import java.util.Locale;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.ling.common.Text;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.util.GlobalSightLocale;
-
-import java.util.Locale;
 
 /**
  * PtagStringFormatter is responsible for rendering ptag strings with the
@@ -39,7 +36,7 @@ public class PtagStringFormatter implements PseudoBaseHandler
     private static final String PTAG_COLOR_START = "<font color=\"red\">";
     private static final String PTAG_COLOR_END = "</font>";
     private static final String HIGHLIGHT_START = "<FONT COLOR=\"blue\"><B>";
-    private static final String HIGHLIGHT_END = "</FONT></B>";
+    private static final String HIGHLIGHT_END = "</B></FONT>";
     
     private PseudoParser m_ptagParser = null;
     private StringBuffer m_ptagSegment = null;

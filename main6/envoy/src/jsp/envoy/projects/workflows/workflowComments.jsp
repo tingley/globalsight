@@ -114,7 +114,6 @@
             aComment = (Comment)allComments.get(j);
             theTaskComments.append("<TD CLASS=\"standardText\" COLSPAN=\"2\">\n");
             theTaskComments.append("<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=detailText>\n");
-            theTaskComments.append("<TBODY>\n");
             theTaskComments.append("<COL STYLE=\"padding-right: 10px\">\n");
             theTaskComments.append("<COL>\n");
             theTaskComments.append("<TR>\n");

@@ -58,7 +58,7 @@
    
    //Urls of the links on this page
    String saveUrl = save.getPageURL();
-   String previousUrl = previous.getPageURL() + "&operation=previous";
+   String previousUrl = previous.getPageURL() + "&action=previous";
 
    String exceptionInfo = (String) request.getAttribute("ExceptionInfo");
    int exLength = 0;
@@ -128,15 +128,11 @@
 	<INPUT TYPE="HIDDEN" NAME="radioBtn" VALUE="<%=tmProfile.getId()%>" />
 
 	<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.MT_ENGINE%>" VALUE="<%=tmProfile.getMtEngine()%>"/>
-	<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.MT_OVERRIDE_MATCHES%>" 
-			VALUE="<%=tmProfile.getOverrideNonExactMatches()==true?"on":null%>"/>
-	<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.MT_AUTOCOMMIT_TO_TM%>" 
-			VALUE="<%=tmProfile.getAutoCommitToTM()==true?"on":null%>"/>
-	<INPUT TYPE="HIDDEN" NAME="mtLeveraging" 
-			VALUE="<%=tmProfile.getIsMTSensitiveLeveraging()==true?"on":null%>"/>
-	<INPUT TYPE="HIDDEN" NAME="mtSensitivePenalty" 
-			VALUE="<%=tmProfile.getMtSensitivePenalty()%>"/>			
-			
+	<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.MT_USE_MT%>" 
+			VALUE="<%=tmProfile.getUseMT()==true?"on":null%>"/>
+	<INPUT TYPE="HIDDEN" NAME="mtConfidenceScore" 
+			VALUE="<%=tmProfile.getMtConfidenceScore()%>"/>
+
 	<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.MT_SHOW_IN_EDITOR%>" 
 			VALUE="<%=tmProfile.getShowInEditor()==true?"on":null%>"/>
 	<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.MT_PTSURL%>" 

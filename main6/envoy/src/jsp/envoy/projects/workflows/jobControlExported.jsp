@@ -336,6 +336,22 @@ function submitForm(buttonClicked)
 	      }
 	   }
    }
+   
+   if (JobForm.jobIdHidden && JobForm.jobIdHidden.length)
+   {
+      for (i = 0; i < JobForm.jobIdHidden.length; i++)
+      {
+         if (JobForm.jobIdHidden[i].checked == true)
+         {
+            if( jobId != "" )
+            {
+               jobId += " "; // must add a [white space] delimiter
+            }
+            valuesArray = getRadioValues(JobForm.jobIdHidden[i].value);
+            jobId += valuesArray[0];
+         }
+       }
+    }
 
    if (buttonClicked == "ViewError")
    {
@@ -385,6 +401,19 @@ function submitForm(buttonClicked)
    JobForm.submit();
 }
 
+//for GBS-2599
+function handleSelectAll() {
+	if (JobForm && JobForm.selectAll) {
+		if (JobForm.selectAll.checked) {
+			checkAllWithName('JobForm', 'transCheckbox');
+			setButtonState();
+	    }
+	    else {
+			clearAll('JobForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 </HEAD>
 
@@ -442,7 +471,6 @@ is defined in header.jspIncl which must be included in the body.
         
 <!-- Data Table  -->             
 <TABLE BORDER="0" CELLPADDING="6" CELLSPACING="0" CLASS="list">
-<TBODY>
 <COL> <!-- Radio button -->
 <COL> <!-- Priority -->
 <COL> <!-- Job ID -->
@@ -453,7 +481,7 @@ is defined in header.jspIncl which must be included in the body.
 <COL> <!-- Date Created -->
                 
 <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM">
-    <TD CLASS="headerCell"></TD>
+    <TD CLASS="headerCell"><input type="checkbox" onclick="handleSelectAll()" name="selectAll"/></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=exportedURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PRIORITY%>"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 BORDER=0 ALT="<%=bundle.getString("lb_priority")%>"></A><%=jobPrioritySortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=exportedURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_ID%>"><%=bundle.getString("lb_job_id")%></A><%=jobIdSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=exportedURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_NAME%>"><%=bundle.getString("lb_job_name")%></A><%=jobNameSortArrow%></TD>
@@ -471,10 +499,13 @@ is defined in header.jspIncl which must be included in the body.
      <TR>
         <TD CLASS="standardText">
             <DIV ID="CheckAllLayer" STYLE="visibility: hidden">
-                <A CLASS="standardHREF" 
+	            <A CLASS="standardHREF"
+	                   HREF="javascript:checkAll('JobForm'); setButtonState()"><%=bundle.getString("lb_check_all") + " " + bundle.getString("lb_jobs")%></A>
+                <!--for gbs-2599
+		A CLASS="standardHREF" 
                    HREF="javascript:checkAll('JobForm');setButtonState();"><%=bundle.getString("lb_check_all")%></A> | 
                 <A CLASS="standardHREF" 
-                   HREF="javascript:clearAll('JobForm');setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
+                   HREF="javascript:clearAll('JobForm');setButtonState();"><%=bundle.getString("lb_clear_all")%></A-->
             </DIV>
          </TD>
      </TR>

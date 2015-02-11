@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.webapp.tags;
@@ -34,6 +34,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.util.StringUtil;
 
 public class TableNavTag extends TagSupport implements TableConstants
 {
@@ -45,6 +46,8 @@ public class TableNavTag extends TagSupport implements TableConstants
     private String pageUrl; // Same as given for tableTag
     private List data;
     private String otherUrl;
+    private boolean showTotalCount = true;
+    private String scope;
 
     /**
      * Set the name of the bean that contains the data. This is the name used in
@@ -125,8 +128,8 @@ public class TableNavTag extends TagSupport implements TableConstants
             int perPage = ((Integer) request.getAttribute(key
                     + NUM_PER_PAGE_STR)).intValue();
 
-            if (total <= perPage)
-                return SKIP_BODY;
+//            if (total <= perPage)
+//                return SKIP_BODY;
 
             int possibleTo = pageNum * perPage;
             int to = possibleTo > total ? total : possibleTo;
@@ -134,20 +137,43 @@ public class TableNavTag extends TagSupport implements TableConstants
             Integer sortChoice = (Integer) sessionMgr.getAttribute(key
                     + SORTING);
 
-            Object[] args =
-            { new Integer(from), new Integer(to), new Integer(total) };
+            // DIV start
+            out.print("<div align='right'>");
+
+            // "Display # :" section
+            if (!StringUtil.isEmpty(scope)) {
+                out.println("<script language='JavaScript'>");
+                out.println("function changePageSize(value) {");
+                out.println("  window.location='" + pageUrl + "&" + key + PAGE_NUM + "=1&" + key + SORTING + "=" + sortChoice + "&numOfPageSize=' + value");
+                out.println("}");
+                out.print("</script>");
+                out.print("Display #: ");
+                out.println("<select id='numOfPageSize' onchange='changePageSize(this.value);'>");
+                String[] pageScopes = scope.split(",");
+                for (String s : pageScopes)
+                {
+                    if (String.valueOf(perPage).equals(s) || perPage == Integer.MAX_VALUE)
+                        out.println("<option value='" + s + "' selected>" + s + "</option>");
+                    else
+                        out.println("<option value='" + s + "'>" + s + "</option>");
+                }
+                out.println("</select>&nbsp;&nbsp;");
+            }
 
             // Print "Displaying x to y of z"
-            out.println(MessageFormat.format(bundle
-                    .getString("lb_displaying_records"), args));
+            Object[] args =
+                { new Integer(from), new Integer(to), new Integer(total) };
+            if (showTotalCount) {
+                out.println(MessageFormat.format(bundle
+                        .getString("lb_displaying_records"), args));
+            }
+            out.println("&nbsp;&nbsp;");
 
-            out.println("<br>");
-            out.println("&lt; ");
-
-            // The "Previous" link
+            // The "First" and "Previous" links
             if (pageNum == 1)
             {
-                // Don't hyperlink "Previous" if it's the first page
+                out.print(bundle.getString("lb_first"));
+                out.print(" | ");
                 out.print(bundle.getString("lb_previous"));
             }
             else
@@ -155,18 +181,23 @@ public class TableNavTag extends TagSupport implements TableConstants
                 int num = pageNum - 1;
                 StringBuilder url = new StringBuilder();
                 url.append("<a href=\"").append(pageUrl).append("&")
+                        .append(key).append(PAGE_NUM).append("=1&").append(key)
+                        .append(SORTING).append("=").append(sortChoice);
+                if (otherUrl != null)
+                    url.append("&").append(otherUrl);
+                url.append("\">").append(bundle.getString("lb_first"))
+                        .append("</a> | ");
+                url.append("<a href=\"").append(pageUrl).append("&")
                         .append(key).append(PAGE_NUM).append("=").append(num)
                         .append("&").append(key).append(SORTING).append("=")
                         .append(sortChoice);
                 if (otherUrl != null)
-                {
                     url.append("&").append(otherUrl);
-                }
                 url.append("\">").append(bundle.getString("lb_previous"))
                         .append("</a>");
                 out.println(url.toString());
             }
-            out.print(" ");
+            out.print(" | ");
 
             // Print out the paging numbers
             for (int i = 1; i <= numPages; i++)
@@ -198,30 +229,41 @@ public class TableNavTag extends TagSupport implements TableConstants
                     out.print(" ");
                 }
             }
-            // The "Next" link
+            out.print("| ");
+
+            // The "Next" and "Last" links
             if (to >= total)
             {
-                // Don't hyperlink "Next" if it's the last page
                 out.print(bundle.getString("lb_next"));
+                out.print(" | ");
+                out.print(bundle.getString("lb_last"));
             }
             else
             {
                 int num = pageNum + 1;
-                
+
                 StringBuilder url = new StringBuilder();
                 url.append("<a href=\"").append(pageUrl).append("&")
                         .append(key).append(PAGE_NUM).append("=").append(num)
                         .append("&").append(key).append(SORTING).append("=")
                         .append(sortChoice);
                 if (otherUrl != null)
-                {
                     url.append("&").append(otherUrl);
-                }
                 url.append("\">").append(bundle.getString("lb_next"))
+                        .append("</a> | ");
+                url.append("<a href=\"").append(pageUrl).append("&")
+                        .append(key).append(PAGE_NUM).append("=").append(numPages)
+                        .append("&").append(key).append(SORTING).append("=")
+                        .append(sortChoice);
+                if (otherUrl != null)
+                    url.append("&").append(otherUrl);
+                url.append("\">").append(bundle.getString("lb_last"))
                         .append("</a>");
                 out.println(url.toString());
             }
-            out.println(" &gt;");
+            
+            // DIV end
+            out.println("</div>");
         }
         catch (IOException e)
         {
@@ -246,5 +288,25 @@ public class TableNavTag extends TagSupport implements TableConstants
     public void setOtherUrl(String otherUrl)
     {
         this.otherUrl = otherUrl;
+    }
+
+    public boolean isShowTotalCount()
+    {
+        return showTotalCount;
+    }
+
+    public void setShowTotalCount(boolean showTotalCount)
+    {
+        this.showTotalCount = showTotalCount;
+    }
+
+    public String getScope()
+    {
+        return scope;
+    }
+
+    public void setScope(String scope)
+    {
+        this.scope = scope;
     }
 }

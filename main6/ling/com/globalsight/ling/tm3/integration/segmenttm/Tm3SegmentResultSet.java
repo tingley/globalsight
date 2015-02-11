@@ -1,16 +1,18 @@
 package com.globalsight.ling.tm3.integration.segmenttm;
 
-import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FROM_WORLDSERVER;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.SID;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
 import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
 import java.util.Iterator;
+import java.util.Map;
 
 import org.hibernate.Session;
 
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentResultSet;
 import com.globalsight.ling.tm2.SegmentTmTu;
@@ -83,12 +85,28 @@ class Tm3SegmentResultSet implements SegmentResultSet {
                 (String) tm3tu.getAttribute(typeAttr), 
                 true, (GlobalSightLocale)tm3tu.getSourceTuv().getLocale());
         String sid = (String) tm3tu.getAttribute(sidAttr);
+        tu.setSID(sid);
         tu.setFromWorldServer((Boolean) tm3tu.getAttribute(fromWsAttr));
         if ((Boolean) tm3tu.getAttribute(translatableAttr)) {
             tu.setTranslatable();
         }
         else {
             tu.setLocalizable();
+        }
+        
+        // convert TM3 attributes to TU properties
+        Map<TM3Attribute, Object> tmAts = tm3tu.getAttributes();
+        if (tmAts != null && !tmAts.isEmpty())
+        {
+            for (Map.Entry<TM3Attribute, Object> tmAt : tmAts.entrySet())
+            {
+                ProjectTmTuTProp prop = TM3Util.toProjectTmTuTProp(tmAt.getKey(), tmAt.getValue());
+                
+                if (prop != null)
+                {
+                    tu.addProp(prop);
+                }
+            }
         }
 
         // XXX: Is it possible to cleanly refactor with TM3Leverager?

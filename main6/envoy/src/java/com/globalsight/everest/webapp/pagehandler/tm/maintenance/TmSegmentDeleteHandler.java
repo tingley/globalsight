@@ -135,53 +135,42 @@ public class TmSegmentDeleteHandler
         ArrayList deletedTus = null;
         ArrayList notDeletedTus = null;
         
-        Session hsession = null;
-        
-        try {
-            hsession = HibernateUtil.getSession();
-            if(action.equals(TM_ACTION_DELETE_TUV))
-            {
-                // get Tuvs to delete
-                ArrayList trgTuvs = getSelectedTargetTuvs(
-                    hsession.connection(),
-                    searchResults, selectedTuIds, targetLocale);
-                
-                // get the list of source and non-source Tuvs
-                ArrayList srcTuvs = getSourceTuvs(trgTuvs);
-                ArrayList nonSrcTuvs = (srcTuvs.size() == 0
-                    ? trgTuvs : getNonSourceTuvs(trgTuvs));
-    
-                // delete non-source Tuvs
-                doDeleteTuvs(getTmForTuvs(nonSrcTuvs), nonSrcTuvs);
-    
-                // get Tu list from Tuv list
-                deletedTus = getTuList(nonSrcTuvs);
-                notDeletedTus = getTuList(srcTuvs);
-            }
-            else if(action.equals(TM_ACTION_DELETE_TU))
-            {
-                // get Tus to delete
-                ArrayList tus = getSelectedTargetTus(hsession.connection(),
-                        searchResults, selectedTuIds);
-    
-                Tm tm = getTmForTus(tus);
-                
-                // delete Tus
-                doDeleteTus(tm, tus);
-                
-                deletedTus = tus;
-                notDeletedTus = new ArrayList();
-            }
+        if(action.equals(TM_ACTION_DELETE_TUV))
+        {
+            // get Tuvs to delete
+            ArrayList trgTuvs = getSelectedTargetTuvs(
+                searchResults, selectedTuIds, targetLocale);
             
-            // save the result for the result screen
-            p_request.setAttribute(TM_DELETED_SEGMENTS, deletedTus);
-            p_request.setAttribute(TM_NOT_DELETED_SEGMENTS, notDeletedTus);
+            // get the list of source and non-source Tuvs
+            ArrayList srcTuvs = getSourceTuvs(trgTuvs);
+            ArrayList nonSrcTuvs = (srcTuvs.size() == 0
+                ? trgTuvs : getNonSourceTuvs(trgTuvs));
+
+            // delete non-source Tuvs
+            doDeleteTuvs(getTmForTuvs(nonSrcTuvs), nonSrcTuvs);
+
+            // get Tu list from Tuv list
+            deletedTus = getTuList(nonSrcTuvs);
+            notDeletedTus = getTuList(srcTuvs);
         }
-        finally {
-            if (hsession != null) {
-                hsession.close();
-            }
+        else if(action.equals(TM_ACTION_DELETE_TU))
+        {
+            // get Tus to delete
+            ArrayList tus = getSelectedTargetTus(searchResults, selectedTuIds);
+
+            Tm tm = getTmForTus(tus);
+            
+            // delete Tus
+            doDeleteTus(tm, tus);
+            
+            deletedTus = tus;
+            notDeletedTus = new ArrayList();
         }
+        
+        // save the result for the result screen
+        p_request.setAttribute(TM_DELETED_SEGMENTS, deletedTus);
+        p_request.setAttribute(TM_NOT_DELETED_SEGMENTS, notDeletedTus);
+
         super.invokePageHandler(p_pageDescriptor, p_request,
             p_response, p_context);
     }
@@ -242,19 +231,16 @@ public class TmSegmentDeleteHandler
     }
 
 
-    private ArrayList getSelectedTargetTuvs(Connection p_connection,
-        TmConcordanceResult p_searchResults,
+    private ArrayList getSelectedTargetTuvs(TmConcordanceResult p_searchResults,
         String[] p_selectedTuIds, GlobalSightLocale p_targetLocale)
     {
-        return getTuvs(
-            makeMap(p_connection, p_searchResults), p_selectedTuIds, p_targetLocale);
+        return getTuvs(makeMap(p_searchResults), p_selectedTuIds, p_targetLocale);
     }
 
-
-    private ArrayList getSelectedTargetTus(Connection p_connection,
-        TmConcordanceResult p_searchResults, String[] p_selectedTuIds)
+	private ArrayList getSelectedTargetTus(TmConcordanceResult p_searchResults,
+			String[] p_selectedTuIds)
     {
-        return getTus(makeMap(p_connection, p_searchResults), p_selectedTuIds);
+        return getTus(makeMap(p_searchResults), p_selectedTuIds);
     }
 
 
@@ -301,10 +287,10 @@ public class TmSegmentDeleteHandler
     /**
      * Returns a map from [tu id (Long)] to [SegmentTmTu].
      */
-    private HashMap<Long, SegmentTmTu> makeMap(Connection p_connection, TmConcordanceResult p_searchResults)
+    private HashMap<Long, SegmentTmTu> makeMap(TmConcordanceResult p_searchResults)
     {
         HashMap<Long, SegmentTmTu> result = new HashMap<Long, SegmentTmTu>();
-        List<SegmentTmTu> tus = p_searchResults.getTus(p_connection);
+        List<SegmentTmTu> tus = p_searchResults.getTus();
 
         for (int i = 0, max = tus.size(); i < max; i++)
         {

@@ -9,7 +9,7 @@
             com.globalsight.everest.webapp.pagehandler.administration.config.xmlrulefile.XmlRuleConstant, 
             com.globalsight.everest.util.comparator.XmlRuleFileComparator, 
             com.globalsight.cxe.entity.xmlrulefile.XmlRuleFileImpl,
-            com.globalsight.everest.servlet.util.ServerProxy,
+            com.globalsight.everest.company.CompanyWrapper,
             java.util.*"
     session="true"
 %>
@@ -141,7 +141,7 @@ function enableButtons()
         </amb:column>
         <% if (isSuperAdmin) { %>
         <amb:column label="lb_company_name" sortBy="<%=XmlRuleFileComparator.ASC_COMPANY%>">
-            <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(xmlRule.getCompanyId())).getCompanyName()%>
+            <%=CompanyWrapper.getCompanyNameById(xmlRule.getCompanyId())%>
         </amb:column>
         <% } %>
       </amb:table>

@@ -309,9 +309,7 @@ TR.standardText
             <TD><%=bundle.getString("file_list_report_desc")%></TD>
         </TR>        
         
-        
 <% }
-
     if (userPerms.getPermissionFor(Permission.REPORTS_DELL_VENDOR_PO))
     {
         hasAtLeastOneReport=true;
@@ -350,7 +348,19 @@ TR.standardText
             </TD>
             <TD><%=reportDesc%></TD>
         </TR>
-        <% } %>
+		<% } %>
+
+		<!-- Summary Reports -->
+		<amb:permission name="<%=Permission.REPORTS_SUMMARY%>">
+        <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">
+            <TD>
+          	 <A CLASS=standardHREF HREF='javascript: popupExternal("/globalsight/ControlServlet?activityName=xlsReportSummary","SummaryReport")'
+             	onMouseOver="window.status='/globalsight/ControlServlet?activityName=xlsReportSummary'; return true"><%=EMEA + bundle.getString("report_summary_title")%>
+             </A>
+            </TD>
+            <TD><%=bundle.getString("report_summary_desc")%></TD>
+        </TR>
+		</amb:permission>
 
 		<amb:permission name="<%=Permission.REPORTS_LANGUAGE_SIGN_OFF%>">
         <TR BGCOLOR="<%=toggleBgColor(rowNum++)%>" CLASS="standardText">

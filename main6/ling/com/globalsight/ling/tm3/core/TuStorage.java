@@ -101,12 +101,6 @@ abstract class TuStorage<T extends TM3Data> {
         if (tuvs.size() == 0) {
             return;
         }
-        for (TM3Tuv<T> tuv : tuvs) {
-            if (tuv.equals(tuv.getTu().getSourceTuv())) {
-                throw new IllegalArgumentException(
-                        "Can't delete source TUV without deleting TU");
-            }
-        }
         // Events will cascade
         StatementBuilder sb = new StatementBuilder("DELETE FROM ")
             .append(storage.getTuvTableName())
@@ -188,7 +182,12 @@ abstract class TuStorage<T extends TM3Data> {
     }
 
     public TM3Tu<T> getTu(Long id, boolean locking) throws SQLException {
-        return getTu(Collections.singletonList(id), locking).get(0);
+        List<TM3Tu<T>> list = getTu(Collections.singletonList(id), locking);
+        if (list == null || list.size() == 0){
+            return null;
+        }else{
+            return list.get(0);
+        }
     }
     
     public List<TM3Tu<T>> getTu(List<Long> ids, boolean locking)
@@ -222,8 +221,8 @@ abstract class TuStorage<T extends TM3Data> {
     public TM3Tu<T> getTuByTuvId(long tuvId) throws SQLException { 
        long tuId = getTuIdByTuvId(tuvId);
        if (tuId == 0) {
-           throw new IllegalArgumentException("No such tuv " + tuvId + " for tm3 id "  +
-                   getStorage().getTm().getId());
+           //tuv may already been deleted
+           return null;
        }
        return getTu(tuId, false);
     }
@@ -476,5 +475,58 @@ OUTER:  for (FuzzyCandidate<T> candidate : candidates) {
     
     // Support for the "get tu by tuv" hack.
     protected abstract long getTuIdByTuvId(Long tuvId) throws SQLException;
+    
+    public boolean doesCustomAttribtueExist(long tuId, long attId) throws SQLException
+    {
+        BaseTm tm = storage == null ? null : storage.getTm();
+        if (tm != null)
+        {
+            long tmId = tm.getId();
+            StatementBuilder sb = new StatementBuilder();
+            sb.append("select count(*) from ").append(storage.getAttrValTableName());
+            sb.append(" where tmId = ? and tuId = ?");
+            sb.addValues(tmId, tuId);
+
+            long count = SQLUtil.execCountQuery(getConnection(), sb);
+
+            return count > 0;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    
+    public void saveCustomAttribute(long tuId, TM3Attribute tm3a, String value)
+            throws SQLException
+    {
+        BaseTm tm = storage == null ? null : storage.getTm();
+        if (tm != null)
+        {
+            long tmId = tm.getId();
+            StatementBuilder sb = new StatementBuilder();
+            sb.append("INSERT INTO ").append(storage.getAttrValTableName())
+            .append(" (tmId, tuId, attrId, value) VALUES (?, ?, ?, ?)");;
+            sb.addValues(tmId, tuId, tm3a.getId(), value);
+            
+            SQLUtil.exec(getConnection(), sb);
+        }
+    }
+    
+    public void updateCustomAttribute(long tuId, TM3Attribute tm3a, String value)
+            throws SQLException
+    {
+        BaseTm tm = storage == null ? null : storage.getTm();
+        if (tm != null)
+        {
+            long tmId = tm.getId();
+            StatementBuilder sb = new StatementBuilder();
+            sb.append("UPDATE ").append(storage.getAttrValTableName())
+            .append(" set value = ? where tmId = ? and tuId = ? and attrId = ?");;
+            sb.addValues(value, tmId, tuId, tm3a.getId());
+            
+            SQLUtil.exec(getConnection(), sb);
+        }
+    }
 
 }

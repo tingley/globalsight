@@ -69,7 +69,7 @@ public class FileProfileVo
         }
         catch (Exception e1)
         {
-            CATEGORY.error(e1);
+            CATEGORY.error(e1.getMessage(), e1);
         }
 
         long l10nProfileId = fileProfile.getL10nProfileId();
@@ -81,7 +81,7 @@ public class FileProfileVo
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
     }
 

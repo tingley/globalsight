@@ -19,11 +19,14 @@ package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
@@ -34,25 +37,25 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.foundation.Timestamp;
-import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.PrimaryFile;
+import com.globalsight.everest.secondarytargetfile.SecondaryTargetFile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.TaskInfo;
+import com.globalsight.everest.util.comparator.TaskInstanceComparator;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflowmanager.TaskJbpmUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.everest.workflowmanager.WorkflowManagerLocal;
 
 /**
  * The WorkflowActivitiesHandler provides data to the workflowActivities.jsp
@@ -100,8 +103,8 @@ public class WorkflowActivitiesHandler extends PageHandler
             Job job = WorkflowHandlerHelper.getJobById(Long
                     .parseLong(jobIdParam));
 
-            List<Workflow> workflows = new ArrayList<Workflow>(job
-                    .getWorkflows());
+            List<Workflow> workflows = new ArrayList<Workflow>(
+                    job.getWorkflows());
 
             // Find the workflow whose activities you want to display
             Workflow curWf = null;
@@ -115,8 +118,8 @@ public class WorkflowActivitiesHandler extends PageHandler
                     break;
                 }
             }
-            WorkflowInstance wfi = WorkflowHandlerHelper.getWorkflowInstance(
-                    wfId);
+            WorkflowInstance wfi = WorkflowHandlerHelper
+                    .getWorkflowInstance(wfId);
             if (action != null && "view".equals(action))
             {
                 List taskInfos = (List) sessionMgr
@@ -158,8 +161,9 @@ public class WorkflowActivitiesHandler extends PageHandler
                             curWf.getTargetPages(PrimaryFile.UNEXTRACTED_FILE));
 
             p_request.setAttribute(
-                    JobManagementHandler.WORKFLOW_SECONDARY_TARGET_FILES, curWf
-                            .getSecondaryTargetFiles());
+                    JobManagementHandler.WORKFLOW_SECONDARY_TARGET_FILES,
+                    new ArrayList<SecondaryTargetFile>(curWf
+                            .getSecondaryTargetFiles()));
 
             // now call the JSP
             super.invokePageHandler(p_thePageDescriptor, p_request, p_response,
@@ -174,8 +178,8 @@ public class WorkflowActivitiesHandler extends PageHandler
     /**
      * Invokes this page handler for an applet request object.
      * 
-     * @param p_isGet -
-     *            Determines whether the request is a get or post.
+     * @param p_isGet
+     *            - Determines whether the request is a get or post.
      * @param thePageDescriptor
      *            the description of the page to be produced
      * @param theRequest
@@ -202,39 +206,15 @@ public class WorkflowActivitiesHandler extends PageHandler
     }
 
     @SuppressWarnings("unchecked")
-    private String getActivitiesText(HttpSession p_session,WorkflowInstance wfi,
-            Locale p_uiLocale, TimeZone p_timeZone)
+    private String getActivitiesText(HttpSession p_session,
+            WorkflowInstance wfi, Locale p_uiLocale, TimeZone p_timeZone)
             throws EnvoyServletException
     {
         ResourceBundle bundle = getBundle(p_session);
-
-        // Map activeTasksMap = WorkflowHandlerHelper.getActiveTasksForWorkflow(
-        // p_session.getId(), wfId);
-
         StringBuilder sb = new StringBuilder();
-
-        // for (int i = 0; i < p_workflowTasks.size(); i++)
-        // {
-        // WorkflowTaskInstance wfTask = (WorkflowTaskInstance) p_workflowTasks
-        // .get(i);
-        // if (wfTask.getType() == WorkflowConstants.ACTIVITY)
-        // {
-        // Task task = (Task) p_tasks.get(new Long(wfTask.getTaskId()));
-        // // there are no tasks for workflows in pending/ready states.
-        // if (task != null)
-        // {
-        // task.setWorkflowTask(wfTask);
-        // }
-        // }
-        // }
-
-//      List tasks = new ArrayList(p_tasks.values());
-//      int size = tasks.size();
-
-        // if there are no tasks (happens when workflow is in Pending
-        // or Ready To Be Dispatched state), let the user know.
-        List<TaskInstance> tasks = WorkflowManagerLocal.getTaskHistoryByWorkflowId(wfi.getId());
-        if (tasks.size() == 0)
+        Map<TaskInstance, Boolean> taskMap = WorkflowHandlerHelper
+                .getWorkflowHistory(wfi.getId());
+        if (taskMap.isEmpty())
         {
             return emptyTableMessage(sb, bundle.getString("msg_wf_not_started"));
         }
@@ -242,83 +222,71 @@ public class WorkflowActivitiesHandler extends PageHandler
         Timestamp ts = new Timestamp(p_timeZone);
         ts.setLocale(p_uiLocale);
 
-        // now sort tasks....
-//      Collections.sort(tasks, new TaskComparator());
+        Set<TaskInstance> keys = taskMap.keySet();
+        List<TaskInstance> tasks = new ArrayList<TaskInstance>(keys.size());
+        tasks.addAll(keys);
+        Collections.sort(tasks, new TaskInstanceComparator(p_uiLocale));
         for (TaskInstance task : tasks)
         {
-            // at this point, we're comparing NodeInstance state (not WorkItem
-            // state)
-                Date dt = task.getEnd();
+            String style = "standardText";
+            boolean taskCompleted = true;
+            Date completedDate = task.getEnd();
+            if (completedDate == null)
+            {
+                // this task has not been completed
+                style = "greenText";
+                taskCompleted = false;
+            }
+            ts.setDate(completedDate);
 
-                String style = "standardText";
-                if (tasks.indexOf(task) == tasks.size() - 1 && dt == null)
+            sb.append("<TR CLASS=" + style + ">");
+
+            // activity name
+            sb.append("<TD STYLE=\"padding-right: 10px;\">");
+            sb.append(TaskJbpmUtil.getTaskDisplayName(task.getName()));
+            sb.append("</TD>\n");
+
+            // roles
+            sb.append("<TD STYLE=\"padding-right: 10px;\">");
+            String[] roles = TaskJbpmUtil.getActivityRole(wfi, task);
+            int numOfRoles = roles == null ? 0 : roles.length;
+            if (numOfRoles > 0)
+            {
+                sb.append(roles[0]);
+                for (int i = 1; i < numOfRoles; i++)
                 {
-                    style = "greenText";
+                    sb.append("<BR>");
+                    sb.append(roles[i]);
                 }
+            }
+            sb.append("</TD>\n");
 
-                ts.setDate(dt);
-                String completedDate = (dt == null ? "--" : ts.toString());
+            // accepter
+            sb.append("<TD STYLE=\"padding-right: 10px;\">");
+            String acceptor = task.getActorId();
+            sb.append(acceptor == null ? "--" : UserUtil
+                    .getUserNameById(acceptor));
+            sb.append("</TD>");
 
-                sb.append("<TR CLASS=" + style + ">");
-                sb.append("<TD STYLE=\"padding-right: 10px;\">");
-                sb.append(TaskJbpmUtil.getTaskDisplayName(task.getName()));
-                sb.append("</TD>\n");
-                sb.append("<TD STYLE=\"padding-right: 10px;\">");
-                // loop thru roles of a task
-                
-                String[] roles = TaskJbpmUtil.getActivityRole(wfi, task);
-                int numOfRoles = roles == null ? 0 : roles.length;
-                if (numOfRoles > 0)
-                {
-                    sb.append(roles[0]);
-                    for (int j = 1; j < numOfRoles; j++)
-                    {
-                        sb.append("<BR>");
-                        sb.append(roles[j]);
-                    }
-                }
-                sb.append("</TD>\n");
+            // duration
+            sb.append("<TD STYLE=\"padding-right: 10px;\">");
+            sb.append(TaskJbpmUtil.getActualDuration(task));
+            sb.append("</TD>\n");
 
-                // accepter
-                User user = null;
+            // completed date
+            sb.append("<TD STYLE=\"padding-right: 10px;\">");
+            sb.append(completedDate == null ? "--" : ts.toString());
+            sb.append("</TD>\n");
 
-                try
-                {
-                    String acceptor = task.getActorId();
-                    if(acceptor!=null)
-                    {
-                        user = ServerProxy.getUserManager().getUser(acceptor);
-                    }
-                }
-                catch (Exception e)
-                {
-                    CATEGORY.error("Problem getting user information for "
-                            + task.getActorId(), e);
-                }
+            // status
+            sb.append("<TD>");
+            sb.append(taskMap.get(task) == true ? bundle
+                    .getString("lb_skipped") : (taskCompleted ? bundle
+                    .getString("lb_completed_report") : bundle
+                    .getString("lb_inprogress")));
+            sb.append("</TD>\n");
 
-                if (user == null)
-                {
-                    sb.append("<TD STYLE=\"padding-right: 10px;\">");
-                    sb.append("--");
-                    sb.append("</TD>");
-                }
-                else
-                {
-                    sb.append("<TD STYLE=\"padding-right: 10px;\">");
-                    sb.append(user.getUserId());
-                    sb.append("</TD>");
-                }
-
-                // duration
-                sb.append("<TD STYLE=\"padding-right: 10px;\">");
-
-                sb.append(TaskJbpmUtil.getActualDuration(task));
-
-                sb.append("</TD>\n");
-                sb.append("<TD>");
-                sb.append(completedDate);
-                sb.append("</TD>\n");
-                sb.append("</TR>\n");
+            sb.append("</TR>\n");
         }
         return sb.toString();
     }

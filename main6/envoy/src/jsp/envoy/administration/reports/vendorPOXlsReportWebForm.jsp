@@ -74,8 +74,7 @@ function submitForm()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("select_the_appropriate")%>
-</SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/vendorPOXlsReport.jsp">

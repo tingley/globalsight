@@ -139,7 +139,7 @@ if( typeof( kadovInitEffects ) != 'function' ) kadovInitEffects = new Function()
 <td width="15.993%" class="whs5">
 <p class="whs6">Summary:</td>
 <td width="84.007%" class="whs7">
-<p class="whs6">Machine Translation Options determine machine translation engine, how the results are used and if show mt lable in segment editor.</td></tr>
+<p class="whs6">Machine Translation Options determine machine translation engine, how the results are used and if show MT label in segment editor.</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="2" rowspan="1" width="100%" class="whs8">
@@ -165,31 +165,24 @@ else
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">
-<p class="whs14">Override Non-Exact Matches below Threshold</td>
+<p class="whs14">User MT</td>
 <td colspan="1" rowspan="1" width="84.007%" class="whs11">
-<p class="whs6">Checked: <span style="font-weight: normal;">While creating job, if the best match score from local TM is lower than threshold of current translation memory profile, GlobalSight will leverage from MT engine. </span></p>
-<p><span style="font-weight: bold;"><B>Unchecked:</B></span> The MT engine will not be used, and "Auto Commit to TM" will be set to false automatically.</td></tr>
+<p class="whs6">Checked: <span style="font-weight: normal;">While creating job, if the best match score from local TM is lower than "MT Confidence Score", GlobalSight will leverage from MT engine. </span></p>
+<p><span style="font-weight: bold;">Unchecked:</span> The MT engine will not be used.</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">
-<p class="whs14">Auto Commit to TM</a></td>
+<p class="whs14">MT Confidence Score</td>
 <td colspan="1" rowspan="1" width="84.007%" class="whs11">
-<p class="whs6">Checked: <span style="font-weight: normal;"> Results from MT engine will be taken as 100% match, and will be applied to target segment as default translation. </span></p>
-<p><span style="font-weight: bold;"><B>Unchecked:</B></span> This works together with "MT-sensitive Leveraging" option. "MT-sensitive Leveraging" will specify a number as MT penalty. In this case, results from MT engine will only be taken as a reference match, will not apply to target segment automatically. </td></tr>
-
-<tr valign="top" class="whs4">
-<td colspan="1" rowspan="1" width="15.993%" class="whs10">
-<p class="whs14">MT-sensitive Leveraging</a></td>
-<td colspan="1" rowspan="1" width="84.007%" class="whs11">
-<p class="whs6">Checked: <span style="font-weight: normal;"> MT penalty will apply to results from MT engine. For example, if "Penalty" is set to 10, MT results will be 90% match. The "Penalty" should be a number between 0(exclude) and 100(include). </span></p>
-<p><span style="font-weight: bold;"><B>Unchecked:</B></span> No MT penalty will applied. </td></tr>
+<p class="whs6"><span style="font-weight: normal;"> Returned MT translations will have this as score. It should be a number between 0(include) and 100(include). </span></p>
+</td></tr>
 
 <tr valign="top" class="whs4">
 <td colspan="1" rowspan="1" width="15.993%" class="whs10">
 <p class="whs14">Show In Editor</a></td>
 <td colspan="1" rowspan="1" width="84.007%" class="whs11">
 <p class="whs6">Checked: <span style="font-weight: normal;"> MT matches will be shown in "Segment Editor" for translator. </span></p>
-<p><span style="font-weight: bold;"><B>Unchecked:</B></span> MT matches will be hidden in "Segment Editor". </td></tr>
+<p><span style="font-weight: bold;">Unchecked:</span> MT matches will be hidden in "Segment Editor". </td></tr>
 
 </table>
 

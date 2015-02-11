@@ -14,7 +14,6 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
 import java.util.ArrayList;
@@ -31,10 +30,10 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
 
-import com.globalsight.cxe.adapter.passolo.PassoloUtil;
+import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.jobhandler.jobcreation.JobAdditionEngine;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.PageException;
 import com.globalsight.everest.page.PageStateValidator;
 import com.globalsight.everest.page.SourcePage;
@@ -56,21 +55,17 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.util.NumberUtil;
 
 /**
- * This control flow helper exports the selected pages
- * and then sends the user back to the page that they
- * initiated Export from.
+ * This control flow helper exports the selected pages and then sends the user
+ * back to the page that they initiated Export from.
  * <P>
- * We will know the page they initiated Export from by
- * grabbing the ExportInitPage param from the
- * sessionMgr. This means that all pages that have
+ * We will know the page they initiated Export from by grabbing the
+ * ExportInitPage param from the sessionMgr. This means that all pages that have
  * an Export button will have to set the ExportInitPage param.
  */
-class JobExportControlFlowHelper
-    implements ControlFlowHelper, WebAppConstants
+class JobExportControlFlowHelper implements ControlFlowHelper, WebAppConstants
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            JobExportControlFlowHelper.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(JobExportControlFlowHelper.class);
 
     // local variables
     private HttpServletRequest m_request = null;
@@ -83,53 +78,51 @@ class JobExportControlFlowHelper
      * Constructor
      */
     public JobExportControlFlowHelper(HttpServletRequest p_request,
-                                      HttpServletResponse p_response)
+            HttpServletResponse p_response)
     {
         m_request = p_request;
         m_response = p_response;
     }
 
-
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: ControlFlowHelper Implementation
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: ControlFlowHelper Implementation
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Get the page, from the sessionMgr, where they initiated the Export from
      * and return it as the link to follow
      */
-    public String determineLinkToFollow()
-    throws EnvoyServletException
+    public String determineLinkToFollow() throws EnvoyServletException
     {
         HttpSession session = m_request.getSession(false);
-        SessionManager sessionMgr =
-        (SessionManager)session.getAttribute(SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
         String destinationPage = null;
-        if (sessionMgr.getAttribute(
-            JobManagementHandler.EXPORT_INIT_PARAM) == null)
+        if (sessionMgr.getAttribute(JobManagementHandler.EXPORT_INIT_PARAM) == null)
         {
 
-            destinationPage =  "progress";
-        } else
+            destinationPage = "progress";
+        }
+        else
         {
-            destinationPage = 
-            (String)sessionMgr.getAttribute(JobManagementHandler
-                                            .EXPORT_INIT_PARAM);
+            destinationPage = (String) sessionMgr
+                    .getAttribute(JobManagementHandler.EXPORT_INIT_PARAM);
         }
 
         String[] exportActions = m_request.getParameterValues("exportAction");
-        if (exportActions != null && exportActions.length > 0 && exportActions[0].equals("export"))
+        if (exportActions != null && exportActions.length > 0
+                && exportActions[0].equals("export"))
         {
-            // They clicked on the Export button
-            // Export the data
-            
+            String jobId = m_request.getParameter(JobManagementHandler.JOB_ID);
+            Job job = WorkflowHandlerHelper.getJobById(Long.parseLong(jobId));
+            m_job = job;
+
             Date jobExportStartTime = new Date();
-                        
+
             getExportData();
-            
-            // Setting Delay time for download after exporting 
+
+            // Setting Delay time for download after exporting
             User user = (User) sessionMgr.getAttribute(USER);
             String userId = user.getUserId();
-            String jobId = String.valueOf(m_job.getId());
 
             String delayTimeTableKey = null;
             Hashtable delayTimeTable = (Hashtable) sessionMgr
@@ -143,8 +136,9 @@ class JobExportControlFlowHelper
             {
                 for (int temp = 0; temp < pages.length; temp++)
                 {
-                    String wfId = pages[temp].substring(pages[temp]
-                            .indexOf("_wfId_") + 7, pages[temp].length());
+                    String wfId = pages[temp].substring(
+                            pages[temp].indexOf("_wfId_") + 7,
+                            pages[temp].length());
                     delayTimeTableKey = userId + jobId + wfId;
                     delayTimeTable.put(delayTimeTableKey, jobExportStartTime);
                 }
@@ -152,10 +146,14 @@ class JobExportControlFlowHelper
 
             sessionMgr.setAttribute(WebAppConstants.DOWLOAD_DELAY_TIME_TABLE,
                     delayTimeTable);
-            
-            if ("true".equals(m_request.getParameter(JobManagementHandler.EXPORT_MULTIPLE_ACTIVITIES_PARAM)))
-                m_request.setAttribute(WebAppConstants.TASK_STATE,new Integer(Task.STATE_ACCEPTED));
-        } else
+
+            if ("true"
+                    .equals(m_request
+                            .getParameter(JobManagementHandler.EXPORT_MULTIPLE_ACTIVITIES_PARAM)))
+                m_request.setAttribute(WebAppConstants.TASK_STATE, new Integer(
+                        Task.STATE_ACCEPTED));
+        }
+        else
         {
             // They clicked on the Cancel button, so do nothing
         }
@@ -164,74 +162,84 @@ class JobExportControlFlowHelper
 
         return destinationPage;
     }
-    //////////////////////////////////////////////////////////////////////
-    //  End: ControlFlowHelper Implementation
-    //////////////////////////////////////////////////////////////////////
 
-    
-    
-    //////////////////////////////////////////////////////////////////////////////
-    //////////////////////////  EXPORT OPERATION  ////////////////////////////////
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: ControlFlowHelper Implementation
+    // ////////////////////////////////////////////////////////////////////
 
-    private void getExportData()
-        throws EnvoyServletException
+    // ////////////////////////////////////////////////////////////////////////////
+    // //////////////////////// EXPORT OPERATION
+    // ////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
+    private void getExportData() throws EnvoyServletException
     {
         try
         {
-            if (m_request.getParameter(
-                JobManagementHandler.EXPORT_FOR_UPDATE_PARAM) != null &&
-                m_request.getParameter(
-                    JobManagementHandler.EXPORT_FOR_UPDATE_PARAM)
-                .equals("true"))
+            if (m_request
+                    .getParameter(JobManagementHandler.EXPORT_FOR_UPDATE_PARAM) != null
+                    && m_request.getParameter(
+                            JobManagementHandler.EXPORT_FOR_UPDATE_PARAM)
+                            .equals("true"))
             {
                 performExportForUpdate();
-            } else
-            {
-                List wf_list = performExportPageLevel();
-                //Make DTP Workflow instance
-                JobAdditionEngine m_jobAdditionEngine = new JobAdditionEngine();
-                m_jobAdditionEngine.addDtpWorkflowToJob(wf_list);
             }
-        } catch (PageException pe)
+            else
+            {
+                // Get all the checked pages as an array of strings
+                final String pages[] = m_request.getParameterValues("page");
+                HttpSession session = m_request.getSession(false);
+                final User user = PageHandler.getUser(session);
+                Runnable runnable = new Runnable()
+                {
+                    public void run()
+                    {
+                        // run the export process in a new thread in order to
+                        // return to job detail page quickly without waiting for
+                        // the export process to be completed
+                        performExportPageLevel(pages, user);
+                    }
+                };
+                Thread t = new MultiCompanySupportedThread(runnable);
+                t.start();
+            }
+        }
+        catch (PageException pe)
         {
             throw new EnvoyServletException(pe);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
     }
 
-    private void exportPage(Workflow p_workflow, List p_listOfPageIds, 
-                            boolean p_isTargetPage, long p_exportBatchId)
-        throws EnvoyServletException, PageException
+    private void exportPage(Workflow p_workflow, List p_listOfPageIds,
+            boolean p_isTargetPage, long p_exportBatchId)
+            throws EnvoyServletException, PageException
     {
         long id = p_workflow.getId();
         String locale = p_workflow.getTargetLocale().toString();
         String codeSetParam = getConcatenatedRequestParameter(
-            JobManagementHandler.EXPORT_WF_CODE_PARAM,id, locale);
+                JobManagementHandler.EXPORT_WF_CODE_PARAM, id, locale);
         String exportLocation = getConcatenatedRequestParameter(
-            JobManagementHandler.EXPORT_WF_LOCATION_PARAM, id, locale);
+                JobManagementHandler.EXPORT_WF_LOCATION_PARAM, id, locale);
         String localeSubDir = getConcatenatedRequestParameter(
-            JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM,id,locale);
+                JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM, id, locale);
         String bomType = getConcatenatedRequestParameter("bomType", id, locale);
 
         ExportParameters ep = new ExportParameters(p_workflow, codeSetParam,
                 exportLocation, localeSubDir, NumberUtil.convertToInt(bomType));
 
-        WorkflowHandlerHelper.exportPage(ep, p_listOfPageIds, 
-                                         p_isTargetPage, p_exportBatchId);
+        WorkflowHandlerHelper.exportPage(ep, p_listOfPageIds, p_isTargetPage,
+                p_exportBatchId);
     }
 
-
-    /* 
+    /*
      * Export the primary target files as one batch.
      */
-    private void exportPrimaryTargetFiles(List p_pageIds, 
-                                          HttpSession p_session, 
-                                          List p_workflowIds,
-                                          HashMap p_map)
-        throws EnvoyServletException, PageException
+    private void exportPrimaryTargetFiles(List p_pageIds, User p_user,
+            List p_workflowIds, HashMap p_map) throws EnvoyServletException,
+            PageException
     {
         long exportBatchId = -1;
         // register for export notification - use last workflow to get the job
@@ -239,87 +247,88 @@ class JobExportControlFlowHelper
         {
             if (p_pageIds.size() > 0)
             {
-                exportBatchId = 
-                    ExportEventObserverHelper.notifyBeginExportTargetBatch(
-                        m_job,
-                        PageHandler.getUser(p_session), p_pageIds,
-                        p_workflowIds, null, m_exportType);
+                exportBatchId = ExportEventObserverHelper
+                        .notifyBeginExportTargetBatch(m_job, p_user, p_pageIds,
+                                p_workflowIds, null, m_exportType);
             }
-        }  
-        catch(Exception e)
+        }
+        catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
             throw new EnvoyServletException(e);
         }
-        
+
         // Iterate through each workflow and send its checked
         // pages to be exported
         Iterator it = p_map.keySet().iterator();
         while (it.hasNext())
         {
-            Workflow workflow = (Workflow)it.next();
-            exportPage(workflow, 
-                       getTargetPageIds((HashSet)p_map.get(workflow)), 
-                       true, exportBatchId);
+            Workflow workflow = (Workflow) it.next();
+            // from GBS-2137, add "Exporting" state before export is done
+            if (Workflow.LOCALIZED.equals(workflow.getState()))
+            {
+                JobCreationMonitor.updateWorkflowState(workflow,
+                        Workflow.EXPORTING);
+                JobCreationMonitor.updateJobStateToExporting(workflow.getJob());
+            }
+
+            exportPage(workflow,
+                    getTargetPageIds((HashSet) p_map.get(workflow)), true,
+                    exportBatchId);
         }
     }
 
-
     /*
-     * Export secondary target files as one batch.  Note that we cannot
-     * export both priamry and secondary as one batch due to the page 
-     * object type that needs to be known for ExportEventObserver remote
-     * interface.  The object type is known based on the export type and
-     * for STFs we use either INTERIM_SECONDARY or FINAL_SECONDARY.
+     * Export secondary target files as one batch. Note that we cannot export
+     * both priamry and secondary as one batch due to the page object type that
+     * needs to be known for ExportEventObserver remote interface. The object
+     * type is known based on the export type and for STFs we use either
+     * INTERIM_SECONDARY or FINAL_SECONDARY.
      */
-    private void exportSecondaryTargetFiles(List p_stfIds, 
-                                            HttpSession p_session, 
-                                            List p_stfWorkflowIds, 
-                                            HashMap p_stfMap)
-        throws EnvoyServletException
+    private void exportSecondaryTargetFiles(List p_stfIds, User p_user,
+            List p_stfWorkflowIds, HashMap p_stfMap)
+            throws EnvoyServletException
     {
         long exportBatchId = -1;
         try
         {
             if (p_stfIds.size() > 0)
             {
-                exportBatchId = 
-                    ExportEventObserverHelper.notifyBeginExportTargetBatch(
-                        m_job,
-                        PageHandler.getUser(p_session), p_stfIds,
-                        p_stfWorkflowIds, null, m_stfExportType);
+                exportBatchId = ExportEventObserverHelper
+                        .notifyBeginExportTargetBatch(m_job, p_user, p_stfIds,
+                                p_stfWorkflowIds, null, m_stfExportType);
             }
-        }  
-        catch(Exception e)
-        { 
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
         }
 
         Object[] keys = p_stfMap.keySet().toArray();
         for (int h = 0; h < keys.length; h++)
         {
-            Workflow workflow = (Workflow)keys[h];
-            exportStfs(workflow, getTargetPageIds(
-                (HashSet)p_stfMap.get(workflow)), exportBatchId);
+            Workflow workflow = (Workflow) keys[h];
+            exportStfs(workflow,
+                    getTargetPageIds((HashSet) p_stfMap.get(workflow)),
+                    exportBatchId);
         }
     }
 
     // Export the Secondary Target Files
-    private void exportStfs(Workflow p_workflow,
-                            List p_listOfStfIds, 
-                            long p_exportBatchId)
-        throws EnvoyServletException
+    private void exportStfs(Workflow p_workflow, List p_listOfStfIds,
+            long p_exportBatchId) throws EnvoyServletException
     {
         try
         {
             long id = p_workflow.getId();
             String locale = p_workflow.getTargetLocale().toString();
             String codeSetParam = getConcatenatedRequestParameter(
-                JobManagementHandler.EXPORT_WF_CODE_PARAM,id, locale);
+                    JobManagementHandler.EXPORT_WF_CODE_PARAM, id, locale);
             String exportLocation = getConcatenatedRequestParameter(
-                JobManagementHandler.EXPORT_WF_LOCATION_PARAM, id, locale);
+                    JobManagementHandler.EXPORT_WF_LOCATION_PARAM, id, locale);
             String localeSubDir = getConcatenatedRequestParameter(
-                JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM,id,locale);
+                    JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM, id,
+                    locale);
             String bomType = getConcatenatedRequestParameter(
                     JobManagementHandler.EXPORT_WF_BOM_PARAM, id, locale);
 
@@ -327,9 +336,9 @@ class JobExportControlFlowHelper
                     codeSetParam, exportLocation, localeSubDir,
                     NumberUtil.convertToInt(bomType),
                     ExportConstants.EXPORT_STF);
-        
-            ServerProxy.getPageManager().exportSecondaryTargetFiles(
-                ep, p_listOfStfIds, p_exportBatchId);
+
+            ServerProxy.getPageManager().exportSecondaryTargetFiles(ep,
+                    p_listOfStfIds, p_exportBatchId);
         }
         catch (Exception e)
         {
@@ -349,35 +358,26 @@ class JobExportControlFlowHelper
         return list;
     }
 
-    private Workflow getWorkflowById(long p_wfId)
-        throws EnvoyServletException
+    private Workflow getWorkflowById(long p_wfId) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getWorkflowManager()
-                    .getWorkflowByIdRefresh(
-                                     p_wfId);
+            return ServerProxy.getWorkflowManager().getWorkflowByIdRefresh(
+                    p_wfId);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
     }
 
-
-    private void performExportForUpdate()
-    throws Exception
+    private void performExportForUpdate() throws Exception
     {
-        long jobId = Long.parseLong(m_request.getParameter(
-            JobManagementHandler.JOB_ID));
-        Job job = WorkflowHandlerHelper.getJobById(jobId);
-        /* set the job */
-        m_job = job;
-
+        long jobId = m_job.getId();
         // validate page states before exporting source pages
-        PageStateValidator.validateStateOfPagesInJob(job);
+        PageStateValidator.validateStateOfPagesInJob(m_job);
 
-        Iterator iter = job.getSourcePages().iterator();
+        Iterator iter = m_job.getSourcePages().iterator();
         ArrayList idList = new ArrayList();
         while (iter.hasNext())
         {
@@ -395,8 +395,10 @@ class JobExportControlFlowHelper
         String localeSubDir = m_request
                 .getParameter(JobManagementHandler.EXPORT_WF_LOCALE_SUBDIR_PARAM
                         + "_" + jobId);
-        String bomType = m_request.getParameter(JobManagementHandler.EXPORT_WF_BOM_PARAM + "_" + jobId);
-        
+        String bomType = m_request
+                .getParameter(JobManagementHandler.EXPORT_WF_BOM_PARAM + "_"
+                        + jobId);
+
         ExportParameters ep = new ExportParameters(null, codeSetParam,
                 exportLocation, localeSubDir, NumberUtil.convertToInt(bomType));
         int minutesOfDelay = Integer.parseInt(m_request
@@ -405,45 +407,41 @@ class JobExportControlFlowHelper
         HttpSession session = m_request.getSession(false);
         User user = PageHandler.getUser(session);
 
-        CATEGORY.info("Exporting source pages in " + minutesOfDelay + 
-                      " minutes. Export initiated by " + user);
-        DelayedExportRequest der = new DelayedExportRequest(
-            ep, idList, false, minutesOfDelay, jobId, user);
-        DelayedExporter.getInstance().delayExport(der, job);
+        CATEGORY.info("Exporting source pages in " + minutesOfDelay
+                + " minutes. Export initiated by " + user);
+        DelayedExportRequest der = new DelayedExportRequest(ep, idList, false,
+                minutesOfDelay, jobId, user);
+
+        DelayedExporter.getInstance().delayExport(der, m_job);
     }
 
-
-    private List performExportPageLevel() throws PageException,
-            EnvoyServletException
+    private void performExportPageLevel(String[] pages, User user)
+            throws PageException, EnvoyServletException
     {
-        // Get all the checked pages as an array of strings
-        String pages[] = m_request.getParameterValues("page");
-        HttpSession session = m_request.getSession(false);
         Workflow workflow = null;
-        
         // For Primary Files
-        HashMap map = new HashMap();      
+        HashMap map = new HashMap();
         ArrayList pageIds = new ArrayList();
         ArrayList workflowIds = new ArrayList();
-        
+
         // For Secondary Target Files
         HashMap stfMap = new HashMap();
         ArrayList stfIds = new ArrayList();
         ArrayList stfWorkflowIds = new ArrayList();
         HashMap wfMap = new HashMap();
-        
+
         // Find the workflows associated with the pages checked
         for (int i = 0; i < pages.length; i++)
-        {       
-            // The value of the page param is "pageId_<pageId>_wfId_<p or s><wfId>
+        {
+            // The value of the page param is "pageId_<pageId>_wfId_<p or
+            // s><wfId>
             // so we must extract it using substring()
             Long curPageId = new Long(pages[i].substring(
-                pages[i].indexOf("pageId_") + 7, 
-                pages[i].indexOf("_wfId")));
-            
-            String wfId = pages[i].substring(pages[i].indexOf("_wfId_") + 
-                                             7, pages[i].length());
-            
+                    pages[i].indexOf("pageId_") + 7, pages[i].indexOf("_wfId")));
+
+            String wfId = pages[i].substring(pages[i].indexOf("_wfId_") + 7,
+                    pages[i].length());
+
             if (pages[i].indexOf("_wfId_" + JobExportHandler.PRIMARY_PREFIX) != -1)
             {
                 preparePrimaryTargetInfo(pageIds, curPageId, map, workflowIds);
@@ -456,36 +454,28 @@ class JobExportControlFlowHelper
         }
 
         // before exporting, let's make sure no page is in UPDATING state
-        PageStateValidator.validateStateOfPagesInWorkflows(map.keySet().toArray());
+        PageStateValidator.validateStateOfPagesInWorkflows(map.keySet()
+                .toArray());
 
-        List wfList = new ArrayList();       
         // first export primary target files (if any)
-        exportPrimaryTargetFiles(pageIds, session, workflowIds, map);
-        wfList.addAll(map.keySet());
+        exportPrimaryTargetFiles(pageIds, user, workflowIds, map);
         // now export secondary target files (if any)
-        exportSecondaryTargetFiles(stfIds, session, stfWorkflowIds,stfMap);
-        wfList.removeAll(stfMap.keySet());
-        wfList.addAll(stfMap.keySet());
-        
-        return wfList;
+        exportSecondaryTargetFiles(stfIds, user, stfWorkflowIds, stfMap);
     }
-    
 
     /*
-     * Prepare the information used for exporting a list of
-     * primary target files.  This method is called within a for
-     * loop.
+     * Prepare the information used for exporting a list of primary target
+     * files. This method is called within a for loop.
      */
     private void preparePrimaryTargetInfo(List p_pageIds, Long p_curPageId,
-                                          HashMap p_map, List p_workflowIds)
-        throws EnvoyServletException
+            HashMap p_map, List p_workflowIds) throws EnvoyServletException
     {
         p_pageIds.add(p_curPageId);
-        TargetPage targetPage = 
-            WorkflowHandlerHelper.getTargetPage(p_curPageId.longValue());
+        TargetPage targetPage = WorkflowHandlerHelper.getTargetPage(p_curPageId
+                .longValue());
         Workflow workflow = targetPage.getWorkflowInstance();
 
-        HashSet set = (HashSet)p_map.get(workflow);
+        HashSet set = (HashSet) p_map.get(workflow);
         if (set == null)
         {
             set = new HashSet();
@@ -495,38 +485,28 @@ class JobExportControlFlowHelper
         set.add(p_curPageId);
 
         // use the last workflow to determine the export type
-        m_exportType = workflow.getState().equals(Workflow.LOCALIZED) ? 
-            ExportBatchEvent.FINAL_PRIMARY : 
-                ExportBatchEvent.INTERIM_PRIMARY;
-
-        // only set job once.
-        if (m_job == null)
-        {
-            m_job = workflow.getJob();
-        }
+        m_exportType = workflow.getState().equals(Workflow.LOCALIZED) ? ExportBatchEvent.FINAL_PRIMARY
+                : ExportBatchEvent.INTERIM_PRIMARY;
     }
 
     /**
-     * Prepare the information used for exporting a list of
-     * secondary target files.  This method is called within a for
-     * loop.
+     * Prepare the information used for exporting a list of secondary target
+     * files. This method is called within a for loop.
      */
     private void prepareSecondaryTargetInfo(List p_stfIds, Long p_curPageId,
-                                            HashMap p_wfMap, String p_wfId, 
-                                            HashMap p_stfMap, 
-                                            List p_stfWorkflowIds)
-        throws EnvoyServletException
+            HashMap p_wfMap, String p_wfId, HashMap p_stfMap,
+            List p_stfWorkflowIds) throws EnvoyServletException
     {
         p_stfIds.add(p_curPageId);
-        Workflow workflow = (Workflow)p_wfMap.get(p_wfId);
+        Workflow workflow = (Workflow) p_wfMap.get(p_wfId);
         if (workflow == null)
         {
             workflow = getWorkflowById(Long.parseLong(p_wfId));
-                
+
             p_wfMap.put(p_wfId, workflow);
         }
-        
-        HashSet set = (HashSet)p_stfMap.get(workflow);
+
+        HashSet set = (HashSet) p_stfMap.get(workflow);
         if (set == null)
         {
             set = new HashSet();
@@ -536,25 +516,17 @@ class JobExportControlFlowHelper
         set.add(p_curPageId);
 
         // use the last workflow to determine the export type
-        m_stfExportType = workflow.getState().equals(Workflow.LOCALIZED) ? 
-            ExportBatchEvent.FINAL_SECONDARY : 
-                ExportBatchEvent.INTERIM_SECONDARY;
-
-        // only set job once.
-        if (m_job == null)
-        {
-            m_job = workflow.getJob();
-        }
+        m_stfExportType = workflow.getState().equals(Workflow.LOCALIZED) ? ExportBatchEvent.FINAL_SECONDARY
+                : ExportBatchEvent.INTERIM_SECONDARY;
     }
 
     /**
-    * Concatenates the strings to create the desired request parameter name.
-    * If the value does not exist, then it is tried without the original suffix,
-    * but with the locale instead. format is "prefix_suffix" or "prefix_locale"
-    */
+     * Concatenates the strings to create the desired request parameter name. If
+     * the value does not exist, then it is tried without the original suffix,
+     * but with the locale instead. format is "prefix_suffix" or "prefix_locale"
+     */
     private String getConcatenatedRequestParameter(String p_prefix,
-                                                   long p_suffix,
-                                                   String p_locale)
+            long p_suffix, String p_locale)
     {
         String newPrefix = p_prefix + "_";
         String value = m_request.getParameter(newPrefix + p_suffix);

@@ -61,7 +61,7 @@ public class LuceneReindexer
         }
         catch(Exception e)
         {
-            c_logger.warn(e);
+            c_logger.warn(e.getMessage(), e);
             
             c_minMergeDocs = 10000; // default 10000 docs
         }

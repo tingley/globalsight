@@ -74,7 +74,7 @@
         EventNotificationHelper.systemNotificationEnabled();
 	//Retrieve User info
 	User user = (User)sessionMgr.getAttribute("myAccountUser");
-	String username = user.getUserId();
+	String username = user.getUserName();
 	String firstName = user.getFirstName();
     String lastName = user.getLastName();
 	String password = user.getPassword();

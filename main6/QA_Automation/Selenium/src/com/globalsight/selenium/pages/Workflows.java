@@ -16,9 +16,13 @@ public class Workflows {
 	public static final String Export_BUTTON="expBtn";
 	public static final String Duplicate_BUTTON="dupBtn";
 	public static final String RemoveWF_BUTTON="removeBtn";
+	public static final String Edit_BUTTON="editBtn";
 		
 	public static final String Workflows_TABLE="//div[@id='contentLayer']/form/p/table/tbody/tr[2]/td/table/tbody";
 	
+	//Edit workflow
+	public static final String Target_Encoding_SELECT="encodingField";
+	public static final String EditWF_NEXT_Button ="Next";
 	
 	//Import Workflow
 	public static final String Name_TEXT_FIELD_IMPORT="nameTF";
@@ -34,6 +38,7 @@ public class Workflows {
 	
 	//Duplicate Workflow
 	public static final String Name_TEXT_FIELD_DUPLICATE="nameTF";
+	public static final String Project_SELECTION_DUPLICATE="projectField";
 	public static final String SourceLocle_SELECTION_DUPLICATE="sourceLocale";
 	public static final String TargetLocale_SELECTION_DUPLICATE="targetLocale";
 	public static final String Add_BUTTON_DUPLICATE="addButton";

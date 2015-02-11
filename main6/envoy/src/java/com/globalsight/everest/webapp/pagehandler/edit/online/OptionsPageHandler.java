@@ -52,6 +52,8 @@ public class OptionsPageHandler
     private static final Logger CATEGORY =
         Logger.getLogger(
             OptionsPageHandler.class);
+    
+    private boolean m_deleteAllPreviewPDF = true;
 
     /**
      * Invokes this EntryPageHandler object.
@@ -206,6 +208,15 @@ public class OptionsPageHandler
             PageHandler.getUserParameter(
                 p_session, VISITED_HYPERLINK_COLOR).getValue());
         
+        p_request.setAttribute(PREVIEW_100MATCH_COLOR,
+                PageHandler.getUserParameter(p_session, PREVIEW_100MATCH_COLOR).getValue());
+
+        p_request.setAttribute(PREVIEW_ICEMATCH_COLOR,
+                PageHandler.getUserParameter(p_session, PREVIEW_ICEMATCH_COLOR).getValue());
+
+        p_request.setAttribute(PREVIEW_NONMATCH_COLOR,
+                PageHandler.getUserParameter(p_session, PREVIEW_NONMATCH_COLOR).getValue());
+        
         p_request.setAttribute(EDITOR_SEGMENTS_MAX_NUM,
                 PageHandler.getUserParameter(
                     p_session, EDITOR_SEGMENTS_MAX_NUM).getValue());
@@ -215,6 +226,7 @@ public class OptionsPageHandler
         HttpServletRequest p_request)
         throws EnvoyServletException
     {
+        m_deleteAllPreviewPDF = false;
         String userName = (String)p_session.getAttribute(WebAppConstants.USER_NAME);
 
         setParameter(p_session, p_request, userName, EDITOR_AUTO_SAVE_SEGMENT);
@@ -233,7 +245,15 @@ public class OptionsPageHandler
         setParameter(p_session, p_request, userName, HYPERLINK_COLOR);
         setParameter(p_session, p_request, userName, ACTIVE_HYPERLINK_COLOR);
         setParameter(p_session, p_request, userName, VISITED_HYPERLINK_COLOR);
+        setParameter(p_session, p_request, userName, PREVIEW_100MATCH_COLOR);
+        setParameter(p_session, p_request, userName, PREVIEW_ICEMATCH_COLOR);
+        setParameter(p_session, p_request, userName, PREVIEW_NONMATCH_COLOR);
         setParameter(p_session, p_request, userName, EDITOR_SEGMENTS_MAX_NUM);
+        
+        if (m_deleteAllPreviewPDF)
+        {
+            PreviewPDFPageHandler.deleteOldPdfByUser(userName);
+        }
     }
 
     private void setParameter(HttpSession p_session,
@@ -248,6 +268,17 @@ public class OptionsPageHandler
 
             if (param != null) 
             {
+                if (p_name.equals(PREVIEW_100MATCH_COLOR)
+                        || p_name.equals(PREVIEW_ICEMATCH_COLOR)
+                        || p_name.equals(PREVIEW_NONMATCH_COLOR))
+                {
+                    String oldValue = param.getValue();
+                    if (!newValue.equals(oldValue))
+                    {
+                        m_deleteAllPreviewPDF = true;
+                    }
+                }
+                
                 param.setValue(newValue);
                 param = updateParameter(param);
 

@@ -61,6 +61,7 @@
 <TITLE><%= title %></TITLE>
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -139,7 +140,17 @@ function submitForm(selectedButton)
     WFForm.submit();
 }
 
-
+//for GBS-2599
+function handleSelectAll() {
+	if (WFForm && WFForm.selectAll) {
+		if (WFForm.selectAll.checked) {
+			checkAll('WFForm');
+	    }
+	    else {
+			clearAll('WFForm'); 
+	    }
+	}
+}
 </SCRIPT>
 <style type="text/css">
 .list {
@@ -226,7 +237,7 @@ function submitForm(selectedButton)
 <!-- WorkflowInfos data table -->
   <table border="0" cellspacing="0" cellpadding="5" class="list">
     <tr class="tableHeadingBasic" valign="bottom" style="padding-bottom: 3px;">
-      <td>&nbsp;</td>
+      <td><input type="checkbox" onclick="handleSelectAll()" name="selectAll"/></td>
       <td style="padding-right: 10px;">
         <a class="sortHREFWhite" href="<%=selfUrl%>&<%= "pageNum"%>=<%=pageNum%>&<%="sorting"%>=<%=WorkflowTemplateInfoComparator.NAME%>&doSort=true"> <%=nameCol%></a>
       </td>

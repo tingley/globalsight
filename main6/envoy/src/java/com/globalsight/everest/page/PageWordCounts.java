@@ -21,19 +21,11 @@ import com.globalsight.everest.persistence.PersistentObject;
 /**
  * A data object designed to hold a variety of word counts for a page.
  */
-public class PageWordCounts
-    extends PersistentObject
+public class PageWordCounts extends PersistentObject
 {
     private static final long serialVersionUID = -5400707613158140160L;
     
     private Integer m_totalWordCount = new Integer(0);
-    
-    //The default context match word counts.
-    private Integer m_contextMatchWordCount = new Integer(0);
-    
-    // The exact match word counts if use in-context match(exclude ICE
-    // word counts).
-    private Integer m_segmentTmWordCount = new Integer(0);
     
     private Integer m_lowFuzzyWordCount = new Integer(0);
     private Integer m_medFuzzyWordCount = new Integer(0);
@@ -44,14 +36,26 @@ public class PageWordCounts
     private Integer m_subLevMatchWordCount = new Integer(0);
     private Integer m_subLevRepetitionWordCount = new Integer(0);
     
-    //The in-context match word counts if use in-context match.
-    private Integer m_inContextMatchWordCount = new Integer(0);
-    
-    //The exact match word counts if not use in-context match, the value is 0.
+    /**
+     * This includes ALL exact match word counts(segment-TM,context,MT,XLF and
+     * PO exact matches etc).
+     */
+    private Integer totalExactMatchWordCount = new Integer(0);
+    /**
+     * The default context match word counts.
+     */
+    private Integer contextMatchWordCount = new Integer(0);
+    /**
+     * The exact match word counts(exclude ICE word counts).
+     * (allExactMatchWordCount = segmentTmWordCount + inContextMatchWordCount)
+     */
+    private Integer segmentTmWordCount = new Integer(0);
+    /**
+     * The ICE word counts. 
+     */
+    private Integer inContextMatchWordCount = new Integer(0);
+
     private Integer m_noUseInContextMatchWordCount = new Integer(0);
-    
-    //The exact match word counts if not use in-context match.
-    private Integer m_noUseExactMatchWordCount = new Integer(0);
     
     private Integer m_MTExactMatchWordCount = new Integer(0);
     
@@ -81,22 +85,22 @@ public class PageWordCounts
             int p_segmentTmWordCount, int p_lowFuzzyWordCount,
             int p_medFuzzyWordCount, int p_medHiFuzzyWordCount,
             int p_hiFuzzyWordCount, int p_inContextMatchWordCount,
-            int p_noUseInContextMatchWordCount, int p_noUseExactMatchWordCount,
+            int p_noUseInContextMatchWordCount, int p_totalExactMatchWordCount,
             int p_unmatchedWordCount, int p_repetitionWordCount,
             int p_medFuzzyRepetitionWordCount,
             int p_medHighFuzzyRepetitionWordCount,
             int p_hiFuzzyRepetitionWordCount)
     {
         m_totalWordCount = new Integer(p_totalWordCount);
-        m_contextMatchWordCount = new Integer(p_contextMatchWordCount);
-        m_segmentTmWordCount = new Integer(p_segmentTmWordCount);
+        contextMatchWordCount = new Integer(p_contextMatchWordCount);
+        segmentTmWordCount = new Integer(p_segmentTmWordCount);
         m_lowFuzzyWordCount = new Integer(p_lowFuzzyWordCount);
         m_medFuzzyWordCount = new Integer(p_medFuzzyWordCount);
         m_medHiFuzzyWordCount = new Integer(p_medHiFuzzyWordCount);
         m_hiFuzzyWordCount = new Integer(p_hiFuzzyWordCount);
-        m_inContextMatchWordCount = new Integer(p_inContextMatchWordCount);
+        inContextMatchWordCount = new Integer(p_inContextMatchWordCount);
         m_noUseInContextMatchWordCount = new Integer(p_noUseInContextMatchWordCount);
-        m_noUseExactMatchWordCount = new Integer(p_noUseExactMatchWordCount);
+        totalExactMatchWordCount = new Integer(p_totalExactMatchWordCount);
         m_unmatchedWordCount = new Integer(p_unmatchedWordCount);
         m_repetitionWordCount = new Integer(p_repetitionWordCount);
         m_medFuzzyRepetitionWordCount = new Integer(p_medFuzzyRepetitionWordCount);
@@ -110,27 +114,43 @@ public class PageWordCounts
 
     public void setInContextWordCount(int inContextWordCount)
     {
-        m_inContextMatchWordCount = new Integer(inContextWordCount);
+        inContextMatchWordCount = new Integer(inContextWordCount);
     }
 
     public int getInContextWordCount()
     {
         int inContextWordCount = 0;
-        if (m_inContextMatchWordCount != null)
+        if (inContextMatchWordCount != null)
         {
-            inContextWordCount = m_inContextMatchWordCount.intValue();
+            inContextWordCount = inContextMatchWordCount.intValue();
         }
         return inContextWordCount;
     }
     
+    public void setTotalExactMatchWordCount(int p_totalExactMatchWordCount) {
+        this.totalExactMatchWordCount = new Integer(p_totalExactMatchWordCount);
+    }
+    
+    public int getTotalExactMatchWordCount() {
+        if(totalExactMatchWordCount != null) {
+            return totalExactMatchWordCount.intValue();
+        } else {
+            return 0;
+        }
+    }
+    
+    /**
+     * @deprecated -- This is useless in current codes(It is always 0).
+     * @since 8.2.1
+     */
     public void setNoUseInContextMatchWordCount(int noUseInContextMatchWordCount) {
         this.m_noUseInContextMatchWordCount = new Integer(noUseInContextMatchWordCount);
     }
-    
-    public void setNoUseExactMatchWordCount(int segmentTmWordCount) {
-        this.m_noUseExactMatchWordCount = new Integer(segmentTmWordCount);
-    }
-    
+
+    /**
+     * @deprecated -- This is useless in current codes(It is always 0).
+     * @since 8.2.1
+     */
     public int getNoUseInContextMatchWordCount() {
         int noUseInContextWordCount = 0;
         if(this.m_noUseInContextMatchWordCount != null){
@@ -139,14 +159,6 @@ public class PageWordCounts
         return noUseInContextWordCount;
     }
     
-    public int getNoUseExactMatchWordCount() {
-        int noUseExactWordCount = 0;
-        if(this.m_noUseExactMatchWordCount != null){
-            noUseExactWordCount = this.m_noUseExactMatchWordCount.intValue();
-        }
-        return noUseExactWordCount;
-    }
-
     /**
      * To set the total word count.
      */
@@ -174,7 +186,7 @@ public class PageWordCounts
      */
     public void setContextMatchWordCount(int p_contextMatchWordCount)
     {
-        m_contextMatchWordCount = new Integer(p_contextMatchWordCount);
+        contextMatchWordCount = new Integer(p_contextMatchWordCount);
     }
 
     /**
@@ -184,8 +196,8 @@ public class PageWordCounts
      */
     public int getContextMatchWordCount()
     {
-        return m_contextMatchWordCount == null ? 
-            0 : m_contextMatchWordCount.intValue();
+        return contextMatchWordCount == null ? 
+            0 : contextMatchWordCount.intValue();
     }
 
     
@@ -245,7 +257,7 @@ public class PageWordCounts
      */
     public void setSegmentTmWordCount(int p_segmentTmWordCount)
     {
-        m_segmentTmWordCount = new Integer(p_segmentTmWordCount);
+        segmentTmWordCount = new Integer(p_segmentTmWordCount);
     }
 
     /**
@@ -255,8 +267,8 @@ public class PageWordCounts
      */
     public int getSegmentTmWordCount()
     {
-        return m_segmentTmWordCount == null ? 
-            0 : m_segmentTmWordCount.intValue();
+        return segmentTmWordCount == null ? 
+            0 : segmentTmWordCount.intValue();
     }
 
     public void setLowFuzzyWordCount(int p_lowFuzzyWordCount)
@@ -503,11 +515,11 @@ public class PageWordCounts
         sb.append((m_totalWordCount != null ?
             m_totalWordCount.toString() : "null"));
         sb.append(" context match=");
-        sb.append((m_contextMatchWordCount != null ?
-            m_contextMatchWordCount.toString() : "null"));
+        sb.append((contextMatchWordCount != null ?
+            contextMatchWordCount.toString() : "null"));
         sb.append(" segment TM=");
-        sb.append((m_segmentTmWordCount != null ?
-            m_segmentTmWordCount.toString() : "null"));
+        sb.append((segmentTmWordCount != null ?
+            segmentTmWordCount.toString() : "null"));
         sb.append(" low fuzzy (50%-74%)=");
         sb.append((m_lowFuzzyWordCount != null ?
             m_lowFuzzyWordCount.toString() : "null"));

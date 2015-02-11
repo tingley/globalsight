@@ -15,13 +15,14 @@ import com.globalsight.everest.unittest.util.FileUtil;
 public class FontMappingHelperTest
 {
     private String inddXml = null;
-    
+
     @Before
     public void init() throws Exception
     {
-        String xmlFile = FileUtil.getResourcePath(FontMappingHelperTest.class, "files/indd_markup.xml");
+        String xmlFile = FileUtil.getResourcePath(FontMappingHelperTest.class,
+                "files/indd_markup.xml");
         inddXml = com.globalsight.util.FileUtil.readFile(new File(xmlFile), "UTF-8");
-        
+
         List<FontMapping> fms = new ArrayList<FontMapping>();
         FontMapping fm1 = new FontMapping();
         fm1.setTargetFont("MingLiU");
@@ -35,19 +36,27 @@ public class FontMappingHelperTest
         fms.add(fm2);
         FontMappingHelper.initForDebug(fms);
     }
-    
+
     @Test
     public void testCheckInddXml()
     {
         Assert.assertTrue(FontMappingHelper.isInddXml("xml", inddXml));
     }
-    
+
     @Test
     public void testProcessInddXml()
-    {       
+    {
         String processed = FontMappingHelper.processInddXml("zh_CN", inddXml);
         Assert.assertTrue(processed.contains("InddFontFamily=\"MingLiU\""));
         Assert.assertTrue(processed.contains("InddFontFamily=\"MS Mincho\""));
+        Assert.assertTrue(processed.contains("[Medium-10-MingLiU]"));
+        Assert.assertTrue(processed.contains("[Bold-10-MS Mincho]"));
+        Assert.assertTrue(processed.contains("[55 Roman-11.3086700439453-MingLiU]"));
+        Assert.assertTrue(processed.contains("[/55 Roman-11.3086700439453-MingLiU]"));
+        Assert.assertTrue(processed.contains("[65 Bold-10-MingLiU]"));
+        Assert.assertTrue(processed.contains("[/65 Bold-10-MingLiU]"));
+        Assert.assertTrue(processed.contains("[Book-9.5-MingLiU]"));
+        Assert.assertTrue(processed.contains("[/Book-9.5-MingLiU]"));
     }
 
     /**

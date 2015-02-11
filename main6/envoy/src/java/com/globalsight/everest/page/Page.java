@@ -19,9 +19,12 @@ package com.globalsight.everest.page;
 
 // globalsight imports
 import java.io.File;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -284,6 +287,20 @@ public abstract class Page extends PersistentObject implements GenericPage
             {
                 Map templates = ((TargetPage) this).getSourcePage()
                         .getExtractedFile().getTemplates();
+                
+                if (templates == null)
+                {
+                	String hql = "from PageTemplate p where p.sourcePage.id = ?";
+					List<PageTemplate> ts = (List<PageTemplate>) HibernateUtil
+							.search(hql, ((TargetPage) this).getSourcePage()
+									.getIdAsLong());
+					
+					templates = new HashMap<Long, PageTemplate>();
+                    for (PageTemplate t : ts)
+                    {
+                    	templates.put(new Long(t.getType()), t);
+                    }
+                }
                 m_extractedFile.setTemplates(templates);
             }
             file = m_extractedFile;

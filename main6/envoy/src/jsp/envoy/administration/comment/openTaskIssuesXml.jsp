@@ -4,6 +4,7 @@
     com.globalsight.util.edit.EditUtil,
     com.globalsight.everest.page.TargetPage,
     org.apache.log4j.Logger,
+    java.util.HashMap,
     java.util.ArrayList"
     session="true"
 %><%!
@@ -15,34 +16,40 @@ String[] targetPageIds = request.getParameterValues("targetPgId");
 <openTaskIssues><%   
 try {
     if (targetPageIds != null)
-    { 
-    ArrayList statusList = new ArrayList();
-    statusList.add(Issue.STATUS_OPEN);
-    statusList.add(Issue.STATUS_QUERY);
-
-    for (int i=0; i < targetPageIds.length; i++)
     {
-    long tpId = Long.parseLong(targetPageIds[i]);
-    TargetPage tp = ServerProxy.getPageManager().getTargetPage(tpId);
-    String tpName = tp.getExternalPageId();
-//    System.out.println("On targetPg: " + tpId + " " + tpName);
+	    ArrayList<String> statusList = new ArrayList<String>();
+	    statusList.add(Issue.STATUS_OPEN);
+	    statusList.add(Issue.STATUS_QUERY);
+	    statusList.add(Issue.STATUS_REJECTED);
 
-    //find out how many open issues there are for this target page
-    String logicalKey = targetPageIds[i] + "_";
-    int numOpen = ServerProxy.getCommentManager().getIssueCount(
-        Issue.TYPE_SEGMENT, logicalKey, statusList);
-//    System.out.println("Got numopen: " + numOpen);
-    if (numOpen > 0)
-    {
-    %><targetPage numOpen="<%=numOpen%>"><%=EditUtil.encodeXmlEntities(tpName)%></targetPage>
-<%  } //endif
-    } //endor
+    	ArrayList<Long> tpIds = new ArrayList<Long>();
+	    for (int j = 0; j < targetPageIds.length; j++)
+	    {
+	    	tpIds.add(Long.parseLong(targetPageIds[j]));
+	    }
+
+	    HashMap<Long, Integer> openCounts =
+	   		ServerProxy.getCommentManager().getIssueCountPerTargetPage(
+				Issue.TYPE_SEGMENT, tpIds, statusList);
+
+    	for (int i=0; i < tpIds.size(); i++)
+	    {
+		    long tpId = tpIds.get(i);
+		    TargetPage tp = ServerProxy.getPageManager().getTargetPage(tpId);
+		    String tpName = tp.getExternalPageId();
+
+		    int numOpen = (openCounts.get(tpId) == null ? 0 : openCounts.get(tpId));
+	        if (numOpen > 0)
+	        {
+%>
+ 	       <targetPage numOpen="<%=numOpen%>"><%=EditUtil.encodeXmlEntities(tpName)%></targetPage>
+<%
+	        }
+	    }
     }
-    
-} //endtry
+}
 catch (Throwable e)
 {
     CATEGORY.error("Failed to query open issues for target pages from openTaskIssuesXml.jsp", e);
 }
 %></openTaskIssues>
-

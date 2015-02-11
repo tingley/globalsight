@@ -70,7 +70,7 @@ public class XmlUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -82,7 +82,7 @@ public class XmlUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -118,7 +118,7 @@ public class XmlUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -130,7 +130,7 @@ public class XmlUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

@@ -41,6 +41,7 @@ import com.globalsight.ling.inprogresstm.population.TmPopulater;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.persistence.DbUtil;
@@ -163,14 +164,15 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             GlobalSightLocale p_targetLocale, long p_sourcePageId)
             throws LingManagerException
     {
-        BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId);
         SourcePage sourcePage = getSourcePage(p_sourcePageId);
+        BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId,
+                sourcePage.getCompanyId());
         LeverageOptions leverageOptions = getLeverageOptions(sourcePage,
                 p_targetLocale);
 
         return leverage(srcTuv, p_targetLocale, sourcePage, leverageOptions);
     }
-    
+
     private DynamicLeverageResults leverage(BaseTmTuv p_sourceTuv,
             GlobalSightLocale p_targetLocale, SourcePage p_sourcePage,
             LeverageOptions p_leverageOptions) throws LingManagerException
@@ -187,10 +189,10 @@ public class InProgressTmManagerLocal implements InProgressTmManager
 
                 // Leverage from current job's in-progress TM data.
                 long jobId = getJobId(p_sourcePage);
-                Set<Long> jobIdsToLevFrom = new HashSet();
+                Set<Long> jobIdsToLevFrom = new HashSet<Long>();
                 jobIdsToLevFrom.add(jobId);
                 // Leverage from jobs which are specified by TM profile options
-                Set<Long> tmIds = new HashSet();
+                Set<Long> tmIds = new HashSet<Long>();
                 tmIds = p_leverageOptions.getTmIdsForLevInProgressTmPurpose();
 
                 if (p_sourceTuv.isTranslatable())
@@ -201,14 +203,15 @@ public class InProgressTmManagerLocal implements InProgressTmManager
                 }
                 else
                 {
-                    GlobalSightLocale sourceLocale = 
-                        p_sourcePage.getGlobalSightLocale();
+                    GlobalSightLocale sourceLocale = p_sourcePage
+                            .getGlobalSightLocale();
                     results = leverager.leverageLocalizable(p_sourceTuv,
                             sourceLocale, p_targetLocale, p_leverageOptions,
                             jobId, jobIdsToLevFrom, tmIds);
                 }
                 // Close the DB connection and the session object finally.
-                if (session != null) {
+                if (session != null)
+                {
                     TmUtil.closeStableSession(session);
                 }
             }
@@ -216,8 +219,21 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             // leverage from gold TM
             if (p_leverageOptions.dynamicLeveragesFromGoldTm())
             {
-                DynamicLeverageResults goldResult = LingServerProxy.getTmCoreManager()
-                        .leverageSegment(p_sourceTuv, p_leverageOptions);
+                long jobId = -1;
+                try
+                {
+                    jobId = getJobId(p_sourcePage);
+                }
+                catch (Exception eee)
+                {
+                    // ignore
+                    jobId = -1;
+                }
+
+                TmCoreManager tmcm = LingServerProxy.getTmCoreManager();
+                tmcm.setJobId(jobId);
+                DynamicLeverageResults goldResult = tmcm.leverageSegment(
+                        p_sourceTuv, p_leverageOptions);
 
                 if (results == null)
                 {
@@ -242,17 +258,18 @@ public class InProgressTmManagerLocal implements InProgressTmManager
                     p_sourcePage.getGlobalSightLocale(), p_targetLocale,
                     p_sourceTuv.isTranslatable());
         }
-        
+
         results.serOrgSid(p_sourceTuv.getSid());
-        
+
         boolean isTmProcedence = p_leverageOptions.isTmProcedence();
-        if(isTmProcedence)
+        if (isTmProcedence)
         {
-            results.generalSortByTm(p_leverageOptions);
+            results.generalSortByTm(p_leverageOptions,
+                    p_sourcePage.getCompanyId());
         }
         else
         {
-             results.generalSort(p_leverageOptions);
+            results.generalSort(p_leverageOptions, p_sourcePage.getCompanyId());
         }
         return results;
     }
@@ -283,9 +300,12 @@ public class InProgressTmManagerLocal implements InProgressTmManager
     {
         try
         {
-            BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId);
-            BaseTmTuv trgTuv = TmUtil.createTmSegment(p_targetTuv, p_subId);
             SourcePage sourcePage = getSourcePage(p_sourcePageId);
+            String companyId = sourcePage.getCompanyId();
+            BaseTmTuv srcTuv = TmUtil.createTmSegment(p_sourceTuv, p_subId,
+                    companyId);
+            BaseTmTuv trgTuv = TmUtil.createTmSegment(p_targetTuv, p_subId,
+                    companyId);
 
             TmPopulater tmPopulater = new TmPopulater();
             tmPopulater.saveSegment(srcTuv, trgTuv, sourcePage);
@@ -296,7 +316,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
             throw new LingManagerException(e);
         }
     }
-    
+
     /**
      * Saves a source and target translatable segment pair to the in-progress
      * TM.
@@ -373,7 +393,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         saveSegmentByText(p_sourceText, p_targetText, p_tuId, p_targetLocale,
                 p_segmentType, p_sourcePageId, false);
     }
-    
+
     private void saveSegmentByText(String p_sourceText, String p_targetText,
             long p_tuId, GlobalSightLocale p_targetLocale,
             String p_segmentType, long p_sourcePageId, boolean p_isTranslatable)
@@ -462,7 +482,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         }
 
     }
-    
+
     /**
      * Get "LeverageOptions" for specified target locale.
      */
@@ -477,7 +497,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         // create LeveragingLocales that contains only leveraging
         // locales for p_targetLocale
         LeveragingLocales leveragingLocalesForTarget = new LeveragingLocales();
-        Set locales = null;
+        Set<GlobalSightLocale> locales = null;
         try
         {
             locales = allLeveragingLocales.getLeveragingLocales(p_targetLocale);
@@ -493,7 +513,8 @@ public class InProgressTmManagerLocal implements InProgressTmManager
                 for (Iterator i = wrList.iterator(); !found && i.hasNext();)
                 {
                     WorkflowRequest wr = (WorkflowRequest) i.next();
-                    Collection wfTemplate = wr.getWorkflowTemplateList();
+                    Collection<WorkflowTemplateInfo> wfTemplate = wr
+                            .getWorkflowTemplateList();
                     for (Iterator j = wfTemplate.iterator(); !found
                             && j.hasNext();)
                     {
@@ -501,7 +522,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
                                 .next();
                         if (wti.getTargetLocale().equals(p_targetLocale))
                         {
-                            locales = new HashSet(wti.getLeveragingLocales());
+                            locales = wti.getLeveragingLocales();
                             found = true;
                         }
                     }
@@ -511,7 +532,7 @@ public class InProgressTmManagerLocal implements InProgressTmManager
         }
 
         leveragingLocalesForTarget.setLeveragingLocale(p_targetLocale,
-                new HashSet(locales));
+                new HashSet<GlobalSightLocale>(locales));
 
         return new LeverageOptions(l10nProfile.getTranslationMemoryProfile(),
                 leveragingLocalesForTarget);

@@ -89,8 +89,10 @@ class SharedStorageTables {
 
     protected void createTuStorage(Set<TM3Attribute> inlineAttributes)
             throws SQLException {
+        String tuTableName = getTuTableName(poolId);
+        
         StringBuilder stmt = new StringBuilder(
-            "CREATE TABLE " + getTuTableName(poolId) + " (" +
+            "CREATE TABLE " + tuTableName + " (" +
             "tmId bigint NOT NULL, " +
             "id bigint NOT NULL, " +
             "srcLocaleId bigint NOT NULL, ");
@@ -105,24 +107,32 @@ class SharedStorageTables {
 
         // Now create the TUV table.  Note the denormalized tmId
         // (to avoid an extra join during fuzzy lookup)
+        String tuvTableName = getTuvTableName(poolId);
         SQLUtil.exec(conn,
-            "CREATE TABLE " + getTuvTableName(poolId) + " (" +
+            "CREATE TABLE " + tuvTableName + " (" +
             "id bigint NOT NULL, " +
             "tuId bigint NOT NULL, " +
             "tmId bigint NOT NULL, " +
             "localeId bigint NOT NULL, " +
             "fingerprint bigint NOT NULL, " +
-            "content text NOT NULL, " + 
+            "content mediumtext NOT NULL, " + 
             "firstEventId bigint NOT NULL, " +
             "lastEventId bigint NOT NULL, " +
             "PRIMARY KEY (id), " +
             "KEY (tmId, localeId, fingerprint), " +
             "KEY (tuId, localeId), " + 
-            "FOREIGN KEY (tuId) REFERENCES " + getTuTableName(poolId) + " (id) ON DELETE CASCADE, " +
+            "FOREIGN KEY (tuId) REFERENCES " + tuTableName + " (id) ON DELETE CASCADE, " +
             "FOREIGN KEY (firstEventID) REFERENCES TM3_EVENTS (id), " +
             "FOREIGN KEY (lastEventID) REFERENCES TM3_EVENTS (id) " +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
         );
+        
+        //Create index on TUV table
+        stmt = new StringBuilder();
+        stmt.append("CREATE INDEX INDEX_").append(tuvTableName)
+            .append("_TMID ON ").append(tuvTableName) 
+            .append(" (tmId)");
+        SQLUtil.exec(conn, stmt.toString());
     }
 
     protected void destroyAttrTable() throws SQLException {

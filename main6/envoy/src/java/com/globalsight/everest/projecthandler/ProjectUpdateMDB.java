@@ -21,13 +21,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -38,7 +36,7 @@ import com.globalsight.everest.persistence.l10nprofile.WorkflowTemplateInfoDescr
 import com.globalsight.everest.persistence.workflow.WorkflowDescriptorModifier;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.jms.GenericQueueMDB;
-import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTemplate;
@@ -47,7 +45,6 @@ import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.everest.workflowmanager.WorkflowOwner;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.mail.MailerConstants;
-import com.globalsight.util.mail.MailerHelper;
 
 /**
  * This is a listener that's invoked via JMS and is responsible for updating all
@@ -98,8 +95,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
      * workflow instances/templates (if the PM has changed). Upon an exception,
      * a notification will be sent to the modifier.
      * 
-     * @param p_message -
-     *            The message to be passed.
+     * @param p_message
+     *            - The message to be passed.
      */
     public void onMessage(Message p_message)
     {
@@ -127,7 +124,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
                 {
                     String[] messageArguments = new String[3];
                     messageArguments[0] = msg.getProjectId().toString();
-                    messageArguments[1] = msg.getCurrentProjectManager();
+                    messageArguments[1] = UserUtil.getUserNameById(msg
+                            .getCurrentProjectManager());
                     messageArguments[2] = e.toString();
                     notifyUser(messageArguments, msg.getProjectModifier(),
                             MailerConstants.WF_PM_CHANGE_FAILED_SUBJECT,
@@ -158,6 +156,7 @@ public class ProjectUpdateMDB extends GenericQueueMDB
      * 
      * @param p_workflowId - The id of the workflow that the new owners should
      * be assigned. @param p_newPmId - The username of the newly assigned PM.
+     * 
      * @param p_newWorkflowOwners - A list of new workflow owners to be
      * assigned.
      */
@@ -191,8 +190,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            Workflow wfClone = (Workflow) session.get(Workflow.class, p_wf
-                    .getIdAsLong());
+            Workflow wfClone = (Workflow) session.get(Workflow.class,
+                    p_wf.getIdAsLong());
 
             List previousOnwers = wfClone.getWorkflowOwners();
             int listSize = previousOnwers.size();
@@ -217,8 +216,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
                     Permission.GROUP_PROJECT_MANAGER));
 
             // set the new owners in the jbpm's process instance
-            assignWorkflowInstanceOwners(p_wf.getId(), p_newPmId, wfClone
-                    .getWorkflowOwners());
+            assignWorkflowInstanceOwners(p_wf.getId(), p_newPmId,
+                    wfClone.getWorkflowOwners());
 
             session.update(wfClone);
 
@@ -238,7 +237,7 @@ public class ProjectUpdateMDB extends GenericQueueMDB
         {
             if (session != null)
             {
-                //session.close();
+                // session.close();
             }
         }
     }
@@ -283,8 +282,8 @@ public class ProjectUpdateMDB extends GenericQueueMDB
             // now try removing the old template (to cleanup template table)
             /*
              * We cannot remove the template in jbpm implementation.
-            removeWorkflowTemplate(oldTemplateId);
-            */
+             * removeWorkflowTemplate(oldTemplateId);
+             */
         }
         catch (Exception e)
         {
@@ -299,7 +298,7 @@ public class ProjectUpdateMDB extends GenericQueueMDB
         {
             if (session != null)
             {
-                ////session.close();
+                // //session.close();
             }
         }
     }
@@ -313,7 +312,7 @@ public class ProjectUpdateMDB extends GenericQueueMDB
     {
         String[] messageArguments = new String[4];
         messageArguments[0] = p_projectId.toString();
-        messageArguments[1] = p_newPm;
+        messageArguments[1] = UserUtil.getUserNameById(p_newPm);
         messageArguments[2] = m_failedInstances.toString();
         messageArguments[3] = m_failedTemplates.toString();
 
@@ -345,8 +344,9 @@ public class ProjectUpdateMDB extends GenericQueueMDB
             EmailInformation emailInfo = ServerProxy.getUserManager()
                     .getEmailInformationForUser(p_recipientUserId);
 
-            ServerProxy.getMailer().sendMail((EmailInformation)null, emailInfo,
-                    p_subjectKey, p_messageKey, p_messageArgs, m_companyIdStr);
+            ServerProxy.getMailer().sendMail((EmailInformation) null,
+                    emailInfo, p_subjectKey, p_messageKey, p_messageArgs,
+                    m_companyIdStr);
         }
         catch (Exception e)
         {
@@ -378,8 +378,6 @@ public class ProjectUpdateMDB extends GenericQueueMDB
         notifyEndOfProcess(projectId, modifier, newPm);
     }
 
-    
-
     /*
      * Update the existing workflow instances.
      */
@@ -391,12 +389,13 @@ public class ProjectUpdateMDB extends GenericQueueMDB
         map.put("pmUserId", p_originalPm);
 
         String sql = WorkflowDescriptorModifier.WORKFLOW_BY_OWNER_AND_TYPE_SQL;
-        Collection c = HibernateUtil.searchWithSql(sql, map, WorkflowImpl.class);
- 
+        Collection c = HibernateUtil
+                .searchWithSql(sql, map, WorkflowImpl.class);
+
         if (c == null)
         {
             s_category.info("no workflow instances to be updated for new PM: "
-                    + p_newPm);
+                    + UserUtil.getUserNameById(p_newPm));
             return;
         }
 
@@ -417,14 +416,15 @@ public class ProjectUpdateMDB extends GenericQueueMDB
     {
         Map map = new HashMap();
         map.put("projectId", p_projectId);
-        
+
         String sql = WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_PROJECT_ID_SQL;
-        Collection c = HibernateUtil.searchWithSql(sql, map, WorkflowTemplateInfo.class);
+        Collection c = HibernateUtil.searchWithSql(sql, map,
+                WorkflowTemplateInfo.class);
 
         if (c == null)
         {
             s_category.info("no workflow templates to be updated for new PM: "
-                    + p_newPm);
+                    + UserUtil.getUserNameById(p_newPm));
             return;
         }
 

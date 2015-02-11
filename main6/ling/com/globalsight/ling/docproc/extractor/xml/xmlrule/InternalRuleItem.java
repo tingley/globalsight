@@ -25,11 +25,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.globalsight.ling.docproc.extractor.xml.Rule;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 
 public class InternalRuleItem extends XmlRuleItem
 {
-    private static final String NAME = "internal";
+    public static final String NAME = "internal";
     private static final String PATH = "path";
 
     @Override
@@ -39,8 +38,7 @@ public class InternalRuleItem extends XmlRuleItem
         NamedNodeMap attributes = ruleNode.getAttributes();
         String xpath = attributes.getNamedItem(PATH).getNodeValue();
 
-        NodeList affectedNodes = XPathAPI.selectNodeList(toBeExtracted
-                .getDocumentElement(), xpath);
+        NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
 
         if (affectedNodes != null)
         {
@@ -64,8 +62,22 @@ public class InternalRuleItem extends XmlRuleItem
         rule.setInternal(true);
         rule.setInline(true);
 
+        // do not set internal for office 2010 files
+        boolean isOfficeXml = false;
+        try
+        {
+            String rootNodeName = node.getOwnerDocument().getDocumentElement().getNodeName();
+            isOfficeXml = "w:document".equals(rootNodeName) || "w:comments".equals(rootNodeName)
+                    || "w:hdr".equals(rootNodeName) || "w:ftr".equals(rootNodeName)
+                    || "w:footnotes".equals(rootNodeName);
+        }
+        catch (Exception e)
+        {
+            // ignore
+            isOfficeXml = false;
+        }
         NamedNodeMap attributes = node.getAttributes();
-        if (attributes != null)
+        if (attributes != null && !isOfficeXml)
         {
             for (int i = 0; i < attributes.getLength(); i++)
             {

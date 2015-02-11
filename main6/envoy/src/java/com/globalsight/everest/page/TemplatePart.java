@@ -16,10 +16,10 @@
  */
 package com.globalsight.everest.page;
 
+import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.persistence.PersistentObject;
-
 import com.globalsight.util.edit.EditUtil;
 
 /**
@@ -35,10 +35,10 @@ public class TemplatePart extends PersistentObject
 
     /**
      * <p>
-     * Value returned by getTuId() if a TemplatePart does not have a tu id (-1).
+     * Value returned by getTuId() if a TemplatePart does not have a tu id (0).
      * </p>
      */
-    public static final long INVALID_TUID = -1;
+    public static final long INVALID_TUID = 0;
     public static final Long INVALID_TUID_LONG = new Long(INVALID_TUID);
 
     private static final int CLOB_THRESHOLD = 4000;
@@ -46,6 +46,7 @@ public class TemplatePart extends PersistentObject
     private String m_skeletonClob;
     private String m_skeletonString;
     private Tu m_tu = null;
+    private Long tuId = new Long(0);
     private int m_order;
     private PageTemplate m_pageTemplate = null;
 
@@ -63,7 +64,15 @@ public class TemplatePart extends PersistentObject
             Tu p_tu, int p_order)
     {
         m_pageTemplate = p_pageTemplate;
+        if (p_tu != null)
+        {
+            tuId = p_tu.getTuId();
+        }
         m_tu = p_tu;
+        if (p_tu != null && tuId <= 0)
+        {
+            tuId = p_tu.getId();
+        }
         m_order = p_order;
         setSkeleton(p_skeleton);
     }
@@ -71,14 +80,23 @@ public class TemplatePart extends PersistentObject
     // //////////////////////////////////////////////////////////////////
     // End: Constructor
     // //////////////////////////////////////////////////////////////////
-    public Tu getTu()
+    public Tu getTu(String companyId)
     {
+        if (this.m_tu == null)
+        {
+            loadTu(companyId);
+        }
+
         return m_tu;
     }
 
     public void setTu(Tu tu)
     {
         m_tu = tu;
+        if (m_tu != null)
+        {
+            tuId = m_tu.getId();
+        }
     }
 
     public long getTemplateId()
@@ -118,12 +136,12 @@ public class TemplatePart extends PersistentObject
 
     public long getTuId()
     {
-        return m_tu == null ? INVALID_TUID : m_tu.getId();
+        return this.tuId;
     }
 
-    public Long getTuIdAsLong()
+    public void setTuId(Long p_tuId)
     {
-        return m_tu == null ? INVALID_TUID_LONG : m_tu.getIdAsLong();
+        this.tuId = p_tuId;
     }
 
     public int getOrder()
@@ -156,10 +174,15 @@ public class TemplatePart extends PersistentObject
     // package level method that is called by PageTemplate.
     // This may return NULL. Not every template part has a
     // TUV - some are just skeletons.
-    Tuv getTuv(long p_localeId)
+    Tuv getTuv(long p_localeId, String companyId)
     {
+        if (this.m_tu == null)
+        {
+            loadTu(companyId);
+        }
+
         if (m_tu != null)
-            return m_tu.getTuv(p_localeId);
+            return m_tu.getTuv(p_localeId, companyId);
         else
             return null;
     }
@@ -189,5 +212,20 @@ public class TemplatePart extends PersistentObject
     public void setPageTemplate(PageTemplate template)
     {
         m_pageTemplate = template;
+    }
+
+    private void loadTu(String companyId)
+    {
+        if (m_tu == null && tuId > 0)
+        {
+            try
+            {
+                this.m_tu = SegmentTuUtil.getTuById(tuId, companyId);
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
 }

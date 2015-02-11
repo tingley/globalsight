@@ -16,81 +16,77 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
-import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.ling.tm.ExactMatchedSegments;
-import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm.LeverageMatchType;
-import com.globalsight.ling.tm2.SegmentTmInfo;
-import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
-
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
- * LeverageDataCenter is a central repository of segment data to be
- * levereaged and the leverage results. This class provides the
- * functions listed below.
- *
- * - repository of the original source segment and the leverage
- *   results of these segments.
- *
- * - make a list of unique original source segments to avoid leverage
- *   identical segments from Page TM many times.
- *
- * - break up the original source segments into a main segment and
- *   subflows. Maintain the mapping of the original segments and the
- *   separated segments.
- *
- * - make a list of unique separated segments to avoid leverage
- *   identical segments from Segment TM many times.
- *
+ * LeverageDataCenter is a central repository of segment data to be levereaged
+ * and the leverage results. This class provides the functions listed below.
+ * 
+ * - repository of the original source segment and the leverage results of these
+ * segments.
+ * 
+ * - make a list of unique original source segments to avoid leverage identical
+ * segments from Page TM many times.
+ * 
+ * - break up the original source segments into a main segment and subflows.
+ * Maintain the mapping of the original segments and the separated segments.
+ * 
+ * - make a list of unique separated segments to avoid leverage identical
+ * segments from Segment TM many times.
+ * 
  * - produce ExactMatchedSegments object from the leverage results.
  */
 
 public class LeverageDataCenter
 {
-    private static Logger c_logger =
-        Logger.getLogger(
-            LeverageDataCenter.class.getName());
+    private static Logger c_logger = Logger.getLogger(LeverageDataCenter.class
+            .getName());
 
     // leverage options
     private LeverageOptions m_leverageOptions = null;
 
     private GlobalSightLocale m_sourceLocale = null;
     private Collection m_targetLocales = null;
-    
+    private Job m_job = null;
+
     // mapping of a unique original source segment and a list of
     // identical segments to it.
-    // key:    BaseTmTuv (a unique original source segment)
+    // key: BaseTmTuv (a unique original source segment)
     // value: IdenticalSegments object which holds a list of identical
-    //        original source segments and their leverage results
+    // original source segments and their leverage results
     private Map<BaseTmTuv, IdenticalSegments> m_uniqueOriginalSegments = null;
-    
+
     // mapping of a unique separated source segment and a list of
     // identical segments to it
-    // key:    SegmentTmTuv (a unique separated original source segment)
+    // key: SegmentTmTuv (a unique separated original source segment)
     // value: Initially, it is null. After Segment Tm leveraging,
-    //        LeverageMatches object is set if the segment finds matches. It
-    //        remains null otherwise.
+    // LeverageMatches object is set if the segment finds matches. It
+    // remains null otherwise.
     private Map<BaseTmTuv, LeverageMatches> m_uniqueSeparatedSegments = null;
-
 
     // constructor
     public LeverageDataCenter(GlobalSightLocale p_sourceLocale,
-        Collection p_targetLocales, LeverageOptions p_leverageOptions)
+            Collection p_targetLocales, LeverageOptions p_leverageOptions)
     {
         m_sourceLocale = p_sourceLocale;
         m_targetLocales = p_targetLocales;
@@ -98,50 +94,49 @@ public class LeverageDataCenter
         m_uniqueOriginalSegments = new HashMap<BaseTmTuv, IdenticalSegments>();
         m_uniqueSeparatedSegments = null;
     }
-    
 
     /**
      * Get source locale
-     *
+     * 
      * @return source locale in GlobalSightLocale
      */
     public GlobalSightLocale getSourceLocale()
     {
         return m_sourceLocale;
     }
-    
 
     /**
      * Get leverage options
-     *
+     * 
      * @return LeverageOptions object
      */
     public LeverageOptions getLeverageOptions()
     {
         return m_leverageOptions;
     }
-    
+
     /**
      * Get target locales
-     *
+     * 
      * @return Collection of target locales (GlobalSightLocale)
      */
     public Collection getTargetLocales()
     {
         return m_targetLocales;
     }
-    
+
     /**
-     * Add an original source Tuv to this object. 
-     *
-     * @param p_tuv original source Tuv that is leveraged
+     * Add an original source Tuv to this object.
+     * 
+     * @param p_tuv
+     *            original source Tuv that is leveraged
      */
     public void addOriginalSourceTuv(BaseTmTuv p_tuv)
     {
-        IdenticalSegments identicalSegments
-            = m_uniqueOriginalSegments.get(p_tuv);
+        IdenticalSegments identicalSegments = m_uniqueOriginalSegments
+                .get(p_tuv);
 
-        if(identicalSegments == null)
+        if (identicalSegments == null)
         {
             identicalSegments = new IdenticalSegments();
             m_uniqueOriginalSegments.put(p_tuv, identicalSegments);
@@ -149,128 +144,123 @@ public class LeverageDataCenter
         identicalSegments.add(p_tuv);
     }
 
-    
     /**
-     * Get a Set of whole (un-separated) BaseTmTuv objects that are
-     * leveraged in Page TM or TUV table. This is a unique set of
-     * segments collected from all segments that are leveraged. This
-     * method returns only segments that don't have matches for all
-     * locales.
-     *
-     * @return Set of unique original source segments (BaseTmTuv) that
-     * are leveraged in Page TM.
+     * Get a Set of whole (un-separated) BaseTmTuv objects that are leveraged in
+     * Page TM or TUV table. This is a unique set of segments collected from all
+     * segments that are leveraged. This method returns only segments that don't
+     * have matches for all locales.
+     * 
+     * @return Set of unique original source segments (BaseTmTuv) that are
+     *         leveraged in Page TM.
      */
-    public Set<BaseTmTuv> getOriginalWholeSegments()
+    public Set<BaseTmTuv> getOriginalWholeSegments(String companyId)
     {
         Set<BaseTmTuv> segments = new HashSet<BaseTmTuv>();
-        
+
         // walk through all unique original source segments
-        for(Map.Entry<BaseTmTuv, IdenticalSegments> entry : 
-                            m_uniqueOriginalSegments.entrySet()) {
+        for (Map.Entry<BaseTmTuv, IdenticalSegments> entry : m_uniqueOriginalSegments
+                .entrySet())
+        {
             // if the unique segment has an exact match for all
             // locales, skip the segment. We don't re-leverage again a
             // segment that already has an exact match.
-            if(!entry.getValue().hasPageTmExactMatchForAllLocales())
+            if (!entry.getValue().hasPageTmExactMatchForAllLocales(companyId))
             {
                 segments.add(entry.getKey());
             }
         }
-        
+
         return segments;
     }
-    
 
     /**
-     * Get a Set of BaseTmTuv objects that are leveraged in Segment
-     * TM. This is a unique set of subflow separated segments
-     * collected from all segments that are leveraged. If the Page TM
-     * leverage has taken place before the Segment TM leveraging, the
-     * segments that have found their matches in the Page TM are not
-     * included in the set returned from this method.
-     *
-     * @return Set of unique original (subflow separated) source
-     * segments (BaseTmTuv) that are leveraged in Segment TM.
+     * Get a Set of BaseTmTuv objects that are leveraged in Segment TM. This is
+     * a unique set of subflow separated segments collected from all segments
+     * that are leveraged. If the Page TM leverage has taken place before the
+     * Segment TM leveraging, the segments that have found their matches in the
+     * Page TM are not included in the set returned from this method.
+     * 
+     * @return Set of unique original (subflow separated) source segments
+     *         (BaseTmTuv) that are leveraged in Segment TM.
      */
-    public Set<BaseTmTuv> getOriginalSeparatedSegments()
-        throws Exception
+    public Set<BaseTmTuv> getOriginalSeparatedSegments(String companyId)
+            throws Exception
     {
         // if unique separated segments map is not there, build it.
-        if(m_uniqueSeparatedSegments == null)
+        if (m_uniqueSeparatedSegments == null)
         {
             m_uniqueSeparatedSegments = new HashMap<BaseTmTuv, LeverageMatches>();
-            
+
             // walk through all unique original source segments
-            Iterator<IdenticalSegments> itIdenticalSegments
-                = m_uniqueOriginalSegments.values().iterator();
-            while(itIdenticalSegments.hasNext())
+            Iterator<IdenticalSegments> itIdenticalSegments = m_uniqueOriginalSegments
+                    .values().iterator();
+            while (itIdenticalSegments.hasNext())
             {
-                IdenticalSegments identicalSegments
-                    = itIdenticalSegments.next();
+                IdenticalSegments identicalSegments = itIdenticalSegments
+                        .next();
 
                 // if the unique segment has a page tm exact match for
                 // all locales, skip the segment. We don't leverage
                 // again a segment that already has a page tm exact
                 // match.
-                if(!identicalSegments.hasPageTmExactMatchForAllLocales())
+                if (!identicalSegments
+                        .hasPageTmExactMatchForAllLocales(companyId))
                 {
                     // walk through all separated segments in a unique
                     // original segment
                     Iterator<LeverageMatches> itSeparatedSegment = identicalSegments
-                        .separatedSegmentIterator();
-                    while(itSeparatedSegment.hasNext())
+                            .separatedSegmentIterator();
+                    while (itSeparatedSegment.hasNext())
                     {
-                        LeverageMatches levMatch
-                            = itSeparatedSegment.next();
-                        BaseTmTuv originalSeparatedTuv
-                            = levMatch.getOriginalTuv();
+                        LeverageMatches levMatch = itSeparatedSegment.next();
+                        BaseTmTuv originalSeparatedTuv = levMatch
+                                .getOriginalTuv();
 
-                        m_uniqueSeparatedSegments.put(
-                            originalSeparatedTuv, null);
+                        m_uniqueSeparatedSegments.put(originalSeparatedTuv,
+                                null);
                     }
                 }
             }
         }
-            
+
         return m_uniqueSeparatedSegments.keySet();
     }
 
-
     /**
      * Add match results from a TM that leverages whole segment
-     *
-     * @param p_leverageResults LeverageMatchResults object
+     * 
+     * @param p_leverageResults
+     *            LeverageMatchResults object
      */
     public void addLeverageResultsOfWholeSegment(
-        LeverageMatchResults p_leverageResults)
-        throws Exception
+            LeverageMatchResults p_leverageResults) throws Exception
     {
         // Walk through the list of leverage result of the page
-        Iterator<LeverageMatches> itLeverageResult = p_leverageResults.iterator();
-        while(itLeverageResult.hasNext())
+        Iterator<LeverageMatches> itLeverageResult = p_leverageResults
+                .iterator();
+        while (itLeverageResult.hasNext())
         {
             // get the original source segment of the leverage result
-            LeverageMatches leverageMatches
-                = itLeverageResult.next();
+            LeverageMatches leverageMatches = itLeverageResult.next();
             BaseTmTuv originalTuv = leverageMatches.getOriginalTuv();
 
             // set the leverage result to an IdenticalSegments of the
             // original source segment
-            IdenticalSegments identicalSegments
-                = m_uniqueOriginalSegments.get(originalTuv);
-            identicalSegments.setLeverageResultsOfWholeSegment(
-                leverageMatches);
+            IdenticalSegments identicalSegments = m_uniqueOriginalSegments
+                    .get(originalTuv);
+            identicalSegments.setLeverageResultsOfWholeSegment(leverageMatches);
         }
     }
-    
 
     /**
-     * Add leverage results from Segment TM leveraging to this object.  This 
-     * will merge with existing results.
-     *
-     * @param p_leverageResults LeverageMatchResults object
+     * Add leverage results from Segment TM leveraging to this object. This will
+     * merge with existing results.
+     * 
+     * @param p_leverageResults
+     *            LeverageMatchResults object
      */
     public void addLeverageResultsOfSegmentTmMatching(
-        LeverageMatchResults p_leverageResults) throws Exception
+            LeverageMatchResults p_leverageResults) throws Exception
     {
         // Walk through the list of leverage result of the page
         for (LeverageMatches leverageMatches : p_leverageResults)
@@ -280,8 +270,9 @@ public class LeverageDataCenter
             BaseTmTuv originalTuv = leverageMatches.getOriginalTuv();
 
             // set the leverage result
-            LeverageMatches existing = m_uniqueSeparatedSegments.get(originalTuv);
-            if (existing == null) 
+            LeverageMatches existing = m_uniqueSeparatedSegments
+                    .get(originalTuv);
+            if (existing == null)
             {
                 m_uniqueSeparatedSegments.put(originalTuv, leverageMatches);
             }
@@ -293,67 +284,62 @@ public class LeverageDataCenter
         }
     }
 
-
     /**
-     * Get ExactMatchedSegments from the leverage results held in this
-     * object. Segments all of whose subflow separated segments have
-     * got an exact match (including Page TM match) are re-composed to
-     * a complete segment (meaning merging subflows into a main
-     * segment) and are included in the ExactMatchedSegments
-     * object. The segments that have only fuzzy matches are not
-     * included in it.
-     *
+     * Get ExactMatchedSegments from the leverage results held in this object.
+     * Segments all of whose subflow separated segments have got an exact match
+     * (including Page TM match) are re-composed to a complete segment (meaning
+     * merging subflows into a main segment) and are included in the
+     * ExactMatchedSegments object. The segments that have only fuzzy matches
+     * are not included in it.
+     * 
      * @return ExactMatchedSegments object
      */
-    public ExactMatchedSegments getExactMatchedSegments()
-        throws Exception
+    public ExactMatchedSegments getExactMatchedSegments(String companyId)
+            throws Exception
     {
-        ExactMatchedSegments exactMatchedSegments
-            = new ExactMatchedSegments();
-        
+        ExactMatchedSegments exactMatchedSegments = new ExactMatchedSegments();
+
         // walk through all unique original source segments
-        Iterator<IdenticalSegments> itOriginalSource
-            = m_uniqueOriginalSegments.values().iterator();
-        while(itOriginalSource.hasNext())
+        Iterator<IdenticalSegments> itOriginalSource = m_uniqueOriginalSegments
+                .values().iterator();
+        while (itOriginalSource.hasNext())
         {
-            IdenticalSegments identicalSegments
-                = itOriginalSource.next();
+            IdenticalSegments identicalSegments = itOriginalSource.next();
 
             // check if the original segment and all its subflows get
             // an exact match
-            ExactLeverageMatch exactLevMatch
-                = identicalSegments.getCompleteExactMatch();
-            if(exactLevMatch != null)
+            ExactLeverageMatch exactLevMatch = identicalSegments
+                    .getCompleteExactMatch(companyId);
+            if (exactLevMatch != null)
             {
                 // walk through all target matches in the exact match
                 Iterator itTargetLocale = exactLevMatch.targetLocaleIterator();
-                while(itTargetLocale.hasNext())
+                while (itTargetLocale.hasNext())
                 {
-                    GlobalSightLocale targetLocale
-                        = (GlobalSightLocale)itTargetLocale.next();
-                    LeveragedTuv matchedTuv
-                        = exactLevMatch.getMatch(targetLocale);
+                    GlobalSightLocale targetLocale = (GlobalSightLocale) itTargetLocale
+                            .next();
+                    LeveragedTuv matchedTuv = exactLevMatch
+                            .getMatch(targetLocale);
 
                     // walk through all original source segments in
                     // this unique segment (IdenticalSegments)
-                    Iterator<BaseTmTuv> itOriginalSegment
-                        = identicalSegments.originalSegmentIterator();
-                    while(itOriginalSegment.hasNext())
+                    Iterator<BaseTmTuv> itOriginalSegment = identicalSegments
+                            .originalSegmentIterator();
+                    while (itOriginalSegment.hasNext())
                     {
-                        BaseTmTuv originalTuv
-                            = itOriginalSegment.next();
+                        BaseTmTuv originalTuv = itOriginalSegment.next();
 
                         // set the exact match segment in
-                        // ExactMatchedSegments object 
+                        // ExactMatchedSegments object
                         exactMatchedSegments.putLeveragedSegment(targetLocale,
                                 originalTuv.getId(), matchedTuv.getSegment(),
                                 getJobTuvState(matchedTuv.getMatchState()),
-                                matchedTuv.getModifyDate(), m_leverageOptions
-                                        .getTmIndexsToLeverageFrom().get(
-                                                matchedTuv.getTu().getTmId())
+                                matchedTuv.getModifyDate(),
+                                m_leverageOptions.getTmIndexsToLeverageFrom()
+                                        .get(matchedTuv.getTu().getTmId())
                                         .intValue(), matchedTuv.getSid(),
                                 matchedTuv.getId());
-                    }  
+                    }
                 }
             }
         }
@@ -361,12 +347,11 @@ public class LeverageDataCenter
         return exactMatchedSegments;
     }
 
-
     // get (old) state for job data.
     public String getJobTuvState(MatchState p_matchState)
     {
         String jobTuvState = null;
-        
+
         if (p_matchState == null)
         {
             jobTuvState = LeverageMatchType.UNKNOWN_NAME;
@@ -375,148 +360,145 @@ public class LeverageDataCenter
         {
             jobTuvState = LeverageMatchType.EXACT_MATCH_NAME;
         }
-        else if(p_matchState.equals(MatchState.PAGE_TM_EXACT_MATCH))
+        else if (p_matchState.equals(MatchState.PAGE_TM_EXACT_MATCH))
         {
             jobTuvState = LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH_NAME;
         }
-        else if(p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH))
+        else if (p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH))
         {
             jobTuvState = LeverageMatchType.UNVERIFIED_EXACT_MATCH_NAME;
         }
-        
+
         return jobTuvState;
     }
-    
+
     public static String getTuvState(String p_matchState)
     {
         String jobTuvState = null;
-        
+
         if (p_matchState == null)
         {
             jobTuvState = LeverageMatchType.UNKNOWN_NAME;
         }
-        else if (p_matchState.equals(MatchState.SEGMENT_TM_EXACT_MATCH.getName()))
+        else if (p_matchState.equals(MatchState.SEGMENT_TM_EXACT_MATCH
+                .getName()))
         {
             jobTuvState = LeverageMatchType.EXACT_MATCH_NAME;
         }
-        else if(p_matchState.equals(MatchState.PAGE_TM_EXACT_MATCH.getName()))
+        else if (p_matchState.equals(MatchState.PAGE_TM_EXACT_MATCH.getName()))
         {
             jobTuvState = LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH_NAME;
         }
-        else if(p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH.getName()))
+        else if (p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH
+                .getName()))
         {
             jobTuvState = LeverageMatchType.UNVERIFIED_EXACT_MATCH_NAME;
         }
-        
+
         return jobTuvState;
     }
-
 
     /**
      * Apply Page Tm leveraging options to each Page Tm match.
      */
-    public void applyPageTmOptions()
-        throws Exception
+    public void applyPageTmOptions() throws Exception
     {
-        Iterator<IdenticalSegments> itIdenticalSegments
-            = m_uniqueOriginalSegments.values().iterator();
-        while(itIdenticalSegments.hasNext())
+        Iterator<IdenticalSegments> itIdenticalSegments = m_uniqueOriginalSegments
+                .values().iterator();
+        while (itIdenticalSegments.hasNext())
         {
-            IdenticalSegments identicalSegments
-                = itIdenticalSegments.next();
+            IdenticalSegments identicalSegments = itIdenticalSegments.next();
             identicalSegments.applyPageTmOptions();
         }
     }
-    
-            
+
     /**
      * Apply Segment Tm leveraging options to each Segment Tm match.
      */
-    public void applySegmentTmOptions()
-        throws Exception
+    public void applySegmentTmOptions() throws Exception
     {
-        if(m_uniqueSeparatedSegments != null)
+        if (m_uniqueSeparatedSegments != null)
         {
-            Iterator<LeverageMatches> itLeverageMatches
-                = m_uniqueSeparatedSegments.values().iterator();
-            while(itLeverageMatches.hasNext())
+            Iterator<LeverageMatches> itLeverageMatches = m_uniqueSeparatedSegments
+                    .values().iterator();
+            while (itLeverageMatches.hasNext())
             {
-                LeverageMatches levMatches
-                    = itLeverageMatches.next();
-                
+                LeverageMatches levMatches = itLeverageMatches.next();
+
                 // value of m_uniqueSeparatedSegments can be null
-                if(levMatches != null)
+                if (levMatches != null)
                 {
+                    levMatches.setJob(m_job);
                     levMatches.applySegmentTmOptions();
                 }
             }
         }
     }
-    
-            
 
     /**
-     * Get an Iterator that iterates leverage match results in this
-     * object. next() method of this Iterator returns LeverageMatches
-     * object.
-     *
+     * Get an Iterator that iterates leverage match results in this object.
+     * next() method of this Iterator returns LeverageMatches object.
+     * 
      * @return Iterator of LeverageMatches object
      */
-    public Iterator<LeverageMatches> leverageResultIterator()
-        throws Exception
+    public Iterator<LeverageMatches> leverageResultIterator() throws Exception
     {
         return new LeverageResultItr();
     }
 
+    public Job getJob()
+    {
+        return m_job;
+    }
+
+    public void setJob(Job m_job)
+    {
+        this.m_job = m_job;
+    }
 
     // leverage result iterator
-    private class LeverageResultItr
-        implements Iterator<LeverageMatches>
+    private class LeverageResultItr implements Iterator<LeverageMatches>
     {
         Iterator<IdenticalSegments> m_itUniqueSegment = null;
         Iterator<LeverageMatches> m_itSeparatedSegmentMatch = null;
 
         // constructor
-        private LeverageResultItr()
-            throws Exception
+        private LeverageResultItr() throws Exception
         {
             // iterator of unique segments
-            m_itUniqueSegment
-                = m_uniqueOriginalSegments.values().iterator();
-            if(m_itUniqueSegment.hasNext())
+            m_itUniqueSegment = m_uniqueOriginalSegments.values().iterator();
+            if (m_itUniqueSegment.hasNext())
             {
                 // iterator of separated segment match in IdenticalSegments
-                IdenticalSegments identicalSegments
-                    = m_itUniqueSegment.next();
-                m_itSeparatedSegmentMatch
-                    = identicalSegments.separatedSegmentMatchIterator();
+                IdenticalSegments identicalSegments = m_itUniqueSegment.next();
+                m_itSeparatedSegmentMatch = identicalSegments
+                        .separatedSegmentMatchIterator();
             }
         }
-
 
         public boolean hasNext()
         {
             boolean result = false;
-            if(m_itSeparatedSegmentMatch != null)
+            if (m_itSeparatedSegmentMatch != null)
             {
                 result = m_itSeparatedSegmentMatch.hasNext();
-                if(result == false)
+                if (result == false)
                 {
-                    if(m_itUniqueSegment.hasNext())
+                    if (m_itUniqueSegment.hasNext())
                     {
                         result = true;
                         // iterator of separated segment match in
                         // IdenticalSegments
-                        IdenticalSegments identicalSegments
-                            = (IdenticalSegments)m_itUniqueSegment.next();
-                        
+                        IdenticalSegments identicalSegments = (IdenticalSegments) m_itUniqueSegment
+                                .next();
+
                         // can't throw checked exceptions
                         try
                         {
                             m_itSeparatedSegmentMatch = identicalSegments
-                                .separatedSegmentMatchIterator();
+                                    .separatedSegmentMatchIterator();
                         }
-                        catch(Exception e)
+                        catch (Exception e)
                         {
                             throw new RuntimeException(e.getMessage());
                         }
@@ -526,11 +508,10 @@ public class LeverageDataCenter
             return result;
         }
 
-
         public LeverageMatches next()
         {
             LeverageMatches o = null;
-            if(hasNext())
+            if (hasNext())
             {
                 o = m_itSeparatedSegmentMatch.next();
             }
@@ -540,16 +521,14 @@ public class LeverageDataCenter
             }
             return o;
         }
-        
 
         public void remove()
         {
             // it shouldn't be called.
         }
-        
+
     }
-    
-            
+
     // Inner class. This class holds identical segments of a unique
     // original segment.
     private class IdenticalSegments
@@ -557,8 +536,7 @@ public class LeverageDataCenter
         // List of identical original source Tuvs. Two Tuvs are deemed to
         // be identical when they have identical segment text, the same
         // type and the same localize type. See BaseTmTuv#equals()
-        private List<BaseTmTuv> m_originalSourceTuvs = 
-                    new ArrayList<BaseTmTuv>();
+        private List<BaseTmTuv> m_originalSourceTuvs = new ArrayList<BaseTmTuv>();
 
         // Page TM matches
         private LeverageMatches m_pageTmLeverageMatches = null;
@@ -566,40 +544,40 @@ public class LeverageDataCenter
         // map of subflow id and its LeverageMatches object. One of an
         // original source Tuv this class holds is broken up and form this
         // member variable.
-        // key:    Subflow id in String (main segment's id is "0")
+        // key: Subflow id in String (main segment's id is "0")
         // value: LeverageMatches object, which holds a separated Tuv
-        //        that corresponds to the subflow id. This object also holds
-        //        leverage match result of the separated segment.
+        // that corresponds to the subflow id. This object also holds
+        // leverage match result of the separated segment.
         private Map<String, LeverageMatches> m_separatedSegments = null;
-    
+
         // indicates that the values in m_separatedSegments have been
         // merged with the Segment TM match results
         private boolean m_separatedSegmentMatchMerged = false;
-        
+
         /**
          * Add a Tuv
-         *
-         * @param p_tuv original source Tuv to be leveraged
+         * 
+         * @param p_tuv
+         *            original source Tuv to be leveraged
          */
         private void add(BaseTmTuv p_tuv)
         {
             m_originalSourceTuvs.add(p_tuv);
         }
 
-
         /**
-         * Set leverage result of page tm matching for this unique
-         * original source Tuv
-         *
-         * @param p_leverageMatches leverage match result of page tm
+         * Set leverage result of page tm matching for this unique original
+         * source Tuv
+         * 
+         * @param p_leverageMatches
+         *            leverage match result of page tm
          */
         private void setLeverageResultsOfWholeSegment(
-            LeverageMatches p_leverageMatches)
-            throws Exception
+                LeverageMatches p_leverageMatches) throws Exception
         {
-            if(p_leverageMatches != null)
+            if (p_leverageMatches != null)
             {
-                if(m_pageTmLeverageMatches != null)
+                if (m_pageTmLeverageMatches != null)
                 {
                     m_pageTmLeverageMatches.merge(p_leverageMatches);
                 }
@@ -607,153 +585,142 @@ public class LeverageDataCenter
                 {
                     m_pageTmLeverageMatches = p_leverageMatches;
                 }
-                
+
                 setPageTmMatchResultToSeparatedSegments();
             }
         }
-    
-    
+
         /**
-         * Break up a page tm match result into main segments and
-         * subflows and set them to m_separatedSegments.
-         *
-         * @param p_leverageMatches Page tm leverage result
+         * Break up a page tm match result into main segments and subflows and
+         * set them to m_separatedSegments.
+         * 
+         * @param p_leverageMatches
+         *            Page tm leverage result
          */
-        private void setPageTmMatchResultToSeparatedSegments()
-            throws Exception
+        private void setPageTmMatchResultToSeparatedSegments() throws Exception
         {
             // reset the merge flag
             m_separatedSegmentMatchMerged = false;
-            
+
             // if separated segments list are not setup, build it
-            if(m_separatedSegments == null)
+            if (m_separatedSegments == null)
             {
                 setupSeparatedSegments();
             }
-            
+
             // break up the page tm match result and put them in
             // m_separatedSegments
-            Iterator itPageTmMatchSeparated
-                = m_pageTmLeverageMatches.separateMatch().iterator();
-            while(itPageTmMatchSeparated.hasNext())
+            Iterator itPageTmMatchSeparated = m_pageTmLeverageMatches
+                    .separateMatch().iterator();
+            while (itPageTmMatchSeparated.hasNext())
             {
-                LeverageMatches separatedLevMatch
-                    = (LeverageMatches)itPageTmMatchSeparated.next();
+                LeverageMatches separatedLevMatch = (LeverageMatches) itPageTmMatchSeparated
+                        .next();
 
                 String subId = separatedLevMatch.getSubflowId();
                 // sanity check
-                if(!m_separatedSegments.containsKey(subId))
+                if (!m_separatedSegments.containsKey(subId))
                 {
                     throw new LingManagerException(
-                        "IllegalSeparatedPageTmMatch", null, null);
+                            "IllegalSeparatedPageTmMatch", null, null);
                 }
-                
+
                 m_separatedSegments.put(subId, separatedLevMatch);
             }
         }
-                
 
         /**
-         * Break up the original segment and put them in
-         * m_separatedSegments.
+         * Break up the original segment and put them in m_separatedSegments.
          */
-        private void setupSeparatedSegments()
-            throws Exception
+        private void setupSeparatedSegments() throws Exception
         {
             // if separated segment list is not there yet, build it.
-            if(m_separatedSegments == null)
+            if (m_separatedSegments == null)
             {
                 m_separatedSegments = new HashMap<String, LeverageMatches>();
-            
+
                 // no original segment, no separated segment
-                if(!m_originalSourceTuvs.isEmpty())
+                if (!m_originalSourceTuvs.isEmpty())
                 {
                     // get the first original source segment
-                    BaseTmTuv originalTuv
-                        = m_originalSourceTuvs.get(0);
+                    BaseTmTuv originalTuv = m_originalSourceTuvs.get(0);
                     BaseTmTu originalTu = originalTuv.getTu();
                     GlobalSightLocale sourceLocale = originalTuv.getLocale();
-                
-                    // break the segment up
-                    Iterator<SegmentTmTu> itSeparatedTu = TmUtil.createSegmentTmTus(
-                        originalTu, sourceLocale).iterator();
-                
-                    // walk through the separated segments
-                    while(itSeparatedTu.hasNext())
-                    {
-                        BaseTmTuv separatedTuv
-                            = itSeparatedTu.next()
-                            .getFirstTuv(sourceLocale);
 
-                        String subId
-                            = ((SegmentTmTu)separatedTuv.getTu()).getSubId();
-                        LeverageMatches levMatch
-                            = new LeverageMatches(
+                    // break the segment up
+                    Iterator<SegmentTmTu> itSeparatedTu = TmUtil
+                            .createSegmentTmTus(originalTu, sourceLocale)
+                            .iterator();
+
+                    // walk through the separated segments
+                    while (itSeparatedTu.hasNext())
+                    {
+                        BaseTmTuv separatedTuv = itSeparatedTu.next()
+                                .getFirstTuv(sourceLocale);
+
+                        String subId = ((SegmentTmTu) separatedTuv.getTu())
+                                .getSubId();
+                        LeverageMatches levMatch = new LeverageMatches(
                                 separatedTuv, m_leverageOptions);
                         m_separatedSegments.put(subId, levMatch);
                     }
                 }
             }
         }
-        
-
-
 
         /**
-         * Get LeverageMatch that has exact matches of the complete
-         * segment (not separated segments) for all or part of target
-         * locales.
-         *
-         * All the parts of the segment (the main segment and its
-         * subflows) returned in LeverageMatch are not necessarily exact
-         * matches. Only the main segment or only a subflow can be an
-         * exact. If the other parts didn't get exact matches in the TM,
-         * source segments are substituted. In other words, only one of
-         * parts of the segment gets an exact match, LeverageMatch for the
-         * segment is created and the segment string will be copied in the
-         * target segment in translation_unit_variant table.
-         *
+         * Get LeverageMatch that has exact matches of the complete segment (not
+         * separated segments) for all or part of target locales.
+         * 
+         * All the parts of the segment (the main segment and its subflows)
+         * returned in LeverageMatch are not necessarily exact matches. Only the
+         * main segment or only a subflow can be an exact. If the other parts
+         * didn't get exact matches in the TM, source segments are substituted.
+         * In other words, only one of parts of the segment gets an exact match,
+         * LeverageMatch for the segment is created and the segment string will
+         * be copied in the target segment in translation_unit_variant table.
+         * 
          * @return LeverageMatch object
          */
-        private ExactLeverageMatch getCompleteExactMatch()
-            throws Exception
+        private ExactLeverageMatch getCompleteExactMatch(String companyId)
+                throws Exception
         {
             ExactLeverageMatch exactLevMatch = null;
             Set<GlobalSightLocale> exactTargetForPageTm = null;
-            if(m_pageTmLeverageMatches != null)
+            if (m_pageTmLeverageMatches != null)
             {
                 // get exact matches from Page TM matches
-                exactLevMatch
-                    = m_pageTmLeverageMatches.getExactLeverageMatch();
-                exactTargetForPageTm
-                    = m_pageTmLeverageMatches.getExactMatchLocales();
+                exactLevMatch = m_pageTmLeverageMatches
+                        .getExactLeverageMatch(companyId);
+                exactTargetForPageTm = m_pageTmLeverageMatches
+                        .getExactMatchLocales(companyId);
             }
             else
             {
                 exactLevMatch = new ExactLeverageMatch();
                 exactTargetForPageTm = new HashSet<GlobalSightLocale>();
             }
-        
-            if(m_separatedSegments != null)
+
+            if (m_separatedSegments != null)
             {
                 // get all target locales that have at least one exact
                 // match for any separated segments
                 Set<GlobalSightLocale> exactTargetForSegmentTm = new HashSet<GlobalSightLocale>();
                 for (LeverageMatches levMatches : m_separatedSegments.values())
                 {
-                    exactTargetForSegmentTm.addAll(
-                        levMatches.getExactMatchLocales());
+                    exactTargetForSegmentTm.addAll(levMatches
+                            .getExactMatchLocales(companyId));
                 }
 
                 // remove locales that have Page TM exact match
                 exactTargetForSegmentTm.removeAll(exactTargetForPageTm);
-            
-                Iterator<GlobalSightLocale> itTargetLocales = exactTargetForSegmentTm.iterator();
-                while(itTargetLocales.hasNext())
+
+                Iterator<GlobalSightLocale> itTargetLocales = exactTargetForSegmentTm
+                        .iterator();
+                while (itTargetLocales.hasNext())
                 {
-                    GlobalSightLocale targetLocale
-                        = itTargetLocales.next();
-                
+                    GlobalSightLocale targetLocale = itTargetLocales.next();
+
                     // for each target locale, get exact match or source
                     // segment (if there is no match for the separated
                     // segment) for all separated segment and put them in
@@ -763,22 +730,22 @@ public class LeverageDataCenter
                     Map<String, String> separatedSegmentMap = new HashMap<String, String>();
                     for (String subId : m_separatedSegments.keySet())
                     {
-                        LeverageMatches levMatches
-                            = m_separatedSegments.get(subId);
-                        LeveragedTuv levMatchSub
-                            = levMatches.getExactLeverageMatch(targetLocale);
-                        if(subId == SegmentTmTu.ROOT)
+                        LeverageMatches levMatches = m_separatedSegments
+                                .get(subId);
+                        LeveragedTuv levMatchSub = levMatches
+                                .getExactLeverageMatch(targetLocale, companyId);
+                        if (subId == SegmentTmTu.ROOT)
                         {
                             levMatchMainSegment = levMatchSub;
                         }
-                        
+
                         if (levMatchSub == null)
                         {
                             isExactMatch = false;
                         }
-                        
+
                         String segment = null;
-                        if(levMatchSub != null)
+                        if (levMatchSub != null)
                         {
                             segment = levMatchSub.getSegment();
                         }
@@ -786,44 +753,42 @@ public class LeverageDataCenter
                         {
                             segment = levMatches.getOriginalTuv().getSegment();
                         }
-                    
+
                         separatedSegmentMap.put(subId, segment);
                     }
 
                     // get an original segment text (with formatting code
                     // and subflows in it)
-                    String originalSegmentText
-                        = m_originalSourceTuvs.get(0)
-                        .getSegment();
-                
+                    String originalSegmentText = m_originalSourceTuvs.get(0)
+                            .getSegment();
+
                     // get a composed segment text
                     String composedSegmentText = TmUtil.composeCompleteText(
-                        originalSegmentText, separatedSegmentMap);
-                
+                            originalSegmentText, separatedSegmentMap);
+
                     // If there isn't matched main segment, create one
                     // from the original main segment
-                    if(levMatchMainSegment == null)
+                    if (levMatchMainSegment == null)
                     {
-                        BaseTmTuv originalMainSegment
-                            = m_separatedSegments
+                        BaseTmTuv originalMainSegment = m_separatedSegments
                                 .get(SegmentTmTu.ROOT).getOriginalTuv();
                         BaseTmTu originalMainTu = originalMainSegment.getTu();
-                        
-                        LeveragedTu createdTu = new LeveragedPageTu(
-                            0, 0, originalMainTu.getFormat(),
-                            originalMainTu.getType(),
-                            originalMainTu.isTranslatable(),
-                            originalMainSegment.getLocale());
 
-                        levMatchMainSegment = new LeveragedPageTuv(
-                            0, "", targetLocale);
+                        LeveragedTu createdTu = new LeveragedPageTu(0, 0,
+                                originalMainTu.getFormat(),
+                                originalMainTu.getType(),
+                                originalMainTu.isTranslatable(),
+                                originalMainSegment.getLocale());
+
+                        levMatchMainSegment = new LeveragedPageTuv(0, "",
+                                targetLocale);
 
                         createdTu.addTuv(levMatchMainSegment);
                     }
 
                     // put the composed segment in it
                     levMatchMainSegment.setSegment(composedSegmentText);
-                
+
                     // put it in a return object
                     if (isExactMatch)
                     {
@@ -831,29 +796,25 @@ public class LeverageDataCenter
                     }
                 }
             }
-        
+
             return exactLevMatch;
         }
-    
 
         /**
          * Apply Page Tm leveraging options to the Page Tm match.
          */
-        public void applyPageTmOptions()
-            throws Exception
+        public void applyPageTmOptions() throws Exception
         {
-            if(m_pageTmLeverageMatches != null)
+            if (m_pageTmLeverageMatches != null)
             {
                 m_pageTmLeverageMatches.applyPageTmOptions();
             }
         }
-        
-                
+
         /**
-         * Returns Iterator of a list of identical original source
-         * segments. next() method of this Iterator returns BaseTmTuv
-         * object
-         *
+         * Returns Iterator of a list of identical original source segments.
+         * next() method of this Iterator returns BaseTmTuv object
+         * 
          * @return Iterator
          */
         private Iterator<BaseTmTuv> originalSegmentIterator()
@@ -861,172 +822,155 @@ public class LeverageDataCenter
             return m_originalSourceTuvs.iterator();
         }
 
-
         /**
-         * Returns Iterator of a list of separated segments. next() method
-         * of this Iterator returns LeverageMatches object
-         *
+         * Returns Iterator of a list of separated segments. next() method of
+         * this Iterator returns LeverageMatches object
+         * 
          * @return Iterator
          */
         private Iterator<LeverageMatches> separatedSegmentIterator()
-            throws Exception
+                throws Exception
         {
             // if separated segment list is not there yet, build it.
-            if(m_separatedSegments == null)
+            if (m_separatedSegments == null)
             {
                 setupSeparatedSegments();
             }
             return m_separatedSegments.values().iterator();
         }
-    
 
         /**
-         * Test if Page TM leverage results have exact matches for all
-         * target locales
+         * Test if Page TM leverage results have exact matches for all target
+         * locales
          */
-        private boolean hasPageTmExactMatchForAllLocales()
+        private boolean hasPageTmExactMatchForAllLocales(String companyId)
         {
             boolean result = false;
-            
-            if(m_pageTmLeverageMatches != null)
+
+            if (m_pageTmLeverageMatches != null)
             {
                 // get all target locales of the exact matches
-                Collection exactMatchedTargetLocales
-                    = m_pageTmLeverageMatches.getExactMatchLocales();
+                Collection exactMatchedTargetLocales = m_pageTmLeverageMatches
+                        .getExactMatchLocales(companyId);
 
                 // test if the exact match target locales contains all
                 // target locales for leveraging
-                result
-                    = exactMatchedTargetLocales.containsAll(m_targetLocales);
+                result = exactMatchedTargetLocales.containsAll(m_targetLocales);
             }
 
             return result;
         }
 
-
         /**
-         * Merge Segment TM match result of each separated segment
-         * with the separated Page TM match results.
+         * Merge Segment TM match result of each separated segment with the
+         * separated Page TM match results.
          */
-        private void mergeSeparatedSegmentMatchResult()
-            throws Exception
+        private void mergeSeparatedSegmentMatchResult() throws Exception
         {
             // if separated segment list is not there yet, build it.
-            if(m_separatedSegments == null)
+            if (m_separatedSegments == null)
             {
                 setupSeparatedSegments();
             }
 
-            if(m_uniqueSeparatedSegments != null)
+            if (m_uniqueSeparatedSegments != null)
             {
-                Iterator<LeverageMatches> itSeparatedSegment
-                    = m_separatedSegments.values().iterator();
-                while(itSeparatedSegment.hasNext())
+                Iterator<LeverageMatches> itSeparatedSegment = m_separatedSegments
+                        .values().iterator();
+                while (itSeparatedSegment.hasNext())
                 {
-                    LeverageMatches pageTmLevMatch
-                        = itSeparatedSegment.next();
-                    BaseTmTuv separatedSourceTuv
-                        = pageTmLevMatch.getOriginalTuv();
-                    LeverageMatches segmentTmLevMatch
-                        = m_uniqueSeparatedSegments
-                        .get(separatedSourceTuv);
+                    LeverageMatches pageTmLevMatch = itSeparatedSegment.next();
+                    BaseTmTuv separatedSourceTuv = pageTmLevMatch
+                            .getOriginalTuv();
+                    LeverageMatches segmentTmLevMatch = m_uniqueSeparatedSegments
+                            .get(separatedSourceTuv);
                     pageTmLevMatch.merge(segmentTmLevMatch);
                 }
             }
-            
+
             // set the 'merged' flag to true
             m_separatedSegmentMatchMerged = true;
         }
-        
-                
 
         /**
-         * Get an Iterator that iterates leverage match results of
-         * separated segments in this object. The iterator iterates
-         * the result of each separated segments of each original
-         * segments.  next() method of this Iterator returns
-         * appropriate LeverageMatches object.
-         *
+         * Get an Iterator that iterates leverage match results of separated
+         * segments in this object. The iterator iterates the result of each
+         * separated segments of each original segments. next() method of this
+         * Iterator returns appropriate LeverageMatches object.
+         * 
          * @return Iterator of LeverageMatches object
          */
         private Iterator<LeverageMatches> separatedSegmentMatchIterator()
-            throws Exception
+                throws Exception
         {
             // if separated segment list is not there yet, build it.
-            if(m_separatedSegments == null)
+            if (m_separatedSegments == null)
             {
                 setupSeparatedSegments();
             }
 
             // if match result is not merged yet, do so now
-            if(!m_separatedSegmentMatchMerged)
+            if (!m_separatedSegmentMatchMerged)
             {
                 mergeSeparatedSegmentMatchResult();
             }
-            
+
             return new SeparatedSegmentMatchItr();
         }
-        
 
         // iterator of separated segment tm matches
-        private class SeparatedSegmentMatchItr
-            implements Iterator<LeverageMatches>
+        private class SeparatedSegmentMatchItr implements
+                Iterator<LeverageMatches>
         {
             Iterator<BaseTmTuv> m_itOriginalSegment = null;
             Iterator<LeverageMatches> m_itSeparatedSegment = null;
             BaseTmTuv m_originalSourceTuv = null;
-            
 
             // constructor
             private SeparatedSegmentMatchItr()
             {
                 // iterator of unique segments
                 m_itOriginalSegment = m_originalSourceTuvs.iterator();
-                if(m_itOriginalSegment.hasNext())
+                if (m_itOriginalSegment.hasNext())
                 {
-                    m_originalSourceTuv
-                        = m_itOriginalSegment.next();
-                    
+                    m_originalSourceTuv = m_itOriginalSegment.next();
+
                     // iterator of separated segment
-                    m_itSeparatedSegment
-                        = m_separatedSegments.values().iterator();
+                    m_itSeparatedSegment = m_separatedSegments.values()
+                            .iterator();
                 }
             }
-
 
             public boolean hasNext()
             {
                 boolean result = false;
-                if(m_itSeparatedSegment != null)
+                if (m_itSeparatedSegment != null)
                 {
                     result = m_itSeparatedSegment.hasNext();
-                    if(result == false)
+                    if (result == false)
                     {
-                        if(m_itOriginalSegment.hasNext())
+                        if (m_itOriginalSegment.hasNext())
                         {
                             result = true;
 
-                            m_originalSourceTuv
-                                = m_itOriginalSegment.next();
-                    
+                            m_originalSourceTuv = m_itOriginalSegment.next();
+
                             // iterate the separated segment again
-                            m_itSeparatedSegment
-                                = m_separatedSegments.values().iterator();
+                            m_itSeparatedSegment = m_separatedSegments.values()
+                                    .iterator();
                         }
                     }
                 }
                 return result;
             }
 
-
             public LeverageMatches next()
             {
                 LeverageMatches levMatch = null;
-                if(hasNext())
+                if (hasNext())
                 {
                     levMatch = m_itSeparatedSegment.next();
-                    levMatch.setOriginalSourceTuvId(
-                        m_originalSourceTuv.getId());
+                    levMatch.setOriginalSourceTuvId(m_originalSourceTuv.getId());
                 }
                 else
                 {
@@ -1034,15 +978,14 @@ public class LeverageDataCenter
                 }
                 return levMatch;
             }
-        
 
             public void remove()
             {
                 // it shouldn't be called.
             }
-        
+
         }
-        
+
     }
 
 }

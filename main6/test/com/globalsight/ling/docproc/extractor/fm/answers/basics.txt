@@ -43,6 +43,19 @@ step[x13] on page
 Status="Release" RevDate="Feb 2005" ModifiedBy="Lisa Blue"
 step
 Figure[x14] on page
+Chapter
+Chapter
+Chapter
+Chapter
+Chapter
+Appendix
+Appendix
+Appendix
+Appendix
+Chapter
+Chapter
+Appendix
+Appendix
 Basics
 The following topics are provided[x15]:
 [x16]A[x17]bout BMC Remedy Alert

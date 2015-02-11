@@ -120,9 +120,7 @@ function submitForm()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("word_count_report_in_csv_format")%>
-<%=bundle.getString("the_all_multi_select")%>
-</SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/jobStatusXlsReport.jsp">

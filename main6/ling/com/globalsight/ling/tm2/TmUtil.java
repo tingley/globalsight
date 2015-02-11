@@ -57,44 +57,49 @@ import com.globalsight.util.gxml.GxmlNames;
  */
 public class TmUtil
 {
-    private static Logger c_logger = Logger
-            .getLogger(TmUtil.class.getName());
+    private static Logger c_logger = Logger.getLogger(TmUtil.class.getName());
 
     public static final String X_NBSP = "x-nbspace";
     public static final String X_MSO_SPACERUN = "x-mso-spacerun";
     public static final String X_MSO_TAB = "x-mso-tab";
 
-    
     /**
-     * Produce a Hibernate session wrapped around a stable connection from
-     * our pool.  This will avoid TM code leaking connection objects when it
-     * calls session.connection().  Yes, this is all very gross.
+     * Produce a Hibernate session wrapped around a stable connection from our
+     * pool. This will avoid TM code leaking connection objects when it calls
+     * session.connection(). Yes, this is all very gross.
+     * 
      * @return
      * @throws LingManagerException
      */
-    public static Session getStableSession() throws LingManagerException {
-        try {
+    public static Session getStableSession() throws LingManagerException
+    {
+        try
+        {
             Connection conn = DbUtil.getConnection();
             conn.setAutoCommit(false);
             return HibernateUtil.openSessionWithConnection(conn);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
-    
-    public static void closeStableSession(Session session) {
-        try {
+
+    public static void closeStableSession(Session session)
+    {
+        try
+        {
             Connection conn = session.disconnect();
             conn.setAutoCommit(true);
             DbUtil.returnConnection(conn);
             session.close();
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Create Tuvs suitable for storing in Segment TM. Tuvs in Segment TM don't
      * have native formatting codes and their subflows are separated out from
@@ -145,9 +150,9 @@ public class TmUtil
                         if (p_tu instanceof LeveragedTu)
                         {
                             segmentTmTu = new LeveragedSegmentTu(p_tu.getId(),
-                                    p_tu.getTmId(), segAtt.getFormat(), segAtt
-                                            .getType(),
-                                    segAtt.isTranslatable(), p_sourceLocale);
+                                    p_tu.getTmId(), segAtt.getFormat(),
+                                    segAtt.getType(), segAtt.isTranslatable(),
+                                    p_sourceLocale);
                             ((LeveragedTu) segmentTmTu)
                                     .setMatchState(((LeveragedTu) p_tu)
                                             .getMatchState());
@@ -162,17 +167,26 @@ public class TmUtil
                         }
                         else
                         {
-                            segmentTmTu = new SegmentTmTu(p_tu.getId(), p_tu
-                                    .getTmId(), segAtt.getFormat(), segAtt
-                                    .getType(), segAtt.isTranslatable(),
+                            segmentTmTu = new SegmentTmTu(p_tu.getId(),
+                                    p_tu.getTmId(), segAtt.getFormat(),
+                                    segAtt.getType(), segAtt.isTranslatable(),
                                     p_sourceLocale);
                         }
 
                         segmentTmTu.setSubId(subId);
 
                         segmentTmTu.setSourceTmName(p_tu.getSourceTmName());
-                        segmentTmTu.setFromWorldServer(p_tu.isFromWorldServer());
+                        segmentTmTu
+                                .setFromWorldServer(p_tu.isFromWorldServer());
                         segmentTmTu.setSourceContent(p_tu.getSourceContent());
+
+                        if (p_tu instanceof SegmentTmTu)
+                        {
+                            segmentTmTu.setProps(((SegmentTmTu) p_tu)
+                                    .getProps());
+                            segmentTmTu.setSID(((SegmentTmTu) p_tu).getSID());
+                        }
+
                         newTus.put(subId, segmentTmTu);
                     }
 
@@ -204,7 +218,8 @@ public class TmUtil
                         if (tuv instanceof SegmentTmTuv)
                         {
                             SegmentTmTuv segmentTuv = (SegmentTmTuv) tuv;
-                            segmentTmTuv.setOrgSegment(segmentTuv.getOrgSegment());
+                            segmentTmTuv.setOrgSegment(segmentTuv
+                                    .getOrgSegment());
                         }
                     }
 
@@ -255,15 +270,27 @@ public class TmUtil
 
         // get the main text of the fragmented segment
         String mainText = (String) p_separatedSegmentMap.get(SegmentTmTu.ROOT);
+        if (mainText == null)
+        {
+            mainText = p_originalGxml;
+        }
+        else
+        {
+            // inject formatting codes and subflows to the main text from
+            // the source text
+            mainText = injectCodes(mainText, sourceDom);
+        }
 
-        c_logger.debug("mainText = " + mainText);
-
-        // inject formatting codes and subflows to the main text from
-        // the source text
-        mainText = injectCodes(mainText, sourceDom);
-
-        // substitute subflow contents
-        mainText = substituteSubflows(mainText, p_separatedSegmentMap);
+        // substitute subflow contents (for now,only when all subIds have extact
+        // matches, this methods will succeed)
+        try
+        {
+            mainText = substituteSubflows(mainText, p_separatedSegmentMap);
+        }
+        catch (Exception e)
+        {
+            c_logger.warn(e);
+        }
 
         return mainText;
     }
@@ -308,31 +335,37 @@ public class TmUtil
         return handler.toString();
     }
 
-    public static String getSidForTuv(long tmId, long tuvId) 
-                throws LingManagerException {
+    public static String getSidForTuv(long tmId, long tuvId)
+            throws LingManagerException
+    {
         if (tuvId > 0 && tmId > 0)
         {
-            try {
+            try
+            {
                 TmCoreManager mgr = LingServerProxy.getTmCoreManager();
                 return mgr.getSidByTuvId(tmId, tuvId);
             }
-            catch (RemoteException e) {
+            catch (RemoteException e)
+            {
                 throw new LingManagerException(e);
             }
         }
         return null;
     }
-    
-    public static Date getModifyDateForTuv(long tmId, long tuvId) 
-        throws LingManagerException {
+
+    public static Date getModifyDateForTuv(long tmId, long tuvId)
+            throws LingManagerException
+    {
         if (tuvId > 0 && tmId > 0)
         {
             // This used to use Hibernate to fetch a ProjectTmTuvT.
-            try {
+            try
+            {
                 TmCoreManager mgr = LingServerProxy.getTmCoreManager();
                 return mgr.getModifyDateByTuvId(tmId, tuvId);
             }
-            catch (RemoteException e) {
+            catch (RemoteException e)
+            {
                 throw new LingManagerException(e);
             }
         }
@@ -340,38 +373,44 @@ public class TmUtil
     }
 
     public static String getCreationUserIdForTuv(long tmId, long tuvId)
-        throws LingManagerException {
+            throws LingManagerException
+    {
         if (tuvId > 0 && tmId > 0)
         {
             // This used to use Hibernate to fetch a ProjectTmTuvT.
-            try {
+            try
+            {
                 TmCoreManager mgr = LingServerProxy.getTmCoreManager();
                 return mgr.getCreatingUserByTuvId(tmId, tuvId);
             }
-            catch (RemoteException e) {
+            catch (RemoteException e)
+            {
                 throw new LingManagerException(e);
             }
         }
         return null;
     }
-    
-    public static String getSourceTextForTuv(long tmId, long tuvId, long srcLocaleId)
-        throws LingManagerException {
+
+    public static String getSourceTextForTuv(long tmId, long tuvId,
+            long srcLocaleId) throws LingManagerException
+    {
 
         if (tuvId > 0 && tmId > 0)
         {
             // Based on ProjectTmTuvT-fetching code from OfflinePageData.
-            try {
+            try
+            {
                 TmCoreManager mgr = LingServerProxy.getTmCoreManager();
                 return mgr.getSourceTextByTuvId(tmId, tuvId, srcLocaleId);
             }
-            catch (RemoteException e) {
+            catch (RemoteException e)
+            {
                 throw new LingManagerException(e);
             }
         }
         return null;
     }
-    
+
     // replace subflow contents in a main gxml text with fragmented
     // segments that are mapped with its sub id stored in a Map object
     static private String substituteSubflows(String p_mainText,
@@ -464,6 +503,13 @@ public class TmUtil
                 GxmlElement orgElem = m_sourceDom
                         .getNthDescendantByAttributeValue(attName, tuType,
                                 elementType, pos);
+
+				if (p_attributes.getProperty(GxmlNames.BPT_TYPE) == null
+						&& "yes".equalsIgnoreCase(p_attributes.getProperty(GxmlNames.INTERNAL)))
+                {
+                    orgElem = m_sourceDom.getNthDescendantByAttributeNone(attName, elementType, pos);
+                }
+                
                 String tagGxml = null;
                 if (orgElem != null)
                 {
@@ -752,12 +798,12 @@ public class TmUtil
             return closingTopTag.subst(result, "");
         }
     }
-    
+
     /**
      * Get BaseTmTuv from a TUV (moved here from "InProgressTmManagerLocal")
      */
-    public static BaseTmTuv createTmSegment(Tuv p_tuv, String p_subId)
-            throws LingManagerException
+    public static BaseTmTuv createTmSegment(Tuv p_tuv, String p_subId,
+            String companyId) throws LingManagerException
     {
         BaseTmTuv result = null;
 
@@ -765,8 +811,9 @@ public class TmUtil
         {
             GlobalSightLocale locale = p_tuv.getGlobalSightLocale();
 
-            PageTmTu tu = new PageTmTu(p_tuv.getTu().getId(), 0, "unknown",
-                    p_tuv.getTu().getTuType(), !p_tuv.isLocalizable());
+            PageTmTu tu = new PageTmTu(p_tuv.getTu(companyId).getId(), 0,
+                    "unknown", p_tuv.getTu(companyId).getTuType(),
+                    !p_tuv.isLocalizable(companyId));
             PageTmTuv tuv = new PageTmTuv(p_tuv.getId(), p_tuv.getGxml(),
                     locale);
             tuv.setSid(p_tuv.getSid());
@@ -791,7 +838,7 @@ public class TmUtil
 
         return result;
     }
-    
+
     /**
      * Get BaseTmTuv from a TUV (moved here from "InProgressTmManagerLocal")
      */
@@ -836,7 +883,7 @@ public class TmUtil
 
         return result;
     }
-    
+
     // add the top <segment> tag if it doesn't exist
     private static String addSegmentTag(String p_text)
     {
@@ -847,7 +894,7 @@ public class TmUtil
 
         return p_text;
     }
-    
+
     // add the top <localizable> tag if it doesn't exist
     private static String addLocalizableTag(String p_text)
     {

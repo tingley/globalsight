@@ -1,6 +1,6 @@
 
 <!-- Task Comments data table -->
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%">
         <tr>
             <td><b><%=bundle.getString("lb_activity")%> <%=bundle.getString("lb_comments")%>
             </b></td>
@@ -36,20 +36,20 @@
                     onclick="enableButtons('editActBtn')">
             </amb:permission>
             </amb:column>
-            <amb:column label="lb_target_locale" width="100px" sortBy="<%=TaskCommentInfoComparator.LOCALE%>">
+            <amb:column label="lb_target_locale" width="10%" sortBy="<%=TaskCommentInfoComparator.LOCALE%>">
                 <%=taskcomment.getTargetLocale().getDisplayName()%>
             </amb:column>
-            <amb:column label="lb_comment_creator" width="100px" sortBy="<%=TaskCommentInfoComparator.USER%>">
-                <%=taskcomment.getCreatorId()%>
+            <amb:column label="lb_comment_creator" width="10%" sortBy="<%=TaskCommentInfoComparator.USER%>">
+                <%=UserUtil.getUserNameById(taskcomment.getCreatorId())%>
             </amb:column>
-            <amb:column label="lb_date_created" width="100px" sortBy="<%=TaskCommentInfoComparator.DATE%>">
+            <amb:column label="lb_date_created" width="15%" sortBy="<%=TaskCommentInfoComparator.DATE%>">
                 <%=taskcomment.getCreatedDate()%>
             </amb:column>
-            <amb:column label="lb_activity" width="100px" sortBy="<%=TaskCommentInfoComparator.TASK%>">
+            <amb:column label="lb_activity" width="10%" sortBy="<%=TaskCommentInfoComparator.TASK%>">
                 <%=taskcomment.getTaskDisplayName()%>
             </amb:column>
-            <amb:column label="lb_comments" width="350px" style="word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:350px\'>\");}</SCRIPT>"); %>
+            <amb:column label="lb_comments" width="35%" style="word-wrap:break-word;word-break:break-all">
+            <DIV style='width:40%'>
                 <%
                     String com = taskcomment.getComment();
                     if (com.length() > 200)
@@ -64,9 +64,10 @@
                     else
                         out.println(taskcomment.getComment());
                 %>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+            </DIV>
             </amb:column>
-            <amb:column label="lb_attached_files" width="100px" style="word-wrap:break-word;word-break:break-all">
+	    <amb:column label="multiCheckbox_2" align="right" width="5px"></amb:column>
+            <amb:column label="lb_attached_files" width="20%" style="word-wrap:break-word;word-break:break-all">
             <%
                  List commentReferences = taskcomment.getAttachments();
                  String commentId = (new Long(taskcomment.getCommentId())).toString();
@@ -83,14 +84,13 @@
                             filesize = (filesize%1024!=0) ?
                                  ((filesize/1024)+1)/*round up*/ : filesize/1024;
                         }
-
 %>
-						<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+                        <DIV style='width:100%'>
+			<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
                         	<input type="checkbox" id="<%=commentId%>" name="ActivityCheckboxBtn" value="<%=commentId + ":" + file.getFileAccess() + ":" + file.getFilename()%>">
                         </amb:permission>
 
                         <IMG SRC="/globalsight/images/file_paperclip.gif" ALT="<%=bundle.getString("lb_reference_file")%>" HEIGHT=15 WIDTH=13>
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:100px\'>\");}</SCRIPT>"); %>
 <%
 path = "/globalsight/".concat(AmbFileStoragePathUtils.COMMENT_REFERENCE_SUB_DIR).concat(File.separator).concat(commentId);
 path += File.separator.concat(file.getFileAccess()).concat(File.separator).concat(file.getFilename());
@@ -99,7 +99,6 @@ path = URLEncoder.encodeUrlStr(path);
                         <A class="standardHREF" target="_blank" href="<%=path %>">
                         <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
                         </A>
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
                         <SPAN CLASS=smallText>
                         <%=numberFormat.format(filesize)%>k
 <%
@@ -113,6 +112,7 @@ path = URLEncoder.encodeUrlStr(path);
                         }
 %>
                         </SPAN>
+                        </DIV>
                         <br>
 <%
                     }
@@ -146,7 +146,7 @@ path = URLEncoder.encodeUrlStr(path);
                 <%=taskcomment.getTargetLocale().getDisplayName()%>
             </amb:column>
             <amb:column label="lb_comment_creator" width="100px" sortBy="<%=TaskCommentInfoComparator.USER%>">
-                <%=taskcomment.getCreatorId()%>
+                <%=UserUtil.getUserNameById(taskcomment.getCreatorId())%>
             </amb:column>
             <amb:column label="lb_date_created" width="100px" sortBy="<%=TaskCommentInfoComparator.DATE%>">
                 <%=taskcomment.getCreatedDate()%>
@@ -230,7 +230,8 @@ path = URLEncoder.encodeUrlStr(path);
       </td>
       <tr>
       <td style="text-align:right">
-     	<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+     	<%--for gbs-2599
+	amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
 				<A CLASS="standardHREF" HREF="#"
                      onClick="doCheckAll('ActivityCheckboxBtn'); return false;"
                      onFocus="this.blur();"><%=bundle.getString("lb_check_all")%></A> |
@@ -239,7 +240,7 @@ path = URLEncoder.encodeUrlStr(path);
                      onFocus="this.blur();"><%=bundle.getString("lb_clear_all")%></A>
 
       		<input type="BUTTON" value="<%=bundle.getString("lb_download_files_in_job_detail")%>" onclick="submitForm('DownloadFiles')"/>
-      	</amb:permission>
+      	</amb:permission--%>
     <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
     <INPUT TYPE="BUTTON" NAME=editActBtn VALUE="<%=editButton%>" disabled onClick="submitForm('Edit');">
     </amb:permission>

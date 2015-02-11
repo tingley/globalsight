@@ -9,7 +9,8 @@
       <class name="com.globalsight.selenium.testcases.dataprepare.smoketest.job.PrepareCreatingJob"/>
     </classes>
   </test> 
-    
+
+<!-- 
   <test name="CreateJobs" preserve-order="true">
     <classes>
       <class name="com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreateJobs"/>
@@ -21,7 +22,7 @@
       <class name="com.globalsight.selenium.testcases.dataprepare.smoketest.job.JobActivityOperation"/>
     </classes>
   </test> 
-    
+   -->
 </suite>
 
 

@@ -26,7 +26,7 @@ public class OfflinePageDataTest
     public void testGetSourceTargetText()
     {
         OfflinePageData opd = new OfflinePageData();
-        
+
         LeverageMatch match = new LeverageMatch();
         match.setMatchedText("Sample Document in Chinese");
         match.setProjectTmIndex(Leverager.MT_PRIORITY);
@@ -39,14 +39,14 @@ public class OfflinePageDataTest
         boolean isFromXliff = false;
         String sourceLocal = "en_US";
         String targetLocal = "zh_CN";
-        
-        ArrayList arr = opd
-                .getSourceTargetText(null, match, sourceText, targetText,
-                        userId, isFromXliff, sourceLocal, targetLocal, true);
+
+        ArrayList arr = opd.getSourceTargetText(null, match, sourceText,
+                targetText, userId, isFromXliff, sourceLocal, targetLocal,
+                true, "1000");
         Assert.assertSame("MT!", (String) arr.get(2));
 
         arr = opd.getSourceTargetText(null, match, sourceText, targetText,
-                userId, isFromXliff, sourceLocal, targetLocal, false);
+                userId, isFromXliff, sourceLocal, targetLocal, false, "1000");
         Assert.assertSame("Google_MT", (String) arr.get(2));
     }
 

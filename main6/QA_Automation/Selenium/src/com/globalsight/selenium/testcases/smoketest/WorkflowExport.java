@@ -1,69 +1,22 @@
 package com.globalsight.selenium.testcases.smoketest;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.WorkflowsFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
-import com.thoughtworks.selenium.Selenium;
 
 public class WorkflowExport extends BaseTestCase
 {
-    private Selenium selenium;
-    private WorkflowsFuncs iWorkflowsFuncs = new WorkflowsFuncs();
+    private WorkflowsFuncs workflowsFuncs = new WorkflowsFuncs();
 
-  @Test
-  public void exportWorkflow() throws Exception 
-  {
-      selenium.click(MainFrame.Setup_MENU);
-      selenium.click(MainFrame.Workflows_SUBMENU);
-      selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-      iWorkflowsFuncs.exportWorkflow(selenium, ConfigUtil.getDataInCase(getClassName(), "workflowTemplate"));
-  }
-  @BeforeMethod
-  public void beforeMethod() {
-      CommonFuncs.loginSystemWithAdmin(selenium);
-  }
+    @Test
+    public void exportWorkflow() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.WORKFLOWS_SUBMENU);
 
-  @AfterMethod
-  public void afterMethod() {
-      CommonFuncs.logoutSystem(selenium);
-  }
-
-  @BeforeClass
-  public void beforeClass() {
-  }
-
-  @AfterClass
-  public void afterClass() {
-  }
-
-  @BeforeTest
-  public void beforeTest() {
-      selenium=CommonFuncs.initSelenium();
-  }
-
-  @AfterTest
-  public void afterTest() {
-      CommonFuncs.endSelenium(selenium);
-      
-  }
-
-  @BeforeSuite
-  public void beforeSuite() {
-  }
-
-  @AfterSuite
-  public void afterSuite() {
-  }
+        workflowsFuncs.exportWorkflow(selenium,
+                getProperty("workflow.export.workflowTemplate"));
+    }
 }

@@ -35,10 +35,10 @@ namespace InDesignConverter
                 m_watchDirNames = m_watchDirNameIndd + ";" + m_watchDirNameInx;
 
                 m_log = Logger.GetLogger();
+                m_log.EnableDebug = AppConfig.IsDebugEnabled();
                 m_log.Log("[Indesign]: GlobalSight InDesign CS4 Converter starting up.");
                 m_log.Log("[Indesign]: Creating and starting threads to watch directory " +
                     m_watchDirNames);
-
                 m_importConverterRunner = new ConverterRunner(
                     new InDesignConverterImpl(InDesignConverterImpl.ConversionType.IMPORT),
                     m_watchDirNames);

@@ -59,7 +59,7 @@ public class TargetPagePersistenceCommand extends PersistenceCommand
         "TOTAL_WORD_COUNT, SUB_LEV_MATCH_WORD_COUNT, SUB_LEV_REPETITION_WORD_COUNT, " +
         "FUZZY_LOW_WORD_COUNT, FUZZY_MED_WORD_COUNT, FUZZY_MED_HI_WORD_COUNT, " + 
         "FUZZY_HI_WORD_COUNT, EXACT_CONTEXT_WORD_COUNT, EXACT_SEGMENT_TM_WORD_COUNT, IN_CONTEXT_MATCH_WORD_COUNT " + 
-        "NO_MATCH_WORD_COUNT,NO_USE_IC_MATCH_WORD_COUNT,NO_USE_EXACT_MATCH_WORD_COUNT,IS_DEFAULT_CONTEXT_MATCH, storage_path, modifier_user_id, last_modified, file_length) " +
+        "NO_MATCH_WORD_COUNT,NO_USE_IC_MATCH_WORD_COUNT, TOTAL_EXACT_MATCH_WORD_COUNT,IS_DEFAULT_CONTEXT_MATCH, storage_path, modifier_user_id, last_modified, file_length) " +
         " values(null,?,?,?,0,0,0,0,0,0,0,0,0,0,0,0,0,'N',?,?,?,?)";
 
     // private static final String m_updateImportError =

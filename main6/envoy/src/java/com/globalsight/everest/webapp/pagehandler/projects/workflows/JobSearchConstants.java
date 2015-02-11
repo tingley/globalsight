@@ -42,6 +42,11 @@ public class JobSearchConstants
     public static String ACCEPTANCE_END = "aef";
     public static String ACCEPTANCE_END_OPTIONS = "aeo";
     public static String COMPANY_OPTIONS = "comanyo";
+    
+    public static final String EXPORT_DATE_START = "edss";
+    public static final String EXPORT_DATE_START_OPTIONS = "edso";
+    public static final String EXPORT_DATE_END = "edee";
+    public static final String EXPORT_DATE_END_OPTIONS = "edes";
 
     // Cookie and session attribute names
     public static final String MRU_JOBS = "mostRecentlyUsedJobs";

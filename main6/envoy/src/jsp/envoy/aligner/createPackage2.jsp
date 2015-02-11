@@ -264,6 +264,7 @@ private void getDocumentString(File p_document, String p_selectFileURL,
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>
@@ -417,6 +418,18 @@ function navigateDirectoriesTrg(folder)
    navigateDirectoriesForm.<%=WebAppConstants.GAP_CURRENTFOLDERTRG%>.value = folder;
    navigateDirectoriesForm.submit();
 }
+//for gbs-2599
+$(document).ready(function(){
+	$("#selectAll").click(function(){
+		$("form[name='selectedFilesForm'] :checkbox[name!='selectAll']").each(function(){
+			if($("#selectAll").attr("checked")){
+				$(this).attr("checked",true);
+			}else{
+				$(this).attr("checked",false);
+			}
+		});      
+	});
+});
 </script>
 <STYLE type="text/css">
 .importList {
@@ -486,7 +499,6 @@ function navigateDirectoriesTrg(folder)
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 100px; LEFT: 0px; overflow-y: scroll;">
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH=320>
-  <TBODY>
     <COL WIDTH=21>   <!-- Checkbox -->
     <COL WIDTH=22>   <!-- Folder/File icon -->
     <COL WIDTH=259>  <!-- File -->
@@ -535,7 +547,6 @@ function navigateDirectoriesTrg(folder)
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 265px; LEFT: 0px; overflow-y: scroll;">
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH=320>
-  <TBODY>
     <COL WIDTH=21>   <!-- Checkbox -->
     <COL WIDTH=22>   <!-- Folder/File icon -->
     <COL WIDTH=259>  <!-- File -->
@@ -605,12 +616,11 @@ function navigateDirectoriesTrg(folder)
 
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH="320">
-  <TBODY>
     <COL WIDTH=21>   <!-- Checkbox -->
     <COL WIDTH=22>   <!-- File icon -->
     <COL WIDTH=277>  <!-- File -->
     <TR CLASS="tableHeadingBasic">
-      <TD>&nbsp;</TD>
+      <TD><input type="checkbox" id="selectAll" name="selectAll"/></TD>
       <TD><IMG SRC="/globalsight/images/file.gif" HEIGHT=15 WIDTH=13 VSPACE=2></TD>
       <TD><%=bundle.getString("lb_file")%></TD>
     </TR>
@@ -643,13 +653,14 @@ function navigateDirectoriesTrg(folder)
 <!-- End Selected Files -->
 </FORM>
 
-<DIV CLASS="standardText"
+<!--for gbs-2599
+DIV CLASS="standardText"
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 7; TOP: 400px; LEFT: 420px;">
 <A CLASS="standardHREF" HREF="#" onclick="checkAll('selectedFilesForm')"
  ><%=bundle.getString("lb_check_all")%></A> |
 <A CLASS="standardHREF" HREF="#" onclick="clearAll('selectedFilesForm')"
  ><%=bundle.getString("lb_clear_all")%></A>
-</DIV>
+</DIV-->
 
 <!-- Navigation Buttons -->
 <!-- <DIV ALIGN="RIGHT" STYLE="POSITION: ABSOLUTE; Z-INDEX: 7; TOP: 415px; LEFT: 420px; WIDTH: 338"> -->

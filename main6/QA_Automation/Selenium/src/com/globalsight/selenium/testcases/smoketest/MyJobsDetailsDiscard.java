@@ -5,24 +5,14 @@ import junit.framework.Assert;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
 import com.globalsight.selenium.functions.BasicFuncs;
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.JobDetails;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.pages.MyActivities;
-import com.globalsight.selenium.pages.MyJobs;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
 import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreateJobs;
-import com.thoughtworks.selenium.Selenium;
-
+import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreatedJob;
 
 /*
  * TestCaseName: MyJobsDetailsDiscard.java 
@@ -33,63 +23,50 @@ import com.thoughtworks.selenium.Selenium;
  * 2011-6-26 First Version Jester
  */
 
-public class MyJobsDetailsDiscard extends BaseTestCase {
-	/*
-	 * Common Variables
-	 */
-	private Selenium selenium;
-	BasicFuncs iBasicFuncs=new BasicFuncs();
-	CreateJobs c = new CreateJobs();
-  @Test
-  public void verifyJobsDetailsDiscard() throws Exception {
-		
-	  selenium.click(MainFrame.MyJobs_MENU);
-	  selenium.click(MainFrame.Ready_SUBMENU);
-	  selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	  selenium.click("link="+ConfigUtil.getDataInCase(c.getClassName(), "jobName1"));
-	  selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	  iBasicFuncs.selectRadioButtonFromTable(selenium, JobDetails.Workflows_TABLE, ConfigUtil.getDataInCase(getClassName(), "WORKFLOW"));
-	  selenium.click(JobDetails.Discard_BUTTON);
-	  Assert.assertEquals((selenium.getConfirmation().
-	          matches("Warning!!\n\nThis will permanently remove the selected Workflows from the system.\nNote: There may be a short delay when Workflows jobs are being discarded.")),true);
+public class MyJobsDetailsDiscard extends BaseTestCase
+{
+    /*
+     * Common Variables
+     */
+    BasicFuncs basicFuncs = new BasicFuncs();
+    CreateJobs createJobs = new CreateJobs();
 
-	  Assert.assertFalse(iBasicFuncs.isPresentInTable(selenium, JobDetails.Workflows_TABLE, ConfigUtil.getDataInCase(getClassName(), "WORKFLOW")));
-	 
-  }
-  @BeforeMethod
-  public void beforeMethod() {
-	  CommonFuncs.loginSystemWithPM(selenium);
-  }
+    @Test
+    public void verifyJobsDetailsDiscard() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.MY_JOBS_MENU,
+                MainFrame.MY_JOBS_READY_SUBMENU);
 
-  @AfterMethod
-  public void afterMethod() {
-	  CommonFuncs.logoutSystem(selenium);
-  }
+        String oriJobName = ConfigUtil.getDataInCase(createJobs.getClassName(),
+                "jobName1");
+        String jobName = CreatedJob.getCreatedJobName(oriJobName);
+        selenium.click("link=" + jobName);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
-  @BeforeClass
-  public void beforeClass() {
-  }
+        basicFuncs.selectRadioButtonFromTable(selenium,
+                JobDetails.WORKFLOWS_TABLE, getDataInCase("workflow"));
+        selenium.click(JobDetails.DISCARD_BUTTON);
+        if (selenium.isConfirmationPresent())
+        {
+            Assert.assertEquals(
+                    (selenium.getConfirmation()
+                            .matches("Warning!!\n\nThis will permanently remove the selected Workflows from the system.\nNote: There may be a short delay when Workflows jobs are being discarded.")),
+                    true);
+        }
 
-  @AfterClass
-  public void afterClass() {
-  }
+        Assert.assertFalse(basicFuncs.isPresentInTable(selenium,
+                JobDetails.WORKFLOWS_TABLE, getDataInCase("workflow")));
+    }
 
-  @BeforeTest
-  public void beforeTest() {
-	  selenium=CommonFuncs.initSelenium();
-  }
+    @BeforeMethod
+    public void beforeMethod()
+    {
+        CommonFuncs.loginSystemWithPM(selenium);
+    }
 
-  @AfterTest
-  public void afterTest() {
-	  CommonFuncs.endSelenium(selenium);
-  }
-
-  @BeforeSuite
-  public void beforeSuite() {
-  }
-
-  @AfterSuite
-  public void afterSuite() {
-  }
-
+    @AfterMethod
+    public void afterMethod()
+    {
+        CommonFuncs.logoutSystem(selenium);
+    }
 }

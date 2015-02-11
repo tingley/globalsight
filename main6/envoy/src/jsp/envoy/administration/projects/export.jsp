@@ -34,18 +34,18 @@ String xmlExportOptions =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_EXPORT_OPTIONS);
 String projectName =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_NAME);
-Object[] projectUserIds = 
-  (Object[])sessionMgr.getAttribute(WebAppConstants.USER_IDS);
+Object[] projectUserNames = 
+  (Object[])sessionMgr.getAttribute(WebAppConstants.USER_NAMES);
 
 StringBuffer str_usersArray = new StringBuffer();
   
-for (int i = 0, max = projectUserIds.length; i < max; i++)
+for (int i = 0, max = projectUserNames.length; i < max; i++)
 {
-  String userId = (String)projectUserIds[i];
+  String userName = (String) projectUserNames[i];
   str_usersArray.append("users[");
   str_usersArray.append(i);
   str_usersArray.append("] = \"");
-  str_usersArray.append(EditUtil.toJavascript(userId));
+  str_usersArray.append(EditUtil.toJavascript(userName));
   str_usersArray.append("\";");
 }
   

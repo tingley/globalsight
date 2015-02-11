@@ -30,10 +30,10 @@
             com.globalsight.everest.webapp.pagehandler.projects.workflows.AddSourceHandler,
             com.globalsight.everest.company.CompanyThreadLocal,
             com.globalsight.util.edit.EditUtil,
+            com.globalsight.everest.webapp.pagehandler.tasks.UpdateLeverageHelper,
             com.globalsight.util.modules.Modules,
             java.util.Date,
             java.util.Set,
-            java.util.*,
             java.text.MessageFormat,
             com.globalsight.everest.foundation.User,
             java.util.*"
@@ -43,11 +43,13 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="pending" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobDetails" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobComments" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="jobAttributes" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="jobDetails" scope="request"
+<jsp:useBean id="jobReports" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="modify" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -93,16 +95,23 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
  <jsp:useBean id="allStatus" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
- 
+<jsp:useBean id="updateLeverage" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     String thisFileSearch = (String) request.getAttribute(JobManagementHandler.PAGE_SEARCH_PARAM);
-   if (thisFileSearch == null)
-   {
+   if (thisFileSearch == null){
        thisFileSearch = "";
    }
+   //Indicate if is updating word-counts
+   String isUpdatingWordCounts = (String) request.getAttribute("isUpdatingWordCounts");
+   if (isUpdatingWordCounts != null) {
+       isUpdatingWordCounts = isUpdatingWordCounts.toLowerCase();
+   } else {
+       isUpdatingWordCounts = "";
+   }
 
-   ResourceBundle bundle = PageHandler.getBundle(session);
    String selfURL = self.getPageURL();
+   String updateLeverageURL = updateLeverage.getPageURL();
    String pendingURL = pending.getPageURL();
    String detailsURL = jobDetails.getPageURL();
    String addWfURL = addWF.getPageURL();
@@ -113,28 +122,14 @@
    String editPagesURL = editPages.getPageURL();
    String downloadURL = download.getPageURL() + "&fromJobDetail=true";
    String editTotalSourcePageWcURL = editTotalSourcePageWc.getPageURL();
-   String editExpensesFinalCostURL = editFinalCost.getPageURL()
-                                    + "&"
-                                    + JobManagementHandler.SURCHARGES_FOR
-                                    + "=" + WebAppConstants.EXPENSES;
-   String editRevenueFinalCostURL = editFinalCost.getPageURL()
-                                    + "&"
-                                    + JobManagementHandler.SURCHARGES_FOR
-                                    + "=" + WebAppConstants.REVENUE;
-   String expensesSurchargesURL = surcharges.getPageURL()
-                                    + "&"
-                                    + JobManagementHandler.SURCHARGES_FOR
-                                    + "=" + WebAppConstants.EXPENSES;
-   String revenueSurchargesURL = surcharges.getPageURL()
-                                    + "&"
-                                    + JobManagementHandler.SURCHARGES_FOR
-                                    + "=" + WebAppConstants.REVENUE;
-   String jobCommentsURL = jobComments.getPageURL()
-                                    + "&" + JobManagementHandler.JOB_ID
-                                    + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
+   String editExpensesFinalCostURL = editFinalCost.getPageURL() + "&" + JobManagementHandler.SURCHARGES_FOR + "=" + WebAppConstants.EXPENSES;
+   String editRevenueFinalCostURL = editFinalCost.getPageURL() + "&" + JobManagementHandler.SURCHARGES_FOR + "=" + WebAppConstants.REVENUE;
+   String expensesSurchargesURL = surcharges.getPageURL() + "&" + JobManagementHandler.SURCHARGES_FOR + "=" + WebAppConstants.EXPENSES;
+   String revenueSurchargesURL = surcharges.getPageURL() + "&" + JobManagementHandler.SURCHARGES_FOR + "=" + WebAppConstants.REVENUE;
+   String jobCommentsURL = jobComments.getPageURL() + "&" + JobManagementHandler.JOB_ID + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
    String jobAttributesURL = jobAttributes.getPageURL() + "&" + JobManagementHandler.JOB_ID + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
-   String detailsTabURL = detailsURL + "&" + JobManagementHandler.JOB_ID
-                                    + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
+   String jobReportsURL = jobReports.getPageURL() + "&" + JobManagementHandler.JOB_ID + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
+   String detailsTabURL = detailsURL + "&" + JobManagementHandler.JOB_ID + "=" + request.getAttribute(JobManagementHandler.JOB_ID);
    String rateVendorURL = rateVendor.getPageURL();
    String wordCountURL = wordcountList.getPageURL() + "&action=list";
    String modifyURL = modify.getPageURL();
@@ -153,19 +148,23 @@
    String showDeleteProgressURL = addSourceFilesURL + "&action=" + AddSourceHandler.SHOW_DELETE_PROGRESS;
    String showUpdateProgressURL = addSourceFilesURL + "&action=" + AddSourceHandler.SHOW_UPDATE_PROGRESS;
    String checkPageExistURL = addSourceFilesURL + "&action=" + AddSourceHandler.CHECK_PAGE_EXIST;
-
-   SessionManager sessionMgr = (SessionManager)session.getAttribute(
-     WebAppConstants.SESSION_MANAGER);
-
+   String workflowActivitiesURL = workflowActivities.getPageURL();
+   String workflowCommentsURL = workflowComments.getPageURL();
+   
    String currentCurrency = (String)session.getAttribute(JobManagementHandler.CURRENCY);
+   
+   ResourceBundle bundle = PageHandler.getBundle(session);
    String lbChangeCurrency = bundle.getString("lb_change_currency");
    String lbDetails = bundle.getString("lb_details");
    String lbJob = bundle.getString("lb_job");
    String lbPrevious = bundle.getString("lb_previous");
    String title = bundle.getString("lb_job_details");
-   String workflowActivitiesURL = workflowActivities.getPageURL();
-   String workflowCommentsURL = workflowComments.getPageURL();
+   String labelDetails = bundle.getString("lb_details");
+   String labelComments = bundle.getString("lb_comments");
+   String lb_filter_text = bundle.getString("lb_source_file_filter");// used by the pageSearch include
+   
    String xmlCurrency = (String)session.getAttribute(JobManagementHandler.CURRENCY_XML);
+   SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
    String openSegmentComments = (String)sessionMgr.getAttribute(JobManagementHandler.OPEN_AND_QUERY_SEGMENT_COMMENTS);
    String closedSegmentComments = (String)sessionMgr.getAttribute(JobManagementHandler.CLOSED_SEGMENT_COMMENTS);
    
@@ -186,12 +185,6 @@
        anthoriserUser = null;
    }
    
-   String labelDetails = bundle.getString("lb_details");
-   String labelComments = bundle.getString("lb_comments");
-
-   // used by the pageSearch include
-   String lb_filter_text = bundle.getString("lb_source_file_filter");
-
    boolean jobCosting = ((Boolean)request.getAttribute(
       SystemConfigParamNames.COSTING_ENABLED)).booleanValue();
    boolean jobRevenue = ((Boolean)request.getAttribute(
@@ -203,8 +196,7 @@
    Cost cost = (Cost)sessionMgr.getAttribute(JobManagementHandler.COST_OBJECT);
    boolean isCostOverriden = false;
    int colspan = 8;
-   PermissionSet perms = (PermissionSet) session.getAttribute(
-                    WebAppConstants.PERMISSIONS);
+   PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
    boolean costEditAllowed = perms.getPermissionFor(Permission.JOB_COSTING_EDIT);
    boolean costReEditAllowed = perms.getPermissionFor(Permission.JOB_COSTING_REEDIT);
    boolean dispatchWorkflow = perms.getPermissionFor(Permission.JOB_WORKFLOWS_DISPATCH);
@@ -241,8 +233,7 @@
    Long projectId = null;
    try
    {
-       jobId =
-           new Long((String)request.getAttribute(JobManagementHandler.JOB_ID));
+       jobId = new Long((String)request.getAttribute(JobManagementHandler.JOB_ID));
        job = ServerProxy.getJobHandler().getJobById(jobId.longValue());
        jobName = job.getJobName();
        jobState = job.getState();
@@ -266,15 +257,11 @@
    }
 
    int reimportOption = 0;
-   try
-   {
+   try {
        reimportOption = Integer.parseInt(ServerProxy.getSystemParameterPersistenceManager().getSystemParameter(SystemConfigParamNames.REIMPORT_OPTION).getValue());
-   }
-   catch (Exception ge)
-   {
+   } catch (Exception ge) {
        // assumes disabled.
    }
-
    boolean allowEditSourcePage = ((Boolean)request.getAttribute(
       WebAppConstants.GXML_EDITOR)).booleanValue();
    boolean canEditSourcePage = false;
@@ -317,7 +304,7 @@
         (String) request.getSession().getAttribute(WebAppConstants.USER_NAME));
 
    User user = (User)sessionMgr.getAttribute(WebAppConstants.USER);
-   String userId = user.getUserId();   
+   String userName = user.getUserName();   
    Hashtable delayTimeTable = (Hashtable)sessionMgr.getAttribute(WebAppConstants.DOWLOAD_DELAY_TIME_TABLE);
    
    boolean isIE = request.getHeader("User-Agent").indexOf("MSIE")!=-1;
@@ -326,31 +313,25 @@
    SystemConfiguration sysConfig = SystemConfiguration.getInstance();
    boolean useSSL = sysConfig.getBooleanParameter(SystemConfigParamNames.USE_SSL);
    String httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
-   if (useSSL == true)
-   {
+   if (useSSL == true) {
        httpProtocolToUse = WebAppConstants.PROTOCOL_HTTPS;
-   }
-   else
-   {
+   } else {
        httpProtocolToUse = WebAppConstants.PROTOCOL_HTTP;
    }
    
    StringBuffer appletcontent = new StringBuffer();
-   if(isIE){
+   if(isIE) {
        appletcontent.append("<OBJECT classid=\"clsid:8AD9C840-044E-11D1-B3E9-00805F499D93\" width=\"920\" height=\"500\" ");
        appletcontent.append("NAME = \"FSV\" codebase=\"");
        appletcontent.append(httpProtocolToUse);
        appletcontent.append("://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6\"> ");
-   }
-   else
-   {
-       appletcontent.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.6\" width=\"920\" height=\"500\" ");
+       appletcontent.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
+   } else {
+       appletcontent.append("<APPLET style=\"display:inline\" type=\"application/x-java-applet;jpi-version=1.6\" width=\"920\" height=\"500\" code=\"com.globalsight.EditSourceApplet\" ");
        appletcontent.append("pluginspage=\"http://java.sun.com/products/plugin/index.html#download\"> ");
    }
-
-   appletcontent.append("<PARAM NAME = \"code\" VALUE = \"com.globalsight.EditSourceApplet\" > ");
    appletcontent.append("<PARAM NAME = \"cache_option\" VALUE = \"Plugin\" > ");
-   appletcontent.append("<PARAM NAME = \"cache_archive\" VALUE = \"/globalsight/applet/lib/SelectFilesApplet.jar,/globalsight/applet/lib/commons-codec-1.3.jar,/globalsight/applet/lib/commons-httpclient-3.0-rc2.jar,/globalsight/applet/lib/commons-logging.jar\" >");
+   appletcontent.append("<PARAM NAME = \"cache_archive\" VALUE = \"applet/lib/SelectFilesApplet.jar, applet/lib/commons-codec-1.3.jar, applet/lib/commons-httpclient-3.0-rc2.jar, applet/lib/commons-logging.jar, applet/lib/jaxrpc.jar, applet/lib/axis.jar, applet/lib/commons-discovery.jar, applet/lib/wsdl4j.jar, applet/lib/webServiceClient.jar\">");
    appletcontent.append("<PARAM NAME = NAME VALUE = \"FSV\"> ");
    appletcontent.append("<PARAM NAME = \"type\" VALUE=\"application/x-java-applet;version=1.6\"> ");
    appletcontent.append("<PARAM NAME = \"scriptable\" VALUE=\"true\"> ");
@@ -358,6 +339,8 @@
    appletcontent.append("<PARAM NAME = \"companyId\" value=\"" + currentId + "\"> ");
    appletcontent.append("<PARAM NAME = \"pageLocale\" value=\"" + bundle.getLocale() + "\"> ");
    appletcontent.append("<PARAM NAME = \"projectId\" value=\"" + projectId + "\"> ");
+   appletcontent.append("<PARAM NAME = \"userId\" value=\"" + user.getUserId() + "\"> ");
+   appletcontent.append("<PARAM NAME = \"password\" value=\"" + user.getPassword() + "\"> ");
    appletcontent.append("<PARAM NAME = \"addToApplet\" value=\"MainAppletWillAddThis\"> ");
    
    if(isIE){
@@ -367,16 +350,19 @@
    }%>
 <HTML>
 <HEAD>
-<!-- This JSP is envoy/projects/workflows/jobDetails.jsp -->
 <TITLE><%= title %></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
+<link rel="STYLESHEET" type="text/css" href="/globalsight/includes/css/jobDetails.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <script src="/globalsight/includes/ieemu.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
-<%@ include file="/envoy/projects/workflows/changeCurrencyJavascript.jspIncl" %>
+<script src="/globalsight/envoy/projects/workflows/changeCurrencyJavascript.js"></script>
+<script src="/globalsight/envoy/projects/workflows/jobDetails.js"></script>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<script src="/globalsight/jquery/jquery-1.6.4.js"></script>
+<script src="/globalsight/jquery/jquery.progressbar.js"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
 <TITLE><%=title%></TITLE>
@@ -385,90 +371,18 @@
 @import url(/globalsight/dojox/form/resources/FileUploader.css);
 @import url(/globalsight/dijit/themes/tundra/ProgressBar2.css);
 
-h1 {
-    font:   menu;
-	font-size: 1.5em; 
-	font-weight: normal;
-	line-height: 1em; 
-	margin-top: 1em;
-	margin-bottom:0;
-}
-
-h1 {
-	font-size: 1.5em; 
-	font-weight: normal;
-	line-height: 1em; 
-	margin-top: 1em;
-	margin-bottom:0;
-}
-h2 { 
-	font-size: 1.1667em; 
-	font-weight: bold; 
-	line-height: 1.286em; 
-	margin-top: 1.929em; 
-	margin-bottom:0.643em;
-}
-h3, h4, h5, h6 {
-	font-size: 1em; 
-	font-weight: bold; 
-	line-height: 1.5em; 
-	margin-top: 1.5em; 
-	margin-bottom: 0;
-}
-
-.header2 {
-    font-weight: normal; !important;
-}
-
-.dijitDialogTitle {
-font-family:Arial, Helvetica, sans-serif;
-}
-
-.nomalFont {
-font-family:Arial, Helvetica, sans-serif;
-}
-
-.tundra .dijitButtonText {
-    width:100%;
-    height:20px;
-	text-align: center;
-	padding: 0 0.3em;
-}
-
-.tundra .dijitDialog .dijitDialogPaneContent {
-  background: #fff;
-  border: none;
-  border-top: 1px solid #d3d3d3;
-  padding: 0px;
-}
-
 div.tableContainer {
 <% 
     if (perms.getPermissionFor(Permission.JOB_COSTING_VIEW)) {
 %>
-	height:expression(this.scrollHeight>350?"330":"100%");
-	max-height:330px; /* must be greater than tbody*/
+    height:expression(this.scrollHeight>350?"330":"100%");
+    max-height:330px; /* must be greater than tbody*/
 <% } else { %> 
-	height:expression(this.scrollHeight>185?"185":"100%");
+    height:expression(this.scrollHeight>185?"185":"100%");
     max-height:185px;  /* must be greater than tbody*/
 <% }  %> 
     overflow: auto;
-    }
-
-table.scroll {
-    width: 99%;     /*100% of container produces horiz. scroll in Mozilla*/
-    border: solid 1px slategray;
-    }
-
-table.scroll>tbody  {  /* child selector syntax which IE6 and older do not support*/
-    overflow: auto;
-    height: auto;
-    }
-
-thead.scroll td.scroll  {
-    position:relative;
-    top: expression(document.getElementById("data").scrollTop-2); /*IE5+ only*/
-    }
+}
 </style>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/dojo/dojo.js" djConfig="parseOnLoad: true"></SCRIPT>
 <SCRIPT>
@@ -479,6 +393,7 @@ var w_viewer = null;
 var w_addSourceFileWindow = null;
 var rateVendorWindow = null;
 var helpFile = "<%=bundle.getString("help_job_details")%>";
+var PoNumberIsChanged = false;
 
 dojo.require("dijit.Dialog");
 dojo.require("dijit.Dialog");
@@ -486,18 +401,133 @@ dojo.require("dijit.form.Button");
 dojo.require("dojo.io.iframe");
 dojo.require("dijit.ProgressBar");
 
-function loadPage()
-{
-   ContextMenu.intializeContextMenu();
-   // Load the Guide
-   loadGuides();
-   // Load the currency stuff
-   doOnLoad();
- }
+$(document).ready(function() {
+    // If is updating word counts, show the progress bar.
+    if ('<%=isUpdatingWordCounts%>' == 'yes')
+    {
+        var scrollHeight = document.body.scrollHeight-120;
+        var scrollWidth = document.body.scrollWidth-40;
+        $("#fullbg").css({width:scrollWidth, height:scrollHeight, display:"block"});
+        $("#container").css({top:"400px",left:"600px",display:"block"});
+        $("#updateWordCountsProgressBar").progressBar();
+        setTimeout(updateWordCountsProgress, 500);
+    }
+    
+    var getPercentageURL = '<%=selfURL%>' + "&action=getUpdateWCPercentage";
+    var percentage = 0;
+    function updateWordCountsProgress()
+    {
+        // On IE, it the url is no change, seems it will not execute the url really, 
+        // so add a fake parameter "percentage" to cheat it in IE.
+        percentage += 1;
+        getPercentageURL = getPercentageURL + "&percentage=" + percentage;
+        $.getJSON(getPercentageURL, function(data) {
+            var per = data.updateWCPercentage;
+            $("#updateWordCountsProgressBar").progressBar(per);
+            if (per < 100) {
+                setTimeout(updateWordCountsProgress,1000);
+            } else {
+                setTimeout(closeBg,1000);
+            }
+        });
+    }
+
+    // Click "Update Leverage" button
+    $("#idUpdateLeverageBtn").click(function(){
+        var selectedWfIds = getSelectedWorkflowIds();
+        if (selectedWfIds.length == 0){
+            alert('<%=bundle.getString("jsmsg_please_select_a_row")%>');
+            return false;
+        }
+        var checkWFURL = "<%=updateLeverageURL%>" + "&action=checkHaveNonReadyWFSelected";
+        $.post(checkWFURL, {selectedWorkFlows: selectedWfIds}, function(data){
+            var dataObj = eval('(' + data + ')');
+            var readyWfIds = dataObj.readyWfIds;
+            if (readyWfIds.length == 0) {
+                alert('<%=bundle.getString("msg_no_ready_workflow_selected")%>');
+                return false;
+            }
+            var nonReadyWfs = dataObj.nonReadyWfs;
+            if (nonReadyWfs.length > 0) {
+                var msg = '<%=bundle.getString("msg_update_leverage_ready_only")%>';
+//              var msg2 = nonReadyWfs.replace(/_returnPH_/g,"\n");
+//              alert(msg + '\n' + msg2);
+                alert(msg);
+                return false;
+            }
+            var url = "<%=updateLeverageURL%>" + "&wfId=" + readyWfIds + "&action=getAvailableJobsForWfs";
+            $("#workflowForm").attr("action", url);
+            $("#workflowForm").submit();
+        });
+    });
+    
+    function getSelectedWorkflowIds()
+    {
+        var selectedWfIds = "";
+        $("[name=wfId]").each(function(){
+            var isChecked = $(this).attr("checked");
+            var id = $(this).attr("id");
+            var wfId = id.substring(5);
+            if (isChecked && isChecked == 'checked'){
+                if (selectedWfIds.length == 0){
+                    selectedWfIds = wfId;
+                } else {
+                    selectedWfIds += " " + wfId;
+                }
+            }
+        });
+
+        return selectedWfIds;
+    }
+
+    function closeBg() {
+        $("#fullbg").css("display","none");
+        $("#container").css("display","none");
+    }
+
+    //Click "Send Mail" button
+    $("#sendEmailId").click(function(){
+        send_email('<%=bundle.getString("msg_quote_ready_confirm")%>', '<%=selfURL%>');
+    });
+    // Save the Quote Po Number
+    $("#PONumberSave").click(function(){
+        saveQuotePoNumber(PoNumberIsChanged, 
+            '<%=bundle.getString("msg_save_po_number_confirm")%>', 
+            '<%=selfURL%>', '<%=JobManagementHandler.QUOTE_PO_NUMBER%>',
+            '<%=bundle.getString("msg_validate_po_number")%>');
+    });
+    //Click "Confirm Approved" button
+    $("#confirmApproveId").click(function(){
+        var workflowForm = document.getElementById("workflowForm");
+        var wfFormActionUrl = "<%=detailsURL%>" +
+            "&<%=JobManagementHandler.DISPATCH_ALL_WF_PARAM%>=true" +
+            "&<%=JobManagementHandler.JOB_ID%>=" + workflowForm.jobId.value + 
+            "&<%=JobManagementHandler.ALL_READY_WORKFLOW_IDS%>=<%=allReadyWorkflowsIds%>";
+
+        confirmApproveQuote('<%=bundle.getString("msg_quote_approve_confirm")%>',
+            '<%=JobManagementHandler.QUOTE_APPROVED_DATE%>', 
+            '<%= JobManagementHandler.QUOTE_APPROVED_DATE_MODIFY_FLAG %>',
+            '<%=dispatchWorkflow%>',
+            '<%=bundle.getString("msg_cost_center_empty")%>', 
+            '<%=hasReadyWorkflow%>',
+            '<%=bundle.getString("msg_dispatch_all_workflow_confirm")%>',
+            wfFormActionUrl, 
+            '<%=selfURL%>');
+    });
+
+    //for gbs-2599
+    $("#selectAll_2").click(function(){
+        if($("#selectAll_2").attr("checked")){
+            $("[name='pageIds']").attr("checked",true);
+        }else{
+            $("[name='pageIds']").attr("checked",false);
+        }
+    });
+});
 
 function openViewerWindow(url)
-{	
-	hideContextMenu();
+{
+    hideContextMenu();
     dojo.xhrPost(
     {
         url:"<%=checkPageExistURL%>" + url,
@@ -506,7 +536,7 @@ function openViewerWindow(url)
         {
             if (data=="")
             {
-            	if (w_viewer != null && !w_viewer.closed)
+                if (w_viewer != null && !w_viewer.closed)
                 {
                     w_viewer.focus();
                     return;
@@ -517,59 +547,14 @@ function openViewerWindow(url)
             }
             else
             {
-            	showMsg3(data);
+                showMsg3(data);
             }
         },
         error:function(error)
         {
-        	showMsg(error.message);
+            showMsg(error.message);
         }
     });
-}
-
-function openGxmlEditor(url)
-{
-    hideContextMenu();
-    if (w_viewer != null && !w_viewer.closed)
-    {
-        w_viewer.close();
-    }
-    window.location.href = ("<%=sourceEditorUrl%>" + url);
-}
-
-
-function doUnload()
-{
-    if (w_viewer != null && !w_viewer.closed)
-    {
-        w_viewer.close();
-    }
-    w_viewer = null;
-
-    if (rateVendorWindow != null && !rateVendorWindow.closed)
-    {
-        rateVendorWindow.close();
-    }
-    rateVendorWindow = null;
-
-    if (w_addSourceFileWindow != null && !w_addSourceFileWindow.closed)
-    {
-    	w_addSourceFileWindow.close();
-    }
-    w_addSourceFileWindow = null;
-}
-
-function openActivitiesWindow(url)
-{
-    activitiesWindow = window.open(url, 'activitiesWindow',
-       'resizable,scrollbars=yes,top=0,left=0,height=700,width=800');
-}
-
-
-function openRateVendorWindow(url)
-{
-    rateVendorWindow = window.open(url, 'rateVendorWindow',
-        'resizable,scrollbars=yes,top=0,left=0,height=500,width=1000');
 }
 
 function contextForPage(url, e)
@@ -591,7 +576,7 @@ function contextForPage(url, e)
          new ContextItem("<B><%=bundle.getString("lb_context_item_view_trans_status") %></B>",
            function(){ openViewerWindow(url);}),
          new ContextItem("<%=bundle.getString("lb_context_item_edit_src_page") %>",
-           function(){ openGxmlEditor(url);}, !canEditSource)
+           function(){ openGxmlEditor(url,"<%=sourceEditorUrl%>");}, !canEditSource)
        ];
     }
     else
@@ -605,190 +590,30 @@ function contextForPage(url, e)
     ContextMenu.display(popupoptions, e);
 }
 
-function hideContextMenu()
-{
-    document.getElementById("idBody").focus();
-}
-
-// According a check box to
-function updateButtonStateByCheckBox(buttonId,objBox)
-{
-    var objButton =  document.getElementById(buttonId);
-    if (objBox.checked)
-	{
-		objButton.disabled = false;
-	}
-	else
-	{
-		objButton.disabled = true;
-	}
-}
-
-function send_email()
-{
-   if(confirm('<%=bundle.getString("msg_quote_ready_confirm")%>'))
-   {
-	setQuoteReadyDate();
-	submitEmail();
-   }
-}
-
-function submitEmail() 
-{
-
-  var quoteForm = document.getElementById("quoteForm");
-	quoteForm.action = "<%=selfURL%>";
-	quoteForm.submit();
-}
-
-// for ready quote date
-function setQuoteReadyDate()
-{
-	var date = new Date();
-	var myDate = getMyDate(date);
-	document.getElementById("<%= JobManagementHandler.QUOTE_DATE %>").value = myDate;
-}
-
-// Get the date which has be formated
-function getMyDate(dateObj)
-{ 
-	    var day = dateObj.getDate();
-		var month = dateObj.getMonth() + 1;
-		var year = dateObj.getYear();
-		var hour = dateObj.getHours();
-		var minute = dateObj.getMinutes();
-		if (day < 10) 
-		{
-			day = "0" + day;
-		}
-		if (month < 10) 
-		{
-			month = "0" + month;
-		}
-		if (hour < 10) 
-		{
-			hour = "0" + hour;
-		}
-		if (minute < 10) 
-		{
-			minute = "0" + minute;
-		}
-		var time = hour + ":" + minute;
-		var date = month + "/" + day + "/" + year + " " + time;
-		return date;
-}
-
-// For "Quote process webEx" issue
-// Set the Confirm Approved Quote Date
-function confirmApproveQuote()
-{
-   var workflowForm = document.getElementById("workflowForm"); 
-   
-   if(confirm('<%=bundle.getString("msg_quote_approve_confirm")%>'))
-   {
-	   setApproveQuoteDate();
-	   //submitEmail();
-	   
-	   var hasSetCostCenter = document.getElementById("hasSetCostCenter").value;
-	   if (<%=dispatchWorkflow%>)
-	   {
-		   if ("false" == hasSetCostCenter)
-		   {
-			   alert("<%=bundle.getString("msg_cost_center_empty")%>");		   
-		   }else if (<%=hasReadyWorkflow%> && confirm('<%=bundle.getString("msg_dispatch_all_workflow_confirm")%>'))
-		   {
-	 		   workflowForm.action = "<%=detailsURL%>";
-			   workflowForm.action += "&" +
-			       "<%=JobManagementHandler.DISPATCH_ALL_WF_PARAM%>=true&" +
-			       "<%=JobManagementHandler.JOB_ID%>=" + workflowForm.jobId.value + 
-			       "&<%=JobManagementHandler.ALL_READY_WORKFLOW_IDS%>=<%=allReadyWorkflowsIds%>";
-		   }
-	   }
-
-	   
-	   var quoteForm = document.getElementById("quoteForm");
-   	 quoteForm.action = "<%=selfURL%>";
-       //When user selects dispatch all workflows in the same time,add the action for "workflowForm" to current form,
-       //then handler will handle them both once.
-	   if (workflowForm.action.length > 0)
-	   {
-		   quoteForm.action += "&workflowFormAction=" + workflowForm.action;
-	   }
-	   
-	   quoteForm.submit();
-   }
-}
-
-function dispatchAllWorkflow()
-{
-	workflowForm.action = "<%=detailsURL%>";
-    workflowForm.action += "&" +
-    "<%=JobManagementHandler.DISPATCH_ALL_WF_PARAM%>=true&" +
-    "<%=JobManagementHandler.JOB_ID%>=" + workflowForm.jobId.value + 
-    "&<%=JobManagementHandler.ALL_READY_WORKFLOW_IDS%>=<%=allReadyWorkflowsIds%>";
-    alert("workflowForm.action :: " + workflowForm.action);
-    workflowForm.submit();
-}
-
-function setApproveQuoteDate()
-{
-   var date = new Date();
-   var myDate = getMyDate(date);
-   document.getElementById('<%= JobManagementHandler.QUOTE_APPROVED_DATE %>').value = myDate;
-   document.getElementById('<%= JobManagementHandler.QUOTE_APPROVED_DATE_MODIFY_FLAG %>').value = true;
-}
- 
-// Save the Quote Po Number
-var PoNumberIsChanged = false;
-function saveQuotePoNumber()
-{
-   var quotePoNumber = document.getElementById("POnumber").value;
-   var quoteForm = document.getElementById("quoteForm");   
-	   if (PoNumberIsChanged)
-       {
-	         if(confirm('<%=bundle.getString("msg_save_po_number_confirm")%>'))
-	         {
-		         quoteForm.action = "<%=selfURL%>"+"&<%= JobManagementHandler.QUOTE_PO_NUMBER %>=" + URLencode(quotePoNumber);
-		         quoteForm.submit();
-		     }
-       }
-       else
-       {
-          alert('<%=bundle.getString("msg_validate_po_number")%>');
-          return false;
-       }
-   
-} 
-
-function URLencode(sStr) 
-{
-	return escape(sStr).replace(/\+/g, '%2B').replace(/\"/g,'&quote;').replace(/\'/g, '%27').replace(/\//g,'%2F');
-}
-
 function submitForm(buttonClicked)
 {
-	var pagesForm = document.forms["pagesForm"];
-	var workflowForm = document.forms["workflowForm"];
+    var pagesForm = document.forms["pagesForm"];
+    var workflowForm = document.forms["workflowForm"];
     dojo.xhrPost(
-    	    {
-    	        url:"<%=beforeAccessWorkflowURL%>",
-    	        handleAs: "text", 
-    	        load:function(data)
-    	        {
-    	            if (data=="")
-    	            {
-    	            	realSubmitForm(buttonClicked, workflowForm, pagesForm);
-    	            }
-    	            else
-    	            {
-    	            	showMsg(data);
-    	            }
-    	        },
-    	        error:function(error)
-    	        {
-    	        	showMsg(error.message);
-    	        }
-    	    });
+            {
+                url:"<%=beforeAccessWorkflowURL%>",
+                handleAs: "text", 
+                load:function(data)
+                {
+                    if (data=="")
+                    {
+                        realSubmitForm(buttonClicked, workflowForm, pagesForm);
+                    }
+                    else
+                    {
+                        showMsg(data);
+                    }
+                },
+                error:function(error)
+                {
+                    showMsg(error.message);
+                }
+            });
 }
 
 function realSubmitForm(buttonClicked,workflowForm, pagesForm){
@@ -801,7 +626,7 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
        workflowForm.submit();
        return true
     }else if (buttonClicked == "AddWF"){
-    	<%if(job.hasPassoloFiles()){%>
+        <%if(job.hasPassoloFiles()){%>
         alert("<%=bundle.getString("jsmsg_cannot_add_passolo_workflow")%>");
         return;
         <%} else if(jobState.equals(Job.PENDING) || jobState.equals("IMPORT_FAILED")){%>
@@ -903,9 +728,9 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
    }
    else if (buttonClicked == "UpdateWordCounts")
    {
-	   workflowForm.action = "<%=selfURL %>" + "&" +
-	       "<%=JobManagementHandler.UPDATE_WORD_COUNTS%>=yes" + "&" +
-	       "<%=JobManagementHandler.WF_ID%>=" + wfId;
+       workflowForm.action = "<%=selfURL %>" + "&" +
+           "<%=JobManagementHandler.UPDATE_WORD_COUNTS%>=yes" + "&" +
+           "<%=JobManagementHandler.WF_ID%>=" + wfId;
    }
    else if (buttonClicked == "WordCount")
    {
@@ -928,19 +753,40 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
    }
    else if (buttonClicked == "skip")
    {
-      if(wfState.indexOf("READY_TO_BE_DISPATCHED") != -1 || wfState.indexOf("DISPATCHED") != -1 
-	) 
-      {
-	workflowForm.action = "<%=skipURL%>" + "&" +
-	   "<%=JobManagementHandler.WF_ID%>=" + wfId + "&" +
-	   "<%=JobManagementHandler.JOB_ID%>=" + workflowForm.jobId.value;
-      
-
-	} else {
-
-	  alert("<%=bundle.getString("jsmsg_cannot_skip")%>");
-	  return;
-	}
+       if (workflowForm.wfId.length)
+       {
+          for (i = 0; i < workflowForm.wfId.length; i++)
+          {
+             var checkBoxObj = workflowForm.wfId[i];
+             if (checkBoxObj.checked == true)
+             {
+                valuesArray = getRadioValuesWf(checkBoxObj.value);
+                var workflowState = valuesArray[1];
+                if(workflowState != "DISPATCHED")
+                {
+                    alert("<%=bundle.getString("jsmsg_cannot_skip")%>");
+                    return false;
+                }
+             }
+          }
+       }
+       else
+       {
+           var checkBoxObj = workflowForm.wfId;
+           if (checkBoxObj.checked == true)
+           {
+              valuesArray = getRadioValuesWf(checkBoxObj.value);
+              var workflowState = valuesArray[1];
+              if(workflowState != "DISPATCHED")
+              {
+                  alert("<%=bundle.getString("jsmsg_cannot_skip")%>");
+                  return false;
+              }
+           }
+       }
+    workflowForm.action = "<%=skipURL%>" + "&" +
+       "<%=JobManagementHandler.WF_ID%>=" + wfId + "&" +
+       "<%=JobManagementHandler.JOB_ID%>=" + workflowForm.jobId.value;
    }
    else if (buttonClicked == "Edit")
    {
@@ -1009,13 +855,13 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
    }
    else if (buttonClicked == "Dispatch")
    {
-	   var hasSetCostCenter = document.getElementById("hasSetCostCenter").value;
-	   if ("false" == hasSetCostCenter)
-	   {
-		   alert("<%=bundle.getString("msg_cost_center_empty")%>");
-		   return;
-	   }
-	   
+       var hasSetCostCenter = document.getElementById("hasSetCostCenter").value;
+       if ("false" == hasSetCostCenter)
+       {
+           alert("<%=bundle.getString("msg_cost_center_empty")%>");
+           return;
+       }
+       
       workflowForm.action = "<%=detailsURL%>";
       // You can only dispatch workflows that are in the READY_TO_BE_DISPATCHED,
       // state.
@@ -1054,8 +900,7 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
    {
       workflowForm.action = "<%=detailsURL%>";
 
-      // You can only archive workflows that are in the EXPORTED
-      // state.
+      // You can only archive workflows that are in the EXPORTED state.
       if (wfState.indexOf("ARCHIVED") != -1 ||
           wfState.indexOf("BATCH_RESERVED") != -1 ||
           wfState.indexOf("DISPATCHED") != -1 ||
@@ -1067,6 +912,11 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
       {
          // You can only archive workflows that are...EXPORTED
          alert("<%=bundle.getString("jsmsg_cannot_archive_workflow")%>");
+         return false;
+      }
+      if (wfState.indexOf("EXPORTING") != -1)
+      {
+         alert("<%=bundle.getString("jsmsg_cannot_operate_workflow_exporting")%>");
          return false;
       }
 
@@ -1110,6 +960,11 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
          alert("<%=bundle.getString("jsmsg_cannot_export_workflow")%>");
          return false;
       }
+      if (wfState.indexOf("EXPORTING") != -1)
+      {
+         alert("<%=bundle.getString("jsmsg_cannot_operate_workflow_exporting")%>");
+         return false;
+      }
 
       workflowForm.action = "<%=exportURL%>";
       workflowForm.action += "&" +
@@ -1118,9 +973,9 @@ function realSubmitForm(buttonClicked,workflowForm, pagesForm){
    }
    else if (buttonClicked == "Download")
    {
-      var user_id = "<%=userId%>";
+      var user_name = "<%=userName%>";
       var job_id = "<%=jobId%>";
-      var delayTimeTableKey = user_id + job_id + wfId;
+      var delayTimeTableKey = user_name + job_id + wfId;
       checkDelayTime(delayTimeTableKey, wfId);
       return false;
    }
@@ -1149,8 +1004,8 @@ var jsStartTimesArray = new Array();
     }
 %>
 function checkDelayTime(key, wfId)
-{   
-	var start_time = 0;
+{
+    var start_time = 0;
     if(key in jsStartTimesArray)
     {
         start_time = jsStartTimesArray[key];
@@ -1158,219 +1013,64 @@ function checkDelayTime(key, wfId)
     //send request to get current time from server.
     dojo.xhrPost(
     {
-    	url:"<%=selfURL%>&<%=JobManagementHandler.OBTAIN_TIME%>=true",
-    	handleAs: "text", 
-    	load:function(dateString)
-    	{
-    	    if (dateString != "")
-    	    {
-        	    var currentTime = parseInt(dateString);
-        	    var usedTime = (currentTime - start_time)/1000;
-        	    var delayTime = <%=sessionMgr
-        									.getAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME)%>;
-        	    var leftTime = parseInt(delayTime - usedTime);
-        	    if(leftTime > 0)
-        	    {
-        	        alert("<%=bundle.getString("msg_task_download_time")%>".replace("%1", delayTime).replace("%2", leftTime));
-        	    }
-        	    else
-        	    {
-        	    	workflowForm.action = "<%=downloadURL%>&firstEntry=true&<%=DownloadFileHandler.PARAM_JOB_ID%>" +
+        url:"<%=selfURL%>&<%=JobManagementHandler.OBTAIN_TIME%>=true",
+        handleAs: "text", 
+        load:function(dateString)
+        {
+            if (dateString != "")
+            {
+                var currentTime = parseInt(dateString);
+                var usedTime = (currentTime - start_time)/1000;
+                var delayTime = <%=sessionMgr
+                                            .getAttribute(SystemConfigParamNames.DOWNLOAD_JOB_DELAY_TIME)%>;
+                var leftTime = parseInt(delayTime - usedTime);
+                if(leftTime > 0)
+                {
+                    alert("<%=bundle.getString("msg_task_download_time")%>".replace("%1", delayTime).replace("%2", leftTime));
+                }
+                else
+                {
+                    workflowForm.action = "<%=downloadURL%>&firstEntry=true&<%=DownloadFileHandler.PARAM_JOB_ID%>" +
                     "=<%=jobId%>&<%=DownloadFileHandler.PARAM_WORKFLOW_ID%>=" + wfId;
-        	    	workflowForm.submit();
-        	    }
-    	    }     
-    	 },
-    	 error:function(error)
-    	 {
-    	    alert(error.message);
-    	 }
+                    workflowForm.submit();
+                }
+            }
+         },
+         error:function(error)
+         {
+            alert(error.message);
+         }
     });
 }
 
-function showPriorityDiv(wfId)
-{
-<% if (!perms.getPermissionFor(Permission.JOB_WORKFLOWS_PRIORITY)) {%>
-	return;
-<% } %>
-   //select "Check All"
-   if (wfId == 'workflowForm_checkAll')
-   {
-	   var form = eval("document.workflowForm");
-	   for (var i = 0; i < form.elements.length; i++)
-	   {
-		if (form.elements[i].type == "checkbox")
-	        {
-	            var wf_id = form.elements[i].id.substring(5);
-	            var prioritySelect = document.getElementById("prioritySelect" + wf_id);
-	            var priorityLabel = document.getElementById("priorityLabel" + wf_id);
-	            prioritySelect.style.display = "block";
-	            priorityLabel.style.display = "none";
-	        }
-	   }
-   }
-   //select "Clear All"
-   else if (wfId == 'workflowForm_clearAll')
-   {
-	   var form = eval("document.workflowForm");
-	   for (var i = 0; i < form.elements.length; i++)
-	   {
-			if (form.elements[i].type == "checkbox")
-	        {
-	            var wf_id = form.elements[i].id.substring(5);
-	            var prioritySelect = document.getElementById("prioritySelect" + wf_id);
-	            var priorityLabel = document.getElementById("priorityLabel" + wf_id);
-	            prioritySelect.style.display = "none";
-	            priorityLabel.style.display = "block";
-	        }
-	   }
-   }
-   //select one by one
-   else 
-   {
-	   var currentCheckbox = document.getElementById("wfId_" + wfId);
-	   
-	   var prioritySelect = document.getElementById("prioritySelect" + wfId);
-	   var priorityLabel = document.getElementById("priorityLabel" + wfId);
 
-	   if (currentCheckbox.type == "checkbox")
-	   {
-		   if ( currentCheckbox.checked == true)
-		   {
-	           prioritySelect.style.display = "block";
-	           priorityLabel.style.display = "none";
-		   }
-		   else 
-		   {
-               prioritySelect.style.display = "none";
-	           priorityLabel.style.display = "block";
-		   }
-	   }
-   }
-}
-
-function setButtonState()
-{
-   var workflowState;
-   var isSkipDisable = false;
-   
-   j = 0;
-   if (workflowForm.wfId.length)
-   {
-      for (i = 0; i < workflowForm.wfId.length; i++)
-      {
-      	 var checkBoxObj = workflowForm.wfId[i];
-         if (checkBoxObj.checked == true)
-         {
-         	var workflowId = checkBoxObj.id.substring(checkBoxObj.id.lastIndexOf("_") + 1);
-         	workflowState = document.getElementById("currentWorkflowState_" + workflowId).innerHTML.replace(/(^\s*)|(\s*$)/g,"");
-         	if(workflowState != 'DISPATCHED' && workflowState != 'READY_TO_BE_DISPATCHED')
-         	{
-         		isSkipDisable = true;
-         	}
-            j++;
-         }
-      }
-   }
-
-   if (j > 1)
-   {
-      if (document.workflowForm.Details)
-          document.workflowForm.Details.disabled = true;
-      if (document.workflowForm.Edit)
-          document.workflowForm.Edit.disabled = true;
-      if (document.workflowForm.ViewError)
-          document.workflowForm.ViewError.disabled = true;
-      if (document.workflowForm.changePriority)
-          document.workflowForm.changePriority.disabled = true;
-          
-      <% if (Modules.isVendorManagementInstalled()) { %>
-          if (document.workflowForm.Rate)
-              document.workflowForm.Rate.disabled = true;
-      <% } %>
-      if (document.workflowForm.ReAssign)
-          document.workflowForm.ReAssign.disabled = true;
-      
-      if (document.workflowForm.Download)
-          document.workflowForm.Download.disabled = true;
-	   if(isSkipDisable)
-	   {
-	   		if(document.workflowForm.skip){
-	   			document.workflowForm.skip.disabled = true;
-	   		}
-	   }
-	   else
-	   {
-	     	if(document.workflowForm.skip){
-	   			document.workflowForm.skip.disabled = false;
-	   		}
-	   }
-          
-   }
-   else
-   {
-      if (document.workflowForm.Details)
-          document.workflowForm.Details.disabled = false;
-      if (document.workflowForm.Edit)
-          document.workflowForm.Edit.disabled = false;
-      if (document.workflowForm.ViewError)
-          document.workflowForm.ViewError.disabled = false;
-      if (document.workflowForm.changePriority)
-          document.workflowForm.changePriority.disabled = false;
-          
-      <% if (Modules.isVendorManagementInstalled()) { %>
-          if (document.workflowForm.Rate)
-              document.workflowForm.Rate.disabled = false;
-      <% } %>
-      if (document.workflowForm.ReAssign)
-         document.workflowForm.ReAssign.disabled = false;
-      if (document.workflowForm.Download)
-          document.workflowForm.Download.disabled = false;
-      if(document.workflowForm.skip){
-		  document.workflowForm.skip.disabled = false;
-	  }
-   }
-}
-
-function getJobCookie()
-{
-    var lastjobs = "";
-    var cookieName = "<%=JobSearchConstants.MRU_JOBS_COOKIE%>" +
-                     "<%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>";
-    if (document.cookie.length > 0)
-    {
-        offset = document.cookie.indexOf(cookieName);
-        if (offset != -1)
-        {
-            offset += cookieName.length + 1;
-            end = document.cookie.indexOf(";", offset);
-            if (end == -1)
-            {
-                end = document.cookie.length;
-            }
-            var lastjobs = unescape(document.cookie.substring(offset, end));
+//for GBS-2599
+function handleSelectAll() {
+    if (workflowForm && workflowForm.selectAll_1) {
+        if (workflowForm.selectAll_1.checked) {
+            checkAll('workflowForm');
+            <% if (Modules.isVendorManagementInstalled()) { %>
+                setButtonState(true);
+            <% }  else {%>
+                setButtonState(false);
+            <% } %>
+            <% if (perms.getPermissionFor(Permission.JOB_WORKFLOWS_PRIORITY)) {%>
+                showPriorityDiv('workflowForm_checkAll');
+            <% } %>
+        }
+        else {
+            clearAll('workflowForm');
+            <% if (Modules.isVendorManagementInstalled()) { %>
+                setButtonState(true);
+            <% }  else {%>
+                setButtonState(false);
+            <% } %>
+            <% if (perms.getPermissionFor(Permission.JOB_WORKFLOWS_PRIORITY)) {%>
+                showPriorityDiv('workflowForm_clearAll');
+            <% } %>
         }
     }
-    return lastjobs;
 }
-
-function setJobCookie(lastJobs)
-{
-    var today = new Date();
-    var expires = new Date(today.getTime() + (90 * 86400000));  //90 days
-    var cookieName = "<%=JobSearchConstants.MRU_JOBS_COOKIE%>" +
-                     "<%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>" + "=";
-    document.cookie = cookieName + lastJobs + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
-}
-
-var windownum = 1;
-function popup(url, target)
-{
-   target = target + parent.windx + windownum++;
-   parent.windx++;
-   var newurl = url+'&target=' + target;
-   window.open(newurl,target,config='height=500,width=700,toolbar=no,menubar=no,scrollbars=yes,resizable=yes,location=no,directories=no,status=no');
-};
 
 function confirmCostChange()
 {
@@ -1396,42 +1096,41 @@ function addSourceFiles()
         {
             if (data=="")
             {
-            	openAddSourceFilesWindow();
+                openAddSourceFilesWindow();
             }
             else
             {
-            	showMsg(data);
+                showMsg(data);
             }
         },
         error:function(error)
         {
-        	showMsg(error.message);
+            showMsg(error.message);
         }
     });
 }
 
 function openAddSourceFilesWindow()
 {
-
-	var div = dijit.byId('addSourceDiv');
-	div.show();
-	dojo.byId('appletDiv').innerHTML = '<%=appletcontent.toString()%>';
+    var div = dijit.byId('addSourceDiv');
+    div.show();
+    dojo.byId('appletDiv').innerHTML = '<%=appletcontent.toString()%>';
 }
 
 function removeSourceFiles()
-{	
-	var pIds = getSelectPageIds();
-	
-	if (pIds.length == 0)
-	{
-		showMsg('<%=bundle.getString("msg_no_file_remove")%>');
-		return;
+{   
+    var pIds = getSelectPageIds();
+    
+    if (pIds.length == 0)
+    {
+        showMsg('<%=bundle.getString("msg_no_file_remove")%>');
+        return;
     }
 
-	var obj = {
-		pIds : pIds
-	}
-	
+    var obj = {
+        pIds : pIds
+    }
+    
     dojo.xhrPost(
     {
         url:"<%=beforeDeleteSourceURL%>",
@@ -1441,86 +1140,58 @@ function removeSourceFiles()
         {
             if (data=="")
             {
-                if (confirm('<%=bundle.getString("msg_confirm_remove")%>'))
-                {
-                	doRemoveFiles(pIds);
+                if (confirm('<%=bundle.getString("msg_confirm_remove")%>')) {
+                    doRemoveFiles(pIds);
                 }
             }
             else
             {               
-            	var returnData = eval(data);
+                var returnData = eval(data);
                 if (returnData.error)
                 {
-                	showMsg(returnData.error);
+                    showMsg(returnData.error);
                 }
                 else if (returnData.confirm && confirm(returnData.confirm))
                 {
-                	doRemoveFiles(pIds);
+                    doRemoveFiles(pIds);
                 }
             }
         },
         error:function(error)
         {
-        	showMsg(error.message);
+            showMsg(error.message);
         }
     });
 }
 
-function getSelectPageIds()
-{
-	var pIds = document.getElementsByName("pageIds");
-	var selectIds = "";
-	for (var i = 0; i < pIds.length; i++)
-    {
-        if (pIds[i].checked)
-        {
-           if (selectIds.length > 0)
-           {
-           	selectIds = selectIds.concat(",");
-           }
-           
-           selectIds = selectIds.concat(pIds[i].value);
-        }
-    }
-
-    return selectIds;
-}
-
 function doRemoveFiles(pIds)
 {
-
-	var  randomNum = new Date().getTime() + Math.floor(Math.random()*10000+1);
+    var  randomNum = new Date().getTime() + Math.floor(Math.random()*10000+1);
     dojo.xhrPost(
-    	    {
-    	        url:"<%=deleteSourceURL%>" + "&pageIds=" + pIds + "&randomNum=" + randomNum,
-    	        handleAs: "text", 
-    	        load:function(data)
-    	        {
-        	        closeMsg2();
-        	        
-    	            if (data=="")
-    	            {
-    	            	refreshJobPage();
-    	            }
-    	            else
-    	            {
-    	            	var returnData = eval(data);
-    	            	if (returnData.discard != null)
-    	            	{
-    	            		location.replace('<%=allStatus.getPageURL()%>');
-            	        }
-    	            	else
-    	            	{
-    	            		showMsg(data);
-            	        }
-    	            }
-    	        },
-    	        error:function(error)
-    	        {
-    	        	closeMsg2();
-    	        	showMsg(error.message);
-    	        }
-    	    });
+            {
+                url:"<%=deleteSourceURL%>" + "&pageIds=" + pIds + "&randomNum=" + randomNum,
+                handleAs: "text", 
+                load:function(data)
+                {
+                    closeMsg2();
+                    
+                    if (data==""){
+                        refreshJobPage();
+                    } else {
+                        var returnData = eval(data);
+                        if (returnData.discard != null){
+                            location.replace('<%=allStatus.getPageURL()%>');
+                        } else {
+                            showMsg(data);
+                        }
+                    }
+                },
+                error:function(error)
+                {
+                    closeMsg2();
+                    showMsg(error.message);
+                }
+            });
 
     dojo.byId('progressMsg').innerHTML='<%=bundle.getString("msg_wait_delete_finish")%>';
     showDeleteProgress(0, randomNum);
@@ -1528,185 +1199,190 @@ function doRemoveFiles(pIds)
 
 function downloadFiles()
 {
-	var pIds = getSelectPageIds();
-	if (pIds.length == 0)
-	{
-		showMsg('<%=bundle.getString("msg_no_file_remove")%>');
-		return;
+    var pIds = getSelectPageIds();
+    if (pIds.length == 0) {
+        showMsg('<%=bundle.getString("msg_no_file_remove")%>');
+        return;
     }
-    
-	downLoadForm.action = '<%=downloadSourceURL%>' + "&pageIds=" + pIds;	
-	downLoadForm.submit();
+    var obj = {
+            pIds : pIds
+        }
+        
+    dojo.xhrPost(
+    {
+        url:"<%=beforeDeleteSourceURL%>",
+        handleAs: "text", 
+        content:obj,
+        load:function(data)
+        {
+            if (data=="")
+            {
+                doDownloadFiles(pIds);
+            } else {
+                var returnData = eval(data);
+                if (returnData.error)
+                {
+                    showMsg(returnData.error);
+                }
+                else 
+                {
+                    doDownloadFiles(pIds);
+                }
+            }
+        },
+        error:function(error)
+        {
+            showMsg(error.message);
+        } 
+    });
+}
+
+function doDownloadFiles(pIds) {
+    downLoadForm.action = '<%=downloadSourceURL%>' + "&pageIds=" + pIds;    
+    downLoadForm.submit();
 }
 
 function openUploadFile()
 {
     dojo.xhrPost(
-    	    {
-    	        url:"<%=beforeAddDeleteSourceURL%>",
-    	        handleAs: "text", 
-    	        load:function(data)
-    	        {
-    	            if (data=="")
-    	            {
-    	            	dijit.byId('uploadFormDiv').show();
-    	            }
-    	            else
-    	            {
-    	            	showMsg(data);
-    	            }
-    	        },
-    	        error:function(error)
-    	        {
-    	        	showMsg(error.message);
-    	        }
-    	    });
+            {
+                url:"<%=beforeAddDeleteSourceURL%>",
+                handleAs: "text", 
+                load:function(data)
+                {
+                    if (data=="") {
+                        dijit.byId('uploadFormDiv').show();
+                    } else {
+                        showMsg(data);
+                    }
+                },
+                error:function(error){
+                    showMsg(error.message);
+                }
+            });
 }
 
 function showUpdateProgress(num, randomNum)
 {
-	var obj = {
-		number : num,
-		randomNum : randomNum
-	}
-	
-	dojo.xhrPost(
+    var obj = {
+        number : num,
+        randomNum : randomNum
+    }
+    
+    dojo.xhrPost(
     {
- 	        url:"<%=showUpdateProgressURL%>",
- 	        content:obj,
- 	        handleAs: "text", 
- 	        load:function(data)
- 	        {
- 	            if (data=="")
- 	            {
- 	            	
- 	            }
- 	            else
- 	            {
- 	            	var returnData = eval(data);
- 	            	dijit.byId('theBar').update({ maximum: returnData.total, progress:returnData.number });
- 	            	dijit.byId('progressDialog').show();
- 	            	showUpdateProgress(returnData.number, randomNum);
- 	            }
- 	        },
- 	        error:function(error)
- 	        {
- 	        	
- 	        }
+            url:"<%=showUpdateProgressURL%>",
+            content:obj,
+            handleAs: "text", 
+            load:function(data) {
+                if (data=="") {
+
+                } else {
+                    var returnData = eval(data);
+                    dijit.byId('theBar').update({ maximum: returnData.total, progress:returnData.number });
+                    dijit.byId('progressDialog').show();
+                    showUpdateProgress(returnData.number, randomNum);
+                }
+            },
+            error:function(error) {
+
+            }
     });
 }
 
 function showDeleteProgress(num, randomNum)
 {
-	var obj = {
-		number : num,
-		randomNum : randomNum
-	}
-	
-	dojo.xhrPost(
+    var obj = {
+        number : num,
+        randomNum : randomNum
+    }
+    
+    dojo.xhrPost(
     {
- 	        url:"<%=showDeleteProgressURL%>",
- 	        content:obj,
- 	        handleAs: "text", 
- 	        load:function(data)
- 	        {
- 	            if (data=="")
- 	            {
- 	            	
- 	            }
- 	            else
- 	            {
- 	            	var returnData = eval(data);
- 	            	dijit.byId('theBar').update({ maximum: returnData.total, progress:returnData.number });
- 	            	dijit.byId('progressDialog').show();
- 	            	showDeleteProgress(returnData.number, randomNum);
- 	            }
- 	        },
- 	        error:function(error)
- 	        {
- 	        	
- 	        }
+            url:"<%=showDeleteProgressURL%>",
+            content:obj,
+            handleAs: "text", 
+            load:function(data)
+            {
+                if (data=="") {
+
+                } else {
+                    var returnData = eval(data);
+                    dijit.byId('theBar').update({ maximum: returnData.total, progress:returnData.number });
+                    dijit.byId('progressDialog').show();
+                    showDeleteProgress(returnData.number, randomNum);
+                }
+            },
+            error:function(error) {
+                
+            }
     });
 }
 
 function uploadFile() 
 {
-	var  randomNum = new Date().getTime() + Math.floor(Math.random()*10000+1);
-	
+    var  randomNum = new Date().getTime() + Math.floor(Math.random()*10000+1);
+    
     dojo.io.iframe.send({
-		form: dojo.byId("uploadForm"),
-		url:  "<%=uploadSourceURL%>" + "&randomNum=" + randomNum,
+        form: dojo.byId("uploadForm"),
+        url:  "<%=uploadSourceURL%>" + "&randomNum=" + randomNum,
        method: 'POST', 
        contentType: "multipart/form-data",
-		handleAs: "text",
-		handle: function(response, ioArgs){
-			if(response instanceof Error){
-				alert("Failed to upload file, please try later.");
-			}
-			else{
-				dijit.byId('uploadFormDiv').hide();
-   				var returnData = eval(response);
-   				if (returnData)
-   				{
-   					var msg = returnData;
-   					if (returnData.error)
-   	                {
-   	                	msg = returnData.error;
-   	                }
-
-   					dijit.byId('progressDialog').hide();
-   					showMsg(msg);
-   	   			}
-   				else
-   				{
-   					refreshJobPage();
-   	   	   		}
-   			}
-		}
-	});
+        handleAs: "text",
+        handle: function(response, ioArgs){
+            if(response instanceof Error){
+                alert("Failed to upload file, please try later.");
+            } else {
+                dijit.byId('uploadFormDiv').hide();
+                var returnData = eval(response);
+                if (returnData) {
+                    var msg = returnData;
+                    if (returnData.error) {
+                        msg = returnData.error;
+                    }
+                    dijit.byId('progressDialog').hide();
+                    showMsg(msg);
+                } else {
+                    refreshJobPage();
+                }
+            }
+        }
+    });
 
     dijit.byId('uploadFormDiv').hide();
     dojo.byId('progressMsg').innerHTML='<%=bundle.getString("lb_upldate_applet_msg")%>';
     showUpdateProgress(0, randomNum);
 }
 
-function showMsg(msg)
-{
-	 dojo.byId('msgDiv').innerHTML=msg;
-	 dijit.byId('msgDialog').show();
+function showMsg(msg){
+     dojo.byId('msgDiv').innerHTML=msg;
+     dijit.byId('msgDialog').show();
 }
 
-function showMsg3(msg)
-{
-	 dojo.byId('msgDiv3').innerHTML=msg;
-	 dijit.byId('msgDialog3').show();
+function showMsg3(msg) {
+     dojo.byId('msgDiv3').innerHTML=msg;
+     dijit.byId('msgDialog3').show();
 }
 
-
-function showMsg2(msg)
-{
+function showMsg2(msg) {
     var dialog = dijit.byId('msgDialog2');
     dojo.style(dialog.closeButtonNode,"display","none"); 
-	dojo.byId('msgDiv2').innerHTML=msg;
-	dijit.byId('msgDialog2').show();
+    dojo.byId('msgDiv2').innerHTML=msg;
+    dijit.byId('msgDialog2').show();
 }
 
-function closeMsg2()
-{
-	dijit.byId('msgDialog2').hide();
+function closeMsg2() {
+    dijit.byId('msgDialog2').hide();
 }
 
-function refreshJobPage()
-{
-	try
-	{
-		document.getElementById("detailTab").click();
-	}
-	catch(ex)
-	{ 
-		location.reload(true)
-	}
+function refreshJobPage() {
+    try {
+        document.getElementById("detailTab").click();
+    } catch(ex) {
+        location.reload(true)
+    }
 }
+
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -1764,6 +1440,14 @@ function refreshJobPage()
         </amb:permission>
         </TD>
         
+        <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
+        <TD WIDTH="2"></TD>       
+        <TD CLASS="tableHeadingListOff">        
+        <IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+        <A CLASS="sortHREFWhite" HREF="<%=jobReportsURL%>"><%=bundle.getString("lb_reports")%></A>
+        <IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+        </TD>
+        </amb:permission>
 </TR>
 <TR>
     <TD COLSPAN="4" HEIGHT="1"><IMG SRC="/globalsight/images/spacer.gif" HEIGHT="1" WIDTH="1"></TD>
@@ -1803,7 +1487,7 @@ function refreshJobPage()
         <TR VALIGN="TOP">
             <TD style="width:100px"><B><%=bundle.getString("lb_job_name")%>:<B></TD>
             <TD style="width:200px;word-wrap:break-word;word-break:break-all">
-			<%out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT>"); %>
+            <%out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT>"); %>
             <%=request.getAttribute(JobManagementHandler.JOB_NAME_SCRIPTLET)%>
             <%out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
             </TD>
@@ -1882,23 +1566,23 @@ function refreshJobPage()
                                     if (costReEditAllowed)
                                     {
                                 %>
-                                     	(<A HREF="#" CLASS="standardHREFDetail" TABINDEX="0" onclick="changeCurrency('<%=currentCurrency%>'); return false;"><%=bundle.getString("lb_edit")%></A>):<B>
+                                        (<A HREF="#" CLASS="standardHREFDetail" TABINDEX="0" onclick="changeCurrency('<%=currentCurrency%>', '<%= changeCurrencyURL%>'); return false;"><%=bundle.getString("lb_edit")%></A>):<B>
                                 <%
-                                	}
-                                	else if (costEditAllowed)
-                                	{ 
-                                		 if(quoteApprovedDate == null)
-                                		 {
+                                    }
+                                    else if (costEditAllowed)
+                                    { 
+                                         if(quoteApprovedDate == null)
+                                         {
                                 %>
- 											(<A HREF="#" CLASS="standardHREFDetail" TABINDEX="0" onclick="changeCurrency('<%=currentCurrency%>'); return false;"><%=bundle.getString("lb_edit")%></A>):<B>
-   								<% 
-   										}else
-   										{
-   								%>
-											(<A  href="#" CLASS="standardHREFDetail" TABINDEX="0" onclick="return false;"><%=bundle.getString("lb_edit")%></A>):<B>
+                                            (<A HREF="#" CLASS="standardHREFDetail" TABINDEX="0" onclick="changeCurrency('<%=currentCurrency%>', '<%=changeCurrencyURL%>'); return false;"><%=bundle.getString("lb_edit")%></A>):<B>
+                                <% 
+                                        }else
+                                        {
+                                %>
+                                            (<A  href="#" CLASS="standardHREFDetail" TABINDEX="0" onclick="return false;"><%=bundle.getString("lb_edit")%></A>):<B>
                                 <%
-                                 		}
-                                 	} 
+                                        }
+                                    } 
                                 %>
                                     </TD>
                                     <TD ALIGN="RIGHT"><%=currentCurrency%></TD>
@@ -1928,25 +1612,25 @@ function refreshJobPage()
                                     <TD NOWRAP><B><%=bundle.getString("lb_surcharges")%>
                                     <%
                                       if (costReEditAllowed)
-                                    	{
+                                        {
                                     %>
-                                    	(<A HREF="<%=expensesSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
+                                        (<A HREF="<%=expensesSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-                                    	}
-                                    	else if (costEditAllowed)
-                                    	{
-	                                       	 if(quoteApprovedDate == null)
-	                                       	 {
+                                        }
+                                        else if (costEditAllowed)
+                                        {
+                                             if(quoteApprovedDate == null)
+                                             {
                                     %>
-                                   			 	(<A HREF="<%=expensesSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
-                                	<%
-											}else
-											{
-                                	%>
-                                				(<A  href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                                (<A HREF="<%=expensesSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-                                    		}
-                                    	}
+                                            }else
+                                            {
+                                    %>
+                                                (<A  href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                    <%
+                                            }
+                                        }
                                     %>
                                     :</B></TD>
                                     <TD ALIGN="RIGHT"></TD>
@@ -2010,26 +1694,26 @@ function refreshJobPage()
                                 <TR VALIGN="TOP">
                                     <TD NOWRAP><B><%=bundle.getString("lb_final_internal_costs")%>
                                 <% 
-	                                if (costReEditAllowed)
-	                                {
-	                            %>
-	                                   (<A HREF="<%=editExpensesFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
-                                <%
-	                                }
-	                                else if (costEditAllowed) 
-	                                {
-	                                   if(quoteApprovedDate == null)
-	                                   {
+                                    if (costReEditAllowed)
+                                    {
                                 %>
-                                    		(<A HREF="<%=editExpensesFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
+                                       (<A HREF="<%=editExpensesFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                 <%
-	                                  	}else
-	                                  	{
-	                            %>
-	                                     	(<A href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                    }
+                                    else if (costEditAllowed) 
+                                    {
+                                       if(quoteApprovedDate == null)
+                                       {
+                                %>
+                                            (<A HREF="<%=editExpensesFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                 <%
-	                                    }
-	                                }
+                                        }else
+                                        {
+                                %>
+                                            (<A href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                <%
+                                        }
+                                    }
                                 %>
                                     :<B></TD>
                                     <TD ALIGN="RIGHT"><%=request.getAttribute(JobManagementHandler.FINAL_COST)%>
@@ -2054,26 +1738,26 @@ function refreshJobPage()
                                 <TR VALIGN="TOP">
                                     <TD NOWRAP><B><%=bundle.getString("lb_surcharges")%>
                                     <%
-	                                    if (costReEditAllowed)
-	                                    {
-	                                %>
-	                                     (<A HREF="<%=revenueSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
-                                    <%
-	                                    }
-	                                    else if (costEditAllowed)
-	                                    {
-	                                        if(quoteApprovedDate == null)
-	                                        {
+                                        if (costReEditAllowed)
+                                        {
                                     %>
-                                    	 		 (<A HREF="<%=revenueSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
+                                         (<A HREF="<%=revenueSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-	                                    	}else
-	                                    	{
-	                                %>
-	                                      		(<A href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                        }
+                                        else if (costEditAllowed)
+                                        {
+                                            if(quoteApprovedDate == null)
+                                            {
+                                    %>
+                                                 (<A HREF="<%=revenueSurchargesURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-	                                    	}
-	                                    }
+                                            }else
+                                            {
+                                    %>
+                                                (<A href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                    <%
+                                            }
+                                        }
                                     %>
                                     :</B></TD>
                                     <TD ALIGN="RIGHT"></TD>
@@ -2153,26 +1837,26 @@ function refreshJobPage()
                                 <TR VALIGN="TOP">
                                     <TD NOWRAP><B><%=bundle.getString("lb_final_billing_charges")%>
                                     <%
-	                                    if (costReEditAllowed)
-	                                    {
+                                        if (costReEditAllowed)
+                                        {
                                     %>
-                                     		(<A HREF="<%=editRevenueFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
+                                            (<A HREF="<%=editRevenueFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-	                                    }
-	                                    else if(costEditAllowed)
-	                                    {
-	                                       if(quoteApprovedDate == null)
-	                                       {
+                                        }
+                                        else if(costEditAllowed)
+                                        {
+                                           if(quoteApprovedDate == null)
+                                           {
                                     %>
-                                    		(<A HREF="<%=editRevenueFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
+                                            (<A HREF="<%=editRevenueFinalCostURL%>" CLASS=standardHREFDetail onclick="return confirmCostChange()"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-	                                	   }else
-	                                       {
+                                           }else
+                                           {
                                     %>
-                                    		(<A href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
+                                            (<A href="#" CLASS=standardHREFDetail onclick="return false;"><%=bundle.getString("lb_edit")%></A>)
                                     <%
-	                                       }
-	                                    }
+                                           }
+                                        }
                                     %>
                                     :<B></TD>
                                     <TD ALIGN="RIGHT"><%=request.getAttribute(JobManagementHandler.FINAL_REVENUE)%>
@@ -2213,42 +1897,42 @@ function refreshJobPage()
 <%@ include file="/envoy/projects/workflows/pageSearch.jspIncl" %>
 
     <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" width="100%" style="border: solid 1px slategray;">
-		<tbody>
-		<TR width=100%>
-		<TD colspan=4 width=100%>
+        <tbody>
+        <TR width=100%>
+        <TD colspan=4 width=100%>
             <div class="tableContainer" id="data">
             <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" width="100%">
-				<thead class="scroll">
-					<TR CLASS="tableHeadingBasic" VALIGN="BOTTOM" width="100%">
-					<TD class=scroll align=left style="padding-left: 8px; padding-top: 2px; padding-bottom: 2px;width:70%;height:30px">
-						<A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.EXTERNAL_PAGE_ID%>">
-						<%=bundle.getString("lb_primary_source_files")%></A><%=pageNameSortArrow%></TD>
-					<TD CLASS=scroll ALIGN=left style="padding-center: 8px; padding-top: 2px; padding-bottom: 2px;" nowrap >
-						<%=bundle.getString("lb_file_profile")%></TD>
-					<TD class=scroll align=right style="padding-right: 8px; padding-top: 2px; padding-bottom: 2px;" nowrap>
-						<A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.WORD_COUNT%>">
-						<%=bundle.getString("lb_source_word_count")%></A><%=wordCountSortArrow%></TD>
-					<TD class=scroll align=center style="padding-right: 8px; padding-top: 2px; padding-bottom: 2px;" nowrap>
-						<%=bundle.getString("lb_source")%></TD>
-					</TR>
-			    </thead>
-    		<%=request.getAttribute(JobManagementHandler.JOB_CONTENT_SCRIPTLET)%>
-		<TR>
-			<TD colspan=4>
-			<amb:permission  name="<%=Permission.ADD_SOURCE_FILES%>" >
-			<input CLASS="standardText" type="button" name="Add Files" value="<%=bundle.getString("lb_add_files") %>" onclick="addSourceFiles()">
-			</amb:permission>
-			<amb:permission  name="<%=Permission.DELETE_SOURCE_FILES%>" >
-			<input CLASS="standardText" type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files") %>" onclick="removeSourceFiles()">
-			</amb:permission>
-			<amb:permission  name="<%=Permission.EDIT_SOURCE_FILES%>" >
-			<input CLASS="standardText" type="button" name="download Files" value="<%=bundle.getString("lb_download_edit") %>" onclick="downloadFiles()">
-			<input CLASS="standardText" type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit") %>" onclick="openUploadFile();">
-			</amb:permission> 
-			</TD>
-	   </TR>
-	</tbody>
-	</TABLE>
+                <thead class="scroll">
+                    <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM" width="100%">
+                    <TD class=scroll align=left style="padding-left: 0px; padding-top: 2px; padding-bottom: 2px;width:70%;height:30px"><input type="checkbox"  name="selectAll_2" id="selectAll_2"/>
+                        <A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.EXTERNAL_PAGE_ID%>">
+                        <%=bundle.getString("lb_primary_source_files")%></A><%=pageNameSortArrow%></TD>
+                    <TD CLASS=scroll ALIGN=left style="padding-center: 8px; padding-top: 2px; padding-bottom: 2px;" nowrap >
+                        <%=bundle.getString("lb_file_profile")%></TD>
+                    <TD class=scroll align=right style="padding-right: 8px; padding-top: 2px; padding-bottom: 2px;" nowrap>
+                        <A CLASS="sortHREFWhite" HREF="<%=pageListUrl + "&" + JobManagementHandler.PAGE_SORT_PARAM + "=" + PageComparator.WORD_COUNT%>">
+                        <%=bundle.getString("lb_source_word_count")%></A><%=wordCountSortArrow%></TD>
+                    <TD class=scroll align=center style="padding-right: 8px; padding-top: 2px; padding-bottom: 2px;" nowrap>
+                        <%=bundle.getString("lb_source")%></TD>
+                    </TR>
+                </thead>
+            <%=request.getAttribute(JobManagementHandler.JOB_CONTENT_SCRIPTLET)%>
+        <TR>
+            <TD colspan=4>
+            <amb:permission  name="<%=Permission.ADD_SOURCE_FILES%>" >
+            <input CLASS="standardText" type="button" name="Add Files" value="<%=bundle.getString("lb_add_files") %>" onclick="addSourceFiles()">
+            </amb:permission>
+            <amb:permission  name="<%=Permission.DELETE_SOURCE_FILES%>" >
+            <input CLASS="standardText" type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files") %>" onclick="removeSourceFiles()">
+            </amb:permission>
+            <amb:permission  name="<%=Permission.EDIT_SOURCE_FILES%>" >
+            <input CLASS="standardText" type="button" name="download Files" value="<%=bundle.getString("lb_download_edit") %>" onclick="downloadFiles()">
+            <input CLASS="standardText" type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit") %>" onclick="openUploadFile();">
+            </amb:permission> 
+            </TD>
+       </TR>
+    </tbody>
+    </TABLE>
     <!-- End Pages table -->
 </TD>
 </amb:permission>
@@ -2258,8 +1942,8 @@ function refreshJobPage()
 <FORM id = "quoteForm" NAME="quoteForm" METHOD="POST">
 <TABLE CELLPADDING=0 CELLSPACING=2 BORDER=0 CLASS=detailText BGCOLOR="WHITE" WIDTH=100%>
 <TR>
-	<TD WIDTH=24%>
-    	   <amb:permission name="<%=Permission.JOB_QUOTE_SEND%>" >
+    <TD WIDTH=24%>
+           <amb:permission name="<%=Permission.JOB_QUOTE_SEND%>" >
                 <div>
                  <% if(quoteApprovedDate != null)
                     {
@@ -2281,17 +1965,17 @@ function refreshJobPage()
                 </div>
                <div height="50">&nbsp;</div>
                <div>
-                   <INPUT CLASS="standardText" TYPE="BUTTON" NAME="sendEmail" id = "sendEmailId" value="<%=bundle.getString("lb_send_email")%>" DISABLED="TRUE" ONCLICK="send_email()">
+                   <INPUT CLASS="standardText" TYPE="BUTTON" NAME="sendEmail" id="sendEmailId" value="<%=bundle.getString("lb_send_email")%>" DISABLED="TRUE">
                </div>
                <div height="15">&nbsp;</div>
             </amb:permission>
             <!-- For Quote process webEx-->
             <amb:permission name="<%=Permission.JOB_QUOTE_PONUMBER_VIEW%>" >
               <span>
-                <%=bundle.getString("lb_po_number")%><input type = "text" name = "POnumber" id = "POnumber" disabled = "true" size = 15 value = "<%=quotePOnumber%>" onChange= "PoNumberIsChanged=true;"/>
+                <%=bundle.getString("lb_po_number")%><input type="text" name="POnumber" id="POnumber" disabled="true" size=15 value="<%=quotePOnumber%>" onChange= "PoNumberIsChanged=true;"/>
               </span>
               <amb:permission name="<%=Permission.JOB_QUOTE_PONUMBER_EDIT%>" >
-                     <div ALIGN="RIGHT"><input class="standardText" type = "button" name = "PONumberSave" id = "PONumberSave" value = "<%=bundle.getString("lb_po_number_save")%>" onClick = "saveQuotePoNumber()"/></div>
+                     <div ALIGN="RIGHT"><input class="standardText" type="button" name="PONumberSave" id="PONumberSave" value="<%=bundle.getString("lb_po_number_save")%>" /></div>
                       <script>
                             var objPONumberText = document.getElementById('POnumber');
                             objPONumberText.disabled = false;                           
@@ -2301,18 +1985,18 @@ function refreshJobPage()
 
     </TD>
     <TD WIDTH=4%></TD>
-    <%	String src_green = "";
-    	String src_red = "";
-    	if (quoteApprovedDate != null)
-    	{
-    		src_green = "/globalsight/images/traffic_green.gif";
-    		src_red = "/globalsight/images/traffic_off.gif";
-    	}
-    	else 
-    	{
-    		src_red = "/globalsight/images/traffic_red.gif";
-    		src_green = "/globalsight/images/traffic_off.gif";
-    	}
+    <%  String src_green = "";
+        String src_red = "";
+        if (quoteApprovedDate != null)
+        {
+            src_green = "/globalsight/images/traffic_green.gif";
+            src_red = "/globalsight/images/traffic_off.gif";
+        }
+        else 
+        {
+            src_red = "/globalsight/images/traffic_red.gif";
+            src_green = "/globalsight/images/traffic_off.gif";
+        }
     %>
     <TD WIDTH=70% ALIGN="left">
         <amb:permission name="<%=Permission.JOB_QUOTE_STATUS_VIEW%>" >
@@ -2355,37 +2039,37 @@ function refreshJobPage()
             </script>
             <tr height = "30">&nbsp;</tr>
             <tr>
-                <INPUT CLASS="standardText" TYPE="BUTTON" NAME="confirmApprove" id="confirmApproveId" value="<%=bundle.getString("lb_quote_approve_confirm")%>" DISABLED="TRUE" ONCLICK="confirmApproveQuote();"/>
+                <INPUT CLASS="standardText" TYPE="BUTTON" NAME="confirmApprove" id="confirmApproveId" value="<%=bundle.getString("lb_quote_approve_confirm")%>" DISABLED="TRUE" />
             </tr>
          </amb:permission>
        </table>
     </TD>
     <TD WIDTH=4%></TD>
-    <%	
-    	String quoteReadyDateMessage = "";
-    	String quoteApprovedDateMessage = "";
-    	String quoteApprovedAnthoriserMessage = "";
-    	if(quoteDate != null && !quoteDate.equals(""))
-    	{
+    <%  
+        String quoteReadyDateMessage = "";
+        String quoteApprovedDateMessage = "";
+        String quoteApprovedAnthoriserMessage = "";
+        if(quoteDate != null && !quoteDate.equals(""))
+        {
                 quoteReadyDateMessage = "<B>" + bundle.getString("lb_quote_ready_email_sent") + "</B><br><B>" + quoteDate + "</B>";
         }
 
-    	if (quoteApprovedDate != null && !quoteApprovedDate.equals(""))
-    	{
-   		quoteApprovedDateMessage = "<B>" + bundle.getString("lb_quote_approved_email_sent") + "</B><br><B>" + quoteApprovedDate + "</B>";
-    	}
-    	if(anthoriserUser != null && !anthoriserUser.equals(""))
-    	{
-    		quoteApprovedAnthoriserMessage = "<B>" + bundle.getString("lb_send_authoriser") + "</B><br><B>" + anthoriserUser.getFirstName() + "&nbsp;" + anthoriserUser.getLastName() + "</B>";
-    	}
+        if (quoteApprovedDate != null && !quoteApprovedDate.equals(""))
+        {
+        quoteApprovedDateMessage = "<B>" + bundle.getString("lb_quote_approved_email_sent") + "</B><br><B>" + quoteApprovedDate + "</B>";
+        }
+        if(anthoriserUser != null && !anthoriserUser.equals(""))
+        {
+            quoteApprovedAnthoriserMessage = "<B>" + bundle.getString("lb_send_authoriser") + "</B><br><B>" + anthoriserUser.getFirstName() + "&nbsp;" + anthoriserUser.getLastName() + "</B>";
+        }
     %>
     <TD WIDTH=70% ALIGN="left">
       <amb:permission name="<%=Permission.JOB_QUOTE_STATUS_VIEW%>" >
-      	      <div style="float:left;"><%= quoteApprovedAnthoriserMessage %></div>
-      	      <div style="float:left;color: #FFFFFF;width:20px;">&nbsp;</div>
-      	      <div style="float:left;"><%= quoteReadyDateMessage %></div>
-      	      <div style="float:left;color: #FFFFFF;width:20px;">&nbsp;</div>
-      	      <div style="float:left;"><%= quoteApprovedDateMessage %></div>
+              <div style="float:left;"><%= quoteApprovedAnthoriserMessage %></div>
+              <div style="float:left;color: #FFFFFF;width:20px;">&nbsp;</div>
+              <div style="float:left;"><%= quoteReadyDateMessage %></div>
+              <div style="float:left;color: #FFFFFF;width:20px;">&nbsp;</div>
+              <div style="float:left;"><%= quoteApprovedDateMessage %></div>
       </amb:permission>
     </TD>
 </TR>
@@ -2424,7 +2108,7 @@ function refreshJobPage()
                     <TD CLASS="tableHeadingBasic" COLSPAN=<%=colspan%> HEIGHT="2"><IMG SRC="/globalsight/images/spacer.gif" WIDTH="1" HEIGHT="2"></TD>
                     </TR>
                     <TR>
-                        <TD CLASS="tableHeadingBasic"></TD>
+                        <TD CLASS="tableHeadingBasic"><input type="checkbox" onclick="handleSelectAll()" name="selectAll_1"/></TD>
                         <TD CLASS="tableHeadingBasic"><SPAN CLASS="whiteBold"><%=bundle.getString("lb_target_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
                         <TD CLASS="wordCountHeadingWhite" ALIGN="CENTER"><%=bundle.getString("lb_word_count")%>&nbsp;&nbsp;&nbsp;</TD>
                         <TD CLASS="tableHeadingBasic" ALIGN="CENTER"><SPAN CLASS="whiteBold">&nbsp;&nbsp;&nbsp;<%=bundle.getString("lb_percent_complete")%>&nbsp;&nbsp;&nbsp;</SPAN></TD>
@@ -2440,16 +2124,17 @@ function refreshJobPage()
                         <TD CLASS="tableHeadingBasic"><SPAN CLASS="whiteBold"><%=bundle.getString("lb_priority")%>&nbsp;&nbsp;&nbsp;</SPAN></TD>
                     </TR>
                     <%=request.getAttribute(JobManagementHandler.WORKFLOW_SCRIPTLET)%>
-				     <TR>
-				        <TD COLSPAN=<%=colspan%>>
-				            <DIV ID="CheckAllLayer">
-				                <A CLASS="standardHREF"
-				                   HREF="javascript:checkAll('workflowForm'); setButtonState(); showPriorityDiv('workflowForm_checkAll');"><%=bundle.getString("lb_check_all")%></A> |
-				                <A CLASS="standardHREF"
-				                   HREF="javascript:clearAll('workflowForm');setButtonState(); showPriorityDiv('workflowForm_clearAll');"><%=bundle.getString("lb_clear_all")%></A>
-				            </DIV>
-				         </TD>
-				     </TR>
+                     <TR>
+                        <TD COLSPAN=<%=colspan%>>
+                            <!--for gbs-2599
+                            DIV ID="CheckAllLayer">
+                                <A CLASS="standardHREF"
+                                   HREF="javascript:checkAll('workflowForm'); setButtonState(); showPriorityDiv('workflowForm_checkAll');"><%=bundle.getString("lb_check_all")%></A> |
+                                <A CLASS="standardHREF"
+                                   HREF="javascript:clearAll('workflowForm');setButtonState(); showPriorityDiv('workflowForm_clearAll');"><%=bundle.getString("lb_clear_all")%></A>
+                            </DIV-->
+                         </TD>
+                     </TR>
                     <TR>
                     <TD COLSPAN=<%=colspan%> ALIGN=RIGHT>
 <%
@@ -2458,19 +2143,21 @@ function refreshJobPage()
 %>
 <% if (Modules.isCustomerAccessGroupInstalled()) { %>
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_REASSIGN%>" >
-		    <INPUT CLASS="standardText" TYPE="BUTTON" NAME="ReAssign" VALUE="<%=bundle.getString("lb_reassign")%>" onclick="submitForm('ReAssign');"/>
+            <INPUT CLASS="standardText" TYPE="BUTTON" NAME="ReAssign" VALUE="<%=bundle.getString("lb_reassign")%>" onclick="submitForm('ReAssign');"/>
                     </amb:permission>
 <% } %>
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_DISCARD%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="Discard" VALUE="<%=bundle.getString("lb_discard")%>" onclick="submitForm('Discard');"/>
                     </amb:permission>
-
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_VIEW_ERROR%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="ViewError" VALUE="<%=bundle.getString("action_view_error")%>..." onclick="submitForm('ViewError');">
                     </amb:permission>
-                    <amb:permission  name="<%=Permission.UPDATE_WORD_COUNTS%>" >
+                    <amb:permission  name="<%=Permission.JOB_UPDATE_LEVERAGE%>" >
+                        <INPUT CLASS="standardText" TYPE="BUTTON" NAME="UpdateLeverage" id="idUpdateLeverageBtn" VALUE="<%=bundle.getString("lb_update_leverage_title")%>...">
+                    </amb:permission>
+                    <amb:permission  name="<%=Permission.JOB_UPDATE_WORD_COUNTS%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="UpdateWordCounts" VALUE="<%=bundle.getString("lb_update_word_counts")%>" onclick="submitForm('UpdateWordCounts');">
-                    </amb:permission>                    
+                    </amb:permission>
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_WORDCOUNT%>" >
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="WordCount" VALUE="<%=bundle.getString("lb_detailed_word_counts")%>..." onclick="submitForm('WordCount');">
                     </amb:permission>
@@ -2637,14 +2324,15 @@ function refreshJobPage()
 </div>
 
 
-<Form name="downLoadForm" method="post" action="<%=downloadSourceURL%>">
+<Form name="downLoadForm" method="post" action="<%=downloadSourceURL%>"></Form>
 
-</Form>
+<div id="fullbg"></div>
+<div id="container"><div id="updateWordCountsProgressBar"></div></div>
 
 <script>
 // Set cookie for most recently used job list
 var thisjob = "<%=request.getAttribute(JobManagementHandler.JOB_ID)%>" + ":" + "<%=jobName%>";
-var cookie = getJobCookie();
+var cookie = getJobCookie("<%=JobSearchConstants.MRU_JOBS_COOKIE%><%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>");
 if (cookie.length != 0)
 {
     // only save last 3.  make sure this one isn't already on the list.
@@ -2657,13 +2345,12 @@ if (cookie.length != 0)
             lastjobs += "," + jobs[i];
         }
     }
-    setJobCookie(lastjobs);
+    setJobCookie(lastjobs,"<%=JobSearchConstants.MRU_JOBS_COOKIE%><%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>" + "=");
 }
 else
 {
-    setJobCookie(thisjob);
+    setJobCookie(thisjob,"<%=JobSearchConstants.MRU_JOBS_COOKIE%><%=session.getAttribute(WebAppConstants.USER_NAME).hashCode()%>" + "=");
 }
 </script>
 </BODY>
 </HTML>
-

@@ -129,7 +129,7 @@ public class Plug_8_1_1 implements Plug
 		} 
 		catch (IOException e) 
 		{
-			 log.error(e);
+			 log.error(e.getMessage(), e);
              UI ui = UIFactory.getUI();
              ui.confirmContinue("Failed to update envoy.properties");
 		}

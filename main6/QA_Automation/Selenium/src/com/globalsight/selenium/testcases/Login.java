@@ -13,20 +13,16 @@ package com.globalsight.selenium.testcases;
 import junit.framework.Assert;
 
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.thoughtworks.selenium.Selenium;
 
-public class Login
+public class Login extends BaseTestCase
 {
     /**
      * Common variables initialization.
      */
-    private Selenium selenium;
 
     /**
      * Log in with an administrator account and then log out.
@@ -35,7 +31,7 @@ public class Login
     public void AdminLogin()
     {
         CommonFuncs.loginSystemWithSuperAdmin(selenium);
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.Home_LINK),
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.HOME_LINK),
                 true);
     }
 
@@ -46,7 +42,7 @@ public class Login
     public void AnyOneLogin()
     {
         CommonFuncs.loginSystemWithAnyone(selenium);
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.Home_LINK),
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.HOME_LINK),
                 true);
     }
 
@@ -57,26 +53,14 @@ public class Login
     public void PMLogin()
     {
         CommonFuncs.loginSystemWithAdmin(selenium);
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.Home_LINK),
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.HOME_LINK),
                 true);
     }
 
     @AfterMethod
     public void afterMethod()
     {
-        selenium.click(MainFrame.LogOut_LINK);
-    }
-
-    @BeforeTest
-    public void beforeTest()
-    {
-        selenium = CommonFuncs.initSelenium();
-    }
-
-    @AfterTest
-    public void afterTest()
-    {
-        CommonFuncs.endSelenium(selenium);
+        selenium.click(MainFrame.LOG_OUT_LINK);
     }
 
 }

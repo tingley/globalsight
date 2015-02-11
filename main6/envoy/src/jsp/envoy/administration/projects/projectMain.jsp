@@ -11,7 +11,7 @@
          com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectMainHandler,
          com.globalsight.everest.projecthandler.ProjectInfo,
          com.globalsight.everest.foundation.User,
-         com.globalsight.everest.servlet.util.ServerProxy,
+         com.globalsight.everest.company.CompanyWrapper,
          com.globalsight.util.edit.EditUtil,
          java.text.MessageFormat,
          java.util.Locale,
@@ -62,11 +62,12 @@
     // user info
     User user = (User)sessionManager.getAttribute(WebAppConstants.USER);
     String pmName = user.getUserName();
-
+    String pNameFilter = (String) sessionManager.getAttribute("pNameFilter");
+    String cNameFilter = (String) sessionManager.getAttribute("cNameFilter");
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     
     String error = (String) sessionManager.getAttribute(WebAppConstants.PROJECT_ERROR);
-
+	
 %>
 <HTML XMLNS:gs>
 <!-- This JSP is envoy/administration/projects/projectMain.jsp -->
@@ -74,6 +75,7 @@
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -81,8 +83,64 @@
     var objectName = "";
     var guideNode = "projects";
     var helpFile = "<%=bundle.getString("help_projects_main_screen")%>";
+    $(
+    		function(){
+    			$("#ProjectForm").keydown(function(e){
+    				if(e.keyCode==13)
+    				
+    				{
+    					
+    					submitForm("self");
+    				
+    				}
+    				
+    				});
+    			
+    			
+    		}		
+    	)
 
-   
+
+
+
+    function handleSelectAll() {
+    	var ch = $("#selectAll").attr("checked");
+    	if (ch == "checked") {
+    		$("[name='radioBtn']").attr("checked", true);
+    	} else {
+    		$("[name='radioBtn']").attr("checked", false);
+    	}
+    	buttonManagement();
+    }
+    function buttonManagement()
+    {
+    	
+    	var count = $("input[name='radioBtn']:checked").length;
+    	if (count > 0) {
+    		$("#removeBtn").attr("disabled", false);
+    		if (count == 1) {
+    			 $("#removeBtn").attr("disabled", false);
+    			$("#exportBtn").attr("disabled", false);
+    			$("#importBtn").attr("disabled", false);
+    		} else {
+    			 $("#removeBtn").attr("disabled", true);
+    			$("#exportBtn").attr("disabled", true);
+    			$("#importBtn").attr("disabled", true);
+    		}
+    	} else {
+            $("#removeBtn").attr("disabled", true);
+            $("#exportBtn").attr("disabled", true);
+            $("#importBtn").attr("disabled", true);
+    	}
+    }
+    function modifyuser(name){
+    	
+    	var url = "<%=editUrl%>&radioBtn=" + name;
+    	ProjectForm.action = url;
+
+    	ProjectForm.submit();
+    	
+    }
 function enableButtons()
 {
     if (ProjectForm.editBtn) {
@@ -138,6 +196,12 @@ function submitForm(selectedButton)
         ProjectForm.submit();
         return;
     }
+    if (selectedButton == 'self')
+    {
+        ProjectForm.action = "<%=selfUrl%>";
+        ProjectForm.submit();
+        return;
+    }
     else if (!checked)
     {
         alert("<%= bundle.getString("jsmsg_select_project") %>");
@@ -181,6 +245,17 @@ function submitForm(selectedButton)
         	alert("<%=bundle.getString("jsmsg_cannot_remove_project") %>");
         	return;
         }
+        var rv="";
+		$(":checkbox:checked").each(
+			function (i){
+				rv+=$(this).val()+" ";
+			}
+		)
+		$(":checkbox:checked").each(
+			function (i){
+				$(this).val(rv);
+			}
+		)
         ProjectForm.action = "<%=removeUrl%>";
     }
 
@@ -208,8 +283,8 @@ function submitForm(selectedButton)
     <amb:header title="<%=title%>"/>
 <% }  %>
     
-    <form name="ProjectForm" method="post">
-    <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS="standardText">
+    <form name="ProjectForm" id="ProjectForm" method="post">
+    <TABLE cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" align="left" style="min-width:1024px;">
       <TR VALIGN="TOP">
         <TD ALIGN="RIGHT">
           <amb:tableNav bean="projects" key="<%=ProjectMainHandler.PROJECT_KEY%>"
@@ -218,15 +293,19 @@ function submitForm(selectedButton)
       </tr>
       <tr>
         <td>
-          <amb:table bean="projects" id="proj" key="<%=ProjectMainHandler.PROJECT_KEY%>"
+          <amb:table bean="projects" id="proj" key="<%=ProjectMainHandler.PROJECT_KEY%>" hasFilter="true"
            dataClass="com.globalsight.everest.projecthandler.ProjectInfo" pageUrl="self"
            emptyTableMsg="msg_no_projects" >
-            <amb:column label="" width="20px">
-              <input type="radio" name="radioBtn" onclick="enableButtons()"
-                 value="<%=proj.getProjectId()%>">
+            <amb:column label="checkbox" width="2%">
+            <input type="checkbox" name="radioBtn" id="<%=user.getUserId()%>" value="<%=proj.getProjectId()%>" onclick="buttonManagement()">
             </amb:column>
-            <amb:column label="lb_name" sortBy="<%=ProjectComparator.PROJECTNAME%>">
-              <%=proj.getName()%>
+            <amb:column label="lb_name" sortBy="<%=ProjectComparator.PROJECTNAME%>" filter="pNameFilter" filterValue="<%=pNameFilter == null ? "" : pNameFilter %>" width="20%">
+             <amb:permission name="<%=Permission.PROJECTS_EDIT%>" > <a href='javascript:void(0)' title='Edit project' onclick="modifyuser('<%= proj.getProjectId() %>')"> </amb:permission>
+               <%=proj.getName()%> 
+              <amb:permission name="<%=Permission.PROJECTS_EDIT%>" > </a> </amb:permission>
+            </amb:column>
+            <amb:column label="lb_description" sortBy="<%=ProjectComparator.DESCRIPTION%>" width="45%">
+              <%=proj.getDescription()%>
             </amb:column>
             <amb:column label="lb_project_manager"
              sortBy="<%=ProjectComparator.PROJECTMANAGER%>">
@@ -236,40 +315,43 @@ function submitForm(selectedButton)
               <% out.print(proj.getTermbaseName() == null ? "" : proj.getTermbaseName()); %>
             </amb:column>
             <% if (isSuperAdmin) { %>
-            <amb:column label="lb_company_name" sortBy="<%=ProjectComparator.ASC_COMPANY%>">
-              <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(proj.getCompanyId())).getCompanyName()%>
+            <amb:column label="lb_company_name" sortBy="<%=ProjectComparator.ASC_COMPANY%>"  filter="cNameFilter" filterValue="<%=cNameFilter == null ? "" : cNameFilter %>" width="120">
+              <%=CompanyWrapper.getCompanyNameById(proj.getCompanyId())%>
             </amb:column>
             <% } %>
           </amb:table>
 </TD>
 </TR>
+
+</TR>
+    <td>
+      <amb:tableNav bean="projects"  key="<%=ProjectMainHandler.PROJECT_KEY%>" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/>
+    </td>
+  <TR>
 </DIV>
 <TR><TD>&nbsp;</TD></TR>
 
 <TR>
 <TD>
-<DIV ID="DownloadButtonLayer" ALIGN="RIGHT" STYLE="visibility: visible">
+<DIV ID="DownloadButtonLayer" ALIGN="left" STYLE="visibility: visible">
     <P>
     <%if(b_calendaring) { %>
 <amb:permission name="<%=Permission.PROJECTS_IMPORT%>" >
     <INPUT TYPE="BUTTON" VALUE="<%=importButton%>" onClick="submitForm('Import');"
-        name="importBtn" disabled />
+        name="importBtn" id="importBtn" disabled />
 </amb:permission>
 <amb:permission name="<%=Permission.PROJECTS_EXPORT%>" >
     <INPUT TYPE="BUTTON" VALUE="<%=exportButton%>" onClick="submitForm('Export');"
-        name="exportBtn" disabled />
+        name="exportBtn" id="exportBtn" disabled />
 </amb:permission>
     <% } %>
-<amb:permission name="<%=Permission.PROJECTS_EDIT%>" >
-    <INPUT TYPE="BUTTON" VALUE="<%=editButton%>" onClick="submitForm('Edit');"
-        name="editBtn" disabled />
-</amb:permission>
+
 <amb:permission name="<%=Permission.PROJECTS_NEW%>" >
     <INPUT TYPE="BUTTON" VALUE="<%=newButton%>" onClick="submitForm('New');" />
 </amb:permission>
 <amb:permission name="<%=Permission.PROJECTS_REMOVE%>" >
     <INPUT TYPE="BUTTON" VALUE="<%=removeButton%>" onClick="submitForm('Remove');"
-    	name="removeBtn" disabled />
+    	name="removeBtn" id="removeBtn" disabled />
 </amb:permission>
 </DIV>
 </TD>

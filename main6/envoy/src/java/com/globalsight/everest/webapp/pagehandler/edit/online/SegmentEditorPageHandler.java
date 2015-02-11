@@ -19,7 +19,6 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -38,6 +37,7 @@ import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -47,20 +47,19 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.util.edit.EditUtil;
 
-
 /**
- * <p>SegmentEditorPageHandler is responsible for:</p>
+ * <p>
+ * SegmentEditorPageHandler is responsible for:
+ * </p>
  * <ol>
  * <li>Displaying the segment editor screen.</li>
  * </ol>
  */
 
-public class SegmentEditorPageHandler
-    extends PageHandler
-    implements EditorConstants
+public class SegmentEditorPageHandler extends PageHandler implements
+        EditorConstants
 {
     private static final Logger CATEGORY = Logger
             .getLogger(SegmentEditorPageHandler.class);
@@ -71,35 +70,37 @@ public class SegmentEditorPageHandler
     }
 
     /**
-    * Invokes this PageHandler
-    *
-    * @param p_pageDescriptor the page descriptor
-    * @param p_request the original request sent from the browser
-    * @param p_response the original response object
-    * @param p_context context the Servlet context
-    */
+     * Invokes this PageHandler
+     * 
+     * @param p_pageDescriptor
+     *            the page descriptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
+     */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-      HttpServletRequest p_request, HttpServletResponse p_response,
-      ServletContext p_context)
-        throws ServletException,
-               IOException,
-               EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession();
-        
+
         User user = TaskHelper.getUser(session);
-        String userName = user.getUserId();
+        String userId = user.getUserId();
 
-        SessionManager sessionMgr = (SessionManager)session.getAttribute(
-            WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         // "state" is initialized when open pop-up editor
-        EditorState state = (EditorState)sessionMgr.getAttribute(
-            WebAppConstants.EDITORSTATE);
+        EditorState state = (EditorState) sessionMgr
+                .getAttribute(WebAppConstants.EDITORSTATE);
 
-        long targetPageId   = state.getTargetPageId().longValue();
+        long targetPageId = state.getTargetPageId().longValue();
         long sourceLocaleId = state.getSourceLocale().getId();
         long targetLocaleId = state.getTargetLocale().getId();
-        
+
         String value;
         if ((value = p_request.getParameter("tuId")) != null)
         {
@@ -118,18 +119,18 @@ public class SegmentEditorPageHandler
             state.setPTagFormat(value);
         }
         // for close all comments issue
-        String isClosedComment = ""; 
-        if ((value = p_request.getParameter("isClosedComment")) != null) 
+        String isClosedComment = "";
+        if ((value = p_request.getParameter("isClosedComment")) != null)
         {
             isClosedComment = value;
         }
-        
-        long tuId  = state.getTuId();
+
+        long tuId = state.getTuId();
         long tuvId = state.getTuvId();
         long subId = state.getSubId();
         String originalKey = tuId + "_" + tuvId + "_" + subId;
         String newKey = null;
-        
+
         ConcurrentHashMap segmentViewMap = (ConcurrentHashMap) sessionMgr
                 .getAttribute(WebAppConstants.SEGMENT_VIEW_MAP);
         if (segmentViewMap == null)
@@ -138,10 +139,10 @@ public class SegmentEditorPageHandler
         }
         CopyOnWriteArrayList tuTuvSubIDList = (CopyOnWriteArrayList) sessionMgr
                 .getAttribute(WebAppConstants.PAGE_TU_TUV_SUBID_SET);
-        
+
         SegmentView segmentView = (SegmentView) sessionMgr
-                    .getAttribute(WebAppConstants.SEGMENTVIEW);
-        
+                .getAttribute(WebAppConstants.SEGMENTVIEW);
+
         /**
          * Execute "save" if: 1. "Save" is clicked; 2. Target is changed when
          * click "next segment" or "previous segment",and auto save is set to
@@ -160,17 +161,19 @@ public class SegmentEditorPageHandler
                 if (segmentView == null)
                 {
                     segmentView = EditorHelper.getSegmentView(state, tuId,
-                        tuvId, subId, targetPageId, sourceLocaleId,
-                        targetLocaleId, false);
+                            tuvId, subId, targetPageId, sourceLocaleId,
+                            targetLocaleId, false);
                 }
-                
-                EditorHelper.updateSegment(state, segmentView,
-                    tuId, tuvId, subId, value, userName);
-                
-                //Delete the old pdf file for the Indd preview
-                PreviewPDFPageHandler.deleteOldPdf(targetPageId, targetLocaleId);
-                PreviewPageHandler.deleteOldPreviewFile(targetPageId, targetLocaleId);
-                
+
+                EditorHelper.updateSegment(state, segmentView, tuId, tuvId,
+                        subId, value, userId);
+
+                // Delete the old pdf file for the Indd preview
+                PreviewPDFPageHandler
+                        .deleteOldPdf(targetPageId, targetLocaleId);
+                PreviewPageHandler.deleteOldPreviewFile(targetPageId,
+                        targetLocaleId);
+
                 // As target is changed,remove this from cache to ensure it is
                 // obtained again from DB when cache data.
                 segmentViewMap.remove(originalKey);
@@ -179,7 +182,7 @@ public class SegmentEditorPageHandler
             }
             catch (EnvoyServletException e)
             {
-                // This should, of course, never fail.  If it fails,
+                // This should, of course, never fail. If it fails,
                 // we just redisplay the current state.
                 CATEGORY.error("SE ignoring update exception", e);
             }
@@ -195,11 +198,11 @@ public class SegmentEditorPageHandler
             // Close all comments for current TUV.
             if (isClosedComment.trim().equals("true"))
             {
-                closeAllCommentForCurrentSegment(state, userName);
+                closeAllCommentForCurrentSegment(state, userId);
             }
-            
+
             int i_direction = Integer.parseInt(value);
-            if (i_direction == -1)                // go backward
+            if (i_direction == -1) // go backward
             {
                 // Update previous tuID, tuvID, subID from cache to save time.
                 boolean isSucceed = setPreviousSegment(state, tuTuvSubIDList);
@@ -208,7 +211,7 @@ public class SegmentEditorPageHandler
                     EditorHelper.previousSegment(state);
 
                     // Update the key set in session for performance reason.
-                    tuId  = state.getTuId();
+                    tuId = state.getTuId();
                     tuvId = state.getTuvId();
                     subId = state.getSubId();
                     newKey = tuId + "_" + tuvId + "_" + subId;
@@ -228,7 +231,7 @@ public class SegmentEditorPageHandler
                         }
                         originalSegKey.setPreviousKey(newKey);
                         preSegKey.setNextKey(originalKey);
-                        
+
                         CacheSegmentViewDataThread.updateSessionWithSegmentKey(
                                 sessionMgr, tuTuvSubIDList, originalSegKey);
                         CacheSegmentViewDataThread.updateSessionWithSegmentKey(
@@ -236,19 +239,20 @@ public class SegmentEditorPageHandler
                     }
                 }
 
-                // If current TU is on previous page, need refresh pop-up editor.
+                // If current TU is on previous page, need refresh pop-up
+                // editor.
                 setUpdatePopUpEditorPrevious(state);
             }
-            else if (i_direction == 1)            // go forward
+            else if (i_direction == 1) // go forward
             {
                 // Update next tuID, tuvID, subID from cache to save time.
                 boolean isSucceed = setNextSegment(state, tuTuvSubIDList);
                 if (!isSucceed)
                 {
                     EditorHelper.nextSegment(state);
-                    
+
                     // Update the key set in session for performance reason.
-                    tuId  = state.getTuId();
+                    tuId = state.getTuId();
                     tuvId = state.getTuvId();
                     subId = state.getSubId();
                     newKey = tuId + "_" + tuvId + "_" + subId;
@@ -268,19 +272,19 @@ public class SegmentEditorPageHandler
                         }
                         originalSegKey.setNextKey(newKey);
                         nextSegKey.setPreviousKey(originalKey);
-                        
+
                         CacheSegmentViewDataThread.updateSessionWithSegmentKey(
                                 sessionMgr, tuTuvSubIDList, originalSegKey);
                         CacheSegmentViewDataThread.updateSessionWithSegmentKey(
                                 sessionMgr, tuTuvSubIDList, nextSegKey);
                     }
                 }
-                
+
                 // If current TU is on next page, need refresh pop-up editor.
                 setUpdatePopUpEditorNext(state);
             }
 
-            // This option is "true" for both "Save" and "Refresh". 
+            // This option is "true" for both "Save" and "Refresh".
             boolean b_releverage = false;
             if ((value = p_request.getParameter("releverage")) != null)
             {
@@ -289,7 +293,7 @@ public class SegmentEditorPageHandler
 
             // Try to get segmentView from cache,otherwise get it from DB.
             // If "direction" is not -1 and 1,"newKey" is still null.
-            tuId  = state.getTuId();
+            tuId = state.getTuId();
             tuvId = state.getTuvId();
             subId = state.getSubId();
             newKey = tuId + "_" + tuvId + "_" + subId;
@@ -299,31 +303,36 @@ public class SegmentEditorPageHandler
                 segmentView = EditorHelper.getSegmentView(state, tuId, tuvId,
                         subId, targetPageId, sourceLocaleId, targetLocaleId,
                         b_releverage);
-                
+
                 // Put this segmentView into SEGMENT_VIEW_MAP in session.
                 segmentViewMap.put(newKey, segmentView);
-                sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP, segmentViewMap);
+                sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP,
+                        segmentViewMap);
             }
             else
             {
+                TargetPage tp = ServerProxy.getPageManager().getTargetPage(
+                        targetPageId);
                 // If segmentView has existed in cache,reset its TM matches to
                 // include page_tm data.
                 segmentView = state.getEditorManager().addSegmentMatches(
                         segmentView, state, tuId, tuvId, subId, sourceLocaleId,
-                        targetLocaleId, b_releverage);
+                        targetLocaleId, b_releverage,
+                        tp.getSourcePage().getCompanyId());
 
                 // Put this segmentView into SEGMENT_VIEW_MAP in session.
                 segmentViewMap.put(newKey, segmentView);
-                sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP, segmentViewMap);
+                sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP,
+                        segmentViewMap);
             }
-            
+
             EditorHelper.setEditorType(state, segmentView);
             // Set this segmentView in session for UI usage.
             sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);
-            
+
             // Set "SHOW_IN_EDITOR" value.
             setShowInEditor(sessionMgr, state);
-            
+
             // Cache "next" and "previous" segmentView asynchronously.
             EditorState cloneState = EditorState.cloneState(state);
             CacheSegmentViewDataThread t = new CacheSegmentViewDataThread(
@@ -333,9 +342,9 @@ public class SegmentEditorPageHandler
         }
 
         EditorHelper.checkSynchronizationStatus(state);
-        
-        super.invokePageHandler(p_pageDescriptor, p_request,
-            p_response, p_context);
+
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
     /**
@@ -355,16 +364,19 @@ public class SegmentEditorPageHandler
         {
             show_in_editor = tmProfile.getShowInEditor();
         }
-        p_sessionMgr.setAttribute("SHOW_IN_EDITOR", String
-                .valueOf(show_in_editor));
+        p_sessionMgr.setAttribute("SHOW_IN_EDITOR",
+                String.valueOf(show_in_editor));
     }
-    
+
     /**
      * Get translation memory profile by source page id
-     * @param sourcePageId long
+     * 
+     * @param sourcePageId
+     *            long
      * @return TranslationMemoryProfile
      */
-    private TranslationMemoryProfile getTMprofileBySourcePageId(long p_sourcePageID)
+    private TranslationMemoryProfile getTMprofileBySourcePageId(
+            long p_sourcePageID)
     {
         TranslationMemoryProfile tmProfile = null;
         try
@@ -381,67 +393,66 @@ public class SegmentEditorPageHandler
                     + p_sourcePageID, e);
         }
 
-    	return tmProfile;
+        return tmProfile;
     }
-    
+
     /**
      * To invoke MT, extra parameters must be transformed to MT engine for
      * "PROMT","MS_TRANSLATOR" or "ASIA_ONLINE".
      * 
-     * @param p_tmProfile
+     * @param tmProfile
      */
-    private void setExtraOptionsForMT(TranslationMemoryProfile p_tmProfile,
-            Long p_sourcePageID, MachineTranslator p_mt)
-    {
-        if (p_mt != null) 
-        {
-            HashMap paramHM = new HashMap();
-            String mtEngine = p_tmProfile.getMtEngine();
-            Long tmProfileID = p_tmProfile.getIdAsLong();
-
-            if (MachineTranslator.ENGINE_PROMT.equalsIgnoreCase(mtEngine))
-            {
-                String ptsurl = p_tmProfile.getPtsurl();
-                String ptsUsername = p_tmProfile.getPtsUsername();                
-                String ptsPassword = p_tmProfile.getPtsPassword();
-                
-                paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-                paramHM.put(MachineTranslator.PROMT_PTSURL, ptsurl);
-                paramHM.put(MachineTranslator.PROMT_USERNAME, ptsUsername);
-                paramHM.put(MachineTranslator.PROMT_PASSWORD, ptsPassword);
-            }
-            if (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(mtEngine))
-            {
-                String msMtEndpoint = p_tmProfile.getMsMTUrl();
-                String msMtAppId = p_tmProfile.getMsMTAppID();
-                String msMtUrlFlag = p_tmProfile.getMsMTUrlFlag();
-                
-                paramHM.put(MachineTranslator.MSMT_ENDPOINT, msMtEndpoint);
-                paramHM.put(MachineTranslator.MSMT_APPID, msMtAppId);
-                paramHM.put(MachineTranslator.MSMT_URLFLAG, msMtUrlFlag);
-            }
-            if (MachineTranslator.ENGINE_ASIA_ONLINE.equalsIgnoreCase(mtEngine))
-            {
-                String aoMtUrl = p_tmProfile.getAoMtUrl();
-                long aoMtPort = p_tmProfile.getAoMtPort();
-                String aoMtUsername = p_tmProfile.getAoMtUsername();
-                String aoMtPassword = p_tmProfile.getAoMtPassword();
-                long aoMtAccountNumber = p_tmProfile.getAoMtAccountNumber();
-                
-                paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
-                paramHM.put(MachineTranslator.AO_URL, aoMtUrl);
-                paramHM.put(MachineTranslator.AO_PORT, (Long) aoMtPort);
-                paramHM.put(MachineTranslator.AO_USERNAME, aoMtUsername);
-                paramHM.put(MachineTranslator.AO_PASSWORD, aoMtPassword);
-                paramHM.put(MachineTranslator.AO_ACCOUNT_NUMBER,
-                        (Long) aoMtAccountNumber);
-                paramHM.put(MachineTranslator.SOURCE_PAGE_ID, p_sourcePageID);
-            }
-
-            p_mt.setMtParameterMap(paramHM);
-        }
-    }
-    
+    /*
+     * private void setExtraOptionsForMT(TranslationMemoryProfile tmProfile,
+     * Long p_sourcePageID, MachineTranslator p_mt) { if (p_mt != null) {
+     * HashMap paramHM = new HashMap(); String mtEngine =
+     * tmProfile.getMtEngine(); Long tmProfileID = tmProfile.getIdAsLong();
+     * 
+     * if (MachineTranslator.ENGINE_PROMT.equalsIgnoreCase(mtEngine)) { String
+     * ptsurl = tmProfile.getPtsurl(); String ptsUsername =
+     * tmProfile.getPtsUsername(); String ptsPassword =
+     * tmProfile.getPtsPassword();
+     * 
+     * paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
+     * paramHM.put(MachineTranslator.PROMT_PTSURL, ptsurl);
+     * paramHM.put(MachineTranslator.PROMT_USERNAME, ptsUsername);
+     * paramHM.put(MachineTranslator.PROMT_PASSWORD, ptsPassword); } if
+     * (MachineTranslator.ENGINE_MSTRANSLATOR.equalsIgnoreCase(mtEngine)) {
+     * String msMtEndpoint = tmProfile.getMsMTUrl(); String msMtAppId =
+     * tmProfile.getMsMTAppID(); String msMtUrlFlag =
+     * tmProfile.getMsMTUrlFlag(); String msMtClientID =
+     * tmProfile.getMsMTClientID(); String msMtClientSecret =
+     * tmProfile.getMsMTClientSecret();
+     * 
+     * paramHM.put(MachineTranslator.MSMT_ENDPOINT, msMtEndpoint);
+     * paramHM.put(MachineTranslator.MSMT_APPID, msMtAppId);
+     * paramHM.put(MachineTranslator.MSMT_URLFLAG, msMtUrlFlag);
+     * paramHM.put(MachineTranslator.MSMT_CLIENTID, msMtClientID);
+     * paramHM.put(MachineTranslator.MSMT_CLIENT_SECRET, msMtClientSecret); } if
+     * (MachineTranslator.ENGINE_ASIA_ONLINE.equalsIgnoreCase(mtEngine)) {
+     * String aoMtUrl = tmProfile.getAoMtUrl(); long aoMtPort =
+     * tmProfile.getAoMtPort(); String aoMtUsername =
+     * tmProfile.getAoMtUsername(); String aoMtPassword =
+     * tmProfile.getAoMtPassword(); long aoMtAccountNumber =
+     * tmProfile.getAoMtAccountNumber();
+     * 
+     * paramHM.put(MachineTranslator.TM_PROFILE_ID, tmProfileID);
+     * paramHM.put(MachineTranslator.AO_URL, aoMtUrl);
+     * paramHM.put(MachineTranslator.AO_PORT, (Long) aoMtPort);
+     * paramHM.put(MachineTranslator.AO_USERNAME, aoMtUsername);
+     * paramHM.put(MachineTranslator.AO_PASSWORD, aoMtPassword);
+     * paramHM.put(MachineTranslator.AO_ACCOUNT_NUMBER, (Long)
+     * aoMtAccountNumber); paramHM.put(MachineTranslator.SOURCE_PAGE_ID,
+     * p_sourcePageID); } if
+     * (MachineTranslator.ENGINE_SAFABA.equalsIgnoreCase(mtEngine)) { List<?>
+     * mtInfoList = TMProfileHandlerHelper
+     * .getMtinfoByTMProfileIdAndEngine(tmProfile.getId(),
+     * tmProfile.getMtEngine()); for (int i = 0; i < mtInfoList.size(); i++) {
+     * TMProfileMTInfo mtInfo = (TMProfileMTInfo) mtInfoList.get(i);
+     * paramHM.put(mtInfo.getMtKey(), mtInfo.getMtValue()); } }
+     * 
+     * p_mt.setMtParameterMap(paramHM); } }
+     */
     /**
      * Close all comments for current TUV.
      * 
@@ -452,17 +463,18 @@ public class SegmentEditorPageHandler
     private void closeAllCommentForCurrentSegment(EditorState p_state,
             String p_userName)
     {
-        if (p_state == null) return;
-        
+        if (p_state == null)
+            return;
+
         long tuId = p_state.getTuId();
         long tuvId = p_state.getTuvId();
         long subId = p_state.getSubId();
-        long targetPageId   = p_state.getTargetPageId().longValue();
-        
+        long targetPageId = p_state.getTargetPageId().longValue();
+
         try
         {
-            CommentView commentView = p_state.getEditorManager().getCommentView(-1,
-                    targetPageId, tuId, tuvId, subId);
+            CommentView commentView = p_state.getEditorManager()
+                    .getCommentView(-1, targetPageId, tuId, tuvId, subId);
             Issue issue = commentView.getComment();
             if (issue != null)
             {
@@ -482,7 +494,7 @@ public class SegmentEditorPageHandler
         }
 
     }
-    
+
     /**
      * Get previous tuID, tuvID, subID from cached key list to update the state
      * object.
@@ -500,7 +512,7 @@ public class SegmentEditorPageHandler
         {
             return false;
         }
-        
+
         boolean succeed = false;
         try
         {
@@ -576,7 +588,7 @@ public class SegmentEditorPageHandler
 
         return succeed;
     }
-    
+
     /**
      * If current TU is on previous page, need refresh pop-up editor.
      * 
@@ -612,7 +624,7 @@ public class SegmentEditorPageHandler
             p_state.setNeedUpdatePopUpEditor("previous");
         }
     }
-    
+
     /**
      * If current TU is on next page, need refresh pop-up editor.
      * 

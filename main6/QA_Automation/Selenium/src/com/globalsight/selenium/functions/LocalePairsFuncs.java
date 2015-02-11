@@ -22,8 +22,10 @@ public class LocalePairsFuncs extends BasicFuncs {
 			System.out.println("error");
 		}
 		selenium.click(LocalePairs.Remove);
-		selenium.getConfirmation();
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+		if (selenium.isConfirmationPresent()) {
+		    selenium.getConfirmation();
+		    selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+		}
 	}
 	/**
 	 * Create the local pairs with the values provided.

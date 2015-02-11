@@ -450,7 +450,6 @@ is defined in header.jspIncl which must be included in the body.
 
 <!-- Data Table  -->
 <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" CLASS="list">
-<TBODY>
 <COL> <!-- Radio button -->
 <COL> <!-- Priority -->
 <COL> <!-- Job ID -->

@@ -20,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -100,7 +101,9 @@ public class DbUtil
     {
         try
         {
-            returnConnection(p_connection);
+        	if (p_connection != null) {
+                returnConnection(p_connection);        		
+        	}
         }
         catch (Exception e)
         {
@@ -125,6 +128,11 @@ public class DbUtil
 
     /** Silently closes the statement */
     public static void silentClose(PreparedStatement p_statement)
+    {
+        ConnectionPool.silentClose(p_statement);
+    }
+    
+    public static void silentClose(Statement p_statement)
     {
         ConnectionPool.silentClose(p_statement);
     }
@@ -277,13 +285,14 @@ public class DbUtil
         catch (SQLException e)
         {
             // try to lock again.
+        	c_logger.warn("Try to lock again for 'Lock wait timeout', sql is " + sql);
             if (e.getMessage().indexOf("Lock wait timeout") > -1)
             {
                 execute(p_connection, sql, args);
             }
             else
             {
-                c_logger.error(e);
+                c_logger.error(e.getMessage(), e);
                 throw e;
             }
         }
@@ -308,7 +317,7 @@ public class DbUtil
         }
         catch (SQLException e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
             throw e;
         }
         finally

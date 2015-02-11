@@ -2,13 +2,10 @@ package com.globalsight.selenium.testcases.dataprepare.smoketest.cvsjob;
 
 import java.util.ArrayList;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.CVSFuncs;
-import com.globalsight.selenium.functions.CommonFuncs;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /**
  * Prepare the environment for create cvs job, some data depends on createjobs
@@ -16,25 +13,10 @@ import com.thoughtworks.selenium.Selenium;
  * @author leon
  * 
  */
-public class PrepareCreatingCVSJob
+public class PrepareCreatingCVSJob extends BaseTestCase
 {
-    private Selenium selenium;
-    private CVSFuncs cvsFuncs;
+    private CVSFuncs cvsFuncs = new CVSFuncs();
     private String CVSServerName = "CVSServer";
-
-    @BeforeClass
-    public void beforeClass()
-    {
-        selenium = CommonFuncs.initSelenium();
-        CommonFuncs.loginSystemWithAdmin(selenium);
-        cvsFuncs = new CVSFuncs();
-    }
-
-    @AfterClass
-    public void afterClass()
-    {
-        selenium.stop();
-    }
 
     @Test
     public void prepareCVSJob()
@@ -181,6 +163,5 @@ public class PrepareCreatingCVSJob
         {
             return targetName;
         }
-
     }
 }

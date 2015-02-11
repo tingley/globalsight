@@ -26,6 +26,7 @@ import java.util.Set;
 
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
@@ -50,7 +51,7 @@ import com.globalsight.util.GlobalSightLocale;
 public class DynamicLeverageResults implements Serializable
 {
     private static final long serialVersionUID = 7049251457045228463L;
-    
+
     // Comparator used in generalSort()
     private static GeneralComparator c_generalComapator = new GeneralComparator();
     private static GeneralComparatorByTm c_generalComparatorByTm = new GeneralComparatorByTm();
@@ -114,7 +115,7 @@ public class DynamicLeverageResults implements Serializable
     {
         return m_leverageResults.get(p_index);
     }
-    
+
     public void serOrgSid(String orgSid)
     {
         if (m_leverageResults != null)
@@ -125,7 +126,6 @@ public class DynamicLeverageResults implements Serializable
             }
         }
     }
-
 
     /**
      * get the size of the leverage result.
@@ -153,9 +153,10 @@ public class DynamicLeverageResults implements Serializable
      * the order of FROM_GOLD_TM, FROM_IN_PROGRESS_TM_SAME_JOB and
      * FROM_IN_PROGRESS_TM_OTHER_JOB when the score is the same.
      */
-    public void generalSort(LeverageOptions leverageOptions)
+    public void generalSort(LeverageOptions leverageOptions, String companyId)
     {
         c_generalComapator.setLeverageOptions(leverageOptions);
+        c_generalComapator.setCompanyId(companyId);
         Collections.sort(m_leverageResults, c_generalComapator);
     }
 
@@ -189,7 +190,7 @@ public class DynamicLeverageResults implements Serializable
      *            Set of LeverageMatch objects
      */
     public void mergeWithPreLeverage(Set p_preLeverageResults,
-            boolean isTmProcedence, int threshold)
+            boolean isTmProcedence, String companyId)
     {
         // sanity check
         if (p_preLeverageResults == null)
@@ -199,89 +200,75 @@ public class DynamicLeverageResults implements Serializable
 
         for (Iterator it = p_preLeverageResults.iterator(); it.hasNext();)
         {
-            LeverageMatch levMatch = (LeverageMatch)it.next();
-            if (levMatch.getScoreNum() < threshold) {
-                continue;
-            }
-            String source = levMatch.getMatchedOriginalSource() == null ? "" : levMatch
-                    .getMatchedOriginalSource();
-            int matchCategory = getMatchCategory(levMatch);
+        	try
+        	{
+                LeverageMatch levMatch = (LeverageMatch) it.next();
+                String source = levMatch.getMatchedOriginalSource() == null ? ""
+                        : levMatch.getMatchedOriginalSource();
+                int matchCategory = getMatchCategory(levMatch);
 
-            DynamicLeveragedSegment dynLevSegment = new DynamicLeveragedSegment(
-                    source, levMatch.getMatchedText(), m_sourceLocale,
-                    m_targetLocale, levMatch.getMatchState(), levMatch
-                            .getScoreNum(), matchCategory, levMatch.getTmId(),
-                    levMatch.getMatchedTuvId());
+                DynamicLeveragedSegment dynLevSegment = new DynamicLeveragedSegment(
+                        source, levMatch.getMatchedText(), m_sourceLocale,
+                        m_targetLocale, levMatch.getMatchState(),
+                        levMatch.getScoreNum(), matchCategory, levMatch.getTmId(),
+                        levMatch.getMatchedTuvId());
 
-            long matchedTUVId = levMatch.getMatchedTuvId();
-            int tmIndex = levMatch.getProjectTmIndex();
-            long tmId = levMatch.getTmId();
-            long targetLocaleId = levMatch.getTargetLocaleId();
-            TuvBasicInfo tuvBasicInfo = null;
-            if (tmIndex == -7)
-            {
-                // Leverage from in progress TM, tmId is the job ID
-                String jobName = "";
-                long jobDataTuId = levMatch.getJobDataTuId();
-                GlobalSightLocale locale = levMatch.getTargetLocale();
-
-                Tuv tuv = null;
-                try
+                long matchedTUVId = levMatch.getMatchedTuvId();
+                int tmIndex = levMatch.getProjectTmIndex();
+                long tmId = levMatch.getTmId();
+                long targetLocaleId = levMatch.getTargetLocaleId();
+                TuvBasicInfo tuvBasicInfo = null;
+                if (tmIndex == -7)
                 {
-                    tuv = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                            jobDataTuId).getTuv(locale.getId());
-                    jobName = ServerProxy.getJobHandler().getJobById(tmId)
-                            .getJobName();
-                }
-                catch (Exception e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+                    // Leverage from in progress TM, tmId is the job ID
+                    long jobDataTuId = levMatch.getJobDataTuId();
+                    GlobalSightLocale locale = levMatch.getTargetLocale();
 
-                tuvBasicInfo = new TuvBasicInfo(levMatch
-                        .getLeveragedTargetString(), null, null, locale, tuv
-                        .getCreatedDate(), tuv.getCreatedUser(), tuv
-                        .getLastModified(), tuv.getLastModifiedUser(), null,
-                        tuv.getSid());
-                dynLevSegment.setMatchedTuvJobName(jobName);
-            }
-            else if (tmId > 0)
-            {
-                try
-                {
-                    tuvBasicInfo = LingServerProxy.getTmCoreManager()
-                            .getTuvBasicInfoByTuvId(tmId, matchedTUVId,
-                                    targetLocaleId);
-                }
-                catch (Exception e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
+                    Job job = ServerProxy.getJobHandler().getJobById(tmId);
+					Tuv tuv = ServerProxy.getTuvManager()
+							.getTuForSegmentEditor(jobDataTuId, companyId)
+							.getTuv(locale.getId(), companyId);
 
-            dynLevSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
-            dynLevSegment.setTmIndex(tmIndex);
+                    tuvBasicInfo = new TuvBasicInfo(
+                            levMatch.getLeveragedTargetString(), null, null,
+                            locale, tuv.getCreatedDate(), tuv.getCreatedUser(),
+                            tuv.getLastModified(), tuv.getLastModifiedUser(), null,
+                            tuv.getSid());
+                    dynLevSegment.setMatchedTuvJobName(job.getJobName());
+                }
+                else if (tmId > 0)
+                {
+					tuvBasicInfo = LingServerProxy.getTmCoreManager()
+							.getTuvBasicInfoByTuvId(tmId, matchedTUVId,
+									targetLocaleId);
+               }
 
-            dynLevSegment.setTmIndex(tmIndex);
-            dynLevSegment.setOrderNum(levMatch.getOrderNum());
-            dynLevSegment.setMtName(levMatch.getMtName());
-            dynLevSegment.setOrgSid(levMatch.getOrgSid());
-            add(dynLevSegment);
+                dynLevSegment.setMatchedTuvBasicInfo(tuvBasicInfo);
+                dynLevSegment.setTmIndex(tmIndex);
+
+                dynLevSegment.setTmIndex(tmIndex);
+                dynLevSegment.setOrderNum(levMatch.getOrderNum());
+                dynLevSegment.setMtName(levMatch.getMtName());
+                dynLevSegment.setOrgSid(levMatch.getOrgSid(companyId));
+                add(dynLevSegment);        		
+        	}
+        	catch (Exception ignore)
+        	{
+        		ignore.printStackTrace();
+        	}
         }
         if (isTmProcedence)
         {
-            generalSortByTm(leverageOptions);
+            generalSortByTm(leverageOptions, companyId);
         }
         else
         {
-            generalSort(leverageOptions);
+            generalSort(leverageOptions, companyId);
         }
 
         removeDuplicates();
     }
-    
+
     /**
      * As the static matches in "leverage_match" may be both from gold TM and In
      * Progress TM, here need decide the match category according to
@@ -292,11 +279,11 @@ public class DynamicLeverageResults implements Serializable
     {
         // Default set it to "from gold TM".
         int matchCategory = DynamicLeveragedSegment.FROM_GOLD_TM;
-        
+
         int matchedTableType = (int) p_levMatches.getMatchedTableType();
-        // The static match is from In-Progress job TM (via "update leverage" operation)
-        if ( (matchedTableType == LeverageMatchLingManager.IN_PROGRESS_TM_T
-                || matchedTableType == LeverageMatchLingManager.IN_PROGRESS_TM_L)
+        // The static match is from In-Progress job TM (via "update leverage"
+        // operation)
+        if ((matchedTableType == LeverageMatchLingManager.IN_PROGRESS_TM_T || matchedTableType == LeverageMatchLingManager.IN_PROGRESS_TM_L)
                 && p_levMatches.getProjectTmIndex() == Leverager.IN_PROGRESS_TM_PRIORITY)
         {
             // For in progress matches, the "tmId" is the jobId.
@@ -305,23 +292,24 @@ public class DynamicLeverageResults implements Serializable
             long srcPageId = p_levMatches.getSourcePageId();
             try
             {
-                SourcePage sp = ServerProxy.getPageManager().getSourcePage(srcPageId);
+                SourcePage sp = ServerProxy.getPageManager().getSourcePage(
+                        srcPageId);
                 long jobId = sp.getRequest().getJob().getId();
-                if (jobIdMatchFrom == jobId) 
+                if (jobIdMatchFrom == jobId)
                 {
-                    matchCategory = 
-                        DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB;
-                } 
-                else 
-                {
-                    matchCategory = 
-                        DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB;
+                    matchCategory = DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB;
                 }
-            } catch (Exception e) {
+                else
+                {
+                    matchCategory = DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB;
+                }
+            }
+            catch (Exception e)
+            {
                 e.printStackTrace();
             }
         }
-        
+
         return matchCategory;
     }
 
@@ -330,9 +318,9 @@ public class DynamicLeverageResults implements Serializable
     private void removeDuplicates()
     {
         DynamicLeveragedSegment prevSeg = null;
-        
-        for(Iterator<DynamicLeveragedSegment> it = 
-                    m_leverageResults.iterator(); it.hasNext();)
+
+        for (Iterator<DynamicLeveragedSegment> it = m_leverageResults
+                .iterator(); it.hasNext();)
         {
             DynamicLeveragedSegment currSeg = it.next();
             if (currSeg.equals(prevSeg))
@@ -345,15 +333,21 @@ public class DynamicLeverageResults implements Serializable
             }
         }
     }
-    
+
     private static class GeneralComparatorByTm implements Comparator
     {
         private HashMap m_categoryMap;
         private LeverageOptions leveragetOptions;
+        private String companyId;
 
         public void setLeverageOptions(LeverageOptions leveragetOptions)
         {
             this.leveragetOptions = leveragetOptions;
+        }
+
+        public void setCompanyId(String companyId)
+        {
+            this.companyId = companyId;
         }
 
         public LeverageOptions getLeverageOptions()
@@ -394,7 +388,7 @@ public class DynamicLeverageResults implements Serializable
                     return result;
                 }
 
-                result = (int)(score2 - score1);
+                result = (int) (score2 - score1);
                 if (result != 0)
                 {
                     return result;
@@ -402,7 +396,8 @@ public class DynamicLeverageResults implements Serializable
 
                 if (score2 == 100)
                 {
-                    result = LeverageUtil.compareSid(segment1, segment2);
+                    result = LeverageUtil.compareSid(segment1, segment2,
+                            companyId);
                     if (result != 0)
                     {
                         return result;
@@ -491,6 +486,7 @@ public class DynamicLeverageResults implements Serializable
     {
         private HashMap m_categoryMap;
         private LeverageOptions leverageOptions;
+        private String companyId;
 
         private GeneralComparator()
         {
@@ -511,6 +507,11 @@ public class DynamicLeverageResults implements Serializable
             this.leverageOptions = leverageOptions;
         }
 
+        public void setCompanyId(String companyId)
+        {
+            this.companyId = companyId;
+        }
+
         public int compare(Object o1, Object o2)
         {
             int result = 1; // default can be any of -1, 0, 1
@@ -521,7 +522,7 @@ public class DynamicLeverageResults implements Serializable
                 DynamicLeveragedSegment segment1 = (DynamicLeveragedSegment) o1;
                 DynamicLeveragedSegment segment2 = (DynamicLeveragedSegment) o2;
 
-                result = (int)(segment2.getScore() - segment1.getScore());
+                result = (int) (segment2.getScore() - segment1.getScore());
                 if (result != 0)
                 {
                     return result;
@@ -529,7 +530,8 @@ public class DynamicLeverageResults implements Serializable
 
                 if (segment1.getScore() == 100)
                 {
-                    result = LeverageUtil.compareSid(segment1, segment2);
+                    result = LeverageUtil.compareSid(segment1, segment2,
+                            companyId);
                     if (result != 0)
                     {
                         return result;
@@ -604,7 +606,7 @@ public class DynamicLeverageResults implements Serializable
                         return result;
                     }
                 }
-                
+
                 Integer category1 = (Integer) m_categoryMap.get(new Integer(
                         segment1.getMatchCategory()));
                 Integer category2 = (Integer) m_categoryMap.get(new Integer(
@@ -620,7 +622,8 @@ public class DynamicLeverageResults implements Serializable
         }
     }
 
-    public void generalSortByTm(LeverageOptions leverageOptions)
+    public void generalSortByTm(LeverageOptions leverageOptions,
+            String companyId)
     {
         c_generalComparatorByTm.setLeverageOptions(leverageOptions);
         Collections.sort(m_leverageResults, c_generalComparatorByTm);

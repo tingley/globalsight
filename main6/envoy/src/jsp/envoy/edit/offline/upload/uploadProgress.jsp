@@ -1,21 +1,7 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
-    import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,
-        com.globalsight.util.progress.IProcessStatusListener,
-        com.globalsight.util.progress.ProcessStatus,
-        com.globalsight.everest.edit.offline.OfflineEditManager,
-        com.globalsight.everest.edit.offline.OfflineEditManagerLocal,
-        com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
-        com.globalsight.everest.edit.offline.OEMProcessStatus,
-        java.util.ResourceBundle,
-        java.text.MessageFormat,
-        com.globalsight.util.edit.EditUtil,
-        com.globalsight.everest.webapp.pagehandler.PageHandler,
-        com.globalsight.everest.webapp.WebAppConstants,
-        com.globalsight.everest.servlet.util.SessionManager,
-        com.globalsight.everest.taskmanager.Task,
-        java.io.IOException"
+    import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,com.globalsight.util.progress.IProcessStatusListener,com.globalsight.util.progress.ProcessStatus,com.globalsight.everest.edit.offline.OfflineEditManager,com.globalsight.everest.edit.offline.OfflineEditManagerLocal,com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,com.globalsight.everest.edit.offline.OEMProcessStatus,java.util.ResourceBundle,java.text.MessageFormat,com.globalsight.util.edit.EditUtil,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.servlet.util.SessionManager,com.globalsight.everest.taskmanager.Task,java.io.IOException"
     session="true"
 %>
 <%@ include file="/envoy/common/header.jspIncl" %>
@@ -30,70 +16,83 @@
 <jsp:useBean id="errorPage" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 <%
-   //Constants
-   final String AND = "&";
-   final String EQUAL = "=";
+    ResourceBundle bundle = PageHandler.getBundle(session);
+    String lb_cancel = bundle.getString("lb_cancel");
+    String lb_refresh = bundle.getString("lb_refresh");
+    String lb_done = bundle.getString("lb_done");
+    String lb_back = bundle.getString("lb_upload_again_report");
+    String lb_messages = bundle.getString("lb_messages");
+    String lb_upload = bundle.getString("lb_processing_upload_file");
+    String lb_please_wait = bundle.getString("lb_please_wait");
+    // success/failure message
+    String successMsg = bundle.getString("msg_upload_success");
+    String cancelMsg = bundle.getString("msg_upld_cancel");
+    String bigRedErrorTitle = bundle
+            .getString("msg_upload_error_title");
+    String errorMsg = bundle.getString("msg_upload_failure");
+    String uploadErrors = bundle.getString("msg_upload_view_error");
+    //Constants
+    final String AND = "&";
+    final String EQUAL = "=";
 
-   ResourceBundle bundle = PageHandler.getBundle(session);
+    SessionManager sessionMgr = (SessionManager) session
+            .getAttribute(WebAppConstants.SESSION_MANAGER);
+    //Fix for GBS-2191, from task upload page or simple offline upload page
+    boolean fromTaskUpload = WebAppConstants.UPLOAD_FROMTASKUPLOAD
+            .equals(sessionMgr
+                    .getAttribute(WebAppConstants.UPLOAD_ORIGIN));
 
-   
-   SessionManager sessionMgr = (SessionManager)session.getAttribute(
-      WebAppConstants.SESSION_MANAGER);
-   Task task = (Task)sessionMgr.getAttribute(WebAppConstants.WORK_OBJECT);
-   String url = done.getPageURL(); 
-   
-   // link to get back to task details page
-   StringBuffer urlDone = new StringBuffer();
-   urlDone.append(url);
-   urlDone.append(AND);
-   urlDone.append(WebAppConstants.TASK_ACTION);
-   urlDone.append(EQUAL);
-   urlDone.append(WebAppConstants.TASK_ACTION_RETRIEVE);
-   urlDone.append(AND);
-   urlDone.append(WebAppConstants.TASK_ID);
-   urlDone.append(EQUAL);
-   urlDone.append(task.getId());
-   urlDone.append(AND);
-   urlDone.append(WebAppConstants.TASK_STATE);
-   urlDone.append(EQUAL);
-   urlDone.append(task.getState());
+    Task task = null;
+    String url = done.getPageURL();
+    StringBuffer urlDone = new StringBuffer();
+    urlDone.append(url);
+    if(fromTaskUpload)
+    {
+        task = (Task) sessionMgr
+                .getAttribute(WebAppConstants.WORK_OBJECT);
+        // link to get back to task details page
+        urlDone.append(AND);
+        urlDone.append(WebAppConstants.TASK_ACTION);
+        urlDone.append(EQUAL);
+        urlDone.append(WebAppConstants.TASK_ACTION_RETRIEVE);
+        urlDone.append(AND);
+        urlDone.append(WebAppConstants.TASK_ID);
+        urlDone.append(EQUAL);
+        urlDone.append(task.getId());
+        urlDone.append(AND);
+        urlDone.append(WebAppConstants.TASK_STATE);
+        urlDone.append(EQUAL);
+        urlDone.append(task.getState());
+    }
 
-String urlCancel = cancel.getPageURL() +
-    "&" + WebAppConstants.UPLOAD_ACTION +
-    "=" + WebAppConstants.UPLOAD_ACTION_CANCEL;
-String urlBack = back.getPageURL() + 
-    "&" + WebAppConstants.UPLOAD_ACTION +
-    "=" + WebAppConstants.UPLOAD_ACTION_BACK;
-String urlRefresh = refresh.getPageURL() +
-    "&" + WebAppConstants.UPLOAD_ACTION +
-    "=" + WebAppConstants.UPLOAD_ACTION_REFRESH;
-String urlProgress = refresh.getPageURL() +
-    "&" + WebAppConstants.UPLOAD_ACTION +
-    "=" + WebAppConstants.UPLOAD_ACTION_PROGRESS;
-String errorPageUrl = errorPage.getPageURL();
-String lb_cancel = bundle.getString("lb_cancel");
-String lb_refresh = bundle.getString("lb_refresh");
-String lb_done = bundle.getString("lb_done");
-String lb_back = bundle.getString("lb_upload_again_report");
-String lb_messages = bundle.getString("lb_messages");
-String lb_upload = bundle.getString("lb_processing_upload_file");
-String lb_please_wait = bundle.getString("lb_please_wait");
-// success/failure message
-String successMsg = bundle.getString("msg_upload_success");
-String bigRedErrorTitle = bundle.getString("msg_upload_error_title");
-String errorMsg = bundle.getString("msg_upload_failure");
-String uploadErrors = bundle.getString("msg_upload_view_error");
-OEMProcessStatus status = (OEMProcessStatus)sessionMgr.getAttribute(WebAppConstants.UPLOAD_STATUS);
-int counter = 0;
-int percentage = 0;
-ArrayList messages = null;
-if(status != null)
-{
-     counter    = status.getCounter();
-     percentage = status.getPercentage();
-     messages = status.giveMessages();
-}
+    String urlCancel = cancel.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_CANCEL;
+    String urlBack = back.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_BACK;
+    String urlRefresh = refresh.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_REFRESH;
+    String urlProgress = refresh.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_PROGRESS;
+    String urlCancelProcess =  refresh.getPageURL() + "&"
+            + WebAppConstants.UPLOAD_ACTION + "="
+            + WebAppConstants.UPLOAD_ACTION_CANCE_PROGRESS;
+    String errorPageUrl = errorPage.getPageURL();
 
+    OEMProcessStatus status = (OEMProcessStatus) sessionMgr
+            .getAttribute(WebAppConstants.UPLOAD_STATUS);
+    int counter = 0;
+    int percentage = 0;
+    ArrayList messages = null;
+    if (status != null)
+    {
+        counter = status.getCounter();
+        percentage = status.getPercentage();
+        messages = status.giveMessages();
+    }
 %>
 <HTML>
 <HEAD>
@@ -103,21 +102,19 @@ if(status != null)
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT src="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT SRC="envoy/terminology/management/protocol.js"></SCRIPT>
+<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <STYLE type="text/css">
-<!--
 #idProgressContainer { border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; z-index: 1; 
                  position: absolute; top: 42; left: 20; width: 400; }
 #idProgressBar { background-color: #a6b8ce; z-index: 0;
                  border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>; 
                  position: absolute; top: 42; left: 20; width: 0; height: 15;}
 #idProgress    { text-align: center; z-index: 2; font-weight: bold; }
-#idMessagesHeader { position: absolute; top: 72; left: 20; font-weight: bold;}
-#idMessages    { position: absolute; overflow: auto; z-index: 0; 
-                 top: 102; left: 20; height: 80; width: 400; }
-#idLinks       { position: absolute; left: 20; top: 414; z-index: 1; }
+#idMessagesHeader { top: 72; left: 20; font-weight: bold;}
+#idMessages    { overflow: auto; z-index: 0; top: 102; left: 20;}
+#idLinks       { left: 20; top: 414; z-index: 1; }
 #idCancel      { position: absolute; left: 20; top: 414; z-index: 1; }
 #passMsg  { color: green;  }
--->
 </STYLE>
 <SCRIPT>
 var needWarning = false;
@@ -129,6 +126,7 @@ var counter = <%=counter%>;
 var percentage = <%=percentage%>;
 var upldState = 1;
 var WIDTH = 400;
+var cancelProcess = false;
 
 function isIE(){ //ie? 
 if (window.navigator.userAgent.toLowerCase().indexOf("msie")>=1) 
@@ -161,23 +159,23 @@ if(!isIE()){ //firefox innerText define
 
 function showMessage(message)
 {
-    var div = document.createElement("DIV");
-    div.innerHTML = message;
-    idMessages.appendChild(div);
-
-    if (idMessages.style.pixelHeight < 80)
-    {
-      idMessages.style.pixelHeight = 80;
-    }
-
-    idMessages.style.pixelHeight += 40;
-
-    if (idMessages.style.pixelHeight > 200)
-    {
-      idMessages.style.pixelHeight = 250;
-    }
-
-    div.scrollIntoView(false);
+	var reg = /[0-9]+%$/;
+	var isInt = reg.test(message);
+	if (isInt && idMessages.hasChildNodes)
+	{
+       var x = idMessages.lastChild;
+	   var content = x.innerHTML;
+	   content = content.replace(reg, "");
+	   content += message;
+	   x.innerHTML = content;
+	}
+   else
+   {
+	    var div = document.createElement("DIV");
+	    div.innerHTML = message;
+	    idMessages.appendChild(div);
+	    div.scrollIntoView(false);
+   }
 }
 
 function showProgress(entryCount, percentage, message)
@@ -195,7 +193,53 @@ function showProgress(entryCount, percentage, message)
 
 function doCancel()
 {
-    window.location.href = "<%=urlCancel%>";
+	var obj = {
+			inputJobIDS : "<%=task == null ? -1 :task.getJobId()%>"
+	}
+
+    dojo.xhrPost(
+    {
+       url:"<%=urlCancelProcess%>",
+       handleAs: "text", 
+       content:obj,
+       load:function(data)
+       {
+    	   cancelProcess = true;
+    	   
+    	   var div = document.createElement("DIV");
+    	   if (idMessages.hasChildNodes)
+   	       {
+   	          var x = idMessages.lastChild;
+   		      var content = x.innerHTML;
+   		      var reg = /[0-9]+%$/;
+   		      var isInt = reg.test(content);
+
+   		      if (isInt)
+   		      {
+   			    content = content.replace(reg, "");
+   			    content += "100%";
+   			    x.innerHTML = content;
+   		      }					  
+   	       }
+    	   
+    	   div.innerHTML = "<P class='headingError' >" + "<%=cancelMsg%>";
+           idMessages.appendChild(div);
+           div.scrollIntoView(false); 
+           
+           idPleaseWait.style.visibility = 'hidden';
+
+           idCancelOk.value = "<%=lb_back%>";
+           idCancelOk.onclick = doBack;
+
+           idRefreshResult.value = "<%=lb_done%>";
+           idRefreshResult.onclick = doDone;
+           idRefreshResult.disabled = false;
+       },
+       error:function(error)
+       {
+           alert(error.message);
+       }
+   });
 }
 
 function doBack()
@@ -213,28 +257,43 @@ function showFinalSuccessMessage()
     document.all.PassMsgLayer.style.visibility = "visible";
 }
 
-function showFinalPassFailMessage(state)
+function showFinalPassFailMessage(state, message)
 {
     var div = document.createElement("DIV");
 
     if(state==2) //pass 
     {
-        div.innerHTML = "<P STYLE='color: green;' >OK.<BR><BR> " + "<%= successMsg %>";
+    	if (idMessages.hasChildNodes)
+	    {
+	      var x = idMessages.lastChild;
+		  var content = x.innerHTML;
+		  var reg = /[0-9]+%$/;
+		  var isInt = reg.test(content);
+
+		  if (isInt)
+		  {
+			  content = content.replace(reg, "");
+			  content += "100%";
+			  x.innerHTML = content;
+		  }					  
+	    }
+	    
+        div.innerHTML = "<P STYLE='color: green;' >OK.<BR><BR> " + "<%=successMsg%>";
         idMessages.appendChild(div);
         div.scrollIntoView(false); 
     }
     else if(state==3) // fail
     {
-        div.innerHTML = "<P ALIGN='LEFT' CLASS='headingError'><A CLASS='headingError' HREF='<%=errorPageUrl%>'><%= bigRedErrorTitle %></A><BR><BR><%= errorMsg %><BR><BR><A CLASS='standardHREF' HREF='<%=errorPageUrl%>'><%= uploadErrors %></A></P>";
+        div.innerHTML = "<br><span align='left' class='headingError'><%=bigRedErrorTitle%><BR><BR>" + message + "</span>";
         idMessages.appendChild(div);
-        div.scrollIntoView(false);        
+        div.scrollIntoView(false);
     }
     else
     {
         alert("Unknown result");
     }
 }
-function done(state)
+function done(state, message)
 {
 
   idPleaseWait.style.visibility = 'hidden';
@@ -246,35 +305,31 @@ function done(state)
   idRefreshResult.onclick = doDone;
   idRefreshResult.disabled = false;
 
-  showFinalPassFailMessage(state);
+  showFinalPassFailMessage(state, message);
 }
 
 function doOnLoad()
 {
   loadGuides();
   //window.setTimeout("callServer()", 5000, "JavaScript");
-  <%
-       if (messages != null)
-       {
-         for (int i = 0, max = messages.size(); i < max; i++)
-         {
-           String msg = (String)messages.get(i);
-           out.print("parent.showProgress(");
-           out.print(counter);
-           out.print(",");
-           out.print(percentage);
-           out.print(",'");
-           out.print(EditUtil.toJavascript(msg));
-           out.println("');");
-         }
-       }
-       else
-       {
-%>
+  <%if (messages != null)
+            {
+                for (int i = 0, max = messages.size(); i < max; i++)
+                {
+                    String msg = (String) messages.get(i);
+                    out.print("parent.showProgress(");
+                    out.print(counter);
+                    out.print(",");
+                    out.print(percentage);
+                    out.print(",'");
+                    out.print(EditUtil.toJavascript(msg));
+                    out.println("');");
+                }
+            }
+            else
+            {%>
                 parent.showProgress(counter, percentage, "");
-<%
-       }
-%>
+<%}%>
   callServer("<%=urlProgress%>");
 }
 
@@ -294,17 +349,30 @@ function doOnLoad()
 </DIV>
 <DIV id="idProgressBar"></DIV>
 
-<DIV id="idLinks" style="width:500px">
-  <INPUT TYPE="BUTTON" VALUE="<%=lb_cancel%>"
-   id="idCancelOk" onclick="doCancel()"> &nbsp;
-  <INPUT TYPE="BUTTON" VALUE="<%=lb_done%>"
-   id="idRefreshResult" onclick="doDone()" disabled = "true">
-  <BR>
-</DIV>
+<div style="position:absolute;top:72;left:20">
+	<table cellspacing=0 cellpadding=0 border=0 class=standardText>
+	<tr>
+		<td>
+			<DIV id="idMessagesHeader" class="header"><%=lb_messages%></DIV>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<DIV id="idMessages"></DIV>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<DIV id="idLinks" style="width:500px">
+				<INPUT TYPE="BUTTON" VALUE="<%=lb_cancel%>" id="idCancelOk" onclick="doCancel()"> &nbsp;
+			  	<INPUT TYPE="BUTTON" VALUE="<%=lb_done%>" id="idRefreshResult" onclick="doDone()" disabled="true">
+			</DIV>
+		</td>
+	</tr>
+	</table>
+</div>
 
-<BR>
-<DIV id="idMessagesHeader" class="header"><%=lb_messages%></DIV>
-<DIV id="idMessages"></DIV>
+
 </DIV>
 
 </BODY>
@@ -334,46 +402,58 @@ function callServer(url)
 }
 function updatePage() 
 {
-  if (xmlHttp.readyState == 4) 
-  {
-   if (xmlHttp.status == 200) 
-   {
-       var response = xmlHttp.responseText;
-       var statusInfo = response;
-       if(statusInfo != null && statusInfo.length != 0)
-       {
-            var status = statusInfo.split(",");
-            percentage = status[0];
-            counter = status[1];
-            upldState = (status[2] == "true") ? 2 : 3;
-            if(percentage >= 100)
-            {
-               showProgress(counter, percentage, "");
-               done(upldState);
-            }
-            else
-            {
-               if(status[3] != 'undefined' && status[3].length != 0)
-               {
-                   for (var i = 3; i < status.length; i++)
-                   {
-                      var msg = status[i];
-                      showProgress(counter, percentage, msg);
-                   }
-               }
-               else
-               {
-                  showProgress(counter, percentage, "");
-               }
-
-			   setTimeout('callServer("<%=urlRefresh%>")',100);
-            }
-      }
-      else
-      {
-		   setTimeout('callServer("<%=urlRefresh%>")',100);
-      }
-   }
-  }
+	if (xmlHttp.readyState == 4) 
+  	{
+   		if (xmlHttp.status == 200) 
+   		{
+   			if (cancelProcess)
+   				return;
+   			
+       		var response = xmlHttp.responseText;
+       		var statusInfo = response;
+       		
+       		if(statusInfo != null && statusInfo.length != 0)
+			{
+       			var result = eval("(" + statusInfo + ")");
+       			
+            	percentage = result.percentage;
+            	counter = result.counter;
+            	upldState = 2 ;
+            	if(percentage >= 100)
+            	{
+					showProgress(counter, percentage, "");
+					var message = "";
+					if (result.errMsg != null && result.errMsg.length > 0){
+						message = result.errMsg;
+						upldState = 3;
+					}
+               		done(upldState, message);
+            	}
+            	else
+            	{
+            		var msg = result.msg;
+            		if (msg != null){
+            			for (var i = 0; i < msg.length; i++)
+                       	{
+    						var m = msg[i];
+    						showProgress(counter, percentage, m);
+                       	}
+            		}
+            		
+               		
+            		if (result.process != null && result.process.length > 0)
+            		{
+            			showProgress(counter, percentage, result.process);
+            		}
+            		
+			   		setTimeout('callServer("<%=urlRefresh%>")',100);
+            	}
+      		}
+      		else
+      		{
+		   		setTimeout('callServer("<%=urlRefresh%>")',100);
+      		}
+   		}
+	}
 }
 </SCRIPT>

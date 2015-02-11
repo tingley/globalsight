@@ -119,4 +119,6 @@ public interface IHtmlHandler
      * Handle text (#PCDATA).
      */
     void handleText(HtmlObjects.Text t);
+    
+    void handleSpecialChar(HtmlObjects.Text t);
 }

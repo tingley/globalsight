@@ -20,6 +20,7 @@ import java.util.Locale;
 
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.BasicL10nProfileInfo;
+import com.globalsight.everest.webapp.pagehandler.projects.l10nprofiles.LocProfileHandlerHelper;
 
 /**
 * This class can be used to compare BasicL10nProfileInfo objects
@@ -30,6 +31,10 @@ public class LocProfileComparator extends StringComparator
 	public static final int NAME = 0;
 	public static final int DESC = 1;
 	public static final int ASC_COMPANY = 2;
+	public static final int TMPROFILE = 3;
+	public static final int PROJECT = 4;
+	public static final int SOURCE_LOCALE = 5;
+	public static final int WORKFLOW_DISPATCH = 6;
 
 	/**
 	* Creates a LocProfileComparator with the given type and locale.
@@ -75,6 +80,26 @@ public class LocProfileComparator extends StringComparator
 			bValue = CompanyWrapper.getCompanyNameById(b.getCompanyId());
 			rv = this.compareStrings(aValue,bValue);
 			break;
+		case TMPROFILE:
+		    aValue = a.getTmProfileName();
+		    bValue = b.getTmProfileName();
+		    rv = this.compareStrings(aValue,bValue);
+		    break;
+		case PROJECT:
+		    aValue = a.getProjectName();
+		    bValue = b.getProjectName();
+		    rv = this.compareStrings(aValue,bValue);
+		    break;
+		case SOURCE_LOCALE:
+		    aValue = a.getSrcLocaleName();
+		    bValue = b.getSrcLocaleName();
+		    rv = this.compareStrings(aValue,bValue);
+		    break;
+		case WORKFLOW_DISPATCH:
+		    aValue = a.getIsAutoDispatch() + "";
+		    bValue = b.getIsAutoDispatch() + "";
+		    rv = this.compareStrings(aValue,bValue);
+		    break;
 		}
 		return rv;
 	}

@@ -40,7 +40,7 @@ public class ModuleMappingManagerLocal {
 				transaction.rollback();
 			} catch (Exception e2) {
 			}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			throw new ModuleMappingException(e.getMessage());
 		}
     }
@@ -66,7 +66,7 @@ public class ModuleMappingManagerLocal {
 				transaction.rollback();
 			} catch (Exception e2) {
 			}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			throw new ModuleMappingException(e.getMessage());
 		}
     }
@@ -93,7 +93,7 @@ public class ModuleMappingManagerLocal {
 				transaction.rollback();
 			} catch (Exception e2) {
 			}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
     }
 
@@ -147,7 +147,7 @@ public class ModuleMappingManagerLocal {
 				transaction.rollback();
 			} catch (Exception e2) {
 			}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
     }
 
@@ -183,7 +183,7 @@ public class ModuleMappingManagerLocal {
 			try {
 				transaction.rollback();
 			} catch (Exception se) {}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
     }
     
@@ -408,7 +408,7 @@ public class ModuleMappingManagerLocal {
 				transaction.rollback();
 			} catch (Exception e2) {
 			}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			throw new ModuleMappingException(e.getMessage());
 		}
     }
@@ -431,7 +431,7 @@ public class ModuleMappingManagerLocal {
 				transaction.rollback();
 			} catch (Exception e2) {
 			}
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
     }
     

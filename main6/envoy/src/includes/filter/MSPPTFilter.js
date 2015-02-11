@@ -37,6 +37,14 @@ MSPPTFilter.prototype.edit = function(filterId, color, specialFilters, topFilter
 	str.append("</tr>");
 	
 	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractNotes + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	var notesTranslate = (this.filter.notesTranslate) ? "checked":"";
+	str.append("<input id='pptNotesTranslate' type='checkbox' name='pptNotesTranslate' value='"+this.filter.notesTranslate+"' "+notesTranslate+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>");
 	str.append(jsContentPostFilter);
 	str.append("</td>");
@@ -86,6 +94,13 @@ MSPPTFilter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='pptAltTranslate' type='checkbox' name='pptAltTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractNotes + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='pptNotesTranslate' type='checkbox' name='pptNotesTranslate' value='false' />");
 	str.append("</td>");
 	str.append("</tr>");
 	
@@ -145,6 +160,7 @@ function saveMSPPTFilter()
 	
 	var filterDesc = document.getElementById(this.filterDesId).value;
 	var altTranslate = document.getElementById("pptAltTranslate").checked;
+	var notesTranslate = document.getElementById("pptNotesTranslate").checked;
 	
 	var contentPostFilterIdAndTableName = document.getElementById("pptContentPostFilterSelect").value;
 	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
@@ -165,6 +181,7 @@ function saveMSPPTFilter()
 		filterDesc : filterDesc,
 		companyId : companyId,
 		altTranslate : altTranslate,
+		notesTranslate : notesTranslate,
 		contentPostFilterId : contentPostFilterId,
 		contentPostFilterTableName : contentPostFilterTableName,
 		baseFilterId:baseFilterId
@@ -200,6 +217,7 @@ function updatePPTFilterCallback(data)
 		jpFilter.contentPostFilterTableName = checkExistPPTCallback.obj.contentPostFilterTableName;
 		jpFilter.companyId = companyId;
 		jpFilter.altTranslate = checkExistPPTCallback.obj.altTranslate;
+		jpFilter.notesTranslate = checkExistPPTCallback.obj.notesTranslate;
 		jpFilter.baseFilterId = checkExistPPTCallback.obj.baseFilterId;
 		
 		var specialFilters = updateSpecialFilter(saveMSPPTFilter.specialFilters, jpFilter);
@@ -237,6 +255,7 @@ function saveMSOfficePPTFilterCallback(data)
 		jpFilter.contentPostFilterId = checkExistPPTCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistPPTCallback.obj.contentPostFilterTableName;
 		jpFilter.altTranslate = checkExistPPTCallback.obj.altTranslate;
+		jpFilter.notesTranslate = checkExistPPTCallback.obj.notesTranslate;
 		jpFilter.baseFilterId = checkExistPPTCallback.obj.baseFilterId;
 		
 		filter.specialFilters.push(jpFilter);

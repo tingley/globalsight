@@ -35,12 +35,8 @@
         <property name="companyId" column="COMPANYID" type="string"
             not-null="true" />
 
-        <component name="tmProfile"
-            class="com.globalsight.everest.projecthandler.TranslationMemoryProfile">
-
-            <property name="tuTypes" column="JOB_EXCLUDE_TU_TYPES"
+        <property name="tuTypes" column="JOB_EXCLUDE_TU_TYPES"
                 type="string" length="2000" not-null="false" />
-        </component>
 
         <component name="dispatchCriteria"
             class="com.globalsight.everest.foundation.DispatchCriteria">

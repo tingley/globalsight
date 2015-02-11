@@ -17,32 +17,26 @@
 package com.globalsight.everest.tm.searchreplace;
 
 import java.rmi.RemoteException;
-import com.globalsight.everest.tm.TmManagerException;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
+
+import com.globalsight.everest.tm.TmManagerException;
 
 public interface JobSearchReplaceManager
 {
     public JobSearchReportQueryResult searchForJobSegments(
-        boolean p_caseSensitiveSearch,
-        String p_queryString,
-        Collection p_targetLocales,
-        Collection p_jobIds)
-        throws TmManagerException, RemoteException;
+            boolean p_caseSensitiveSearch, String p_queryString,
+            Collection p_targetLocales, Collection p_jobIds)
+            throws TmManagerException, RemoteException;
 
     public ActivitySearchReportQueryResult searchForActivitySegments(
-        boolean p_caseSensitiveSearch,
-        String p_queryString,
-        Collection p_targetLocales,
-        Collection p_jobId)
-        throws TmManagerException, RemoteException;
+            boolean p_caseSensitiveSearch, String p_queryString,
+            Collection p_targetLocales, Collection p_jobId)
+            throws TmManagerException, RemoteException;
 
     public Collection replaceForPreview(String p_old, String p_new,
-        Collection p_jobInfos, boolean p_caseSensitiveSearch)
-        throws TmManagerException, RemoteException;
+            Collection p_jobInfos, boolean p_caseSensitiveSearch)
+            throws TmManagerException, RemoteException;
 
-    public void replace(Collection p_tuvs)
-        throws TmManagerException,RemoteException;
+    public void replace(Collection p_tuvs, String companyId)
+            throws TmManagerException, RemoteException;
 }

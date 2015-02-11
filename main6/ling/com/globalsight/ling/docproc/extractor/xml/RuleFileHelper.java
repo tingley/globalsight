@@ -162,7 +162,7 @@ public class RuleFileHelper
         }
         catch (DiplomatBasicParserException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         tuv.setSegmentString(segString);
         List subflows = tuv.getSubflowsAsGxmlElements();

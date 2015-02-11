@@ -20,9 +20,9 @@ import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -31,7 +31,6 @@ import com.globalsight.everest.util.comparator.ComparatorByTmOrder;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmMatchRetrieveProcCaller;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.util.GlobalSightLocale;
@@ -44,7 +43,7 @@ public class SegmentTmLeverager
 {
     private static final Logger c_logger = Logger
             .getLogger(SegmentTmLeverager.class);
-    
+
     private static final Object LOCK = new Object();
 
     /**
@@ -54,8 +53,9 @@ public class SegmentTmLeverager
      *            LeverageDataCenter that contains segments that are leveraged.
      * @return LeverageMatchResults that contains leverage results
      */
-    public LeverageMatchResults leverage(Connection p_connection, List<Tm> p_tms,
-            LeverageDataCenter p_leverageDataCenter) throws Exception
+    public LeverageMatchResults leverage(Connection p_connection,
+            List<Tm> p_tms, LeverageDataCenter p_leverageDataCenter,
+            String companyId) throws Exception
     {
         LeverageMatchResults levMatchResults = new LeverageMatchResults();
         GlobalSightLocale sourceLocale = p_leverageDataCenter.getSourceLocale();
@@ -68,7 +68,7 @@ public class SegmentTmLeverager
         Collection trSegments = new ArrayList();
         Collection loSegments = new ArrayList();
         Iterator itOriginalSegment = p_leverageDataCenter
-                .getOriginalSeparatedSegments().iterator();
+                .getOriginalSeparatedSegments(companyId).iterator();
         while (itOriginalSegment.hasNext())
         {
             BaseTmTuv originalSegment = (BaseTmTuv) itOriginalSegment.next();
@@ -96,22 +96,24 @@ public class SegmentTmLeverager
         // Add a blank space while the segment is not end with blank space and
         // this segment can't be the last segment in a translatable. ???
         //
-        // New Notes by York on 2009-10-29: 
-        // The purpose of below method is to keep only ONE space if the segment has/have trailing space(s). 
+        // New Notes by York on 2009-10-29:
+        // The purpose of below method is to keep only ONE space if the segment
+        // has/have trailing space(s).
         // If no trailing space(s),do nothing.
         // Ignore this method for GBS-747.
-        //addBlankSpace(levMatchResults);
+        // addBlankSpace(levMatchResults);
 
         // 2. then do fuzzy matching unless "only exact match" is set
         if (!leverageOptions.leverageOnlyExactMatches())
         {
             // get the original segments that didn't find exact matches
             Collection forFuzzy = getNoMatchSegments(trSegments,
-                    levMatchResults);
+                    levMatchResults, leverageOptions);
 
             // fuzzy match leveraging
             LeverageMatchResults levFuzzyMatchResults = leverageFuzzyTranslatable(
-                    p_connection, sourceLocale, forFuzzy, leverageOptions, p_tms);
+                    p_connection, sourceLocale, forFuzzy, leverageOptions,
+                    p_tms);
             levMatchResults.merge(levFuzzyMatchResults);
         }
 
@@ -119,7 +121,8 @@ public class SegmentTmLeverager
         if (leverageOptions.isLeveragingLocalizables())
         {
             LeverageMatchResults loLevMatchResults = leverageLocalizable(
-                    stPersistence, sourceLocale, loSegments, leverageOptions, p_tms);
+                    stPersistence, sourceLocale, loSegments, leverageOptions,
+                    p_tms);
             levMatchResults.merge(loLevMatchResults);
         }
 
@@ -145,15 +148,15 @@ public class SegmentTmLeverager
         LeverageMatchResults levResults = null;
         if (p_sourceTuv.isTranslatable())
         {
-            levResults = leverageFuzzyTranslatable(p_connection, p_sourceTuv
-                    .getLocale(), segments, p_leverageOptions, p_tms);
+            levResults = leverageFuzzyTranslatable(p_connection,
+                    p_sourceTuv.getLocale(), segments, p_leverageOptions, p_tms);
         }
         else
         {
             SegmentTmPersistence stPersistence = new SegmentTmPersistence(
                     p_connection);
-            levResults = leverageLocalizable(stPersistence, p_sourceTuv
-                    .getLocale(), segments, p_leverageOptions, p_tms);
+            levResults = leverageLocalizable(stPersistence,
+                    p_sourceTuv.getLocale(), segments, p_leverageOptions, p_tms);
         }
 
         // LeverageMatchResults should holds at most one LeverageMatches.
@@ -254,17 +257,16 @@ public class SegmentTmLeverager
      * @return LeverageMatchResults object
      */
     @SuppressWarnings("unchecked")
-	private LeverageMatchResults leverageExactSegments(
+    private LeverageMatchResults leverageExactSegments(
             SegmentTmPersistence p_stPersistence,
             GlobalSightLocale p_sourceLocale, Collection p_segments,
             boolean p_isTranslatable, LeverageOptions p_leverageOptions,
-            List<Tm> p_tms)
-            throws Exception
+            List<Tm> p_tms) throws Exception
     {
         LeverageMatchResults levResults = new LeverageMatchResults();
 
         c_logger.debug("Leverage localizable begin");
-        
+
         synchronized (LOCK)
         {
             Iterator itLevMatches = p_stPersistence.leverageExact(
@@ -279,14 +281,15 @@ public class SegmentTmLeverager
                 LeverageMatches levMatches = (LeverageMatches) itLevMatches
                         .next();
                 List list = levMatches.getLeveragedTus();
-                Collections.sort(list, new ComparatorByTmOrder(p_leverageOptions));
+                Collections.sort(list, new ComparatorByTmOrder(
+                        p_leverageOptions));
                 levMatches.setLeveragedTus(list);
                 levResults.add(levMatches);
             }
-        }        
-        
+        }
+
         c_logger.debug("Leverage match retrieve end");
-       
+
         return levResults;
     }
 
@@ -311,8 +314,22 @@ public class SegmentTmLeverager
         c_logger.debug("Creating token list");
 
         List segmentTokensList = new ArrayList(p_segments.size());
-        FuzzyMatcher fuzzyMatcher = new FuzzyMatcher(p_sourceLocale,
-                p_tms, p_leverageOptions.isMultiLingLeveraging());
+
+        // fix for GBS-2448, user could search target locale in TM Search Page,
+        // if not from TM Search Page, keep old logic(by isMultiLingLeveraging
+        // of FileProfile)
+        boolean lookupTarget;
+        if (p_leverageOptions.isFromTMSearchPage())
+        {
+            lookupTarget = true;
+        }
+        else
+        {
+            lookupTarget = p_leverageOptions.isMultiLingLeveraging();
+        }
+
+        FuzzyMatcher fuzzyMatcher = new FuzzyMatcher(p_sourceLocale, p_tms,
+                lookupTarget);
 
         // tokenize segments and store them in segmentTokensList
         Iterator itSegment = p_segments.iterator();
@@ -337,9 +354,9 @@ public class SegmentTmLeverager
                         .next();
 
                 Collection tokenMatches = fuzzyMatcher.findMatches(
-                        segmentForFuzzyMatching, p_leverageOptions
-                                .getMatchThreshold(), p_leverageOptions
-                                .getNumberOfMatchesReturned());
+                        segmentForFuzzyMatching,
+                        p_leverageOptions.getMatchThreshold(),
+                        p_leverageOptions.getNumberOfMatchesReturned());
 
                 // System.out.println("Score of matches:");
                 // Iterator it = tokenMatches.iterator();
@@ -393,15 +410,32 @@ public class SegmentTmLeverager
     // Select segments from p_segments that are not listed in
     // p_levMatchResults and return a new Collection that contains them
     private Collection getNoMatchSegments(Collection p_segments,
-            LeverageMatchResults p_levMatchResults)
+            LeverageMatchResults p_levMatchResults,
+            LeverageOptions leverageOptions)
     {
         ArrayList newList = new ArrayList(p_segments);
+        Set<GlobalSightLocale> trgLocales = leverageOptions
+                .getLeveragingLocales().getAllTargetLocales();
 
         Iterator it = p_levMatchResults.iterator();
         while (it.hasNext())
         {
+            boolean hasExactForAllTargetLocales = false;
             LeverageMatches levMatches = (LeverageMatches) it.next();
-            newList.remove(levMatches.getOriginalTuv());
+            for (LeveragedTu levTu : levMatches.getLeveragedTus())
+            {
+                Set<GlobalSightLocale> localesIHave = levTu.getAllTuvLocales();
+                if (localesIHave.containsAll(trgLocales))
+                {
+                    hasExactForAllTargetLocales = true;
+                    break;
+                }
+            }
+
+            if (hasExactForAllTargetLocales)
+            {
+                newList.remove(levMatches.getOriginalTuv());
+            }
         }
 
         return newList;

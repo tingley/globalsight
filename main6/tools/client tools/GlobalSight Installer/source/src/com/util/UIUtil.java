@@ -44,7 +44,7 @@ public class UIUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 }

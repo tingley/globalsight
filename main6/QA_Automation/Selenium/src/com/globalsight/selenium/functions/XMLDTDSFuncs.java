@@ -1,6 +1,7 @@
 package com.globalsight.selenium.functions;
 
 import org.testng.Assert;
+import org.testng.Reporter;
 
 import com.globalsight.selenium.pages.XMLDTDS;
 import com.thoughtworks.selenium.Selenium;
@@ -50,7 +51,7 @@ public class XMLDTDSFuncs extends BasicFuncs {
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
 		Assert.assertEquals(
-				findElementsOnTables(selenium, "link=" + iXMLDTDName), true);
+				isElementPresent(selenium, "link=" + iXMLDTDName), true);
 		return iXMLDTDName;
 	}
 
@@ -66,11 +67,11 @@ public class XMLDTDSFuncs extends BasicFuncs {
 				selenium.getConfirmation();
 				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 			} catch (Exception e) {
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+			    Reporter.log("Error: " + e.getMessage());
 			}
 		}
 		Assert.assertEquals(
-				findElementsOnTables(selenium, "link=" + iXMLDTDName), false);
+				isElementPresent(selenium, "link=" + iXMLDTDName), false);
 		return false;
 	}
 }

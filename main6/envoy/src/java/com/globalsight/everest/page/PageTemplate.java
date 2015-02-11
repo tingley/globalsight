@@ -24,20 +24,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import org.apache.xerces.parsers.DOMParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-
-import com.globalsight.everest.edit.offline.xliff.ListViewWorkXLIFFWriter;
-import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
-import com.globalsight.everest.integration.ling.tm2.LeverageMatchLingManagerLocal;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
@@ -45,10 +36,8 @@ import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvState;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
-import com.globalsight.ling.tm2.leverage.Leverager;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 
@@ -67,8 +56,7 @@ public class PageTemplate extends PersistentObject
 {
     private static final long serialVersionUID = 3462604430091153330L;
 
-    static private final Logger c_logger = Logger
-            .getLogger(PageTemplate.class);
+    static private final Logger c_logger = Logger.getLogger(PageTemplate.class);
 
     static public final int TYPE_EXPORT = 1;
     static public final int TYPE_STANDARD = 2;
@@ -86,7 +74,8 @@ public class PageTemplate extends PersistentObject
 
     // Need to have a map that contains the corresponding string value of
     // the page template type (the value stored in db)
-    static private Map s_typeMap = new HashMap(4);
+    static private Map<Integer, String> s_typeMap = new HashMap<Integer, String>(
+            4);
     static
     {
         s_typeMap.put(new Integer(TYPE_EXPORT), "EXP");
@@ -100,12 +89,12 @@ public class PageTemplate extends PersistentObject
     private long target_locale_id;
 
     // template parts - this relationship is NOT mapped.
-    // must use PageManager.getTemplatePartsForSourcePage() and the
+    // must use PageManager.getTemplatePartsForSourcePage() and then
     // set them within PageTemplate
-    protected List m_templateParts = new ArrayList();
+    protected List<TemplatePart> m_templateParts = new ArrayList<TemplatePart>();
 
     /** HashMap of TuId (Key)and Tuv content (value) */
-    protected HashMap m_tuvContents = null;
+    protected HashMap<Long, String> m_tuvContents = null;
 
     private SourcePage m_sourcePage = null;
 
@@ -161,7 +150,8 @@ public class PageTemplate extends PersistentObject
      * @param p_templateParts
      *            - The templateParts to be set.
      */
-    public void setTemplatePartsForPersistence(ArrayList p_templateParts)
+    public void setTemplatePartsForPersistence(
+            ArrayList<TemplatePart> p_templateParts)
     {
         if (m_templateParts.size() == 0)
         {
@@ -177,12 +167,12 @@ public class PageTemplate extends PersistentObject
      * @param p_templateParts
      *            - The templateParts to be set.
      */
-    public void setTemplateParts(List p_templateParts)
+    public void setTemplateParts(List<TemplatePart> p_templateParts)
     {
         m_templateParts = p_templateParts;
     }
 
-    public List getTemplateParts()
+    public List<TemplatePart> getTemplateParts()
     {
         return m_templateParts;
     }
@@ -249,7 +239,7 @@ public class PageTemplate extends PersistentObject
     {
         if (m_tuvContents == null)
         {
-            m_tuvContents = new HashMap();
+            m_tuvContents = new HashMap<Long, String>();
         }
 
         m_tuvContents.put(p_tuId, p_tuvContent);
@@ -306,6 +296,7 @@ public class PageTemplate extends PersistentObject
         TemplatePart part;
         int i = 0;
         String altStr = new String();
+        IPageTemplateExtention pt = new WsPageTemplateExtention(isWfFinished());
 
         for (Iterator it = m_templateParts.iterator(); it.hasNext();)
         {
@@ -342,94 +333,37 @@ public class PageTemplate extends PersistentObject
 
                     if (part.getTuId() > 0)
                     {
-                        Tuv tuv = part.getTuv(target_locale_id);
-                        Tu tu = tuv.getTu();
-                        String trasStr = "<"
-                                + DiplomatNames.Element.TRANSLATABLE;
+                        String companyId = m_sourcePage.getCompanyId();
+                        Tuv targetTuv = part
+                                .getTuv(target_locale_id, companyId);
+                        Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
+                                companyId);
+                        Tu tu = part.getTu(companyId);
 
-                        boolean isLocalized = isTuvLocalized(tuv);
-                        boolean isComplete = (tuv.getState().getValue() == TuvState.COMPLETE
+                        boolean isLocalized = isTuvLocalized(targetTuv);
+                        boolean isComplete = (targetTuv.getState().getValue() == TuvState.COMPLETE
                                 .getValue());
-                        // If the tuv state is "localized" or
-                        // "exact_match_localized"", add an attribute "isLocalized=yes"
-                        // to the translatable element, else add attribute
-                        // "isLocalized = no"
-                        if (isLocalized || isComplete)
-                        {
-                            boolean wfFinished = isWfFinished();
-                            if (tu.getGenerateFrom() != null
-                                    && tu.getGenerateFrom().equals(
-                                            TuImpl.FROM_WORLDSERVER))
-                            {
-                                String lastModUser = tuv.getLastModifiedUser();
-                                String sourceContent = tu.getSourceContent();
 
-                                if (lastModUser != null
-                                        && lastModUser.indexOf("_MT") > -1)
-                                {
-                                    // For GBS-1864 by York on 2011-03-07
-                                    // Avoid to change "iws:segment-metadata"
-                                    // content for "repetition" segments.
-                                    if (Extractor.IWS_REPETITION
-                                            .equalsIgnoreCase(sourceContent)
-                                            && !wfFinished)
-                                    {
-                                        tempStr = tempStr
-                                                .replace(
-                                                        trasStr,
-                                                        trasStr
-                                                                + " "
-                                                                + DiplomatNames.Attribute.ISLOCALIZED
-                                                                + "=\"no\" ");
-                                    }
-                                    else
-                                    {
-                                        // Default behavior
-                                        tempStr = tempStr
-                                                .replace(
-                                                        trasStr,
-                                                        trasStr
-                                                                + " "
-                                                                + DiplomatNames.Attribute.ISLOCALIZED
-                                                                + "=\"" + byMT
-                                                                + "\" ");
-                                    }
-                                }
-                                else if (lastModUser != null
-                                        && !lastModUser
-                                                .equals(IFormatNames.FORMAT_TDA)
-                                        && !lastModUser
-                                                .equals(IFormatNames.FORMAT_XLIFF_NAME)
-                                        && !lastModUser
-                                                .equals(IFormatNames.FORMAT_PO))
-                                {
-                                    tempStr = tempStr
-                                            .replace(
-                                                    trasStr,
-                                                    trasStr
-                                                            + " "
-                                                            + DiplomatNames.Attribute.ISLOCALIZED
-                                                            + "=\"" + byUser
-                                                            + "\" ");
-                                }
-                                else if (lastModUser == null)
-                                {
-                                    tempStr = tempStr
-                                            .replace(
-                                                    trasStr,
-                                                    trasStr
-                                                            + " "
-                                                            + DiplomatNames.Attribute.ISLOCALIZED
-                                                            + "=\"" + byLocalTM
-                                                            + "\" ");
-                                }
-                            }
-                        }
-                        else
+                        if (tu.getGenerateFrom() != null
+                                && tu.getGenerateFrom().equals(
+                                        TuImpl.FROM_WORLDSERVER))
                         {
-                            tempStr = tempStr.replace(trasStr, trasStr + " "
-                                    + DiplomatNames.Attribute.ISLOCALIZED
-                                    + "=\"no\" ");
+                            // if the job creating file is from worldserver,
+                            // then add
+                            // the leverage match results into the alt-trans
+                            // parts
+                            altStr = pt.getAltTrans(sourceTuv, targetTuv,
+                                    companyId);
+
+                            // If the tuv state is "localized" or
+                            // "exact_match_localized"", add an attribute "isLocalized=yes"
+                            // to the translatable element, else add attribute
+                            // "isLocalized = no"
+                            if (isLocalized || isComplete)
+                            {
+                                tempStr = pt.processSkeleton(tempStr,
+                                        targetTuv, companyId);
+                            }
                         }
                     }
                 }
@@ -440,14 +374,15 @@ public class PageTemplate extends PersistentObject
             // if there is a TU in this template part, append it too.
             if (part.getTuId() > 0)
             {
+                String companyId = m_sourcePage.getCompanyId();
                 // If the TU has not been set, this will output "null"
                 // into the result string. Caller needs to make sure
                 // all TUs have been set to values.
-                String tuvString = (String) m_tuvContents.get(part
-                        .getTuIdAsLong());
-                Tu tu = part.getTu();
-                Tuv targetTuv = part.getTuv(target_locale_id);
-                Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId());
+                String tuvString = (String) m_tuvContents.get(part.getTuId());
+                Tu tu = part.getTu(companyId);
+                Tuv targetTuv = part.getTuv(target_locale_id, companyId);
+                Tuv sourceTuv = part.getTuv(m_sourcePage.getLocaleId(),
+                        companyId);
 
                 // For XLF file format, revert original target content in some
                 // cases.
@@ -503,19 +438,6 @@ public class PageTemplate extends PersistentObject
                     }
                 }
 
-                // if the job creating file is from worldserver, then add the
-                // leverage match results into the alt-trans parts
-                if (tu.getGenerateFrom() != null
-                        && tu.getGenerateFrom().equals(TuImpl.FROM_WORLDSERVER))
-                {
-                    LeverageMatchLingManagerLocal lmm = new LeverageMatchLingManagerLocal();
-                    SortedSet lms = lmm.getTuvMatches(sourceTuv.getIdAsLong(),
-                            targetTuv.getLocaleId(), "0", false);
-
-                    List list = new ArrayList(lms);
-                    altStr = getAltTransOfMatch(list);
-                }
-
                 if (c_logger.isDebugEnabled())
                 {
                     System.err.println("tuv part: " + tuvString);
@@ -534,6 +456,13 @@ public class PageTemplate extends PersistentObject
                     }
                 }
 
+                if (targetTuv != null
+                        && "passolo".equals(targetTuv.getDataType(companyId))
+                        && targetTuv.getLastModifiedUser() == null
+                        && TuvState.NOT_LOCALIZED.equals(targetTuv.getState()))
+                {
+                    tuvString = "<segment><removeTu/></segment>";
+                }
                 result.append(tuvString);
             }
         }
@@ -583,17 +512,24 @@ public class PageTemplate extends PersistentObject
      * locale ID.
      * 
      * @return boolean
+     * @throws PageException
      */
-    private boolean isWfFinished()
+    private boolean isWfFinished() throws PageException
     {
         boolean result = false;
-
         try
         {
             TargetPage wantedTP = null;
-            Set trgPages = m_sourcePage.getTargetPages();
-            Iterator trgPageIter = trgPages.iterator();
-            while (trgPageIter.hasNext())
+            Set<TargetPage> trgPages = new HashSet<TargetPage>();
+            if (m_sourcePage != null)
+            {
+                SourcePage sp = ServerProxy.getPageManager().getSourcePage(
+                        m_sourcePage.getId());
+                trgPages = sp.getTargetPages();
+            }
+
+            for (Iterator trgPageIter = trgPages.iterator(); trgPageIter
+                    .hasNext();)
             {
                 TargetPage tp = (TargetPage) trgPageIter.next();
                 if (tp.getGlobalSightLocale().getId() == target_locale_id)
@@ -614,9 +550,9 @@ public class PageTemplate extends PersistentObject
                 }
             }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-
+            c_logger.error("Failed to judge if workflow is finished", e);
         }
 
         return result;
@@ -646,121 +582,15 @@ public class PageTemplate extends PersistentObject
 
         return result;
     }
-
-    private String getAltTransOfMatch(List<LeverageMatch> list)
+    
+    public String getTuvContent(Long tuId)
     {
-        String altStr = new String();
-        ListViewWorkXLIFFWriter lvwx = new ListViewWorkXLIFFWriter();
-
-        if (list != null)
+        if (m_tuvContents != null)
         {
-            LeverageMatch.orderMatchResult(list);
-
-            for (int i = 0; i < list.size(); i++)
-            {
-                LeverageMatch leverageMatch = list.get(i);
-
-                if (judgeIfneedAdd(leverageMatch))
-                {
-                    altStr = altStr + lvwx.getAltByMatch(leverageMatch, null);
-                }
-            }
+            return (String) m_tuvContents.get(tuId);
         }
-
-        return altStr;
-    }
-
-    /*
-     * Judge if need add the leverage match result into alt-trans when export
-     * There are three condition need not add, because they are repeated with
-     * the target content or the original alt-trans content. 1. Auto-commit:
-     * 
-     * project_tm_index == -2(MT_PRIORITY) && score_num == 100 && Target tuv
-     * content == leverage match content (no changed)
-     * 
-     * Not write this into "alt-trans".
-     * 
-     * 2. Target has valid content (not empty and not placeholder-only) Target
-     * has valid content (LM data is from target) target is same with original
-     * target(not modified by user) || trans type is "machine_translation_mt"
-     * 
-     * Not write this into "alt-trans". 3. Target has NO valid content (empty or
-     * placeholder-only) && come from xliff alt, not write this into
-     * "alt-trans".
-     */
-    private boolean judgeIfneedAdd(LeverageMatch lm)
-    {
-        try
-        {
-            Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                    lm.getOriginalSourceTuvId());
-            Tuv targetTuv = sourceTuv.getTu().getTuv(lm.getTargetLocaleId());
-            boolean isWSXlf = false;
-            if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(sourceTuv.getTu()
-                    .getGenerateFrom()))
-            {
-                isWSXlf = true;
-            }
-
-            String targetContent = targetTuv.getGxml();
-            String originalTarget = sourceTuv.getTu().getXliffTargetGxml()
-                    .getTextValue();
-
-            if (lm.getProjectTmIndex() == Leverager.MT_PRIORITY
-                    && lm.getScoreNum() == 100
-                    && (lm.getMatchedText().equals(targetContent) || isWSXlf))
-            {
-                // For GBS-1864 (if work-flow is in progress, and
-                // source_content="repetition", MT translation
-                // will NOT be written into "target", so need add MT translation
-                // into "alt-trans".
-                String sourceContentAtt = sourceTuv.getTu().getSourceContent();
-                if (!isWfFinished()
-                        && Extractor.IWS_REPETITION
-                                .equalsIgnoreCase(sourceContentAtt))
-                {
-                    return true;
-                }
-                else
-                {
-                    // auto committed by MT and not modified by user
-                    return false;
-                }
-
-            }
-            else if (!originalTarget.trim().isEmpty())
-            {
-                // The original target content is not empty and not modified by
-                // user
-                String transType = ((TuImpl) sourceTuv.getTu())
-                        .getXliffTranslationType();
-
-                if (lm.getMatchedText().equals(targetContent))
-                {
-                    return false;
-                }
-                else if ((transType != null && transType
-                        .equals("machine_translation_mt"))
-                        && targetTuv.getState().getValue() == TuvState.NOT_LOCALIZED
-                                .getValue())
-                {
-                    return false;
-                }
-            }
-            else if (originalTarget.trim().isEmpty())
-            {
-                // from max score alt trans target content
-                if (lm.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
-                {
-                    return false;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-        }
-
-        return true;
+        
+        return null;
     }
 
     /**
@@ -801,7 +631,7 @@ public class PageTemplate extends PersistentObject
             part = (TemplatePart) it.next();
 
             // if there is a TU in this template part, append it too.
-            if (part.getTuId() > 0 && p_tuIdList.contains(part.getTuIdAsLong()))
+            if (part.getTuId() > 0 && p_tuIdList.contains(part.getTuId()))
             {
                 // append the skeleton part
                 if (part.getSkeleton() != null)
@@ -817,7 +647,7 @@ public class PageTemplate extends PersistentObject
                 // If the TU has not been set, this will output "null"
                 // into the result string. Caller needs to make sure
                 // all TUs have been set to values.
-                String tuv = (String) m_tuvContents.get(part.getTuIdAsLong());
+                String tuv = (String) m_tuvContents.get(part.getTuId());
 
                 if (c_logger.isDebugEnabled())
                 {

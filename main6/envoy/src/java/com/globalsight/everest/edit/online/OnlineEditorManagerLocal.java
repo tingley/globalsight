@@ -14,7 +14,6 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.everest.edit.online;
 
 import java.rmi.RemoteException;
@@ -37,6 +36,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
@@ -55,12 +55,11 @@ import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.SnippetPageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageupdate.GxmlPreviewer;
 import com.globalsight.everest.page.pageupdate.PageUpdateApi;
-import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionException;
-import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TaskTuv;
@@ -75,6 +74,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
+import com.globalsight.everest.webapp.pagehandler.edit.online.OnlineTagHelper;
 import com.globalsight.ling.common.RegEx;
 import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.common.RegExMatchInterface;
@@ -85,11 +85,9 @@ import com.globalsight.ling.inprogresstm.DynamicLeveragedSegment;
 import com.globalsight.ling.inprogresstm.InProgressTmManager;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm.LeverageMatchType;
-import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.LeverageUtil;
 import com.globalsight.ling.tm2.leverage.Leverager;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
@@ -100,6 +98,7 @@ import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordL
 import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
 import com.globalsight.util.gxml.GxmlElement;
@@ -181,13 +180,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         private SegmentRepetitions m_repetitions = null;
 
         public Object m_targetTuvsLock = new Object();
-        private List m_targetTuvs = null;
+        private List<Tuv> m_targetTuvs = null;
 
         public Object m_imageMapsLock = new Object();
-        private ArrayList m_imageMaps = null;
+        private ArrayList<ImageReplaceFileMap> m_imageMaps = null;
 
         public Object m_commentsLock = new Object();
-        private ArrayList m_comments = null;
+        private ArrayList<Issue> m_comments = null;
 
         public Object m_matchTypesLock = new Object();
         private MatchTypeStatistics m_matchTypes = null;
@@ -195,9 +194,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         public Object m_templateLock = new Object();
         private PageTemplate m_sourceTemplate = null;
         private PageTemplate m_targetTemplate = null;
-        private ArrayList m_sourceTemplateParts = null;
-        private ArrayList m_targetTemplateParts = null;
+        private ArrayList<TemplatePart> m_sourceTemplateParts = null;
+        private ArrayList<TemplatePart> m_targetTemplateParts = null;
         private HashSet m_interpretedTuIds = null;
+        
+        private List<Long> m_currentPageTuIDS = null;
+        private List<Tu> m_tu_ICE = null;
+        private List<Tu> m_tu_100 = null;
+        private List<Tu> m_tu_REPEATED = null;
+        private List<Tu> m_tu_REPETITIONS = null;
+        private List<Tu> m_tu_MODIFIED = null;
+        private List<Tu> m_tu_COMMENTED = null;
 
         /** Clear cache when switching to different source page. */
         public void clearAll()
@@ -216,6 +223,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_sourceTemplateParts = null;
             m_targetTemplateParts = null;
             m_interpretedTuIds = null;
+            
+            m_currentPageTuIDS = null;
+            m_tu_ICE = null;
+            m_tu_100 = null;
+            m_tu_REPEATED = null;
+            m_tu_REPETITIONS = null;
+            m_tu_MODIFIED = null;
+            m_tu_COMMENTED = null;
         }
 
         /** Clear target cache when switching to different target page. */
@@ -229,6 +244,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_targetTemplate = null;
             m_targetTemplateParts = null;
             m_interpretedTuIds = null;
+
+            m_currentPageTuIDS = null;
+            m_tu_ICE = null;
+            m_tu_100 = null;
+            m_tu_REPEATED = null;
+            m_tu_REPETITIONS = null;
+            m_tu_MODIFIED = null;
+            m_tu_COMMENTED = null;
         }
 
         public SourcePage getSourcePage()
@@ -287,7 +310,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return m_targetTuvs;
         }
 
-        public void setTargetTuvs(ArrayList p_tuvs)
+        public void setTargetTuvs(ArrayList<Tuv> p_tuvs)
         {
             m_targetTuvs = p_tuvs;
         }
@@ -321,7 +344,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return m_imageMaps;
         }
 
-        public void setImageMaps(ArrayList p_maps)
+        public void setImageMaps(ArrayList<ImageReplaceFileMap> p_maps)
         {
             m_imageMaps = p_maps;
         }
@@ -365,7 +388,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return m_comments;
         }
 
-        public void setComments(ArrayList p_comments)
+        public void setComments(ArrayList<Issue> p_comments)
         {
             m_comments = p_comments;
         }
@@ -460,12 +483,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_targetTemplate = p_template;
         }
 
-        public ArrayList getSourceTemplateParts()
+        public ArrayList<TemplatePart> getSourceTemplateParts()
         {
             return m_sourceTemplateParts;
         }
 
-        public void setSourceTemplateParts(ArrayList p_parts)
+        public void setSourceTemplateParts(ArrayList<TemplatePart> p_parts)
         {
             m_sourceTemplateParts = p_parts;
         }
@@ -475,7 +498,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return m_targetTemplateParts;
         }
 
-        public void setTargetTemplateParts(ArrayList p_parts)
+        public void setTargetTemplateParts(ArrayList<TemplatePart> p_parts)
         {
             m_targetTemplateParts = p_parts;
         }
@@ -488,6 +511,76 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         public void setInterpretedTuIds(HashSet p_set)
         {
             m_interpretedTuIds = p_set;
+        }
+
+        public List<Long> getCurrentPageTuIDS()
+        {
+            return m_currentPageTuIDS;
+        }
+
+        public void setCurrentPageTuIDS(List<Long> m_currentPageTuIDS)
+        {
+            this.m_currentPageTuIDS = m_currentPageTuIDS;
+        }
+
+        public List<Tu> getTuICE()
+        {
+            return m_tu_ICE;
+        }
+
+        public void setTuICE(List<Tu> p_tus)
+        {
+            this.m_tu_ICE = p_tus;
+        }
+
+        public List<Tu> getTu100()
+        {
+            return m_tu_100;
+        }
+
+        public void setTu100(List<Tu> p_tus)
+        {
+            this.m_tu_100 = p_tus;
+        }
+
+        public List<Tu> getTuRepeated()
+        {
+            return m_tu_REPEATED;
+        }
+
+        public void setTuRepeated(List<Tu> p_tus)
+        {
+            this.m_tu_REPEATED = p_tus;
+        }
+
+        public List<Tu> getTuRepeations()
+        {
+            return m_tu_REPETITIONS;
+        }
+
+        public void setTuRepeations(List<Tu> p_tus)
+        {
+            this.m_tu_REPETITIONS = p_tus;
+        }
+
+        public List<Tu> getTuModified()
+        {
+            return m_tu_MODIFIED;
+        }
+
+        public void setTuModified(List<Tu> p_tus)
+        {
+            this.m_tu_MODIFIED = p_tus;
+        }
+
+        public List<Tu> getTuCommonted()
+        {
+            return m_tu_COMMENTED;
+        }
+
+        public void setTuCommonted(List<Tu> p_tus)
+        {
+            this.m_tu_COMMENTED = p_tus;
         }
     }
 
@@ -517,8 +610,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             m_tuvManager = ServerProxy.getTuvManager();
             m_termManager = ServerProxy.getTermLeverageManager();
             m_lingManager = LingServerProxy.getLeverageMatchLingManager();
-            m_imageManager = ServerProxy
-                    .getImageReplaceFileMapPersistenceManager();
+            m_imageManager = ServerProxy.getImageReplaceFileMapPersistenceManager();
             m_commentManager = ServerProxy.getCommentManager();
             m_inprogressTmManager = LingServerProxy.getInProgressTmManager();
         }
@@ -547,9 +639,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         // Clear cache to refresh all data from DB.
         m_pageCache.clearAll();
 
+        String companyId = CompanyWrapper.getCurrentCompanyId();
+
         try
         {
             SourcePage srcPage = getSourcePage(p_srcPageId);
+            companyId = String.valueOf(srcPage.getCompanyId());
 
             String state = srcPage.getPageState();
             if (state.equals(PageState.UPDATING))
@@ -557,12 +652,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 String[] args =
                 { String.valueOf(p_srcPageId) };
 
-                CATEGORY
-                        .info("Source page "
-                                + srcPage.getExternalPageId()
-                                + " (ID "
-                                + p_srcPageId
-                                + ") cannot be edited because it is already being updated.");
+                CATEGORY.info("Source page "
+                        + srcPage.getExternalPageId()
+                        + " (ID "
+                        + p_srcPageId
+                        + ") cannot be edited because it is already being updated.");
 
                 throw new OnlineEditorException(
                         OnlineEditorException.MSG_SOURCEPAGE_NOT_EDITABLE,
@@ -580,8 +674,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (template.getTemplateParts() == null
                     || template.getTemplateParts().size() == 0)
             {
-                ArrayList parts = getSourceTemplateParts(srcPage.getIdAsLong(),
-                        template.getTypeAsString());
+                ArrayList<TemplatePart> parts = getSourceTemplateParts(
+                        srcPage.getIdAsLong(), template.getTypeAsString());
 
                 template.setTemplateParts(parts);
             }
@@ -594,10 +688,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 Tuv srcTuv = (Tuv) tuvs.get(i);
 
-                Long tuId = srcTuv.getTu().getIdAsLong();
+                Long tuId = srcTuv.getTu(companyId).getIdAsLong();
                 String tuvContent;
 
-                if (srcTuv.getTu().isLocalizable())
+                if (srcTuv.getTu(companyId).isLocalizable())
                 {
                     tuvContent = srcTuv.getGxmlExcludeTopTags();
                 }
@@ -748,30 +842,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (template.getTemplateParts() == null
                     || template.getTemplateParts().size() == 0)
             {
-                ArrayList parts = getSourceTemplateParts(srcPage.getIdAsLong(),
-                        template.getTypeAsString());
+                ArrayList<TemplatePart> parts = getSourceTemplateParts(
+                        srcPage.getIdAsLong(), template.getTypeAsString());
 
                 // for snippets, computes positions
                 template.setTemplateParts(parts);
             }
 
             // get the Tuvs in the page
-            ArrayList tuvs = getPageTuvs(srcPage);
+            List<Tuv> tuvs = getPageTuvs(srcPage);
 
-            int segmentNumPerPage = p_pi.getSegmentNumPerPage();
-            int currentPageNum = p_pi.getCurrentPageNum();
-
-            int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
-            int count = 0;
-            ArrayList tuIdList = new ArrayList();
-            // Find all tuIds on current page
-            for (int i = beginIndex, max = tuvs.size(); count < segmentNumPerPage
-                    && i < max; i++)
-            {
-                count++;
-                Tuv tuv = (Tuv) tuvs.get(i);
-                tuIdList.add(tuv.getTu().getIdAsLong());
-            }
+            List<Long> tuIdList = getCurrentTuIds(tuvs, p_pi);
 
             // insert all tuv content into template despite of current page num
             // believe this won't bring performance issue
@@ -779,8 +860,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 Tuv tuv = (Tuv) tuvs.get(i);
                 String html = getSourceDisplayHtml(tuv,
-                        p_options.getViewMode(), srcPage, searchMap);
-                template.insertTuvContent(tuv.getTu().getIdAsLong(), html);
+                        p_options.getViewMode(), srcPage, searchMap, p_options);
+                template.insertTuvContent(tuv.getTuId(), html);
             }
 
             p_options.setEditMode(EDITMODE_READ_ONLY);
@@ -845,202 +926,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    /**
-     * <p>
-     * Returns HTML formated output for target page view.
-     * </p>
-     * 
-     * @see OnlineEditorManager.getTargetPageView(long, RenderingOptions,
-     *      Vector)
-     * 
-     * @deprecated Do not use this.
-     */
-    public String getTargetPageView(long p_trgPageId,
-            RenderingOptions p_options, Vector p_excludedItemTypes,
-            boolean p_dirtyTemplate) throws OnlineEditorException,
-            RemoteException
-    {
-        String result = null;
-        // Old editor is template-based, new paragraph editor is not.
-        // I wouldn't want to add another meaningless template
-        // that would look like current list view (basically empty).
-        boolean useTemplate = p_options.getUiMode() != UIMODE_PREVIEW_EDITOR;
-        boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
-        boolean reviewReadOnly = p_options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
-
-        try
-        {
-            if (p_dirtyTemplate)
-            {
-                invalidateCachedTemplates();
-            }
-
-            // The motherlode of all database queries
-            TargetPage targetPage = getTargetPage(p_trgPageId);
-            SourcePage sourcePage = targetPage.getSourcePage();
-            m_pageCache.setSourcePage(sourcePage);
-            String pageType = getExtractedSourceFile(sourcePage).getDataType();
-
-            // Load the TUs into the Toplink cache to prevent called
-            // code from loading each TU individually.
-            getPageTus(sourcePage);
-
-            PageTemplate template = null;
-
-            if (p_options.getTmProfile() == null)
-            {
-                p_options.setTmProfile(sourcePage.getRequest().getJob()
-                        .getL10nProfile().getTranslationMemoryProfile());
-            }
-
-            if (useTemplate)
-            {
-                template = getPageTemplate(p_options.getViewMode(), targetPage);
-
-                // Sat Jun 08 16:27:59 2002 add/delete: if this page
-                // contains add/delete instructions, turn the template
-                // into its extended form. getPageData() will then execute
-                // the template.
-                if (containGsTags(sourcePage)
-                        && !(template instanceof SnippetPageTemplate))
-                {
-                    GlobalSightLocale locale = targetPage
-                            .getGlobalSightLocale();
-                    template = makeSnippetPageTemplate(template, locale,
-                            sourcePage);
-                    m_pageCache.setTargetTemplate(template);
-                }
-
-                if (template.getTemplateParts() == null
-                        || template.getTemplateParts().size() == 0)
-                {
-                    List parts = getTargetTemplateParts(sourcePage
-                            .getIdAsLong(), template.getTypeAsString());
-
-                    // for snippets, computes positions
-                    template.setTemplateParts(parts);
-                }
-            }
-
-            List targetTuvs = getPageTuvs(targetPage);
-            List sourceTuvs = getPageTuvs(sourcePage);
-            List imageMaps = getImageMaps(targetPage);
-            List comments = null;
-            SegmentRepetitions repetitions = getRepetitions(sourcePage);
-
-            if (reviewMode || reviewReadOnly)
-            {
-                comments = getComments(targetPage);
-            }
-
-            Long targetLocaleId = targetPage.getGlobalSightLocale()
-                    .getIdAsLong();
-
-            MatchTypeStatistics tuvMatchTypes = null;
-            if (sourceTuvs.size() > 0)
-            {
-                tuvMatchTypes = getMatchTypes(sourcePage.getIdAsLong(),
-                        targetLocaleId);
-            }
-
-            if (!useTemplate)
-            {
-                // As this "getTargetPageView()" is not in use,set the values as
-                // below for now.
-                int segmentNumPerPage = 1000;
-                int currentPageNum = 1;
-                result = getTargetDisplayHtml2(sourceTuvs, targetTuvs,
-                        p_options, p_excludedItemTypes, targetPage,
-                        tuvMatchTypes, pageType, repetitions,
-                        segmentNumPerPage, currentPageNum, null);
-            }
-            else
-            {
-                String html;
-
-                for (int i = 0, max = sourceTuvs.size(); i < max; i++)
-                {
-                    // the number of source tuvs must be equal to the
-                    // number of target tuvs
-                    Tuv srcTuv = (Tuv) sourceTuvs.get(i);
-                    Tuv trgTuv = (Tuv) targetTuvs.get(i);
-
-                    html = getTargetDisplayHtml(srcTuv, trgTuv, p_options,
-                            p_excludedItemTypes, targetPage, tuvMatchTypes,
-                            imageMaps, comments, repetitions);
-
-                    template.insertTuvContent(trgTuv.getTu().getIdAsLong(),
-                            html);
-
-                    String mergeState = trgTuv.getMergeState();
-
-                    if (mergeState.equals(Tuv.MERGE_START))
-                    {
-                        do
-                        {
-                            i++;
-                            trgTuv = (Tuv) targetTuvs.get(i);
-
-                            html = getTargetDisplayHtmlMerged(trgTuv,
-                                    p_options, comments);
-
-                            template.insertTuvContent(trgTuv.getTu()
-                                    .getIdAsLong(), html);
-
-                            mergeState = trgTuv.getMergeState();
-                        }
-                        while (!mergeState.equals(Tuv.MERGE_END));
-                    }
-                }
-
-                // get template content
-                result = template.getPageData(p_options);
-
-                // clear temporary data in template
-                template.clearTuvContent();
-
-                // If this is a Prs template in text mode, we must insert
-                // a dynamic preview link to /CapExportServlet and/or its
-                // associated data.
-
-                // There must be a good way to find out when to do this,
-                // i.e, we don't want to do this for a large HTML page.
-                if (targetPage.getDataSourceType().equals("db")
-                        || targetPage.getDataSourceType().equals("teamsite"))
-                {
-                    if (sourcePage.getRequest().isPageCxePreviewable())
-                    {
-                        result = insertTuvIds(result, targetTuvs);
-                    }
-                    else
-                    {
-                        result = removePreviewLink(result);
-                    }
-                }
-
-                // Extra clean-up process for preview mode only: disables
-                // active elements that would make the editor navigate.
-                // Active elements are scripts, onXXX handlers, forms etc.
-                if (p_options.getViewMode() == VIEWMODE_PREVIEW)
-                {
-                    result = GxmlUtil.cleanUpDisplayHtml(result);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            String[] args =
-            { "Failed to retrieve target page view." };
-
-            CATEGORY.error(args[0], ex);
-
-            throw new OnlineEditorException(
-                    OnlineEditorException.MSG_FAILED_TO_GET_PAGEVIEW, args, ex);
-        }
-
-        return result;
-    }
-
     public String getTargetPageView(long p_trgPageId, EditorState p_state,
             Vector p_excludedItemTypes, boolean p_dirtyTemplate)
             throws OnlineEditorException, RemoteException
@@ -1049,38 +934,27 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 p_dirtyTemplate, null);
     }
 
-    // Webex proposed reviewer view of term memory,
-    // We pass EditorState to get termbase information - termbaseName.
     /**
-     * <p>
-     * Returns HTML formated output for target page view.
-     * </p>
-     * 
-     * @see OnlineEditorManager.getTargetPageView(long, RenderingOptions,
-     *      Vector)
+     * @see OnlineEditorManager.getTargetPageView(long, EditorState, Vector,
+     *      boolean, HashMap)
      */
     public String getTargetPageView(long p_trgPageId, EditorState p_state,
             Vector p_excludedItemTypes, boolean p_dirtyTemplate,
             HashMap p_searchMap) throws OnlineEditorException, RemoteException
     {
         String result = null;
-        RenderingOptions p_options = p_state.getRenderingOptions();
-
-        PaginateInfo pi = p_state.getPaginateInfo();
-        int segmentNumPerPage = pi.getSegmentNumPerPage();
-        int currentPageNum = pi.getCurrentPageNum();
-        int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
+        RenderingOptions options = p_state.getRenderingOptions();
 
         TranslationMemoryProfile tmProfile = p_state.getTmProfile();
-        p_options.setTmProfile(tmProfile);
-        p_options.setUserName(p_state.getUserName());
+        options.setTmProfile(tmProfile);
+        options.setUserName(p_state.getUserName());
 
         // Old editor is template-based, new paragraph editor is not.
         // I wouldn't want to add another meaningless template
         // that would look like current list view (basically empty).
-        boolean useTemplate = p_options.getUiMode() != UIMODE_PREVIEW_EDITOR;
-        boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
-        boolean reviewReadOnly = p_options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
+        boolean useTemplate = options.getUiMode() != UIMODE_PREVIEW_EDITOR;
+        boolean reviewMode = options.getUiMode() == UIConstants.UIMODE_REVIEW;
+        boolean reviewReadOnly = options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
 
         try
         {
@@ -1093,6 +967,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             TargetPage targetPage = getTargetPage(p_trgPageId);
             SourcePage sourcePage = targetPage.getSourcePage();
             m_pageCache.setSourcePage(sourcePage);
+            String companyId = String.valueOf(sourcePage.getCompanyId());
 
             String pageType = getExtractedSourceFile(sourcePage).getDataType();
 
@@ -1104,7 +979,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (useTemplate)
             {
-                template = getPageTemplate(p_options.getViewMode(), targetPage);
+                template = getPageTemplate(options.getViewMode(), targetPage);
 
                 // Sat Jun 08 16:27:59 2002 add/delete: if this page
                 // contains add/delete instructions, turn the template
@@ -1123,46 +998,65 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (template.getTemplateParts() == null
                         || template.getTemplateParts().size() == 0)
                 {
-                    List parts = getTargetTemplateParts(sourcePage
-                            .getIdAsLong(), template.getTypeAsString());
+                    List parts = getTargetTemplateParts(
+                            sourcePage.getIdAsLong(),
+                            template.getTypeAsString());
 
                     // for snippets, computes positions
                     template.setTemplateParts(parts);
                 }
             }
 
-            List targetTuvs = getPageTuvs(targetPage);
-            List targetTuvs2 = new ArrayList();
+            ArrayList<Tuv> sourceTuvs = getPageTuvs(sourcePage);
+            ArrayList imageMaps = getImageMaps(targetPage);
+            ArrayList comments = null;
+            SegmentRepetitions repetitions = getRepetitions(sourcePage);
+
+            if (reviewMode || reviewReadOnly || SegmentFilter.isFilterSegment(p_state))
+            {
+                comments = getComments(targetPage);
+            }
+
+            Long targetLocaleId = targetPage.getGlobalSightLocale().getIdAsLong();
+            MatchTypeStatistics tuvMatchTypes = null;
+            if (sourceTuvs.size() > 0)
+            {
+                tuvMatchTypes = getMatchTypes(sourcePage.getIdAsLong(),
+                        targetLocaleId);
+            }
+            
+            List<Tuv> targetTuvs = getPageTuvs(targetPage);
+            List<Tuv> targetTuvs2 = new ArrayList<Tuv>();
             if (targetTuvs != null && targetTuvs.size() > 0)
             {
-                Iterator it = targetTuvs.iterator();
+                Iterator<Tuv> it = targetTuvs.iterator();
                 while (it.hasNext())
                 {
                     Tuv targetTuv = (Tuv) it.next();
-                    
+
                     boolean isWSXlf = false;
                     boolean isAutoCommit = false;
                     if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(targetTuv
-                            .getTu().getGenerateFrom()))
+                            .getTu(companyId).getGenerateFrom()))
                     {
                         isWSXlf = true;
                     }
                     if (targetTuv.getLastModifiedUser() != null
                             && targetTuv.getLastModifiedUser().indexOf("_MT") > -1)
-//                            && targetTuv.getState().getValue() == TuvState.LOCALIZED
-//                                    .getValue())
+                    // && targetTuv.getState().getValue() == TuvState.LOCALIZED
+                    // .getValue())
                     {
                         isAutoCommit = true;
                     }
                     // Clone the targetTuv to avoid changes are stored into DB.
                     TuvImpl cloneTargetTuv = new TuvImpl((TuvImpl) targetTuv);
-                    cloneTargetTuv.setId(targetTuv.getId());//tuvId also needed
+                    cloneTargetTuv.setId(targetTuv.getId());// tuvId also needed
                     // If WS XLF and auto-commit,should display source in
                     // pop-up editor.
                     if (isWSXlf && isAutoCommit)
                     {
-                        Tuv sourceTuv = targetTuv.getTu().getTuv(
-                                p_state.getSourceLocale().getId());
+                        Tuv sourceTuv = targetTuv.getTu(companyId).getTuv(
+                                p_state.getSourceLocale().getId(), companyId);
                         cloneTargetTuv.setGxml(sourceTuv.getGxml());
                         cloneTargetTuv.setLastModifiedUser(null);
                         cloneTargetTuv.setState(TuvState.NOT_LOCALIZED);
@@ -1170,93 +1064,44 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     targetTuvs2.add(cloneTargetTuv);
                 }
             }
-            targetTuvs = targetTuvs2;            
-            
-            ArrayList sourceTuvs = getPageTuvs(sourcePage);
-            ArrayList imageMaps = getImageMaps(targetPage);
-            ArrayList comments = null;
-            SegmentRepetitions repetitions = getRepetitions(sourcePage);
-
-            if (reviewMode || reviewReadOnly)
-            {
-                comments = getComments(targetPage);
-            }
-
-            Long targetLocaleId = targetPage.getGlobalSightLocale()
-                    .getIdAsLong();
-            MatchTypeStatistics tuvMatchTypes = null;
-            if (sourceTuvs.size() > 0)
-            {
-                tuvMatchTypes = getMatchTypes(sourcePage.getIdAsLong(),
-                        targetLocaleId);
-            }
+            targetTuvs = targetTuvs2;
 
             if (!useTemplate)
             {
-                result = getTargetDisplayHtml2(sourceTuvs, targetTuvs,
-                        p_options, p_excludedItemTypes, targetPage,
-                        tuvMatchTypes, pageType, repetitions,
-                        segmentNumPerPage, currentPageNum, p_searchMap);
+                result = getTargetDisplayHtml2(sourceTuvs, targetTuvs, options,
+                        p_excludedItemTypes, targetPage, tuvMatchTypes,
+                        pageType, repetitions, p_state, p_searchMap);
             }
             else
             {
                 String html;
+                
+                // Gets the filtered source and target tuvs, and reset PaginateInfo.
+                Map<String, List<Tuv>> filterResult = SegmentFilter
+                        .operateForSegmentFilter(m_pageCache, sourceTuvs,
+                                targetTuvs, p_state, tuvMatchTypes, comments,
+                                Long.valueOf(companyId), p_excludedItemTypes, p_trgPageId);
+                // Gets the Paginate info
+                PaginateInfo pi = getPaginateInfo(p_state, sourceTuvs, filterResult);
+                int segmentNumPerPage = pi.getSegmentNumPerPage();
+                int currentPageNum = pi.getCurrentPageNum();
+                int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
+                
+                // Gets Terminology Match Result.
+                TermLeverageResult termLeverageResult = getTermLeverageResult(
+                        sourceTuvs, beginIndex, segmentNumPerPage,
+                        p_state.getDefaultTermbaseName(),
+                        Long.valueOf(companyId), options,
+                        sourcePage.getGlobalSightLocale(),
+                        targetPage.getGlobalSightLocale(), filterResult);
 
-                TermLeverageManager termLeverageManager = null;
-                Locale sourcePageLocale = null;
-                Locale targetPageLocale = null;
-                TermLeverageOptions termLeverageOptions = null;
-                TermLeverageResult termLeverageResult = null;
-
-                ArrayList tuvListOfCurrentPage = new ArrayList();
-                if (sourceTuvs.size() > 0)
-                {
-                    int tmpCount = 0;
-                    for (int i = beginIndex, max = sourceTuvs.size(); tmpCount < segmentNumPerPage
-                            && i < max; i++)
-                    {
-                        tmpCount++;
-                        tuvListOfCurrentPage.add(sourceTuvs.get(i));
-                    }
-
-                    termLeverageManager = ServerProxy.getTermLeverageManager();
-                    sourcePageLocale = sourcePage.getGlobalSightLocale()
-                            .getLocale();
-                    targetPageLocale = targetPage.getGlobalSightLocale()
-                            .getLocale();
-                    termLeverageOptions = getTermLeverageOptions(
-                            sourcePageLocale, targetPageLocale, p_state
-                                    .getDefaultTermbaseName(), sourcePage.getCompanyId());
-                    if (termLeverageOptions != null)
-                    {
-                        if (p_options.getViewMode() == EditorConstants.VIEWMODE_TEXT
-                                || p_options.getViewMode() == EditorConstants.VIEWMODE_DETAIL)
-                        {
-                            termLeverageResult = termLeverageManager
-                                    .leverageTerms(tuvListOfCurrentPage,
-                                            termLeverageOptions, sourcePage.getCompanyId());
-                        }
-                        else
-                        {
-                            termLeverageResult = termLeverageManager
-                                    .leverageTerms(sourceTuvs,
-                                            termLeverageOptions, sourcePage.getCompanyId());
-                        }
-
-                    }
-                }
-
-                List tuIdList = new ArrayList();
-                int _count = 0;
-                // Find all tuIds on current page
-                for (int i = beginIndex, max = sourceTuvs.size(); _count < segmentNumPerPage
-                        && i < max; i++)
-                {
-                    _count++;
-
-                    Tuv trgTuv = (Tuv) targetTuvs.get(i);
-                    tuIdList.add(trgTuv.getTu().getIdAsLong());
-                }
+                // Gets Display TU Id List.
+                List<Long> displayTuIdList = getDisplayIdList(sourceTuvs,
+                        targetTuvs, beginIndex, segmentNumPerPage,
+                        Long.valueOf(companyId), filterResult);
+                m_pageCache.setCurrentPageTuIDS(displayTuIdList);
+                if (displayTuIdList == null || displayTuIdList.size() == 0)
+                    return "";
 
                 // insert all tuv content into template despite of current page
                 // num
@@ -1271,30 +1116,33 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (isShowDefaultContext)
                     {
                         html = getDefaultContextTargetDisplayHtml(srcTuv,
-                                trgTuv, p_options, termLeverageResult,
+                                trgTuv, options, termLeverageResult,
                                 p_excludedItemTypes, targetPage, tuvMatchTypes,
-                                imageMaps, comments, repetitions, p_searchMap);
-                        template.insertTuvContent(trgTuv.getTu().getIdAsLong(),
-                                html);
+                                imageMaps, comments, repetitions, p_searchMap,
+                                p_state);
+                        template.insertTuvContent(trgTuv.getTu(companyId)
+                                .getIdAsLong(), html);
                     }
                     else if (LeverageUtil.isIncontextMatch(i, sourceTuvs,
-                            targetTuvs, tuvMatchTypes, p_excludedItemTypes))
+                            targetTuvs, tuvMatchTypes, p_excludedItemTypes,
+                            companyId))
                     {
                         html = getInContextTargetDisplayHtml(srcTuv, trgTuv,
-                                p_options, termLeverageResult,
+                                options, termLeverageResult,
                                 p_excludedItemTypes, targetPage, tuvMatchTypes,
-                                imageMaps, comments, repetitions, p_searchMap);
-                        template.insertTuvContent(trgTuv.getTu().getIdAsLong(),
-                                html);
+                                imageMaps, comments, repetitions, p_searchMap,
+                                p_state);
+                        template.insertTuvContent(trgTuv.getTu(companyId)
+                                .getIdAsLong(), html);
                     }
                     else
                     {
-                        html = getTargetDisplayHtml(srcTuv, trgTuv, p_options,
+                        html = getTargetDisplayHtml(srcTuv, trgTuv, options,
                                 termLeverageResult, p_excludedItemTypes,
                                 targetPage, tuvMatchTypes, imageMaps, comments,
-                                repetitions, p_searchMap);
-                        template.insertTuvContent(trgTuv.getTu().getIdAsLong(),
-                                html);
+                                repetitions, p_searchMap, p_state);
+                        template.insertTuvContent(trgTuv.getTu(companyId)
+                                .getIdAsLong(), html);
                     }
 
                     String mergeState = trgTuv.getMergeState();
@@ -1309,29 +1157,28 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             }
 
                             trgTuv = (Tuv) targetTuvs.get(i);
-                            html = getTargetDisplayHtmlMerged(trgTuv,
-                                    p_options, comments);
-                            template.insertTuvContent(trgTuv.getTu()
+                            html = getTargetDisplayHtmlMerged(trgTuv, options,
+                                    comments);
+                            template.insertTuvContent(trgTuv.getTu(companyId)
                                     .getIdAsLong(), html);
                             mergeState = trgTuv.getMergeState();
-                        }
-                        while (!mergeState.equals(Tuv.MERGE_END));
+                        } while (!mergeState.equals(Tuv.MERGE_END));
                     }
                 }
 
                 // for "text" and "list" view, only return tuvs on current page.
-                // otherwise, return all tuvs' data as origianl.
-                if (p_options.getViewMode() == EditorConstants.VIEWMODE_TEXT
-                        || p_options.getViewMode() == EditorConstants.VIEWMODE_DETAIL)
+                // otherwise, return all tuvs' data as original.
+                if (options.getViewMode() == EditorConstants.VIEWMODE_TEXT
+                        || options.getViewMode() == EditorConstants.VIEWMODE_DETAIL)
                 {
-                    result = template.getPageData(tuIdList);
+                    result = template.getPageData(displayTuIdList);
                 }
                 else
                 {
-                    result = template.getPageData(p_options);
+                    result = template.getPageData(options);
                 }
                 // "text" view mode need extra html tags.
-                if (p_options.getViewMode() == EditorConstants.VIEWMODE_TEXT)
+                if (options.getViewMode() == EditorConstants.VIEWMODE_TEXT)
                 {
                     if (!result.trim().startsWith(
                             "<PRE><SPAN CLASS=\"editorStandardText\">"))
@@ -1370,7 +1217,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // Extra clean-up process for preview mode only: disables
                 // active elements that would make the editor navigate.
                 // Active elements are scripts, onXXX handlers, forms etc.
-                if (p_options.getViewMode() == VIEWMODE_PREVIEW)
+                if (options.getViewMode() == VIEWMODE_PREVIEW)
                 {
                     result = GxmlUtil.cleanUpDisplayHtml(result);
                 }
@@ -1390,6 +1237,113 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
+    // Gets Display Tu Id List
+    private List<Long> getDisplayIdList(List<Tuv> p_srcTuvs, List<Tuv> p_trgTuvs,
+            int p_segmentIndex, int p_segmentNumPerPage, long p_companyId,
+            Map<String, List<Tuv>> p_filterResult)
+    {
+        List<Long> result = new ArrayList<Long>();
+        List<Tuv> srcTuvs = p_srcTuvs;
+        List<Tuv> trgTuvs = p_trgTuvs;
+        if (p_filterResult != null && p_filterResult.get(SegmentFilter.KEY_SOURCE) != null)
+        {
+            srcTuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_SOURCE);
+            trgTuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_TARGET);
+        }
+        
+        for (int i = p_segmentIndex, max = srcTuvs.size(), _count = 0; _count < p_segmentNumPerPage
+                && i < max; i++)
+        {
+            _count++;
+
+            Tuv trgTuv = (Tuv) trgTuvs.get(i);
+            result.add(trgTuv.getTu(String.valueOf(p_companyId)).getIdAsLong());
+        }
+
+        return result;
+    }
+    
+    // Gets Terminology Match Result.
+    private TermLeverageResult getTermLeverageResult(List<Tuv> p_tuvs,
+            int p_segmentIndex, int p_segmentNumPerPage, String p_termBaseName,
+            long p_companyId, RenderingOptions p_options,
+            GlobalSightLocale p_srcGL, GlobalSightLocale p_trgGL,
+            Map<String, List<Tuv>> p_filterResult)
+    {
+        TermLeverageResult termLeverageResult = null;
+        List<Tuv> tuvs = p_tuvs;
+        if (p_filterResult != null && p_filterResult.get(SegmentFilter.KEY_SOURCE) != null)
+        {
+            tuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_SOURCE);
+        }
+        
+        if (tuvs.size() > 0)
+        {
+            int tmpCount = 0;
+            ArrayList<Tuv> tuvListOfCurrentPage = new ArrayList<Tuv>();
+            for (int i = p_segmentIndex, max = tuvs.size(); tmpCount < p_segmentNumPerPage
+                    && i < max; i++)
+            {
+                tmpCount++;
+                tuvListOfCurrentPage.add(tuvs.get(i));
+            }
+
+            TermLeverageManager termLeverageManager = ServerProxy
+                    .getTermLeverageManager();
+            Locale sourcePageLocale = p_srcGL.getLocale();
+            Locale targetPageLocale = p_trgGL.getLocale();
+            TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
+                    sourcePageLocale, targetPageLocale, p_termBaseName,
+                    String.valueOf(p_companyId));
+            if (termLeverageOptions != null)
+            {
+                try
+                {
+                    if (p_options.getViewMode() == EditorConstants.VIEWMODE_TEXT
+                            || p_options.getViewMode() == EditorConstants.VIEWMODE_DETAIL)
+                    {
+                        termLeverageResult = termLeverageManager.leverageTerms(
+                                tuvListOfCurrentPage, termLeverageOptions,
+                                String.valueOf(p_companyId));
+                    }
+                    else
+                    {
+                        termLeverageResult = termLeverageManager.leverageTerms(
+                                tuvs, termLeverageOptions,
+                                String.valueOf(p_companyId));
+                    }
+                }
+                catch (Exception e)
+                {
+                    
+                }
+            }
+        }
+        
+        return termLeverageResult;
+    }
+    
+    // Recalculates the pagination Info.
+    private PaginateInfo getPaginateInfo(EditorState p_state, List<Tuv> p_tuvs,
+            Map<String, List<Tuv>> p_filterResult)
+    {
+        PaginateInfo pi = p_state.getPaginateInfo();
+        List<Tuv> tuvs = p_tuvs;
+        if (p_filterResult != null
+                && p_filterResult.get(SegmentFilter.KEY_SOURCE) != null)
+        {
+            tuvs = (List<Tuv>) p_filterResult.get(SegmentFilter.KEY_SOURCE);
+        }
+        
+        if (pi.getTotalSegmentNum() != tuvs.size())
+        {
+            pi = new PaginateInfo(tuvs.size(), pi.getSegmentNumPerPage(), 1);
+            p_state.setPaginateInfo(pi);
+        }
+        
+        return pi;
+    }
+    
     private boolean showDefaultContext(TargetPage targetPage, int i,
             List sourceTuvs, MatchTypeStatistics tuvMatchTypes)
     {
@@ -1403,15 +1357,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             TermLeverageResult p_leverageResult, Vector p_excludedItemTypes,
             TargetPage p_targetPage, MatchTypeStatistics p_matchTypes,
             Collection p_imageMaps, ArrayList p_comments,
-            SegmentRepetitions p_repetitions, HashMap p_searchMap)
+            SegmentRepetitions p_repetitions, HashMap p_searchMap,
+            EditorState p_editorState)
     {
-
+        String companyId = String.valueOf(p_targetPage.getSourcePage()
+                .getCompanyId());
         p_options.setTmProfile(p_targetPage.getSourcePage().getRequest()
                 .getJob().getL10nProfile().getTranslationMemoryProfile());
-        Tu tu = p_targetTuv.getTu();
+        Tu tu = p_targetTuv.getTu(companyId);
         long tuId = tu.getTuId();
         long tuvId = p_targetTuv.getId();
-        String dataType = p_targetTuv.getDataType();
+        String dataType = p_targetTuv.getDataType(companyId);
         GxmlElement elem = p_targetTuv.getGxmlElement();
 
         boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
@@ -1423,14 +1379,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
                 || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
-                        .isTuvInProtectedState(p_targetTuv));
+                        .isTuvInProtectedState(p_targetTuv, companyId));
 
         boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
                 itemType, p_excludedItemTypes);
 
         // HTML class attribute that colors the segment in the editor
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
-                DUMMY_SUBID, isExcluded, unlock, p_repetitions);
+                DUMMY_SUBID, isExcluded, unlock, p_repetitions, companyId);
         // For "localized" segment,if target is same with source,commonly
         // display as "no match" in blue color,for segment with sub,display
         // according to its LMs.
@@ -1446,17 +1402,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (subFlows != null && subFlows.size() > 0)
                 {
                     style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
-                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions);
+                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions,
+                            companyId);
                 }
                 else
                 {
-                    style = STYLE_NO_MATCH;                
+                    style = STYLE_NO_MATCH;
                 }
             }
         }
         else
         {
-            style = STYLE_UNVERIFIED;
+            // Fixed for GBS-2531
+            // style = STYLE_UNVERIFIED;
+            style = STYLE_EXACT_MATCH;
         }
 
         if (!PageHandler.isDefaultContextMatch(p_targetPage))
@@ -1472,14 +1431,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         // Make the segment RTL if it's 1) Translatable 2) In an RTL
         // language and 3) it has bidi characters in it.
-        if (b_rtlLocale && !p_targetTuv.isLocalizable()
+        if (b_rtlLocale && !p_targetTuv.isLocalizable(companyId)
                 && Text.containsBidiChar(p_targetTuv.getGxml()))
         {
             dir = " DIR=rtl";
         }
 
         boolean isHighLight = isHighLight(p_searchMap, p_srcTuv, p_targetTuv);
-        
+
         StringBuffer result = new StringBuffer(256);
         switch (p_options.getViewMode())
         {
@@ -1506,6 +1465,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 result.append(tuId);
                 result.append("</TD>\n");
+
+                // Append "TD" for "Find Repeated Segments".
+                if (p_editorState.getNeedFindRepeatedSegments())
+                {
+                    result.append(this.appendRepetitionTD(tu, p_srcTuv, p_matchTypes));
+                }
 
                 if (reviewMode || reviewReadOnly)
                 {
@@ -1544,17 +1509,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 segment = SegmentProtectionManager.handlePreserveWhiteSpace(
                         elem, segment, null, null);
+                String seg = getEditorSegment(p_targetTuv,
+                        EditorConstants.PTAGS_COMPACT, segment,
+                        p_editorState.getNeedShowPTags(), companyId);
                 if (!b_subflows) // No subflows
                 {
                     if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
-                        result.append(getNonEditableCell(style, segment));
+                        result.append(getNonEditableCell(style, seg));
                     }
                     else
                     {
                         result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
+                                DUMMY_SUBID, seg, false));
                     }
                 }
                 else
@@ -1576,12 +1544,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
-                        result.append(getNonEditableCell(style, segment));
+                        result.append(getNonEditableCell(style, seg));
                     }
                     else
                     {
                         result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
+                                DUMMY_SUBID, seg, false));
                     }
 
                     result.append("</TD></TR>\n");
@@ -1614,14 +1582,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         // ... or from document if tuv inherits it.
                         if (dataType == null)
                         {
-                            dataType = p_targetTuv.getDataType();
+                            dataType = p_targetTuv.getDataType(companyId);
                         }
 
                         if (b_rtlLocale
                                 && isTranslatableSub(subElmt)
-                                && Text
-                                        .containsBidiChar(subElmt
-                                                .getTextValue()))
+                                && Text.containsBidiChar(subElmt.getTextValue()))
                         {
                             dir = " DIR=rtl";
                         }
@@ -1668,9 +1634,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             result.append("</TD>\n");
 
                             segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_leverageResult, p_options
-                                            .getViewMode());
-
+                                    segment, p_leverageResult,
+                                    p_options.getViewMode());
                         }
 
                         // If the TUV is read-only, or the sub is
@@ -1722,8 +1687,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     result.append("<SPAN");
@@ -1751,8 +1716,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_comments));
 
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     result.append("<SPAN");
@@ -1778,14 +1743,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         && itemType.equals("text"))
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
+                            p_targetPage, p_imageMaps,
+                            p_targetTuv.getIdAsLong());
 
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     if ((!reviewMode || reviewReadOnly)
@@ -1809,14 +1774,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 else
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
+                            p_targetPage, p_imageMaps,
+                            p_targetTuv.getIdAsLong());
 
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     if (EditUtil.isHtmlDerivedFormat(dataType)
@@ -1844,20 +1809,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Vector p_excludedItemTypes, TargetPage p_targetPage,
             MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
             ArrayList p_comments, SegmentRepetitions p_repetitions,
-            HashMap p_searchMap) throws PermissionException, RemoteException
+            HashMap p_searchMap, EditorState p_editorState)
+            throws PermissionException, RemoteException
     {
-        String userName = p_options.getUserName();
-        // String userName =
-        // p_targetPage.getSourcePage().getRequest().getJob().getUserId().getUser().getUserName();
-        PermissionSet ps = Permission.getPermissionManager()
-                .getPermissionSetForUser(userName);
+        String companyId = String.valueOf(p_targetPage.getSourcePage()
+                .getCompanyId());
         p_options.setTmProfile(p_targetPage.getSourcePage().getRequest()
                 .getJob().getL10nProfile().getTranslationMemoryProfile());
 
-        Tu tu = p_targetTuv.getTu();
+        Tu tu = p_targetTuv.getTu(companyId);
         long tuId = tu.getTuId();
         long tuvId = p_targetTuv.getId();
-        String dataType = p_targetTuv.getDataType();
+        String dataType = p_targetTuv.getDataType(companyId);
         GxmlElement elem = p_targetTuv.getGxmlElement();
 
         boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
@@ -1872,7 +1835,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         // HTML class attribute that colors the segment in the editor
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
-                DUMMY_SUBID, isExcluded, unlock, p_repetitions);
+                DUMMY_SUBID, isExcluded, unlock, p_repetitions, companyId);
         // For "localized" segment,if target is same with source,commonly
         // display as "no match" in blue color,for segment with sub,display
         // according to its LMs.
@@ -1890,7 +1853,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (subFlows != null && subFlows.size() > 0)
                 {
                     style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
-                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions);
+                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions,
+                            companyId);
                 }
                 else
                 {
@@ -1902,7 +1866,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
         else
         {
-            if(unlock)
+            if (unlock)
             {
                 style = STYLE_CONTEXT_UNLOCK;
             }
@@ -1913,14 +1877,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             isReadOnly = !unlock;
         }
 
-
         if (!PageHandler.isInContextMatch(p_targetPage.getSourcePage()
                 .getRequest().getJob()))
         {
             style = STYLE_EXACT_MATCH;
             isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
                     || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
-                            .isTuvInProtectedState(p_targetTuv));
+                            .isTuvInProtectedState(p_targetTuv, String
+                                    .valueOf(p_targetPage.getSourcePage()
+                                            .getCompanyId())));
         }
 
         // Get the target page locale so we can set the DIR attribute
@@ -1931,7 +1896,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         // Make the segment RTL if it's 1) Translatable 2) In an RTL
         // language and 3) it has bidi characters in it.
-        if (b_rtlLocale && !p_targetTuv.isLocalizable()
+        if (b_rtlLocale && !p_targetTuv.isLocalizable(companyId)
                 && Text.containsBidiChar(p_targetTuv.getGxml()))
         {
             dir = " DIR=rtl";
@@ -1964,6 +1929,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 result.append(tuId);
                 result.append("</TD>\n");
+                // Append "TD" for "Find Repeated Segments".
+                if (p_editorState.getNeedFindRepeatedSegments())
+                {
+                    result.append(this.appendRepetitionTD(tu, p_srcTuv, p_matchTypes));
+                }
 
                 if (reviewMode || reviewReadOnly)
                 {
@@ -2002,17 +1972,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 segment = SegmentProtectionManager.handlePreserveWhiteSpace(
                         elem, segment, null, null);
+                String seg = getEditorSegment(p_targetTuv,
+                        EditorConstants.PTAGS_COMPACT, segment,
+                        p_editorState.getNeedShowPTags(), companyId);
                 if (!b_subflows) // No subflows
                 {
                     if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
-                        result.append(getNonEditableCell(style, segment));
+                        result.append(getNonEditableCell(style, seg));
                     }
                     else
                     {
                         result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
+                                DUMMY_SUBID, seg, false));
                     }
                 }
                 else
@@ -2034,12 +2007,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
-                        result.append(getNonEditableCell(style, segment));
+                        result.append(getNonEditableCell(style, seg));
                     }
                     else
                     {
                         result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
+                                DUMMY_SUBID, seg, false));
                     }
 
                     result.append("</TD></TR>\n");
@@ -2072,14 +2045,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         // ... or from document if tuv inherits it.
                         if (dataType == null)
                         {
-                            dataType = p_targetTuv.getDataType();
+                            dataType = p_targetTuv.getDataType(companyId);
                         }
 
                         if (b_rtlLocale
                                 && isTranslatableSub(subElmt)
-                                && Text
-                                        .containsBidiChar(subElmt
-                                                .getTextValue()))
+                                && Text.containsBidiChar(subElmt.getTextValue()))
                         {
                             dir = " DIR=rtl";
                         }
@@ -2129,9 +2100,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             result.append("</TD>\n");
 
                             segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_leverageResult, p_options
-                                            .getViewMode());
-
+                                    segment, p_leverageResult,
+                                    p_options.getViewMode());
                         }
 
                         // If the TUV is read-only, or the sub is
@@ -2182,8 +2152,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     result.append("<SPAN");
@@ -2211,8 +2181,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_comments));
 
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     result.append("<SPAN");
@@ -2238,14 +2208,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         && itemType.equals("text"))
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
+                            p_targetPage, p_imageMaps,
+                            p_targetTuv.getIdAsLong());
 
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     if ((!reviewMode || reviewReadOnly)
@@ -2269,14 +2239,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 else
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
+                            p_targetPage, p_imageMaps,
+                            p_targetTuv.getIdAsLong());
 
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     if (EditUtil.isHtmlDerivedFormat(dataType)
@@ -2294,6 +2264,39 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 break;
         }
+
+        return result.toString();
+    }
+
+    /**
+     * 
+     * @param p_tu
+     * @return
+     */
+    private String appendRepetitionTD(Tu p_tu, Tuv p_srcTuv,
+            MatchTypeStatistics p_matchTypes)
+    {
+        StringBuffer result = new StringBuffer();
+
+        if (p_tu.isRepeated()
+                && LeverageMatchLingManager.EXACT != p_matchTypes
+                        .getLingManagerMatchType(p_srcTuv.getId(), "0"))
+        {
+            result.append("<TD bgColor=\"").append(UIConstants.COLOR_REPEATED)
+                    .append("\" >");
+        }
+        else if (p_tu.getRepetitionOfId() > 0
+                && LeverageMatchLingManager.EXACT != p_matchTypes
+                        .getLingManagerMatchType(p_srcTuv.getId(), "0"))
+        {
+            result.append("<TD bgColor=\"")
+                    .append(UIConstants.COLOR_REPETITION).append("\" >");
+        }
+        else
+        {
+            result.append("<TD>");
+        }
+        result.append("</TD>\n");
 
         return result.toString();
     }
@@ -2343,25 +2346,25 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             p_subId = DUMMY_SUBID;
         }
-        
+
         TargetPage tp = getTargetPage(p_trgPageId);
-        String companyId = tp.getSourcePage().getCompanyId();
+        String companyId = String.valueOf(tp.getSourcePage().getCompanyId());
 
         try
         {
-            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
+            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, companyId);
 
-            if (targetTuv.getXliffAlt() != null
-                    && !targetTuv.getXliffAlt().isEmpty())
+            Set xliffAltSet = targetTuv.getXliffAlt(true);
+            if (xliffAltSet != null && !xliffAltSet.isEmpty())
             {
-                result.setXliffAlt(targetTuv.getXliffAlt());
+                result.setXliffAlt(targetTuv.getXliffAlt(true));
             }
 
             String mergeState = targetTuv.getMergeState();
             if (mergeState.equals(Tuv.NOT_MERGED))
             {
                 sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
-                        p_sourceLocaleId);
+                        p_sourceLocaleId, companyId);
             }
             else
             {
@@ -2370,15 +2373,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             boolean isWSXlf = false;
             boolean isAutoCommit = false;
-            if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(targetTuv.getTu()
-                    .getGenerateFrom()))
+            if (TuImpl.FROM_WORLDSERVER.equalsIgnoreCase(targetTuv.getTu(
+                    companyId).getGenerateFrom()))
             {
                 isWSXlf = true;
             }
             if (targetTuv.getLastModifiedUser() != null
                     && targetTuv.getLastModifiedUser().indexOf("_MT") > -1)
-//                    && targetTuv.getState().getValue() == TuvState.LOCALIZED
-//                            .getValue())
+            // && targetTuv.getState().getValue() == TuvState.LOCALIZED
+            // .getValue())
             {
                 isAutoCommit = true;
             }
@@ -2393,9 +2396,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
             else
             {
-                result.setTargetTuv(targetTuv);                
+                result.setTargetTuv(targetTuv);
             }
-            
+
             // add the source segment as TMX string
             if (p_subId.equals(DUMMY_SUBID))
             {
@@ -2419,13 +2422,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 }
                 else
                 {
-                    result.setTargetSegment(targetTuv.getGxmlElement());                    
+                    result.setTargetSegment(targetTuv.getGxmlElement());
                 }
 
-
-                isLocalizable = sourceTuv.getTu().isLocalizable();
-                itemType = targetTuv.getTu().getTuType();
-                dataType = targetTuv.getDataType();
+                isLocalizable = sourceTuv.getTu(companyId).isLocalizable();
+                itemType = targetTuv.getTu(companyId).getTuType();
+                dataType = targetTuv.getDataType(companyId);
 
                 // Note: only top-level segments have previous versions.
 
@@ -2434,7 +2436,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         p_termbase, p_releverage, companyId);
 
                 // add versions of this segment in previous tasks
-                result = addSegmentVersions(result, targetTuv, p_subId);
+                result = addSegmentVersions(result, targetTuv, p_subId,
+                        companyId);
             }
             else
             {
@@ -2460,7 +2463,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // ... or from document if tuv inherits it.
                 if (dataType == null)
                 {
-                    dataType = targetTuv.getDataType();
+                    dataType = targetTuv.getDataType(companyId);
                 }
             }
 
@@ -2468,7 +2471,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             result = addSegmentMatches(result, sourceTuv, targetTuv, p_subId,
                     p_tmNames, p_releverage);
 
-            
             // Set the segment's or sub's data format and item type
             result.setDataType(dataType);
             result.setItemType(itemType);
@@ -2537,8 +2539,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 WebAppConstants.VIRTUALDIR_CXEDOCS, ef.getInternalBaseHref(),
                 extUrl
         // GSDEF00010714: this breaks the online editor.
-                // ef.getExternalBaseHref().substring(0,
-                // ef.getExternalBaseHref().lastIndexOf("/"))
+        // ef.getExternalBaseHref().substring(0,
+        // ef.getExternalBaseHref().lastIndexOf("/"))
                 );
 
         long subId = Long.parseLong(p_subId);
@@ -2558,8 +2560,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     .getTotalTextValue(), WebAppConstants.VIRTUALDIR_CXEDOCS,
                     ef.getInternalBaseHref(), extUrl
             // GSDEF00010714: this breaks the online editor.
-                    // ef.getExternalBaseHref().substring(0,
-                    // ef.getExternalBaseHref().lastIndexOf("/"))
+            // ef.getExternalBaseHref().substring(0,
+            // ef.getExternalBaseHref().lastIndexOf("/"))
                     );
         }
         else
@@ -2619,9 +2621,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             GlobalSightLocale p_targetLocale = p_targetTuv
                     .getGlobalSightLocale();
             SourcePage sourcePage = getSourcePage(srcPageId);
-            int threshold = 
-                sourcePage.getRequest().getJob().getLeverageMatchThreshold();
-            
+            String companyId = String.valueOf(sourcePage.getCompanyId());
+
             LeverageOptions leverageOptions = m_inprogressTmManager
                     .getLeverageOptions(sourcePage, p_targetLocale);
             Collection tms = leverageOptions.getTmsToLeverageFrom();
@@ -2635,12 +2636,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
 
             boolean isTmProcedence = leverageOptions.isTmProcedence();
-            
+
             // Find matches created at import time
             SortedSet staticMatches = null;
             staticMatches = m_lingManager.getTuvMatches(p_srcTuv.getIdAsLong(),
                     p_targetTuv.getGlobalSightLocale().getIdAsLong(), p_subId,
-                    isTmProcedence, null);
+                    isTmProcedence, companyId, null);
 
             // Re-leverage from in-progress and gold TMs.
             DynamicLeverageResults dynamicMatches;
@@ -2648,10 +2649,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             dynamicMatches = m_inprogressTmManager.leverage(p_srcTuv, p_subId,
                     p_targetTuv.getGlobalSightLocale(), srcPageId);
 
-            
             dynamicMatches.setLeverageOptions(leverageOptions);
             // Should remove duplicate matches...
-            dynamicMatches.mergeWithPreLeverage(staticMatches, isTmProcedence, threshold);
+            dynamicMatches.mergeWithPreLeverage(staticMatches, isTmProcedence,
+                    companyId);
 
             ArrayList matchResults = new ArrayList();
 
@@ -2666,7 +2667,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // for segment editor TM matches.
                 // Ideally,this should not happen.
                 if (matchedSource == null || "".equals(matchedSource.trim())
-                        || matchedTarget == null || "".equals(matchedTarget.trim()))
+                        || matchedTarget == null
+                        || "".equals(matchedTarget.trim()))
                 {
                     continue;
                 }
@@ -2680,8 +2682,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // The save TM have the highest priority : -1
                 if (match.getTmIndex() == Leverager.HIGHEST_PRIORTIY)
                 {
-                    tmName = ServerProxy.getProjectHandler().getProjectTMById(
-                            leverageOptions.getSaveTmId(), false).getName();
+                    tmName = ServerProxy
+                            .getProjectHandler()
+                            .getProjectTMById(leverageOptions.getSaveTmId(),
+                                    false).getName();
                 }
                 else if (match.getTmIndex() == Leverager.MT_PRIORITY)
                 {
@@ -2710,8 +2714,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // Normal reference TM
                 else
                 {
-                    tmName = ServerProxy.getProjectHandler().getProjectTMById(
-                            match.getTmId(), false).getName();
+                    tmName = ServerProxy.getProjectHandler()
+                            .getProjectTMById(match.getTmId(), false).getName();
                     mayHaveSid = true;
                 }
 
@@ -2734,9 +2738,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     matchTypeName = "MT_EXACT_MATCH";
                 }
 
-                SegmentMatchResult matchResult = new SegmentMatchResult(match
-                        .getMatchedTuvId(), matchedTarget, match.getScore(),
-                        matchTypeName, match.getTmId(), tmName, mayHaveSid);
+                SegmentMatchResult matchResult = new SegmentMatchResult(
+                        match.getMatchedTuvId(), matchedTarget,
+                        match.getScore(), matchTypeName, match.getTmId(),
+                        tmName, mayHaveSid);
                 matchResult.setMatchContentSource(matchedSource);
                 matchResult.setMatchedTuvBasicInfo(match
                         .getMatchedTuvBasicInfo());
@@ -2761,19 +2766,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
         catch (NamingException e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
 
         return p_view;
     }
-    
+
     /**
      * Set segment matches for "SegmentView" object.This method allows to re-set
      * TM matches separately.
      */
     public SegmentView addSegmentMatches(SegmentView p_view,
             EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
-            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage)
+            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage,
+            String companyId)
     {
         SegmentView segmentView = null;
 
@@ -2781,13 +2787,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             Tuv sourceTuv;
             Tuv targetTuv;
-            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
+            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, companyId);
 
             String mergeState = targetTuv.getMergeState();
             if (mergeState.equals(Tuv.NOT_MERGED))
             {
                 sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
-                        p_sourceLocaleId);
+                        p_sourceLocaleId, companyId);
             }
             else
             {
@@ -2815,8 +2821,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * </p>
      */
     private SegmentView addTerminologyMatches(SegmentView p_view, Tuv p_srcTuv,
-            Tuv p_trgTuv, String p_termbase, boolean p_releverage, String p_companyId)
-            throws OnlineEditorException, RemoteException
+            Tuv p_trgTuv, String p_termbase, boolean p_releverage,
+            String p_companyId) throws OnlineEditorException, RemoteException
     {
         try
         {
@@ -2824,19 +2830,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             if (p_releverage && p_termbase != null)
             {
-                TermLeverageOptions options = getTermLeverageOptions(p_srcTuv,
-                        p_trgTuv, p_termbase, p_companyId);
+                TermLeverageOptions options = getTermLeverageOptions(p_srcTuv
+                        .getGlobalSightLocale().getLocale(), p_trgTuv
+                        .getGlobalSightLocale().getLocale(), p_termbase,
+                        p_companyId);
 
                 if (options != null)
                 {
-                    ArrayList dummy = new ArrayList();
+                    ArrayList<Tuv> dummy = new ArrayList<Tuv>();
                     dummy.add(p_srcTuv);
 
                     TermLeverageResult result = ServerProxy
                             .getTermLeverageManager().leverageTerms(dummy,
                                     options, p_companyId);
 
-                    // TODO: convert result to termmatches
+                    // TODO: convert result to term matches
                     termMatches = result.toTermLeverageMatchResult();
                 }
             }
@@ -2845,8 +2853,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 // getTermMatchesForSegment accepts a subid but I don't
                 // think we leverage subs, so pass in 0.
-                termMatches = m_termManager.getTermMatchesForSegment(p_srcTuv
-                        .getId(), 0L, p_trgTuv.getGlobalSightLocale());
+                termMatches = m_termManager.getTermMatchesForSegment(
+                        p_srcTuv.getId(), 0L, p_trgTuv.getGlobalSightLocale());
             }
             p_view.setTbMatchResults(termMatches);
         }
@@ -2875,29 +2883,29 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * </p>
      */
     private SegmentView addSegmentVersions(SegmentView p_view, Tuv p_targetTuv,
-            String p_subId) throws OnlineEditorException, RemoteException
+            String p_subId, String companyId) throws OnlineEditorException,
+            RemoteException
     {
         try
         {
-            List taskTuvs = m_tuvManager.getPreviousTaskTuvs(p_targetTuv
-                    .getId/* AsLong */(), MAX_NUM_VERSIONS);
+            List taskTuvs = m_tuvManager.getPreviousTaskTuvs(
+                    p_targetTuv.getId/* AsLong */(), MAX_NUM_VERSIONS);
 
             if (taskTuvs != null)
             {
                 int size = taskTuvs.size();
-                ArrayList versions = new ArrayList(size);
+                ArrayList<SegmentVersion> versions = new ArrayList<SegmentVersion>(
+                        size);
 
                 for (int i = 0; i < size; i++)
                 {
                     TaskTuv taskTuv = (TaskTuv) taskTuvs.get(i);
-                    Tuv tuv = taskTuv.getTuv();
+                    Tuv tuv = taskTuv.getTuv(companyId);
                     GxmlElement elem;
                     String gxml, stage;
 
                     if (tuv == null)
                     {
-                        CATEGORY.warn("Previous version of tuv "
-                                + p_targetTuv.getId() + " is null, ignoring");
                         continue;
                     }
 
@@ -2979,10 +2987,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * Returns a list of TU ids (Long) for a source page. Tu IDs are cached by
      * the page handlers in EditorState, don't need to be cached here.
      */
-    public ArrayList getTuIdsInPage(Long p_srcPageId)
+    public ArrayList<Long> getTuIdsInPage(Long p_srcPageId)
             throws OnlineEditorException, RemoteException
     {
-        ArrayList result = new ArrayList();
+        ArrayList<Long> result = new ArrayList<Long>();
 
         try
         {
@@ -2992,7 +3000,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             for (Iterator it = tus.iterator(); it.hasNext();)
             {
                 Tu tu = (Tu) it.next();
-
                 result.add(tu.getIdAsLong());
             }
         }
@@ -3048,46 +3055,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      *                - Network related exception.
      * @see CommentView
      */
-    public CommentView getCommentView(long p_trgPageId, long p_tuId,
-            long p_tuvId, long p_subId) throws OnlineEditorException,
-            RemoteException
-    {
-        CommentView result = new CommentView(p_tuId, p_tuvId, p_subId);
-
-        try
-        {
-            ArrayList temp = getComments(getTargetPage(p_trgPageId));
-
-            String key = CommentHelper.makeLogicalKey(getCurrentTargetPage()
-                    .getId(), p_tuId, p_tuvId, p_subId);
-
-            // Todo: manage comment list as map organized by logical key
-            for (int i = 0, max = temp.size(); i < max; i++)
-            {
-                Issue issue = (Issue) temp.get(i);
-
-                if (issue.getLogicalKey().equals(key))
-                {
-                    result.setComment(issue);
-                    return result;
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            String[] args =
-            { String.valueOf(p_trgPageId), String.valueOf(p_tuId),
-                    String.valueOf(p_tuvId), String.valueOf(p_subId),
-                    ex.getMessage() };
-
-            throw new OnlineEditorException(
-                    OnlineEditorException.MSG_FAILED_TO_GET_COMMENTVIEW, args,
-                    ex);
-        }
-
-        return result;
-    }
-
     public CommentView getCommentView(long p_commentId, long p_trgPageId,
             long p_tuId, long p_tuvId, long p_subId)
             throws OnlineEditorException, RemoteException
@@ -3326,8 +3293,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 Issue issue = (Issue) p_issueList.get(i);
                 m_commentManager.editIssue(issue.getId(), issue.getTitle(),
-                        issue.getPriority(), Issue.STATUS_CLOSED, issue
-                                .getCategory(), p_user, issue.getComment());
+                        issue.getPriority(), Issue.STATUS_CLOSED,
+                        issue.getCategory(), p_user, issue.getComment());
             }
         }
         catch (Exception ex)
@@ -3365,70 +3332,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public void updateTUV(long p_tuvId, String p_subId, String p_newContent)
             throws OnlineEditorException, RemoteException
     {
-        Tuv sourceTuv;
-        Tuv targetTuv;
-
-        try
-        {
-            // Retrieve the target Tuv
-            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
-
-            // set new content to subflow or the Tuv itself
-            if (p_subId != null && (!p_subId.equals(DUMMY_SUBID)))
-            {
-                targetTuv.setSubflowGxml(p_subId, p_newContent);
-            }
-            else
-            {
-                targetTuv.setGxmlExcludeTopTagsIgnoreSubflows(p_newContent);
-            }
-
-            m_tuvManager.updateTuv(targetTuv);
-
-            // If database update succeeded, update cached copy.
-
-            // Do we need to reload the TUV or can we use the in-mem copy?
-            // tuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
-            m_pageCache.updateTuv(targetTuv);
-
-            // Update in-progress TM.
-            try
-            {
-                long sourcePageId = getCurrentSourcePage().getId();
-                long sourceLocaleId = getCurrentSourcePage()
-                        .getGlobalSightLocale().getId();
-
-                String mergeState = targetTuv.getMergeState();
-                if (mergeState.equals(Tuv.NOT_MERGED))
-                {
-                    long tuId = targetTuv.getTu().getId();
-                    sourceTuv = m_tuvManager.getTuvForSegmentEditor(tuId,
-                            sourceLocaleId);
-                }
-                else
-                {
-                    sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
-                }
-
-                m_inprogressTmManager.save(sourceTuv, targetTuv, p_subId,
-                        sourcePageId);
-            }
-            catch (Throwable ignore)
-            {
-                CATEGORY.error("cannot update in-progress TM", ignore);
-            }
-        }
-        catch (GeneralException ge)
-        {
-            String[] args =
-            { "TuvManager failed to update the Tuv." };
-
-            CATEGORY.error(args[0], ge);
-
-            throw new OnlineEditorException(
-                    OnlineEditorException.MSG_FAILED_TO_UPDATE_SEGMENT, args,
-                    ge);
-        }
+        this.updateTUV(p_tuvId, p_subId, p_newContent, null);
     }
 
     public void updateTUV(long p_tuvId, String p_subId, String p_newContent,
@@ -3439,9 +3343,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         try
         {
-            // Retrieve the target Tuv
-            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
+            SourcePage sp = getCurrentSourcePage();
+            String companyId = String.valueOf(sp.getCompanyId());
 
+            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId, companyId);
             // set new content to subflow or the Tuv itself
             if (p_subId != null && (!p_subId.equals(DUMMY_SUBID)))
             {
@@ -3449,15 +3354,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             }
             else
             {
-                targetTuv.setGxmlExcludeTopTagsIgnoreSubflows(p_newContent);
+                targetTuv.setGxmlExcludeTopTagsIgnoreSubflows(p_newContent,
+                        companyId);
+            }
+            if (p_userId != null)
+            {
+                targetTuv.setLastModifiedUser(p_userId);
             }
 
-            targetTuv.setLastModifiedUser(p_userId);
-
-            m_tuvManager.updateTuv(targetTuv);
+            m_tuvManager.updateTuv(targetTuv, companyId);
 
             // If database update succeeded, update cached copy.
-
             // Do we need to reload the TUV or can we use the in-mem copy?
             // tuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
             m_pageCache.updateTuv(targetTuv);
@@ -3465,16 +3372,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             // Update in-progress TM.
             try
             {
-                long sourcePageId = getCurrentSourcePage().getId();
-                long sourceLocaleId = getCurrentSourcePage()
-                        .getGlobalSightLocale().getId();
+                long sourcePageId = sp.getId();
+                long sourceLocaleId = sp.getGlobalSightLocale().getId();
 
                 String mergeState = targetTuv.getMergeState();
                 if (mergeState.equals(Tuv.NOT_MERGED))
                 {
-                    long tuId = targetTuv.getTu().getId();
+                    long tuId = targetTuv.getTuId();
                     sourceTuv = m_tuvManager.getTuvForSegmentEditor(tuId,
-                            sourceLocaleId);
+                            sourceLocaleId, companyId);
                 }
                 else
                 {
@@ -3614,15 +3520,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * re-merged from their source to produce correct sub ids. Any existing
      * translations are lost.
      */
-    public void splitSegments(long p_tuv1, long p_tuv2, String p_location)
-            throws OnlineEditorException, RemoteException
+    public void splitSegments(long p_tuv1, long p_tuv2, String p_location,
+            String companyId) throws OnlineEditorException, RemoteException
     {
         try
         {
-            ArrayList splits = new ArrayList();
-            ArrayList sourceSplits = new ArrayList();
+            ArrayList<Tuv> splits = new ArrayList<Tuv>();
+            ArrayList<Tuv> sourceSplits = new ArrayList<Tuv>();
 
-            List sourceTuvs = getPageTuvs(getCurrentSourcePage());
+            List<Tuv> sourceTuvs = getPageTuvs(getCurrentSourcePage());
             List targetTuvs = getPageTuvs(getCurrentTargetPage());
 
             // Collect TUVs to split: all from tuv1 to tuv2.
@@ -3707,7 +3613,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // TODO: the cached TUVs must be cloned before being
                 // modified, then updated atomically in DB; only if
                 // the update succeeds can the cache be updated.
-                m_tuvManager.updateTuv(tuv);
+                m_tuvManager.updateTuv(tuv, companyId);
                 m_pageCache.updateTuv(tuv);
             }
         }
@@ -3722,14 +3628,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * Merges a range of segments. The first segment receives the combined
      * target strings, all others will be set to empty.
      */
-    public void mergeSegments(long p_tuv1, long p_tuv2)
+    public void mergeSegments(long p_tuv1, long p_tuv2, String companyId)
             throws OnlineEditorException, RemoteException
     {
         try
         {
-            List merges = new ArrayList();
-
-            List tuvs = getPageTuvs(getCurrentTargetPage());
+            List<Tuv> merges = new ArrayList<Tuv>();
+            List<Tuv> tuvs = getPageTuvs(getCurrentTargetPage());
 
             // Collect TUVs to merge: all from tuv1 to tuv2.
             boolean found = false;
@@ -3771,7 +3676,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // TODO: the cached TUVs must be cloned before being
                 // modified, then updated atomically in DB; only if
                 // the update succeeds can the cache be updated.
-                m_tuvManager.updateTuv(tuv);
+                m_tuvManager.updateTuv(tuv, companyId);
                 m_pageCache.updateTuv(tuv);
             }
         }
@@ -3796,12 +3701,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             Vector p_excludedItemTypes, TargetPage p_targetPage,
             MatchTypeStatistics p_matchTypes, Collection p_imageMaps,
             ArrayList p_comments, SegmentRepetitions p_repetitions,
-            HashMap searchMap) throws OnlineEditorException, RemoteException
+            HashMap searchMap, EditorState p_editorState)
+            throws OnlineEditorException, RemoteException
     {
-        TuImpl tu = (TuImpl) p_targetTuv.getTu();
+        String companyId = String.valueOf(p_targetPage.getSourcePage()
+                .getCompanyId());
+        TuImpl tu = (TuImpl) p_targetTuv.getTu(companyId);
         long tuId = tu.getTuId();
         long tuvId = p_targetTuv.getId();
-        String dataType = p_targetTuv.getDataType();
+        String dataType = p_targetTuv.getDataType(companyId);
         GxmlElement elem = p_targetTuv.getGxmlElement();
 
         boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
@@ -3813,14 +3721,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
                 || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
-                        .isTuvInProtectedState(p_targetTuv));
+                        .isTuvInProtectedState(p_targetTuv, companyId));
 
         boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
                 itemType, p_excludedItemTypes);
 
         // HTML class attribute that colors the segment in the editor
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
-                DUMMY_SUBID, isExcluded, unlock, p_repetitions);
+                DUMMY_SUBID, isExcluded, unlock, p_repetitions, companyId);
 
         // For "localized" segment,if target is same with source,commonly
         // display as "no match" in blue color,for segment with sub,display
@@ -3836,11 +3744,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (subFlows != null && subFlows.size() > 0)
             {
                 style = getMatchStyleByLM(p_matchTypes, p_srcTuv, p_targetTuv,
-                        DUMMY_SUBID, unlock, p_repetitions);
+                        DUMMY_SUBID, unlock, p_repetitions, companyId);
             }
             else
             {
-                style = STYLE_NO_MATCH;                
+                style = STYLE_NO_MATCH;
             }
         }
         // Get the target page locale so we can set the DIR attribute
@@ -3851,7 +3759,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         // Make the segment RTL if it's 1) Translatable 2) In an RTL
         // language and 3) it has bidi characters in it.
-        if (b_rtlLocale && !p_targetTuv.isLocalizable()
+        if (b_rtlLocale && !p_targetTuv.isLocalizable(companyId)
                 && Text.containsBidiChar(p_targetTuv.getGxml()))
         {
             dir = " DIR=rtl";
@@ -3886,6 +3794,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 result.append(tuId);
                 result.append("</TD>\n");
 
+                // Append extra "TD" for "Find Repeated Segments".
+                if (p_editorState.getNeedFindRepeatedSegments())
+                {
+                    result.append(appendRepetitionTD(tu, p_srcTuv, p_matchTypes));
+                }
+
+                // Append extra "TD" for comments
                 if (reviewMode || reviewReadOnly)
                 {
                     if (isHighLight)
@@ -3931,17 +3846,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                 segment = SegmentProtectionManager.handlePreserveWhiteSpace(
                         elem, segment, null, null);
+                String seg = getEditorSegment(p_targetTuv,
+                        EditorConstants.PTAGS_COMPACT, segment,
+                        p_editorState.getNeedShowPTags(), companyId);
                 if (!b_subflows) // No subflows
                 {
                     if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
-                        result.append(getNonEditableCell(style, segment));
+                        result.append(getNonEditableCell(style, seg));
                     }
                     else
                     {
                         result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
+                                DUMMY_SUBID, seg, false));
                     }
                 }
                 else
@@ -3963,12 +3881,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if ((!reviewMode || reviewReadOnly)
                             && (isReadOnly || isExcluded))
                     {
-                        result.append(getNonEditableCell(style, segment));
+                        result.append(getNonEditableCell(style, seg));
                     }
                     else
                     {
                         result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
+                                DUMMY_SUBID, seg, false));
                     }
 
                     result.append("</TD></TR>\n");
@@ -4001,14 +3919,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         // ... or from document if tuv inherits it.
                         if (dataType == null)
                         {
-                            dataType = p_targetTuv.getDataType();
+                            dataType = p_targetTuv.getDataType(companyId);
                         }
 
                         if (b_rtlLocale
                                 && isTranslatableSub(subElmt)
-                                && Text
-                                        .containsBidiChar(subElmt
-                                                .getTextValue()))
+                                && Text.containsBidiChar(subElmt.getTextValue()))
                         {
                             dir = " DIR=rtl";
                         }
@@ -4026,7 +3942,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         // LMs.
                         style = getMatchStyle(p_matchTypes, p_srcTuv,
                                 p_targetTuv, subId, isExcluded, unlock,
-                                p_repetitions);
+                                p_repetitions, companyId);
                         segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
                                 p_options.getViewMode());
                         segmentSrc = GxmlUtil.getDisplayHtml(subElmtSrc,
@@ -4034,19 +3950,20 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         if (STYLE_UPDATED.equals(style)
                                 && segment.trim().equals(segmentSrc.trim()))
                         {
-                            List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+                            List subFlows = p_targetTuv
+                                    .getSubflowsAsGxmlElements();
                             if (subFlows != null && subFlows.size() > 0)
                             {
                                 style = getMatchStyleByLM(p_matchTypes,
                                         p_srcTuv, p_targetTuv, subId, unlock,
-                                        p_repetitions);
+                                        p_repetitions, companyId);
                             }
                             else
                             {
                                 style = STYLE_NO_MATCH;
                             }
                         }
-                        
+
                         result.append("<TR>");
                         result.append(getSubIdColumn(tuId, subId));
 
@@ -4058,9 +3975,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                             result.append("</TD>\n");
 
                             segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                    segment, p_leverageResult, p_options
-                                            .getViewMode());
-
+                                    segment, p_leverageResult,
+                                    p_options.getViewMode());
                         }
 
                         // If the TUV is read-only, or the sub is
@@ -4112,8 +4028,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     result.append("<SPAN");
@@ -4141,8 +4057,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                 p_comments));
 
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     result.append("<SPAN");
@@ -4168,14 +4084,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         && itemType.equals("text"))
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
+                            p_targetPage, p_imageMaps,
+                            p_targetTuv.getIdAsLong());
 
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     if ((!reviewMode || reviewReadOnly)
@@ -4199,14 +4115,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 else
                 {
                     segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
+                            p_targetPage, p_imageMaps,
+                            p_targetTuv.getIdAsLong());
 
                     if (reviewMode || reviewReadOnly)
                     {
                         segment = highlightTerms(p_srcTuv, p_targetTuv,
-                                segment, p_leverageResult, p_options
-                                        .getViewMode());
+                                segment, p_leverageResult,
+                                p_options.getViewMode());
                     }
 
                     if (EditUtil.isHtmlDerivedFormat(dataType)
@@ -4228,8 +4144,55 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result.toString();
     }
 
+    /**
+     * Gets the segment with tags, such as the segment in segment editor.
+     * 
+     * @param p_targetTuv
+     *            tuv data
+     * @param p_ptagFlag
+     *            pTag flag, such as verbose/compact
+     * @param p_originalSegment
+     *            original Segment without pTags
+     * @param p_needShowPTags
+     *            true, return the segment with tags false, return
+     *            p_originalSegment
+     */
+    private String getEditorSegment(Tuv p_tuv, String p_ptagFlag,
+            String p_originalSegment, boolean p_needShowPTags, String companyId)
+    {
+        if (!p_needShowPTags)
+        {
+            return p_originalSegment;
+        }
+
+        OnlineTagHelper applet = new OnlineTagHelper();
+        try
+        {
+            String seg = GxmlUtil.getInnerXml(p_tuv.getGxmlElement());
+            applet.setDataType(p_tuv.getDataType(companyId));
+            applet.setInputSegment(seg, "", p_tuv.getDataType(companyId));
+            if (EditorConstants.PTAGS_VERBOSE.equals(p_ptagFlag))
+            {
+                applet.getVerbose();
+                seg = applet.makeVerboseColoredPtags(seg);
+            }
+            else
+            {
+                applet.getCompact();
+                seg = applet.makeCompactColoredPtags(seg);
+            }
+            return seg;
+        }
+        catch (Exception e)
+        {
+            CATEGORY.info("getEditorSegment Error.", e);
+        }
+
+        return p_originalSegment;
+    }
+
     // Webex proposed reviewer view of term memory,
-    // main algorthim to hightlight terms.
+    // main algorithm to highlight terms.
     private String highlightTerms(Tuv p_srcTuv, Tuv p_targetTuv,
             String p_segment, TermLeverageResult p_leverageResult,
             int p_viewMode)
@@ -4265,9 +4228,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         {
                             TargetTerm tt = (TargetTerm) targets.get(ti);
                             targetTerm = tt.getMatchedTargetTerm();
-                            if (targetTerm != null)
+                            if (!StringUtil.isEmpty(targetTerm)
+                                    && targetTerm.trim().length() > 1
+                                    && targetTerm.indexOf("span") == -1
+                                    && targetTerm.indexOf("style") == -1
+                                    && targetTerm.indexOf("color") == -1
+                                    && targetTerm.indexOf("chocolate") == -1)
                             {
-
                                 while (true)
                                 {
                                     indexInSegment = sb.indexOf(targetTerm,
@@ -4277,20 +4244,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                                     {
                                         // Now find a targetTerm in target
                                         // segment,
-                                        // we add start tag of hightlight color
+                                        // we add start tag of highlight color
                                         // before this term.
-                                        sb.insert(indexInSegment, "<span style"
-                                                + "=\"color: chocolate\">");
-                                        // And now add end tag of hightlight
+                                        sb.insert(indexInSegment,
+                                                "<span style=\"color: chocolate\">");
+                                        // And now add end tag of highlight
                                         // color after this term.
-                                        sb
-                                                .insert(
-                                                        indexInSegment
-                                                                + "<span style=\"color: chocolate\">"
-                                                                        .length()
-                                                                + targetTerm
-                                                                        .length(),
-                                                        "</span>");
+                                        sb.insert(
+                                                indexInSegment
+                                                        + "<span style=\"color: chocolate\">"
+                                                                .length()
+                                                        + targetTerm.length(),
+                                                "</span>");
                                     }
                                     else
                                     {
@@ -4315,406 +4280,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return sb == null ? p_segment : sb.toString();
     }
 
-    private String getTargetDisplayHtml(Tuv p_srcTuv, Tuv p_targetTuv,
-            RenderingOptions p_options, Vector p_excludedItemTypes,
-            TargetPage p_targetPage, MatchTypeStatistics p_matchTypes,
-            Collection p_imageMaps, List p_comments,
-            SegmentRepetitions p_repetitions)
-    {
-        return getTargetDisplayHtml(p_srcTuv, p_targetTuv, p_options,
-                p_excludedItemTypes, p_targetPage, p_matchTypes, p_imageMaps,
-                p_comments, p_repetitions, null);
-
-    }
-
-    /**
-     * <p>
-     * Returns the formatted Html display string for a Tuv. If the Tuv or a
-     * subflow is excluded by types or p_excludedItemTypes, it is made readOnly.
-     * </p>
-     */
-    private String getTargetDisplayHtml(Tuv p_srcTuv, Tuv p_targetTuv,
-            RenderingOptions p_options, Vector p_excludedItemTypes,
-            TargetPage p_targetPage, MatchTypeStatistics p_matchTypes,
-            Collection p_imageMaps, List p_comments,
-            SegmentRepetitions p_repetitions, HashMap searchMap)
-    {
-        Tu tu = p_targetTuv.getTu();
-        long tuId = tu.getTuId();
-        long tuvId = p_targetTuv.getId();
-        String dataType = p_targetTuv.getDataType();
-        GxmlElement elem = p_targetTuv.getGxmlElement();
-
-        boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
-        boolean reviewReadOnly = p_options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
-        boolean unlock = p_options.getEditMode() == EDITMODE_EDIT_ALL;
-
-        // Localizables carry their own type attribute, whereas
-        // segments inherit it from their parent translatable.
-        String itemType = tu.getTuType();
-
-        boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
-                || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
-                        .isTuvInProtectedState(p_targetTuv));
-
-        boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
-                itemType, p_excludedItemTypes);
-
-        // HTML class attribute that colors the segment in the editor
-        String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
-                DUMMY_SUBID, isExcluded, unlock, p_repetitions);
-        // For "localized" segment,if target is same with source,commonly
-        // display as "no match" in blue color,for segment with sub,display
-        // according to its LMs.
-        String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
-                dataType, p_options.getViewMode());
-        String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
-                dataType, p_options.getViewMode());
-        if (STYLE_UPDATED.equals(style)
-                && segment.trim().equals(segmentSrc.trim()))
-        {
-            List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
-            if (subFlows != null && subFlows.size() > 0)
-            {
-                style = getMatchStyleByLM(p_matchTypes, p_srcTuv, p_targetTuv,
-                        DUMMY_SUBID, unlock, p_repetitions);
-            }
-            else
-            {
-                style = STYLE_NO_MATCH;
-            }
-        }
-        
-        // Get the target page locale so we can set the DIR attribute
-        // for right-to-left languages such as Hebrew and Arabic
-        boolean b_rtlLocale = EditUtil.isRTLLocale(p_targetPage
-                .getGlobalSightLocale());
-        String dir = "";
-
-        // Make the segment RTL if it's 1) Translatable 2) In an RTL
-        // language and 3) it has bidi characters in it.
-        if (b_rtlLocale && !p_targetTuv.isLocalizable()
-                && Text.containsBidiChar(p_targetTuv.getGxml()))
-        {
-            dir = " DIR=rtl";
-        }
-
-        StringBuffer result = new StringBuffer(256);
-        switch (p_options.getViewMode())
-        {
-            case VIEWMODE_LIST:
-                // add javascript to synchronize scroll bars
-                // by segment id in the pop-up editor
-                result.append("<TD ID=seg");
-
-                result.append(tuId);
-                result.append(">");
-                result.append("<Script Language=\"JavaScript\">");
-                result.append("update_tr(\"");
-                result.append("seg");
-                result.append(tuId);
-                result.append("\");");
-                result.append("</Script>");
-
-                result.append(tuId);
-                result.append("</TD>\n");
-
-                if (reviewMode || reviewReadOnly)
-                {
-                    result.append("<TD>");
-                    result.append(getCommentIcon(tuId, tuvId, DUMMY_SUBID,
-                            p_comments));
-                    result.append("</TD>\n");
-                }
-
-                result.append("<TD ID=seg");
-                result.append(tuId);
-                result.append('_');
-                result.append(tuvId);
-                result.append("_0");
-
-                List subflows = p_targetTuv.getSubflowsAsGxmlElements(true);
-                boolean b_subflows = (subflows != null && subflows.size() > 0);
-                // b_subflows = hasSubflows(subflows);
-                // hasSubflows(subflows);
-                if (!b_subflows)
-                {
-                    result.append(dir);
-                }
-
-                result.append('>');
-
-                segment = GxmlUtil.getDisplayHtml(elem, dataType, p_options
-                        .getViewMode());
-                segment = SegmentProtectionManager.handlePreserveWhiteSpace(
-                        elem, segment, null, null);
-                if (!b_subflows) // No subflows
-                {
-                    if ((!reviewMode || reviewReadOnly)
-                            && (isReadOnly || isExcluded))
-                    {
-                        result.append(getNonEditableCell(style, segment));
-                    }
-                    else
-                    {
-                        result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
-                    }
-                }
-                else
-                // Subflows
-                {
-                    result.append("<TABLE WIDTH=100% CELLSPACING=0");
-                    result.append(" CELLPADDING=2>\n");
-                    result.append("<COL WIDTH=1%  VALIGN=TOP CLASS=editorId>");
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        result.append("<COL WIDTH=1%  VALIGN=TOP>");
-                    }
-                    result.append("<COL WIDTH=99% VALIGN=TOP>\n");
-                    result.append("<TR><TD COLSPAN=");
-                    result.append((reviewMode || reviewReadOnly) ? '3' : '2');
-                    result.append(dir);
-                    result.append('>');
-
-                    if ((!reviewMode || reviewReadOnly)
-                            && (isReadOnly || isExcluded))
-                    {
-                        result.append(getNonEditableCell(style, segment));
-                    }
-                    else
-                    {
-                        result.append(getEditableCell(style, tuId, tuvId,
-                                DUMMY_SUBID, segment, false));
-                    }
-
-                    result.append("</TD></TR>\n");
-
-                    // now process each subflow
-                    List subflowsSRC = p_srcTuv.getSubflowsAsGxmlElements(true);
-                    // hasSubflows(subflows);
-                    // hasSubflows(subflowsSRC);
-                    for (int i = 0; i < subflows.size(); i++)
-                    {
-                        GxmlElement subElmt = (GxmlElement) subflows.get(i);
-                        GxmlElement subElmtSrc = (GxmlElement) subflowsSRC
-                                .get(i);
-                        String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
-                        dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
-
-                        // Inherit datatype from parent element...
-                        if (dataType == null)
-                        {
-                            GxmlElement node = subElmt.getParent();
-
-                            while (dataType == null && node != null)
-                            {
-                                dataType = node
-                                        .getAttribute(GxmlNames.SUB_DATATYPE);
-                                node = node.getParent();
-                            }
-                        }
-
-                        // ... or from document if tuv inherits it.
-                        if (dataType == null)
-                        {
-                            dataType = p_targetTuv.getDataType();
-                        }
-
-                        if (b_rtlLocale
-                                && isTranslatableSub(subElmt)
-                                && Text
-                                        .containsBidiChar(subElmt
-                                                .getTextValue()))
-                        {
-                            dir = " DIR=rtl";
-                        }
-                        else
-                        {
-                            dir = "";
-                        }
-
-                        isExcluded = SegmentProtectionManager.isTuvExcluded(
-                                subElmt, itemType, p_excludedItemTypes);
-                        // For "localized" segment,if target is same with
-                        // source,commonly display as "no match" in blue
-                        // color,for segment with sub,display according to its
-                        // LMs.
-                        style = getMatchStyle(p_matchTypes, p_srcTuv,
-                                p_targetTuv, subId, isExcluded, unlock,
-                                p_repetitions);
-                        segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
-                                p_options.getViewMode());
-                        segmentSrc = GxmlUtil.getDisplayHtml(subElmtSrc,
-                                dataType, p_options.getViewMode());
-                        if (STYLE_UPDATED.equals(style)
-                                && segment.trim().equals(segmentSrc.trim()))
-                        {
-                            List subFlows = 
-                                p_targetTuv.getSubflowsAsGxmlElements();
-                            if (subFlows != null && subFlows.size() > 0)
-                            {
-                                style = getMatchStyleByLM(p_matchTypes,
-                                        p_srcTuv, p_targetTuv, subId, unlock,
-                                        p_repetitions);
-                            }
-                            else
-                            {
-                                style = STYLE_NO_MATCH;
-                            }
-                        }
-
-                        result.append("<TR>");
-                        result.append(getSubIdColumn(tuId, subId));
-
-                        if (reviewMode || reviewReadOnly)
-                        {
-                            result.append("<TD>");
-                            result.append(getCommentIcon(tuId, tuvId, subId,
-                                    p_comments));
-                            result.append("</TD>\n");
-                        }
-
-                        // If the TUV is read-only, or the sub is
-                        // excluded, don't show the sub as editable.
-                        if ((!reviewMode || reviewReadOnly)
-                                && (isReadOnly || isExcluded))
-                        {
-                            result.append("<TD");
-                            result.append(dir);
-                            result.append('>');
-                            result.append(getNonEditableCell(style, segment));
-                            result.append("</TD>");
-                        }
-                        else
-                        {
-                            result.append("<TD");
-                            result.append(dir);
-                            result.append(" ID=seg");
-                            result.append(tuId);
-                            result.append('_');
-                            result.append(tuvId);
-                            result.append('_');
-                            result.append(subId);
-                            result.append('>');
-                            result.append(getEditableCell(style, tuId, tuvId,
-                                    subId, segment, false));
-                            result.append("</TD>");
-                        }
-
-                        result.append("</TR>\n");
-                    }
-
-                    result.append("</TABLE>\n");
-                }
-
-                result.append("</TD>\n");
-
-                break;
-
-            case VIEWMODE_TEXT:
-                if ((!reviewMode || reviewReadOnly)
-                        && (isReadOnly || isExcluded))
-                {
-                    // Bug alert: this makes internal tags have the same
-                    // color (blue) as the segment.
-                    segment = p_targetTuv.getGxmlElement().getTotalTextValue();
-                    segment = EditUtil.encodeHtmlEntities(segment);
-
-                    result.append("<SPAN");
-                    result.append(dir);
-                    result.append(" ID=seg");
-                    result.append(tuId);
-                    result.append('_');
-                    result.append(tuvId);
-                    result.append("_0");
-                    result.append('>');
-
-                    // This makes the non-editable segment still have a color.
-                    result.append(getNonEditableCell(style, segment));
-
-                    result.append("</SPAN>");
-                }
-                else
-                {
-                    segment = GxmlUtil.getDisplayHtmlForText(elem, dataType,
-                            tuId, tuvId, style, p_excludedItemTypes);
-
-                    if (reviewMode || reviewReadOnly)
-                    {
-                        result.append(getCommentIcon(tuId, tuvId, DUMMY_SUBID,
-                                p_comments));
-                    }
-
-                    result.append("<SPAN");
-                    result.append(dir);
-                    result.append(" ID=seg");
-                    result.append(tuId);
-                    result.append('_');
-                    result.append(tuvId);
-                    result.append("_0");
-                    result.append('>');
-                    result.append(segment);
-                    result.append("</SPAN>");
-                }
-
-                break;
-
-            case VIEWMODE_PREVIEW: // fall through
-            default:
-                // If this is a visible segment, make it a link if not
-                // excluded; else output it as is.
-
-                if ((elem.getType() == GxmlElement.SEGMENT)
-                        && itemType.equals("text"))
-                {
-                    segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
-
-                    if ((!reviewMode || reviewReadOnly)
-                            && (isReadOnly || isExcluded))
-                    {
-                        result.append(getNonEditableCellForPreview(style,
-                                segment, dir));
-                    }
-                    else
-                    {
-                        if (reviewMode || reviewReadOnly)
-                        {
-                            result.append(getCommentIcon(tuId, tuvId,
-                                    DUMMY_SUBID, p_comments));
-                        }
-
-                        result.append(getEditableCellForPreview(style, tuId,
-                                tuvId, DUMMY_SUBID, segment, true, dir));
-                    }
-                }
-                else
-                {
-                    segment = GxmlUtil.getDisplayHtmlForPreview(elem, dataType,
-                            p_targetPage, p_imageMaps, p_targetTuv
-                                    .getIdAsLong());
-
-                    if (EditUtil.isHtmlDerivedFormat(dataType)
-                            || dataType.equals("plaintext"))
-                    {
-                        segment = EditUtil.encodeHtmlEntities(segment);
-                    }
-                    else if (dataType.equals("javascript"))
-                    {
-                        segment = EditUtil.toJavascript(segment);
-                    }
-
-                    result.append(segment);
-                }
-
-                break;
-        }
-
-        return result.toString();
-    }
-
     /**
      * <p>
      * Returns the formatted Html display string for a merged Tuv (for
@@ -4729,8 +4294,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         boolean reviewMode = p_options.getUiMode() == UIConstants.UIMODE_REVIEW;
         boolean reviewReadOnly = p_options.getUiMode() == UIConstants.UIMODE_REVIEW_READ_ONLY;
 
-        Tu tu = p_targetTuv.getTu();
-        long tuId = tu.getTuId();
+        long tuId = p_targetTuv.getTuId();
         long tuvId = p_targetTuv.getId();
 
         switch (p_options.getViewMode())
@@ -4807,127 +4371,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result.toString();
     }
 
-    private static String getTuType(Object tuv)
-    {
-        if (tuv instanceof Tuv)
-        {
-            Tuv sourceTuv = (Tuv) tuv;
-            return sourceTuv.getTu().getTuType();
-        }
-        else
-        {
-            SegmentTmTuv sourceTuv = (SegmentTmTuv) tuv;
-            return sourceTuv.getTu().getType();
-        }
-    }
-
-    public static int[] getContinueExactMatchCount(int index, int max,
-            ArrayList p_sourceTuvs, MatchTypeStatistics p_matchTypes)
-    {
-        int[] icWordCount = new int[2];
-        int possibleContextIndex = index;
-        int noTextCount = 0;
-        int indexOfLastText = -1;
-
-        L: for (possibleContextIndex = index + 1; possibleContextIndex < max; possibleContextIndex++)
-        {
-            Object o = p_sourceTuvs.get(possibleContextIndex);
-            int state = 0;
-            if (o instanceof Tuv)
-            {
-                Tuv sourceTuv = (Tuv) o;
-                state = p_matchTypes.getLingManagerMatchType(sourceTuv.getId(),
-                        DUMMY_SUBID);
-                int statisticMatchType = p_matchTypes
-                        .getStatisticsMatchType(sourceTuv.getId(),
-                                OnlineEditorManagerLocal.DUMMY_SUBID);
-                String type = sourceTuv.getTu().getTuType();
-                if ("text".equals(type) || "charset".equals(type)
-                        || "meta-content".equals(type))
-                {
-                    if (state == LeverageMatchLingManager.EXACT
-                            && statisticMatchType != 6)
-                    {
-                        icWordCount[1] += sourceTuv.getWordCount();
-                        indexOfLastText = possibleContextIndex;
-                        continue L;
-                    }
-                    else
-                    {
-                        break L;
-                    }
-                }
-                else
-                {
-                    noTextCount++;
-                }
-            }
-            else if (o instanceof SegmentTmTuv)
-            {
-                SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
-                String type = sourceTuv.getType();
-                if ("text".equals(type) || "charset".equals(type)
-                        || "meta-content".equals(type))
-                {
-                    state = p_matchTypes.getLingManagerMatchType(sourceTuv
-                            .getId(), DUMMY_SUBID);
-                    int statisticMatchType = p_matchTypes
-                            .getStatisticsMatchType(sourceTuv.getId(),
-                                    OnlineEditorManagerLocal.DUMMY_SUBID);
-                    if (state == LeverageMatchLingManager.EXACT
-                            && statisticMatchType != 6)
-                    {
-                        icWordCount[1] += sourceTuv.getWordCount();
-                        indexOfLastText = possibleContextIndex;
-                        continue L;
-                    }
-                    else
-                    {
-                        break L;
-                    }
-                }
-                else
-                {
-                    noTextCount++;
-                }
-            }
-        }
-
-        // always escape the last "text" word count
-        if (indexOfLastText != -1)
-        {
-            Object o = p_sourceTuvs.get(indexOfLastText);
-            int wordCount = 0;
-            if (o instanceof Tuv)
-            {
-                Tuv sourceTuv = (Tuv) o;
-                wordCount = sourceTuv.getWordCount();
-            }
-            else if (o instanceof SegmentTmTuv)
-            {
-                SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
-                wordCount = sourceTuv.getWordCount();
-            }
-
-            icWordCount[1] -= wordCount;
-            if (icWordCount[1] < 0)
-            {
-                // don't sub the last word count.
-                icWordCount[1] += wordCount;
-            }
-
-            if (LeverageUtil.isSIDContextMatch(indexOfLastText, p_sourceTuvs,
-                    p_matchTypes))
-            {
-                icWordCount[1] += wordCount;
-            }
-        }
-
-        icWordCount[0] = possibleContextIndex - index - 1;
-
-        return icWordCount;
-    }
-
     /**
      * <p>
      * Template-less UI mode: returns the formatted HTML display string for an
@@ -4938,28 +4381,32 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             RenderingOptions p_options, Vector p_excludedItemTypes,
             TargetPage p_targetPage, MatchTypeStatistics p_matchTypes,
             String p_pageDataType, SegmentRepetitions p_repetitions,
-            int p_segmentNumPerPage, int p_currentPageNum, HashMap p_searchMap)
+            EditorState p_state, HashMap p_searchMap)
             throws Exception
     {
+        String companyId = String.valueOf(p_targetPage.getSourcePage()
+                .getCompanyId());
         StringBuffer result = new StringBuffer(256);
 
         long curPid = 0;
         long prevPid = 0;
         StringBuffer segmentPar = new StringBuffer();
 
-        int beginIndex = (p_currentPageNum - 1) * p_segmentNumPerPage;
+        int segmentNumPerPage = p_state.getPaginateInfo().getSegmentNumPerPage();
+        int currentPageNum = p_state.getPaginateInfo().getCurrentPageNum();
+        int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
         int tmpCount = 0;
-        for (int i = beginIndex, max = p_sourceTuvs.size(); tmpCount < p_segmentNumPerPage
+        for (int i = beginIndex, max = p_sourceTuvs.size(); tmpCount < segmentNumPerPage
                 && i < max; i++)
         {
             tmpCount++;
             Tuv sourceTuv = (Tuv) p_sourceTuvs.get(i);
             Tuv targetTuv = (Tuv) p_targetTuvs.get(i);
 
-            Tu tu = targetTuv.getTu();
+            Tu tu = targetTuv.getTu(companyId);
             long tuId = tu.getTuId();
             long tuvId = targetTuv.getId();
-            String dataType = targetTuv.getDataType();
+            String dataType = targetTuv.getDataType(companyId);
             String itemType = tu.getTuType();
             boolean isLocalizable = tu.isLocalizable();
             GxmlElement srcElem = sourceTuv.getGxmlElement();
@@ -4985,30 +4432,36 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
             // Make the segment RTL if it's 1) Translatable 2) In an RTL
             // language
-            if (b_rtlLocale && !targetTuv.isLocalizable())
+            if (b_rtlLocale && !targetTuv.isLocalizable(companyId))
             {
                 dir = "DIR=rtl ";
             }
 
             String style;
-            boolean isShowDefaultContext = showDefaultContext(p_targetPage, i,
+            // Is exact match in "Leverage Default Matches".
+            boolean isExactDefaultContext = showDefaultContext(p_targetPage, i,
                     p_sourceTuvs, p_matchTypes);
-            if (isShowDefaultContext)
+            if (isExactDefaultContext)
             {
-                style = STYLE_SEGMENT_UNVERIFIED;
+                // Modify for GBS-2531
+                // style = STYLE_SEGMENT_UNVERIFIED;
+                style = STYLE_SEGMENT_EXACT;
             }
             else if (LeverageUtil.isIncontextMatch(i, p_sourceTuvs,
-                    p_targetTuvs, p_matchTypes, p_excludedItemTypes))
+                    p_targetTuvs, p_matchTypes, p_excludedItemTypes, companyId))
             {
                 style = STYLE_CONTEXT;
             }
             else
             {
                 style = getMatchStyle2(p_matchTypes, sourceTuv, targetTuv,
-                        p_repetitions);
+                        p_repetitions, DUMMY_SUBID, companyId);
                 if (STYLE_SEGMENT_UPDATED.equals(style)
-                        && GxmlUtil.getDisplayHtml2(srcElem).trim().equals(
-                                GxmlUtil.getDisplayHtml2(trgElem).trim()))
+                        && GxmlUtil
+                                .getDisplayHtml2(srcElem)
+                                .trim()
+                                .equals(GxmlUtil.getDisplayHtml2(trgElem)
+                                        .trim()))
                 {
                     style = STYLE_SEGMENT;
                 }
@@ -5076,10 +4529,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 segmentPar.append("isMerged=\"").append(
                         mapMergeState(mergeState));
                 segmentPar.append("\" ");
-                segmentPar.append("\nsource=\"").append(mergedSource).append(
-                        "\" ");
-                segmentPar.append("\ntarget=\"").append(targetGxml).append(
-                        "\" ");
+                segmentPar.append("\nsource=\"").append(mergedSource)
+                        .append("\" ");
+                segmentPar.append("\ntarget=\"").append(targetGxml)
+                        .append("\" ");
             }
             else if (mergeState.equals(Tuv.MERGE_MIDDLE)
                     || mergeState.equals(Tuv.MERGE_END))
@@ -5087,17 +4540,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 segmentPar.append("isMerged=\"").append(
                         mapMergeState(mergeState));
                 segmentPar.append("\" ");
-                segmentPar.append("\nsource=\"").append(sourceGxml).append(
-                        "\" ");
-                segmentPar.append("\ntarget=\"").append(targetGxml).append(
-                        "\" ");
+                segmentPar.append("\nsource=\"").append(sourceGxml)
+                        .append("\" ");
+                segmentPar.append("\ntarget=\"").append(targetGxml)
+                        .append("\" ");
             }
             else
             {
-                segmentPar.append("\nsource=\"").append(sourceGxml).append(
-                        "\" ");
-                segmentPar.append("\ntarget=\"").append(targetGxml).append(
-                        "\" ");
+                segmentPar.append("\nsource=\"").append(sourceGxml)
+                        .append("\" ");
+                segmentPar.append("\ntarget=\"").append(targetGxml)
+                        .append("\" ");
             }
             segmentPar.append(">");
             // TODO: need to show B/I/U; client handles real ptag conversion.
@@ -5117,7 +4570,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             {
                 result.append(getSubSegments(sourceTuv, targetTuv,
                         p_matchTypes, b_rtlLocale, p_pageDataType,
-                        p_repetitions));
+                        p_repetitions, companyId));
             }
 
             prevPid = curPid;
@@ -5132,15 +4585,15 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      */
     private String getSubSegments(Tuv sourceTuv, Tuv targetTuv,
             MatchTypeStatistics p_matchTypes, boolean b_rtlLocale,
-            String p_pageDataType, SegmentRepetitions p_repetitions)
-            throws Exception
+            String p_pageDataType, SegmentRepetitions p_repetitions,
+            String companyId) throws Exception
     {
         StringBuffer result = null;
         List subflowsTarget = targetTuv.getSubflowsAsGxmlElements(true);
         boolean b_subflows = (subflowsTarget != null && subflowsTarget.size() > 0);
         // b_subflows = hasSubflows(subflowsTarget);
 
-        Tu tu = targetTuv.getTu();
+        Tu tu = targetTuv.getTu(companyId);
         long tuId = tu.getTuId();
         long tuvId = targetTuv.getId();
         String itemType = tu.getTuType();
@@ -5174,7 +4627,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // ... or from document if tuv inherits it.
                 if (dataType == null)
                 {
-                    dataType = targetTuv.getDataType();
+                    dataType = targetTuv.getDataType(companyId);
                 }
                 String dir;
                 if (b_rtlLocale && isTranslatableSub(subElmtTarget)
@@ -5193,12 +4646,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         .encodeHtmlEntities(subElmtTarget
                                 .toGxmlExcludeTopTags());
                 String style = getMatchStyle2(p_matchTypes, sourceTuv,
-                        targetTuv, p_repetitions);
+                        targetTuv, p_repetitions, subId, companyId);
                 if (STYLE_SEGMENT_UPDATED.equals(style)
-                        && GxmlUtil.getDisplayHtml2(subElmtTarget).trim()
-                                .equals(
-                                        GxmlUtil.getDisplayHtml2(subEletSource)
-                                                .trim()))
+                        && GxmlUtil
+                                .getDisplayHtml2(subElmtTarget)
+                                .trim()
+                                .equals(GxmlUtil.getDisplayHtml2(subEletSource)
+                                        .trim()))
                 {
                     style = STYLE_SEGMENT;
                 }
@@ -5231,10 +4685,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     result.append("isMerged=\"").append(
                             mapMergeState(subMergeState));
                     result.append("\" ");
-                    result.append("\nsource=\"").append(mergedSource).append(
-                            "\" ");
-                    result.append("\ntarget=\"").append(subTargetGxml).append(
-                            "\" ");
+                    result.append("\nsource=\"").append(mergedSource)
+                            .append("\" ");
+                    result.append("\ntarget=\"").append(subTargetGxml)
+                            .append("\" ");
                 }
                 else if (subMergeState.equals(Tuv.MERGE_MIDDLE)
                         || subMergeState.equals(Tuv.MERGE_END))
@@ -5242,17 +4696,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     result.append("isMerged=\"").append(
                             mapMergeState(subMergeState));
                     result.append("\" ");
-                    result.append("\nsource=\"").append(subSourceGxml).append(
-                            "\" ");
-                    result.append("\ntarget=\"").append(subTargetGxml).append(
-                            "\" ");
+                    result.append("\nsource=\"").append(subSourceGxml)
+                            .append("\" ");
+                    result.append("\ntarget=\"").append(subTargetGxml)
+                            .append("\" ");
                 }
                 else
                 {
-                    result.append("\nsource=\"").append(subSourceGxml).append(
-                            "\" ");
-                    result.append("\ntarget=\"").append(subTargetGxml).append(
-                            "\" ");
+                    result.append("\nsource=\"").append(subSourceGxml)
+                            .append("\" ");
+                    result.append("\ntarget=\"").append(subTargetGxml)
+                            .append("\" ");
                 }
                 result.append(">\n");
                 result.append(GxmlUtil.getDisplayHtml2(subElmtTarget)).append(
@@ -5272,10 +4726,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * </p>
      */
     private String getSourceDisplayHtml(Tuv p_srcTuv, int p_viewMode,
-            SourcePage p_srcPage, HashMap searchMap)
+            SourcePage p_srcPage, HashMap searchMap, RenderingOptions p_options)
     {
-        long tuId = p_srcTuv.getTu().getTuId();
-        String dataType = p_srcTuv.getDataType();
+        String companyId = String.valueOf(p_srcPage.getCompanyId());
+        long tuId = p_srcTuv.getTu(companyId).getTuId();
+        String dataType = p_srcTuv.getDataType(companyId);
         // String itemType = p_srcTuv.getTu().getTuType();
 
         // Get the target page locale so we can set the DIR attribute
@@ -5286,7 +4741,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         // Make the segment RTL if it's 1) Translatable 2) In an RTL
         // language and 3) it has bidi characters in it.
-        if (b_rtlLocale && !p_srcTuv.isLocalizable()
+        if (b_rtlLocale && !p_srcTuv.isLocalizable(companyId)
                 && Text.containsBidiChar(p_srcTuv.getGxml()))
         {
             dir = " DIR=rtl";
@@ -5329,9 +4784,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 segment = GxmlUtil.getDisplayHtml(elem, dataType, p_viewMode);
                 segment = SegmentProtectionManager.handlePreserveWhiteSpace(
                         elem, segment, null, null);
+                String seg = getEditorSegment(p_srcTuv,
+                        EditorConstants.PTAGS_COMPACT, segment,
+                        p_options.getNeedShowPTags(), companyId);
                 if (!b_subflows)
                 {
-                    result.append(segment);
+                    result.append(seg);
                 }
                 else
                 {
@@ -5342,7 +4800,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     result.append("<TR><TD COLSPAN=2");
                     result.append(dir);
                     result.append(" CLASS=editorText>");
-                    result.append(segment);
+                    result.append(seg);
                     result.append("</TD></TR>\n");
 
                     // process each subflow
@@ -5352,11 +4810,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         String subId = subElmt.getAttribute(GxmlNames.SUB_ID);
                         dataType = subElmt.getAttribute(GxmlNames.SUB_DATATYPE);
 
+                        if (dataType == null)
+                        {
+                            dataType = p_srcTuv.getDataType(companyId);
+                        }
+
                         if (b_rtlLocale
                                 && isTranslatableSub(subElmt)
-                                && Text
-                                        .containsBidiChar(subElmt
-                                                .getTextValue()))
+                                && Text.containsBidiChar(subElmt.getTextValue()))
                         {
                             dir = " DIR=rtl";
                         }
@@ -5402,8 +4863,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (EditUtil.isHtmlDerivedFormat(dataType))
                 {
                     // can only show images in HTML-derived files
-                    segment = GxmlUtil.getOriginalTextInHtmlWithImages(p_srcTuv
-                            .getGxmlElement(), p_srcPage);
+                    segment = GxmlUtil.getOriginalTextInHtmlWithImages(
+                            p_srcTuv.getGxmlElement(), p_srcPage);
                 }
                 else
                 {
@@ -5417,28 +4878,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
         return result.toString();
     }
-
-    // private boolean hasSubflows(List subflows)
-    // {
-    // if(subflows == null)
-    // {
-    // return false;
-    // }
-    // for(int i = 0; i < subflows.size(); i++)
-    // {
-    // GxmlElement element = (GxmlElement) subflows.get(i);
-    // String s = element.getAttribute("isInlineAttribute");
-    // if(s!=null && Boolean.parseBoolean(s))
-    // {
-    // subflows.remove(i);
-    // if(subflows.size() > 0)
-    // {
-    // i--;
-    // }
-    // }
-    // }
-    // return subflows.size() > 0;
-    // }
 
     /**
      * Get the first column (id field) Html code in the subflow table.
@@ -5630,7 +5069,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      */
     private String getMatchStyle(MatchTypeStatistics p_matchTypes,
             Tuv p_srcTuv, Tuv p_trgTuv, String p_subId, boolean p_isExcluded,
-            boolean p_unlock, SegmentRepetitions p_repetitions)
+            boolean p_unlock, SegmentRepetitions p_repetitions, String companyId)
     {
         if (p_isExcluded)
         {
@@ -5651,12 +5090,12 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
 
         return getMatchStyleByLM(p_matchTypes, p_srcTuv, p_trgTuv, p_subId,
-                p_unlock, p_repetitions);
+                p_unlock, p_repetitions, companyId);
     }
-    
+
     private String getMatchStyleByLM(MatchTypeStatistics p_matchTypes,
             Tuv p_srcTuv, Tuv p_trgTuv, String p_subId, boolean p_unlock,
-            SegmentRepetitions p_repetitions)
+            SegmentRepetitions p_repetitions, String p_companyId)
     {
         int state = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(),
                 p_subId);
@@ -5667,7 +5106,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 return STYLE_UNVERIFIED;
 
             case LeverageMatchLingManager.EXACT:
-                if (EditHelper.isTuvInProtectedState(p_trgTuv) && !p_unlock)
+                if (EditHelper.isTuvInProtectedState(p_trgTuv, p_companyId)
+                        && !p_unlock)
                 {
                     return STYLE_LOCKED;
                 }
@@ -5675,7 +5115,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 return STYLE_EXACT_MATCH;
 
             case LeverageMatchLingManager.FUZZY:
-                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
+                if (p_srcTuv.getTu(p_companyId).getRepetitionOfId() != 0)
                 {
                     return STYLE_REPETITION;
                 }
@@ -5687,7 +5127,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // So it gets colored as a no match. The segment editor
                 // may still show fuzzy matches below the threshold.
             case LeverageMatchLingManager.NO_MATCH:
-                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
+                if (p_srcTuv.getTu(p_companyId).getRepetitionOfId() != 0)
                 {
                     return STYLE_REPETITION;
                 }
@@ -5705,7 +5145,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * </p>
      */
     private String getMatchStyle2(MatchTypeStatistics p_matchTypes,
-            Tuv p_srcTuv, Tuv p_trgTuv, SegmentRepetitions p_repetitions)
+            Tuv p_srcTuv, Tuv p_trgTuv, SegmentRepetitions p_repetitions,
+            String p_subId, String companyId)
     {
         // Template-less UI mode shows only text segments, so nothing
         // needs to be excluded.
@@ -5718,14 +5159,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
 
         int state = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(),
-                DUMMY_SUBID);
+                p_subId);
 
         switch (state)
         {
             case LeverageMatchLingManager.UNVERIFIED:
                 return STYLE_SEGMENT_UNVERIFIED;
             case LeverageMatchLingManager.EXACT:
-                if (EditHelper.isTuvInProtectedState(p_trgTuv))
+                if (EditHelper.isTuvInProtectedState(p_trgTuv, companyId))
                 {
                     return STYLE_SEGMENT_LOCKED;
                 }
@@ -5734,11 +5175,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                     return STYLE_SEGMENT_EXACT;
                 }
             case LeverageMatchLingManager.FUZZY:
-                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
+                if (p_srcTuv.getTu(companyId).getRepetitionOfId() != 0)
                 {
                     return STYLE_SEGMENT_REPETITION;
                 }
-                else 
+                else
                 {
                     return STYLE_SEGMENT_FUZZY;
                 }
@@ -5748,7 +5189,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // So it gets colored as a no match. The segment editor
                 // may still show fuzzy matches below the threshold.
             case LeverageMatchLingManager.NO_MATCH:
-                if (p_srcTuv.getTu().getRepetitionOfId() != 0)
+                if (p_srcTuv.getTu(companyId).getRepetitionOfId() != 0)
                 {
                     return STYLE_SEGMENT_REPETITION;
                 }
@@ -5884,22 +5325,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     /**
-     * Returns the page data for a given source page id and page template.
-     */
-    private String getPageData(Long p_sourcePageId,
-            PageTemplate p_pageTemplate, RenderingOptions p_options)
-            throws Exception
-    {
-        Collection tp = m_pageManager.getTemplatePartsForSourcePage(
-                p_sourcePageId, p_pageTemplate.getTypeAsString());
-
-        // ALWAYS set the template parts before getting the page data
-        p_pageTemplate.setTemplateParts(new ArrayList(tp));
-
-        return p_pageTemplate.getPageData(p_options);
-    }
-
-    /**
      * Returns true if the gxml element representing a SUB has a locType of
      * "translatable".
      */
@@ -5965,7 +5390,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
     private List getMergedSourceTuvs(List p_sourceTuvs, int p_start, int p_count)
     {
-        ArrayList result = new ArrayList();
+        ArrayList<Tuv> result = new ArrayList<Tuv>();
 
         for (int i = 0; i < p_count; i++)
         {
@@ -6023,19 +5448,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
      * Populates a term leverage options object.
      */
     private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
-            Locale p_targetLocale, String p_termbase, String p_companyId) throws GeneralException
+            Locale p_targetLocale, String p_termbase, String p_companyId)
+            throws GeneralException
     {
         TermLeverageOptions options = null;
-
-        Locale sourceLocale = p_sourceLocale;
-        Locale targetLocale = p_targetLocale;
-
         try
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
-
             long termbaseId = manager.getTermbaseId(p_termbase, p_companyId);
-
             // If termbase does not exist, return null options.
             if (termbaseId == -1)
             {
@@ -6046,97 +5466,27 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             options.addTermBase(p_termbase);
             options.setLoadTargetTerms(true);
             options.setSaveToDatabase(false);
-
             // fuzzy threshold set by object constructor - use defaults.
             options.setFuzzyThreshold(0);
-
+            // add source locale and lang names
+            options.setSourcePageLocale(p_sourceLocale);
             ITermbase termbase = manager.connect(p_termbase,
                     ITermbase.SYSTEM_USER, "", p_companyId);
-
-            // add source locale and lang names
-            options.setSourcePageLocale(sourceLocale);
             ArrayList sourceLangNames = termbase
-                    .getLanguagesByLocale(sourceLocale.toString());
-
+                    .getLanguagesByLocale(p_sourceLocale.toString());
             for (int i = 0, max = sourceLangNames.size(); i < max; i++)
             {
                 String langName = (String) sourceLangNames.get(i);
-
                 options.addSourcePageLocale2LangName(langName);
             }
-
             // add target locales and lang names
             ArrayList targetLangNames = termbase
-                    .getLanguagesByLocale(targetLocale.toString());
+                    .getLanguagesByLocale(p_targetLocale.toString());
             for (int i = 0, max = targetLangNames.size(); i < max; i++)
             {
                 String langName = (String) targetLangNames.get(i);
-                options.addTargetPageLocale2LangName(targetLocale, langName);
-                options.addLangName2Locale(langName, targetLocale);
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new GeneralException(ex);
-        }
-
-        return options;
-    }
-
-    /**
-     * Populates a term leverage options object.
-     */
-    private TermLeverageOptions getTermLeverageOptions(Tuv p_srcTuv,
-            Tuv p_trgTuv, String p_termbase, String p_companyId) throws GeneralException
-    {
-        TermLeverageOptions options = null;
-
-        Locale sourceLocale = p_srcTuv.getGlobalSightLocale().getLocale();
-        Locale targetLocale = p_trgTuv.getGlobalSightLocale().getLocale();
-
-        try
-        {
-            ITermbaseManager manager = ServerProxy.getTermbaseManager();
-
-            long termbaseId = manager.getTermbaseId(p_termbase, p_companyId);
-
-            // If termbase does not exist, return null options.
-            if (termbaseId == -1)
-            {
-                return null;
-            }
-
-            options = new TermLeverageOptions();
-            options.addTermBase(p_termbase);
-            options.setLoadTargetTerms(true);
-            options.setSaveToDatabase(false);
-
-            // fuzzy threshold set by object constructor - use defaults.
-            options.setFuzzyThreshold(0);
-
-            ITermbase termbase = manager.connect(p_termbase,
-                    ITermbase.SYSTEM_USER, "", p_companyId);
-
-            // add source locale and lang names
-            options.setSourcePageLocale(sourceLocale);
-            ArrayList sourceLangNames = termbase
-                    .getLanguagesByLocale(sourceLocale.toString());
-
-            for (int i = 0, max = sourceLangNames.size(); i < max; i++)
-            {
-                String langName = (String) sourceLangNames.get(i);
-
-                options.addSourcePageLocale2LangName(langName);
-            }
-
-            // add target locales and lang names
-            ArrayList targetLangNames = termbase
-                    .getLanguagesByLocale(targetLocale.toString());
-            for (int i = 0, max = targetLangNames.size(); i < max; i++)
-            {
-                String langName = (String) targetLangNames.get(i);
-                options.addTargetPageLocale2LangName(targetLocale, langName);
-                options.addLangName2Locale(langName, targetLocale);
+                options.addTargetPageLocale2LangName(p_targetLocale, langName);
+                options.addLangName2Locale(langName, p_targetLocale);
             }
         }
         catch (Exception ex)
@@ -6150,7 +5500,6 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     //
     // Caching-related helper methods
     //
-
     /**
      * For online-offline synchronization: this method allows the online
      * pagehandler to invalidate target TUVs after an offline file upload.
@@ -6184,20 +5533,17 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     private SourcePage getSourcePage(long p_srcPageId) throws GeneralException,
             RemoteException
     {
-        SourcePage result = null;
-
-        synchronized (m_pageCache.m_pageLock)
-        {
-            result = m_pageCache.getSourcePage();
-
-            if (result == null || result.getId() != p_srcPageId)
-            {
-                m_pageCache.setSourcePage(m_pageManager
-                        .getSourcePage(p_srcPageId));
-
-                result = m_pageCache.getSourcePage();
-            }
-        }
+        SourcePage result = m_pageManager.getSourcePage(p_srcPageId);
+        m_pageCache.setSourcePage(result);
+        /*
+         * synchronized (m_pageCache.m_pageLock) { result =
+         * m_pageCache.getSourcePage();
+         * 
+         * if (result == null || result.getId() != p_srcPageId) {
+         * m_pageCache.setSourcePage(m_pageManager .getSourcePage(p_srcPageId));
+         * 
+         * result = m_pageCache.getSourcePage(); } }
+         */
 
         return result;
     }
@@ -6218,28 +5564,26 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     private TargetPage getTargetPage(long p_trgPageId) throws GeneralException,
             RemoteException
     {
-        TargetPage result = null;
 
-        synchronized (m_pageCache.m_pageLock)
-        {
-            result = m_pageCache.getTargetPage();
+        TargetPage result = m_pageManager.getTargetPage(p_trgPageId);
+        result.setGlobalSightLocale(result.getGlobalSightLocale());
+        m_pageCache.setTargetPage(result);
 
-            if (result == null || result.getId() != p_trgPageId)
-            {
-                result = m_pageManager.getTargetPage(p_trgPageId);
-                Long id = result.getSourcePage().getIdAsLong();
-                SourcePage sPage = (SourcePage) HibernateUtil.get(
-                        SourcePage.class, id);
-                result.setSourcePage(sPage);
-                id = result.getGlobalSightLocale().getIdAsLong();
-                GlobalSightLocale locale = (GlobalSightLocale) HibernateUtil
-                        .get(GlobalSightLocale.class, id);
-                result.setGlobalSightLocale(locale);
-
-                m_pageCache.setTargetPage(result);
-            }
-        }
-
+        /*
+         * synchronized (m_pageCache.m_pageLock) { result =
+         * m_pageCache.getTargetPage();
+         * 
+         * if (result == null || result.getId() != p_trgPageId) { result =
+         * m_pageManager.getTargetPage(p_trgPageId); Long id =
+         * result.getSourcePage().getIdAsLong(); SourcePage sPage = (SourcePage)
+         * HibernateUtil.get( SourcePage.class, id);
+         * result.setSourcePage(sPage); id =
+         * result.getGlobalSightLocale().getIdAsLong(); GlobalSightLocale locale
+         * = (GlobalSightLocale) HibernateUtil .get(GlobalSightLocale.class,
+         * id); result.setGlobalSightLocale(locale);
+         * 
+         * m_pageCache.setTargetPage(result); } }
+         */
         return result;
     }
 
@@ -6276,8 +5620,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     }
 
     @SuppressWarnings("unchecked")
-    private ArrayList getPageTuvs(SourcePage p_page) throws GeneralException,
-            RemoteException
+    private ArrayList<Tuv> getPageTuvs(SourcePage p_page)
+            throws GeneralException, RemoteException
     {
         ArrayList result;
 
@@ -6297,10 +5641,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    private List getPageTuvs(TargetPage p_page) throws GeneralException,
+    @SuppressWarnings("unchecked")
+    private List<Tuv> getPageTuvs(TargetPage p_page) throws GeneralException,
             RemoteException
     {
-        List result;
+        List<Tuv> result;
 
         synchronized (m_pageCache.m_targetTuvsLock)
         {
@@ -6343,6 +5688,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     private ArrayList getImageMaps(TargetPage p_targetPage)
             throws GeneralException, RemoteException
     {
@@ -6366,6 +5712,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     private ArrayList getComments(TargetPage p_targetPage)
             throws GeneralException, RemoteException
     {
@@ -6395,9 +5742,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                  */
 
                 m_pageCache.setComments(m_commentManager.getIssues(
-                        Issue.TYPE_SEGMENT, String
-                                .valueOf(p_targetPage.getId())
-                                + "_"));
+                        Issue.TYPE_SEGMENT,
+                        String.valueOf(p_targetPage.getId()) + "\\_"));
 
                 result = m_pageCache.getComments();
             }
@@ -6492,10 +5838,11 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    private ArrayList getSourceTemplateParts(Long p_srcPageId,
+    @SuppressWarnings("unchecked")
+    private ArrayList<TemplatePart> getSourceTemplateParts(Long p_srcPageId,
             String p_templateType) throws GeneralException, RemoteException
     {
-        ArrayList result;
+        ArrayList<TemplatePart> result;
 
         synchronized (m_pageCache.m_templateLock)
         {
@@ -6578,8 +5925,8 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 if (template.getTemplateParts() == null
                         || template.getTemplateParts().size() == 0)
                 {
-                    ArrayList parts = getSourceTemplateParts(srcPage
-                            .getIdAsLong(), template.getTypeAsString());
+                    ArrayList<TemplatePart> parts = getSourceTemplateParts(
+                            srcPage.getIdAsLong(), template.getTypeAsString());
 
                     // for snippets, computes positions
                     template.setTemplateParts(parts);
@@ -6629,24 +5976,25 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     public ArrayList getPageLastModifyUserList(EditorState p_state)
             throws GeneralException, RemoteException
     {
-        ArrayList result = new ArrayList();
+        ArrayList<String> result = new ArrayList<String>();
 
         TargetPage targetPage = getTargetPage(p_state.getTargetPageId());
         List tuvs = getPageTuvs(targetPage);
-        
-        int segmentNumPerPage = p_state.getPaginateInfo().getSegmentNumPerPage();
+
+        int segmentNumPerPage = p_state.getPaginateInfo()
+                .getSegmentNumPerPage();
         int currentPageNum = p_state.getPaginateInfo().getCurrentPageNum();
 
         int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
         int count = 0;
-        ArrayList tuIdList = new ArrayList();
+
         // Find all sid on current page
         for (int i = beginIndex, max = tuvs.size(); count < segmentNumPerPage
                 && i < max; i++)
         {
             count++;
             Tuv tuv = (Tuv) tuvs.get(i);
-            
+
             String name = tuv.getLastModifiedUser();
 
             if (name != null && !name.equals("") && !name.equals("Xliff")
@@ -6663,20 +6011,21 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return result;
     }
 
-    public ArrayList getPageSidList(EditorState p_state) throws GeneralException,
-            RemoteException
+    public ArrayList getPageSidList(EditorState p_state)
+            throws GeneralException, RemoteException
     {
-        ArrayList result = new ArrayList();
+        ArrayList<String> result = new ArrayList<String>();
 
         SourcePage sourcePage = getSourcePage(p_state.getSourcePageId());
         List tuvs = getPageTuvs(sourcePage);
-        
-        int segmentNumPerPage = p_state.getPaginateInfo().getSegmentNumPerPage();
+
+        int segmentNumPerPage = p_state.getPaginateInfo()
+                .getSegmentNumPerPage();
         int currentPageNum = p_state.getPaginateInfo().getCurrentPageNum();
 
         int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
         int count = 0;
-        ArrayList tuIdList = new ArrayList();
+
         // Find all sid on current page
         for (int i = beginIndex, max = tuvs.size(); count < segmentNumPerPage
                 && i < max; i++)
@@ -6707,9 +6056,10 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             if (p_searchMap != null)
             {
                 Iterator it = p_searchMap.entrySet().iterator();
-                
+
                 if (it.hasNext())
                 {
+                    @SuppressWarnings("unchecked")
                     Map.Entry<String, String> entry = (Map.Entry<String, String>) it
                             .next();
                     String key = entry.getKey();
@@ -6742,4 +6092,26 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         return isHighLight;
     }
 
+    private List<Long> getCurrentTuIds(List<Tuv> p_tuvs, PaginateInfo p_pi)
+    {
+        List<Long> tuIdList = m_pageCache.getCurrentPageTuIDS();
+        if (tuIdList == null)
+        {
+            tuIdList = new ArrayList<Long>();
+            int segmentNumPerPage = p_pi.getSegmentNumPerPage();
+            int currentPageNum = p_pi.getCurrentPageNum();
+            int beginIndex = (currentPageNum - 1) * segmentNumPerPage;
+            // Find all tuIds on current page
+            for (int i = beginIndex, count = 0, max = p_tuvs.size(); count < segmentNumPerPage
+                    && i < max; i++)
+            {
+                count++;
+                Tuv tuv = (Tuv) p_tuvs.get(i);
+                tuIdList.add(tuv.getTuId());
+            }
+        }
+        
+        return tuIdList;
+    }
+    
 }

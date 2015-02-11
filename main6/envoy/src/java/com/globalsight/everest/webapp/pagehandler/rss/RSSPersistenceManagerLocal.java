@@ -390,7 +390,7 @@ public class RSSPersistenceManagerLocal implements RSSPersistenceManager
 		try {
 			item = (Item)HibernateUtil.get(Item.class, p_id);
 		} catch (Exception e) {
-			s_logger.error(e.toString());
+			s_logger.error(e.getMessage(), e);
 		}
 		return item;
 	}
@@ -403,7 +403,7 @@ public class RSSPersistenceManagerLocal implements RSSPersistenceManager
 			HibernateUtil.save(p_item);
 			return true;
 		} catch (Exception e) {
-			s_logger.error(e.toString());
+			s_logger.error(e.getMessage(), e);
 			return false;
 		}
 	}

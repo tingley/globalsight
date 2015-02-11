@@ -77,7 +77,7 @@ public class BuildUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -100,7 +100,7 @@ public class BuildUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
             
             String[] cmd =
@@ -111,7 +111,7 @@ public class BuildUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
         else
@@ -133,7 +133,7 @@ public class BuildUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -224,7 +224,7 @@ public class BuildUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
     
@@ -237,7 +237,7 @@ public class BuildUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -290,7 +290,7 @@ public class BuildUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
 

@@ -23,32 +23,25 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Query;
 import org.hibernate.Session;
 
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.persistence.PersistenceService;
-import com.globalsight.everest.persistence.tuv.TuDescriptorModifier;
-import com.globalsight.everest.persistence.tuv.TuvDescriptorModifier;
-import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuvLing;
+import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.util.GlobalSightCrc;
-import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.ArrayConverter;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -65,10 +58,6 @@ public final class TuvManagerLocal implements TuvManager
     TuvManagerLocal()
     {
     }
-
-    //
-    // TuvManager interface methods
-    //
 
     /**
      * Factory method for creating Tu instances. Does not persist the Tu.
@@ -113,14 +102,19 @@ public final class TuvManagerLocal implements TuvManager
         return tu;
     }
 
-    /*
+    /**
      * Factory method for creating Tuv instances. Does not persist the Tuv. Sets
      * the TUV state to NOT_LOCALIZED.
      * 
-     * @param p_wordCount word count in the segment text. @param
-     * p_globalSightLocale GlobalSightLocale of the Tuv. @param p_sourcePage
-     * SourcePage associated with the Tuv. @return Tuv @throws TuvException when
-     * an error occurs.
+     * @param p_wordCount
+     *            word count in the segment text.
+     * @param p_globalSightLocale
+     *            GlobalSightLocale of the Tuv.
+     * @param p_sourcePage
+     *            SourcePage associated with the Tuv.
+     * @return Tuv
+     * @throws TuvException
+     *             when an error occurs.
      */
     public Tuv createTuv(int p_wordCount, GlobalSightLocale p_locale,
             SourcePage p_sourcePage) throws TuvException, RemoteException
@@ -129,7 +123,7 @@ public final class TuvManagerLocal implements TuvManager
 
         tuv.setWordCount(p_wordCount);
         tuv.setGlobalSightLocale(p_locale);
-        tuv.setSourcePage(p_sourcePage);
+        // tuv.setSourcePage(p_sourcePage);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -146,38 +140,43 @@ public final class TuvManagerLocal implements TuvManager
      * Saves the target segments from an offline edit.
      * 
      * @param p_tuvs
-     *            List of Tuvs to be saved
+     *            TuvImplVo List of Tuvs to be saved
      * @throws TuvException
      *             when an error occurs.
      */
-    public void saveTuvsFromOffline(List p_tuvs) throws TuvException
+    public void saveTuvsFromOffline(List<TuvImplVo> p_tuvs, String companyId)
+            throws TuvException
     {
         TuvImpl tuvInDb = null;
+        Connection conn = null;
         try
         {
-            for (Iterator it = p_tuvs.iterator(); it.hasNext();)
+        	conn = DbUtil.getConnection();
+        	List<TuvImpl> tuvsToBeUpdated = new ArrayList<TuvImpl>();
+            for (TuvImplVo tuv : p_tuvs)
             {
-                Tuv tuv = (Tuv) it.next();
-                tuvInDb = (TuvImpl) HibernateUtil.get(TuvImpl.class,
-                        tuv.getId());
+				tuvInDb = SegmentTuvUtil.getTuvById(conn, tuv.getId(), companyId);
                 tuvInDb.setExactMatchKey(GlobalSightCrc
                         .calculate(((TuvLing) tuv).getExactMatchFormat()));
-                tuvInDb.setSegmentString(tuv.getGxml());
+                tuvInDb.setGxml(tuv.getGxml());
                 tuvInDb.setState(TuvState.LOCALIZED);
                 tuvInDb.setMergeState(tuv.getMergeState());
                 tuvInDb.setLastModifiedUser(tuv.getLastModifiedUser());
                 tuvInDb.setLastModified(new Date());
                 tuvInDb.setTimestamp(new Timestamp(System.currentTimeMillis()));
-                
-                HibernateUtil.saveOrUpdate(tuvInDb);
+
+                tuvsToBeUpdated.add(tuvInDb);
             }
+
+            SegmentTuvUtil.updateTuvs(tuvsToBeUpdated, Long.parseLong(companyId));
         }
         catch (Exception ex)
         {
             CATEGORY.error("Cannot save offline TUV", ex);
             CATEGORY.error("id: " + tuvInDb.getId());
             CATEGORY.error("segment: " + tuvInDb.getSegmentString());
-            Set<XliffAlt> alts = tuvInDb.getXliffAlt();
+            // Ensure xliffAlt is loaded if it has
+            Set<XliffAlt> alts = tuvInDb.getXliffAlt(true);
             CATEGORY.error("xliffAlt size: " + alts.size());
             int i = 0;
             for (XliffAlt alt : alts)
@@ -188,10 +187,16 @@ public final class TuvManagerLocal implements TuvManager
                 CATEGORY.error("    segment :" + alt.getSegment());
                 CATEGORY.error("    language :" + alt.getLanguage());
                 CATEGORY.error("    quality :" + alt.getQuality());
-                CATEGORY.error("    tuv id :" + alt.getTuv().getId());
+                CATEGORY.error("    tuv id :" + alt.getTuvId());
             }
 
             throw new TuvException("Cannot save offline TUVs", ex);
+        }
+        finally
+        {
+        	if (conn != null) {
+            	DbUtil.silentReturnConnection(conn);
+        	}
         }
     }
 
@@ -199,10 +204,10 @@ public final class TuvManagerLocal implements TuvManager
      * Clones the source page's tuv for a target page based on the specified
      * locale.
      * 
-     * @param p_sourceLocaleTuv -
-     *            The tuv to be cloned.
-     * @param p_targetLocale -
-     *            The locale of the tuv.
+     * @param p_sourceLocaleTuv
+     *            - The tuv to be cloned.
+     * @param p_targetLocale
+     *            - The locale of the tuv.
      * @throws TuvException
      *             when an error occurs.
      * @throws RemoteException
@@ -212,7 +217,6 @@ public final class TuvManagerLocal implements TuvManager
             throws TuvException, RemoteException
     {
         TuvImpl tuv = new TuvImpl((TuvImpl) p_sourceTuv);
-
         tuv.setGlobalSightLocale(p_targetLocale);
         tuv.setExactMatchKey(0);
 
@@ -230,10 +234,10 @@ public final class TuvManagerLocal implements TuvManager
      * Clones the source page's tuv for a target page based on the specified
      * locale.
      * 
-     * @param p_sourceLocaleTuv -
-     *            The tuv to be cloned.
-     * @param p_targetLocale -
-     *            The locale of the tuv.
+     * @param p_sourceLocaleTuv
+     *            - The tuv to be cloned.
+     * @param p_targetLocale
+     *            - The locale of the tuv.
      * @param p_matchType
      *            match type that the Tuv p_gxml came from. Must be
      *            LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH,
@@ -253,21 +257,21 @@ public final class TuvManagerLocal implements TuvManager
 
         switch (p_matchType)
         {
-        case LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH:
-            tuv.setState(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED);
-            break;
-        case LeverageMatchType.EXACT_MATCH:
-            tuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
-            break;
-        case LeverageMatchType.UNVERIFIED_EXACT_MATCH:
-            tuv.setState(TuvState.UNVERIFIED_EXACT_MATCH);
-            break;
-        default:
-            TuvException ex = new TuvException("cloneToTarget: "
-                    + "p_matchType " + Integer.toString(p_matchType)
-                    + " not valid for this method");
-            CATEGORY.error(ex);
-            throw ex;
+            case LeverageMatchType.LEVERAGE_GROUP_EXACT_MATCH:
+                tuv.setState(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED);
+                break;
+            case LeverageMatchType.EXACT_MATCH:
+                tuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
+                break;
+            case LeverageMatchType.UNVERIFIED_EXACT_MATCH:
+                tuv.setState(TuvState.UNVERIFIED_EXACT_MATCH);
+                break;
+            default:
+                TuvException ex = new TuvException("cloneToTarget: "
+                        + "p_matchType " + Integer.toString(p_matchType)
+                        + " not valid for this method");
+                CATEGORY.error(ex.getMessage(), ex);
+                throw ex;
         }
 
         tuv.setGxmlWithSubIds(p_gxml);
@@ -291,31 +295,16 @@ public final class TuvManagerLocal implements TuvManager
     public Collection getExportTuvs(SourcePage p_sourcePage,
             GlobalSightLocale p_locale) throws TuvException, RemoteException
     {
-        // Vector queryArgs = new Vector(2);
-        // queryArgs.add(p_sourcePage.getIdAsLong());
-        // queryArgs.add(p_locale.getIdAsLong());
-
-        /*
-         * Collection result = executeQuery(
-         * TuvQueryNames.EXPORT_TUVS_BY_SOURCE_PAGE_ID, queryArgs,
-         * TopLinkPersistence.MAKE_EDITABLE);
-         */
-
-        // Hibernate access
-        HashMap map = new HashMap();
-        map.put(TuvQueryConstants.LOCALE_ID_ARG, p_locale.getIdAsLong());
-        map.put(TuvQueryConstants.SOURCE_PAGE_ID_ARG, p_sourcePage
-                .getIdAsLong());
-        List result = HibernateUtil.searchWithSql(
-                TuvDescriptorModifier.TARGET_TUV_BY_SOURCE_PAGE_SQL, map,
-                TuvDescriptorModifier.TUV_CLASS);
-        if (CATEGORY.isDebugEnabled())
+        List result = null;
+        try
         {
-            Collection ids = TuvPersistenceHelper.getIds(result);
-
-            CATEGORY.debug("getExportTuvs" + " p_sourcePage="
-                    + p_sourcePage.getId() + " p_locale=" + p_locale.toString()
-                    + " returned " + ids.size() + " Tuvs=" + ids.toString());
+            result = SegmentTuvUtil.getExportTuvs(
+                    Long.parseLong(p_sourcePage.getCompanyId()),
+                    p_locale.getId(), p_sourcePage.getId());
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
         }
 
         return result;
@@ -340,32 +329,56 @@ public final class TuvManagerLocal implements TuvManager
 
         try
         {
-            conn = PersistenceService.getInstance().getConnection();
+            conn = DbUtil.getConnection();
             TuvJdbcQuery tuvQuery = new TuvJdbcQuery(conn);
             tus = tuvQuery.getTusBySourcePageIdAndLocales(p_sourcePage,
                     p_trgLocales);
+            // Improve performance (required)
+            loadTuTuvsPrior(p_sourcePage, p_trgLocales);
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
-
+            CATEGORY.error(ex.getMessage(), ex);
             throw new TuvException(ex);
         }
         finally
         {
             if (conn != null)
             {
-                try
-                {
-                    PersistenceService.getInstance().returnConnection(conn);
-                }
-                catch (Exception ignore)
-                {
-                }
+                DbUtil.silentReturnConnection(conn);
             }
         }
 
         return new PageSegments(tus, p_sourcePage, p_trgLocales);
+    }
+
+    /**
+     * Load data prior to improve performance.
+     */
+    private void loadTuTuvsPrior(SourcePage p_sourcePage,
+            Collection p_trgLocales)
+    {
+        try
+        {
+            // Load all TUs for page
+            SegmentTuUtil.getTusBySourcePageId(p_sourcePage.getId());
+            // Load all source TUVs for source page
+            SegmentTuvUtil.getSourceTuvs(p_sourcePage);
+            // Load all target TUVs for target locales.
+            for (TargetPage tp : p_sourcePage.getTargetPages())
+            {
+                if (p_trgLocales.contains(tp.getGlobalSightLocale()))
+                {
+                    SegmentTuvUtil.getTargetTuvs(tp);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(
+                    "Error when load data prior for source page and target pages",
+                    e);
+        }
     }
 
     /**
@@ -384,44 +397,39 @@ public final class TuvManagerLocal implements TuvManager
      *             when a communication-related error occurs.
      */
     public void resetTargetTuvStatus(SourcePage p_sourcePage,
-            GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale)
-            throws TuvException, RemoteException
+            GlobalSightLocale p_targetLocale) throws TuvException,
+            RemoteException
     {
+        Session session = TmUtil.getStableSession();
         try
         {
-            // get the target tuvs
-            // Vector queryArgs1 = new Vector(2);
-            // queryArgs1.add(p_sourcePage.getIdAsLong());
-            // queryArgs1.add(p_targetLocale.getIdAsLong());
-            /*
-             * Collection targetTuvs = executeQuery(
-             * TuvQueryNames.EXPORT_TUVS_BY_SOURCE_PAGE_ID, queryArgs1,
-             * TopLinkPersistence.MAKE_EDITABLE);
-             */
-            // Hibernate access
-            HashMap map = new HashMap();
-            map.put(TuvQueryConstants.LOCALE_ID_ARG, p_targetLocale
-                    .getIdAsLong());
-            map.put(TuvQueryConstants.SOURCE_PAGE_ID_ARG, p_sourcePage
-                    .getIdAsLong());
-            List targetTuvs = HibernateUtil.searchWithSql(
-                    TuvDescriptorModifier.TARGET_TUV_BY_SOURCE_PAGE_SQL, map,
-                    TuvDescriptorModifier.TUV_CLASS);
-
-            Object[] tuvs = targetTuvs.toArray();
-            int size = tuvs.length;
-            for (int i = 0; i < size; i++)
+            TargetPage targetPage = null;
+            for (TargetPage tp : p_sourcePage.getTargetPages())
             {
-                TuvImpl tuv = (TuvImpl) tuvs[i];
-                tuv.setState(TuvState.NOT_LOCALIZED);
-                tuv.setLastModified(new Date());
-                HibernateUtil.update(tuv);
-                // getPersistence().updateObject(tuv);
+                if (tp.getLocaleId() == p_targetLocale.getId())
+                {
+                    targetPage = tp;
+                    break;
+                }
             }
+
+            List<TuvImpl> targetTuvs = SegmentTuvUtil.getTargetTuvs(targetPage);
+            for (TuvImpl targetTuv : targetTuvs)
+            {
+                targetTuv.setState(TuvState.NOT_LOCALIZED);
+                targetTuv.setLastModified(new Date());
+            }
+
+			SegmentTuvUtil.updateTuvs(targetTuvs,
+					Long.parseLong(p_sourcePage.getCompanyId()));
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            CATEGORY.error(ex);
+            throw new TuvException(e);
+        }
+        finally
+        {
+            TmUtil.closeStableSession(session);
         }
     }
 
@@ -439,40 +447,18 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId)
-            throws TuvException, RemoteException
+    public Collection getTuvsForOnlineEditor(long[] p_tuIds, long p_localeId,
+            String companyId) throws TuvException, RemoteException
     {
-        /*
-         * List tus = (List) getObjectsByPKs(TuvPersistenceHelper
-         * .makeInArgumentListFromIds(ArrayConverter.asList(p_tuIds)),
-         * TuImpl.class, TopLinkPersistence.MAKE_NOT_EDITABLE);
-         */
-        List tus = (List) getObjectsByPKs(new Vector(ArrayConverter
-                .asList(p_tuIds)), TuImpl.class);
-        ArrayList tuvs = new ArrayList(tus.size());
-
-        for (int i = 0; i < tus.size(); i++)
+        List tuvs = new ArrayList();
+        try
         {
-            Object object = ((Tu) tus.get(i)).getTuv(p_localeId);
-
-            if (object != null)
-            {
-                tuvs.add(object);
-            }
+            tuvs = SegmentTuvUtil.getTuvsByTuIdsLocaleId(p_tuIds, p_localeId,
+                    companyId);
         }
-
-        if (CATEGORY.isDebugEnabled())
+        catch (Exception e)
         {
-            Collection ids = new ArrayList(0);
-
-            if (!tuvs.isEmpty())
-            {
-                ids = TuvPersistenceHelper.getIds(tuvs);
-            }
-
-            CATEGORY.debug("getTuvsForOnlineEditor" + " p_tuIds="
-                    + ArrayConverter.asList(p_tuIds).toString() + " returned "
-                    + ids.size() + " Tuvs=" + ids.toString());
+            throw new TuvException(e);
         }
 
         return tuvs;
@@ -493,57 +479,58 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId)
-            throws TuvException, RemoteException
+    public Tuv getTuvForSegmentEditor(long p_tuId, long p_localeId,
+            String companyId) throws TuvException, RemoteException
     {
-        // return ((Tu)getObjectByPK(p_tuId, TuImpl.class,
-        // TopLinkPersistence.MAKE_EDITABLE)).getTuv(p_localeId);
-
-        // Vector args = new Vector(2);
-        // args.add(new Long(p_tuId));
-        // args.add(new Long(p_localeId));
-
-        /*
-         * return (Tuv) executeQuery(TuvQueryNames.TUV_BY_TU_LOCALE, args,
-         * TopLinkPersistence.MAKE_EDITABLE).iterator().next();
-         * 
-         */
-
-        String sql = TuvDescriptorModifier.TUV_BY_TU_LOCALE_SQL;
-        Map map = new HashMap();
-        map.put(TuvQueryConstants.TUV_ID_ARG, new Long(p_tuId));
-        map.put(TuvQueryConstants.TARGET_LOCALE_ID_ARG, new Long(p_localeId));
-
         Tuv tuv = null;
-        List result = HibernateUtil.searchWithSql(sql, map, TuvImpl.class);
-        if (result != null && result.size() > 0)
+        try
         {
-            tuv = (Tuv) result.get(0);
+            tuv = SegmentTuvUtil.getTuvByTuIdLocaleId(p_tuId, p_localeId,
+                    companyId);
         }
+        catch (Exception ex)
+        {
+            throw new TuvException(ex);
+        }
+
         return tuv;
     }
 
-    /*
+    /**
      * Gets the Tuv for the segment editor for the specified Tuv identifier.
      * 
-     * @param p_tuvId unique identifier of a Tuv object. @return Tuv. @throws
-     * TuvException when an error occurs. @throws RemoteException when a
-     * communication-related error occurs.
+     * @param p_tuvId
+     *            unique identifier of a Tuv object.
+     * @return Tuv
+     * @throws TuvException
+     *             when an error occurs.
+     * @throws RemoteException
+     *             when a communication-related error occurs.
      */
-    public Tuv getTuvForSegmentEditor(long p_tuvId) throws TuvException,
-            RemoteException
+    public Tuv getTuvForSegmentEditor(long p_tuvId, String companyId)
+            throws TuvException, RemoteException
     {
-        return (Tuv) getObjectByPK(p_tuvId, TuvImpl.class);
-        /*
-         * return (Tuv) getObjectByPK(p_tuvId, TuvImpl.class,
-         * TopLinkPersistence.MAKE_EDITABLE);
-         */
+        try
+        {
+            return SegmentTuvUtil.getTuvById(p_tuvId, companyId);
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
+        }
     }
-    
-    public Tu getTuForSegmentEditor(long p_tuId) throws TuvException, 
-                                                         RemoteException
+
+    public Tu getTuForSegmentEditor(long p_tuId, String companyId)
+            throws TuvException, RemoteException
     {
-        return (Tu) getObjectByPK(p_tuId, TuImpl.class);
+        try
+        {
+            return SegmentTuUtil.getTuById(p_tuId, companyId);
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
+        }
     }
 
     /**
@@ -564,15 +551,7 @@ public final class TuvManagerLocal implements TuvManager
     public List getPreviousTaskTuvs(long p_tuvId, int p_maxResultNum)
             throws TuvException, RemoteException
     {
-        // Vector queryArgs = new Vector(1);
-        // queryArgs.add(new Long(p_tuvId));
-        // queryArgs.add(new Integer(p_maxResultNum));
-        /*
-         * List taskTuvs = (List) executeQuery(
-         * TaskTuvQueryNames.PREVIOUS_TASK_TUVS, queryArgs,
-         * TopLinkPersistence.MAKE_NOT_EDITABLE);
-         */
-        String hql = " from TaskTuv t where t.currentTuv= :tuvId order by t.version desc";
+        String hql = " from TaskTuv t where t.currentTuvId= :tuvId order by t.version desc";
         Session session = HibernateUtil.getSession();
         Query query = session.createQuery(hql);
         query.setMaxResults(p_maxResultNum);
@@ -600,7 +579,8 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public void updateTuv(Tuv p_tuv) throws TuvException, RemoteException
+    public void updateTuv(Tuv p_tuv, String companyId) throws TuvException,
+            RemoteException
     {
         try
         {
@@ -610,8 +590,9 @@ public final class TuvManagerLocal implements TuvManager
                     .getExactMatchFormat()));
             tuv.setState(TuvState.LOCALIZED);
             tuv.setLastModified(new Date());
-            HibernateUtil.update(tuv);
-            // getPersistence().updateObject(tuv);
+
+            // HibernateUtil.update(tuv);
+            SegmentTuvUtil.updateTuv(tuv, companyId);
         }
         catch (Exception ex)
         {
@@ -633,29 +614,14 @@ public final class TuvManagerLocal implements TuvManager
     public Collection getSourceTuvsForStatistics(SourcePage p_sourcePage)
             throws TuvException, RemoteException
     {
-        // Vector queryArgs = new Vector(2);
-        // queryArgs.add(p_sourcePage.getIdAsLong());
-        // queryArgs.add(p_sourcePage.getGlobalSightLocale().getIdAsLong());
-
-        // Collection result = executeQuery(
-        // TuvQueryNames.SOURCE_TUVS_FOR_STATISTICS_BY_SOURCE_PAGE_ID,
-        // queryArgs, TopLinkPersistence.MAKE_NOT_EDITABLE);
-
-        HashMap map = new HashMap();
-        map.put(TuvQueryConstants.LOCALE_ID_ARG, p_sourcePage
-                .getGlobalSightLocale().getIdAsLong());
-        map.put(TuvQueryConstants.SOURCE_PAGE_ID_ARG, p_sourcePage
-                .getIdAsLong());
-        List result = HibernateUtil.searchWithSql(
-                TuvDescriptorModifier.TUV_BY_SOURCE_PAGE_SQL, map,
-                TuvDescriptorModifier.TUV_CLASS);
-        if (CATEGORY.isDebugEnabled())
+        List result = new ArrayList();
+        try
         {
-            Collection ids = TuvPersistenceHelper.getIds(result);
-
-            CATEGORY.debug("getSourceTuvsForStatistics" + " p_sourcePage="
-                    + p_sourcePage.getId() + " returned " + ids.size()
-                    + " Tuvs=" + ids.toString());
+            result = SegmentTuvUtil.getSourceTuvs(p_sourcePage);
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
         }
 
         return result;
@@ -672,32 +638,17 @@ public final class TuvManagerLocal implements TuvManager
      * @throws RemoteException
      *             when a communication-related error occurs.
      */
-    public Collection getTargetTuvsForStatistics(TargetPage p_targetPage)
+    public Collection<Tuv> getTargetTuvsForStatistics(TargetPage p_targetPage)
             throws TuvException, RemoteException
     {
-        // Vector queryArgs = new Vector(2);
-        // queryArgs.add(p_targetPage.getIdAsLong());
-        // queryArgs.add(p_targetPage.getGlobalSightLocale().getIdAsLong());
-
-        // Collection result = executeQuery(
-        // TuvQueryNames.TARGET_TUVS_FOR_STATISTICS_BY_TARGET_PAGE_ID,
-        // queryArgs, TopLinkPersistence.MAKE_EDITABLE);
-        HashMap map = new HashMap();
-        map.put(TuvQueryConstants.TARGET_PAGE_ID_ARG, p_targetPage
-                .getIdAsLong());
-        map.put(TuvQueryConstants.LOCALE_ID_ARG, p_targetPage
-                .getGlobalSightLocale().getIdAsLong());
-        List result = HibernateUtil.searchWithSql(
-                TuvDescriptorModifier.TUV_BY_TARGET_PAGE_SQL, map,
-                TuvDescriptorModifier.TUV_CLASS);
-
-        if (CATEGORY.isDebugEnabled())
+        List<Tuv> result = new ArrayList<Tuv>();
+        try
         {
-            Collection ids = TuvPersistenceHelper.getIds(result);
-
-            CATEGORY.debug("getTargetTuvsForStatistics" + " p_targetPage="
-                    + p_targetPage.getId() + " returned " + ids.size()
-                    + " Tuvs=" + ids.toString());
+            result.addAll(SegmentTuvUtil.getTargetTuvs(p_targetPage));
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
         }
 
         return result;
@@ -710,27 +661,82 @@ public final class TuvManagerLocal implements TuvManager
      *            the id of the source page
      * @return Collection a sorted list of tus from the source page
      */
-    public Collection getTus(Long p_sourcePageId) throws TuvException,
+    public Collection<TuImpl> getTus(Long p_sourcePageId) throws TuvException,
             RemoteException
     {
-        // Vector queryArgs = new Vector(1);
-        // queryArgs.add(p_sourcePageId);
-
-        // Collection result = executeQuery(TuQueryNames.TUS_BY_SOURCE_PAGE_ID,
-        // queryArgs, TopLinkPersistence.MAKE_NOT_EDITABLE);
-
-        String sql = TuDescriptorModifier.TU_BY_SOURCE_PAGE_ID_SQL;
-        Map map = new HashMap();
-        map.put(TuvQueryConstants.SOURCE_PAGE_ID_ARG, p_sourcePageId);
-
-        return HibernateUtil.searchWithSql(sql, map, TuImpl.class);
+        try
+        {
+            return SegmentTuUtil.getTusBySourcePageId(p_sourcePageId);
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
+        }
     }
-    
+
     /**
-     * Judge if current page is WorldServer xliff file.
+     * Retrieves the list of repetition TUs belonging to a source page.
      * 
      * @param p_sourcePageId
-     * @return
+     *            - the id of the source page
+     * @return Collection a unsorted list of TUs from the source page.
+     */
+    public Collection<TuImpl> getRepTusBySourcePageId(Long p_sourcePageId)
+    {
+        try
+        {
+            return SegmentTuUtil.getRepTusBySourcePageId(p_sourcePageId);
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
+        }
+    }
+
+    /**
+     * Return all TUs which belong to the same repetition group by TuID.
+     * 
+     * @param p_repTuId
+     *            - This Tu may be not repeated or repetition.
+     * 
+     * @return - List<TuImpl>.
+     * @throws RemoteException
+     * @throws TuvException
+     */
+    public List<TuImpl> getRepTusByTuId(Long p_repTuId, String companyId)
+            throws TuvException, RemoteException
+    {
+        Tu tu = getTuForSegmentEditor(p_repTuId, companyId);
+        long repeatedTuId = 0;
+        if (tu.isRepeated())
+        {
+            repeatedTuId = tu.getId();
+        }
+        else if (tu.getRepetitionOfId() > 0)
+        {
+            repeatedTuId = tu.getRepetitionOfId();
+        }
+
+        if (repeatedTuId > 0)
+        {
+            try
+            {
+                return SegmentTuUtil.getRepTusByTuId(companyId, repeatedTuId);
+            }
+            catch (Exception e)
+            {
+                throw new TuvException(e);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Judge if current page is WorldServer XLF file.
+     * 
+     * @param p_sourcePageId
+     * @return boolean
      * @throws TuvException
      * @throws RemoteException
      */
@@ -738,21 +744,13 @@ public final class TuvManagerLocal implements TuvManager
             throws TuvException, RemoteException
     {
         boolean result = false;
-
-        Collection tus = getTus(p_sourcePageId);
-        if (tus != null && tus.size() > 0)
+        try
         {
-            Iterator it = tus.iterator();
-            while (it.hasNext())
-            {
-                Tu tu = (Tu) it.next();
-                if (tu.getGenerateFrom() != null
-                        && tu.getGenerateFrom().equals(TuImpl.FROM_WORLDSERVER))
-                {
-                    result = true;
-                    break;
-                }
-            }
+            result = SegmentTuUtil.isWorldServerXlfSourceFile(p_sourcePageId);
+        }
+        catch (Exception e)
+        {
+            throw new TuvException(e);
         }
 
         return result;
@@ -775,117 +773,4 @@ public final class TuvManagerLocal implements TuvManager
             tuv.setExactMatchKey(crc);
         }
     }
-
-    //
-    // package methods
-    //
-
-    Collection getTuvsByPK(Collection p_tuvIds, boolean p_makeEditable)
-            throws TuvException
-    {
-        Vector tuvIds = new Vector(p_tuvIds);
-
-        try
-        {
-            // TopLinkPersistence persistence =
-            // PersistenceService.getInstance();
-            // return TuvPersistenceHelper.executeObjectsByPKsQuery(tuvIds,
-            // TuvImpl.class);
-            return getObjectsByPKs(tuvIds, TuvImpl.class);
-        }
-        catch (Throwable t)
-        {
-            CATEGORY.error("p_tuvIds " + p_tuvIds.toString(), t);
-            throw new TuvException(GeneralException.getStackTraceString(t));
-        }
-    }
-
-    List getObjectsByPKs(Vector p_Ids, Class p_class) throws TuvException
-    {
-        try
-        {
-            List objList = new ArrayList();
-            for (int i = 0; i < p_Ids.size(); i++)
-            {
-                long p_id = ((Integer) p_Ids.get(i)).longValue();
-                Object obj = getObjectByPK(p_id, p_class);
-                if (obj != null)
-                {
-                    objList.add(obj);
-                }
-            }
-            return objList;
-            /*
-             * return (List)
-             * TuvPersistenceHelper.executeObjectsByPKsQuery(p_Ids, p_class,
-             * p_makeEditable);
-             */
-        }
-        catch (Throwable t)
-        {
-            CATEGORY.error("p_class=" + p_class.toString() + " p_Ids "
-                    + p_Ids.toString(), t);
-            throw new TuvException(GeneralException.getStackTraceString(t));
-        }
-    }
-
-    Object getObjectByPK(long p_Id, Class p_class) throws TuvException
-    {
-        try
-        {
-            return HibernateUtil.get(p_class, p_Id);
-            /*
-             * return TuvPersistenceHelper.executeObjectByPKQuery(p_Id, p_class,
-             * p_makeEditable);
-             */
-        }
-        catch (Throwable t)
-        {
-            CATEGORY.error("p_class=" + p_class.toString() + " p_Id "
-                    + Long.toString(p_Id) + GlobalSightCategory.getLineContinuation()
-            // + TuvPersistenceHelper.dumpDescriptor(SESSION, p_class)
-                    // .toString()
-                    , t);
-            throw new TuvException(GeneralException.getStackTraceString(t));
-        }
-    }
-
-    // private TopLinkPersistence getPersistence() throws PersistenceException
-    // {
-    // if (m_tlp == null)
-    // {
-    // m_tlp = PersistenceService.getInstance();
-    // }
-    //
-    // return m_tlp;
-    // }
-
-    // private void syncTopLinkCache(Collection p_tuvs) throws Exception
-    // {
-    // Session session = getPersistence().acquireClientSession();
-    //
-    // try
-    // {
-    // for (Iterator it = p_tuvs.iterator(); it.hasNext();)
-    // {
-    // Tuv tuvNoTopLink = (Tuv) it.next();
-    // TuvImpl tuvTopLink = new TuvImpl();
-    // tuvTopLink.setId(tuvNoTopLink.getId());
-    //
-    // session.refreshObject(tuvTopLink);
-    // }
-    // }
-    // catch (Exception e)
-    // {
-    // throw new Exception(e);
-    // }
-    // finally
-    // {
-    // if (session != null)
-    // {
-    // session.release();
-    // }
-    // }
-    // }
-
 }

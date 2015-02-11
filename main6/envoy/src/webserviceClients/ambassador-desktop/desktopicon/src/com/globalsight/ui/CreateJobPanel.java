@@ -42,6 +42,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 import org.apache.log4j.Logger;
 
@@ -66,13 +67,14 @@ import com.globalsight.util2.ConfigureHelperV2;
 public class CreateJobPanel extends JPanel
 {
     private static final long serialVersionUID = 198902272008L;
-    
-    //Added by Vincent Yan
+
+    // Added by Vincent Yan
     private boolean isFromCVS = false;
     private HashMap<File, String> cvsModules = new HashMap<File, String>();
     private String fpSourceLocale = "";
-    JobAttributeDialog jobAttributeDialog = new JobAttributeDialog(SwingHelper.getMainFrame());
-    
+    JobAttributeDialog jobAttributeDialog = new JobAttributeDialog(
+            SwingHelper.getMainFrame());
+
     // ///////////////////////////////////////////////////////////////
     // constructor
     // ///////////////////////////////////////////////////////////////
@@ -147,38 +149,40 @@ public class CreateJobPanel extends JPanel
         GridBagConstraints c1 = new GridBagConstraints();
         c1.insets = new Insets(2, 2, 2, 2);
 
-        //File(s) Label
+        // File(s) Label
         JLabel label2 = new JLabel(fileLableName, Label.RIGHT);
         c1.gridx = 0;
         c1.gridy = 0;
         c1.gridwidth = 3;
         c1.gridheight = 1;
         contentPane.add(label2, c1);
-        
-        //File Profile Label
+
+        // File Profile Label
         JLabel label3 = new JLabel(fileProfileIDLableName, Label.RIGHT);
         c1.gridx = 3;
         c1.gridy = 0;
         c1.gridwidth = 2;
         c1.gridheight = 1;
         contentPane.add(label3, c1);
-        
-        //Mapping Result Label
+
+        // Mapping Result Label
         JLabel label6 = new JLabel(mappingResult, Label.RIGHT);
         c1.gridx = 5;
         c1.gridy = 0;
         c1.gridwidth = 3;
         c1.gridheight = 1;
         contentPane.add(label6, c1);
-        
-        //Added files
+
+        // Added files
         m_filesList = new JList(m_filesModel);
         m_filesList.setAutoscrolls(true);
-        m_filesList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        m_filesList
+                .setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         m_filesList.setTransferHandler(FileTransferHandler.install());
         jScrollPaneFiles = new JScrollPane(m_filesList);
-        jScrollPaneFiles.setMinimumSize(new Dimension(width31, 120));//100
-        jScrollPaneFiles.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jScrollPaneFiles.setMinimumSize(new Dimension(width31, 120));// 100
+        jScrollPaneFiles
+                .setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         c1.gridx = 0;
         c1.gridy = 1;
         c1.gridwidth = 3;
@@ -186,21 +190,24 @@ public class CreateJobPanel extends JPanel
         contentPane.add(jScrollPaneFiles, c1);
 
         jComboBoxFileProfiles = new JComboBox();
+        jComboBoxFileProfiles.setRenderer(new ComboBoxRenderer());
         if (m_filesModel.size() == 0)
             jComboBoxFileProfiles.addItem(Constants.PLEASE_ADD_FILE);
         else
             jComboBoxFileProfiles.addItem(Constants.PLEASE_SELECT_FILE);
         jComboBoxFileProfiles.setPreferredSize(new Dimension(220, 30));
         JScrollPane scrollPaneFP = new JScrollPane(jComboBoxFileProfiles);
-        scrollPaneFP.setMinimumSize(new Dimension(250, 50));//220,50
-        scrollPaneFP.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        scrollPaneFP.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPaneFP.setMinimumSize(new Dimension(250, 50));// 220,50
+        scrollPaneFP
+                .setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPaneFP
+                .setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         c1.gridx = 3;
         c1.gridy = 1;
         c1.gridwidth = 2;
         c1.gridheight = 1;
         contentPane.add(scrollPaneFP, c1);
-        //"Map Files" & "Clear Map" buttons
+        // "Map Files" & "Clear Map" buttons
         mappingButton = new JButton(mappingButtonName);
         mappingButton.setToolTipText(mappingButtonName);
         mappingButton.setEnabled(false);
@@ -220,17 +227,19 @@ public class CreateJobPanel extends JPanel
 
         m_fpsList = new JList(m_fileProfilesModel);
         m_fpsList.setAutoscrolls(true);
-        m_fpsList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        m_fpsList
+                .setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         jScrollPaneResult = new JScrollPane(m_fpsList);
-        jScrollPaneResult.setMinimumSize(new Dimension(width31, 120));//100
-        jScrollPaneResult.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        jScrollPaneResult.setMinimumSize(new Dimension(width31, 120));// 100
+        jScrollPaneResult
+                .setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         c1.gridx = 5;
         c1.gridy = 1;
         c1.gridwidth = 3;
         c1.gridheight = 4;
         contentPane.add(jScrollPaneResult, c1);
 
-        //"Add File(s)" button
+        // "Add File(s)" button
         addFileButton = new JButton(addButtonName);
         addFileButton.setToolTipText(addButtonName);
         c1.gridx = 0;
@@ -238,7 +247,7 @@ public class CreateJobPanel extends JPanel
         c1.gridwidth = 1;
         c1.gridheight = 1;
         contentPane.add(addFileButton, c1);
-        //"Remove File(s)" button
+        // "Remove File(s)" button
         delFileButton = new JButton(delButtonName);
         delFileButton.setToolTipText(delButtonName);
         c1.gridx = 2;
@@ -247,44 +256,44 @@ public class CreateJobPanel extends JPanel
         c1.gridheight = 1;
         contentPane.add(delFileButton, c1);
 
-        //jScrollPaneLocales
+        // jScrollPaneLocales
         localesBox = Box.createVerticalBox();
         JScrollPane jScrollPaneLocales = new JScrollPane(localesBox);
         jScrollPaneLocales.setBorder(BorderFactory
                 .createTitledBorder("Target Locales"));
         jScrollPaneLocales
                 .setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        jScrollPaneLocales.setMinimumSize(new Dimension(width31 - 70, 280));//130
-        c1.gridx = 5;//5
-        c1.gridy = 5;//4
+        jScrollPaneLocales.setMinimumSize(new Dimension(width31 - 70, 280));// 130
+        c1.gridx = 5;// 5
+        c1.gridy = 5;// 4
         c1.gridwidth = 3;
-        c1.gridheight = 4;//4
+        c1.gridheight = 4;// 4
         contentPane.add(jScrollPaneLocales, c1);
 
         checkAllButton = new JButton(checkAllName);
         checkAllButton.setToolTipText(checkAllName);
-//      checkAllButton.setFont(new Font("Arial",Font.PLAIN,10));
-        c1.gridx = 5;//4
-        c1.gridy = 9;//7
+        // checkAllButton.setFont(new Font("Arial",Font.PLAIN,10));
+        c1.gridx = 5;// 4
+        c1.gridy = 9;// 7
         c1.gridwidth = 1;
         c1.gridheight = 1;
         contentPane.add(checkAllButton, c1);
-        
+
         uncheckAllButton = new JButton(uncheckAllName);
         uncheckAllButton.setToolTipText(uncheckAllName);
-//      uncheckAllButton.setFont(new Font("Arial",Font.PLAIN,10));
-        c1.gridx = 7;//5
-        c1.gridy = 9;//7
+        // uncheckAllButton.setFont(new Font("Arial",Font.PLAIN,10));
+        c1.gridx = 7;// 5
+        c1.gridy = 9;// 7
         c1.gridwidth = 1;
         c1.gridheight = 1;
         contentPane.add(uncheckAllButton, c1);
-        
-        //Create job
+
+        // Create job
         JPanel panel = new JPanel();
         panel.setSize(width31 * 2 - 100, height21);
         c1.gridx = 0;
         c1.gridy = 6;
-        c1.gridwidth = 5;//6
+        c1.gridwidth = 5;// 6
         c1.gridheight = 6;
         contentPane.add(panel, c1);
         panel.setLayout(new GridBagLayout());
@@ -299,7 +308,7 @@ public class CreateJobPanel extends JPanel
         c2.gridwidth = 1;
         c2.gridheight = 1;
         panel.add(label1, c2);
-        
+
         jTextFieldJobName = new JTextField("", 40);
         jTextFieldJobName.setMinimumSize(new Dimension(width_3, 30));
         jTextFieldJobName.setDocument(new MaxLengthDocument(150));
@@ -316,7 +325,7 @@ public class CreateJobPanel extends JPanel
         c2.gridwidth = 1;
         c2.gridheight = 2;
         panel.add(label4, c2);
-        
+
         jTextAreaNote = new JTextArea("", 10, 40);
         jTextAreaNote.setLineWrap(true);
         JScrollPane scrollPaneTextNoteArea = new JScrollPane(jTextAreaNote);
@@ -326,7 +335,7 @@ public class CreateJobPanel extends JPanel
         c2.gridwidth = 3;
         c2.gridheight = 2;
         panel.add(scrollPaneTextNoteArea, c2);
-        
+
         // reference file
         JLabel label5 = new JLabel(noteAttachmentLableName, Label.RIGHT);
         c2.gridx = 0;
@@ -334,7 +343,7 @@ public class CreateJobPanel extends JPanel
         c2.gridwidth = 1;
         c2.gridheight = 1;
         panel.add(label5, c2);
-        
+
         jTextFieldNoteAttachment = new JTextField("", 40);
         jTextFieldNoteAttachment.setEditable(false);
         jTextFieldNoteAttachment.setMinimumSize(new Dimension(width_3, 30));
@@ -343,7 +352,7 @@ public class CreateJobPanel extends JPanel
         c2.gridwidth = 3;
         c2.gridheight = 1;
         panel.add(jTextFieldNoteAttachment, c2);
-        
+
         addNoteAttachmentButton = new JButton(browseButtonName);
         c2.gridx = 4;
         c2.gridy = 3;
@@ -353,27 +362,31 @@ public class CreateJobPanel extends JPanel
 
         // whether hide the job priority option
         boolean isShowJobPriority = false;
-        try {
+        try
+        {
             isShowJobPriority = ConfigureHelperV2.readPrefJobPriority();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.error("error when hide the job priority option", e);
         }
-        
-        //Added by Vincent Yan, to fix #644
+
+        // Added by Vincent Yan, to fix #644
         // reference file
         JLabel label10 = new JLabel(jobPriority, Label.RIGHT);
         c2.gridx = 0;
         c2.gridy = 4;
         c2.gridwidth = 1;
         c2.gridheight = 1;
-        if(isShowJobPriority)
+        if (isShowJobPriority)
         {
             panel.add(label10, c2);
         }
-  
+
         jComboBoxJobPriority = new JComboBox();
         jComboBoxJobPriority.setPreferredSize(new Dimension(160, 30));
-        for (int i=1;i<6;i++) {
+        for (int i = 1; i < 6; i++)
+        {
             jComboBoxJobPriority.addItem(String.valueOf(i));
         }
         jComboBoxJobPriority.setSelectedIndex(2);
@@ -382,12 +395,12 @@ public class CreateJobPanel extends JPanel
         c2.gridwidth = 1;
         c2.gridheight = 1;
         c2.anchor = GridBagConstraints.WEST;
-        if(isShowJobPriority)
+        if (isShowJobPriority)
         {
             panel.add(jComboBoxJobPriority, c2);
         }
-        //End of #644
-        
+        // End of #644
+
         // option : max file number per job
         JLabel label11 = new JLabel(jobSplitting, Label.RIGHT);
         c2.gridx = 0;
@@ -398,12 +411,12 @@ public class CreateJobPanel extends JPanel
         jRadioButtonMaxFileNumName = new JRadioButton(fileNumberPerJobName);
         jRadioButtonMaxFileNumName.setActionCommand(fileNumberPerJobName);
         jRadioButtonMaxFileNumName.setSelected(true);
-        c2.insets = new Insets(5,4,5,15);
+        c2.insets = new Insets(5, 4, 5, 15);
         c2.gridx = 1;
         c2.gridy = 5;
         c2.gridwidth = 2;
         c2.gridheight = 1;
-        panel.add(jRadioButtonMaxFileNumName, c2);      
+        panel.add(jRadioButtonMaxFileNumName, c2);
         // option: max job size per job
         jRadioButtonMaxJobSizeName = new JRadioButton(fileSizePerJobName);
         jRadioButtonMaxJobSizeName.setActionCommand(fileSizePerJobName);
@@ -427,33 +440,36 @@ public class CreateJobPanel extends JPanel
         c2.gridheight = 1;
         panel.add(jTextFieldMaxFileNumName, c2);
         // textfield for max job size
-        jTextFieldMaxJobSizeName = new JTextField("0",40);
+        jTextFieldMaxJobSizeName = new JTextField("0", 40);
         jTextFieldMaxJobSizeName.setMinimumSize(new Dimension(60, 25));
         c2.gridx = 3;
         c2.gridy = 6;
         c2.gridwidth = 1;
         c2.gridheight = 1;
-        panel.add( jTextFieldMaxJobSizeName, c2);
-        
+        panel.add(jTextFieldMaxJobSizeName, c2);
+
         // whether hide the job splitting option
         boolean isShowJobSplitting = false;
-        try {
+        try
+        {
             isShowJobSplitting = ConfigureHelperV2.readPrefJobSplitting();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             log.error("error when hide the job splitting option", e);
         }
-    
-        if(!isShowJobSplitting)
+
+        if (!isShowJobSplitting)
         {
             label11.setVisible(false);
-            jRadioButtonMaxJobSizeName.setVisible(false);//.setEnabled(false);
+            jRadioButtonMaxJobSizeName.setVisible(false);// .setEnabled(false);
             jRadioButtonMaxFileNumName.setVisible(false);
             jTextFieldMaxFileNumName.setVisible(false);
             jTextFieldMaxJobSizeName.setVisible(false);
             c2.insets = new Insets(30, 4, 5, 4);
-            panel.add(new JLabel(),c2);
+            panel.add(new JLabel(), c2);
         }
-        
+
         // "set job attribute","create" and "cancel" buttons
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout());
@@ -464,11 +480,11 @@ public class CreateJobPanel extends JPanel
         attibuteButton = new JButton(attributeButtonName);
         attibuteButton.setVisible(false);
         buttonPanel.add(attibuteButton);
-        
+
         c2.gridx = 2;
-        if(!isShowJobSplitting)
+        if (!isShowJobSplitting)
         {
-          c2.insets = new Insets(10,0,4,4);
+            c2.insets = new Insets(10, 0, 4, 4);
         }
         c2.gridx = 1;
         c2.gridy = 7;
@@ -495,7 +511,8 @@ public class CreateJobPanel extends JPanel
             {
                 int[] indices = m_filesList.getSelectedIndices();
                 delFile(indices);
-                if (isFromCVS) {
+                if (isFromCVS)
+                {
                     if (m_filesModel.getSize() == 0)
                         addFileButton.setEnabled(true);
                     else
@@ -506,9 +523,10 @@ public class CreateJobPanel extends JPanel
                     showLocales((FileProfile) obj);
                 else
                     showLocales(null);
-                if (m_filesModel.size() == 0) cleanlMap();
-                
-                //set max file num and max job size per job
+                if (m_filesModel.size() == 0)
+                    cleanlMap();
+
+                // set max file num and max job size per job
                 setMaxFileNumAndMaxJobSize();
             }
         });
@@ -625,8 +643,8 @@ public class CreateJobPanel extends JPanel
                 }
                 catch (Exception e1)
                 {
-                    AmbOptionPane.showMessageDialog("Exception:\n"
-                            + e1.getMessage(), "Error",
+                    AmbOptionPane.showMessageDialog(
+                            "Exception:\n" + e1.getMessage(), "Error",
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -647,9 +665,9 @@ public class CreateJobPanel extends JPanel
                 cleanPanel();
             }
         });
-        
-        //02-05-2009 for GBS-354
-        checkAllButton.addActionListener(new ActionListener() 
+
+        // 02-05-2009 for GBS-354
+        checkAllButton.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
@@ -657,14 +675,14 @@ public class CreateJobPanel extends JPanel
             }
         });
 
-        uncheckAllButton.addActionListener(new ActionListener() 
+        uncheckAllButton.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
                 checkAllTargetLocales(false);
             }
         });
-        
+
         attibuteButton.addActionListener(new ActionListener()
         {
 
@@ -674,22 +692,23 @@ public class CreateJobPanel extends JPanel
             }
         });
     }
-    
+
     private void updateProjectId(FileProfile profile)
     {
         try
         {
-            long projectId = GetAttributeAction.getProjectIdByFileProfile(profile);
+            long projectId = GetAttributeAction
+                    .getProjectIdByFileProfile(profile);
             jobAttributeDialog.setProjectId(projectId);
             attibuteButton.setVisible(jobAttributeDialog.hasAttribute());
         }
         catch (Exception e)
         {
-//            AmbOptionPane.showMessageDialog(Constants.MSG_FAIL_GET_PROJECT,
-//                    "Warning", JOptionPane.ERROR_MESSAGE);
+            // AmbOptionPane.showMessageDialog(Constants.MSG_FAIL_GET_PROJECT,
+            // "Warning", JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
     private void showJobAttriubteDialog()
     {
         int size = m_fileProfilesModel.getSize();
@@ -699,11 +718,12 @@ public class CreateJobPanel extends JPanel
                     "Warning", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
         Object ob = m_fileProfilesModel.getElementAt(0);
         if (ob instanceof FileProfile)
         {
-            FileProfile profile = (FileProfile)m_fileProfilesModel.getElementAt(0);
+            FileProfile profile = (FileProfile) m_fileProfilesModel
+                    .getElementAt(0);
             updateProjectId(profile);
             jobAttributeDialog.display();
         }
@@ -714,21 +734,26 @@ public class CreateJobPanel extends JPanel
         }
     }
 
-    private void checkAllTargetLocales(boolean bool){
+    private void checkAllTargetLocales(boolean bool)
+    {
         localesBox.removeAll();
         Object obj = jComboBoxFileProfiles.getSelectedItem();
 
-        if (obj instanceof FileProfile){
+        if (obj instanceof FileProfile)
+        {
             FileProfile fp = (FileProfile) obj;
-            if ( bool == true ){
+            if (bool == true)
+            {
                 selectedLocales.addAll(Arrays.asList(fp.getTargetLocales()));
-            } else {
+            }
+            else
+            {
                 selectedLocales.clear();
             }
             showLocales(fp);
         }
     }
-    
+
     private void showLocales(FileProfile fp)
     {
         localesBox.removeAll();
@@ -737,14 +762,15 @@ public class CreateJobPanel extends JPanel
             l10n = fp.getL10nprofile();
             fpSourceLocale = fp.getSourceLocale();
             String[] tls = fp.getTargetLocales();
-            //York added on 02/05/2009 for GBS-354
+            // York added on 02/05/2009 for GBS-354
             Arrays.sort(tls);
-            
+
             for (int i = 0; i < tls.length; i++)
             {
                 String locale = tls[i];
                 JCheckBox jcb = new JCheckBox(locale);
-                if (selectedLocales.contains(locale)) jcb.setSelected(true);
+                if (selectedLocales.contains(locale))
+                    jcb.setSelected(true);
                 jcb.addChangeListener(new ChangeListener()
                 {
                     public void stateChanged(ChangeEvent e)
@@ -761,31 +787,54 @@ public class CreateJobPanel extends JPanel
                                 if (c instanceof JCheckBox)
                                 {
                                     JCheckBox jcb = (JCheckBox) c;
-                                    if (jcb.isSelected()) {
-                                        if (isFromCVS) {
-                                            int[] indexs = m_filesList.getSelectedIndices();
-                                            if (indexs != null && indexs.length > 0) {
+                                    if (jcb.isSelected())
+                                    {
+                                        if (isFromCVS)
+                                        {
+                                            int[] indexs = m_filesList
+                                                    .getSelectedIndices();
+                                            if (indexs != null
+                                                    && indexs.length > 0)
+                                            {
                                                 File f = null;
                                                 String sourceModule = "";
-                                                String targetLocale = jcb.getText();
+                                                String targetLocale = jcb
+                                                        .getText();
                                                 ModuleMappingHelper helper = new ModuleMappingHelper();
                                                 ModuleMapping mm = null;
                                                 boolean isOK = false;
-                                                for (int k=0;k<indexs.length;k++) {
-                                                    f = (File)m_filesModel.elementAt(indexs[k]);
-                                                    sourceModule = (String)cvsModules.get(f);
-                                                    mm = helper.getModuleMapping(fpSourceLocale, sourceModule, targetLocale, null);
-                                                    if (mm != null) {
-                                                        //Find module-mapping
+                                                for (int k = 0; k < indexs.length; k++)
+                                                {
+                                                    f = (File) m_filesModel
+                                                            .elementAt(indexs[k]);
+                                                    sourceModule = (String) cvsModules
+                                                            .get(f);
+                                                    mm = helper
+                                                            .getModuleMapping(
+                                                                    fpSourceLocale,
+                                                                    sourceModule,
+                                                                    targetLocale,
+                                                                    null);
+                                                    if (mm != null)
+                                                    {
+                                                        // Find module-mapping
                                                         jcb.setForeground(Color.GREEN);
-//                                                      FileProfile tmp_fp = (FileProfile)m_fileProfilesModel.elementAt(indexs[k]);
-//                                                      String mmIds = tmp_fp.getModuleMappingIds();
-//                                                      if (mmIds.indexOf(jcb.getText()) < 0)
-//                                                          mmIds += mm.getId() + ",";
-//                                                      tmp_fp.setModuleMappingIds(mmIds);
-//                                                      m_fileProfilesModel.set(indexs[k], tmp_fp);
+                                                        // FileProfile tmp_fp =
+                                                        // (FileProfile)m_fileProfilesModel.elementAt(indexs[k]);
+                                                        // String mmIds =
+                                                        // tmp_fp.getModuleMappingIds();
+                                                        // if
+                                                        // (mmIds.indexOf(jcb.getText())
+                                                        // < 0)
+                                                        // mmIds += mm.getId() +
+                                                        // ",";
+                                                        // tmp_fp.setModuleMappingIds(mmIds);
+                                                        // m_fileProfilesModel.set(indexs[k],
+                                                        // tmp_fp);
                                                         isOK = true;
-                                                    } else {
+                                                    }
+                                                    else
+                                                    {
                                                         if (isOK)
                                                             jcb.setForeground(Color.YELLOW);
                                                         else
@@ -794,7 +843,8 @@ public class CreateJobPanel extends JPanel
                                                 }
                                             }
                                         }
-                                        locales.append(jcb.getText()).append(",");
+                                        locales.append(jcb.getText()).append(
+                                                ",");
                                     }
                                 }
                             }
@@ -842,11 +892,11 @@ public class CreateJobPanel extends JPanel
     {
         if (canCreate())
         {
-            String jobName = jTextFieldJobName.getText();
+            String jobName = getJobName();
             String commentText = jTextAreaNote.getText();
             String attachFile = jTextFieldNoteAttachment.getText();
             String priority = jComboBoxJobPriority.getSelectedItem().toString();
-            
+
             String jobCreateOption = null;
             String jobFileNumOrSize = null;
             if (jRadioButtonMaxJobSizeName.isSelected())
@@ -854,7 +904,8 @@ public class CreateJobPanel extends JPanel
                 jobCreateOption = Constants.JOB_CREATE_OPTION_MAX_FILE_SIZE;
                 jobFileNumOrSize = jTextFieldMaxJobSizeName.getText().trim();
             }
-            else //jRadioButtonMaxFileNumName.isSelected()
+            else
+            // jRadioButtonMaxFileNumName.isSelected()
             {
                 jobCreateOption = Constants.JOB_CREATE_OPTION_MAX_FILE_NUM;
                 jobFileNumOrSize = jTextFieldMaxFileNumName.getText().trim();
@@ -865,15 +916,30 @@ public class CreateJobPanel extends JPanel
             {
                 UploadFilesDialog ufDialog = new UploadFilesDialog(rootPane);
                 AttributeTableModel model = jobAttributeDialog.getModel();
+                boolean isShowJobPriority = false;
+                try
+                {
+                    isShowJobPriority = ConfigureHelperV2.readPrefJobPriority();
+                }
+                catch (Exception e)
+                {
+                    log.error("Error reading show job priority parameter", e);
+                }
+                if (!isShowJobPriority)
+                {
+                    priority = null;
+                }
                 if (!isFromCVS)
                 {
-                    ufDialog.commitJob(jobName, m_filesModel, m_fileProfilesModel,
-                            commentText, attachFile, jobCreateOption, jobFileNumOrSize, priority, model);                  
+                    ufDialog.commitJob(jobName, m_filesModel,
+                            m_fileProfilesModel, commentText, attachFile,
+                            jobCreateOption, jobFileNumOrSize, priority, model);
                 }
                 else
                 {
-                    ufDialog.commitCVSJob(jobName, m_filesModel, m_fileProfilesModel,
-                            commentText, attachFile,  jobCreateOption, jobFileNumOrSize, priority, model); 
+                    ufDialog.commitCVSJob(jobName, m_filesModel,
+                            m_fileProfilesModel, commentText, attachFile,
+                            jobCreateOption, jobFileNumOrSize, priority, model);
                 }
 
                 ufDialog.setLocationRelativeTo(mappingButton);
@@ -897,11 +963,13 @@ public class CreateJobPanel extends JPanel
         {
             // get select locales and clone a new FileProfile
             FileProfile fp = (FileProfile) obj;
-            if (selectedLocales.isEmpty()){
-                selectedLocales.addAll(Arrays.asList(fp.getTargetLocales()));               
+            if (selectedLocales.isEmpty())
+            {
+                selectedLocales.addAll(Arrays.asList(fp.getTargetLocales()));
             }
             String[] usedLocales = new String[selectedLocales.size()];
-            fp.setUsedTargetLocales((String[])selectedLocales.toArray(usedLocales));
+            fp.setUsedTargetLocales((String[]) selectedLocales
+                    .toArray(usedLocales));
             showLocales(fp);
             // mapping all the files with same suffix
             String firstSuffix = getSuffix(m_filesModel.get(indices[0])
@@ -915,26 +983,28 @@ public class CreateJobPanel extends JPanel
                     m_fileProfilesModel.set(indices[i], fp);
                 }
             }
-            
+
             updateProjectId(fp);
-            
-            //Set job priority
-            //Note: fp.getL10nprofile() can't get a l10nprofile Id at all, so comment it.
-//          try {
-//              QueryAction query = new QueryAction();
-//              
-//              String result = query.execute(new String[] { QueryAction.q_getPriorityByID, fp.getL10nprofile() });
-//              priority = result;
-//          } catch (Exception e) {
-                priority = "3";
-//          }
+
+            // Set job priority
+            // Note: fp.getL10nprofile() can't get a l10nprofile Id at all, so
+            // comment it.
+            // try {
+            // QueryAction query = new QueryAction();
+            //
+            // String result = query.execute(new String[] {
+            // QueryAction.q_getPriorityByID, fp.getL10nprofile() });
+            // priority = result;
+            // } catch (Exception e) {
+            priority = "3";
+            // }
         }
     }
 
     private String fileChooserAction()
     {
-        JFileChooser fileChooser = new JFileChooser(ConfigureHelper
-                .getBaseFolder());
+        JFileChooser fileChooser = new JFileChooser(
+                ConfigureHelper.getBaseFolder());
         fileChooser.setDialogTitle("Select The File");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         int status = fileChooser.showOpenDialog(SwingHelper.getMainFrame());
@@ -952,8 +1022,8 @@ public class CreateJobPanel extends JPanel
 
     private File[] filesChooserAction()
     {
-        JFileChooser fileChooser = new JFileChooser(ConfigureHelper
-                .getBaseFolder());
+        JFileChooser fileChooser = new JFileChooser(
+                ConfigureHelper.getBaseFolder());
         fileChooser.setDialogTitle("Select The File(s)");
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(true);
@@ -1010,10 +1080,10 @@ public class CreateJobPanel extends JPanel
         allFileProfiles = null;
         l10n = "";
         selectedLocales.clear();
-        
+
         jTextFieldMaxFileNumName.setText("0");
         jTextFieldMaxJobSizeName.setText("0");
-        
+
         attibuteButton.setVisible(false);
         jobAttributeDialog = new JobAttributeDialog(SwingHelper.getMainFrame());
     }
@@ -1051,18 +1121,15 @@ public class CreateJobPanel extends JPanel
         {
             indices = m_fpsList.getSelectedIndices();
         }
-        if (indices.length == 0) return;
+        if (indices.length == 0)
+            return;
 
         /**
-        if (isFromCVS) {
-            if (!isSameModulePath(indices)) {
-                AmbOptionPane.showMessageDialog(Constants.ERROR_NOT_SAME_MODULE_PATH,
-                        "Warning", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        }
-        */
-        
+         * if (isFromCVS) { if (!isSameModulePath(indices)) {
+         * AmbOptionPane.showMessageDialog(Constants.ERROR_NOT_SAME_MODULE_PATH,
+         * "Warning", JOptionPane.ERROR_MESSAGE); return; } }
+         */
+
         // check if user logoned
         User user = CacheUtil.getInstance().getCurrentUser();
         if (user == null)
@@ -1099,8 +1166,8 @@ public class CreateJobPanel extends JPanel
                 {
                     jComboBoxFileProfiles
                             .addItem("getting file profiles from server...");
-                    String result = queryAction
-                            .execute(new String[] { QueryAction.q_fileprofile });
+                    String result = queryAction.execute(new String[]
+                    { QueryAction.q_fileprofile });
                     allFileProfiles = StringHelper.split(result, "fileProfile");
                     jComboBoxFileProfiles.removeAllItems();
                     lastUser = user;
@@ -1108,6 +1175,7 @@ public class CreateJobPanel extends JPanel
                 // get file profile by extension and l10nprofile
                 fileProfiles = StringHelper.getFileProfiles(allFileProfiles,
                         l10n, suffix);
+                fileProfilesTipsList = new ArrayList<String>();
                 if (fileProfiles.size() == 0)
                 {
                     log.info("No available FileProfile for this \"*." + suffix
@@ -1123,6 +1191,15 @@ public class CreateJobPanel extends JPanel
                 {
                     FileProfile filePorfile = (FileProfile) fileProfiles.get(i);
                     jComboBoxFileProfiles.addItem(filePorfile);
+                    String description = filePorfile.getDescription();
+                    if (description == null || description.trim().length() == 0)
+                    {
+                        fileProfilesTipsList.add(filePorfile.getName());
+                    }
+                    else
+                    {
+                        fileProfilesTipsList.add(description);
+                    }
                     if (fp != null && fp.getId().equals(filePorfile.getId()))
                     {
                         jComboBoxFileProfiles.setSelectedIndex(i);
@@ -1170,19 +1247,21 @@ public class CreateJobPanel extends JPanel
                     String temp_zip_folder = dir + File.separator + "temp_zip"
                             + File.separator + p_file.getName() + "_"
                             + System.currentTimeMillis();
-                    List files = ZipIt.unpackZipPackage(p_file
-                            .getAbsolutePath(), temp_zip_folder);
-                    
-                    if (isFromCVS) {
+                    List files = ZipIt.unpackZipPackage(
+                            p_file.getAbsolutePath(), temp_zip_folder);
+
+                    if (isFromCVS)
+                    {
                         tmpPath = cvsModules.get(p_file);
                         cvsModules.remove(p_file);
                     }
                     File[] fileArray = new File[files.size()];
                     for (int i = 0; i < fileArray.length; i++)
                     {
-                        fileArray[i] = new File(temp_zip_folder, (String) files
-                                .get(i));
-                        if (isFromCVS) {
+                        fileArray[i] = new File(temp_zip_folder,
+                                (String) files.get(i));
+                        if (isFromCVS)
+                        {
                             cvsModules.put(fileArray[i], tmpPath);
                         }
                     }
@@ -1191,7 +1270,7 @@ public class CreateJobPanel extends JPanel
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     AmbOptionPane.showMessageDialog("Unzip " + p_file
                             + " error!", "Warning", JOptionPane.ERROR_MESSAGE);
                 }
@@ -1207,9 +1286,11 @@ public class CreateJobPanel extends JPanel
                     isEmptyFile = true;
                     // If the pathName is too long, display as "...xxxxxx".
                     String absolutePath = p_file.getAbsolutePath();
-                    if (absolutePath.length() > 80) {
-                            absolutePath = "..." + 
-                                absolutePath.substring(absolutePath.length() - 80);
+                    if (absolutePath.length() > 80)
+                    {
+                        absolutePath = "..."
+                                + absolutePath
+                                        .substring(absolutePath.length() - 80);
                     }
                     AmbOptionPane.showMessageDialog((Constants.EMPTY_FILE
                             + "\n" + absolutePath), "Warning");
@@ -1290,7 +1371,7 @@ public class CreateJobPanel extends JPanel
             return false;
         }
         // check whether job name is empty
-        if (!ValidationHelper.validateEmptyString(jTextFieldJobName.getText()))
+        if (!ValidationHelper.validateEmptyString(getJobName()))
         {
             AmbOptionPane.showMessageDialog(Constants.ERROR_EMPTY_JOB_STRING,
                     "Warning", JOptionPane.ERROR_MESSAGE);
@@ -1298,13 +1379,13 @@ public class CreateJobPanel extends JPanel
         }
 
         // validate job name characters
-        if (!ValidationHelper.validateJobName(jTextFieldJobName.getText()))
+        if (!ValidationHelper.validateJobName(getJobName()))
         {
             AmbOptionPane.showMessageDialog(Constants.ERROR_JOB_NAME,
                     "Warning", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        
+
         // Check file list is not empty
         if (m_filesModel.size() == 0)
         {
@@ -1327,7 +1408,8 @@ public class CreateJobPanel extends JPanel
             else
             {
                 FileProfile fp = (FileProfile) obj;
-                if (fp.getUsedTargetLocales().length == 0 || selectedLocales.size() == 0)
+                if (fp.getUsedTargetLocales().length == 0
+                        || selectedLocales.size() == 0)
                 {
                     noTarget.add(file);
                 }
@@ -1343,7 +1425,8 @@ public class CreateJobPanel extends JPanel
             {
                 files.append("<li>").append(notMaped.get(i)).append("</li>");
             }
-            if (notMaped.size() > 0) files.append("</ul>");
+            if (notMaped.size() > 0)
+                files.append("</ul>");
             if (noTarget.size() > 0)
                 files.append("Please select target locales");
             files.append("</html>");
@@ -1351,39 +1434,56 @@ public class CreateJobPanel extends JPanel
                     + files, "Warning", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        
-        //check if the file num or job size is valid
-        
+
+        // check if the file num or job size is valid
+
         if (jRadioButtonMaxFileNumName.isSelected())
         {
             String strMaxFileNum = jTextFieldMaxFileNumName.getText();
-            try {
+            try
+            {
                 int intMaxFileNum = (new Integer(strMaxFileNum)).intValue();
-                if ( intMaxFileNum <= 0) {
+                if (intMaxFileNum <= 0)
+                {
                     throw new Exception();
                 }
-            } catch (Exception e) {
-                AmbOptionPane.showMessageDialog(Constants.ERROR_INVALID_FILE_NUM + ": " + strMaxFileNum, "Warning", JOptionPane.ERROR_MESSAGE);
+            }
+            catch (Exception e)
+            {
+                AmbOptionPane
+                        .showMessageDialog(Constants.ERROR_INVALID_FILE_NUM
+                                + ": " + strMaxFileNum, "Warning",
+                                JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
         if (jRadioButtonMaxJobSizeName.isSelected())
         {
             String strMaxJobSize = jTextFieldMaxJobSizeName.getText();
-            try {
-                double doubleMaxJobSize = (new Double(strMaxJobSize)).doubleValue();
-                if ( doubleMaxJobSize <= 0 ) {
+            try
+            {
+                double doubleMaxJobSize = (new Double(strMaxJobSize))
+                        .doubleValue();
+                if (doubleMaxJobSize <= 0)
+                {
                     throw new Exception();
                 }
-            } catch (Exception e) {
-                AmbOptionPane.showMessageDialog(Constants.ERROR_INVALID_JOB_SIZE + ": " + strMaxJobSize, "Warning", JOptionPane.ERROR_MESSAGE);
+            }
+            catch (Exception e)
+            {
+                AmbOptionPane
+                        .showMessageDialog(Constants.ERROR_INVALID_JOB_SIZE
+                                + ": " + strMaxJobSize, "Warning",
+                                JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
-        
+
         if (!jobAttributeDialog.isRequiredAttributeSeted())
         {
-            AmbOptionPane.showMessageDialog(Constants.MSG_SET_REQUIRED_ATTRIBUTE, "Warning", JOptionPane.ERROR_MESSAGE);
+            AmbOptionPane.showMessageDialog(
+                    Constants.MSG_SET_REQUIRED_ATTRIBUTE, "Warning",
+                    JOptionPane.ERROR_MESSAGE);
             showJobAttriubteDialog();
             return false;
         }
@@ -1401,34 +1501,42 @@ public class CreateJobPanel extends JPanel
 
         mappingButton.setEnabled(false);
     }
-    
+
     private void setMaxFileNumAndMaxJobSize()
     {
-        //set max file num per job
+        // set max file num per job
         String fileNum = "0";
-        try {
+        try
+        {
             fileNum = String.valueOf(m_filesModel.size());
-        } catch (Exception e) { }
+        }
+        catch (Exception e)
+        {
+        }
         jTextFieldMaxFileNumName.setText(fileNum);
-        
+
         // set max job size
         String fileSizeInKB = "0.0";
-        if ( m_filesModel != null && m_filesModel.size() > 0)
+        if (m_filesModel != null && m_filesModel.size() > 0)
         {
             double fileSizeInBytes = 0;
             for (int i = 0; i < m_filesModel.size(); i++)
             {
-                try {
+                try
+                {
                     File file = (File) m_filesModel.get(i);
-                    fileSizeInBytes += file.length();                   
-                } catch (Exception e) {}
+                    fileSizeInBytes += file.length();
+                }
+                catch (Exception e)
+                {
+                }
             }
-            
+
             DecimalFormat df = new DecimalFormat("0.0");
-            fileSizeInKB = df.format(fileSizeInBytes/1024);
+            fileSizeInKB = df.format(fileSizeInBytes / 1024);
         }
 
-        jTextFieldMaxJobSizeName.setText(fileSizeInKB);     
+        jTextFieldMaxJobSizeName.setText(fileSizeInKB);
     }
 
     // private static final long serialVersionUID = 2800367301001078235L;
@@ -1448,7 +1556,7 @@ public class CreateJobPanel extends JPanel
     private static String noteAttachmentLableName = "Attached File:";
 
     private static String attributeButtonName = "Set Job Attributes";
-    
+
     private static String createButtonName = "Create";
 
     private static String cancelButtonName = "Cancel";
@@ -1458,29 +1566,31 @@ public class CreateJobPanel extends JPanel
     private static String addButtonName = "Add File(s)";
 
     private static String delButtonName = "Remove File(s)";
-    
+
     private static String checkAllName = "Check All";
-    
+
     private static String uncheckAllName = "Uncheck All";
 
     private static String browseButtonName = "Browse";
 
     private static String cancelMapButtonName = "Clean Map";
-    
+
     private static String jobPriority = "Job Priority:";
-    
+
     private static String jobSplitting = "Job Splitting:";
-    
+
     private static String fileNumberPerJobName = "Maximum number of files per job";
-    
+
     private static String fileSizePerJobName = "Maximum total file size per job (KB)";
 
-    private JTextField jTextFieldJobName, jTextFieldMaxFileNumName, jTextFieldMaxJobSizeName;
+    private JTextField jTextFieldJobName, jTextFieldMaxFileNumName,
+            jTextFieldMaxJobSizeName;
 
-    private JRadioButton jRadioButtonMaxFileNumName, jRadioButtonMaxJobSizeName;
-    
+    private JRadioButton jRadioButtonMaxFileNumName,
+            jRadioButtonMaxJobSizeName;
+
     private ButtonGroup buttonGroupJobCreateOptionName;
-    
+
     private JComboBox jComboBoxFileProfiles, jComboBoxJobPriority;
 
     private JList m_filesList, m_fpsList;
@@ -1497,11 +1607,12 @@ public class CreateJobPanel extends JPanel
 
     private JTextField jTextFieldNoteAttachment;
 
-    private JButton attibuteButton, createButton, cancelButton, mappingButton, cancelMapButton,
-            addFileButton, delFileButton, addNoteAttachmentButton,
-            checkAllButton,uncheckAllButton;
-    
+    private JButton attibuteButton, createButton, cancelButton, mappingButton,
+            cancelMapButton, addFileButton, delFileButton,
+            addNoteAttachmentButton, checkAllButton, uncheckAllButton;
+
     private List fileProfiles = null, allFileProfiles = null;
+    private List<String> fileProfilesTipsList = null;
 
     private User lastUser = null;
 
@@ -1510,7 +1621,7 @@ public class CreateJobPanel extends JPanel
     private boolean addSameFile = true;
 
     private String l10n = "";
-    
+
     private String priority = "";
 
     private FileProfileThread fpThread = null;
@@ -1533,12 +1644,13 @@ public class CreateJobPanel extends JPanel
                 while (m_run)
                 {
                     Thread.sleep(1000);
-                    if (m_run) fileProfileAction(0);
+                    if (m_run)
+                        fileProfileAction(0);
                 }
             }
             catch (InterruptedException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
 
@@ -1548,34 +1660,40 @@ public class CreateJobPanel extends JPanel
             fpThread = null;
         }
     }
-    
-    //Added by Vincent
-    public boolean isFromCVS() {
+
+    // Added by Vincent
+    public boolean isFromCVS()
+    {
         return isFromCVS;
     }
 
-    public void setFromCVS(boolean isFromCVS) {
+    public void setFromCVS(boolean isFromCVS)
+    {
         this.isFromCVS = isFromCVS;
         addFileButton.setEnabled(false);
     }
 
-    public HashMap<File, String> getCvsModules() {
+    public HashMap<File, String> getCvsModules()
+    {
         return cvsModules;
     }
-    
-    public void setCvsModules(HashMap<File, String> cvsModules) {
+
+    public void setCvsModules(HashMap<File, String> cvsModules)
+    {
         this.cvsModules = cvsModules;
     }
-    
-    private boolean isSameModulePath(int[] p_indexs) {
+
+    private boolean isSameModulePath(int[] p_indexs)
+    {
         if (p_indexs == null || p_indexs.length == 0)
             return false;
         if (p_indexs.length == 1)
             return true;
-        File f = (File)m_filesModel.get(p_indexs[0]);
+        File f = (File) m_filesModel.get(p_indexs[0]);
         File t = null;
-        for (int i=1;i<p_indexs.length;i++) {
-            t = (File)m_filesModel.elementAt(p_indexs[i]);
+        for (int i = 1; i < p_indexs.length; i++)
+        {
+            t = (File) m_filesModel.elementAt(p_indexs[i]);
             if (!f.getAbsolutePath().equals(t.getAbsolutePath()))
                 return false;
         }
@@ -1587,4 +1705,36 @@ public class CreateJobPanel extends JPanel
         return jobAttributeDialog;
     }
 
+    /**
+     * Get the Job Name: trim()
+     */
+    public String getJobName()
+    {
+        return jTextFieldJobName.getText().trim();
+    }
+    
+    private class ComboBoxRenderer extends BasicComboBoxRenderer
+    {
+        public Component getListCellRendererComponent(JList list, Object value,
+                int index, boolean isSelected, boolean cellHasFocus)
+        {
+            if (isSelected)
+            {
+                setBackground(list.getSelectionBackground());
+                setForeground(list.getSelectionForeground());
+                if (-1 < index)
+                {
+                    list.setToolTipText(fileProfilesTipsList.get(index));
+                }
+            }
+            else
+            {
+                setBackground(list.getBackground());
+                setForeground(list.getForeground());
+            }
+            setFont(list.getFont());
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
 }

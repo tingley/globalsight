@@ -21,9 +21,9 @@ import org.w3c.dom.NodeList;
 public class ClientTester
 {
 	private static int MAX_SEND_SIZE = 5 * 1000 * 1024;//5M
-	private static String HOST_NAME = "10.10.211.117";
-	private static String HOST_PORT = "80";
-	private static String userName = "gsyorkpm";
+	private static String HOST_NAME = "10.10.215.20";
+	private static String HOST_PORT = "8080";
+	private static String userName = "yorkadmin";
 	private static String password = "password";
 
 	public static Ambassador getAmbassador() throws Exception
@@ -45,6 +45,51 @@ public class ClientTester
         	Ambassador ambassador = getAmbassador(userName, password);
         	String fullAccessToken = ambassador.login(userName, password);
         	System.out.println("fullAccessToken : " + fullAccessToken);
+
+        	//C:\GlobalSight\_Docs\york\createJob_tmp\201211161722-911724879\Documents and Settings\york.jin\Desktop\2694\Welocalize_Company1.html
+        	byte[] content = null;
+            File file = new File("c:/Welocalize1.html");
+            content = new byte[(int) file.length()];
+            FileInputStream fin = new FileInputStream(file);
+            fin.read(content, 0, (int) file.length());
+            ambassador.uploadSourceFile(fullAccessToken, "createJob_tmp\\201211161722-911724879\\Documents and Settings\\york.jin\\Desktop\\2694\\Welocalize_Company1.html", content);
+
+            String result = "";
+//        	result = ambassador.downloadXliffOfflineFile(fullAccessToken, "247");
+//        	System.out.println(result);
+
+/**        	
+        	System.out.println("==== Begin to upload offline file ====");
+        	byte[] content = null;
+        	File file = new File("e:/Downloads/test2_589424576_en_US_de_DE(1)/test2_589424576_de_DE/inbox/demo_company.html.xlf");
+        	content = new byte[(int) file.length()];
+        	FileInputStream fin = new FileInputStream(file);
+        	fin.read(content, 0, (int) file.length());
+        	
+        	ambassador.uploadEditionFileBack(fullAccessToken, "247", "demo_company.html.xlf", content);
+        	System.out.println("==== Upload is done ====");
+        	System.out.println("==== Begin to update content ====");
+        	ambassador.importOfflineTargetFiles(fullAccessToken, "247");
+        	System.out.println("==== Update is done ====");
+*/
+//        	result = ambassador.getWorkflowPath(fullAccessToken, 12);
+//        	System.out.println(result);
+//        	
+//        	result = ambassador.getJobsByTimeRange(fullAccessToken, "1h2d");
+//        	System.out.println(result);
+//        	
+//        	System.out.println("**** fetchWorkflowRelevantInfoByJobs ****");
+//        	result = ambassador.fetchWorkflowRelevantInfoByJobs(fullAccessToken, "1,2");
+//        	System.out.println(result);
+//
+//        	System.out.println("**** getAllL10NProfiles ****");
+//            result = ambassador.getAllL10NProfiles(fullAccessToken);
+//            System.out.println(result);
+//
+//            System.out.println("**** getTasksInJobs ****");
+//            result = ambassador.getTasksInJobs(fullAccessToken, "1,2", "Translation1_2");
+//            System.out.println(result);
+
 //        	String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
 //        	System.out.println("realAccessToken : " + realAccessToken);
         	
@@ -52,9 +97,9 @@ public class ClientTester
 //        	System.out.println("getAllUsers:");
 //        	System.out.println(allUsers);
         	
-        	String localizedDocuments = ambassador.getLocalizedDocuments(fullAccessToken, "1001_004_2_455426079");
-        	System.out.println("getLocalizedDocuments:");
-        	System.out.println(localizedDocuments);
+//        	String localizedDocuments = ambassador.getLocalizedDocuments(fullAccessToken, "1001_004_2_455426079");
+//        	System.out.println("getLocalizedDocuments:");
+//        	System.out.println(localizedDocuments);
         	
 //        	String userInfo = ambassador.getUserInfo(fullAccessToken, userName);
 //        	System.out.println("getUserInfo:");
@@ -199,7 +244,7 @@ public class ClientTester
     	}
     	
     }
-    
+
     /**
     private static void testUploadOriginalSourceFile(String p_accessToken) throws Exception
     {

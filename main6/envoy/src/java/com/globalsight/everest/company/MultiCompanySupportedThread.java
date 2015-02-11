@@ -95,6 +95,7 @@ public class MultiCompanySupportedThread extends Thread
 {
     protected ResourceBundle m_bundle = null;
     private String m_companyId;
+    private Runnable m_runnable;  // saved for ActivityLog
 
     public MultiCompanySupportedThread(Runnable target)
     {
@@ -130,6 +131,7 @@ public class MultiCompanySupportedThread extends Thread
     public MultiCompanySupportedThread(ThreadGroup group, Runnable target)
     {
         super(group, target);
+        this.m_runnable = target;
         this.m_companyId = CompanyThreadLocal.getInstance().getValue();
     }
 
@@ -137,6 +139,7 @@ public class MultiCompanySupportedThread extends Thread
             String name, long stackSize)
     {
         super(group, target, name, stackSize);
+        this.m_runnable = target;
         this.m_companyId = CompanyThreadLocal.getInstance().getValue();
     }
     
@@ -185,6 +188,8 @@ public class MultiCompanySupportedThread extends Thread
     {
         Map<Object,Object> activityArgs = new HashMap<Object,Object>();
         activityArgs.put("class", this.getClass().getName());
+        activityArgs.put("runnableClass",
+            m_runnable == null ? null : m_runnable.getClass().getName());
         activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, this.m_companyId);
         ActivityLog.Start activityStart = ActivityLog.start(
             MultiCompanySupportedThread.class, "run", activityArgs);

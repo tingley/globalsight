@@ -90,33 +90,11 @@ public class TmConcordanceQuery
             tmIds.add(tm.getId());
         }
         
-        // If '*' is the only search word, we return all tu id in the
-        // specified TM.
-        if(isAllSearch(p_searchPattern))
-        {
-            // '*' is the only search word
-            result = getAllTuId(p_sourceLocale, tmIds);
-        }
-        else
-        {
-            result = LuceneSearcher.search(
+        result = LuceneSearcher.search(
                 tmIds, p_searchPattern, p_sourceLocale, null);
-        }
-
         // filter out tus that don't have target locale segment
         return getTuListByTargetLocale(result, p_targetLocale, tmIds);
     }
-    
-
-    //
-    // Private Methods
-    //
-
-    private boolean isAllSearch(String p_pattern)
-    {
-        return p_pattern.trim().equals("*");
-    }
-    
 
     private List<TMidTUid> getAllTuId(
         GlobalSightLocale p_sourceLocale, List p_tmIds)
@@ -172,8 +150,9 @@ public class TmConcordanceQuery
 
             for(Iterator<TMidTUid> it = p_tuIdList.iterator(); it.hasNext(); )
             {
-                long tuId = it.next().getTuId();
-                
+                TMidTUid tt = it.next();
+                long tuId = tt.getTuId();
+                float score = tt.getMatchScore();
                 stmt.setLong(2, tuId);
                 rs = stmt.executeQuery();
                 
@@ -182,7 +161,8 @@ public class TmConcordanceQuery
                 	ProjectTmTuT tu = HibernateUtil.get(ProjectTmTuT.class, tuId);
                 	if(tmIds.contains(tu.getProjectTm().getId()))
                 	{
-                		resultTuList.add(new TMidTUid(tu.getProjectTm().getId(), tuId));
+                        resultTuList.add(new TMidTUid(
+                                tu.getProjectTm().getId(), tuId, score));
                 	}
                 }
             }
@@ -201,39 +181,5 @@ public class TmConcordanceQuery
         }
         
         return resultTuList;
-    }
-    public static class TMidTUid
-    {
-    	private long tmId;
-    	private long tuId;
-    	public TMidTUid(long tmId, long tuId)
-    	{
-    		this.tuId = tuId;
-    		this.tmId = tmId;
-    	}
-    	public long getTmId()
-    	{
-    		return this.tmId;
-    	}
-    	public long getTuId()
-    	{
-    		return this.tuId;
-    	}
-        public boolean equals(Object o)
-        {
-            if (o == null || ! o.getClass().equals(getClass()))
-            {
-                return false;
-            }
-            TMidTUid other = (TMidTUid) o;
-            return other.tmId == tmId && other.tuId == tuId;
-        }
-        public int hashCode()
-        {
-            return (int) tmId * 524287 + (int) tuId;
-        }
-        public String toString() {
-            return "(TM " + tmId + ", TU " + tuId + ")";
-        }
     }
 }

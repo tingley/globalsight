@@ -29,6 +29,7 @@
          com.globalsight.everest.util.comparator.JavaLocaleComparator,
          com.globalsight.everest.util.comparator.TaskCommentInfoComparator,
          com.globalsight.everest.foundation.User,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          com.globalsight.util.AmbFileStoragePathUtils,
          java.text.MessageFormat,
          java.text.NumberFormat,
@@ -41,6 +42,7 @@
 <jsp:useBean id="jobComments" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobDetails" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobAttributes" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+<jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="segmentComments" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobCommentList" class="java.util.ArrayList" scope="request"/>
 <jsp:useBean id="taskCommentList" class="java.util.ArrayList" scope="request"/>
@@ -66,6 +68,9 @@
     String jobCommentsURL = jobComments.getPageURL()
                              + "&" + JobManagementHandler.JOB_ID
                              + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+    String jobReportsURL = jobReports.getPageURL() 
+    						 + "&" + JobManagementHandler.JOB_ID 
+    						 + "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
     String segcommentsUrl = segmentComments.getPageURL();
 
     String title= bundle.getString("lb_comments");
@@ -130,6 +135,7 @@
 </style>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
 
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -299,6 +305,30 @@ function initSelections()
 <% } %>
 }
 
+//for GBS-2599
+function handleMultiSelectAll_1() {
+	if (CommentForm) {
+		if (CommentForm.multiSelectAll_1.checked) {
+			doCheckAll('checkboxBtn');
+	    }
+	    else {
+			doClearAll('checkboxBtn');
+	    }
+	}
+}
+function handleMultiSelectAll_2() {
+	if (CommentForm) {
+		if (CommentForm.multiSelectAll_2.checked) {
+			doCheckAll('ActivityCheckboxBtn');
+	    }
+	    else {
+			doClearAll('ActivityCheckboxBtn');
+	    }
+	}
+}
+$(document).ready(function(){
+	$("[name*='multiSelectAll_']").parent().css("width","2px");
+})
 </SCRIPT>
 </head>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -326,13 +356,22 @@ function initSelections()
 		    <IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
 		    </amb:permission>
 	    </TD>
+	    
+	    <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
+        <TD WIDTH="2"></TD>       
+        <TD CLASS="tableHeadingListOff">        
+        <IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+        <A CLASS="sortHREFWhite" HREF="<%=jobReportsURL%>"><%=bundle.getString("lb_reports")%></A>
+        <IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+        </TD>
+        </amb:permission>
     </TR>
 </TABLE>
 <!-- End Tabs table -->
 
 <form name="CommentForm" method="post">
 <!-- Comments data table -->
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText" width="80%" style="min-width:1024px;">
         <tr>
             <td><b><%=bundle.getString("lb_job")%> <%=bundle.getString("lb_comments")%>
             </b></td>
@@ -340,8 +379,7 @@ function initSelections()
 
         <tr valign="top">
           <td align="right">
-            <amb:tableNav bean="jobCommentList" key="<%=CommentConstants.JOB_COMMENT_KEY%>"
-                 pageUrl="jobComments" />
+            <amb:tableNav bean="jobCommentList" key="<%=CommentConstants.JOB_COMMENT_KEY%>" pageUrl="jobComments" />
           </td>
         </tr>
         <tr>
@@ -355,14 +393,14 @@ function initSelections()
                     onclick="enableButtons('editBtn')">
            </amb:permission>
             </amb:column>
-            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="15%">
-                <%=comment.getCreatorId()%>
+            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="10%">
+                <%=UserUtil.getUserNameById(comment.getCreatorId())%>
             </amb:column>
             <amb:column label="lb_date_created" sortBy="<%=CommentComparator.DATE%>" width="15%">
                 <%=comment.getCreatedDate()%>
             </amb:column>
-            <amb:column label="lb_comments" width="400px" style="word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:400px\'>\");}</SCRIPT>"); %>
+            <amb:column label="lb_comments" width="45%" style="word-wrap:break-word;word-break:break-all">
+            <div style='width:45%'>
                 <%
                     String com = comment.getComment();
                     if (com.length() > 200)
@@ -377,10 +415,11 @@ function initSelections()
                     else
                         out.println(comment.getComment());
                 %>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+            </div>
             </amb:column>
-            <amb:column label="lb_attached_files" width="100px" style="word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:100px\'>\");}</SCRIPT>"); %>
+			<amb:column label="multiCheckbox_1" align="right" width="5px"></amb:column>
+            <amb:column label="lb_attached_files" width="30%" style="word-wrap:break-word;word-break:break-all">
+            <div style='width:100%'>
             <%
                  String commentId = (new Long(comment.getId())).toString();
                  ArrayList commentReferences = null;
@@ -398,7 +437,7 @@ function initSelections()
                  if (commentReferences != null)
                  {  
                     for (Iterator it = commentReferences.iterator(); it.hasNext();)
-                    { 
+                    {
                         CommentFile file = (CommentFile)it.next();
                         // round size to nearest 1024bytes (1k) - like win-explorer.
                         // adjust for empty file
@@ -420,18 +459,14 @@ path = "/globalsight/".concat(AmbFileStoragePathUtils.COMMENT_REFERENCE_SUB_DIR)
 path += File.separator.concat(file.getFileAccess()).concat(File.separator).concat(file.getFilename());
 path = URLEncoder.encodeUrlStr(path);
 %>
-                        <A class="standardHREF" target="_blank" href="<%=path %>">
-                        <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
-                        </A>
+                        <A class="standardHREF" target="_blank" href="<%=path %>"><%=EditUtil.encodeHtmlEntities(file.getFilename())%></A>
                         <SPAN CLASS=smallText>
                         <%=numberFormat.format(filesize)%>k
 <%
                         if (file.getFileAccess().equals("Restricted"))
                         {
 %>
-                            <SPAN STYLE="color: red">
-                                (<%=bundle.getString("lb_restricted")%>)&nbsp;
-                            </SPAN>
+                            <SPAN STYLE="color: red">(<%=bundle.getString("lb_restricted")%>)&nbsp;</SPAN>
 <%
                         }
 %>
@@ -441,7 +476,7 @@ path = URLEncoder.encodeUrlStr(path);
                     }
                   }
 %>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+        </div>
         </amb:column>
   </amb:table>
 </td>
@@ -449,14 +484,15 @@ path = URLEncoder.encodeUrlStr(path);
 <tr>
 
 <td align="right" style="padding-top:6px">
-	<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+	<%--for gbs-2599
+	amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
 		<A CLASS="standardHREF" HREF="#"
 		                            onClick="doCheckAll('checkboxBtn'); return false;"
 		                            onFocus="this.blur();"><%=bundle.getString("lb_check_all")%></A> |
 		<A CLASS="standardHREF" HREF="#"
 		                            onClick="doClearAll('checkboxBtn'); return false;"
 		                            onFocus="this.blur();"><%=bundle.getString("lb_clear_all")%></A>
-    </amb:permission>
+    </amb:permission--%>
     <amb:permission name="<%=Permission.JOB_COMMENTS_EDIT%>" >
     <INPUT TYPE="BUTTON" NAME=editBtn VALUE="<%=editButton%>" disabled onClick="submitForm('Edit');">
     </amb:permission>

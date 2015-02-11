@@ -16,116 +16,146 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.util.comparator.WorkflowTemplateInfoComparator;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateControlFlowHelper;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.util.GeneralException;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Locale;
 import java.util.List;
-import javax.naming.NamingException;
-import javax.servlet.RequestDispatcher;
+import java.util.Locale;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+
 /**
- * DupWorkflowTemplateHandler is the page handler responsible for
- * displaying source & target locales.
+ * DupWorkflowTemplateHandler is the page handler responsible for displaying
+ * source & target locales.
  */
 
-public class DupWorkflowTemplateHandler extends PageHandler
-    implements WorkflowTemplateConstants
+public class DupWorkflowTemplateHandler extends PageHandler implements
+        WorkflowTemplateConstants
 {
-    
+
     public DupWorkflowTemplateHandler()
     {
     }
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Override Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Override Methods
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-                                  HttpServletRequest p_request,
-                                  HttpServletResponse p_response,
-                                  ServletContext p_context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
+        PermissionSet perms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
+        String userName = (String) session
+                .getAttribute(WebAppConstants.USER_NAME);
 
-        if (CANCEL_ACTION.equals(p_request.getParameter(ACTION))) 
+        if (CANCEL_ACTION.equals(p_request.getParameter(ACTION)))
         {
             clearSessionExceptTableInfo(session, KEY);
         }
 
+        List projectInfos = new ArrayList();
+        if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
+        {
+            projectInfos = WorkflowTemplateHandlerHelper
+                    .getAllProjectInfos(uiLocale);
+        }
+        else if (perms.getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
+        {
+            projectInfos = WorkflowTemplateHandlerHelper.getProjectInfosByUser(
+                    userName, uiLocale);
+        }
+        else
+        {
+            User user = UserHandlerHelper.getUser(userName);
+            projectInfos = WorkflowTemplateHandlerHelper
+                    .getAllProjectInfosForUser(user, uiLocale);
+        }
+        p_request.setAttribute(PROJECTS, projectInfos);
+
         getLocales(p_request, session);
-        session.setAttribute(
-            WF_TEMPLATE_INFO_ID, p_request.getParameter(WF_TEMPLATE_INFO_ID));
+
+        String wfId = p_request.getParameter(WF_TEMPLATE_INFO_ID);
+        WorkflowTemplateInfo wti = WorkflowTemplateHandlerHelper
+                .getWorkflowTemplateInfoById(Long.parseLong(wfId));
+        p_request.setAttribute(CHOSEN_PROJECT,
+                Long.valueOf(wti.getProject().getId()));
+
+        session.setAttribute(WF_TEMPLATE_INFO_ID, wfId);
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
+    // ////////////////////////////////////////////////////////////////////
+    // End: Override Methods
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  End: Override Methods
-    //////////////////////////////////////////////////////////////////////
-
-    
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Local Methods
-    //////////////////////////////////////////////////////////////////////
-
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Local Methods
+    // ////////////////////////////////////////////////////////////////////
 
     /**
-     * Put the source, target, and locale pairs in the request
-     * for the dup workflow page
+     * Put the source, target, and locale pairs in the request for the dup
+     * workflow page
      */
-    private void getLocales(HttpServletRequest p_request,
-                                           HttpSession p_session)
-        throws ServletException, IOException, EnvoyServletException
+    private void getLocales(HttpServletRequest p_request, HttpSession p_session)
+            throws ServletException, IOException, EnvoyServletException
 
     {
         List vPairs = null;
-        try {
+        try
+        {
             HttpSession session = p_request.getSession(false);
-            Locale uiLocale =
-                (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+            Locale uiLocale = (Locale) session
+                    .getAttribute(WebAppConstants.UILOCALE);
             vPairs = WorkflowTemplateHandlerHelper.getAllLocalePairs(uiLocale);
             p_request.setAttribute(ALL_LOCALES, vPairs);
-            vPairs = WorkflowTemplateHandlerHelper.getAllSourceLocales(uiLocale);
+            vPairs = WorkflowTemplateHandlerHelper
+                    .getAllSourceLocales(uiLocale);
             p_request.setAttribute(SOURCE_LOCALES, vPairs);
-            vPairs = WorkflowTemplateHandlerHelper.getAllTargetLocales(uiLocale);
+            vPairs = WorkflowTemplateHandlerHelper
+                    .getAllTargetLocales(uiLocale);
             p_request.setAttribute(TARGET_LOCALES, vPairs);
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             System.out.println("ERROR in getting locales");
         }
     }
 
-
-    //////////////////////////////////////////////////////////////////////
-    //  End: Local Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Local Methods
+    // ////////////////////////////////////////////////////////////////////
 
 }

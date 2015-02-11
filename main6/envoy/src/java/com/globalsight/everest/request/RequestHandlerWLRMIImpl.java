@@ -146,27 +146,13 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements RequestHand
                                                       p_job,
                                                       p_workflowTemplates);
     }
-    /*
-     * Implementation of RequestHandler method
-     * @see RequestHandler.submitRequest(...)
-     */
-    public long submitRequest(int p_requestType,
-                              String p_gxml,
-                              String p_l10nRequestXml,
-                              String p_eventFlowXml,        
-                              GeneralException p_exception)
-    throws RequestHandlerException, RemoteException
-    {
-        return m_localReference.submitRequest
-        (p_requestType, p_gxml, p_l10nRequestXml, p_eventFlowXml, p_exception);
-    }
 
     /*
      * Implementation of RequestHandler method
      * @see RequestHandler.importPage(...)
      */
-    public void importPage(Request p_request)
-    throws RequestHandlerException, RemoteException
+    public void importPage(Request p_request) throws RequestHandlerException,
+            RemoteException
     {
         m_localReference.importPage(p_request);
     }
@@ -221,6 +207,7 @@ public class RequestHandlerWLRMIImpl extends RemoteServer implements RequestHand
             p_exception,
             p_l10nRequestXml);
     }
+    
     public FileProfile getFileProfile(Request p_request)
     {
         return m_localReference.getFileProfile(p_request);

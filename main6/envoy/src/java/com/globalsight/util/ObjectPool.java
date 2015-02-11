@@ -103,7 +103,7 @@ public class ObjectPool
                 new IllegalArgumentException(
                     "p_object class " + p_object.getClass().getName()
                     + " invalid for pool " + m_class.getName());
-            CATEGORY.error(ie);
+            CATEGORY.error(ie.getMessage(), ie);
             throw ie;
         }
     }
@@ -124,7 +124,7 @@ public class ObjectPool
         RuntimeException re = new RuntimeException(
             "exception creating new instance for pool "
             + m_class.getName());
-        CATEGORY.error(re);
+        CATEGORY.error(re.getMessage(), re);
         throw re;
     }
 

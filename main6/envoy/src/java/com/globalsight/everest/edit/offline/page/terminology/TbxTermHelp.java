@@ -18,19 +18,22 @@
 package com.globalsight.everest.edit.offline.page.terminology;
 
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 
+import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.edit.offline.page.TerminologyHelp;
+import com.globalsight.terminology.termleverager.TermLeverageMatchResult;
 
 public class TbxTermHelp extends TermHelp implements TerminologyHelp
 {
 	
 	private static final String START = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
-			"<!DOCTYPE martif SYSTEM \"http://www.lisa.org/fileadmin/standards/tbx/TBXcoreStructV02.dtd\">\n" +
+			"<!DOCTYPE martif PUBLIC 'ISO 12200:1999A//DTD MARTIF core (DXFcdV04)//EN' 'TBXcdv04.dtd'>\n" +
 			"<martif type=\"TBX\" xml:lang=\"" + LOCALE.getDisplayLanguage(LOCALE) + "\">\n" +
 			"<martifHeader>\n<fileDesc>\n<sourceDesc>\n<p>from GlobalSight termBase</p>\n" +
 			"</sourceDesc>\n</fileDesc>\n<encodingDesc>\n" +
-			"<p type=\"XCSURI\">http://www.lisa.org/fileadmin/standards/tbx/TBXXCSV02.xcs</p>\n" +
+	        "<p type=\"DCSName\">SYSTEM 'xcs.xml'</p>" +
 			"</encodingDesc>\n</martifHeader>\n<text>\n<body>\n";
 	
 	private static final String END = "</body>\n</text>\n</martif>";
@@ -55,4 +58,21 @@ public class TbxTermHelp extends TermHelp implements TerminologyHelp
 		return MessageFormat.format(LANGUAGE_GRP, locale.getLanguage(), terminology);
 	}
 
+    public String convert(List<TermLeverageMatchResult> terms,
+            Locale srcLocale, Locale trgLocale)
+    {
+        init(terms, srcLocale, trgLocale);
+
+        StringBuffer content = new StringBuffer();
+        content.append(getHead());
+        content.append(getContent());
+        content.append(getEnd());
+
+        String result = content.toString();
+        if (super.getFormat()) {
+            result = XmlUtil.format(result, XmlUtil.getNullEntityResolver());
+        }
+
+        return result;
+    }
 }

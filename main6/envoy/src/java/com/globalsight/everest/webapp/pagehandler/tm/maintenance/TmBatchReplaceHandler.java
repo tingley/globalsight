@@ -144,28 +144,17 @@ public class TmBatchReplaceHandler
 
         // TODO: add a REPLACE_ALL flag and ignore the current selection.
 
-        Session hsession = null;
-        try
-        {
-            hsession = HibernateUtil.getSession();
+        // Now do the replacement and get the results
+        Collection replaceResults = doReplace(manager, oldText, newText,
+        		caseSensitiveSearch, searchResults, selectedTuIds, targetLocale, userId);
 
-            // Now do the replacement and get the results
-            Collection replaceResults = doReplace(hsession.connection(), manager, oldText, newText,
-                caseSensitiveSearch, searchResults, selectedTuIds, targetLocale, userId);
-    
-            // remember result
-            setSessionValues(p_request, replaceResults);
-    
-            // convert results to html table rows
-            ReplaceResultTableMaker tableMaker = new ReplaceResultTableMaker();
-            String html = tableMaker.getTableRows(hsession.connection(), searchResults, replaceResults);
-            setParameters(p_request, html);
-        }
-        finally {
-            if (hsession != null) {
-                hsession.close();
-            }
-        }
+        // remember result
+        setSessionValues(p_request, replaceResults);
+
+        // convert results to html table rows
+        ReplaceResultTableMaker tableMaker = new ReplaceResultTableMaker();
+        String html = tableMaker.getTableRows(searchResults, replaceResults);
+        setParameters(p_request, html);
 
         super.invokePageHandler(p_pageDescriptor, p_request,
             p_response, p_context);
@@ -193,14 +182,14 @@ public class TmBatchReplaceHandler
         sessionMgr.setAttribute(TM_CONCORDANCE_REPLACE_RESULTS, p_results);
     }
 
-    private ArrayList doReplace(Connection p_connection, SearchReplaceManager p_manager,
-        String p_oldText, String p_newText,
-        boolean p_caseSensitiveSearch, TmConcordanceResult p_searchResults,
-        String[] p_selectedTuIds, GlobalSightLocale p_targetLocale, String p_userId)
-        throws  EnvoyServletException
+	private ArrayList doReplace(SearchReplaceManager p_manager,
+			String p_oldText, String p_newText, boolean p_caseSensitiveSearch,
+			TmConcordanceResult p_searchResults, String[] p_selectedTuIds,
+			GlobalSightLocale p_targetLocale, String p_userId)
+			throws EnvoyServletException
     {
-        ArrayList trgTuvs = getSelectedTargetTuvs(p_connection, p_searchResults,
-            p_selectedTuIds, p_targetLocale);
+		ArrayList trgTuvs = getSelectedTargetTuvs(p_searchResults,
+				p_selectedTuIds, p_targetLocale);
 
         try
         {
@@ -213,11 +202,10 @@ public class TmBatchReplaceHandler
         }
     }
 
-    private ArrayList getSelectedTargetTuvs(Connection p_connection, 
-        TmConcordanceResult p_searchResults,
+    private ArrayList getSelectedTargetTuvs(TmConcordanceResult p_searchResults,
         String[] p_selectedTuIds, GlobalSightLocale p_targetLocale)
     {
-        return getTuvs(makeMap(p_connection, p_searchResults), p_selectedTuIds, p_targetLocale);
+        return getTuvs(makeMap(p_searchResults), p_selectedTuIds, p_targetLocale);
     }
 
     private ArrayList getTuvs(Map p_searchResultsMap, String[] p_tuIds,
@@ -243,11 +231,10 @@ public class TmBatchReplaceHandler
     /**
      * Returns a map from [tu id (Long)] to [SegmentTmTu].
      */
-    private Map<Long, SegmentTmTu> makeMap(Connection p_connection, 
-                                TmConcordanceResult p_searchResults)
+    private Map<Long, SegmentTmTu> makeMap(TmConcordanceResult p_searchResults)
     {
         Map<Long, SegmentTmTu> result = new HashMap<Long, SegmentTmTu>();
-        List<SegmentTmTu> tus = p_searchResults.getTus(p_connection);
+        List<SegmentTmTu> tus = p_searchResults.getTus();
 
         for (int i = 0, max = tus.size(); i < max; i++)
         {

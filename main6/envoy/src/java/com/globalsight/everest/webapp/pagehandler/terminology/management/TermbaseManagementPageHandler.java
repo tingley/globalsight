@@ -17,18 +17,27 @@
 
 package com.globalsight.everest.webapp.pagehandler.terminology.management;
 
-import org.apache.log4j.Logger;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.terminology.ITermbaseManager;
-import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseInfo;
-import com.globalsight.terminology.TermbaseList;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectTMTBUsers;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -38,21 +47,13 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-
+import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.terminology.ITermbaseManager;
+import com.globalsight.terminology.Termbase;
+import com.globalsight.terminology.TermbaseException;
+import com.globalsight.terminology.TermbaseInfo;
+import com.globalsight.terminology.TermbaseList;
 import com.globalsight.util.GeneralException;
-
-import java.io.IOException;
-import java.math.BigInteger;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  * <p>PageHandler is responsible creating, deleting and modifying
@@ -330,47 +331,119 @@ public class TermbaseManagementPageHandler
      * @author Leon Song
      * @since 8.0
      */
-    private ArrayList getTBs(String userId, Locale uiLocale)
+    private List getTBs(String userId, Locale uiLocale)
             throws RemoteException
     {
+        List tbs = new ArrayList();
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         Company currentCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
         boolean enableTBAccessControl = currentCompany
                 .getEnableTBAccessControl();
-        ArrayList names = s_manager.getTermbaseList(uiLocale);
-        ArrayList tbs = new ArrayList();
         boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
-        boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
-        if (enableTBAccessControl)
+        boolean isSuperPM = UserUtil.isSuperPM(userId);
+        boolean isSuperLP = UserUtil.isSuperLP(userId);
+
+        List<String> companies = null;
+        List<TermbaseInfo> allTBs = new ArrayList<TermbaseInfo>();
+        try
         {
-            if (isAdmin || isSuperAdmin)
+            allTBs.addAll(s_manager.getTermbaseList(uiLocale));
+        }
+        catch (RemoteException e)
+        {
+            e.printStackTrace();
+        }
+
+        if ("1".equals(currentCompanyId))
+        {
+            companies = new ArrayList<String>();
+            if (isSuperLP)
             {
-                tbs = names;
-            }
-            else
-            {
-                ProjectTMTBUsers ptmUsers = new ProjectTMTBUsers();
-                List tbIds = ptmUsers.getTList(userId, "TB");
-                Iterator it = tbIds.iterator();
-                while (it.hasNext())
+                // Get all the companies the super translator worked for
+                List projectList = null;
+                try
                 {
-                    Termbase tb = TermbaseList.get(((BigInteger) it.next())
-                            .longValue());
-                    if (tb != null)
+                    projectList = ServerProxy.getProjectHandler()
+                            .getProjectsByUser(userId);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                for (Iterator it = projectList.iterator(); it.hasNext();)
+                {
+                    Project pj = (Project) it.next();
+                    String companyId = pj.getCompanyId();
+                    if (!companies.contains(companyId))
                     {
-                        TermbaseInfo tbi = new TermbaseInfo(tb.getId(),
-                                tb.getName(), tb.getDescription(),
-                                tb.getCompanyId());
+                        companies.add(companyId);
+                    }
+                }
+                Iterator<TermbaseInfo> itAllTBs = allTBs.iterator();
+                while (itAllTBs.hasNext())
+                {
+                    TermbaseInfo tbi = (TermbaseInfo) itAllTBs.next();
+                    if (companies.contains(tbi.getCompanyId()))
+                    {
                         tbs.add(tbi);
                     }
                 }
+
+            }
+            else
+            {
+                // Super admin
+                tbs = allTBs;
             }
         }
         else
         {
-            tbs = names;
+            if (enableTBAccessControl && !isAdmin)
+            {
+
+                ArrayList<Long> tbListOfUser = new ArrayList<Long>();
+                ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
+                List tbIdList = projectTMTBUsers.getTList(userId, "TB");
+                Iterator it = tbIdList.iterator();
+                while (it.hasNext())
+                {
+                    long id = ((BigInteger) it.next()).longValue();
+                    Termbase tb = TermbaseList.get(id);
+
+                    if (isSuperPM)
+                    {
+                        if (tb != null
+                                && tb.getCompanyId().equals(currentCompanyId))
+                        {
+                            tbListOfUser.add(id);
+                        }
+                    }
+                    else
+                    {
+                        if (tb != null)
+                        {
+                            tbListOfUser.add(id);
+                        }
+                    }
+                }
+
+                Iterator<TermbaseInfo> itAllTBs = allTBs.iterator();
+                while (itAllTBs.hasNext())
+                {
+                    TermbaseInfo tbi = (TermbaseInfo) itAllTBs.next();
+                    if (tbListOfUser.contains(tbi.getTermbaseId()))
+                    {
+                        tbs.add(tbi);
+                    }
+                }
+            }
+            else
+            {
+                tbs = allTBs;
+            }
         }
+        Collections.sort(tbs, new TermbaseInfoComparator(0, uiLocale));
         return tbs;
     }
 }

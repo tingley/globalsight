@@ -29,13 +29,16 @@ package com.globalsight.everest.webapp.pagehandler.administration.projects;
  * BY LAW.
  */
 // java
-import java.util.Collection;
-
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.TreeSet;
 
-// javax
 import javax.naming.NamingException;
-// com.globalsight
+import javax.servlet.http.HttpServletRequest;
+
+import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
@@ -44,14 +47,8 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.usermgr.UserInfo;
 import com.globalsight.everest.usermgr.UserManager;
-import com.globalsight.everest.usermgr.UserManagerException;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
-
-import javax.servlet.http.HttpServletRequest;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeSet;
 
 public class ProjectHandlerHelper 
 {
@@ -416,5 +413,79 @@ public class ProjectHandlerHelper
         {
             throw new EnvoyServletException(ge.getExceptionId(), ge);
         }
+    }
+    
+    /**
+     * Set Project Data from request
+     * @param p_updatePm    Whether update the Project PM
+     */
+    public static void setData(Project p_project, HttpServletRequest p_request,
+            boolean p_updatePm) throws EnvoyServletException
+    {
+        p_project.setName((String) p_request.getParameter("nameField"));
+        p_project.setTermbaseName((String) p_request.getParameter("tbField"));
+        
+        // Update Project PM
+        if (p_updatePm)
+        {
+            String pmName = (String) p_request.getParameter("pmField");
+            if (pmName != null)
+            {
+                p_project.setProjectManager(ProjectHandlerHelper.getUser(pmName));
+            }
+        }
+
+        String attributeSetId = p_request.getParameter("attributeSet");
+        AttributeSet attSet = null;
+        if (attributeSetId != null)
+        {
+            long attSetId = Long.valueOf(attributeSetId);
+            if (attSetId > 0)
+            {
+                attSet = HibernateUtil.get(AttributeSet.class, attSetId);
+            }
+            p_project.setAttributeSet(attSet);
+        }
+
+        p_project.setDescription((String) p_request.getParameter("descField"));
+
+        String qpName = (String) p_request.getParameter("qpField");
+        if ("-1".equals(qpName))
+        {
+            p_project.setQuotePerson(null);
+        }
+        else if ("0".equals(qpName))
+        {
+            p_project.setQuotePerson("0");
+        }
+        else
+        {
+            p_project.setQuotePerson(ProjectHandlerHelper.getUser(qpName));
+        }
+
+        float pmcost = 0.00f;
+        try
+        {
+            pmcost = Float.parseFloat(p_request.getParameter("pmcost").trim()) / 100;
+        }
+        catch (Exception e)
+        {
+        }
+        p_project.setPMCost(pmcost);
+
+        int poRequired = Project.NO_PO_REQUIRED;
+        if (p_request.getParameter("poRequired") != null)
+        {
+            poRequired = Project.PO_REQUIRED;
+        }
+        p_project.setPoRequired(poRequired);
+
+        // Auto Send Options
+        p_project.setReviewOnlyAutoAccept("on".equalsIgnoreCase(p_request
+                .getParameter("reviewOnlyAA")));
+        p_project.setReviewOnlyAutoSend("on".equalsIgnoreCase(p_request
+                .getParameter("reviewOnlyAS")));
+        p_project.setAutoAcceptPMTask("on".equalsIgnoreCase(p_request
+                .getParameter("autoAcceptPMTask")));
     }
 }

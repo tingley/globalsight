@@ -10,6 +10,10 @@ Public Class Windows
     Public Shared findOldVersion = False
 
     Private Sub Button2_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button2.Click
+        StartConverter()
+    End Sub
+
+    Private Sub StartConverter()
         Dim path As String
         path = TextBox1.Text.Trim
 
@@ -40,7 +44,6 @@ Public Class Windows
         iUtil.startConvert()
         eUtil.setPassoloApp(PSL)
         eUtil.startConvert()
-
     End Sub
 
     Private Const BM_CLICK = &HF5
@@ -109,5 +112,33 @@ Public Class Windows
 
     Private Sub Windows_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
+        TextBox1.Text = My.Settings.Folder
+        CBAutoStart.Checked = My.Settings.AutoStart
+
+        If My.Settings.AutoStart Then
+            Dim t As New Thread(AddressOf AutoStart)
+            t.Start()
+        End If
+    End Sub
+
+    Private Sub CBAutoStart_CheckedChanged(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles CBAutoStart.CheckedChanged
+        My.Settings.AutoStart = CBAutoStart.Checked
+        My.Settings.Save()
+    End Sub
+
+    Public Sub AutoStart()
+        CBAutoStart.Checked = My.Settings.AutoStart
+        Dim dir As String = My.MySettings.Default.Folder
+
+        If "".Equals(dir) Then
+            Return
+        End If
+
+        Dim oriText As String = CBAutoStart.Text
+        CBAutoStart.Text = "Auto Starting..."
+        CBAutoStart.Enabled = False
+        StartConverter()
+        CBAutoStart.Text = oriText
+        CBAutoStart.Enabled = True
     End Sub
 End Class

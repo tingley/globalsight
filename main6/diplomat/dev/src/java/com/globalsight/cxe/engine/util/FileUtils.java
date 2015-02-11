@@ -16,9 +16,17 @@
  */
 package com.globalsight.cxe.engine.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URISyntaxException;
 import java.net.URL;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 
@@ -70,6 +78,94 @@ public class FileUtils
         }
         
         return null;
+    }
+    
+    /**
+     * Get the file extension of a file
+     * @param file
+     * @return file extension
+     */
+    public static String getFileExtension(File file)
+    {
+        if (file != null)
+        {
+            String fileName = file.getName();
+            if (fileName.lastIndexOf(".") != -1)
+            {
+                String extension = fileName
+                        .substring(fileName.lastIndexOf(".") + 1);
+                return extension;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
+    /**
+     * Check whether a directory is empty
+     * @param f
+     * @return
+     */
+    public static boolean isEmpty(File f)
+    {
+        boolean empty = true;
+        
+        if (f.isFile())
+        {
+            return false;
+        }
+        File[] files = f.listFiles();
+        for (File file : files)
+        {
+            if (!empty)
+            {
+                break;
+            }
+            else
+            {
+                if (file.isDirectory())
+                {
+                    empty = isEmpty(file);
+                }
+                else
+                {
+                    empty = false;
+                }
+            }
+        }
+        return empty;
+    }
+    
+    public static void main(String[] args)
+    {
+        System.out.println(isEmpty(new File("C:\\New Folder")));
+    }
+    
+    /**
+     * Get the number of files under a directory
+     * @param directory directory
+     * @return file count
+     */
+    public static int getFileNo(File directory)
+    {
+        int count = 0;
+        File[] files = directory.listFiles();
+        count = files.length;
+        for (File file : files)
+        {
+            if (file.isDirectory())
+            {
+                count += getFileNo(file);
+                count--;
+            }
+        }
+        return count;
     }
 
     public static void write(File file, String data) throws IOException
@@ -228,11 +324,7 @@ public class FileUtils
             if (p_filename != null)
             {
                 File file = new File(p_filename);
-                if (file.isFile())
-                {
-                    deleteSilently(p_filename);
-                }
-                else if (file.isDirectory())
+                if (file.isDirectory())
                 {
                     String files[] = file.list();
                     for (int i = 0; i < files.length; i++)

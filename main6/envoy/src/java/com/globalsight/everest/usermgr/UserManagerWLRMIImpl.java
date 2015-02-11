@@ -16,19 +16,6 @@
  */
 package com.globalsight.everest.usermgr;
 
-/* Copyright (c) 2000, GlobalSight Corporation.  All rights reserved.
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
-
 import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.List;
@@ -55,9 +42,9 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
 {
     private UserManager m_localInstance;
 
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
     /**
      * Construct a remote UserManager
      * 
@@ -72,9 +59,9 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         m_localInstance = new UserManagerLocal();
     }
 
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
     // Begin: UserManagerWLRemote Implementation
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
     public Collection getUserRoles(User p_user) throws RemoteException,
             UserManagerException
     {
@@ -241,6 +228,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         m_localInstance.removeUser(p_userRequestingRemove, p_uid);
     }
 
+    public void removeUserFromLDAP(String userId) throws RemoteException,
+            UserManagerException
+    {
+        m_localInstance.removeUserFromLDAP(userId);
+    }
+
     /**
      * @see UserManager.activateUser(String, List)
      */
@@ -273,12 +266,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     /**
      * Get user matched the given uid
      * 
-     * @param p_uid -
-     *            The user id
+     * @param p_uid
+     *            - The user id
      * 
      * @return a User object
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -286,6 +279,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
             UserManagerException
     {
         return m_localInstance.getUser(p_uid);
+    }
+
+    public User getUserByName(String p_userName) throws RemoteException,
+            UserManagerException
+    {
+        return m_localInstance.getUserByName(p_userName);
     }
 
     /**
@@ -320,8 +319,8 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
      * Get all active users
      * 
      * @return a Vector of User objects
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -334,8 +333,8 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
      * Get all active users for current company only
      * 
      * @return a Vector of User objects
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -343,6 +342,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
             UserManagerException
     {
         return m_localInstance.getUsersForCurrentCompany();
+    }
+
+    public Vector<User> getUsersFromCompany(String companyId)
+            throws RemoteException, UserManagerException
+    {
+        return m_localInstance.getUsersFromCompany(companyId);
     }
 
     /**
@@ -385,14 +390,21 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
      * 
      * @return An array of user names.
      * 
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
-    public String[] getUserNames() throws RemoteException, UserManagerException
+    public String[] getUserNamesFromCurrentAndSuperCompany()
+            throws RemoteException, UserManagerException
     {
-        return m_localInstance.getUserNames();
+        return m_localInstance.getUserNamesFromCurrentAndSuperCompany();
+    }
+
+    public String[] getUserNamesFromAllCompanies() throws RemoteException,
+            UserManagerException
+    {
+        return m_localInstance.getUserNamesFromAllCompanies();
     }
 
     /**
@@ -405,29 +417,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     }
 
     /**
-     * Get all the user names (whether active or deactive)as an array of
-     * strings.
-     * 
-     * @return An array of user names.
-     * 
-     * @exception UserManagerException -
-     *                Component related exception.
-     * @exception java.rmi.RemoteException
-     *                Network related exception.
-     */
-    public String[] getAllUserNames() throws RemoteException,
-            UserManagerException
-    {
-        return m_localInstance.getAllUserNames();
-    }
-
-    /**
      * @see UserManager.getUserNamesByFilter(String, Project)
      */
-    public String[] getUserNamesByFilter(String p_roleName, Project p_project)
+    public String[] getUserIdsByFilter(String p_roleName, Project p_project)
             throws RemoteException, UserManagerException
     {
-        return m_localInstance.getUserNamesByFilter(p_roleName, p_project);
+        return m_localInstance.getUserIdsByFilter(p_roleName, p_project);
     }
 
     /**
@@ -438,23 +433,23 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localInstance.getUsersByFilter(p_roleName, p_project);
     }
-    
+
     /**
      * @see UserManager.getUsersFromEmail(String)
      */
-    public List getUsersByEmail(String p_email)
-            throws RemoteException, UserManagerException
+    public List getUsersByEmail(String p_email) throws RemoteException,
+            UserManagerException
     {
         return m_localInstance.getUsersByEmail(p_email);
     }
 
     /**
-     * @see UserManager.getUserNamesFromRoles(String[], Project)
+     * @see UserManager.getUserIdsFromRoles(String[], Project)
      */
-    public String[] getUserNamesFromRoles(String[] p_roleNames,
-            Project p_project) throws RemoteException, UserManagerException
+    public String[] getUserIdsFromRoles(String[] p_roleNames, Project p_project)
+            throws RemoteException, UserManagerException
     {
-        return m_localInstance.getUserNamesFromRoles(p_roleNames, p_project);
+        return m_localInstance.getUserIdsFromRoles(p_roleNames, p_project);
     }
 
     /**
@@ -498,15 +493,21 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         m_localInstance.removeRole(p_roleName);
     }
 
+    public void removeRoleFromLDAP(String p_roleName) throws RemoteException,
+            UserManagerException
+    {
+        m_localInstance.removeRoleFromLDAP(p_roleName);
+    }
+
     /**
      * Removes users from a role.
      * 
-     * @param p_uids -
-     *            The user id to be deleted.
-     * @param p_roleName -
-     *            The role to add the user to.
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @param p_uids
+     *            - The user id to be deleted.
+     * @param p_roleName
+     *            - The role to add the user to.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -519,12 +520,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
     /**
      * Adds users to a role.
      * 
-     * @param p_uids -
-     *            The user ids to be added.
-     * @param p_roleName -
-     *            The role to add the user to.
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @param p_uids
+     *            - The user ids to be added.
+     * @param p_roleName
+     *            - The role to add the user to.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -534,9 +535,9 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         m_localInstance.addUsersToRole(p_uids, p_roleName);
     }
 
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
     // Begin: Local Methods
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
     /**
      * Get the reference to the local implementation of the server.
      * 
@@ -553,8 +554,8 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
      * @param p_roleName
      *            the role name.
      * @returns the Role with the role name.
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -562,6 +563,12 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
             UserManagerException
     {
         return m_localInstance.getRole(p_roleName);
+    }
+
+    public List<Role> getRolesFromCompany(String companyId)
+            throws RemoteException, UserManagerException
+    {
+        return m_localInstance.getRolesFromCompany(companyId);
     }
 
     /**
@@ -628,8 +635,17 @@ public class UserManagerWLRMIImpl extends RemoteServer implements
         m_localInstance.loggedOutUsers(p_userName, p_sessionId);
     }
 
-    //////////////////////////////////////////////////////////////////////////////
+    @Override
+    public void addUser(User p_userRequestingAdd, User p_user,
+            List p_projectIds, FieldSecurity p_fieldSecurity, List p_roles,
+            boolean needEncodePwd) throws RemoteException, UserManagerException
+    {
+        m_localInstance.addUser(p_userRequestingAdd, p_user, p_projectIds,
+                p_fieldSecurity, p_roles, needEncodePwd);
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////
     // End: Local Methods
-    //////////////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////////////
 
 }

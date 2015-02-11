@@ -156,8 +156,27 @@ public class FileSystemApplet extends EnvoyJApplet
             getParentFrame().setCursor(Cursor.DEFAULT_CURSOR);
         }
     }
-
-
+    
+    /**
+     * Gets a permissible File, due Windows permission issue.
+     * 
+     * @param child     The child pathname string
+     */
+    public File getFile(String child)
+    {
+        String osName = System.getProperty("os.name");
+        if (osName != null && osName.startsWith("Windows"))
+        {
+            File parent = new File(System.getProperty("user.home"));
+            if(!parent.exists()) parent.mkdirs();
+            return new File(parent, child);
+        }
+        else
+        {
+            return new File(child);
+        }
+    }
+    
     /**
      * Zip the selected files and send the zip to the server.
      * @param p_filesToBeZipped - A list of selected files to be uploaded.
@@ -174,7 +193,7 @@ public class FileSystemApplet extends EnvoyJApplet
         sb.append(System.currentTimeMillis());
         sb.append(".zip");
 
-        File targetFile = new File(sb.toString());
+        File targetFile = getFile(sb.toString());
         ZipIt.addEntriesToZipFile (targetFile, p_filesToBeZipped);
         m_progressBar.setValue(30);
 

@@ -685,7 +685,7 @@ function showUserInfo()
                                              userId.equals(userInList.getUserId());
                         String fullname = userInList.getFirstName() + " " +
                                           userInList.getLastName() + " (" +
-                                          userInList.getUserId() + ")";
+                                          userInList.getUserName() + ")";
 %>
                         <amb:selectOption value="<%=userInList.getUserId()%>"
                              selected="<%=Boolean.toString(selected)%>"

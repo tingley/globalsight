@@ -853,7 +853,7 @@ public class SnippetPageTemplateInterpreter
     {
         if (m_part != null)
         {
-            return m_part.getTuIdAsLong();
+            return m_part.getTuId();
         }
 
         return new Long(0L);

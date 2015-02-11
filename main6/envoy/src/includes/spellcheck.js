@@ -42,7 +42,14 @@ function SC_GSA_Parameters()
             { lang: "sk",    dict: "sk" },
             { lang: "sl",    dict: "sl" },
             { lang: "sv",    dict: "sv" },
-            { lang: "uk",    dict: "uk" },
+            { lang: "uk",    dict: "uk" }, 
+            { lang: "af", dict: "afrikaan" },
+            { lang: "hr", dict: "croatian" },
+            { lang: "ja", dict: "japaneseroman;japanesesanscript" },
+            { lang: "sw", dict: "swahili" },
+            { lang: "tr", dict: "turkish;turkey2002" },
+            { lang: "zh", dict: "chinese" },
+            { lang: "XX", dict: "XX" }
             ];
 
     /**
@@ -78,7 +85,7 @@ function SC_GSA_Parameters()
         var locale = p_targetLocale;
 
         // Search for a specific dictionary
-        for (var i in dictionaries)
+        for (var i=0;i<dictionaries.length;i++)
         {
             var dict = dictionaries[i];
 
@@ -91,7 +98,7 @@ function SC_GSA_Parameters()
         var lang = p_targetLocale.substring(0, 2);
 
         // Search for a base dictionary
-        for (var i in dictionaries)
+        for (var i=0;i<dictionaries.length;i++)
         {
             var dict = dictionaries[i];
 

@@ -48,7 +48,7 @@ public class TaskSearchUtil
     static
     {
         StringBuffer sb = new StringBuffer();
-        
+
         sb.append("SELECT COUNT(*) FROM JBPM_TASKINSTANCE ti ");
         sb.append("INNER JOIN JBPM_TASK jt ON jt.ID_ = ti.TASK_ ");
         sb.append("INNER JOIN JBPM_TASKACTORPOOL tap ");
@@ -62,10 +62,10 @@ public class TaskSearchUtil
         sb.append("AND vi.VALUE != pa.actorid_ ");
         sb.append("AND vi.CATEGORY = 'reject' ");
         sb.append("AND pa.ACTORID_ != :actorId ");
-        
+
         IS_REJECT_SQL = sb.toString();
     }
-    
+
     private static String IS_REJECT_REASSIGN_SQL = null;
     static
     {
@@ -82,15 +82,15 @@ public class TaskSearchUtil
         sb.append("and pa.ACTORID_ = :actorId ");
         sb.append("and vi.NAME = 'isRejected' ");
         sb.append("and vi.CATEGORY = 'reject' ");
-        
+
         IS_REJECT_REASSIGN_SQL = sb.toString();
     }
-    
+
     private static String SELECT = null;
     static
     {
         StringBuffer sb = new StringBuffer();
-        
+
         sb.append("select distinct t.TASK_ID, j.ID, j.NAME, ");
         sb.append("w.TOTAL_WORD_COUNT, t.ESTIMATED_COMPLETION_DATE, ");
         sb.append("w.IFLOW_INSTANCE_ID, w.TARGET_LOCALE_ID  ");
@@ -105,10 +105,10 @@ public class TaskSearchUtil
         sb.append("and vi.NAME = 'isRejected' and vi.CATEGORY = 'reject' ");
         sb.append("where w.state not in ('CANCELLED','ARCHIVED') and ");
         sb.append("j.state not in ('ADDING_FILES','DELETING_FILES', 'BATCH_RESERVED') and (");
-        
+
         SELECT = sb.toString();
     }
-    
+
     /**
      * Sets all assignees for the specified task.
      * 
@@ -116,36 +116,36 @@ public class TaskSearchUtil
      *            the specified task that need to set all assignees
      */
     public static void setAllAssignees(TaskImpl t)
-    {       
+    {
         StringBuffer sb2 = new StringBuffer();
         sb2.append("select distinct(ti.actorid_) from JBPM_TASKINSTANCE ti ");
         sb2.append("inner join JBPM_TASK jt ON jt.ID_ = ti.TASK_ ");
         sb2.append("where jt.TASKNODE_ = :id and ti.actorid_ is not null ");
-        
+
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("id", t.getId());
         List result = HibernateUtil.searchWithSql(sb2.toString(), params);
         if (result.size() == 0 || result.get(0) == null)
         {
             StringBuffer sb = new StringBuffer();
-            
+
             sb.append("select distinct(p.actorid_) from jbpm_pooledactor p ");
             sb.append("inner join jbpm_taskactorpool a on a.pooledactor_ = p.id_ ");
             sb.append("inner join JBPM_TASKINSTANCE ti on a.TASKINSTANCE_ = ti.id_ ");
             sb.append("inner join JBPM_TASK jt ON jt.ID_ = ti.TASK_ ");
             sb.append("where jt.TASKNODE_ = :id ");
-            
+
             String sql = sb.toString();
             params = new HashMap<String, Object>();
             params.put("id", t.getId());
             result = HibernateUtil.searchWithSql(sql, params);
         }
-        
-        WorkflowTaskInstance w = new WorkflowTaskInstance("",0);
+
+        WorkflowTaskInstance w = new WorkflowTaskInstance("", 0);
         w.getAllAssignees().addAll(result);
         t.setWorkflowTask(w);
     }
-    
+
     /**
      * Checks the user is project manager or not.
      * 
@@ -173,11 +173,12 @@ public class TaskSearchUtil
         }
         return isProjectManager;
     }
-    
+
     private static String dealState(int state, boolean isPm)
     {
         StringBuffer sql = new StringBuffer();
-        if (state != WorkflowConstants.TASK_DECLINED && state != WorkflowConstants.TASK_ALL_STATES)
+        if (state != WorkflowConstants.TASK_DECLINED
+                && state != WorkflowConstants.TASK_ALL_STATES)
         {
             if (isPm)
             {
@@ -188,107 +189,110 @@ public class TaskSearchUtil
                 sql.append("( pa.ACTORID_ = :actorId ) ");
             }
         }
-        
+
         switch (state)
         {
-        case WorkflowConstants.TASK_ALL_STATES:
-            if (isPm)
-            {
-                sql.append("( pa.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId ");
-            }
-            else
-            {
-                sql.append("( pa.ACTORID_ = :actorId ");
-            }
-            
-            sql.append("or vi.VALUE = :actorId ) ");
-            
-            if (isPm)
-            {
-                sql.append("and (ti.ACTORID_ = :actorId or ti.ACTORID_ is null or ti.DESCRIPTION_ = :actorId) ");
-            }
-            else
-            {
-                sql.append("and (ti.ACTORID_ = :actorId or ti.ACTORID_ is null) ");
-            }
-            
-            break;
-        case WorkflowConstants.TASK_ACTIVE:
-            sql.append("and ti.START_ is null ");
-            if (isPm)
-            {
-              sql.append("and (ti.id_ not in (select distinct ti.id_ ");
-              sql.append("from JBPM_TASKINSTANCE ti inner join JBPM_TASKACTORPOOL tap ");
-              sql.append("on ti.ID_ = tap.TASKINSTANCE_  inner join JBPM_POOLEDACTOR pa ");
-              sql.append("on tap.POOLEDACTOR_ = pa.ID_  inner join JBPM_GS_VARIABLE vi ");
-              sql.append("on ti.ID_ = vi.TASKINSTANCE_ID  and vi.NAME = 'isRejected' ");
-              sql.append("and vi.VALUE != pa.actorid_  and vi.CATEGORY = 'reject'");
-              sql.append("and pa.ACTORID_ != :actorId ))");
-            }
-            break;
-            
-        case WorkflowConstants.TASK_ACCEPTED:
-            if (isPm)
-            {
-                sql.append(" and (ti.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId) ");
-            }
-            else
-            {
+            case WorkflowConstants.TASK_ALL_STATES:
+                if (isPm)
+                {
+                    sql.append("( pa.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId ");
+                }
+                else
+                {
+                    sql.append("( pa.ACTORID_ = :actorId ");
+                }
+
+                sql.append("or vi.VALUE = :actorId ) ");
+
+                if (isPm)
+                {
+                    sql.append("and (ti.ACTORID_ = :actorId or ti.ACTORID_ is null or ti.DESCRIPTION_ = :actorId) ");
+                }
+                else
+                {
+                    sql.append("and (ti.ACTORID_ = :actorId or ti.ACTORID_ is null) ");
+                }
+
+                break;
+            case WorkflowConstants.TASK_ACTIVE:
+                sql.append("and ti.START_ is null ");
+                if (isPm)
+                {
+                    sql.append("and (ti.id_ not in (select distinct ti.id_ ");
+                    sql.append("from JBPM_TASKINSTANCE ti inner join JBPM_TASKACTORPOOL tap ");
+                    sql.append("on ti.ID_ = tap.TASKINSTANCE_  inner join JBPM_POOLEDACTOR pa ");
+                    sql.append("on tap.POOLEDACTOR_ = pa.ID_  inner join JBPM_GS_VARIABLE vi ");
+                    sql.append("on ti.ID_ = vi.TASKINSTANCE_ID  and vi.NAME = 'isRejected' ");
+                    sql.append("and vi.VALUE != pa.actorid_  and vi.CATEGORY = 'reject'");
+                    sql.append("and pa.ACTORID_ != :actorId ))");
+                }
+                break;
+
+            case WorkflowConstants.TASK_ACCEPTED:
+                if (isPm)
+                {
+                    sql.append(" and (ti.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId) ");
+                }
+                else
+                {
+                    sql.append(" and ti.ACTORID_ = :actorId ");
+                }
+                sql.append("and ti.START_ is not null and ti.END_ is null ");
+                break;
+            case WorkflowConstants.TASK_GSEDITION_IN_PROGESS:
+                if (isPm)
+                {
+                    sql.append(" and (ti.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId) ");
+                }
+                else
+                {
+                    sql.append(" and ti.ACTORID_ = :actorId ");
+                }
                 sql.append(" and ti.ACTORID_ = :actorId ");
-            }
-            sql.append("and ti.START_ is not null and ti.END_ is null ");
-            break;
-        case WorkflowConstants.TASK_GSEDITION_IN_PROGESS:
-            if (isPm)
-            {
-                sql.append(" and (ti.ACTORID_ = :actorId or ti.DESCRIPTION_ = :actorId) ");
-            }
-            else
-            {
-                sql.append(" and ti.ACTORID_ = :actorId ");
-            }
-            sql.append(" and ti.ACTORID_ = :actorId ");
-            sql.append(" and t.STATE in ('"  
-                    + TaskImpl.STATE_REDEAY_DISPATCH_GSEDTION_STR + "','"
-                    + TaskImpl.STATE_DISPATCHED_TO_TRANSLATION_STR + "','"
-                    + TaskImpl.STATE_IN_TRANSLATION_STR + "','"
-                    + TaskImpl.STATE_TRANSLATION_COMPLETED_STR +"') ");
-            break;
-        case WorkflowConstants.TASK_DECLINED:
-            sql.append(" vi.NAME = 'isRejected' ");
-            sql.append("and vi.CATEGORY = 'reject' ");
-            if (!isPm)
-            {
-                sql.append("and vi.VALUE = :actorId and ti.ID_ not in (select ti.ID_ from JBPM_TASKINSTANCE ti join JBPM_TASKACTORPOOL tap on ti.ID_ = tap.TASKINSTANCE_ inner join JBPM_POOLEDACTOR pa on tap.POOLEDACTOR_ = pa.ID_ inner join JBPM_GS_VARIABLE vi on ti.ID_ = vi.TASKINSTANCE_ID and vi.NAME = 'isRejected' and vi.VALUE = :actorId and vi.CATEGORY = 'reject' where pa.ACTORID_ = :actorId )");
-            }
-            else
-            {
-                sql.append("and vi.VALUE != pa.actorid_ and pa.ACTORID_ != :actorId ");
-            }
-            break;
-        case WorkflowConstants.TASK_COMPLETED:
-            sql.append("and ti.END_ is not null ");
-            break;
+                sql.append(" and t.STATE in ('"
+                        + TaskImpl.STATE_REDEAY_DISPATCH_GSEDTION_STR + "','"
+                        + TaskImpl.STATE_DISPATCHED_TO_TRANSLATION_STR + "','"
+                        + TaskImpl.STATE_IN_TRANSLATION_STR + "','"
+                        + TaskImpl.STATE_TRANSLATION_COMPLETED_STR + "') ");
+                break;
+            case WorkflowConstants.TASK_DECLINED:
+                sql.append(" vi.NAME = 'isRejected' ");
+                sql.append("and vi.CATEGORY = 'reject' ");
+                if (!isPm)
+                {
+                    sql.append("and vi.VALUE = :actorId and ti.ID_ not in (select ti.ID_ from JBPM_TASKINSTANCE ti join JBPM_TASKACTORPOOL tap on ti.ID_ = tap.TASKINSTANCE_ inner join JBPM_POOLEDACTOR pa on tap.POOLEDACTOR_ = pa.ID_ inner join JBPM_GS_VARIABLE vi on ti.ID_ = vi.TASKINSTANCE_ID and vi.NAME = 'isRejected' and vi.VALUE = :actorId and vi.CATEGORY = 'reject' where pa.ACTORID_ = :actorId )");
+                }
+                else
+                {
+                    sql.append("and vi.VALUE != pa.actorid_ and pa.ACTORID_ != :actorId ");
+                }
+                break;
+            case WorkflowConstants.TASK_COMPLETED:
+                sql.append("and ti.END_ is not null ");
+                break;
         }
-        
+
         sql.append(")");
         return sql.toString();
     }
-    
-    private static String getSearchSql (User user, TaskSearchParameters sp, Map<String, Object> params)
+
+    private static String getSearchSql(User user, TaskSearchParameters sp,
+            Map<String, Object> params)
     {
         Map parameters = sp.getParameters();
-        
-        boolean isPm = isProjectManager (user);
+
+        boolean isPm = isProjectManager(user);
         StringBuffer sql = new StringBuffer(SELECT + "(");
         int state = (Integer) parameters.get(TaskSearchParameters.STATE);
         sql.append(dealState(state, isPm));
         params.put("actorId", user.getUserId());
-        
-        String companyName = (String) parameters.get(TaskSearchParameters.COMPANY_NAME);
+
+        String companyName = (String) parameters
+                .get(TaskSearchParameters.COMPANY_NAME);
         if (companyName != null)
         {
-            long companyId = CompanyWrapper.getCompanyByName(companyName).getId();
+            long companyId = CompanyWrapper.getCompanyByName(companyName)
+                    .getId();
             sql.append(" and t.COMPANY_ID = :companyId");
             params.put("companyId", new Long(companyId));
         }
@@ -297,27 +301,33 @@ public class TaskSearchUtil
             if (!CompanyThreadLocal.getInstance().fromSuperCompany())
             {
                 sql.append(" and t.COMPANY_ID = :companyId");
-                params.put("companyId", new Long(CompanyThreadLocal.getInstance().getValue()));
+                params.put("companyId", new Long(CompanyThreadLocal
+                        .getInstance().getValue()));
             }
         }
-        
-        GlobalSightLocale srcLocale = (GlobalSightLocale) parameters.get(TaskSearchParameters.SOURCE_LOCALE);
+
+        GlobalSightLocale srcLocale = (GlobalSightLocale) parameters
+                .get(TaskSearchParameters.SOURCE_LOCALE);
         if (srcLocale != null)
         {
             int n = sql.indexOf("inner join JBPM_TASKACTORPOOL");
-            sql.insert(n, "inner join REQUEST r on r.JOB_ID = j.id inner join L10N_PROFILE l on r.L10N_PROFILE_ID = l.id ");
+            sql.insert(
+                    n,
+                    "inner join REQUEST r on r.JOB_ID = j.id inner join L10N_PROFILE l on r.L10N_PROFILE_ID = l.id ");
             sql.append(" and l.SOURCE_LOCALE_ID = :lId ");
             params.put("lId", srcLocale.getIdAsLong());
         }
-        
-        GlobalSightLocale trgLocale = (GlobalSightLocale) parameters.get(TaskSearchParameters.TARGET_LOCALE);
+
+        GlobalSightLocale trgLocale = (GlobalSightLocale) parameters
+                .get(TaskSearchParameters.TARGET_LOCALE);
         if (trgLocale != null)
         {
             sql.append(" and w.TARGET_LOCALE_ID = :trgLocale ");
             params.put("trgLocale", trgLocale.getIdAsLong());
         }
 
-        Integer accAmount = (Integer) parameters.get(TaskSearchParameters.ACCEPTANCE_START);
+        Integer accAmount = (Integer) parameters
+                .get(TaskSearchParameters.ACCEPTANCE_START);
         if (accAmount != null)
         {
             String condition = (String) parameters.get(new Integer(
@@ -347,8 +357,9 @@ public class TaskSearchUtil
             sql.append(" and t.ACCEPTED_DATE >= :acceptedStartDate ");
             params.put("acceptedStartDate", now.getTime());
         }
-        
-        Integer endAmount = (Integer) parameters.get(TaskSearchParameters.ACCEPTANCE_END);
+
+        Integer endAmount = (Integer) parameters
+                .get(TaskSearchParameters.ACCEPTANCE_END);
         if (endAmount != null)
         {
             String condition = (String) parameters.get(new Integer(
@@ -380,8 +391,9 @@ public class TaskSearchUtil
             sql.append(" and t.ACCEPTED_DATE <= :acceptedEndDate ");
             params.put("acceptedEndDate", now.getTime());
         }
-        
-        Integer estAmount = (Integer) parameters.get(TaskSearchParameters.EST_COMPLETION_START);
+
+        Integer estAmount = (Integer) parameters
+                .get(TaskSearchParameters.EST_COMPLETION_START);
         if (estAmount != null)
         {
             String condition = (String) parameters.get(new Integer(
@@ -405,19 +417,23 @@ public class TaskSearchUtil
                 {
                     now.add(Calendar.DATE, negativeAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
                 {
                     now.add(Calendar.MONTH, positiveAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
                 {
                     now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.DAYS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.DAYS_FROM_NOW))
                 {
                     now.add(Calendar.DATE, positiveAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.HOURS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.HOURS_FROM_NOW))
                 {
                     now.add(Calendar.HOUR_OF_DAY, positiveAmount);
                 }
@@ -431,9 +447,10 @@ public class TaskSearchUtil
             sql.append(" and t.ESTIMATED_COMPLETION_DATE >= :estimatedCompletionStartDate ");
             params.put("estimatedCompletionStartDate", now.getTime());
         }
-        
-        Integer estEndAmount = (Integer) parameters.get(TaskSearchParameters.EST_COMPLETION_END);
-        if (estEndAmount != null) 
+
+        Integer estEndAmount = (Integer) parameters
+                .get(TaskSearchParameters.EST_COMPLETION_END);
+        if (estEndAmount != null)
         {
             String condition = (String) parameters.get(new Integer(
                     TaskSearchParameters.EST_COMPLETION_END_CONDITION));
@@ -455,19 +472,23 @@ public class TaskSearchUtil
                 {
                     now.add(Calendar.DATE, negativeAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
                 {
                     now.add(Calendar.MONTH, positiveAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
                 {
                     now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.DAYS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.DAYS_FROM_NOW))
                 {
                     now.add(Calendar.DATE, positiveAmount);
                 }
-                else if (condition.equals(SearchCriteriaParameters.HOURS_FROM_NOW))
+                else if (condition
+                        .equals(SearchCriteriaParameters.HOURS_FROM_NOW))
                 {
                     now.add(Calendar.HOUR_OF_DAY, positiveAmount);
                 }
@@ -481,20 +502,21 @@ public class TaskSearchUtil
             sql.append(" and t.ESTIMATED_COMPLETION_DATE <= :estimatedCompletionEndDate ");
             params.put("estimatedCompletionEndDate", now.getTime());
         }
-        
-        
-        String jobName = (String) sp.getParameters().get(TaskSearchParameters.JOB_NAME);
+
+        String jobName = (String) sp.getParameters().get(
+                TaskSearchParameters.JOB_NAME);
         if (jobName != null)
         {
             String condition = (String) parameters.get(new Integer(
                     TaskSearchParameters.JOB_NAME_CONDITION));
-            
-            jobName = dealWithCondition(jobName, condition, sp.isCaseSensitive());
+
+            jobName = dealWithCondition(jobName, condition,
+                    sp.isCaseSensitive());
 
             sql.append(" and j.NAME like :jobName ");
             params.put("jobName", jobName);
         }
-        
+
         String jobId = (String) parameters.get(TaskSearchParameters.JOB_ID);
         if (jobId != null)
         {
@@ -516,8 +538,9 @@ public class TaskSearchUtil
 
             params.put("jobId", Long.valueOf(jobId));
         }
-        
-        String priority = (String) parameters.get(TaskSearchParameters.PRIORITY);
+
+        String priority = (String) parameters
+                .get(TaskSearchParameters.PRIORITY);
         if (priority != null)
         {
             if (priority.indexOf("*") >= 0)
@@ -532,11 +555,13 @@ public class TaskSearchUtil
 
             params.put("priority", priority);
         }
-        
-        String name = (String) parameters.get(TaskSearchParameters.ACTIVITY_NAME);
+
+        String name = (String) parameters
+                .get(TaskSearchParameters.ACTIVITY_NAME);
         if (name != null)
         {
-            long companyId = CompanyWrapper.getCompanyByName(companyName).getId();        
+            long companyId = CompanyWrapper.getCompanyByName(companyName)
+                    .getId();
 
             if (name.indexOf("*") >= 0)
             {
@@ -546,18 +571,19 @@ public class TaskSearchUtil
             else
             {
                 sql.append(" and t.name = :name ");
-                name = name+"_"+companyId;
+                name = name + "_" + companyId;
             }
 
             params.put("name", name);
         }
-        
+
         sql.append(")");
-        
+
         return sql.toString();
     }
-    
-    private static String dealWithCondition(String s, String condition, boolean isCaseSensitive)
+
+    private static String dealWithCondition(String s, String condition,
+            boolean isCaseSensitive)
     {
         if (!isCaseSensitive)
         {
@@ -584,7 +610,7 @@ public class TaskSearchUtil
 
         return s;
     }
-    
+
     /**
      * Search tasks with search parameters.
      * 
@@ -614,7 +640,7 @@ public class TaskSearchUtil
             {
                 taskVo.setEstimatedCompletionDate(new Date(time.getTime()));
             }
-            
+
             taskVo.setWorkflowId(Long.parseLong(contents[5].toString()));
             taskVo.setLocaleId(Long.parseLong(contents[6].toString()));
 
@@ -640,24 +666,25 @@ public class TaskSearchUtil
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("id", t.getId());
         params.put("actorId", actorId);
-        
+
         List<?> result = HibernateUtil.searchWithSql(sql, params);
         Number num = (Number) result.get(0);
         return num.longValue() > 0;
     }
-    
+
     public static boolean isRejectedForReassign(TaskImpl t, String actorId)
     {
         String sql = IS_REJECT_REASSIGN_SQL;
         Map<String, Object> params = new HashMap<String, Object>();
         params.put("id", t.getId());
         params.put("actorId", actorId);
-        
-        List<Number> result = (List<Number>) HibernateUtil.searchWithSql(sql, params);
+
+        List<Number> result = (List<Number>) HibernateUtil.searchWithSql(sql,
+                params);
         Number num = (Number) result.get(0);
         return num.longValue() > 0;
     }
-    
+
     public static void setState(TaskImpl t, String actorId)
     {
         int state = WorkflowConstants.TASK_DECLINED;
@@ -691,7 +718,7 @@ public class TaskSearchUtil
                 }
             }
         }
-        
+
         t.setState(state);
     }
 }

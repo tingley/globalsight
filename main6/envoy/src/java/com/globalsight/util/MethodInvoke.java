@@ -177,7 +177,6 @@ public class MethodInvoke
                     + " method=" + (method != null?method.toString()
                     :"null")
                     + " " + e.toString(), e);
-            e.printStackTrace();
         }
      }
 

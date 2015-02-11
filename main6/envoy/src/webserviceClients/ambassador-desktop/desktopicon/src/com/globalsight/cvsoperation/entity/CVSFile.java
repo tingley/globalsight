@@ -137,7 +137,7 @@ public class CVSFile
 		catch (Exception ex)
 		{
 			returnString = "null";
-			log.error(ex.getMessage());
+			log.error(ex.getMessage(), ex);
 		}
 		
 		return returnString;

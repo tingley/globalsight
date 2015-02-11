@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -116,7 +115,7 @@ public class UserParameterPersistenceManagerLocal implements
         }
         finally
         {
-            //session.close();
+            // session.close();
         }
     }
 
@@ -145,7 +144,7 @@ public class UserParameterPersistenceManagerLocal implements
             List result = query.list();
 
             // Some parameters may be missing, auto-create them.
-            if(createUserParameters(p_userId, result, session))
+            if (createUserParameters(p_userId, result, session))
             {
                 // reload from database
                 result = query.list();
@@ -159,7 +158,7 @@ public class UserParameterPersistenceManagerLocal implements
         }
         finally
         {
-            //session.close();
+            // session.close();
         }
     }
 
@@ -284,7 +283,7 @@ public class UserParameterPersistenceManagerLocal implements
                     retval = true;
                 }
             }
-            
+
             tx.commit();
             return retval;
         }
@@ -428,11 +427,32 @@ public class UserParameterPersistenceManagerLocal implements
                     VISITED_HYPERLINK_COLOR_DEFAULT);
             result.add(param);
         }
-        
+
+        if (!haveParam(p_existing, PREVIEW_100MATCH_COLOR))
+        {
+            param = new UserParameterImpl(p_userId, PREVIEW_100MATCH_COLOR,
+                    PREVIEW_100MATCH_COLOR_DEFAULT);
+            result.add(param);
+        }
+
+        if (!haveParam(p_existing, PREVIEW_ICEMATCH_COLOR))
+        {
+            param = new UserParameterImpl(p_userId, PREVIEW_ICEMATCH_COLOR,
+                    PREVIEW_ICEMATCH_COLOR_DEFAULT);
+            result.add(param);
+        }
+
+        if (!haveParam(p_existing, PREVIEW_NONMATCH_COLOR))
+        {
+            param = new UserParameterImpl(p_userId, PREVIEW_NONMATCH_COLOR,
+                    PREVIEW_NONMATCH_COLOR_DEFAULT);
+            result.add(param);
+        }
+
         if (!haveParam(p_existing, EDITOR_SEGMENTS_MAX_NUM))
         {
             param = new UserParameterImpl(p_userId, EDITOR_SEGMENTS_MAX_NUM,
-            		EDITOR_SEGMENTS_MAX_NUM_DEFAULT);
+                    EDITOR_SEGMENTS_MAX_NUM_DEFAULT);
             result.add(param);
         }
 
@@ -445,9 +465,8 @@ public class UserParameterPersistenceManagerLocal implements
 
         if (!haveParam(p_existing, EDITOR_SELECTION))
         {
-            param = new UserParameterImpl(p_userId, 
-            		EDITOR_SELECTION,
-            		EDITOR_SELECTION_DEFAULT);
+            param = new UserParameterImpl(p_userId, EDITOR_SELECTION,
+                    EDITOR_SELECTION_DEFAULT);
             result.add(param);
         }
 
@@ -524,21 +543,24 @@ public class UserParameterPersistenceManagerLocal implements
                     NOTIFICATION_DISABLED_DEFAULT);
             result.add(param);
         }
-        
-        for(int i = 0; i < DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS.size(); i++)
+
+        for (int i = 0; i < DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS
+                .size(); i++)
         {
-        	String downloadOption = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS.get(i);
-        	String downloadOptionDefault = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS_DEFAULT.get(i);
-        	if(!haveParam(p_existing, downloadOption))
-        	{
-        		param = new UserParameterImpl(p_userId, downloadOption,
-        				downloadOptionDefault);
-        		result.add(param);
-        	}
+            String downloadOption = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS
+                    .get(i);
+            String downloadOptionDefault = DownloadOfflineFilesConfigHandler.DOWNLOAD_OPTIONS_DEFAULT
+                    .get(i);
+            if (!haveParam(p_existing, downloadOption))
+            {
+                param = new UserParameterImpl(p_userId, downloadOption,
+                        downloadOptionDefault);
+                result.add(param);
+            }
         }
-        
+
         createNotificationParameters(p_userId, p_existing, result);
-        
+
         return result;
     }
 
@@ -556,8 +578,7 @@ public class UserParameterPersistenceManagerLocal implements
         }
         catch (Exception e)
         {
-            CATEGORY
-                    .error("Failed to read permissions for user " + p_userId, e);
+            CATEGORY.error("Failed to read permissions for user " + p_userId, e);
         }
 
         if (perms.getPermissionFor(Permission.ACCOUNT_NOTIFICATION_SYSTEM))

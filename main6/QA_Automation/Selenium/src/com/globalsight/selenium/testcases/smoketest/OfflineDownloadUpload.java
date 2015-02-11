@@ -35,7 +35,7 @@ public class OfflineDownloadUpload
     @BeforeClass
     public void beforeClass()
     {
-        selenium = CommonFuncs.initSelenium();
+        selenium = CommonFuncs.getSelenium();
         CommonFuncs.loginSystemWithAnyone(selenium);
     }
 
@@ -56,8 +56,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadBilingualRTF()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -66,7 +66,7 @@ public class OfflineDownloadUpload
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(JobDetails.WorkOffline);
         selenium.click(OfflineDownload.POPULATEFUZZYCHECKBOX);
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -129,8 +129,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadRTFListView()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -144,7 +144,7 @@ public class OfflineDownloadUpload
         selenium.select(OfflineDownload.TERMTYPESELECTOR,
                 "label=GlobalSight Format");
 
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -216,8 +216,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadRTFParagraphView()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -231,7 +231,7 @@ public class OfflineDownloadUpload
                 "label=TMX File - Plain Text");
         selenium.select(OfflineDownload.TERMTYPESELECTOR, "label=HTML");
 
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -313,8 +313,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadText()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -329,7 +329,7 @@ public class OfflineDownloadUpload
                 "label=TMX File - 1.4b");
         selenium.select(OfflineDownload.TERMTYPESELECTOR, "label=TBX");
 
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -417,8 +417,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadTTX()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -441,7 +441,7 @@ public class OfflineDownloadUpload
             e1.printStackTrace();
         }
 
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -537,8 +537,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadXLF()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -550,7 +550,7 @@ public class OfflineDownloadUpload
         selenium.select(OfflineDownload.FORMAT, "label=Xliff 1.2");
         selenium.select(OfflineDownload.TMXTYPESELECTOR, "label=None");
 
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -629,8 +629,8 @@ public class OfflineDownloadUpload
     @Test
     public void offlineDownloadUploadConsolidate()
     {
-        selenium.click(MainFrame.MyActivities_MENU);
-        selenium.click(MainFrame.InProgress2_SUBMENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_MENU);
+        selenium.click(MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // This job name is from the Temp properties file when data prepare
@@ -645,7 +645,7 @@ public class OfflineDownloadUpload
         selenium.select(OfflineDownload.TERMTYPESELECTOR, "label=HTML");
         selenium.click(OfflineDownload.CONSOLIDATETERMCHECKBOX);
 
-        selenium.click(OfflineDownload.STARTDOWNLOAD);
+        selenium.click(OfflineDownload.START_DOWNLOAD_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
         // Wait for the download progress finish.
@@ -703,7 +703,7 @@ public class OfflineDownloadUpload
     public void uploadFile(File file)
     {
         // Upload file
-        selenium.click(OfflineDownload.DOWNLOADAGAIN);
+        selenium.click(OfflineDownload.DOWNLOAD_AGAIN_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(OfflineUpload.UPLOAD);
         try

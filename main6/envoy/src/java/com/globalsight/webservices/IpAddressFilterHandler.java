@@ -18,6 +18,9 @@
 package com.globalsight.webservices;
 
 import java.net.InetAddress;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -31,6 +34,7 @@ import com.globalsight.everest.company.Company;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.config.remoteip.RemoteIpManager;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 
 /**
  * IP Address Filter Handler. This blocks the web service from being
@@ -39,7 +43,15 @@ import com.globalsight.everest.webapp.pagehandler.administration.config.remoteip
 public class IpAddressFilterHandler extends BasicHandler
 {
     private static final long serialVersionUID = 2909599370937608480L;
-    private static final Logger s_logger = Logger.getLogger("WebService");   
+    private static final Logger s_logger = Logger.getLogger("WebService");
+
+    // Allow certain APIs to ignore IP check.
+    private static Set<String> notCareIpFilterMethods = new HashSet<String>();
+    static
+    {
+        notCareIpFilterMethods.add("dummyLogin");
+        notCareIpFilterMethods.add("uploadFiles");
+    }
 
     /**
      * Checks the IP address of the incoming request
@@ -50,18 +62,26 @@ public class IpAddressFilterHandler extends BasicHandler
     public void invoke(MessageContext p_msgContext) throws AxisFault
     {
         try {
-            HttpServletRequest request = 
-            	(HttpServletRequest) p_msgContext.getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
+            HttpServletRequest request = (HttpServletRequest) p_msgContext
+                    .getProperty(HTTPConstants.MC_HTTP_SERVLETREQUEST);
             
             boolean enableIPFiler = false;
-            try {
-                String loginUser = p_msgContext.getUsername();
-                User user = ServerProxy.getUserManager().getUser(loginUser);
-                String companyName = user.getCompanyName();
-                Company company = ServerProxy.getJobHandler().getCompany(companyName);
-                enableIPFiler = company.getEnableIPFilter();            	
-            } catch (Exception e) {
-            	
+            String operationName = p_msgContext.getOperation().getName();
+            if (!notCareIpFilterMethods.contains(operationName))
+            {
+                try
+                {
+                    String loginUser = p_msgContext.getUsername();
+                    String userID = UserUtil.getUserIdByName(loginUser);
+                    User user = ServerProxy.getUserManager().getUser(userID);
+                    String companyName = user.getCompanyName();
+                    Company company = ServerProxy.getJobHandler().getCompany(companyName);
+                    enableIPFiler = company.getEnableIPFilter();
+                }
+                catch (Exception e)
+                {
+
+                }
             }
 
             if (enableIPFiler)

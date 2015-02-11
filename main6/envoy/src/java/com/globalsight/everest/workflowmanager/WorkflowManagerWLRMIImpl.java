@@ -22,8 +22,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
-
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskInfo;
@@ -33,7 +31,7 @@ import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.util.Entry;
 
 /**
- * WorkflowManager remote implementation. All methods are just pass throughs to
+ * WorkflowManager remote implementation. All methods are just passed through to
  * the real WorkflowManager.
  */
 public class WorkflowManagerWLRMIImpl extends RemoteServer implements
@@ -71,8 +69,8 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         m_localReference.dispatch(p_job);
     }
 
-    public void archiveWorkflow(Workflow p_workflow)
-            throws RemoteException, WorkflowManagerException
+    public void archiveWorkflow(Workflow p_workflow) throws RemoteException,
+            WorkflowManagerException
     {
         m_localReference.archiveWorkflow(p_workflow);
     }
@@ -83,52 +81,49 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         m_localReference.archive(p_job);
     }
 
-	public void setTaskCompletion(String p_userId,
-			Task p_task, String p_destinationArrow, String skipping)
-			throws RemoteException, WorkflowManagerException
-    {
-		m_localReference.setTaskCompletion(p_userId, p_task,
-				p_destinationArrow, skipping);
-    }
-
-    public void cancel(String p_idOfUserRequestingCancel,
-            Workflow p_workflow) throws RemoteException,
+    public void setTaskCompletion(String p_userId, Task p_task,
+            String p_destinationArrow, String skipping) throws RemoteException,
             WorkflowManagerException
     {
-        m_localReference.cancel(p_idOfUserRequestingCancel,
-                p_workflow);
+        m_localReference.setTaskCompletion(p_userId, p_task,
+                p_destinationArrow, skipping);
     }
 
-    public void cancel(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state) throws RemoteException,
-            WorkflowManagerException
-    {
-        m_localReference.cancel(p_idOfUserRequestingCancel, p_job,
-                p_state);
-    }
-
-    public void cancel(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state, boolean p_reimport)
+    public void cancel(String p_idOfUserRequestingCancel, Workflow p_workflow)
             throws RemoteException, WorkflowManagerException
     {
-        m_localReference.cancel(p_idOfUserRequestingCancel, p_job,
-                p_state, p_reimport);
+        m_localReference.cancel(p_idOfUserRequestingCancel, p_workflow);
+    }
+
+    public void cancel(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state) throws RemoteException, WorkflowManagerException
+    {
+        m_localReference.cancel(p_idOfUserRequestingCancel, p_job, p_state);
+    }
+
+    public void cancel(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state, boolean p_reimport) throws RemoteException,
+            WorkflowManagerException
+    {
+        m_localReference.cancel(p_idOfUserRequestingCancel, p_job, p_state,
+                p_reimport);
     }
 
     /**
      * This modifies an active workflow.
      * 
-     * @param p_sessionId -
-     *            Users login HTTPSession id
-     * @param p_wfInstance -
-     *            WorkflowInstance that has been modified.
-     * @param p_projectManagerId -
-     *            the ProjectManager userId.
-     * @param p_modifiedTasks -
-     *            A hashtable of the modified tasks. The key is the Task id and
-     *            the value is a TaskInfoBean that contains the modifications.
-     * @throws RemoteException,
-     *             WorkflowManagerException
+     * @param p_sessionId
+     *            - Users login HTTPSession id
+     * @param p_wfInstance
+     *            - WorkflowInstance that has been modified.
+     * @param p_projectManagerId
+     *            - the ProjectManager userId.
+     * @param p_modifiedTasks
+     *            - A hashtable of the modified tasks. The key is the Task id
+     *            and the value is a TaskInfoBean that contains the
+     *            modifications.
+     * @throws RemoteException
+     *             , WorkflowManagerException
      */
     public void modifyWorkflow(String p_sessionId,
             WorkflowInstance p_wfInstance, String p_projectManagerId,
@@ -170,9 +165,10 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
     {
         return m_localReference.getWorkflowByIdRefresh(p_workflowId);
     }
-    
-    public Workflow getWorkflowById(long p_workflowId)
-        throws RemoteException, WorkflowManagerException {
+
+    public Workflow getWorkflowById(long p_workflowId) throws RemoteException,
+            WorkflowManagerException
+    {
         return m_localReference.getWorkflowById(p_workflowId);
     }
 
@@ -190,9 +186,9 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
      * @see WorkflowManager.updatePlannedCompletionDate(long, Date)
      */
     @SuppressWarnings("deprecation")
-    public void updatePlannedCompletionDate(
-            long p_workflowId, Date p_plannedCompletionDate)
-            throws WorkflowManagerException, RemoteException
+    public void updatePlannedCompletionDate(long p_workflowId,
+            Date p_plannedCompletionDate) throws WorkflowManagerException,
+            RemoteException
     {
         m_localReference.updatePlannedCompletionDate(p_workflowId,
                 p_plannedCompletionDate);
@@ -203,24 +199,23 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
      * 
      * @see WorkflowManager.updateEstimatedCompletionDate(long, Date)
      */
-    public void updateEstimatedCompletionDate(
-            long p_workflowId, Date p_estimatedCompletionDate)
-            throws WorkflowManagerException, RemoteException
+    public void updateEstimatedCompletionDate(long p_workflowId,
+            Date p_estimatedCompletionDate) throws WorkflowManagerException,
+            RemoteException
     {
-        m_localReference.updateEstimatedCompletionDate(
-                p_workflowId, p_estimatedCompletionDate);
+        m_localReference.updateEstimatedCompletionDate(p_workflowId,
+                p_estimatedCompletionDate);
     }
 
     /**
-     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long,
-     *      Date)
+     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long, Date)
      */
-    public void updateEstimatedTranslateCompletionDate(
-            long p_workflowId, Date p_estimatedTranslateCompletionDate)
+    public void updateEstimatedTranslateCompletionDate(long p_workflowId,
+            Date p_estimatedTranslateCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
-        m_localReference.updateEstimatedTranslateCompletionDate(
-                p_workflowId, p_estimatedTranslateCompletionDate);
+        m_localReference.updateEstimatedTranslateCompletionDate(p_workflowId,
+                p_estimatedTranslateCompletionDate);
     }
 
     /**
@@ -238,10 +233,10 @@ public class WorkflowManagerWLRMIImpl extends RemoteServer implements
         return m_localReference.getLocalActivity(workflowIds);
     }
 
-    public void setSkip(List<Entry> list, String userId, HttpServletRequest request) throws RemoteException,
-            WorkflowManagerException
+    public void setSkip(List<Entry> list, String userId)
+            throws RemoteException, WorkflowManagerException
     {
-        m_localReference.setSkip(list, userId, request);
+        m_localReference.setSkip(list, userId);
     }
 
     @Override

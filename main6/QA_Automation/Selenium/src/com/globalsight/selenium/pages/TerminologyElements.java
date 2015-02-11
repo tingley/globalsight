@@ -72,11 +72,20 @@ public class TerminologyElements
     
     //maintenance page
     public static final String SEARCHFOR_FIELD = "idSearch";
+    public static final String MATCH_CASE_CHECK = "caseinsensitive";
+    public static final String WHOLE_WORDONLY_CHECK = "wordOnly";
     public static final String CONCEPT_LEVEL_BUTTON = "idLevelConcept";
     public static final String CONCEPT_LEVEL_SELECT = "idFieldConcept";
+    public static final String LANGUAGE_LEVEL_BUTTON = "idLevelLanguage";
+    public static final String LANGUAGE_LEVEL_SELECT = "idFieldLanguage";
+    public static final String LANGUAGE_LEVEL_LANG_SELECT = "idLanguage3";
+    public static final String TERM_LEVEL_BUTTON = "idLevelTerm";
+    public static final String TERM_LEVEL_SELECT = "idFieldTerm";
+    public static final String TERM_LEVEL_LANG_SELECT = "idLanguage4";
     public static final String SEARCH_BUTTON = "idSearchBtn";
     public static final String REPLACE_OK_BUTTON = "replaceButton";
     public static final String REPLACEWITH_FILED = "idReplace";
+    public static final String PREVIOUS_BUTTON = "idCancelBtn";
     public static final String ENTRY_CHECK 	= "checkbox0";
     
     // export page
@@ -91,7 +100,7 @@ public class TerminologyElements
     //index page
     public static final String IDX_SAVE_BUTTON = "//input[@id='idSave']";
     public static final String IDX_REINDEX_BUTTON = "//input[@id='idReindex']";
-    public static final String IDX_INPROGRESS_TEXT = "//input[@id='idProgress2']";
+    public static final String IDX_INPROGRESS_TEXT = "//div[@id='idProgress2']";
     public static final String IDX_PREVIOUS_BUTTON = "//input[@id='idPrevious']";
     public static final String IDX_FINISH_OK_BUTTON = "//input[@id='idCancelOk']";
     
@@ -103,18 +112,18 @@ public class TerminologyElements
     public static final String Target_SELECT="idTarget";
     public static final String Query_TEXT_FIELD="idQuery";
     public static final String SearchType_SELECT="searchType";
-    public static final String Execute_BUTTON="idExecute";
+    public static final String EXECUTE_BUTTON="idExecute";
     public static final String TermsFound_LIST="//div[@id='idHitList']/ul";
     public static final String TermDetails_TEXT_FIELD="//div[@id='idViewerEntry']";
     public static final String CloseTermbase_IMG="//span[@id='idCloseWindow']/img";
     
     //Search Terms
     
-    public static final String Source_Locale="id_sourcelocale";
-    public static final String Target_Locale="id_targetlocale";
-    public static final String Select_Termbases="id_tbnames";
-    public static final String MatchType="id_matchtype";
-    public static final String SearchForTerm="id_searchstr";
+    public static final String SOURCE_LOCALE="id_sourcelocale";
+    public static final String TARGET_LOCALE="id_targetlocale";
+    public static final String SELECTED_TERMBASE="id_tbnames";
+    public static final String MATCH_TYPE="id_matchtype";
+    public static final String SEARCH_TERM="id_searchstr";
     public static final String Search_Button="Submit";
     public static final String Search_Term__Table= "//div[@id='contentLayer']/form/table/tbody";
     

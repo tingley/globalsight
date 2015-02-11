@@ -1,36 +1,38 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.webapp.tags;
 
+import java.io.IOException;
+import java.util.ResourceBundle;
+
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-
-import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.util.StringUtil;
 
 /**
  * Writes a column in a table.
@@ -44,6 +46,9 @@ public class ColumnTag extends TagSupport implements TableConstants
     private String  width;
     private String  align;              //default is left
     private String style;
+    private String filter;
+    private String filterSelect;
+    private String filterValue;
 
 	public ColumnTag()
     {
@@ -97,7 +102,7 @@ public class ColumnTag extends TagSupport implements TableConstants
     {
         this.width = width;
     }
-    
+
     public String getStyle() {
 		return style;
 	}
@@ -136,7 +141,7 @@ public class ColumnTag extends TagSupport implements TableConstants
         return width;
     }
 
-    public int doEndTag() throws JspException 
+    public int doEndTag() throws JspException
     {
 
         JspWriter    out    = pageContext.getOut();
@@ -169,6 +174,9 @@ public class ColumnTag extends TagSupport implements TableConstants
         width = null;
         align = "left";
         style = null;
+        filter = null;
+        filterSelect = null;
+        filterValue = null;
     }
 
     public int doStartTag() throws JspException
@@ -183,13 +191,21 @@ public class ColumnTag extends TagSupport implements TableConstants
         String key = table.getKey();
 
         try
-        { 
+        {
             if (table.showHeader())
             {
                 String pageUrl = table.getPageUrl();
                 int pageNum = ((Integer)request.getAttribute(key+PAGE_NUM)).intValue();
+
+                //for gbs-2599
+                HttpSession session = request.getSession(false);
+                PermissionSet userPerms = (PermissionSet) session.getAttribute(
+                        WebAppConstants.PERMISSIONS);
+
+                String filterContent = (String) pageContext.getAttribute("filterContent");
+
                 // print column header
-                out.print("    <td");
+                out.print("    <td ");
                 if (wrap == false)
                 {
                     out.print(" nowrap");
@@ -199,19 +215,38 @@ public class ColumnTag extends TagSupport implements TableConstants
                 {
                     out.println("&nbsp;");
                 }
+                else if (label.equals("checkbox"))
+                {
+                    out.println("<input type=\"checkbox\" name=\"selectAll\" id=\"selectAll\" onclick=\"handleSelectAll()\" />");
+                }
+
+                //for gbs-2599
+                else if (label.equals("multiCheckbox_1"))
+                {
+                    if (userPerms.getPermissionFor(Permission.ACTIVITIES_JOB_COMMENTS_DOWNLOAD)) {
+                        out.println("<input type=\"checkbox\" name=\"multiSelectAll_1\" id=\"multiSelectAll_1\" onclick=\"handleMultiSelectAll_1()\" />");
+                    }
+                }
+                else if (label.equals("multiCheckbox_2"))
+                {
+                    if (userPerms.getPermissionFor(Permission.ACTIVITIES_COMMENTS_DOWNLOAD)) {
+                        out.println("<input type=\"checkbox\" name=\"multiSelectAll_2\" id=\"multiSelectAll_2\" onclick=\"handleMultiSelectAll_2()\" />");
+                    }
+                }
+
                 else if (sortBy != -1)
                 {
                     out.print("        <a class=\"sortHREFWhite\" href=\"" + pageUrl +
                         "&" + key + PAGE_NUM + "=" + pageNum +
-                        "&" + key + SORTING + "=" + sortBy + 
+                        "&" + key + SORTING + "=" + sortBy +
                         "&" + key + "doSort=true");
-                    
+
                     String taskListStart = table.getTaskListStart();
                     if (taskListStart != null)
                     {
                         out.print("&" + WebAppConstants.TASK_LIST_START + "=" + taskListStart);
                     }
-                    
+
                     String filterSelection = table.getFilterSelection();
                     if (filterSelection != null)
                         out.print("&" + key + FILTER + "=" + filterSelection);
@@ -234,11 +269,30 @@ public class ColumnTag extends TagSupport implements TableConstants
                 {
                     out.println(bundle.getString(label));
                 }
+                if (table.isHasFilter()) {
+                    if (StringUtil.isEmpty(filterContent))
+                        filterContent = "";
+
+                    if (!StringUtil.isEmpty(filter)) {
+                        filterContent += "<td>";
+                        filterContent += "<input type='text' id='" + filter + "' name='" + filter + "' value='" + filterValue + "' onkeydown='filterItems(event);' class='standardText' title='Input the filter,press Enter to filter'/>";
+                        filterContent += "</td>";
+                    } 
+                    else if (StringUtil.isEmpty(filter)&&!StringUtil.isEmpty(filterSelect)) {
+                        filterContent += "<td>";
+                        filterContent += "<select id='" + filterSelect + "' name='" + filterSelect + "' onkeydown='filterSelectItems(event);' class='standardText' title='Select the filter,press Enter to filter'></select>";
+                        filterContent += "</td>";
+                    } 
+                    else {
+                        filterContent += "<td>&nbsp;</td>";
+                    }
+                    pageContext.setAttribute("filterContent", filterContent);
+                }
             }
             else if (!table.skip())
             {
                 // print td for data
-                out.print("    <td class=\"standardText\" valign=top align=" + align);
+                out.print("    <td style=\"padding-bottom: 5px; padding-top: 5px;\" class=\"standardText\" align=" + align);
                 if (width != null)
                 {
                     out.print(" width=\"" + width + "\"");
@@ -261,5 +315,35 @@ public class ColumnTag extends TagSupport implements TableConstants
             return SKIP_BODY;
         else
             return EVAL_PAGE;
+    }
+
+    public String getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter(String filter)
+    {
+        this.filter = filter;
+    }
+
+    public String getFilterSelect()
+    {
+        return filterSelect;
+    }
+
+    public void setFilterSelect(String filterSelect)
+    {
+        this.filterSelect = filterSelect;
+    }
+
+    public String getFilterValue()
+    {
+        return filterValue;
+    }
+
+    public void setFilterValue(String filterValue)
+    {
+        this.filterValue = filterValue;
     }
 }

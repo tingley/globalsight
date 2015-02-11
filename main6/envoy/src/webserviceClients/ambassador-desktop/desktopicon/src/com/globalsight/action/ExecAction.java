@@ -46,7 +46,7 @@ public class ExecAction extends Action
 		}
 		catch (Exception e)
 		{
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -81,7 +81,7 @@ public class ExecAction extends Action
 		}
 		catch (Exception e)
 		{
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 		return null;
 	}

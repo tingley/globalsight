@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Node;
@@ -45,8 +44,10 @@ import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.page.pageimport.FileImportException;
 import com.globalsight.everest.page.pageimport.FileImporter;
-import com.globalsight.everest.page.pageimport.TargetPageImportPersistenceHandler;
+import com.globalsight.everest.page.pageimport.TargetPageImportPersistence;
+import com.globalsight.everest.page.pageimport.TargetPagePersistence;
 import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
@@ -78,7 +79,17 @@ public final class PageManagerLocal implements PageManager
 {
     static private final Logger s_category = Logger
             .getLogger(PageManagerLocal.class);
-    public static Set<Long> EXPORTING_TARGET_PAGE = Collections.synchronizedSet(new HashSet<Long>());
+    public static Set<Long> EXPORTING_TARGET_PAGE = Collections
+            .synchronizedSet(new HashSet<Long>());
+
+    private static final String GET_SOURCE_PAGE_BY_LG_ID_SQL = "SELECT sp.* from source_page sp, source_page_leverage_group splg "
+            + "WHERE sp.id = splg.sp_id " + "AND splg.lg_id = ?";
+
+    private static final String GET_SOURCE_PAGE_BY_TU_ID_SQL = "SELECT sp.* from source_page sp, source_page_leverage_group splg, "
+            + TuvQueryConstants.TU_TABLE_PLACEHOLDER
+            + " tu "
+            + "WHERE sp.id = splg.sp_id "
+            + "AND splg.lg_id = tu.leverage_group_id " + "AND tu.id = ?";
 
     /**
      * PageToDocumentMap is a class mapping a list of page IDs to the name of
@@ -239,7 +250,7 @@ public final class PageManagerLocal implements PageManager
     public PageManagerLocal() throws PageException
     {
         super();
-//        initMachineTranslation();
+        // initMachineTranslation();
     }
 
     //
@@ -282,11 +293,11 @@ public final class PageManagerLocal implements PageManager
 
     /**
      * @see PageManager#getTargetPage(long, long)
-     * @param p_sourcePageId -
-     *            The id of the original source page that the target page was
+     * @param p_sourcePageId
+     *            - The id of the original source page that the target page was
      *            derived from.
-     * @param p_localeId -
-     *            The locale id of the target page.
+     * @param p_localeId
+     *            - The locale id of the target page.
      * @exception PageException
      *                when a page related error occurs.
      * @exception RemoteException
@@ -295,7 +306,8 @@ public final class PageManagerLocal implements PageManager
     public TargetPage getTargetPage(long p_sourcePageId, long p_localeId)
             throws PageException, RemoteException
     {
-        return PagePersistenceAccessor.getTargetPage(p_sourcePageId, p_localeId);
+        return PagePersistenceAccessor
+                .getTargetPage(p_sourcePageId, p_localeId);
     }
 
     /**
@@ -412,13 +424,13 @@ public final class PageManagerLocal implements PageManager
 
         try
         {
-        	MachineTranslator mt = initMachineTranslator(p_sourcePage);
-        	boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
-        	
-            TargetPageImportPersistenceHandler tpip = 
-            		new TargetPageImportPersistenceHandler(mt, autoCommitToTm);
+            MachineTranslator mt = initMachineTranslator(p_sourcePage);
+            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-            pages = tpip.persistObjectsWithExtractedFile(p_sourcePage,
+            TargetPagePersistence tpPersistence = new TargetPageImportPersistence(
+                    mt, autoCommitToTm);
+
+            pages = tpPersistence.persistObjectsWithExtractedFile(p_sourcePage,
                     p_targetLocales, p_termMatches, p_useLeveragedSegments,
                     p_useLeveragedTerms, p_exactMatchedSegments);
         }
@@ -446,14 +458,14 @@ public final class PageManagerLocal implements PageManager
 
         try
         {
-        	MachineTranslator mt = initMachineTranslator(p_sourcePage);
-        	boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
-        	
-            TargetPageImportPersistenceHandler tpip = 
-            		new TargetPageImportPersistenceHandler(mt, autoCommitToTm);
+            MachineTranslator mt = initMachineTranslator(p_sourcePage);
+            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-            pages = tpip.persistObjectsWithUnextractedFile(p_sourcePage,
-                    p_targetLocales);
+            TargetPagePersistence tpPersistence = new TargetPageImportPersistence(
+                    mt, autoCommitToTm);
+
+            pages = tpPersistence.persistObjectsWithUnextractedFile(
+                    p_sourcePage, p_targetLocales);
         }
         catch (PageException e)
         {
@@ -476,17 +488,17 @@ public final class PageManagerLocal implements PageManager
             throws PageException
     {
         Collection pages = null;
-    	
+
         try
         {
-        	MachineTranslator mt = initMachineTranslator(p_sourcePage);
-        	boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
+            MachineTranslator mt = initMachineTranslator(p_sourcePage);
+            boolean autoCommitToTm = getAutoCommitToTm(p_sourcePage);
 
-        	TargetPageImportPersistenceHandler tpip = 
-            		new TargetPageImportPersistenceHandler(mt, autoCommitToTm);
+            TargetPagePersistence tpPersistence = new TargetPageImportPersistence(
+                    mt, autoCommitToTm);
 
-            pages = tpip.persistFailedObjectsWithExtractedFile(p_sourcePage,
-                    p_targetLocaleInfo);
+            pages = tpPersistence.persistFailedObjectsWithExtractedFile(
+                    p_sourcePage, p_targetLocaleInfo);
         }
         catch (PageException e)
         {
@@ -503,10 +515,10 @@ public final class PageManagerLocal implements PageManager
     /**
      * Get a collection of template parts for a given source page id.
      * 
-     * @param p_sourcePageId -
-     *            The id of the source page.
-     * @param p_pageTemplateType -
-     *            The string representation of the page template type.
+     * @param p_sourcePageId
+     *            - The id of the source page.
+     * @param p_pageTemplateType
+     *            - The string representation of the page template type.
      * 
      * @return A collection of template parts based on the given source page id.
      * @exception PageException
@@ -525,9 +537,9 @@ public final class PageManagerLocal implements PageManager
      * Returns a collection of leverage group ids of the previous reimportable
      * page for reimport.
      * 
-     * @param p_sourcePage -
-     *            The source page used for getting it's previous leverage group
-     *            ids.
+     * @param p_sourcePage
+     *            - The source page used for getting it's previous leverage
+     *            group ids.
      * @return leverage group ids of the previous page for reimport.
      * @exception PageException
      *                when a page related error occurs.
@@ -579,7 +591,10 @@ public final class PageManagerLocal implements PageManager
             long id = ((Long) pageIds[i]).longValue();
             TargetPage page = getTargetPageById(id);
 
-            if (!PageState.EXPORTED.equals(page.getPageState())) { return false; }
+            if (!PageState.EXPORTED.equals(page.getPageState()))
+            {
+                return false;
+            }
         }
 
         return true;
@@ -615,14 +630,14 @@ public final class PageManagerLocal implements PageManager
     /**
      * Perform the export process for the specified list of pages.
      * 
-     * @param p_exportParameters -
-     *            The workflow level parameters required for export.
-     * @param p_pageIds -
-     *            A collection of pages to be exported (from a workflow).
-     * @param p_isTargetPage -
-     *            whether the ids refer to target or source pages
-     * @param p_exportBatchId -
-     *            the export ID returned from
+     * @param p_exportParameters
+     *            - The workflow level parameters required for export.
+     * @param p_pageIds
+     *            - A collection of pages to be exported (from a workflow).
+     * @param p_isTargetPage
+     *            - whether the ids refer to target or source pages
+     * @param p_exportBatchId
+     *            - the export ID returned from
      *            ExportEventObserver.notifyBeginExport()
      * @exception PageException
      *                when a page related error occurs.
@@ -635,28 +650,31 @@ public final class PageManagerLocal implements PageManager
     {
         if (p_isTargetPage)
         {
-        	if (ExportConstants.MANUAL_EXPORT == p_exportParameters.getExportType())
-        	{
+            if (ExportConstants.MANUAL_EXPORT == p_exportParameters
+                    .getExportType())
+            {
                 for (int i = p_pageIds.size() - 1; i >= 0; i--)
                 {
                     if (!EXPORTING_TARGET_PAGE.add((Long) p_pageIds.get(i)))
                     {
-                        s_category.info("Ignored exporting request from target page(id=" + p_pageIds.get(i)
-                                + ") as it is already being exported.");
+                        s_category
+                                .info("Ignored exporting request from target page(id="
+                                        + p_pageIds.get(i)
+                                        + ") as it is already being exported.");
                         p_pageIds.remove(i);
                     }
                 }
-        	}
+            }
 
             // Update TargetPage to set the localeSubDir value
-        	for (int i = 0;  i < p_pageIds.size(); i++)
-        	{
+            for (int i = 0; i < p_pageIds.size(); i++)
+            {
                 TargetPage targetPage = this.getTargetPage(((Long) p_pageIds
                         .get(i)).longValue());
                 targetPage
                         .setExportSubDir(p_exportParameters.getLocaleSubDir());
                 PagePersistenceAccessor.updateTargetPage(targetPage);
-        	}
+            }
         }
 
         performExport(p_exportParameters, new Integer(
@@ -680,13 +698,13 @@ public final class PageManagerLocal implements PageManager
      * 
      * @return The string representation of request information for a preview.
      * 
-     * @param p_pageId -
-     *            The id of the page the tuvs belong to.
-     * @param p_tuvIds -
-     *            A collection of tuv ids used for preview.
-     * @param p_uiLocale -
-     *            The UI locale of CAP which will be used by CXE for displaying
-     *            the preview screen.
+     * @param p_pageId
+     *            - The id of the page the tuvs belong to.
+     * @param p_tuvIds
+     *            - A collection of tuv ids used for preview.
+     * @param p_uiLocale
+     *            - The UI locale of CAP which will be used by CXE for
+     *            displaying the preview screen.
      * @exception PageException
      *                when a page related error occurs.
      * @exception RemoteException
@@ -768,8 +786,8 @@ public final class PageManagerLocal implements PageManager
     /**
      * @see PageManager.getSourcePagesStillImporting()
      */
-    public Collection getSourcePagesStillImporting() 
-            throws PageException, RemoteException
+    public Collection getSourcePagesStillImporting() throws PageException,
+            RemoteException
     {
         return PagePersistenceAccessor.getSourcePagesStillImporting();
     }
@@ -835,19 +853,20 @@ public final class PageManagerLocal implements PageManager
     {
         String externalPageId = p_request.getExternalPageId();
         String originalEncoding = p_request.getSourceEncoding();
-        //GBS-2035: Bom not exported, Vincent Yan, 2011/08/04
+        // GBS-2035: Bom not exported, Vincent Yan, 2011/08/04
         int BOMType = 0;
         if (FileUtil.UTF8.equals(originalEncoding))
         {
             String baseDocDir = AmbFileStoragePathUtils.getCxeDocDirPath();
-            if (FileUtil.isNeedBOMProcessing(externalPageId)) {
+            if (FileUtil.isNeedBOMProcessing(externalPageId))
+            {
                 File file = new File(baseDocDir, externalPageId);
                 try
                 {
                     String encoding = FileUtil.guessEncoding(file);
                     if (FileUtil.UTF8.equals(encoding))
                     {
-                        //UTF-8 with BOM
+                        // UTF-8 with BOM
                         BOMType = FileProfileImpl.UTF_8_WITH_BOM;
                     }
                     else if (FileUtil.UTF16LE.equals(encoding))
@@ -864,11 +883,12 @@ public final class PageManagerLocal implements PageManager
                 }
             }
         }
-            
+
         String dataSourceType = p_request.getDataSourceType();
 
         SourcePage sp = new SourcePage(externalPageId, p_sourceLocale,
-                dataSourceType, p_wordCount, BOMType, PrimaryFile.EXTRACTED_FILE);
+                dataSourceType, p_wordCount, BOMType,
+                PrimaryFile.EXTRACTED_FILE);
         ExtractedSourceFile esf = (ExtractedSourceFile) sp.getPrimaryFile();
 
         esf.setOriginalCodeSet(originalEncoding);
@@ -942,8 +962,9 @@ public final class PageManagerLocal implements PageManager
         if (acceptedPage != null
                 && !isPageReimportable(acceptedPage, p_forLeverage))
         {
-            acceptedPage = findAcceptablePage(getSourcePageById(acceptedPage
-                    .getPreviousPageId()), p_forLeverage);
+            acceptedPage = findAcceptablePage(
+                    getSourcePageById(acceptedPage.getPreviousPageId()),
+                    p_forLeverage);
         }
 
         return acceptedPage;
@@ -1026,7 +1047,7 @@ public final class PageManagerLocal implements PageManager
             p_page.setTimestamp(new Timestamp(System.currentTimeMillis()));
             p_page.setCompanyId(p_request.getCompanyId());
             p_page.setRequest(p_request);
-           
+
             HibernateUtil.save(p_page);
             p_request.setSourcePage(p_page);
             HibernateUtil.update(p_request);
@@ -1051,19 +1072,23 @@ public final class PageManagerLocal implements PageManager
                     p_genericPageType);
 
             int pageCount = p_ids.size();
-
-            // set the values in a hashtable
-            Hashtable map = new Hashtable();
-
-            map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
-            map.put(new Integer(TARGET_PAGE), p_genericPageType);
-            map.put(new Integer(PAGE_COUNT), new Integer(pageCount));
-            map.put(ExportConstants.EXPORT_BATCH_ID, new Long(p_exportBatchId));
-            CompanyWrapper.saveCurrentCompanyIdInMap(map, s_category);
+            ArrayList<Hashtable> slidesPages = new ArrayList<Hashtable>();
+            ArrayList<Hashtable> notesPages = new ArrayList<Hashtable>();
+            ArrayList<Hashtable> otherPages = new ArrayList<Hashtable>();
 
             // loop through all pages....
             for (int i = 0; i < pageCount; i++)
             {
+                // set the values in a hashtable
+                Hashtable map = new Hashtable();
+
+                map.put(new Integer(EXPORT_PARAMETERS), p_exportParameters);
+                map.put(new Integer(TARGET_PAGE), p_genericPageType);
+                map.put(new Integer(PAGE_COUNT), new Integer(pageCount));
+                map.put(ExportConstants.EXPORT_BATCH_ID, new Long(
+                        p_exportBatchId));
+                CompanyWrapper.saveCurrentCompanyIdInMap(map, s_category);
+
                 Long pageId = (Long) p_ids.get(i);
                 map.put(new Integer(PAGE_ID), pageId);
                 map.put(new Integer(PAGE_NUM), new Integer(i));
@@ -1071,13 +1096,69 @@ public final class PageManagerLocal implements PageManager
                 // For Office documents in multi-format jobs, specify
                 // which sub-page of the doc this is, and how many in
                 // total there are to export.
-                map.put(new Integer(DOC_PAGE_NUM), pageDocMap
-                        .getPageNumberForDoc(pageId));
-                map.put(new Integer(DOC_PAGE_COUNT), pageDocMap
-                        .getPageCountForDoc(pageId));
+                map.put(new Integer(DOC_PAGE_NUM),
+                        pageDocMap.getPageNumberForDoc(pageId));
+                map.put(new Integer(DOC_PAGE_COUNT),
+                        pageDocMap.getPageCountForDoc(pageId));
+
+                SourcePage page = null;
+                if (p_genericPageType == SOURCE_PAGE)
+                {
+                    page = HibernateUtil.get(SourcePage.class, pageId);
+                }
+                else if (TARGET_PAGE == p_genericPageType)
+                {
+                    TargetPage tpage = HibernateUtil.get(TargetPage.class,
+                            pageId);
+                    page = tpage.getSourcePage();
+                }
+
+                if (page != null)
+                {
+                    ExtractedSourceFile sfile = (ExtractedSourceFile) page
+                            .getExtractedFile();
+                    String path = page.getExternalPageId().toLowerCase();
+                    if (path.endsWith(".pptx") && sfile != null
+                            && "office-xml".equals(sfile.getDataType()))
+                    {
+                        if (path.startsWith("(slide"))
+                        {
+                            slidesPages.add(map);
+                        }
+                        else if (path.startsWith("(notes"))
+                        {
+                            notesPages.add(map);
+                        }
+                        else
+                        {
+                            otherPages.add(map);
+                        }
+
+                        continue;
+                    }
+
+                }
 
                 JmsHelper
                         .sendMessageToQueue(map, JmsHelper.JMS_EXPORTING_QUEUE);
+            }
+
+            if (slidesPages.size() > 0)
+            {
+                JmsHelper.sendMessageToQueue(slidesPages,
+                        JmsHelper.JMS_EXPORTING_QUEUE);
+            }
+
+            if (notesPages.size() > 0)
+            {
+                JmsHelper.sendMessageToQueue(notesPages,
+                        JmsHelper.JMS_EXPORTING_QUEUE);
+            }
+
+            if (otherPages.size() > 0)
+            {
+                JmsHelper.sendMessageToQueue(otherPages,
+                        JmsHelper.JMS_EXPORTING_QUEUE);
             }
         }
         catch (Exception ex)
@@ -1086,7 +1167,7 @@ public final class PageManagerLocal implements PageManager
             throw new PageException(ex);
         }
     }
-    
+
     /**
      * Initializes the MT engine that the PageManager will use during
      * leveraging.
@@ -1107,23 +1188,22 @@ public final class PageManagerLocal implements PageManager
             TranslationMemoryProfile tmProfile = l10nProfile
                     .getTranslationMemoryProfile();
 
-            boolean useMT = tmProfile.getOverrideNonExactMatches();
-            if (!useMT)
+            if (!tmProfile.getUseMT())
             {
-                s_category
-                        .info("Not using machine translation during leveraging.");
+                if (s_category.isDebugEnabled())
+                {
+                    s_category
+                            .info("Not using machine translation during leveraging.");
+                }
             }
             else
             {
                 String mtEngineName = tmProfile.getMtEngine();
                 mt = AbstractTranslator.initMachineTranslator(mtEngineName);
 
-                if (s_category.isDebugEnabled())
-                {
-                    s_category.info("Using machine translation engine: "
-                            + mt.getEngineName() + " for page "
-                            + p_sourcePage.getName());
-                }
+                s_category.info("Using machine translation engine: "
+                        + mt.getEngineName() + " for page "
+                        + p_sourcePage.getName());
             }
         }
         catch (Exception ex)
@@ -1135,7 +1215,7 @@ public final class PageManagerLocal implements PageManager
 
         return mt;
     }
-    
+
     private boolean getAutoCommitToTm(SourcePage p_sourcePage)
     {
         boolean autoCommitToTm = false;
@@ -1151,7 +1231,9 @@ public final class PageManagerLocal implements PageManager
         }
         catch (Exception ex)
         {
-            s_category.error("Could not get parameter 'auto_commit_to_tm' from tm profile", ex);
+            s_category
+                    .error("Could not get parameter 'auto_commit_to_tm' from tm profile",
+                            ex);
         }
 
         return autoCommitToTm;
@@ -1161,11 +1243,11 @@ public final class PageManagerLocal implements PageManager
      * Returns a TargetLocaleLgIdsMapper object, which maps leverage group ids
      * of the reimportable page and target locales
      * 
-     * @param p_sourcePage -
-     *            The source page used for getting it's previous leverage group
-     *            ids.
-     * @param p_targetLocales -
-     *            all target locales for the job
+     * @param p_sourcePage
+     *            - The source page used for getting it's previous leverage
+     *            group ids.
+     * @param p_targetLocales
+     *            - all target locales for the job
      * @return TargetLocaleLgIdsMapper object
      * @exception PageException
      *                when a page related error occurs.
@@ -1209,5 +1291,25 @@ public final class PageManagerLocal implements PageManager
         }
 
         return localeLgIdMap;
+    }
+
+    /**
+     * Get source page object by leverage group ID.
+     * 
+     * @param p_leverageGroupId
+     * @return
+     */
+    public SourcePage getSourcePageByLeverageGroupId(long p_leverageGroupId)
+    {
+        List<SourcePage> sourcePages = HibernateUtil.searchWithSql(
+                SourcePage.class, GET_SOURCE_PAGE_BY_LG_ID_SQL,
+                p_leverageGroupId);
+
+        if (sourcePages != null && sourcePages.size() > 0)
+        {
+            return sourcePages.get(0);
+        }
+
+        return null;
     }
 }

@@ -1,10 +1,11 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     isErrorPage="true"
-    import="java.util.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
+    import="java.util.*,
+            com.globalsight.everest.servlet.ControlServlet,
+            com.globalsight.everest.webapp.pagehandler.PageHandler,
 	    com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.WebAppConstants,
-            org.apache.log4j.Logger,
             java.util.ResourceBundle,
             com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants"
     session="true"
@@ -12,8 +13,7 @@
 <jsp:useBean id="previous" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
-    Logger.getLogger("com.globalsight.everest.webapp.jsp").
-        error("Exception in JSP", exception);
+    ControlServlet.handleJSPException(exception);
 
     ResourceBundle bundle = PageHandler.getBundle(session);
 

@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -777,16 +776,17 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                 }
             }
             
-            if (deletedLangs.size() > 0)
-            {
-                StringBuffer sb = new StringBuffer();
-                sb.append("from TbLanguage tl where tl.name in(");
-                sb.append(temStr.toString());
-                sb.append(") and tl.concept.termbase.id=").append(m_id);
-
-                List list = HibernateUtil.search(sb.toString());
-                HibernateUtil.delete(list);
-            }
+            // Fix for GBS-2515
+            // if (deletedLangs.size() > 0)
+            // {
+            // StringBuffer sb = new StringBuffer();
+            // sb.append("from TbLanguage tl where tl.name in(");
+            // sb.append(temStr.toString());
+            // sb.append(") and tl.concept.termbase.id=").append(m_id);
+            //
+            // List list = HibernateUtil.search(sb.toString());
+            // HibernateUtil.delete(list);
+            // }
             
             String description = _new.getDescription();
             description = EditUtil.truncateUTF8Len(description, 4000);

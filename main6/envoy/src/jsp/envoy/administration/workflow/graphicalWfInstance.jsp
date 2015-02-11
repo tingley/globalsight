@@ -140,20 +140,18 @@ function onClose() {
             <OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
             WIDTH = 80% HEIGHT = 95% NAME = "GPUI"  id = "GPUI"
             codebase="<%=httpProtocolToUse%>://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6">            
+            <PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" >
             <%}  else {%>
             <%=bundle.getString("applet_need_java_support")%>
             <BR>
             <APPLET type="application/x-java-applet;jpi-version=1.6" 
             		NAME="GPUI" id="GPUI" height=95% width=80% 
-            		pluginspage="http://java.sun.com/products/plugin/index.html#download">
+            		pluginspage="http://java.sun.com/products/plugin/index.html#download" code="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class">
             <%}%>
-            <PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" >
             <!-- PARAM NAME = CODEBASE VALUE = "classes/"-->
-            
             <PARAM NAME = "cache_option" VALUE = "Plugin" >
             <PARAM NAME = "cache_archive" VALUE = "/globalsight/applet/lib/graphicalWf.jar">
             <PARAM NAME = NAME VALUE = "GPUI" >
-            
             <PARAM NAME = "type" VALUE="application/x-java-applet;version=1.6">
             <PARAM NAME = "scriptable" VALUE="true">
             <PARAM NAME =  "rand" value=<%=session.getAttribute("UID_" + session.getId())%>>

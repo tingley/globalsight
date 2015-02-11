@@ -15,6 +15,8 @@ import junit.framework.Assert;
 import org.testng.Reporter;
 import com.globalsight.selenium.pages.Projects;
 import com.globalsight.selenium.pages.Users;
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.util.SeleniumUtils;
 import com.thoughtworks.selenium.Selenium;
 
 public class ProjectsFuncs extends BasicFuncs {
@@ -27,6 +29,10 @@ public class ProjectsFuncs extends BasicFuncs {
 	public String newProject(Selenium selenium, String projectProfiles)
 			throws Exception {
 		
+        SeleniumUtils.clickAndWait(selenium, Projects.NEW_BUTTON);
+
+        SeleniumUtils.select(selenium, Projects.PROJECT_MANAGER_SELECT,
+                ConfigUtil.getConfigData("pm"), true);
 
 		// input the values
 		String[] iprojectProfile = projectProfiles.split(",");
@@ -89,8 +95,8 @@ public class ProjectsFuncs extends BasicFuncs {
 			}
 		}
 
-		if (selenium.isElementPresent(Projects.Save_BUTTON)) {
-			selenium.click(Projects.Save_BUTTON);
+		if (selenium.isElementPresent(Projects.SAVE_BUTTON)) {
+			selenium.click(Projects.SAVE_BUTTON);
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
 		// to Check if the project has been created successful.
@@ -100,18 +106,18 @@ public class ProjectsFuncs extends BasicFuncs {
 	
 	//added by ShenYang  2011-06-27
 	public void editProject(Selenium selenium, String iProjectName, String iNewProName, String iNewProManager) throws Exception {
-		boolean selected = selectRadioButtonFromTable(selenium, Projects.Project_TABLE, iProjectName);
+		boolean selected = selectRadioButtonFromTable(selenium, Projects.PROJECT_TABLE, iProjectName);
         if (!selected)
         {
             Reporter.log("Cannot find a proper Project.");
             return;
         }
         try {
-        	selenium.click(Projects.Edit_BUTTON);
+        	selenium.click(Projects.EDIT_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         	selenium.type(Projects.Name_TEXT_FIELD, iNewProName);
-	        selenium.select(Projects.ProjectManager_SELECT, iNewProManager);
-	        selenium.click(Projects.Save_BUTTON);
+	        selenium.select(Projects.PROJECT_MANAGER_SELECT, iNewProManager);
+	        selenium.click(Projects.SAVE_BUTTON);
 	        selenium.getConfirmation();
 	     
 		} catch (Exception e) {
@@ -119,28 +125,28 @@ public class ProjectsFuncs extends BasicFuncs {
 			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
           Assert.assertEquals(
-				isPresentInTable(selenium, Projects.Project_TABLE, iNewProName),
+				isPresentInTable(selenium, Projects.PROJECT_TABLE, iNewProName),
 				true);
 	}
 	
 	//added by ShenYang  2011-06-27
 	public void editProjectUser(Selenium selenium, String iProjectName, String adduser) throws Exception {
-		boolean selected = selectRadioButtonFromTable(selenium, Projects.Project_TABLE, iProjectName);
+		boolean selected = selectRadioButtonFromTable(selenium, Projects.PROJECT_TABLE, iProjectName);
         if (!selected)
         {
             Reporter.log("Cannot find a proper Project.");
             return;
         }
         try {
-        	selenium.click(Projects.Edit_BUTTON);
+        	selenium.click(Projects.EDIT_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	        selenium.click(Projects.User_BUTTON);
+	        selenium.click(Projects.USER_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 	        selenium.addSelection(Projects.Avavilable_FORM,	adduser);
 	        selenium.click(Projects.AddTO_BUTTON);
-	        selenium.click(Projects.Done_User_BUTTON);
+	        selenium.click(Projects.USER_DONE_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	        selenium.click(Projects.Save_BUTTON);
+	        selenium.click(Projects.SAVE_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 	        
 	}catch (Exception e) {
@@ -151,18 +157,18 @@ public class ProjectsFuncs extends BasicFuncs {
 	
 	//added by ShenYang  2011-06-28
 	public void editProjectTermbase(Selenium selenium, String iProjectName, String iTBName) throws Exception {
-		boolean selected = selectRadioButtonFromTable(selenium, Projects.Project_TABLE, iProjectName);
-		String strn = this.getColumnText(selenium, Projects.Project_TABLE, iProjectName, 4);
+		boolean selected = selectRadioButtonFromTable(selenium, Projects.PROJECT_TABLE, iProjectName);
+		String strn = this.getColumnText(selenium, Projects.PROJECT_TABLE, iProjectName, 4);
         if (!selected)
         {
             Reporter.log("Cannot find a proper Project.");
             return;
         }
         try {
-        	selenium.click(Projects.Edit_BUTTON);
+        	selenium.click(Projects.EDIT_BUTTON);
 	        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 	        selenium.select(Projects.TermBase_SELECT, iTBName);
-	        selenium.click(Projects.Save_BUTTON);
+	        selenium.click(Projects.SAVE_BUTTON);
 	        if(selenium.isElementPresent(Projects.Error_MSG_DIV))
 	        {	
 	        	if(selenium.getText(Projects.Error_MSG_DIV)!=null)
@@ -170,7 +176,7 @@ public class ProjectsFuncs extends BasicFuncs {
 	        		selenium.click(Projects.Cancel_BUTTON);
 	        		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 	        		//verify
-	        		Assert.assertEquals(strn, this.getColumnText(selenium, Projects.Project_TABLE, iProjectName, 4));
+	        		Assert.assertEquals(strn, this.getColumnText(selenium, Projects.PROJECT_TABLE, iProjectName, 4));
 	        	}
 	        	else
 	        		{
@@ -178,9 +184,9 @@ public class ProjectsFuncs extends BasicFuncs {
 	        			//verify
 	        			if(iTBName=="No Termbase Selected")
 	        			Assert.assertEquals(this.getColumnText(selenium,
-	        					Projects.Project_TABLE, iProjectName, 4), null);
+	        					Projects.PROJECT_TABLE, iProjectName, 4), null);
 	        			else Assert.assertEquals(this.getColumnText(selenium,
-	        					Projects.Project_TABLE, iProjectName, 4), iTBName);	
+	        					Projects.PROJECT_TABLE, iProjectName, 4), iTBName);	
 	        		}
 	        }
 	        	        
@@ -191,23 +197,11 @@ public class ProjectsFuncs extends BasicFuncs {
         					}
 	}
 	
-	public boolean searchProject(Selenium selenium, String UserProfiles) throws Exception
-	{
-		String[] iUserProfiles = UserProfiles.split(",");
-		String iuserName = null;	
-		boolean result=false;
-		for (String iUserProfile : iUserProfiles) {
-			String[] ivalue = iUserProfile.split("=");
-			String iFieldValue = ivalue[1].trim();
-			BasicFuncs basicfuncs=new BasicFuncs();
-			result=basicfuncs.selectRadioButtonFromTable(selenium,Projects.Project_TABLE,iFieldValue);
-			if(result==true)
-			{
-				selenium.click(Users.Edit_BUTTON);
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-				break;
-			}
-		}
-		return result;
-	}
+    public boolean selectProject(Selenium selenium, String projectName)
+            throws Exception
+    {
+        BasicFuncs basicFuncs = new BasicFuncs();
+        return basicFuncs.selectRadioButtonFromTable(selenium,
+                Projects.PROJECT_TABLE, projectName);
+    }
 }

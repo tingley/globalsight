@@ -64,7 +64,7 @@ public class InstallValues
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
             finally
             {
@@ -77,7 +77,7 @@ public class InstallValues
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
 
@@ -175,7 +175,7 @@ public class InstallValues
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -187,7 +187,7 @@ public class InstallValues
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -226,7 +226,7 @@ public class InstallValues
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 

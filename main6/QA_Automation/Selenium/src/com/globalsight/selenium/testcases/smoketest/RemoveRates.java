@@ -1,63 +1,22 @@
 package com.globalsight.selenium.testcases.smoketest;
-//author : ShenYang  2011-06-28
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
+
 import org.testng.annotations.Test;
 
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.RatesFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
-import com.thoughtworks.selenium.Selenium;
 
-public class RemoveRates extends BaseTestCase{
-	private Selenium selenium;
-	private RatesFuncs rRate = new RatesFuncs();
-	
-@Test	
-	public void remove() throws Exception{
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.Rates_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		String iRateName = ConfigUtil.getDataInCase(getClassName(), "RATENAME");
-		rRate.removeRate(selenium, iRateName);
-	}
-@BeforeMethod
-public void beforeMethod() {CommonFuncs.loginSystemWithAdmin(selenium);
-}
+public class RemoveRates extends BaseTestCase
+{
+    private RatesFuncs rateFunc = new RatesFuncs();
 
-@AfterMethod
-public void afterMethod() {CommonFuncs.logoutSystem(selenium);
-}
+    @Test
+    public void remove() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.RATES_SUBMENU);
 
-@BeforeClass
-public void beforeClass() {
-}
-
-@AfterClass
-public void afterClass() {
-}
-
-@BeforeTest
-public void beforeTest() {selenium = CommonFuncs.initSelenium();
-}
-
-@AfterTest
-public void afterTest() {CommonFuncs.endSelenium(selenium);
-}
-
-@BeforeSuite
-public void beforeSuite() {
-}
-
-@AfterSuite
-public void afterSuite() {
-}
+        String iRateName = getProperty("rate.toRemove");
+        rateFunc.removeRate(selenium, iRateName);
+    }
 }

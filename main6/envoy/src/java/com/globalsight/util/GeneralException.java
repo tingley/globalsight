@@ -63,10 +63,9 @@ public class GeneralException extends RuntimeException implements
     /**
      * 
      */
-    private static final long serialVersionUID = -4079297549785720843L;
+    private static final long serialVersionUID = -2067357005253595605L;
 
-    private static final Logger CATEGORY = Logger
-            .getLogger(GeneralException.class);
+    private Logger m_logger = null;
 
     /**
      * The component that threw this exception.
@@ -115,6 +114,9 @@ public class GeneralException extends RuntimeException implements
      */
     private Exception m_originalException = null;
 
+    // Use String member which is Serializable to transfer via JMS
+    private String m_originalMessage = null;
+
     /**
      * Message key in the error message property file.
      */
@@ -133,6 +135,7 @@ public class GeneralException extends RuntimeException implements
     // element name of serialized xml
     private static final String GENERAL_EXCEPTION = "GeneralException";
     private static final String JAVA_EXCEPTION = "JavaException";
+    private static final String ORIGINALMESSAGE = "originalMessage";
     private static final String KEY = "key";
     private static final String ARGS = "args";
     private static final String ARG = "arg";
@@ -334,6 +337,10 @@ public class GeneralException extends RuntimeException implements
         m_messageId = p_messageId;
         m_messageArguments = p_messageArguments;
         m_originalException = p_originalException;
+        if (p_originalException != null)
+        {
+            m_originalMessage = p_originalException.getMessage();
+        }
 
         if (m_messageId != DEFAULT_MSG_ID)
         {
@@ -521,6 +528,25 @@ public class GeneralException extends RuntimeException implements
         this(GeneralExceptionConstants.EX_GENERAL,
                 GeneralExceptionConstants.COMP_FOUNDATION, p_message,
                 p_originalException);
+    }
+
+    public String getOriginalMessage()
+    {
+        return m_originalMessage;
+    }
+
+    public Logger getLogger()
+    {
+        if (m_logger == null)
+        {
+            m_logger = Logger.getLogger(GeneralException.class);
+        }
+        return m_logger;
+    }
+
+    public void setLogger(Logger logger)
+    {
+        m_logger = logger;
     }
 
     /**
@@ -739,9 +765,12 @@ public class GeneralException extends RuntimeException implements
             String[] p_messageArguments, Exception p_originalException,
             String p_propertyFileName)
     {
+        if (p_originalException != null)
+        {
+            m_originalMessage = p_originalException.getMessage();
+        }
         m_messageKey = p_messageKey;
         m_messageArguments = p_messageArguments;
-        m_originalException = p_originalException;
         m_propertyFileName = p_propertyFileName;
     }
 
@@ -937,8 +966,8 @@ public class GeneralException extends RuntimeException implements
         catch (Exception e)
         {
             String message = (root != null ? root.toString() : "null root")
-                    + e.toString();
-            CATEGORY.error(message, e);
+                    + e.getMessage();
+            getLogger().error(message, e);
             return message;
         }
 
@@ -984,7 +1013,7 @@ public class GeneralException extends RuntimeException implements
         catch (Exception e)
         {
             GeneralException ge = new GeneralException(p_serializedException, e);
-            CATEGORY.error(ge, ge);
+            ge.getLogger().error(ge.getMessage(), ge);
             return ge;
         }
 
@@ -1000,6 +1029,10 @@ public class GeneralException extends RuntimeException implements
      */
     public String getMessage()
     {
+        if (m_originalMessage != null)
+        {
+            return m_originalMessage;
+        }
         // Old stuff. Should be removed once the old code is cleaned up.
         if (m_errorMessage != null)
         {
@@ -1098,7 +1131,7 @@ public class GeneralException extends RuntimeException implements
      */
     public void printStackTrace()
     {
-        CATEGORY.error(getStackTraceString());
+        getLogger().error(getMessage(), this);
     }
 
     /**
@@ -1165,8 +1198,10 @@ public class GeneralException extends RuntimeException implements
             }
             catch (MissingResourceException e)
             {
-                CATEGORY.error(e.toString() + " " + RESOURCE_PACKAGE_NAME + " "
-                        + p_propertyFileName + " " + p_uiLocale.toString(), e);
+                getLogger().error(
+                        e.getMessage() + " " + RESOURCE_PACKAGE_NAME + " "
+                                + p_propertyFileName + " "
+                                + p_uiLocale.toString(), e);
                 return null;
             }
 
@@ -1182,6 +1217,14 @@ public class GeneralException extends RuntimeException implements
     {
         // <GeneralException>
         Element root = doc.createElement(GENERAL_EXCEPTION);
+
+        // <originalMessage>
+        if (m_originalMessage != null)
+        {
+            Element originalMessage = doc.createElement(ORIGINALMESSAGE);
+            originalMessage.appendChild(doc.createTextNode(m_originalMessage));
+            root.appendChild(originalMessage);
+        }
 
         // <key>
         if (m_messageKey != null)
@@ -1387,6 +1430,10 @@ public class GeneralException extends RuntimeException implements
                     message = origMessage;
                 }
             }
+            else if (m_originalMessage != null)
+            {
+                message = m_originalMessage;
+            }
             else
             {
                 // the last method to get the error message.
@@ -1454,7 +1501,11 @@ public class GeneralException extends RuntimeException implements
         /** End element. */
         public void endElement(String uri, String local, String raw)
         {
-            if (raw.equals(KEY))
+            if (raw.equals(ORIGINALMESSAGE))
+            {
+                m_current.m_originalMessage = text;
+            }
+            else if (raw.equals(KEY))
             {
                 m_current.m_messageKey = text;
             }

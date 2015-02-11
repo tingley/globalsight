@@ -93,6 +93,10 @@ public class MailerConstants
     public static final String LOGIN_RESET_PASSWORD_MESSAGE 		= "message_login_resetPassword";
     public static final String LOGIN_RETRIEVE_UESRNAME_MESSAGE 		= "message_login_retrieveUsernames";
     public static final String JOB_IMPORT_SUCC_MESSAGE              = "message_job_import_succ"; 
+    
+    // Auto-accept email
+    public static final String AUTO_ACCEPT_SUBJECT = "subject_autoaccept_task";
+    public static final String AUTO_ACCEPT_MESSAGE = "message_autoaccept_task";
 
     private static HashMap s_notificationMap = new HashMap();
 

@@ -1,14 +1,14 @@
 package com.globalsight.ling.tm2;
 
+import static java.lang.Math.min;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.util.List;
-import static java.lang.Math.min;
 
-import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
-import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.tm.TmManagerException;
 import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.tm.TmManagerException;
+import com.globalsight.ling.tm2.segmenttm.TMidTUid;
 
 /**
  * Handles paging of Tu results.
@@ -70,9 +70,7 @@ public class TuQueryResult implements Serializable {
     /**
      * Return the results for the current page.
      */  
-    // ignore the Connection parameter because TmCoreManagerLocal doesn't use it
-    public List<SegmentTmTu> getPageResults(Connection conn) 
-                    throws TmManagerException {
+    public List<SegmentTmTu> getPageResults() throws TmManagerException {
         try {
             return LingServerProxy.getTmCoreManager().getSegmentsById(
                     m_tuIds.subList(m_first, m_last));

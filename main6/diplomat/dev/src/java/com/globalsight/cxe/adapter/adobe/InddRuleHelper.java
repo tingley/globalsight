@@ -69,13 +69,16 @@ public class InddRuleHelper
             URL url = InddRuleHelper.class.getResource(file);
             File theFile = null;
 
-            try
+            if (url != null)
             {
-                theFile = new File(url.toURI());
-            }
-            catch (Exception exx)
-            {
-                theFile = new File(url.getPath());
+                try
+                {
+                    theFile = new File(url.toURI());
+                }
+                catch (Exception exx)
+                {
+                    theFile = new File(url.getPath());
+                }
             }
 
             if (theFile != null && theFile.exists())

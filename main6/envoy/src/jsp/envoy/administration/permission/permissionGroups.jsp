@@ -8,7 +8,7 @@
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupsHandler, 
             com.globalsight.everest.webapp.pagehandler.administration.permission.PermissionGroupComparator,
-            com.globalsight.everest.servlet.util.ServerProxy,
+              com.globalsight.everest.company.CompanyWrapper,
             java.util.*"
     session="true"
 %>
@@ -26,16 +26,20 @@
  class="java.util.ArrayList" />
 <% 
     ResourceBundle bundle = PageHandler.getBundle(session);
+	String helperText = bundle.getString("helper_text_permissionggroup_list");
     SessionManager sessionMgr =
       (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
  
     String confirmRemove = bundle.getString("msg_confirm_permission_removal");
     String newURL = new1.getPageURL() + "&action=" + PermissionGroupsHandler.CREATE;
+    String selfURL = self.getPageURL();
     String editURL = edit.getPageURL() + "&action=" + PermissionGroupsHandler.EDIT;
     String removeURL = remove.getPageURL() + "&action=" + PermissionGroupsHandler.REMOVE;
     String detailsURL = details.getPageURL() + "&action=" + PermissionGroupsHandler.DETAILS;
     String title = bundle.getString("lb_permission_groups");
     String error = (String)request.getAttribute("errorMsg");
+    String pCompanyFilter= (String) sessionMgr.getAttribute("pCompanyFilter");
+    String pNameFilter= (String) sessionMgr.getAttribute("pNameFilter");
     if (error == null)
     {
         error = "";
@@ -50,6 +54,7 @@
 <TITLE><%=title%></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT>
@@ -57,22 +62,85 @@ var needWarning = false;
 var objectName = "";
 var guideNode = "permissionGroups";
 var helpFile = "<%=bundle.getString("help_permission_groups")%>";
+$(
+		function(){
+			$("#permForm").keydown(function(e){
+				if(e.keyCode==13)
+				
+				{
+					
+					submitForm("self");
+				
+				}
+				
+				});
+			
+			
+		}		
+	)
 
+
+
+function buttonManagement()
+{
+	var count = $("input[name='radioBtn']:checked").length;
+	if (count > 0) {
+		$("#removeBtn").attr("disabled", false);
+	    if (count == 1) {
+	    	$("#detailsBtn").attr("disabled", false);
+		} else {
+	    	$("#detailsBtn").attr("disabled", true);
+		}
+	} else {
+        $("#removeBtn").attr("disabled", true);
+		$("#detailsBtn").attr("disabled", true);
+	}
+}
+
+function handleSelectAll() {
+	var ch = $("#selectAll").attr("checked");
+	if (ch == "checked") {
+		$("[name='radioBtn']").attr("checked", true);
+	} else {
+		$("[name='radioBtn']").attr("checked", false);
+	}
+	buttonManagement();
+}
+function modifyuser(name){
+	
+	var url = "<%=editURL%>&radioBtn=" + name;
+	permForm.action = url;
+
+	permForm.submit();
+	
+}
 function submitForm(button)
 {
     if (button == "New")
     {
         permForm.action = "<%=newURL%>";
     }
+	 if (button == "self")
+    {
+        permForm.action = "<%=selfURL%>";
+        
+    }
     else 
     {
-        if (button == "Edit")
-        {
-            permForm.action = "<%=editURL%>";
-        }
-        else if (button == "Remove")
+        if (button == "Remove")
         {
             if (!confirm('<%=confirmRemove%>')) return false;
+            var rv="";
+			$(":checkbox:checked").each(
+				function (i){
+					rv+=$(this).val()+" ";
+				}
+			)
+			$(":checkbox:checked").each(
+				function (i){
+					$(this).val(rv);
+				}
+			)
             permForm.action = "<%=removeURL%>";
         }
         else if (button == "Details")
@@ -123,11 +191,11 @@ function enableButtons()
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
-<amb:header title="<%=title%>" />
+<amb:header title="<%=title%>" helperText="<%=helperText%>" />
 
-<form name="permForm" method="post">
+<form name="permForm" id="permForm" method="post">
 <div style='color:red'><%=error%></div> 
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%" align="left" style="min-width:1024px;">
   <tr valign="top">
     <td align="right">
       <amb:tableNav bean="permGroups"
@@ -139,44 +207,51 @@ function enableButtons()
     <td>
       <amb:table bean="permGroups" id="permissionGroup"
        key="<%=PermissionGroupsHandler.PERM_GROUP_KEY%>"
-       dataClass="com.globalsight.everest.permission.PermissionGroup"
+       dataClass="com.globalsight.everest.permission.PermissionGroup" hasFilter="true"
        pageUrl="self" emptyTableMsg="msg_no_permission_groups" >
-      <amb:column label="" width="10px">
-      <input type="radio" name="radioBtn" value="<%=permissionGroup.getId()%>"
-       onclick="enableButtons()">
+       <amb:column label="checkbox" width="2%">
+     <input type="checkbox" name="radioBtn" id="<%=permissionGroup.getId()%>" value="<%=permissionGroup.getId()%>" onclick="buttonManagement()">
       </amb:column>
-      <amb:column label="lb_name" sortBy="<%=PermissionGroupComparator.NAME%>"
-       width="150px">
-      <%= permissionGroup.getName() %>
+      
+      
+      <amb:column label="lb_name" sortBy="<%=PermissionGroupComparator.NAME%>" filter="pNameFilter" filterValue="<%=pNameFilter == null ? "" : pNameFilter %>" width="20%">
+    
+       <amb:permission name="<%=Permission.PERMGROUPS_EDIT%>" ><a href='javascript:void(0)' title='Edit permissionGroup' onclick="modifyuser('<%= permissionGroup.getId() %>')">  </amb:permission>
+        <%= permissionGroup.getName() %> 
+         <amb:permission name="<%=Permission.PERMGROUPS_EDIT%>" ></a></amb:permission>
       </amb:column>
-      <amb:column label="lb_description" sortBy="<%=PermissionGroupComparator.DESC%>"
-       width="400px">
+      <amb:column label="lb_description" sortBy="<%=PermissionGroupComparator.DESC%>" width="60%">
       <% out.print(permissionGroup.getDescription() == null ?
        "" : permissionGroup.getDescription()); %>
       </amb:column>
       <% if (isSuperAdmin) { %>
-      <amb:column label="lb_company_name" sortBy="<%=PermissionGroupComparator.ASC_COMPANY%>" 
+      <amb:column label="lb_company_name" sortBy="<%=PermissionGroupComparator.ASC_COMPANY%>"   filter="pCompanyFilter" filterValue="<%=pCompanyFilter == null ? "" : pCompanyFilter %>"
       width="120">
-        <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(permissionGroup.getCompanyId())).getCompanyName()%>
+        <%=CompanyWrapper.getCompanyNameById(permissionGroup.getCompanyId())%>
       </amb:column>
       <% } %>
       </amb:table>
     </td>
   </tr>
+  
+   </TR>
+    <td>
+      <amb:tableNav bean="permGroups"  key="<%=PermissionGroupsHandler.PERM_GROUP_KEY%>" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/>
+    </td>
+  <TR>
+</DIV>
+<TR><TD>&nbsp;</TD></TR>
+  
   <tr>
-    <td style="padding-top:5px" align="right">
+    <td style="padding-top:5px" align="left">
     <amb:permission name="<%=Permission.PERMGROUPS_DETAILS%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_details")%>"
-       name="detailsBtn" disabled onclick="submitForm('Details');">
+       name="detailsBtn" id="detailsBtn" disabled onclick="submitForm('Details');">
     </amb:permission>
     <amb:permission name="<%=Permission.PERMGROUPS_REMOVE%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>"
-       name="removeBtn" disabled onclick="submitForm('Remove');">
-    </amb:permission>
-    <amb:permission name="<%=Permission.PERMGROUPS_EDIT%>" >
-      <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..."
-       name="editBtn" disabled onclick="submitForm('Edit');">
-    </amb:permission>
+       name="removeBtn" id="removeBtn" disabled onclick="submitForm('Remove');">
+    </amb:permission>   
     <amb:permission name="<%=Permission.PERMGROUPS_NEW%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..."
        onclick="submitForm('New');">

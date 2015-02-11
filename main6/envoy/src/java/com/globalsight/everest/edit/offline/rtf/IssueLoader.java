@@ -183,10 +183,15 @@ public class IssueLoader
         {
             status = Issue.STATUS_CLOSED;
         }
+        else if (Issue.STATUS_REJECTED.equalsIgnoreCase(status))
+        {
+            status = Issue.STATUS_REJECTED;
+        }
 
-        if (!Issue.STATUS_QUERY .equals(status) &&
-            !Issue.STATUS_OPEN  .equals(status) &&
-            !Issue.STATUS_CLOSED.equals(status))
+        if (!Issue.STATUS_QUERY.equals(status)
+                && !Issue.STATUS_OPEN.equals(status)
+                && !Issue.STATUS_CLOSED.equals(status)
+                && !Issue.STATUS_REJECTED.equals(status))
         {
             // Accept both "closed" and "close".
             if ("close".equalsIgnoreCase(status))

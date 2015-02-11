@@ -44,7 +44,7 @@ public class ServerUtil
             }
             catch (IOException e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
         

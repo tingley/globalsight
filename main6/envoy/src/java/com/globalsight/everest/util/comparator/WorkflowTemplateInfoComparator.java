@@ -29,12 +29,16 @@ public class WorkflowTemplateInfoComparator extends StringComparator
 	//types of WorkflowTemplateInfo comparison
 	public static final int NAME = 0;
 	public static final int DESCRIPTION = 1;
-    public static final int LOCALEPAIR = 2;
-	public static final int PROJECTMGR = 3;
+	public static final int LOCALEPAIR = 2;
+    public static final int SOURCE_LOCALE = 3;
+    public static final int TARGET_LOCALE = 4;
+    public static final int PROJECT = 5;
+	public static final int PROJECTMGR = 6;
+	public static final int TARGET_ENCODING = 7;
 	
 	// used for workflowType comparison
-	public static final int WORKFLOW_TYPE = 4;
-	public static final int ASC_COMPANY = 5;
+	public static final int WORKFLOW_TYPE = 8;
+	public static final int ASC_COMPANY = 9;
         
 
 	/**
@@ -75,16 +79,36 @@ public class WorkflowTemplateInfoComparator extends StringComparator
 			bValue = b.getDescription();
 			rv = this.compareStrings(aValue,bValue);
 			break;
-                case LOCALEPAIR:
-                        aValue = getLocalePairAsString(a);
-                        bValue = getLocalePairAsString(b);
-                        rv = this.compareStrings(aValue,bValue);
-                        break;
+        case LOCALEPAIR:
+            aValue = getLocalePairAsString(a);
+            bValue = getLocalePairAsString(b);
+            rv = this.compareStrings(aValue,bValue);
+            break;
+        case SOURCE_LOCALE:
+            aValue = a.getSourceLocale().getDisplayName();
+            bValue = b.getSourceLocale().getDisplayName();
+            rv = this.compareStrings(aValue,bValue);
+            break;
+        case TARGET_LOCALE:
+            aValue = a.getTargetLocale().getDisplayName();
+            bValue = b.getTargetLocale().getDisplayName();
+            rv = this.compareStrings(aValue,bValue);
+            break;
+        case PROJECT:
+            aValue = a.getProject().getName();
+            bValue = b.getProject().getName();
+            rv = this.compareStrings(aValue,bValue);
+            break;
 		case PROJECTMGR:
 			aValue = a.getProjectManagerId();
 			bValue = b.getProjectManagerId();
 			rv = this.compareStrings(aValue,bValue);
 			break;
+		case TARGET_ENCODING:
+		    aValue = a.getEncoding();
+		    bValue = b.getEncoding();
+		    rv = this.compareStrings(aValue,bValue);
+		    break;
 		case WORKFLOW_TYPE:
 			aValue = a.getWorkflowType();
 			bValue = b.getWorkflowType();

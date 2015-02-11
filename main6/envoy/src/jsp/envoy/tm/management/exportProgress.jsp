@@ -128,11 +128,11 @@ function showProgress(entryCount, percentage, message)
     percentage.toString(10) + "%)";
 
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
   {
-    idProgressBar.style.height = '18px';
+    idProgressBar.style.height = '17px';
 	idProgressBar.style.border = "0";
-	idProgressBar.style.width = "402";
+	idProgressBar.style.width = parseInt(idProgressBar.style.width) + 2;
   }
   
   if (message != null && message != "")

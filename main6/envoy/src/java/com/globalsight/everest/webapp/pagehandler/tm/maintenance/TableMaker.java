@@ -87,21 +87,22 @@ public class TableMaker
     /**
      * Converts the search results into table rows.
      */
-    public String getTableRows(Connection p_connection, String p_sourceFindText,
+    public String getTableRows(String p_sourceFindText,
             boolean p_sourceCaseSensitive, String p_targetFindText,
             boolean p_targetCaseSensitive, TmConcordanceResult p_tmResults,
             String [] p_selections)
             throws EnvoyServletException
     {
-        return getTableRows(p_connection, p_sourceFindText, p_sourceCaseSensitive, 
-                p_targetFindText, p_targetCaseSensitive, p_tmResults, null, p_selections);
+		return getTableRows(p_sourceFindText, p_sourceCaseSensitive,
+				p_targetFindText, p_targetCaseSensitive, p_tmResults, null,
+				p_selections);
     }
     
     /**
      * Converts the search results into table rows, sorting using the providing
      * comparator.
      */
-    public String getTableRows(Connection p_connection, String p_sourceFindText,
+    public String getTableRows(String p_sourceFindText,
         boolean p_sourceCaseSensitive, String p_targetFindText,
         boolean p_targetCaseSensitive, TmConcordanceResult p_tmResults,
         Comparator<SegmentTmTu> p_tuComparator,
@@ -115,8 +116,8 @@ public class TableMaker
         Map<Long, String> tmIdName = p_tmResults.getMapIdName();
         StringBuffer sb = new StringBuffer();
         List<SegmentTmTu> tus = (p_tuComparator == null) ?
-                p_tmResults.getTus(p_connection) :
-                p_tmResults.getTus(p_connection, p_tuComparator);
+                p_tmResults.getTus() :
+                p_tmResults.getTus(p_tuComparator);
         GlobalSightLocale srcLocale = p_tmResults.getSourceLocale();
         ArrayList<GlobalSightLocale> trgLocales = p_tmResults.getTargetLocales();
         // NOTE: for now we only display one target locale

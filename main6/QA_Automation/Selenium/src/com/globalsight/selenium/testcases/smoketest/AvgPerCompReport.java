@@ -4,16 +4,13 @@ import java.io.File;
 
 import junit.framework.Assert;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.DownloadFileRead.FileRead;
 import com.globalsight.selenium.pages.AvgPerCompReportWebForm;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /**
  * AvgPerComp Report
@@ -21,35 +18,20 @@ import com.thoughtworks.selenium.Selenium;
  * @author leon
  * 
  */
-public class AvgPerCompReport
+public class AvgPerCompReport extends BaseTestCase
 {
-    private Selenium selenium;
-    private int i = 0;
-
-    @BeforeClass
-    public void beforeClass()
-    {
-        selenium = CommonFuncs.initSelenium();
-        CommonFuncs.loginSystemWithAdmin(selenium);
-    }
-
-    @AfterClass
-    public void afterClass()
-    {
-        selenium.stop();
-    }
+    private int pictureIndex = 1;
 
     @Test
     public void generateReport()
     {
-        selenium.click(MainFrame.Reports_MENU);
-        selenium.click(MainFrame.MainReportsPage_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.REPORTS_MENU,
+                MainFrame.REPORTS_MAIN_SUBMENU);
+
         selenium.click(AvgPerCompReportWebForm.REPORT_LINK);
         selenium.selectWindow(AvgPerCompReportWebForm.POPUP_WINDOW_NAME);
 
-        selenium.click(AvgPerCompReportWebForm.Submit_BUTTON);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        clickAndWait(selenium, AvgPerCompReportWebForm.SUBMIT_BUTTON);
 
         selenium.windowMaximize();
 
@@ -65,7 +47,7 @@ public class AvgPerCompReport
     /**
      * Take pictures
      * 
-     * @param i
+     * @param pictureIndex
      */
     private void takePicture()
     {
@@ -74,12 +56,13 @@ public class AvgPerCompReport
         String ecal = "window.scrollTo(" + x + "," + y + ");";
         selenium.getEval(ecal);
         selenium.captureScreenshot(ConfigUtil.getConfigData("Base_Path_Result")
-                + "files\\AvgPerCompReport\\AvgPerCompReport_" + i + ".jpg");
+                + "files\\AvgPerCompReport\\AvgPerCompReport_" + pictureIndex
+                + ".jpg");
         FileRead fileRead = new FileRead();
         File file = fileRead
-                .getFile("files\\AvgPerCompReport\\AvgPerCompReport_" + i
-                        + ".jpg");
+                .getFile("files\\AvgPerCompReport\\AvgPerCompReport_"
+                        + pictureIndex + ".jpg");
         Assert.assertTrue(file.exists());
-        i++;
+        pictureIndex++;
     }
 }

@@ -440,10 +440,9 @@ public class VendorPOXlsReport extends XlsReports
                 //no match word count, do not consider Threshold 
 
                 // add the lowest fuzzies and sublev match to nomatch
-                data.noMatchWordCount += w.getThresholdNoMatchWordCount();
                 data.dellNewWordsWordCount = w.getNoMatchWordCount()
                         + w.getSubLevMatchWordCount();
-                data.tradosNoMatchWordCount = data.dellNewWordsWordCount;
+                data.tradosNoMatchWordCount += w.getThresholdNoMatchWordCount();
                 if (PageHandler.isInContextMatch(w.getJob()))
                 {
                     data.segmentTmWordCount += w.getSegmentTmWordCount();
@@ -453,16 +452,16 @@ public class VendorPOXlsReport extends XlsReports
                 }
                 else if (PageHandler.isDefaultContextMatch(w.getJob()))
                 {
-                    data.segmentTmWordCount += w.getNoUseExactMatchWordCount()
+                    data.segmentTmWordCount += w.getTotalExactMatchWordCount()
                             - w.getContextMatchWordCount();
                     data.dellExactMatchWordCount += data.segmentTmWordCount;
                     data.contextMatchWordCount += w.getContextMatchWordCount();
                 }
                 else
                 {
-                    data.segmentTmWordCount += w.getNoUseExactMatchWordCount();
+                    data.segmentTmWordCount += w.getTotalExactMatchWordCount();
                     data.dellExactMatchWordCount += w
-                            .getNoUseExactMatchWordCount();
+                            .getTotalExactMatchWordCount();
                     data.dellInContextMatchWordCount += w
                             .getNoUseInContextMatchWordCount();
                     data.contextMatchWordCount += 0;
@@ -662,7 +661,6 @@ public class VendorPOXlsReport extends XlsReports
         public long hiFuzzyMatchWordCount = 0;
         public long contextMatchWordCount = 0;
         public long segmentTmWordCount = 0;
-        public long noMatchWordCount = 0;
         public long totalWordCount = 0;
 
         /* word count costs */
@@ -1787,7 +1785,8 @@ public class VendorPOXlsReport extends XlsReports
                         data.trados75to84WordCount, temp_normalFormat));
                 theSheet.setColumnView(col - 1, numwidth);
                 theSheet.addCell(new Number(col++, row,
-                        data.tradosNoMatchWordCount, temp_normalFormat));
+                        data.tradosNoMatchWordCount + data.trados50to74WordCount, 
+                        temp_normalFormat));
                 theSheet.setColumnView(col - 1, numwidth);
                 theSheet.addCell(new Number(col++, row,
                         data.tradosRepsWordCount, temp_normalFormat));

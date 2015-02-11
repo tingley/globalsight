@@ -19,9 +19,6 @@ package com.globalsight.cxe.adapter.idml;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -47,12 +44,11 @@ import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.cxe.message.MessageData;
 import com.globalsight.cxe.message.MessageDataFactory;
-import com.globalsight.diplomat.util.database.ConnectionPool;
-import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.ExportUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.FileUtil;
 
@@ -182,7 +178,9 @@ public class IdmlHelper
             int docPageCount = m_eventFlow.getBatchInfo().getDocPageCount();
             String key = exportBatchId + getBaseFileName() + targetLocale;
 
-            if (isExportFileComplete(key, docPageCount))
+            String eBatchId = (String) params.get("ExportBatchId");
+            String tFileName = (String) params.get("TargetFileName");
+            if (ExportUtil.isLastFile(eBatchId, tFileName, targetLocale))
             {
                 String oofilename = getCategory().getDiplomatAttribute("safeBaseFileName")
                         .getValue();
@@ -302,7 +300,7 @@ public class IdmlHelper
         }
     }
     
-    private void split(String dir) throws Exception
+    public static void split(String dir) throws Exception
     {
         File f = new File(dir, CONTENT);
         File backupFile = new File(dir + CONTENT);
@@ -859,11 +857,10 @@ public class IdmlHelper
     private void doCopyToTargetLocales(File expectedFile)
     {
         String srcLocale = m_eventFlow.getSourceLocale();
-        String l10nProfileId = m_eventFlow.getBatchInfo().getL10nProfileId();
-        ArrayList<String> targetLocales = findTargetLocales(l10nProfileId);
-        for (int i = 0; i < targetLocales.size(); i++)
+        String[] targetLocales = m_eventFlow.getTargetLocale().split(",");
+        for (int i = 0; i < targetLocales.length; i++)
         {
-            String locale = targetLocales.get(i);
+            String locale = targetLocales[i];
             StringBuffer targetDir = new StringBuffer(expectedFile.getParent());
             int srcIndex = targetDir.lastIndexOf(srcLocale);
             targetDir.replace(srcIndex, srcIndex + srcLocale.length(), locale);
@@ -872,66 +869,6 @@ public class IdmlHelper
             targetDirF.mkdirs();
             FileCopier.copy(expectedFile, targetDir.toString());
         }
-    }
-
-    private ArrayList<String> findTargetLocales(String p_l10nProfileId)
-    {
-        ArrayList<String> targetLocales = new ArrayList<String>();
-
-        if (p_l10nProfileId == null || p_l10nProfileId.equals("null"))
-        {
-            // May be null for aligner import.
-            return targetLocales;
-        }
-
-        Connection connection = null;
-        PreparedStatement query = null;
-        StringBuffer sql = new StringBuffer("select loc.iso_lang_code, loc.iso_country_code ");
-        sql.append("from l10n_profile_wftemplate_info lpwf, ");
-        sql.append("  workflow_template wft, locale loc ");
-        sql.append("where lpwf.l10n_profile_id=? ");
-        sql.append("and lpwf.wf_template_id=wft.id ");
-        sql.append("and loc.id=wft.target_locale_id");
-        try
-        {
-            connection = ConnectionPool.getConnection();
-            query = connection.prepareStatement(sql.toString());
-            query.setString(1, p_l10nProfileId);
-            ResultSet results = query.executeQuery();
-            while (results.next())
-            {
-                String lang = results.getString(1);
-                String country = results.getString(2);
-                String locale = lang + "_" + country;
-                if (!targetLocales.contains(locale))
-                {
-                    targetLocales.add(locale);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            throw new RuntimeException("findTargetLocales error " + sql);
-        }
-        finally
-        {
-            try
-            {
-                query.close();
-            }
-            catch (Throwable e)
-            {
-            }
-            try
-            {
-                ConnectionPool.returnConnection(connection);
-            }
-            catch (ConnectionPoolException cpe)
-            {
-            }
-        }
-        return targetLocales;
     }
 
     private static boolean isExportFileComplete(String p_filekey, int p_pageCount)
@@ -1094,7 +1031,7 @@ public class IdmlHelper
             
             while (temContent.split(PARAGRAPH_START).length != temContent.split(PARAGRAPH_END).length + 1)
             {
-                n2 = s.indexOf(PARAGRAPH_END, n2 + 1);
+                n2 = temp.indexOf(PARAGRAPH_END, n2 + 1);
                 if (n2 < 0)
                     break;
                 
@@ -1105,7 +1042,7 @@ public class IdmlHelper
             String content2 = trimSpace(content);
             temp = temp.replace(index, index + content.length(), content2);
             
-            index = getIndexOfParaStart(temp, index + 1);
+            index = getIndexOfParaStart(temp, index + content2.length());
         }
         
         String range = temp.toString();

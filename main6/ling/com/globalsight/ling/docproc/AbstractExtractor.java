@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,6 +35,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.adapter.ling.StandardExtractor;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
@@ -45,7 +45,6 @@ import com.globalsight.ling.common.RegExException;
 import com.globalsight.ling.docproc.extractor.html.Extractor;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.edit.SegmentUtil;
-import com.globalsight.cxe.adapter.ling.StandardExtractor;
 
 /**
  * <p>
@@ -98,7 +97,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     private ExtractorRegistry m_ExtractorRegistry = null;
     private Filter m_mainFilter = null;
     private BaseFilter mainBaseFilter = null;
-    
+
     static
     {
         try
@@ -271,7 +270,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
         if (m_bInExcludeBlock)
             return true;
-        
+
         return !m_bExtractUnmarked;
     }
 
@@ -517,7 +516,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     public void loadRules(String p_rules) throws ExtractorException
     {
     }
-    
+
     /**
      * Set the filter for this format
      */
@@ -525,7 +524,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
     {
         m_mainFilter = p_filter;
     }
-    
+
     /**
      * Get the filter for this format
      */
@@ -578,8 +577,8 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
         ex.extract();
     }
-    
-    private void setJsFunction (AbstractExtractor ex, String... jsFunctionText)
+
+    private void setJsFunction(AbstractExtractor ex, String... jsFunctionText)
     {
         if (ex instanceof com.globalsight.ling.docproc.extractor.javascript.Extractor)
         {
@@ -634,19 +633,19 @@ public abstract class AbstractExtractor implements ExtractorInterface
     {
         return switchExtractor(to_translate, dataFormat, null, null);
     }
-    
-    public Output switchExtractor(String to_translate, String dataFormat, Filter filter)
-    throws ExtractorException
+
+    public Output switchExtractor(String to_translate, String dataFormat,
+            Filter filter) throws ExtractorException
     {
         return switchExtractor(to_translate, dataFormat, null, filter);
     }
-    
+
     public Output switchExtractor(String to_translate, String dataFormat,
             String rules) throws ExtractorException
     {
         return switchExtractor(to_translate, dataFormat, rules, null);
     }
-    
+
     public Output switchExtractor(String to_translate, String dataFormat,
             String rules, Filter filter) throws ExtractorException
     {
@@ -667,7 +666,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
                     ExtractorExceptionConstants.XML_EXTRACTOR_UNKNOWN_FORMAT,
                     message);
         }
-        
+
         String content = to_translate;
         // html
         if (formatId == 1)
@@ -688,20 +687,21 @@ public abstract class AbstractExtractor implements ExtractorInterface
         ex = makeExtractor(newInput.getType());
         ex.init(newInput, out);
         ex.setMainBaseFilter(this.getMainBaseFilter());
-        
+
         if (filter != null)
         {
             ex.setMainFilter(filter);
             long filterId = filter.getId();
             String filterTableName = filter.getFilterTableName();
-            if (FilterConstants.HTML_TABLENAME.equals(filterTableName) && formatId == 1)
+            if (FilterConstants.HTML_TABLENAME.equals(filterTableName)
+                    && formatId == 1)
             {
-                ((Extractor) ex).setRules("", filterId);
+                ((Extractor) ex).setRules(null, filterId);
                 ((Extractor) ex).setFilterId(filterId);
                 ((Extractor) ex).setFilterTableName(filterTableName);
             }
         }
-        
+
         ex.loadRules(rules);
         ex.extract();
         return out;
@@ -715,7 +715,6 @@ public abstract class AbstractExtractor implements ExtractorInterface
         if (m_input.getInput() != null)
         {
             // Read from byte buffer
-
             try
             {
                 bis = new ByteArrayInputStream(m_input.getInput());
@@ -746,52 +745,35 @@ public abstract class AbstractExtractor implements ExtractorInterface
                 }
                 catch (Exception e)
                 {
-                    String path = m_input.getURL();
-                    path = path.replace("file:", "");
-                    in = new FileInputStream(new File(path));
+                    File f = m_input.getFile();
+                    if (f != null)
+                    {
+                        in = new FileInputStream(f);
+                    }
                 }
 
                 String encoding = null;
                 try
                 {
-                    String path = m_input.getURL();
-                    path = path.replace("file:", "");
-                    File file =new File(path);
-                    encoding = FileUtil.guessEncoding(file);
+                    File f = m_input.getFile();
+                    if (f != null)
+                    {
+                        encoding = FileUtil.guessEncoding(f);
+                    }
                 }
                 catch (Exception e)
                 {
-                    //ignore it.
+                    // ignore
                 }
-                
+
                 if (encoding == null)
                     encoding = m_input.getCodeset();
-                
-                if (m_input.getType() == m_ExtractorRegistry
-                        .getFormatId(IFormatNames.FORMAT_XLIFF)) 
-                {
-                    BufferedReader buffReader = 
-                        new BufferedReader(new InputStreamReader(in, encoding));
-                    
-                    String tempString = buffReader.readLine();
-                    StringBuffer newString = new StringBuffer();
-                    
-                    while (tempString != null) 
-                    {
-                        newString.append(tempString).append("\n");
-                        tempString = buffReader.readLine();
-                    }
 
-                    String str = SegmentUtil.protectEntity(newString.toString());
-                    in = new ByteArrayInputStream(str.getBytes(encoding));
-                }
-                
-                if (m_input.getType() == m_ExtractorRegistry.getFormatId(IFormatNames.FORMAT_XML)
-                        || m_input.getType() == m_ExtractorRegistry
-                                .getFormatId(IFormatNames.FORMAT_IDML))
+                if (m_input.getType() == m_ExtractorRegistry
+                        .getFormatId(IFormatNames.FORMAT_XLIFF))
                 {
-                    BufferedReader buffReader = new BufferedReader(new InputStreamReader(in,
-                            encoding));
+                    BufferedReader buffReader = new BufferedReader(
+                            new InputStreamReader(in, encoding));
 
                     String tempString = buffReader.readLine();
                     StringBuffer newString = new StringBuffer();
@@ -802,10 +784,33 @@ public abstract class AbstractExtractor implements ExtractorInterface
                         tempString = buffReader.readLine();
                     }
 
-                    String str = SegmentUtil.protectInvalidUnicodeChar(newString.toString());
+                    String str = SegmentUtil
+                            .protectEntity(newString.toString());
                     in = new ByteArrayInputStream(str.getBytes(encoding));
                 }
-                
+
+                if (m_input.getType() == m_ExtractorRegistry
+                        .getFormatId(IFormatNames.FORMAT_XML)
+                        || m_input.getType() == m_ExtractorRegistry
+                                .getFormatId(IFormatNames.FORMAT_IDML))
+                {
+                    BufferedReader buffReader = new BufferedReader(
+                            new InputStreamReader(in, encoding));
+
+                    String tempString = buffReader.readLine();
+                    StringBuffer newString = new StringBuffer();
+
+                    while (tempString != null)
+                    {
+                        newString.append(tempString).append("\n");
+                        tempString = buffReader.readLine();
+                    }
+
+                    String str = SegmentUtil
+                            .protectInvalidUnicodeChar(newString.toString());
+                    in = new ByteArrayInputStream(str.getBytes(encoding));
+                }
+
                 input = new InputStreamReader(in, encoding);
             }
             catch (UnsupportedEncodingException e)
@@ -828,12 +833,14 @@ public abstract class AbstractExtractor implements ExtractorInterface
         {
             // read from Unicode string
             if (m_input.getType() == m_ExtractorRegistry
-                    .getFormatId(IFormatNames.FORMAT_XLIFF)) 
+                    .getFormatId(IFormatNames.FORMAT_XLIFF))
             {
-                String str = SegmentUtil.protectEntity(m_input.getUnicodeInput());
+                String str = SegmentUtil.protectEntity(m_input
+                        .getUnicodeInput());
                 input = new StringReader(str);
             }
-            else {
+            else
+            {
                 input = new StringReader(m_input.getUnicodeInput());
             }
         }
@@ -847,7 +854,7 @@ public abstract class AbstractExtractor implements ExtractorInterface
 
         return input;
     }
-    
+
     /**
      * <p>
      * Creates the codec for a given format format.

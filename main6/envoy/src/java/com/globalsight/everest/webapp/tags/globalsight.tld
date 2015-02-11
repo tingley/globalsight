@@ -44,6 +44,21 @@
 			<name>style</name>
 			<required>false</required>
 		</attribute>
+        <attribute>
+            <name>filter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>filterSelect</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>filterValue</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
 	</tag>
 
 	<tag>
@@ -252,6 +267,10 @@
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
         </attribute>
+        <attribute>
+            <name>hasFilter</name>
+            <required>false</required>
+        </attribute>
 	</tag>
 
 	<tag>
@@ -277,6 +296,14 @@
             <name>otherUrl</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
+        </attribute>
+        <attribute>
+            <name>showTotalCount</name>
+            <required>false</required>
+        </attribute>
+        <attribute>
+            <name>scope</name>
+            <required>false</required>
         </attribute>
 	</tag>
 

@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.page.pageexport;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -70,19 +72,32 @@ public class ExportMDB extends GenericQueueMDB
         {
             s_logger.debug("received message: " + p_cxeRequest);
             ObjectMessage msg = (ObjectMessage)p_cxeRequest;
-            Hashtable ht = (Hashtable) msg.getObject();
+            Serializable ob = msg.getObject();
+            if (ob instanceof Hashtable)
+            {
+            	Hashtable ht = (Hashtable) msg.getObject();
 
-            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
-            activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID,
-                ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
-            activityArgs.put("pageId", ht.get(PageManager.PAGE_ID));
-            activityStart = ActivityLog.start(
-                ExportMDB.class, "onMessage", activityArgs);
+                Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+                activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID,
+                    ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
+                activityArgs.put("pageId", ht.get(PageManager.PAGE_ID));
+                activityStart = ActivityLog.start(
+                    ExportMDB.class, "onMessage", activityArgs);
 
-            CompanyThreadLocal.getInstance().setIdValue((String) ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
-            
-            ExportHelper helper = new ExportHelper();
-            helper.export(ht);
+                CompanyThreadLocal.getInstance().setIdValue((String) ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
+                
+                ExportHelper helper = new ExportHelper();
+                helper.export(ht);
+            }
+            else if (ob instanceof ArrayList)
+            {
+            	
+            	ArrayList<Hashtable> hts = (ArrayList<Hashtable>) ob; 
+            	Hashtable ht = hts.get(0);
+            	CompanyThreadLocal.getInstance().setIdValue((String) ht.get(CompanyWrapper.CURRENT_COMPANY_ID));
+            	ExportHelper helper = new ExportHelper();
+                helper.export(hts);
+            }
         }
         catch (Exception e)
         {

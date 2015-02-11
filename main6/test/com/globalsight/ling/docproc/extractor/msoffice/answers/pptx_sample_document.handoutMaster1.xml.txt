@@ -1,0 +1,4 @@
+<bpt i="1" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr altLang=&quot;zh-CN&quot; dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>GlobalSight header<ept i="1">&lt;/a:t&gt;&lt;/a:r&gt;</ept><ph type="a:endParaRPr">&lt;a:endParaRPr altLang=&quot;en-US&quot; dirty=&quot;0&quot; lang=&quot;zh-CN&quot;/&gt;</ph>
+
+<bpt i="2" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr altLang=&quot;zh-CN&quot; dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>GlobalSight footer<ept i="2">&lt;/a:t&gt;&lt;/a:r&gt;</ept><ph type="a:endParaRPr">&lt;a:endParaRPr altLang=&quot;en-US&quot; dirty=&quot;0&quot; lang=&quot;zh-CN&quot;/&gt;</ph>
+

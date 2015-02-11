@@ -240,4 +240,40 @@ public final class TmImpl
     public boolean getIsRemoteTm() {
         throw new UnsupportedOperationException("This implementation is no longer supported");
     }
+
+    @Override
+    public int getConvertRate()
+    {
+        throw new UnsupportedOperationException("This implementation is no longer supported");
+    }
+
+    @Override
+    public void setConvertRate(int convertRate)
+    {
+        throw new UnsupportedOperationException("This implementation is no longer supported");
+    }
+
+    @Override
+    public long getLastTUId()
+    {
+        throw new UnsupportedOperationException("This implementation is no longer supported");
+    }
+
+    @Override
+    public void setLastTUId(long lastTUId)
+    {
+        throw new UnsupportedOperationException("This implementation is no longer supported");
+    }
+
+    @Override
+    public long getConvertedTM3Id()
+    {
+        throw new UnsupportedOperationException("This implementation is no longer supported");
+    }
+
+    @Override
+    public void setConvertedTM3Id(long convertedTm3Id)
+    {
+        throw new UnsupportedOperationException("This implementation is no longer supported");
+    }
 }

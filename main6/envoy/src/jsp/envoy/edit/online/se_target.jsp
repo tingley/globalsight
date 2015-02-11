@@ -13,6 +13,9 @@
             com.globalsight.everest.edit.online.SegmentVersion,
             com.globalsight.everest.edit.online.SegmentView,
         	com.globalsight.everest.edit.online.SegmentMatchResult,
+        	com.globalsight.everest.page.SourcePage,
+        	com.globalsight.everest.servlet.util.ServerProxy,
+        	com.globalsight.everest.persistence.tuv.SegmentTuUtil,
         	com.globalsight.ling.docproc.extractor.xliff.XliffAlt,
         	com.globalsight.ling.docproc.extractor.xliff.Extractor,
         	com.globalsight.util.edit.GxmlUtil,
@@ -21,6 +24,7 @@
             com.globalsight.util.date.DateHelper,
             com.globalsight.ling.common.Text,
             com.globalsight.ling.tm.TuvBasicInfo,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.util.Collection,
             java.util.Iterator,
             java.util.List,
@@ -100,8 +104,21 @@ StringBuffer term_segments = new StringBuffer();
 
 List tmMatches = view.getTmMatchResults();
 
+SourcePage sp = null;
+try 
+{
+    sp = ServerProxy.getPageManager().getSourcePage(state.getSourcePageId());
+} 
+catch (Exception e) {}
+
 long tuId = state.getTuId();
-TuImpl tu = HibernateUtil.get(TuImpl.class, tuId);
+TuImpl tu = null;
+try
+{
+	tu = SegmentTuUtil.getTuById(tuId, sp.getCompanyId());
+}
+catch (Exception e) {}
+
 boolean isMtTranslate = tu.isXliffTranslationMT();
 boolean isWSXlf = (TuImpl.FROM_WORLDSERVER.equals(tu.getGenerateFrom()));
 float tm_score = -1;
@@ -219,9 +236,9 @@ if (tmMatches != null)
         
         TuvBasicInfo matchedTuvBasicInfo = p.getMatchedTuvBasicInfo();
         String matchedTuvJobName = p.getMatchedTuvJobName()==null?"N/A":p.getMatchedTuvJobName();
-        String creationUser = (matchedTuvBasicInfo==null)?"N/A":matchedTuvBasicInfo.getCreationUser();
+        String creationUser = (matchedTuvBasicInfo==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getCreationUser());
         String creationDate  = (matchedTuvBasicInfo==null)?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getCreationDate());
-        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":matchedTuvBasicInfo.getModifyUser();
+        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getModifyUser());
         String modifyDate  = (matchedTuvBasicInfo==null||modifyUser=="N/A")?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getModifyDate());
         
         stb_segments.append("\", creationDate: \"");
@@ -394,7 +411,7 @@ if (stages != null)
         stb_segments.append(bundle.getString("lb_last_modify_user"));
         stb_segments.append(":");
 		
-		    String lastModifyUser = v.getLastModifyUser();
+		    String lastModifyUser = UserUtil.getUserNameById(v.getLastModifyUser());
 		    
         if(lastModifyUser != null) {
            stb_segments.append(lastModifyUser);

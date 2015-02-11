@@ -54,7 +54,6 @@
     String title = bundle.getString("lb_tda_options_edit");
 
     SessionManager sessionMgr = (SessionManager) session.getAttribute(WebAppConstants.SESSION_MANAGER);
-    //Long tmProfileId = (Long) sessionMgr.getAttribute(TMProfileConstants.TM_PROFILE_ID);
     TranslationMemoryProfile tmProfile = (TranslationMemoryProfile) sessionMgr.getAttribute(TMProfileConstants.TM_PROFILE);
    
    //Urls of the links on this page
@@ -91,7 +90,7 @@
 	<%@ include file="/envoy/common/warning.jspIncl" %>
 	
 <SCRIPT language="JavaScript">
-	var needWarning = true;
+	var needWarning = false;
 	var objectName = "TDA Options";
 	var guideNode = "tmProfiles";
 	var helpFile = "<%=bundle.getString("help_tmprofile_tda_options")%>"; 
@@ -107,7 +106,8 @@
 				return false;
 			}
 		}
-		else if (formAction == "saveTDAOptions") {
+		else if (formAction == "saveTDAOptions")
+		{
 			var enableTda = document.getElementById("enableTda").checked;
 			var hostName = document.getElementById("hostName").value;
 			var userName = document.getElementById('userName').value;
@@ -137,26 +137,11 @@
 			    alert("<%=bundle.getString("jsmsg_tda_password_length_warning")%>");
 			    return false;
 			}
-			
+
 			document.OptionsForm.action = "<%=saveTDAOptionsUrl%>" + "&action=modify";
-      document.OptionsForm.submit();
+			document.OptionsForm.submit();
 		}
 		
-	}
-
-	function checkIsVaildPercent(percent)
-	{
-      var submit = false;
-		  var i_percent = parseInt(percent);
-		  
-		  if(i_percent > 100 || i_percent < 1){
-			    alert("<%=bundle.getString("msg_tm_leverage_number_1") %>");
-			    submit = false;
-		}else{
-		    submit = true;
-		}	
-		
-		return submit;
 	}
 
 	//remove all whitespace on left and right
@@ -175,8 +160,8 @@
 	     return str.replace(/(\s*$)/g,'');
 	}
 	
-	function clickCheckbox() {
-	    
+	function clickCheckbox()
+	{
 	    var tdaBox = document.getElementById("enableTda");
 
 	    if(!tdaBox.checked) {
@@ -205,7 +190,7 @@
 <DIV CLASS="mainHeading" id="idHeading"><%=title %><%=tmProfile.getName()==null?"":(" : " + tmProfile.getName())%></DIV>
 
 <FORM NAME="OptionsForm" METHOD="POST" action="">
-<INPUT TYPE="HIDDEN" NAME="<%=WebAppConstants.RADIO_BUTTON%>" VALUE="<%=tmProfile.getId()%>"/>
+<INPUT TYPE="HIDDEN" NAME="<%=TMProfileConstants.TM_PROFILE_ID%>" VALUE="<%=tmProfile.getId()%>"/>
 
 	<TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText">
 	  <THEAD>

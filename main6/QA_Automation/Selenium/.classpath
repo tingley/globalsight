@@ -2,18 +2,18 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/axis.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/commons-discovery.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/commons-logging.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/dom4j.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/eclipse-testng.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/GSWSAPI.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/selenium-java-2.0b3.jar" sourcepath="lib/selenium-java-2.0b3-srcs.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/testng.jar"/>
-	<classpathentry kind="lib" path="C:/Users/sy/workspace/GSSelenium/lib/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="F:/selenium/Projects/Projects/GS/lib/eclipse-testng.jar"/>
-	<classpathentry kind="lib" path="F:/selenium/Projects/Projects/GS/lib/selenium-java-2.0b3.jar"/>
-	<classpathentry kind="lib" path="F:/selenium/Projects/Projects/GS/lib/testng.jar"/>
+	<classpathentry kind="lib" path="lib/axis.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="lib/dom4j.jar"/>
+	<classpathentry kind="lib" path="lib/eclipse-testng.jar"/>
+	<classpathentry kind="lib" path="lib/GSWSAPI.jar"/>
+	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="lib/selenium-java-2.0b3.jar"/>
+	<classpathentry kind="lib" path="lib/testng.jar"/>
+	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="lib/jodd-3.3.jar"/>
+	<classpathentry kind="lib" path="lib/jodd-wot-3.3.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.6-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

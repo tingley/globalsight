@@ -32,11 +32,15 @@ import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.diplomat.util.Logger;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.request.Request;
+import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.util.GeneralException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.Serializable;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 /**
  * The CapAdapter provides functionality for receiving messages
  * from CAP and processing them, as well as preparing messages
@@ -112,6 +116,41 @@ public class CapAdapter extends BaseAdapter
             errorArgs[0] = getLogger().getName();
             throw new CapAdapterException("Unexpected", errorArgs, e);
         }
+    }
+    
+    /**
+     * <P>Performs the main function of the adapter based
+     * on the CxeMessage. This involves receiving messages from CAP
+     * for export, secondary target file creation, etc. And it involves
+     * sending messages to CAP for import.
+     *
+     * This adapter handles events like GXML_CREATED_EVENT, GXML_LOCALIZED_EVENT,etc.
+     *
+     * @param p_cxeMessage
+     *               a CxeMessage object containing EventFlowXml, content,
+     *               and possibly parameters
+     * @return AdapterResult[]
+     * @exception GeneralException
+     */
+    public AdapterResult[] handleMessage (AdapterResult ars) throws Exception
+    {
+    	List<CxeMessage> msgs = ars.getMsgs();
+    	ArrayList<HashMap> hms = new ArrayList<HashMap>();
+    	for (CxeMessage msg : msgs)
+    	{
+    		int requestType = Request.EXTRACTED_LOCALIZATION_REQUEST;
+    		 CapImporter capImporter = new CapImporter(msg, getLogger(), requestType);
+    		 HashMap hm = capImporter.getContent();
+    		 hms.add(hm);
+    	}
+    	
+    	if (hms.size() > 0)
+    	{
+    		JmsHelper.sendMessageToQueue((Serializable) hms,
+                    JmsHelper.JMS_IMPORTING_QUEUE);
+    	}
+    	
+    	return null;
     }
 
     /**

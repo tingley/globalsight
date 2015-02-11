@@ -70,7 +70,7 @@ public class IndexerLocal
 //              }
 //              catch(GeneralException e)
 //              {
-//                  CATEGORY.error(e, e);
+//                  CATEGORY.error(e.getMessage(), e);
 //                  throw new FuzzyIndexManagerException(e);
 //              }
 //          }

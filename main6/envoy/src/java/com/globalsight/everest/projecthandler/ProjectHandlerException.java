@@ -16,17 +16,17 @@
  */
 package com.globalsight.everest.projecthandler;
 
-
 import com.globalsight.util.GeneralException;
 
 /**
- * An exception thrown during the process of using the projecthandler
- * api (projects and l10nprofiles)
- *
+ * An exception thrown during the process of using the projecthandler api
+ * (projects and l10nprofiles)
+ * 
  */
-public class ProjectHandlerException
-    extends GeneralException
+public class ProjectHandlerException extends GeneralException
 {
+    private static final long serialVersionUID = 1L;
+
     private static final String PROPERTY_FILE_NAME = "ProjectHandlerException";
 
     /*
@@ -36,11 +36,11 @@ public class ProjectHandlerException
     public final static String MSG_FAILED_TO_ACCESS_USERMANAGER = "FailedToAccessUserManagerComponent";
     // Args: 1 = project id
     public final static String MSG_FAILED_TO_CREATE_TM_FOR_PROJECT = "FailedToCreateTmForProject";
-    public final static String MSG_FAILED_TO_GET_ALL_PROFILES  = "FailedToGetAllProfiles";
-    public final static String MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI = "FailedToGetAllProfilesForGUI";
+    public final static String MSG_FAILED_TO_GET_ALL_PROFILES = "FailedToGetAllProfiles";
+    public final static String MSG_FAILED_TO_GET_ALL_PROFILES_FOR_GUI = MSG_FAILED_TO_GET_ALL_PROFILES;
     public final static String MSG_FAILED_TO_GET_ALL_PROFILE_NAMES = "FailedToGetProfileNames";
-    public final static String MSG_FAILED_TO_GET_ALL_PROJECTS  = "FailedToGetAllProjects";
-    public final static String MSG_FAILED_TO_GET_ALL_PROJECTS_FOR_GUI = "FailedToGetAllProjectsForGUI";
+    public final static String MSG_FAILED_TO_GET_ALL_PROJECTS = "FailedToGetAllProjects";
+    public final static String MSG_FAILED_TO_GET_ALL_PROJECTS_FOR_GUI = MSG_FAILED_TO_GET_ALL_PROJECTS;
     // Args: 1 = profile name
     public final static String MSG_FAILED_TO_ADD_PROFILE = "FailedToAddL10nProfile";
     // Args: 1 = profile name
@@ -60,20 +60,15 @@ public class ProjectHandlerException
     // Args: 1 = pm user id
     public final static String MSG_FAILED_TO_GET_PROJECTS_BY_PM = "FailedToGetProjectsByPm";
     // Args: 1 = user id
-    public final static String MSG_FAILED_TO_GET_PROJECT_INFOS_BY_USER = 
-        "FailedToGetProjectInfosByUser";
+    public final static String MSG_FAILED_TO_GET_PROJECT_INFOS_BY_USER = "FailedToGetProjectInfosByUser";
     // Args: 1 = user id
-    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_USER_ID = 
-        "FailedToGetProjectsByUser";
+    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_USER_ID = "FailedToGetProjectsByUser";
     // Args: 1 = list of user ids
-    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_USER_IDS =
-        "FailedToGetProjectsByUserIds";
+    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_USER_IDS = "FailedToGetProjectsByUserIds";
     // Args: 1 = vendor id
-    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_VENDOR_ID =
-        "FailedToGetProjectsByVendorId";
-    //Args: 1 - user id for permissions
-    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_PERMISSION = 
-        "FailedToGetProjectsByPermission";
+    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_VENDOR_ID = "FailedToGetProjectsByVendorId";
+    // Args: 1 - user id for permissions
+    public final static String MSG_FAILED_TO_GET_PROJECTS_BY_PERMISSION = "FailedToGetProjectsByPermission";
     // Args: 1 = user id
     // Args: 2 = list of project ids
     public final static String MSG_FAILED_TO_ADD_USER_TO_PROJECTS = "FailedToAddUserToProjects";
@@ -82,9 +77,8 @@ public class ProjectHandlerException
     public final static String MSG_FAILED_TO_REMOVE_USER_FROM_PROJECTS = "FailedToRemoveUserFromProjects";
     // Args: 1 = user id
     // Args: 2 = list of project ids
-    public final static String MSG_FAILED_TO_ASSOCIATE_USER_WITH_PROJECTS = 
-        "FailedToAssociatedUserWithProjects";
-    // Args: 1 =  project manager user id
+    public final static String MSG_FAILED_TO_ASSOCIATE_USER_WITH_PROJECTS = "FailedToAssociatedUserWithProjects";
+    // Args: 1 = project manager user id
     public final static String MSG_FAILED_TO_GET_ALL_USERS_PM_MANAGES = "FailedToGetUsersPmManaages";
 
     // Args: 1 = workflow instance id
@@ -103,7 +97,7 @@ public class ProjectHandlerException
     public final static String MSG_FAILED_TO_MODIFY_PROFILE_NAME_EXISTS = "FailedToModifyL10nProfileNameExists";
     // Args: 1 = profile id
     public final static String MSG_FAILED_TO_REMOVE_PROFILE = "FailedToRemoveL10nProfile";
-    //Args: 1 = profile id
+    // Args: 1 = profile id
     public final static String MSG_FAILED_TO_DUPLICATE_PROFILE = "FailedToDuplicateL10nProfile";
 
     // Args: 1 = name
@@ -121,9 +115,8 @@ public class ProjectHandlerException
     // Args: 1 = id
     public final static String MSG_FAILED_TO_REMOVE_WFI = "FailedToRemoveWfi";
     // Args: 1 = workflow template info id
-    //       2 = l10n profile id
-    public final static String MSG_FAILED_TO_REPLACE_WFI_IN_PROFILE = 
-        "FailedToReplaceWfiInProfile";
+    // 2 = l10n profile id
+    public final static String MSG_FAILED_TO_REPLACE_WFI_IN_PROFILE = "FailedToReplaceWfiInProfile";
 
     //
     public final static String MSG_FAILED_TO_CREATE_TMP = "FailedToCreateTMP";
@@ -144,31 +137,35 @@ public class ProjectHandlerException
     public final static String MSG_FAILED_TO_GET_PROJECT_TM_BY_ID = "FailedToGetProjectTmById";
     // Args: 1 = id
     public final static String MSG_FAILED_TO_REMOVE_PROJECT_TM = "FailedToRemoveProjectTm";
-    
+
     public final static String MSG_FAILED_TO_REMOVE_TM_PROFILE = "FailedToRemoveTmProfile";
 
-    public final static String MSG__CREATE_JMS_POOL_FAILED = 
-        "FailedToCreateJmsPool";
-    //Args: 0
+    public final static String MSG__CREATE_JMS_POOL_FAILED = "FailedToCreateJmsPool";
+    // Args: 0
     public final static String MSG_FAILED_TO_GET_FPIS = "FailedToGetFpis";
+
     /**
      * Create a ProjectHandlerException with the specified message.
-     *
-     * @param p_messageKey The key to the message located in the property file.
-     * @param p_messageArguments An array of arguments needed for the
-     * message.  This can be null.
-     * @param p_originalException The original exception that this one
-     * is wrapping.  This can be null.
+     * 
+     * @param p_messageKey
+     *            The key to the message located in the property file.
+     * @param p_messageArguments
+     *            An array of arguments needed for the message. This can be
+     *            null.
+     * @param p_originalException
+     *            The original exception that this one is wrapping. This can be
+     *            null.
      */
     public ProjectHandlerException(String p_messageKey,
-        String[] p_messageArguments, Exception p_originalException)
+            String[] p_messageArguments, Exception p_originalException)
     {
         super(p_messageKey, p_messageArguments, p_originalException,
-            PROPERTY_FILE_NAME);
+                PROPERTY_FILE_NAME);
     }
 
     /**
      * Create a ProjectHandlerException with the specified message.
+     * 
      * @p_message The message.
      */
     public ProjectHandlerException(String p_message)
@@ -178,13 +175,15 @@ public class ProjectHandlerException
 
     /**
      * @see GeneralException#GeneralException(int, int, int, String)
-     * @param p_message error message.
-     * @param p_originalException original exception.
-     *
+     * @param p_message
+     *            error message.
+     * @param p_originalException
+     *            original exception.
+     * 
      * @deprecated It doesn't take a raw message any more
      */
     public ProjectHandlerException(String p_message,
-        Exception p_originalException)
+            Exception p_originalException)
     {
         super(p_message, p_originalException);
     }

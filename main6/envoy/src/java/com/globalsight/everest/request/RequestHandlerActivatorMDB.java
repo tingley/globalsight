@@ -16,8 +16,12 @@
  */
 package com.globalsight.everest.request;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
 
@@ -57,22 +61,12 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
     // Public Methods //
     // ////////////////////////////////////
 
-    /**
-     * This is the JMS service activator for the RequestHandler.
-     * 
-     * @param p_cxeRequest
-     *            The JMS message containing the request for localization.
-     */
-    public void onMessage(Message p_cxeRequest)
+    private boolean onMessage(HashMap hm)
     {
-        HibernateUtil.closeSession();
-        boolean shouldAcknowledge = false;
+    	boolean shouldAcknowledge = false;
         ActivityLog.Start activityStart = null;
         try
         {
-            ObjectMessage msg = (ObjectMessage) p_cxeRequest;
-            HashMap hm = (HashMap) msg.getObject();
-
             Map<Object,Object> activityArgs = new HashMap<Object,Object>();
             activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID,
                     hm.get(CompanyWrapper.CURRENT_COMPANY_ID));
@@ -88,14 +82,14 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
                     (String) hm.get(CompanyWrapper.CURRENT_COMPANY_ID));
 
             String contentFileName = (String) hm.get(CxeToCapRequest.CONTENT);
-            int requestType = ((Integer) hm.get(CxeToCapRequest.REQUEST_TYPE))
-                    .intValue();
-            String eventFlowXml = (String) hm
-                    .get(CxeToCapRequest.EVENT_FLOW_XML);
-            GeneralException exception = (GeneralException) hm
-                    .get(CxeToCapRequest.EXCEPTION);
-            String l10nRequestXml = (String) hm
-                    .get(CxeToCapRequest.L10N_REQUEST_XML);
+            int requestType = 
+                    ((Integer) hm.get(CxeToCapRequest.REQUEST_TYPE)).intValue();
+            String eventFlowXml = 
+                    (String) hm.get(CxeToCapRequest.EVENT_FLOW_XML);
+            GeneralException exception = 
+                    (GeneralException) hm.get(CxeToCapRequest.EXCEPTION);
+            String l10nRequestXml = 
+                    (String) hm.get(CxeToCapRequest.L10N_REQUEST_XML);
             //If jobs have not finished importing when GS server is shut down,
             //and when restart GS server, GS will try to re-import the job.
             //At that time "requestHandler" possibly has not been loaded by Jboss server,
@@ -119,31 +113,69 @@ public class RequestHandlerActivatorMDB extends GenericQueueMDB
         }
         catch (Exception e)
         {
-            s_logger
-                    .error(
-                            "Failed to create and persist the request - left in JMS message queue.",
-                            e);
+            s_logger.error("Failed to create and persist the request - left in JMS message queue.", e);
         }
         finally
         {
-            try
-            {
-                if (shouldAcknowledge)
-                {
-                    p_cxeRequest.acknowledge();
-                }
-            }
-            catch (Exception e)
-            {
-                s_logger.error("Failed to acknowledge the CXE request. ", e);
-            }
-
-            HibernateUtil.closeSession();
             if (activityStart != null)
             {
                 activityStart.end();
             }
-            
         }
+        
+        return shouldAcknowledge;
+    }
+    
+    /**
+     * This is the JMS service activator for the RequestHandler.
+     * 
+     * @param p_cxeRequest
+     *            The JMS message containing the request for localization.
+     */
+    @SuppressWarnings("unchecked")
+	public void onMessage(Message p_cxeRequest)
+    {
+    	HibernateUtil.closeSession();
+        ObjectMessage msg = (ObjectMessage) p_cxeRequest;
+        Serializable ob = null;
+		try 
+		{
+			ob = msg.getObject();
+		} 
+		catch (JMSException e1) 
+		{
+			s_logger.error(e1);
+			return;
+		}
+        
+        boolean shouldAcknowledge = false;
+        if (ob instanceof ArrayList)
+        {
+        	ArrayList<HashMap> msgs = (ArrayList<HashMap>) ob;
+        	for (HashMap m : msgs)
+        	{
+        		shouldAcknowledge = onMessage(m);
+        		HibernateUtil.closeSession();
+        	}
+        }
+        else
+        {
+        	HashMap hm = (HashMap) ob;
+        	shouldAcknowledge = onMessage(hm);
+        }
+        
+        try
+        {
+            if (shouldAcknowledge)
+            {
+                p_cxeRequest.acknowledge();
+            }
+        }
+        catch (Exception e)
+        {
+            s_logger.error("Failed to acknowledge the CXE request. ", e);
+        }
+        
+        HibernateUtil.closeSession();
     }
 }

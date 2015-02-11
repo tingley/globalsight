@@ -683,7 +683,7 @@ function removeNoUsedBr(root)
 
 function getPTag(ptag)
 {
-    return "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>" +
+    return "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>" +
         ptag + "</SPAN>";
 }
 

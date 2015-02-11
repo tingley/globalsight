@@ -228,7 +228,77 @@ public final class TermLeverageManagerLocal
         }
     }
 
+    /**
+     * Retrieves Map<TuvId, Set<TermLeverageMatch>> for given SourcePages.
+     * Added for get Term Match Result for report.
+     */
+    public Map<Long, Set<TermLeverageMatch>> getTermMatchesForPages(
+        Set<SourcePage> p_sourcePages, GlobalSightLocale p_targetPageLocale)
+        throws GeneralException, RemoteException
+    {
+        Connection conn = null;
+        TermLeverageMatchDbAccessor.SelectResult selectResult = null;
+        Map<Long, Set<TermLeverageMatch>> result = new HashMap<Long, Set<TermLeverageMatch>>();
 
+        try
+        {
+            conn = SqlUtil.hireConnection();
+            
+            for (SourcePage sp : p_sourcePages)
+            {
+                // query TERM_LEVERAGE_MATCH table
+                selectResult = TermLeverageMatchDbAccessor.getTermMatchesForPage(
+                        sp.getId(), sp.getGlobalSightLocale().getId(),
+                        p_targetPageLocale.toString(), conn);
+
+                while (selectResult.next())
+                {
+                    long tuvId = selectResult.getLong("tlm.source_tuv_id");
+                    
+                    TermLeverageMatch tlm = new TermLeverageMatch();
+                    tlm.setSourceTuvId(tuvId);
+                    tlm.setMatchedSourceTermId(selectResult.getLong("tlm.source_term_id"));
+                    tlm.setMatchedSourceTerm(selectResult.getString("src_term.term"));
+                    tlm.setMatchedTargetTermId(selectResult.getLong("tlm.target_term_id"));
+                    tlm.setMatchedTargetTerm(selectResult.getString("tgt_term.term"));
+                    tlm.setScore(selectResult.getInt("tlm.score"));
+                    tlm.setConceptId(selectResult.getInt("src_term.cid"));
+                    
+                    Set<TermLeverageMatch> tlmSet = result.get(tuvId);
+                    if (tlmSet == null)
+                    {
+                        tlmSet = new HashSet<TermLeverageMatch>();
+                    }                    
+                    tlmSet.add(tlm);                    
+                    result.put(tuvId, tlmSet);
+                }
+            }
+
+            return result;
+        }
+        catch (SQLException e)
+        {
+            throw new GeneralException(e);
+        }
+        finally
+        {
+            if (selectResult != null)
+            {
+                try
+                {
+                    // close SelectResult which in turns closes its ResultSet
+                    selectResult.close();
+                }
+                catch (Throwable ignore)
+                {
+                }
+            }
+
+            // return the connection
+            SqlUtil.fireConnection(conn);
+        }
+    }
+    
     /**
      * Retrieves the TermLeverageMatchResult for a single source TuvId.
      */

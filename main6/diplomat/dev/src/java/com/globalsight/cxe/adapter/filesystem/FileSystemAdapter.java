@@ -105,13 +105,14 @@ public class FileSystemAdapter extends BaseAdapter
             filename = (String) params.get("Filename");
             boolean isAutomaticImport = ((Boolean)params.get("IsAutomaticImport")).booleanValue();
             Importer importer = new Importer(p_cxeMessage,this.getLogger());
-            String newEventFlowXml = importer.makeEventFlowXml(isAutomaticImport);
+            String newEventFlowXml = importer
+                    .makeEventFlowXml(isAutomaticImport);
+            p_cxeMessage.setEventFlowXml(newEventFlowXml);
             HashMap newParams = params;
             MessageData newMessageData = importer.readFile();
             CxeMessageType newMessageType = importer.getPreExtractEvent();
             BaseAdapter.preserveOriginalFileContent(newMessageData,newParams);
             
-            p_cxeMessage.setEventFlowXml(newEventFlowXml);
             p_cxeMessage.setMessageData(newMessageData);
             //If the script on import return value 1, GlobalSight will report an error on import.
             Object scriptOnImport = params.get("ScriptOnImport");

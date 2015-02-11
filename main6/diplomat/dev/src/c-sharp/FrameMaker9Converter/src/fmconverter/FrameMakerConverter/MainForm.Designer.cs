@@ -43,6 +43,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.bBrowseConv = new System.Windows.Forms.Button();
             this.tbConv = new System.Windows.Forms.TextBox();
+            this.cbAutoStart = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // tbFM
@@ -81,7 +82,7 @@
             // 
             this.bFrameStop.Enabled = false;
             this.bFrameStop.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.bFrameStop.Location = new System.Drawing.Point(264, 219);
+            this.bFrameStop.Location = new System.Drawing.Point(316, 219);
             this.bFrameStop.Name = "bFrameStop";
             this.bFrameStop.Size = new System.Drawing.Size(89, 28);
             this.bFrameStop.TabIndex = 14;
@@ -92,7 +93,7 @@
             // bFrameStart
             // 
             this.bFrameStart.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
-            this.bFrameStart.Location = new System.Drawing.Point(140, 219);
+            this.bFrameStart.Location = new System.Drawing.Point(173, 217);
             this.bFrameStart.Name = "bFrameStart";
             this.bFrameStart.Size = new System.Drawing.Size(89, 28);
             this.bFrameStart.TabIndex = 15;
@@ -145,11 +146,23 @@
             this.tbConv.Size = new System.Drawing.Size(193, 24);
             this.tbConv.TabIndex = 22;
             // 
+            // cbAutoStart
+            // 
+            this.cbAutoStart.AutoSize = true;
+            this.cbAutoStart.Location = new System.Drawing.Point(30, 223);
+            this.cbAutoStart.Name = "cbAutoStart";
+            this.cbAutoStart.Size = new System.Drawing.Size(92, 22);
+            this.cbAutoStart.TabIndex = 24;
+            this.cbAutoStart.Text = "Auto Start";
+            this.cbAutoStart.UseVisualStyleBackColor = true;
+            this.cbAutoStart.CheckedChanged += new System.EventHandler(this.cbAutoStart_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(477, 341);
+            this.Controls.Add(this.cbAutoStart);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.bBrowseConv);
             this.Controls.Add(this.tbConv);
@@ -166,7 +179,8 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "FrameMaker 9 Converter - Verion: 8.2";
+            this.Text = "FrameMaker 9 Converter - Verion: 8.2.1";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -186,5 +200,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button bBrowseConv;
         private System.Windows.Forms.TextBox tbConv;
+        private System.Windows.Forms.CheckBox cbAutoStart;
     }
 }

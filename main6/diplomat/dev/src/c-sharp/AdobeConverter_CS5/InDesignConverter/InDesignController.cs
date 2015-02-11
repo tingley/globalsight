@@ -4,21 +4,26 @@ using System.Text;
 using GlobalSight.Common;
 using GlobalSight.InDesignConverter;
 using System.IO;
+using System.Threading;
 
 namespace InDesignConverter
 {
     public class InDesignController
     {
-        
         static ConverterRunner m_importConverterRunner = null;
         static ConverterRunner m_exportConverterRunner = null;
         static ConverterRunner m_previewConverterRunner = null;
+        static ConverterRunner m_idmlPreviewConverterRunner = null;
+
+        static private String m_watchDirNameIndd = null;
+        static private Boolean m_keepWatching = false;
+        static private Thread m_testThread = null;
+
 
         public static void start(String dir)
         {
             Logger m_log = null;
-            String m_watchDirName = dir;
-            String m_watchDirNameIndd = null;
+            String m_watchDirName = dir;            
             String m_watchDirNameInx = null;
             String m_watchDirNames = null; 
             InDesignApplication m_InDesignApp = null;
@@ -35,6 +40,7 @@ namespace InDesignConverter
                 m_watchDirNames = m_watchDirNameIndd + ";" + m_watchDirNameInx;
 
                 m_log = Logger.GetLogger();
+                m_log.EnableDebug = AppConfig.IsDebugEnabled();
                 m_log.Log("[Indesign]: GlobalSight InDesign CS5 Converter starting up.");
                 m_log.Log("[Indesign]: Creating and starting threads to watch directory " +
                     m_watchDirNames);
@@ -48,15 +54,24 @@ namespace InDesignConverter
                 m_previewConverterRunner = new ConverterRunner(
                     new InDesignConverterImpl(InDesignConverterImpl.ConversionType.PREVIEW),
                     m_watchDirNames);
+                m_idmlPreviewConverterRunner = new ConverterRunner(
+                    new InDesignConverterImpl(InDesignConverterImpl.ConversionType.IDML_PREVIEW),
+                    m_watchDirNames);
 
                 m_importConverterRunner.Start();
                 m_exportConverterRunner.Start();
                 m_previewConverterRunner.Start();
+                m_idmlPreviewConverterRunner.Start();
 
                 m_InDesignApp = InDesignApplication.getInstance();
+
+                m_keepWatching = true;
+                m_testThread = new Thread(new ThreadStart(ScanDirectoryTest));
+                m_testThread.Start();
             }
             catch (Exception e)
             {
+                m_keepWatching = false;
                 string msg = "GlobalSight InDesign Converter failed to initialize because of: " +
                     e.Message + "\r\n" + e.StackTrace;
                 //  EventLog.WriteEntry(msg, EventLogEntryType.Error);
@@ -78,6 +93,34 @@ namespace InDesignConverter
             if (m_previewConverterRunner != null)
             {
                 m_previewConverterRunner.Stop();
+            }
+            if (m_idmlPreviewConverterRunner != null)
+            {
+                m_idmlPreviewConverterRunner.Stop();
+            }
+
+            if (m_testThread != null)
+            {
+                m_keepWatching = false;
+            }
+        }
+
+        private static void ScanDirectoryTest()
+        {
+            while (m_keepWatching)
+            {
+                try
+                {
+                    foreach (FileInfo f in new DirectoryInfo(m_watchDirNameIndd).GetFiles("idml*.test"))
+                    {
+                        f.Delete();
+                    }
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError("Failed to scan directory", e);
+                }
+                Thread.Sleep(1000);
             }
         }
     }

@@ -160,13 +160,13 @@ public class AssignHandler extends PageHandler
                     .getWorkflowTaskById(taskId);
             String[] roles = wfTask.getRoles();
             String[] userIds = ServerProxy.getUserManager()
-                    .getUserNamesFromRoles(roles, proj);
+                    .getUserIdsFromRoles(roles, proj);
             if ((userIds != null) && (userIds.length > 0))
             {
                 selectedUsers = ServerProxy.getUserManager().getUserInfos(
                         userIds);
             }
-            
+
             // get all users for this task and locale pair.
             List userInfos = ServerProxy.getUserManager().getUserInfos(
                     task.getTaskName(), task.getSourceLocale().toString(),
@@ -176,7 +176,7 @@ public class AssignHandler extends PageHandler
             {
                 projectUserIds = proj.getUserIds();
             }
-            
+
             if (userInfos == null)
                 continue;
 

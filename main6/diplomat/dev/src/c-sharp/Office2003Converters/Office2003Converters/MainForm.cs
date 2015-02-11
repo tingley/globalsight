@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using GlobalSight.Common;
 using System.IO;
+using System.Threading;
 
 namespace GlobalSight.Office2003Converters
 {
@@ -61,6 +62,7 @@ namespace GlobalSight.Office2003Converters
                     }
                 }
                 this.textBox1.Text = dir;
+                this.cbAutoStartAll.Checked = AppConfig.AutoStartAll;
             }
             catch { }
         }
@@ -75,7 +77,7 @@ namespace GlobalSight.Office2003Converters
 
         private void bWordStart_Click(object sender, EventArgs e)
         {
-            startWord();
+            startWord(null);
 
             setAllButtonStatus();
         }
@@ -97,7 +99,7 @@ namespace GlobalSight.Office2003Converters
         private void bExcelStart_Click(object sender, EventArgs e)
         {
 
-            startExcel();
+            startExcel(null);
 
             setAllButtonStatus();
         }
@@ -111,7 +113,7 @@ namespace GlobalSight.Office2003Converters
 
         private void bPptStart_Click(object sender, EventArgs e)
         {
-            startPpt();
+            startPpt(null);
 
             setAllButtonStatus();
         }
@@ -123,7 +125,7 @@ namespace GlobalSight.Office2003Converters
             setAllButtonStatus();
         }
 
-        private void startWord()
+        private void startWord(List<String> paras)
         {
             String dir = this.textBox1.Text.Trim();
 
@@ -145,17 +147,27 @@ namespace GlobalSight.Office2003Converters
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Word 2003 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
+                        MessageBox.Show(this, "Word 2003 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Word 2003 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    if (paras == null || paras.Count == 0)
+                    {
+                        if (paras != null)
+                            paras.Add("alerted");
+                        MessageBox.Show(this, "Word 2003 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please set the directory first");
+                if (paras == null || paras.Count == 0)
+                {
+                    if (paras != null)
+                        paras.Add("alerted");
+                    MessageBox.Show(this, "Please set the directory first");
+                }
             }
         }
 
@@ -167,7 +179,7 @@ namespace GlobalSight.Office2003Converters
             this.bWordStart.Enabled = true;
         }
 
-        private void startExcel()
+        private void startExcel(List<String> paras)
         {
             String dir = this.textBox1.Text.Trim();
 
@@ -189,17 +201,27 @@ namespace GlobalSight.Office2003Converters
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Excel 2003 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
+                        MessageBox.Show(this, "Excel 2003 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Excel 2003 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    if (paras == null || paras.Count == 0)
+                    {
+                        if (paras != null)
+                            paras.Add("alerted");
+                        MessageBox.Show(this, "Excel 2003 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please set the directory first");
+                if (paras == null || paras.Count == 0)
+                {
+                    if (paras != null) 
+                        paras.Add("alerted");
+                    MessageBox.Show(this, "Please set the directory first");
+                }
             }
         }
 
@@ -211,7 +233,7 @@ namespace GlobalSight.Office2003Converters
             this.bExcelStop.Enabled = false;
         }
 
-        private void startPpt()
+        private void startPpt(List<String> paras)
         {
             String dir = this.textBox1.Text.Trim();
 
@@ -230,20 +252,34 @@ namespace GlobalSight.Office2003Converters
                         isPptStart = true;
                         this.bPptStart.Enabled = false;
                         this.bPptStop.Enabled = true;
+
+                        continueCheck = true;
+                        Thread closeThread = new Thread(new ThreadStart(CloseAlertWindows));
+                        closeThread.Start();
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("PowerPoint 2003 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
+                        MessageBox.Show(this, "PowerPoint 2003 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
                     }
                 }
                 else
                 {
-                    MessageBox.Show("PowerPoint 2003 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    if (paras == null || paras.Count == 0)
+                    {
+                        if (paras != null)
+                            paras.Add("alerted");
+                        MessageBox.Show(this, "PowerPoint 2003 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please set the directory first");
+                if (paras == null || paras.Count == 0)
+                {
+                    if (paras != null)
+                        paras.Add("alerted");
+                    MessageBox.Show(this, "Please set the directory first");
+                }
             }
         }
 
@@ -253,27 +289,53 @@ namespace GlobalSight.Office2003Converters
             isPptStart = false;
             this.bPptStart.Enabled = true;
             this.bPptStop.Enabled = false;
+            continueCheck = false;
         }
 
         private void bAllStart_Click(object sender, EventArgs e)
         {
+            startAllConverters();
+        }
+
+        private void startAllConverters()
+        {
+            List<String> paras = new List<string>();
+
             if (!isWordStart)
             {
-                startWord();
+                startWord(paras);
             }
 
             if (!isExcelStart)
             {
-                startExcel();
+                startExcel(paras);
             }
 
             if (!isPptStart)
             {
-                startPpt();
+                startPpt(paras);
             }
-            
 
             setAllButtonStatus();
+        }
+
+        public void autoStartAll()
+        {
+            this.cbAutoStartAll.Checked = AppConfig.AutoStartAll;
+            string dir = AppConfig.GetAppConfig("Dir");
+            if (dir == null || "".Equals(dir.Trim()))
+            {
+                return;
+            }
+
+            String oriText = this.cbAutoStartAll.Text;
+            this.cbAutoStartAll.Text = "Auto Starting...";
+            this.cbAutoStartAll.Enabled = false;
+
+            startAllConverters();
+
+            this.cbAutoStartAll.Text = oriText;
+            this.cbAutoStartAll.Enabled = true;
         }
 
         private void bAllStop_Click(object sender, EventArgs e)
@@ -287,9 +349,65 @@ namespace GlobalSight.Office2003Converters
         {
             DialogResult result = MessageBox.Show(this, "Exit Converters?", "Confirm Exit", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
 
-            e.Cancel = result == DialogResult.Cancel;
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                stopConverters();
+
+                setAllButtonStatus();
+            }
         }
 
+        private void cbAutoStartAll_CheckedChanged(object sender, EventArgs e)
+        {
+            AppConfig.AutoStartAll = cbAutoStartAll.Checked;
+        }
 
+        private static bool continueCheck = false;
+
+        private static void CloseAlertWindows()
+        {
+            string PPT_WINDOW_NAME = "Microsoft Office PowerPoint";
+            int sleepTime = 3000;
+
+            while (continueCheck)
+            {
+                IntPtr hwnd1 = Win32Pinvoker.FindWindow(null, PPT_WINDOW_NAME);
+
+                if (hwnd1 == IntPtr.Zero)
+                {
+                    Thread.Sleep(sleepTime);
+                }
+                else
+                {
+                    bool findButton = false;
+                    if (hwnd1 != IntPtr.Zero)
+                    {
+                        IntPtr h1 = Win32Pinvoker.FindWindowEx(hwnd1, IntPtr.Zero, null, "&No");
+                        if (h1 != IntPtr.Zero)
+                        {
+                            findButton = true;
+                            Win32Pinvoker.ClickButtonAndClose(h1);
+                        }
+
+                        h1 = Win32Pinvoker.FindWindowEx(hwnd1, IntPtr.Zero, null, "否(&N)");
+                        if (h1 != IntPtr.Zero)
+                        {
+                            findButton = true;
+                            Win32Pinvoker.ClickButtonAndClose(h1);
+                        }
+                    }
+
+                    if (!findButton)
+                    {
+                        Thread.Sleep(sleepTime);
+                    }
+
+                }
+            }
+        }
     }
 }

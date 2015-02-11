@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
@@ -59,6 +60,7 @@ public class ProjectMainHandler extends PageHandler
 {
     public static final String PROJECT_KEY = "project";
     public static final String PROJECT_LIST = "projects";
+    private static int NUM_PER_PAGE = 10;
 
     private static final Logger s_logger = 
     	Logger.getLogger("ProjectMainHandler");
@@ -120,8 +122,8 @@ public class ProjectMainHandler extends PageHandler
         else if ("remove".equals(action))
         {
         	try {
-        		String projectId = (String) request.getParameter(RADIO_BUTTON);
-        		if (projectId == null
+        		String ids = (String) request.getParameter(RADIO_BUTTON);
+        		if (ids == null
 						|| request.getMethod().equalsIgnoreCase(
 								REQUEST_METHOD_GET)) 
 				{
@@ -130,27 +132,30 @@ public class ProjectMainHandler extends PageHandler
 					return;
 				}
             	long longProjectId = -1;
-            	try {
-            		longProjectId = (new Integer(projectId)).longValue();
-            	} catch (Exception e) {
-            		s_logger.error("Wrong project id : " + projectId);
-            	}
+                String[] idarr=ids.trim().split(" ");
+            	for(String projectId:idarr){
+	                if("on".equals(projectId))continue;
+	            	try {
+	            		longProjectId = (new Integer(projectId)).longValue();
+	            	} catch (Exception e) {
+	            		s_logger.error("Wrong project id : " + projectId);
+	            	}
             	
-        		String error_msg = checkProjectDependency(longProjectId);
-        		if ( error_msg != null && !"".equals(error_msg.trim()) ) {
-        			throw new Exception(error_msg);
-        		}
-        		//delete user from "project_user" table and set project is_active = 'N'
-        		else {
-        			doDeleteProject(longProjectId);
-        		}
-        		
+	        		String error_msg = checkProjectDependency(longProjectId);
+	        		if ( error_msg != null && !"".equals(error_msg.trim()) ) {
+	        			throw new Exception(error_msg);
+	        		}
+	        		//delete user from "project_user" table and set project is_active = 'N'
+	        		else {
+	        			doDeleteProject(longProjectId);
+	        		}
+                 }
         		sessionMgr.clear();
         	} catch (Exception e) {
         		sessionMgr.setAttribute(WebAppConstants.PROJECT_ERROR, e.getMessage());		
         	}
         }
-
+        handleFilters(request, sessionMgr, action);
         dataForTable(request, session);
 
         super.invokePageHandler(pageDescriptor, request, response, context);
@@ -164,10 +169,11 @@ public class ProjectMainHandler extends PageHandler
         throws EnvoyServletException
     {
         Project project = (Project)p_sessionMgr.getAttribute("project");
+        if(project == null) return;
         String prePM = project.getProjectManagerId();
         PermissionSet perms = (PermissionSet)p_request.getSession(false).getAttribute(WebAppConstants.PERMISSIONS);
         boolean updatePm = perms.getPermissionFor(Permission.GET_ALL_PROJECTS);
-        setData(project, p_request, updatePm);
+        ProjectHandlerHelper.setData(project, p_request, updatePm);
         ProjectHandlerHelper.modifyProject(project, p_modifierId);
         String newPM = project.getProjectManagerId();
         // for gbs-1302, activity dashboard
@@ -214,81 +220,40 @@ public class ProjectMainHandler extends PageHandler
         throws EnvoyServletException
     {
         Locale locale = (Locale)p_session.getAttribute(UILOCALE);
-
+        SessionManager sessionMgr = (SessionManager) p_session.getAttribute(SESSION_MANAGER);
         try
         {
-            List allProjects = (List)ProjectHandlerHelper.getAllProjectsForGUI();
+            String pNameFilter = (String) sessionMgr.getAttribute("pNameFilter");
+            String pCompanyFilter = (String) sessionMgr.getAttribute("cNameFilter");
+            String condition="";
+            if(StringUtils.isNotBlank(pNameFilter)){
+                condition+=" and " +"p.name LIKE '%" + pNameFilter.trim() + "%'";
+            }
+            if(StringUtils.isNotBlank(pCompanyFilter)){
+                condition+=" and " +"c.name LIKE '%" + pCompanyFilter.trim() + "%'";
+            }
+            List allProjects = (List)ServerProxy.getProjectHandler().getAllProjectInfosForGUIbyCondition(condition);
+            String numOfPerPage = p_request.getParameter("numOfPageSize");
+            if (StringUtils.isNotEmpty(numOfPerPage))
+            {
+                try
+                {
+                    NUM_PER_PAGE = Integer.parseInt(numOfPerPage);
+                }
+                catch (Exception e)
+                {
+                    NUM_PER_PAGE = Integer.MAX_VALUE;
+                }
+            }
             setTableNavigation(p_request, p_session, allProjects,
                 new ProjectComparator(locale),
-                10,   // change this to be configurable!
+                NUM_PER_PAGE,   // change this to be configurable!
                 PROJECT_LIST, PROJECT_KEY);
         }
         catch (Exception e)
         {
             // Config exception (already has message key...)
             throw new EnvoyServletException(e);
-        }
-    }
-
-    private void setData(Project p_project, HttpServletRequest p_request,
-        boolean p_updatePm)
-        throws EnvoyServletException
-    {
-        p_project.setName((String)p_request.getParameter("nameField"));
-        p_project.setDescription((String)p_request.getParameter("descField"));
-        p_project.setTermbaseName((String)p_request.getParameter("tbField"));
-        String attributeSetId = p_request.getParameter("attributeSet");
-        float pmcost = 0.00f;
-        
-        try {
-			pmcost = Float.parseFloat(p_request.getParameter("pmcost").trim())/100;
-		} catch (Exception e) {
-		}
-		p_project.setPMCost(pmcost);
-		
-		int poRequired = Project.NO_PO_REQUIRED;
-		
-		if(p_request.getParameter("poRequired") != null) {
-		    poRequired= Project.PO_REQUIRED;
-		}
-		
-		p_project.setPoRequired(poRequired);
-        
-        AttributeSet attSet = null;
-        if (attributeSetId != null)
-        {
-            long attSetId = Long.valueOf(attributeSetId);
-            if (attSetId > 0)
-            {
-                attSet = HibernateUtil.get(AttributeSet.class, attSetId);
-            }
-            
-            p_project.setAttributeSet(attSet);
-        }
-        
-        String qpName = (String)p_request.getParameter("qpField");
-        if ("-1".equals(qpName)) 
-        {
-        	p_project.setQuotePerson(null);
-        } 
-        else if ("0".equals(qpName))
-        {
-        	p_project.setQuotePerson("0");
-        }
-        else
-        {
-        	p_project.setQuotePerson(ProjectHandlerHelper.getUser(qpName));
-        }
-
-        if (p_updatePm)
-        {
-            String pmName = (String)p_request.getParameter("pmField");
-
-            if (pmName != null)
-            {
-                p_project.setProjectManager(
-                    ProjectHandlerHelper.getUser(pmName));
-            }
         }
     }
 
@@ -397,6 +362,20 @@ public class ProjectMainHandler extends PageHandler
 			s_logger.error("Fail to delete project.", e );
 		}
 	}
+	
+	 private void handleFilters(HttpServletRequest p_request, SessionManager sessionMgr, String action)
+	    {
+	     
+	        String pNameFilter = (String) p_request.getParameter("pNameFilter");
+	        String cNameFilter = (String) p_request.getParameter("cNameFilter");
+	        if (p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET))
+	        {
+	             pNameFilter = (String) sessionMgr.getAttribute("pNameFilter");
+	             cNameFilter = (String) sessionMgr.getAttribute("cNameFilter");
+	        }
+	        sessionMgr.setAttribute("pNameFilter", pNameFilter);
+	        sessionMgr.setAttribute("cNameFilter", cNameFilter);
+	    }
 
     
 }

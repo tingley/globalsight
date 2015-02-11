@@ -128,6 +128,7 @@ String taskId = (String)request.getParameter(WebAppConstants.TASK_ID);
 // Get task info
 Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
 int task_state = task.getState();
+String companyId = task.getCompanyId();
 
 String closeUrl = close.getPageURL() +
    "&" + WebAppConstants.TASK_ACTION +
@@ -313,6 +314,7 @@ var helpFile = "<%=bundle.getString("help_paragraph_editor")%>";
 var verbose = "<%=str_ptags%>";
 var g_ptagsVerbose = <%=b_ptagsVerbose%>;
 var isMF = navigator.userAgent.indexOf("Firefox") != -1;
+var s_ptagstring = "";
 
 // Menus
 
@@ -839,6 +841,7 @@ function save()
     //debug("Old PTAG string = " + ptagstring);
 
     var result;
+    s_ptagstring = "";
     if (!checkError(ptagstring))
     {
         if (needSave && wasLocked(g_target))
@@ -854,6 +857,11 @@ function save()
             }
         }
 
+        if (s_ptagstring != null && s_ptagstring != "")
+        {
+        	ptagstring = s_ptagstring;
+        }
+        
         g_targetGxml = applet.getTargetDiplomat(ptagstring);
         //debug("New GXML = `" + g_targetGxml + "'");
         g_targetHTML = GetTargetDisplayHtmlForPreview(g_targetGxml, g_datatype);
@@ -944,6 +952,13 @@ function doErrorCheck(ptagstring)
 
     if (msg == "" || msg == null || msg == "null")
     {
+    	var newTarget = applet.getNewPTagTargetString();
+    	
+    	if (newTarget != null && newTarget != "")
+    	{
+    		s_ptagstring = newTarget;
+    	}
+    	
         return null;
     }
     else
@@ -2666,6 +2681,7 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 <INPUT TYPE="hidden" NAME="tuv2" VALUE="">
 <INPUT TYPE="hidden" NAME="location" VALUE="">
 <INPUT TYPE="hidden" NAME="<%=WebAppConstants.TASK_ID%>" VALUE="<%=taskId%>">
+<INPUT TYPE="hidden" NAME="<%=WebAppConstants.COMPANY_ID%>" VALUE="<%=companyId%>">
 </FORM>
     <div id = "selectPtag" style='border-style:solid;border-width:1pt; border-color:#0c1476;background-color:white;left:300px;width:300px;height:180px;position:absolute;top:100px;display:block;z-index:1000; visibility:hidden;'>
     	<div id='selectPtagDialog' onmousedown="Drag.init('selectPtag', '1000')" onmouseup ="Drag.release()" style='border-style:solid;border-width:1pt;background-color:#0c1476;width:100%;cursor:hand'>

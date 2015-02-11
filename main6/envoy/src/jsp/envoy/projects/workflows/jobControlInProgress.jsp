@@ -392,6 +392,19 @@ function submitForm(buttonClicked)
    JobForm.submit();
 }
 
+//for GBS-2599
+function handleSelectAll() {
+	if (JobForm && JobForm.selectAll) {
+		if (JobForm.selectAll.checked) {
+			checkAllWithName('JobForm', '<%=request.getAttribute(JobManagementHandler.CHECKBOX_NAME)%>');
+			setButtonState();
+	    }
+	    else {
+			clearAll('JobForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 </HEAD>
 
@@ -449,7 +462,6 @@ is defined in header.jspIncl which must be included in the body.
 
 <!-- Data Table  -->
 <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" CLASS="list">
-<TBODY>
 <COL> <!-- Radio button -->
 <COL> <!-- Priority -->
 <COL> <!-- Job ID -->
@@ -461,7 +473,7 @@ is defined in header.jspIncl which must be included in the body.
 <COL> <!-- Est Completion Created -->
 
 <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM">
-    <TD CLASS="headerCell"></TD>
+    <TD CLASS="headerCell"><input type="checkbox" onclick="handleSelectAll()" name="selectAll"/></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PRIORITY%>"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 BORDER=0 ALT="<%=bundle.getString("lb_priority")%>"></A><%=jobPrioritySortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_ID%>"><%=bundle.getString("lb_job_id")%></A><%=jobIdSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=progressURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_NAME%>"><%=bundle.getString("lb_job_name")%></A><%=jobNameSortArrow%></TD>
@@ -481,14 +493,16 @@ is defined in header.jspIncl which must be included in the body.
      <TR>
         <TD CLASS="standardText">
             <DIV ID="CheckAllLayer" STYLE="visibility: hidden">
-                <A CLASS="standardHREF"
-                   HREF="javascript:checkAllWithName('JobForm', '<%=request.getAttribute(JobManagementHandler.CHECKBOX_NAME)%>'); setButtonState()"><%=bundle.getString("lb_check_all")%></A> |
+                <!--for GBS-2599
+				A CLASS="standardHREF"
+                   HREF="javascript:checkAllWithName('JobForm', '<%=request.getAttribute(JobManagementHandler.CHECKBOX_NAME)%>'); setButtonState()"><%=bundle.getString("lb_check_all")%></A--> 
 <% if (b_searchEnabled) { %>
                 <A CLASS="standardHREF"
-                   HREF="javascript:checkAll('JobForm'); setButtonState()"><%=bundle.getString("lb_check_all_pages")%></A> |
+                   HREF="javascript:checkAll('JobForm'); setButtonState()"><%=bundle.getString("lb_check_all_pages")%></A> 
 <% } %>
-                <A CLASS="standardHREF"
-                   HREF="javascript:clearAll('JobForm');setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
+                <!--for GBS-2599
+				A CLASS="standardHREF"
+                   HREF="javascript:clearAll('JobForm');setButtonState();"><%=bundle.getString("lb_clear_all")%></A-->
             </DIV>
          </TD>
      </TR>

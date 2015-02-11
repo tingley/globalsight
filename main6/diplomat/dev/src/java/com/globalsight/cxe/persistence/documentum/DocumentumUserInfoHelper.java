@@ -42,13 +42,13 @@ public class DocumentumUserInfoHelper
             mgr = ServerProxy.getDocumentumPersistenceManager();
         } catch (RemoteException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (GeneralException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (NamingException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } 
     }
     
@@ -81,10 +81,10 @@ public class DocumentumUserInfoHelper
             return mgr.createDocumentumUserInfo(p_documentumUserInfo);
         } catch (RemoteException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (DocumentumPersistenceManagerException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -96,10 +96,10 @@ public class DocumentumUserInfoHelper
             return mgr.modifyDocumentumUserInfo(p_documentumUserInfo);
         } catch (RemoteException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (DocumentumPersistenceManagerException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -111,10 +111,10 @@ public class DocumentumUserInfoHelper
             return mgr.removeDocumentumUserInfo(p_documentumUserInfo);
         } catch (RemoteException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (DocumentumPersistenceManagerException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         return false;
     }
@@ -124,9 +124,9 @@ public class DocumentumUserInfoHelper
         try {
             return mgr.findDocumentumUserInfo(p_id);
         } catch (RemoteException e) {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (DocumentumPersistenceManagerException e) {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         return null;
     }
@@ -138,10 +138,10 @@ public class DocumentumUserInfoHelper
             return mgr.getAllDocumentumUserInfos();
         } catch (RemoteException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         } catch (DocumentumPersistenceManagerException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         return null;
     }

@@ -123,7 +123,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
             }
             catch (Exception e)
             {
-                s_logger.error(e.getMessage());
+                s_logger.error(e.getMessage(), e);
             }
         }
         
@@ -233,7 +233,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
             }
             catch (FileNotFoundException e)
             {
-                s_logger.error(e.getMessage());
+                s_logger.error(e.getMessage(), e);
             }
         }
         
@@ -506,7 +506,7 @@ public class AsiaOnlineProxy extends AbstractTranslator implements MachineTransl
         catch (Exception e)
         {
             String msg = "Failed to get target segments from AO returned xliff file";
-            s_logger.error(msg + ": " + e.getMessage());
+            s_logger.error(msg, e);
         }
 
         return resultList;

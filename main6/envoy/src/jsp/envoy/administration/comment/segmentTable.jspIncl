@@ -1,6 +1,6 @@
 
 <!-- Segment Comments data table -->
-    <table cellpadding=0 cellspacing=0 border=0 class="standardText">
+    <table cellpadding=0 cellspacing=0 border=0 class="standardText" width="100%">
         <tr>
             <td><b><%=bundle.getString("lb_segment")%> <%=bundle.getString("lb_comments")%>
             </b></td>
@@ -34,7 +34,7 @@
             <amb:column label="lb_target_locale" width="10%" sortBy="<%=LocaleCommentsComparator.LOCALE%>">
                 <%=segcomment.getTargetLocale().getDisplayName()%>
             </amb:column>
-            <amb:column label="lb_page" width="80%" style="word-wrap:break-word;word-break:break-all">
+            <amb:column label="lb_page" width="75%" style="word-wrap:break-word;word-break:break-all">
                 <%
                     List pages = segcomment.getPageCommentsSummary();
                     for (int i = 0; i < pages.size(); i++)
@@ -48,15 +48,15 @@
                                sessionMgr.getAttribute(JobManagementHandler.JOB_ID) +
                           "&" + WebAppConstants.TARGET_PAGE_NAME + "=" + tPage.getExternalPageId() +
                           "&targLocale=" + segcomment.getTargetLocale().getDisplayName();
-						out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:80%\'>\");}</SCRIPT>");
+						out.println("<div style='width:80%'>");
                         out.println("<a href=\"" + pageUrl + "\">");
                         out.println(tPage.getExternalPageId() + "<br>");
                         out.println("</a>");
-                        out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
+                        out.println("</div>");
                     }
                 %>
             </amb:column>
-            <amb:column label="lb_open_segment_comments" width="5%">
+            <amb:column label="lb_open_segment_comments" width="7%">
                 <%
                     List pages = segcomment.getPageCommentsSummary();
                     for (int i = 0; i < pages.size(); i++)
@@ -66,7 +66,7 @@
                     }
                 %>
             </amb:column>
-            <amb:column label="lb_closed_segment_comments" width="5%">
+            <amb:column label="lb_closed_segment_comments" width="8%">
                 <%
                     List pages = segcomment.getPageCommentsSummary();
                     for (int j = 0; j < pages.size(); j++)
@@ -114,11 +114,11 @@
                                sessionMgr.getAttribute(JobManagementHandler.JOB_ID) +
                           "&" + WebAppConstants.TARGET_PAGE_NAME + "=" + tPage.getExternalPageId() +
                           "&targLocale=" + segcomment.getTargetLocale().getDisplayName();
-                        out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:80%\'>\");}</SCRIPT>");
+                        out.println("<div style='width:80%'>");
                         out.println("<a href=\"" + pageUrl + "\">");
                         out.println(tPage.getExternalPageId() + "<br>");
                         out.println("</a>");
-                        out.println("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>");
+                        out.println("</div>");
                     }
                 %>
             </amb:column>

@@ -12,7 +12,7 @@ public class LeverageMatchTest
     public void testHashCodeWithLargeTuvId()
     {
         LeverageMatch lm = new LeverageMatch();
-        lm.setOriginalSourceTuv(10000000);
+        lm.setOriginalSourceTuvId(10000000);
         lm.setSubId("1");
         GlobalSightLocale locale = new GlobalSightLocale();
         locale.setId(41);
@@ -25,7 +25,7 @@ public class LeverageMatchTest
     public void testHashCodeWithNullSubId()
     {
         LeverageMatch lm = new LeverageMatch();
-        lm.setOriginalSourceTuv(1000);
+        lm.setOriginalSourceTuvId(1000);
         lm.setSubId(null);
         GlobalSightLocale locale = new GlobalSightLocale();
         locale.setId(41);
@@ -38,7 +38,7 @@ public class LeverageMatchTest
     public void testHashCodeWithNullTargetLocale()
     {
         LeverageMatch lm = new LeverageMatch();
-        lm.setOriginalSourceTuv(1000);
+        lm.setOriginalSourceTuvId(1000);
         lm.setSubId(null);
         lm.setTargetLocale(null);
         lm.setOrderNum((short)1);

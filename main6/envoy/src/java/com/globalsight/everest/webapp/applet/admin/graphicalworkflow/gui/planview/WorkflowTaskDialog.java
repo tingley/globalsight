@@ -102,6 +102,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                                                // rate
     private long m_selectedRevenueRateId = -1; // the rate id of the MODIFIED
                                                // rate
+    private String m_currentActivityDisplayName;
     private String m_initialExpenseRateName;
     private String m_initialRevenueRateName;
     private String[] m_roles;
@@ -136,6 +137,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     private boolean m_costingEnabled;
     private boolean m_revenueEnabled;
     private boolean m_isWorkflowTaskInstance;
+    private boolean m_isAccepted;
 
     //
     // PUBLIC CONSTRUCTOR
@@ -180,6 +182,15 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         m_taskInfoBean = (TaskInfoBean) getValue("taskInfoBean");
 
         m_isWorkflowTaskInstance = workflowtask instanceof WorkflowTaskInstance;
+        if (m_isWorkflowTaskInstance)
+        {
+            WorkflowTaskInstance wti = (WorkflowTaskInstance) workflowtask;
+            if (WorkflowConstants.STATE_RUNNING == wti.getTaskState()
+                    && wti.isAccepted())
+            {
+                m_isAccepted = true;
+            }
+        }
 
         m_participantDefaultChoice = m_labels[4];
 
@@ -293,18 +304,14 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
             for (int i = 0; i < 2; i++)
             {
                 boolean initial = i == 0;// set the first as default
-                m_rateSelectionCheckbox[i] = new Checkbox(
-                        (String) m_labels[i + 28], rcbg, initial);
-                m_rateSelectionCheckbox[i].addItemListener(new ItemListener()
+                Checkbox c = new Checkbox((String) m_labels[i + 28], rcbg,
+                        initial);
+                if (m_isAccepted)
                 {
-                    public void itemStateChanged(ItemEvent e)
-                    {
-                        if (e.getStateChange() == e.SELECTED)
-                        {
-                            // Do nothing
-                        }
-                    }
-                });
+                    // can not edit accepted activity
+                    c.setEnabled(false);
+                }
+                m_rateSelectionCheckbox[i] = c;
             }
             // EXPENSE RATE TYPE
             m_expenseRateChoice = new Choice();
@@ -892,6 +899,33 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     }
 
     /**
+     * Makes each component not able to be edited.
+     * <p>
+     * This is for the accepted activity which is not allowed to be modified.
+     */
+    private void cannotEdit()
+    {
+        m_activityTypeChoice.setEnabled(false);
+        m_systemActionChoice.setEnabled(false);
+        m_participantChoice.setEnabled(false);
+        m_expenseRateChoice.setEnabled(false);
+        m_revenueRateChoice.setEnabled(false);
+        m_daysToAccept.setEditable(false);
+        m_hoursToAccept.setEditable(false);
+        m_minutesToAccept.setEditable(false);
+        m_daysToComplete.setEditable(false);
+        m_hoursToComplete.setEditable(false);
+        m_minutesToComplete.setEditable(false);
+        m_daysOverDueToPM.setEditable(false);
+        m_hoursOverDueToPM.setEditable(false);
+        m_minutesOverDueToPM.setEditable(false);
+        m_daysOverDueToUser.setEditable(false);
+        m_hoursOverDueToUser.setEditable(false);
+        m_minutesOverDueToUser.setEditable(false);
+        m_hourlyRateField.setEditable(false);
+    }
+
+    /**
      * Creates the table that displays the user roles.
      */
     private void createUserRoleTable()
@@ -945,6 +979,19 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
 
     private void populateDialog(WorkflowTask p_workflowtask)
     {
+        if (m_isAccepted)
+        {
+            // can not edit accepted activity
+            cannotEdit();
+            // put a note telling user
+            StringBuilder sb = new StringBuilder();
+            sb.append("***");
+            sb.append(AppletHelper.getI18nContent("msg_activity_edit_warning"));
+            sb.append("***");
+
+            noteText.setText(sb.toString());
+            noteText.setFont(EnvoyFonts.getHeaderFont());
+        }
         if (p_workflowtask.getActivityName() != null)
         {
             m_roles = p_workflowtask.getRoles();
@@ -965,8 +1012,9 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 }
             }
 
-            m_activityTypeChoice
-                    .select(p_workflowtask.getActivityDisplayName());
+            m_currentActivityDisplayName = p_workflowtask
+                    .getActivityDisplayName();
+            m_activityTypeChoice.select(m_currentActivityDisplayName);
 
             // Get the System Action Display Name that corresponds to the
             // stored System Action Type
@@ -1108,9 +1156,10 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
      */
     public void performAction()
     {
-        int activityComboIndex = m_activityTypeChoice.getSelectedIndex() - 1;
-        Activity activity = (Activity) m_activities
-                .elementAt(activityComboIndex);
+        String selectedActivityDisplayName = m_activityTypeChoice
+                .getSelectedItem();
+        Activity activity = getSelectedActivity(selectedActivityDisplayName);
+        String selectedActivityName = activity.getActivityName();
 
         boolean isAllQualified = m_participantDefaultChoice
                 .equals(m_participantChoice.getSelectedItem());
@@ -1118,12 +1167,8 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
         if ((activity.isType(activity.TYPE_AUTOACTION) || activity
                 .isType(activity.TYPE_GSEDITION)) && isAllQualified)
         {
-            // Get all autoaction users, if user numbers more than one,
-            // forbidden
-            // to select one user.
-            String selectedActivityDisplayName = m_activityTypeChoice
-                    .getSelectedItem();
-            String selectedActivityName = getSelectedActivityName(selectedActivityDisplayName);
+            // Get all auto action users, if user numbers more than one,
+            // forbidden to select one user.
             // ask the parent screen to get the grid data from the server side
             List<Object[]> roleInfos = null;
 
@@ -1212,7 +1257,7 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                     .getModel();
             Map<Integer, Object[]> userRoles = model.getUserRoles();
 
-            StringBuffer displayName = new StringBuffer();
+            StringBuilder displayName = new StringBuilder();
             for (int i = 0; i < size; i++)
             {
                 if (i > 0)
@@ -1223,9 +1268,8 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                         .convertRowIndexToModel(selectedRows[i]));
                 if (isUserRoleType)
                 {
-                    String firstName = (String) role[0];
-                    String lastName = (String) role[1];
-                    displayName.append(firstName).append(" ").append(lastName);
+                    String userName = (String) role[2];
+                    displayName.append(userName);
                     roles[i] = (String) role[4];
                 }
                 else
@@ -1373,10 +1417,13 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                 // rate type
                 // is Hourly, add the estimated value as well).
 
+                boolean hasActivityChanged = !selectedActivityDisplayName
+                        .equals(m_currentActivityDisplayName);
                 if (m_isWorkflowTaskInstance
                         && !m_expenseRateChoice.getSelectedItem().equals(
                                 m_initialExpenseRateName) || hasRevenueChanged
-                        || hasAmountChanged || hasRateSelectionChanged)
+                        || hasAmountChanged || hasRateSelectionChanged
+                        || hasActivityChanged)
                 {
                     String estimatedHours = null;
                     String actualHours = null;
@@ -1403,7 +1450,8 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                             m_taskInfoBean == null ? WorkflowTask.ID_UNSET
                                     : m_taskInfoBean.getTaskId(),
                             estimatedHours, actualHours, expenseRate,
-                            revenueRate, rateSelectionCriteria);
+                            revenueRate, rateSelectionCriteria,
+                            selectedActivityName);
 
                     if (getValue("modifiedTaskInfoMap") != null)
                     {
@@ -1498,9 +1546,11 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
     /* determines whether we're in the dirty mode. */
     private boolean isDirty()
     {
-        return (timesAreValid() && isRateValid()
-                && m_userRoleTable.getSelectedRow() > -1 && !(m_activityTypeChoice
-                .getSelectedItem().equals(m_defaultChoose)));
+        return (timesAreValid()
+                && isRateValid()
+                && m_userRoleTable.getSelectedRow() > -1
+                && !(m_activityTypeChoice.getSelectedItem()
+                        .equals(m_defaultChoose)) && !m_isAccepted);
     }
 
     // checks to see if rating info is valid. If costing is enabled,
@@ -1741,7 +1791,6 @@ public class WorkflowTaskDialog extends AbstractEnvoyDialog implements
                     Collections.sort(activityRates, new RateComparator(
                             RateComparator.NAME, Locale.getDefault()));
 
-                    
                     for (int i = 0; i < size; i++)
                     {
                         Rate rate = activityRates.get(i);

@@ -49,6 +49,8 @@
             this.bAllStop = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
+            this.cbAutoStartAll = new System.Windows.Forms.CheckBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // textBox1
@@ -88,7 +90,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Calibri", 15F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(114, 20);
+            this.label1.Location = new System.Drawing.Point(115, 20);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(231, 24);
             this.label1.TabIndex = 9;
@@ -208,7 +210,7 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Location = new System.Drawing.Point(0, 65);
+            this.panel1.Location = new System.Drawing.Point(0, 75);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(500, 1);
             this.panel1.TabIndex = 20;
@@ -222,11 +224,33 @@
             this.label5.TabIndex = 0;
             this.label5.Text = "Conversion Directory";
             // 
+            // cbAutoStartAll
+            // 
+            this.cbAutoStartAll.AutoSize = true;
+            this.cbAutoStartAll.Location = new System.Drawing.Point(30, 231);
+            this.cbAutoStartAll.Name = "cbAutoStartAll";
+            this.cbAutoStartAll.Size = new System.Drawing.Size(109, 22);
+            this.cbAutoStartAll.TabIndex = 21;
+            this.cbAutoStartAll.Text = "Auto Start All";
+            this.cbAutoStartAll.UseVisualStyleBackColor = true;
+            this.cbAutoStartAll.CheckedChanged += new System.EventHandler(this.cbAutoStartAll_CheckedChanged);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(120, 44);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(219, 18);
+            this.label6.TabIndex = 22;
+            this.label6.Text = "(also used for office 2010 preview)";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(477, 341);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.cbAutoStartAll);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.bAllStop);
@@ -249,7 +273,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MS Office 2007 Converters - Version: 8.2";
+            this.Text = "MS Office 2007 Converters - Version: 8.2.3";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -275,5 +299,7 @@
         private System.Windows.Forms.Button bAllStop;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox cbAutoStartAll;
+        private System.Windows.Forms.Label label6;
     }
 }

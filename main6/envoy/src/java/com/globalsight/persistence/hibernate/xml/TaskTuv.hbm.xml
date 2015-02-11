@@ -6,18 +6,24 @@
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
-		<many-to-one name="currentTuv" column="CURRENT_TUV_ID"
-			class="com.globalsight.everest.tuv.TuvImpl" not-null="true" />
-		
+		<!-- 
+		<many-to-one name="currentTuv" column="CURRENT_TUV_ID" class="com.globalsight.everest.tuv.TuvImpl" not-null="true" /> 
+		-->
+		<property name="currentTuvId" column="CURRENT_TUV_ID" type="long"
+			length="20" not-null="true" unique="false" />
+
 		<many-to-one name="task" column="TASK_ID"
 			class="com.globalsight.everest.taskmanager.TaskImpl" not-null="true" />
-		
+
 		<property name="version" length="3" column="VERSION" type="int"
 			not-null="true" unique="false" />
-		
-		<many-to-one name="previousTuv" column="PREVIOUS_TUV_ID"
-			class="com.globalsight.everest.tuv.TuvImpl" not-null="true" />
-		
+
+		<!-- 
+		<many-to-one name="previousTuv" column="PREVIOUS_TUV_ID" class="com.globalsight.everest.tuv.TuvImpl" not-null="true" /> 
+		-->
+		<property name="previousTuvId" column="PREVIOUS_TUV_ID" type="long"
+			length="20" not-null="true" unique="false" />
+
 		<property name="taskName" length="40" column="TASK_NAME"
 			type="string" not-null="true" unique="false" />
 	</class>

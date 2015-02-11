@@ -54,6 +54,7 @@ EditorState.LinkStyles styles = state.getLinkStyles();
 Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
 
 boolean b_refreshOther = (request.getAttribute("cmtRefreshOtherPane") != null);
+String b_refreshSource = (String) request.getAttribute("refreshSource");
 
 // Can't use GET-style url, see the forms below.
 String url_refresh = refreshSelf.getPageURL();
@@ -131,6 +132,43 @@ if (newStatus != null)
       state.setNewSynchronizationStatus(null);
     }
 }
+
+List<String> SEGMENT_FILTERS = new ArrayList<String>();
+SEGMENT_FILTERS.add("segFilterAll");
+SEGMENT_FILTERS.add("segFilterAllExceptICE");
+SEGMENT_FILTERS.add("segFilterAllExceptICEand100");
+SEGMENT_FILTERS.add("segFilterICE");
+SEGMENT_FILTERS.add("segFilter100");
+SEGMENT_FILTERS.add("segFilterRepeated");
+SEGMENT_FILTERS.add("segFilterRepetitions");
+SEGMENT_FILTERS.add("segFilterModified");
+SEGMENT_FILTERS.add("segFilterCommented");
+
+String selSegFilter = (String)request.getAttribute("segmentFilter");
+StringBuffer str_segmengFilter = new StringBuffer();
+str_segmengFilter.append(bundle.getString("segment_filter")).append(":&nbsp;&nbsp;");
+str_segmengFilter.append("<select id='segmentFilter' ");
+str_segmengFilter.append("onchange='doSegmentFilter(this[this.selectedIndex].value)' ");
+str_segmengFilter.append("style='font-size: 8pt;'>");
+for(String segFilter : SEGMENT_FILTERS)
+{
+    str_segmengFilter.append("<option ");
+    if (segFilter.equals(selSegFilter))
+    {
+        str_segmengFilter.append("selected ");
+    }
+    str_segmengFilter.append("value=\""+segFilter+"\">")
+    				 .append(bundle.getString(segFilter))
+    				 .append("</option>");
+}
+str_segmengFilter.append("</select>");
+
+StringBuffer tHead = new StringBuffer();
+tHead.append("<table WIDTH='100%' CELLSPACING='0' class='tableHeadingGray'>");
+tHead.append("<tr><td>");
+tHead.append(lb_segment).append("</td><td align='right'>");
+tHead.append(str_segmengFilter);
+tHead.append("</td></tr></table>");
 %>
 <HTML xmlns:gs>
 <!-- This is envoy\edit\online\me_target.jsp -->
@@ -139,7 +177,7 @@ if (newStatus != null)
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/tooltip.js"></SCRIPT>
+<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
 <script src="/globalsight/includes/ContextMenu.js"></script>
 <link type="text/css" rel="StyleSheet" id="cssEditor"
@@ -199,6 +237,7 @@ var g_reviewMode = eval("<%=state.isReviewMode()%>");
 var g_isReviewActivity = eval("<%=b_isReviewActivity%>");
 var g_readOnly = eval("<%=b_readOnly%>");
 var g_disableLink = eval("<%=disableComment%>");
+var g_refreshSource = eval("<%="true".equalsIgnoreCase(b_refreshSource)%>");
 
 var g_syncMessage =
   "<%=syncMessage != null ? EditUtil.toJavascript(syncMessage) : ""%>";
@@ -470,6 +509,7 @@ function SE(tuId, tuvId, subId, p_forceComment)
     {
         return;
     }
+
     if (g_reviewMode || p_forceComment)
     {
         editComment(tuId, tuvId, subId);
@@ -892,15 +932,15 @@ template. The string looks like "&TuvId=103&TuvId=104&TuvId=105...".
 --%>
 var pv_height = screen.height;
 var pv_width =  screen.width * .98;
-var tooltip = new Tooltip();
+
+dojo.require("dijit.Dialog");
 
 function showProgressBar()
 {
    try
    {
-       tooltip.show("", 100, 300);
-       var prograssBarObj = tooltip.tooltip.children[1];
-       fakeProgressByTip(0, prograssBarObj.children[0].children[0], prograssBarObj.children[1], "<%=lb_loadingPreview%>");
+	   var div = dojo.byId('tgt_prograssbar');
+	   div.style.visibility = "visible";
    }
    catch(e)
    {
@@ -1000,18 +1040,18 @@ function update_tr(id)
 		{
 		    try
 		    {
-                    	target_cell = document.getElementById(id);
-			source_cell = pageToScroll.document.getElementById(id);
+              target_cell = document.getElementById(id);
+			  source_cell = pageToScroll.document.getElementById(id);
 		    }catch(e){}
-                }
+        }
 		else if (document.all)
 		{
 		    try
 		    {
-                    	target_cell = document.all[id];
-			source_cell = pageToScroll.document.all[id];
+              target_cell = document.all[id];
+			  source_cell = pageToScroll.document.all[id];
 		    }catch(e){}
-                }
+        }
 			
 		if (target_cell && source_cell) 
 		{
@@ -1029,7 +1069,55 @@ function update_tr(id)
 	
 }
 
+function doSegmentFilter(p_segmentFilter)
+{
+	parent.parent.parent.SegmentFilter(p_segmentFilter);
+}
 </SCRIPT>
+
+<style type="text/css">
+<!--
+#tgt_prograssbar {
+	visibility: hidden;
+	position: absolute;
+	background-color: white;
+	width: 500px;
+	height: 50px;
+	text-align: center;
+	vertical-align: middle;
+	border: 1px solid #ddd;
+}
+-->
+</style>
+
+<script type="text/javascript">
+<!--
+	lastScrollY = 0;
+	function resetLocation(p_eid) {
+	try	{
+		var diffY;
+		if (document.documentElement && document.documentElement.scrollTop)
+			diffY = document.documentElement.scrollTop;
+		else if (document.body)
+			diffY = document.body.scrollTop
+		else {/*Netscape stuff*/
+		}
+		percent = .1 * (diffY - lastScrollY);
+		if (percent > 0)
+			percent = Math.ceil(percent);
+		else
+			percent = Math.floor(percent);
+		document.getElementById(p_eid).style.top = parseInt(document
+				.getElementById(p_eid).style.top)
+				+ percent + "px";
+		lastScrollY = lastScrollY + percent;
+	} catch(e) {
+  	}
+	}
+	window.setInterval("resetLocation(\"tgt_prograssbar\")", 1);
+//-->
+</script>
+
 </HEAD>
 <BODY id="idBody" onscroll="<%=str_scrollHandler%>" oncontextmenu="contextForX(event)"
  onload="doLoad()" onunload="doUnload()" >
@@ -1072,12 +1160,19 @@ function update_tr(id)
 <div id="idSnippetEditorDialog"
      style="behavior: url('/globalsight/envoy/edit/snippets/SnippetEditor.htc');
             display: none;"></div>
+            
+<div id="tgt_prograssbar" style="top: 300px; left: 100px;">
+	<br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
+</div>
 
 <% if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"
  style="border-color: lightgrey; border-collapse: collapse; border-style: solid; border-width: 1px;
  		font-family: Arial,Helvetica,sans-serif; font-size: 10pt;">
-  <COL WIDTH="1%"  VALIGN="TOP" CLASS="editorId" NOWRAP>
+  <COL WIDTH="1%" VALIGN="TOP" CLASS="editorId" NOWRAP>
+  <% if (state.getNeedFindRepeatedSegments()) { %>
+  <COL WIDTH="1%" VALIGH="TOP" ALIGN="center" NOWRAP>
+  <% } %>
   <% if (state.isReviewMode()) { %>
   <COL WIDTH="1%"  VALIGN="TOP" ALIGN="CENTER" NOWRAP>
   <% } %>
@@ -1086,10 +1181,13 @@ function update_tr(id)
   <THEAD>
     <TR CLASS="tableHeadingGray">
       <TD ALIGN="CENTER"><%=lb_id%></TD>
+      <% if (state.getNeedFindRepeatedSegments()) { %>
+      <TD ALIGN="CENTER">Rep</TD>
+      <% } %>
       <% if (state.isReviewMode()) { %>
       <TD ALIGN="CENTER"><img src="/globalsight/images/comment-transparent.gif"></TD>
       <% } %>
-      <TD ALIGN="LEFT"><%=lb_segment%></TD>
+      <TD ALIGN="LEFT"><%=tHead.toString()%></TD>
     </TR>
   </THEAD>
   <TBODY id="idPageHtml"><%=str_pageHtml%></TBODY>
@@ -1100,5 +1198,18 @@ function update_tr(id)
 </DIV>
 <% } %>
 
+<script type="text/javascript">
+if (g_refreshSource)
+{
+    try
+    {
+       var segFilter = document.getElementById("segmentFilter");
+       doSegmentFilter(segFilter[segFilter.selectedIndex].value);
+    }
+    catch (ignore)
+    {
+    }
+}
+</script>
 </BODY>
 </HTML>

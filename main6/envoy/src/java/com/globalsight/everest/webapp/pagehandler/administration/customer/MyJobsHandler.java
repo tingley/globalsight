@@ -153,10 +153,8 @@ public class MyJobsHandler
                 Job job = (Job)p_jobs.get(i);
                 if (searchName != null && !job.getJobName().startsWith(searchName))
                     continue;
-                List workflows = (List)job.getWorkflows();
-                for (int j = 0; j < workflows.size(); j++)
+                for (Workflow wf : job.getWorkflows())
                 {
-                    Workflow wf = (Workflow)workflows.get(j);
                     String wfState = wf.getState();
                     String key = job.getJobName() + wf.getTargetLocale().toString();
                     if (!wfState.equals(Workflow.DISPATCHED) &&

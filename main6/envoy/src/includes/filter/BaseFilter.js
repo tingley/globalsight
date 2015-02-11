@@ -537,6 +537,17 @@ BaseFilter.prototype.deleteCheckedTags = function()
 	baseFilter.switchRules(document.getElementById("baseFilterRulesSection"));
 }
 
+//for gbs-2599
+BaseFilter.prototype.selectAll_BaseFilter = function()
+{
+	var selectAll = document.getElementById("selectAll_BaseFilter")
+	if(selectAll.checked) {
+		this.checkAllTagsToDelete();
+	} else {
+		this.clearAllTagsToDelete();
+	}
+}
+
 BaseFilter.prototype.generateDeleteTagTableContent = function()
 {
 	var str = new StringBuffer("<center><table cellpadding=0 cellspacing=0 border=0 width='540px' class='standardText'>");
@@ -545,6 +556,7 @@ BaseFilter.prototype.generateDeleteTagTableContent = function()
 	str.append("<Label class='tagName_td'>" + jsTagType + "</Label>");
 	str.append("</td>");
 	str.append("<td width='400px'>");
+	str.append("<input type='checkbox' checked='true' id='selectAll_BaseFilter' onclick='baseFilter.selectAll_BaseFilter()'/>");//for gbs-2599
 	str.append("<Label class='tagName_td'>" + jsTagsToDeleted + "</Label>");
 	str.append("</td>");
 	str.append("<td width='22px'>");
@@ -612,6 +624,7 @@ BaseFilter.prototype.generateDeleteTagTableContent = function()
 		}
 	} 
 	str.append("</table></center>");
+	/*gbs-2599
 	str.append("<a href='#' class='specialfilter_a' onclick='baseFilter.checkAllTagsToDelete()'>");
 	str.append(jsCheckAll);
 	str.append("</a>");
@@ -619,6 +632,7 @@ BaseFilter.prototype.generateDeleteTagTableContent = function()
     str.append("<a href='#' class='specialfilter_a' onclick='baseFilter.clearAllTagsToDelete()'>");
     str.append(jsClearAll);
     str.append("</a>");
+	*/
 	if(sum <= 0)
 	{
 		alert(noTagsToChoose);

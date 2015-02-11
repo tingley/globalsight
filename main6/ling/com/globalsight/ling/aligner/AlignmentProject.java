@@ -399,9 +399,7 @@ public class AlignmentProject
         catch(Exception e)
         {
             // log the error
-            StringWriter writer = new StringWriter();
-            e.printStackTrace(new PrintWriter(writer));
-            c_logger.error(writer.toString());
+            c_logger.error(e.getMessage(), e);
             
             String errorMessage = null;
             // process error

@@ -92,7 +92,7 @@ public class L10nProfileDependencyChecker extends DependencyChecker
             message.append(": ");
             message.append(p_profile.getName());
 
-            c_logger.error(message.toString());
+            c_logger.error(message.toString(), e);
 
             String args[] = { Long.toString(p_profile.getId()),
                     p_profile.getName() };
@@ -132,7 +132,7 @@ public class L10nProfileDependencyChecker extends DependencyChecker
             message.append(": ");
             message.append(p_profile.getName());
 
-            c_logger.error(message.toString());
+            c_logger.error(message.toString(), e);
 
             String args[] = { Long.toString(p_profile.getId()),
                     p_profile.getName() };

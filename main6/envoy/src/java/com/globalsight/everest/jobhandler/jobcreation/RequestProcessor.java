@@ -17,18 +17,13 @@
 package com.globalsight.everest.jobhandler.jobcreation;
 
 import java.util.HashMap;
-import java.util.List;
-
 import org.apache.log4j.Logger;
 
-import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.page.PageEventObserver;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.statistics.StatisticsService;
-import com.globalsight.util.GeneralException;
 
 /**
  * Processes the request before adding it to a job.
@@ -55,29 +50,25 @@ class RequestProcessor
     {
         HashMap pages = null;
 
-        switch ( p_request.getType() )
+        switch (p_request.getType())
         {
-        case Request.EXTRACTED_LOCALIZATION_REQUEST:
-            pages = processExtractedRequest(p_request);
-            break;
+            // Since GBS-2218
+            case Request.EXTRACTED_LOCALIZATION_REQUEST:
+            case Request.UNEXTRACTED_LOCALIZATION_REQUEST:
+                pages = importPage(p_request);
+                break;
 
-        case Request.UNEXTRACTED_LOCALIZATION_REQUEST:
-            pages = processUnextractedRequest(p_request);
-            break;
-
-        default:
-            //otherwise an error
-            SourcePage page = processErrorRequest(p_request);
-            if (page != null)
-            {
-                pages = new HashMap(1);
-                pages.put(page.getGlobalSightLocale().getIdAsLong(),page);
-            }
-            else
-            {
-                pages = new HashMap(0);
-            }
-            break;
+            default:
+                // otherwise an error
+                SourcePage page = processErrorRequest(p_request);
+                if (page != null) {
+                    pages = new HashMap(1);
+                    pages.put(page.getGlobalSightLocale().getIdAsLong(), page);
+                } else {
+                    pages = new HashMap(0);
+                }
+                
+                break;
         }
 
         return pages;
@@ -91,7 +82,7 @@ class RequestProcessor
     {
         SourcePage page = p_request.getSourcePage();
 
-        c_logger.error("Processing an error request " +
+        c_logger.info("Processing an error request " +
             p_request.getId() + ": " +
             p_request.getExternalPageId() + ". Importing failed.");
 
@@ -140,78 +131,12 @@ class RequestProcessor
     }
 
     /**
-     * Import the request (ie. Parse through the GXML, import the SourcePage,
-     * leverage and create the target pages).
-     */
-    private HashMap processExtractedRequest(Request p_request)
-        throws JobCreationException
-    {
-        HashMap pages = importPage(p_request);
-
-        // if there are target pages calculate statistics (word count)
-        if (pages.size() > 1)
-        {
-            SourcePage sourcePage = null;
-
-            try
-            {
-                HashMap targetPages = new HashMap(pages);
-
-                L10nProfile l10nProfile = p_request.getL10nProfile();
-
-                // get the source page from the map
-                sourcePage = (SourcePage)targetPages.remove(
-                    l10nProfile.getSourceLocale().getIdAsLong()); 
-                List<Long> unActivelocaleIds = l10nProfile.getUnActivelocaleIds(); 
-                removeUnActiveWorkflow(targetPages, unActivelocaleIds);
-                StatisticsService.calculateTargetPageStatistics(
-                    sourcePage, targetPages,
-                    l10nProfile.getTranslationMemoryProfile().getJobExcludeTuTypes(),
-                    (int)l10nProfile.getTranslationMemoryProfile().
-                    getFuzzyMatchThreshold());
-            }
-            catch (Exception e)
-            {
-                String args[] = new String[1];
-                args[0] = Long.toString(sourcePage.getId());
-                // don't throw the exception since the pages were created successfully
-                // log the error and continue
-                JobCreationException jce = new JobCreationException(
-                    JobCreationException.MSG_STATISTICS_FAILED_FOR_PAGES,
-                    args, e);
-                setExceptionInRequest(p_request, jce);
-            }
-        }
-
-        return pages;
-    }
-
-
-	private void removeUnActiveWorkflow(HashMap targetPages,
-			List<Long> unActivelocaleIds) {
-		for(int i = 0; i < unActivelocaleIds.size(); i++)
-		{
-			targetPages.remove(unActivelocaleIds.get(i));
-		}
-	}
-
-	/**
-     * Import the request and do not extract it.
-     */
-    private HashMap processUnextractedRequest(Request p_request)
-        throws JobCreationException
-    {
-        return importPage(p_request);
-    }
-
-    /**
      * Process the request by importing the page associated with it.
      */
     private HashMap importPage(Request p_request)
         throws JobCreationException
     {
         HashMap pages = new HashMap();
-
         PageManager pm = null;
 
         try
@@ -233,26 +158,4 @@ class RequestProcessor
         return pages;
     }
 
-    /**
-     * Wraps the code for setting an exception in a request and
-     * catching the appropriate exception.
-     */
-    private void setExceptionInRequest(Request p_request,
-        GeneralException p_exception)
-        throws JobCreationException
-    {
-        try
-        {
-            ServerProxy.getRequestHandler().
-                setExceptionInRequest(p_request,p_exception);
-        }
-        catch (Exception e)
-        {
-            String[] args = new String[1];
-            args[0] = Long.toString(p_request.getId());
-            throw new JobCreationException(
-                JobCreationException.MSG_FAILED_TO_SET_EXCEPTION_IN_REQUEST,
-                args, e);
-        }
-    }
 }

@@ -24,13 +24,10 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Vector;
 
@@ -42,15 +39,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.log4j.Logger;
-
 import org.apache.commons.fileupload.DefaultFileItemFactory;
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
+import org.apache.log4j.Logger;
 import org.apache.tools.zip.ZipEntry;
 import org.apache.tools.zip.ZipOutputStream;
-import org.hibernate.Session;
 
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
@@ -60,30 +55,23 @@ import com.globalsight.everest.costing.CostingEngineLocal;
 import com.globalsight.everest.costing.Currency;
 import com.globalsight.everest.costing.Rate;
 import com.globalsight.everest.edit.EditHelper;
-import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.Role;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.foundation.UserRole;
-import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.PageState;
-import com.globalsight.everest.page.PrimaryFile;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.projecthandler.WorkflowTypeConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
-import com.globalsight.everest.taskmanager.TaskManager;
-import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -96,14 +84,6 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.ling.tm.LeverageMatchLingManager;
-import com.globalsight.ling.tm.LeverageSegment;
-import com.globalsight.ling.tm.LeveragingLocales;
-import com.globalsight.ling.tm2.BaseTmTuv;
-import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
-import com.globalsight.ling.tm2.leverage.LeverageMatches;
-import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GeneralExceptionConstants;
@@ -124,11 +104,6 @@ public class TaskDetailHandler extends PageHandler
     protected static boolean s_isCostingEnabled = false;
     protected static boolean s_isRevenueEnabled = false;
     protected static boolean s_isParagraphEditorEnabled = false;
-
-    // Managers
-    private static LeverageMatchLingManager leverageMatchLingManager = 
-        LingServerProxy.getLeverageMatchLingManager();
-    private TaskManager taskManager = ServerProxy.getTaskManager();
 
     static
     {
@@ -175,9 +150,6 @@ public class TaskDetailHandler extends PageHandler
             ServletContext p_context) throws ServletException, IOException,
             EnvoyServletException
     {
-        CommentMainHandler commentMainHandler = new CommentMainHandler();
-        commentMainHandler.handleRequest(p_pageDescriptor, p_request,
-                p_response, p_context);
         HttpSession httpSession = p_request.getSession();
         // Get user id of the person who has logged in.
         User user = TaskHelper.getUser(httpSession);      
@@ -223,11 +195,6 @@ public class TaskDetailHandler extends PageHandler
             TaskHelper.storeObject(httpSession, TASK_DETAILPAGE_ID,
                     TaskHelper.DETAIL_PAGE_2);
         }
-        // Update Leverage
-        else if (action != null && action.equals(WebAppConstants.UPDATE_LEVERAGE))
-        {
-            updateLeverage(p_request);
-        }
         else if (action != null && action.equals(DTP_DOWNLOAD))
         {
             dtpDownload(p_request, p_response);
@@ -260,6 +227,7 @@ public class TaskDetailHandler extends PageHandler
             }
             catch (Exception e)
             {
+            	CATEGORY.info(e);
                 ResourceBundle bundle = getBundle(httpSession);
                 String stateLabel = "";
                 switch (taskState)
@@ -289,7 +257,6 @@ public class TaskDetailHandler extends PageHandler
                 TaskSearchHandler.setup(p_request);
                 RequestDispatcher dispatcher = p_context
                         .getRequestDispatcher("/envoy/tasks/taskSearch.jsp");
-
                 dispatcher.forward(p_request, p_response);
                 return;
             }
@@ -299,9 +266,6 @@ public class TaskDetailHandler extends PageHandler
 
             // Save the task to session
             TaskHelper.storeObject(httpSession, WORK_OBJECT, task);
-            commentMainHandler.handleRequest(p_pageDescriptor, p_request,
-                    p_response, p_context);
-
             Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
             // Save the target pages to session - sorted
             List targetPages = null;
@@ -382,13 +346,14 @@ public class TaskDetailHandler extends PageHandler
             // Get the number of open and closed issues.
             // get just the number of issues in OPEN state
             // query is also considered a subset of the OPEN state
-            List oStates = new ArrayList();
+            List<String> oStates = new ArrayList<String>();
             oStates.add(Issue.STATUS_OPEN);
             oStates.add(Issue.STATUS_QUERY);
+            oStates.add(Issue.STATUS_REJECTED);
             openSegmentCount = getIssueCount(task, httpSession, oStates);
 
             // get just the number of issues in CLOSED state
-            List cStates = new ArrayList();
+            List<String> cStates = new ArrayList<String>();
             cStates.add(Issue.STATUS_CLOSED);
             closedSegmentCount = getIssueCount(task, httpSession, cStates);
             httpSession.setAttribute(
@@ -402,7 +367,7 @@ public class TaskDetailHandler extends PageHandler
         else if (action == null
                 || action.equals(JobManagementHandler.PAGE_SEARCH_BEAN))
         {
-            Task task = (Task) TaskHelper.retrieveObject(httpSession, TASK);
+            Task task = TaskHelper.retrieveMergeObject(httpSession, TASK);
 
             Locale uiLocale = (Locale) httpSession.getAttribute(UILOCALE);
             // Save the target pages to session - sorted
@@ -468,7 +433,10 @@ public class TaskDetailHandler extends PageHandler
         
         // Keeps page cache for JavaScript Function.
         isCache = true;
-        
+        CommentMainHandler commentMainHandler = new CommentMainHandler();
+        commentMainHandler.handleRequest(p_pageDescriptor, p_request,
+                p_response, p_context);
+
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
@@ -520,7 +488,7 @@ public class TaskDetailHandler extends PageHandler
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
         try {
             // Accept the task
@@ -542,7 +510,7 @@ public class TaskDetailHandler extends PageHandler
                         isPageBasedRate(task, p_userId)));
             }
 		} catch (Exception e) {
-			CATEGORY.error(e);
+			CATEGORY.error(e.getMessage(), e);
 		}
     }
 
@@ -1003,43 +971,30 @@ public class TaskDetailHandler extends PageHandler
         return local.getRate(p_id);
     }
 
-    private int getIssueCount(Task task, HttpSession session, List states)
+    private int getIssueCount(Task task, HttpSession session, List<String> states)
             throws EnvoyServletException
     {
-        CommentManager manager = null;
-        try
-        {
-            manager = ServerProxy.getCommentManager();
-        }
-        catch (GeneralException ex)
-        {
-            throw new EnvoyServletException(ex);
-        }
-
-        // If the user has permission to the workflow,
-        // check it's target pages for segment comments.
         int count = 0;
+
         Workflow wf = task.getWorkflow();
         if (!(wf.getState().equals(Workflow.CANCELLED)))
         {
             List pages = wf.getTargetPages();
-            List pageKeys = new ArrayList();
+            List<Long> targetPageIds = new ArrayList<Long>();
             for (int j = 0; j < pages.size(); j++)
             {
                 TargetPage tPage = (TargetPage) pages.get(j);
                 String state = tPage.getPageState();
-                if (PageState.IMPORT_FAIL.equals(state))
+                if (!PageState.IMPORT_FAIL.equals(state))
                 {
-                    // don't add
-                }
-                else
-                {
-                    pageKeys.add(tPage.getId() + "_");
+                    targetPageIds.add(tPage.getId());
                 }
             }
+
             try
             {
-                count = manager.getIssueCount(Issue.TYPE_SEGMENT, pageKeys,
+            	CommentManager manager = ServerProxy.getCommentManager();
+                count = manager.getIssueCount(Issue.TYPE_SEGMENT, targetPageIds,
                         states);
             }
             catch (Exception ex)
@@ -1088,6 +1043,7 @@ public class TaskDetailHandler extends PageHandler
      * Sorts the target pages for the task specified by the sort column and
      * direction.
      */
+    @SuppressWarnings("unchecked")
     protected void sortPages(HttpServletRequest p_request,
             HttpSession p_session, Locale p_uiLocale, List p_pages)
     {
@@ -1127,164 +1083,4 @@ public class TaskDetailHandler extends PageHandler
         p_session.setAttribute(JobManagementHandler.PAGE_SORT_ASCENDING,
                 new Boolean(comparator.getSortAscending()));
     }
-
-    /**
-     * Update from specified jobs or/and re-leverage reference TMs.
-     */
-    private void updateLeverage(HttpServletRequest p_request)
-            throws GeneralException
-    {
-        // Initial parameters and values
-        String taskId = p_request.getParameter(WebAppConstants.TASK_ID);
-        Task task = null;
-        try {
-            task = taskManager.getTask(Long.valueOf(taskId));
-        } catch (Exception e) {
-            throw new EnvoyServletException(e);
-        }
-        GlobalSightLocale sourceLocale = task.getSourceLocale();
-        GlobalSightLocale targetLocale = task.getTargetLocale();
-
-        // Target Page Loop BEGIN:
-        List<TargetPage> targetPages = task
-                .getTargetPages(PrimaryFile.EXTRACTED_FILE);
-        for (TargetPage tp : targetPages)
-        {
-            SourcePage sp = tp.getSourcePage();
-            long sourcePageId = sp.getId();
-            
-            // 1. Untranslated source segments
-            Collection<Tuv> untranslatedSrcTuvs = UpdateLeverageHelper
-                    .getUntranslatedTuvs(tp, sourceLocale.getId());
-
-            // 2. Convert all untranslated source TUVs to "BaseTmTuv".
-            List<BaseTmTuv> sourceTuvs = new ArrayList();
-            for (Tuv srcTuv : untranslatedSrcTuvs)
-            {
-                // TODO: Need care sub segments?
-                BaseTmTuv btt = TmUtil.createTmSegment(srcTuv, "0");
-                sourceTuvs.add(btt);
-            }
-            
-            // 3. Update from jobs
-            Map<Long, LeverageMatches> ipMatches = new HashMap();
-            String updateFromJobCheckBox = 
-                p_request.getParameter("updateFromJobCheckBoxName");
-            if ("on".equals(updateFromJobCheckBox))
-            {
-                // 3.1 Get in progress translations from jobs
-                String[] selectedJobIds = 
-                    p_request.getParameterValues("selectJobs");
-                String ipTmPenalty = 
-                    p_request.getParameter("inProgressTmPenaltyName");
-                int intIpTmPenalty = 0;
-                try {
-                    intIpTmPenalty = Integer.parseInt(ipTmPenalty);
-                } catch (Exception e) {
-                    CATEGORY.error("Invalid In Progress TM penalty", e);
-                    throw new EnvoyServletException(e);
-                }
-                ipMatches = UpdateLeverageHelper
-                        .getInProgressTranslationFromJobs(task, sourceTuvs,
-                                selectedJobIds);
-                // 3.2 Apply In Progress TM penalty
-                Iterator iter = ipMatches.entrySet().iterator();
-                while (iter.hasNext()) {
-                    Map.Entry entry = (Map.Entry) iter.next();
-//                    Long srcTuvId = (Long) entry.getKey();
-                    LeverageMatches levMatches = (LeverageMatches) entry.getValue();
-                    TranslationMemoryProfile tmProfile = 
-                        UpdateLeverageHelper.getTMProfile(task);
-                    UpdateLeverageHelper.applyInProgressTmPenalty(levMatches,
-                            tmProfile, targetLocale, intIpTmPenalty);
-                }
-            }
-            
-            // 4. Re-leverage reference TMs
-            String reApplyRefTmsCheckBox = 
-                p_request.getParameter("reApplyReferenceTmsName");
-            LeverageDataCenter levDataCenter = null;
-            if ("on".equals(reApplyRefTmsCheckBox))
-            {
-                levDataCenter = UpdateLeverageHelper.reApplyReferenceTMs(task,
-                        sourceTuvs);
-            }
-
-            // 5. Merge TM matches with in-progress translations.
-            if (levDataCenter != null) 
-            {
-                try
-                {
-                    Iterator itLeverageMatches = levDataCenter.leverageResultIterator();
-                    while (itLeverageMatches.hasNext())
-                    {
-                        LeverageMatches tmLevMatches = 
-                            (LeverageMatches) itLeverageMatches.next();
-                        if (tmLevMatches.getLeveragedTus().size() > 0) 
-                        {
-                            long originalSourceTuvId = 
-                                tmLevMatches.getOriginalTuv().getId();
-                            LeverageMatches ipLevMatches = 
-                                ipMatches.get(originalSourceTuvId);
-                            // Has in-progress matches
-                            if (ipLevMatches != null) {
-                                ipLevMatches.merge(tmLevMatches);
-                            } else {
-                                ipMatches.put(originalSourceTuvId, tmLevMatches);
-                            }
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    CATEGORY.error("Failed to merge gold TM matches to in progress matches.", e);
-                }
-            }
-
-            // 6. Ignore duplicated matches,always pick latest.
-            Map<Long, LeverageMatches> mergedLevMatches = UpdateLeverageHelper
-                    .removeMatchesExistedInDB(ipMatches, targetLocale);
-
-            if (mergedLevMatches != null && mergedLevMatches.size() > 0)
-            {
-                // 7. Save merged matches into "leverage_match"
-                L10nProfile lp = task.getWorkflow().getJob().getL10nProfile();
-                TranslationMemoryProfile tmProfile = lp.getTranslationMemoryProfile();
-                LeveragingLocales leveragingLocales = lp.getLeveragingLocales();
-                LeverageOptions leverageOptions = 
-                    new LeverageOptions(tmProfile, leveragingLocales);
-                Session session = TmUtil.getStableSession();
-                try {
-                    leverageMatchLingManager.saveLeverageResults(session
-                            .connection(), sourcePageId, mergedLevMatches, targetLocale,
-                            leverageOptions);
-                } catch (Exception e) {
-                    throw new EnvoyServletException(e);
-                } finally {
-                    if (session != null) {
-                        TmUtil.closeStableSession(session);
-                    }
-                }
-                
-                // 8. Populate into target TUVs
-                HttpSession httpSession = p_request.getSession();
-                User user = TaskHelper.getUser(httpSession);
-                int mode = UpdateLeverageHelper.getMode(tmProfile);
-                Map<Long, ArrayList<LeverageSegment>> exactMap = 
-                    leverageMatchLingManager
-                        .getExactMatchesWithSetInside(sourcePageId,
-                                targetLocale.getIdAsLong(), mode, tmProfile);
-                if (exactMap != null && exactMap.size() > 0) {
-                    try {
-                        UpdateLeverageHelper.populateExactMatchesToTargetTuvs(
-                                exactMap, untranslatedSrcTuvs, targetLocale,
-                                user);
-                    } catch (Exception e) {
-                        throw new EnvoyServletException(e);
-                    }                    
-                }
-            }
-        } // Target Page Loop END.
-    }
-
 }

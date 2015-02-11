@@ -256,6 +256,19 @@ function checkName()
     validateName(false);
 }
 
+//for GBS-2599
+function handleSelectAll() {
+	if (dtdFileForm && dtdFileForm.selectAll) {
+		if (dtdFileForm.selectAll.checked) {
+			checkAllWithName('dtdFileForm', 'selectFileNames'); 
+			setButtonState();
+	    }
+	    else {
+			clearAll('dtdFileForm'); 
+			setButtonState();
+	    }
+	}
+}
 </script>
 </head>
 <body id="idBody" leftmargin="0" rightmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadPage();">
@@ -331,7 +344,7 @@ function checkName()
             otherUrl="<%=otherUrl%>"
             >
             
-            <amb:column label="" width="1px;" align="center">
+            <amb:column label="checkbox" width="1px;" align="center">
             <%String path = DtdFileManager.getDisplayPath(Long.parseLong(dtdId), dtdFile); %>
               <input type="checkbox" name="selectFileNames" value="<%=path%>" onclick="setButtonState();">
             </amb:column>      
@@ -346,12 +359,13 @@ function checkName()
             </amb:column>
     </amb:table>
     
-    <DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
+    <!-- for GBS-2599
+	DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
         <A CLASS="standardHREF"
            HREF="javascript:checkAllWithName('dtdFileForm', 'selectFileNames'); setButtonState()"><%=bundle.getString("lb_check_all")%></A> |
         <A CLASS="standardHREF"
            HREF="javascript:clearAll('dtdFileForm'); setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
-    </DIV>
+    </DIV-->
     <div style="width:560px;*width:400px;">
     <INPUT id="idRemoveSubmit" TYPE="submit" VALUE="<%=bundle.getString("lb_remove")%>" style="margin-top:1px;" disabled="true">
     </div>

@@ -3,57 +3,61 @@
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/activityError.jsp"
     import="
+      com.globalsight.config.UserParamNames,      
+      com.globalsight.config.UserParameter,
+      com.globalsight.cxe.entity.fileprofile.FileProfile,
+      com.globalsight.everest.comment.CommentFile,      
+      com.globalsight.everest.comment.CommentManager,
+      com.globalsight.everest.company.CompanyThreadLocal,
+      com.globalsight.everest.company.CompanyWrapper,
       com.globalsight.everest.costing.AmountOfWork,
       com.globalsight.everest.costing.Rate,
       com.globalsight.everest.foundation.Timestamp,
+      com.globalsight.everest.foundation.User,
       com.globalsight.everest.jobhandler.Job,
-      com.globalsight.everest.permission.Permission,
-      com.globalsight.everest.permission.PermissionSet,
+      com.globalsight.everest.jobhandler.JobEditionInfo,
       com.globalsight.everest.page.PageWordCounts,
       com.globalsight.everest.page.PrimaryFile,
-      com.globalsight.everest.page.UnextractedFile,
-      com.globalsight.everest.page.TargetPage,
       com.globalsight.everest.page.SourcePage,
+      com.globalsight.everest.page.TargetPage,
+      com.globalsight.everest.page.UnextractedFile,
+      com.globalsight.everest.page.pageexport.ExportHelper,
+      com.globalsight.everest.permission.Permission,
+      com.globalsight.everest.permission.PermissionSet,
       com.globalsight.everest.secondarytargetfile.SecondaryTargetFile,
       com.globalsight.everest.servlet.util.ServerProxy,
+      com.globalsight.everest.servlet.util.SessionManager,
       com.globalsight.everest.taskmanager.Task,
-      com.globalsight.everest.webapp.javabean.NavigationBean,
+      com.globalsight.everest.util.system.SystemConfigParamNames,
+      com.globalsight.everest.util.system.SystemConfiguration,
       com.globalsight.everest.webapp.WebAppConstants,
+      com.globalsight.everest.webapp.javabean.NavigationBean,
+      com.globalsight.everest.webapp.pagehandler.PageHandler,
+      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
+      com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
+      com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+      com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants,
       com.globalsight.everest.webapp.pagehandler.projects.workflows.PageComparator,
-      com.globalsight.everest.webapp.pagehandler.PageHandler,
-      com.globalsight.everest.workflowmanager.Workflow,
+      com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,      
+      com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
       com.globalsight.everest.workflow.Activity,
       com.globalsight.everest.workflow.ConditionNodeTargetInfo,
-      com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
-      com.globalsight.everest.webapp.pagehandler.tasks.TaskDetailHandler,
-      com.globalsight.util.edit.EditUtil,
-      com.globalsight.config.UserParameter,
-      com.globalsight.config.UserParamNames,
-      com.globalsight.util.date.DateHelper,
-      com.globalsight.everest.page.pageexport.ExportHelper,
-      com.globalsight.everest.webapp.pagehandler.administration.comment.CommentConstants,
-      com.globalsight.everest.comment.CommentManager,
-      com.globalsight.everest.comment.CommentFile,
-      com.globalsight.util.AmbFileStoragePathUtils,
-      com.globalsight.everest.foundation.User,
-      com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler,
-      com.globalsight.everest.util.system.SystemConfiguration,
-      com.globalsight.everest.util.system.SystemConfigParamNames,
+      com.globalsight.everest.workflowmanager.Workflow,
       com.globalsight.everest.workflowmanager.WorkflowManagerLocal,
-      com.globalsight.everest.jobhandler.JobEditionInfo,
+      com.globalsight.ling.common.URLEncoder,
+      com.globalsight.util.AmbFileStoragePathUtils,
+      com.globalsight.util.date.DateHelper,
+      com.globalsight.util.edit.EditUtil,
       java.util.*,
       javax.servlet.jsp.JspWriter,
       java.text.MessageFormat,
       java.text.NumberFormat,
       java.util.Locale,
       java.io.File,
-      java.io.IOException,
-      com.globalsight.ling.common.URLEncoder,
-      com.globalsight.cxe.entity.fileprofile.FileProfile,
-      com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManager"
-   session="true"
+      java.io.IOException"
+    session="true"
 %>
 <jsp:useBean id="detail" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
@@ -224,7 +228,7 @@ private void printPageLinkShort(JspWriter out, String p_page, String p_url, bool
     out.print(p_url);
     out.print("'");
     out.print(" CLASS='standardHREF' TITLE='");
-    out.print(pageName);
+    out.print(pageName.replace("\'", "&apos;"));
     out.print("'>");
     out.print(shortName);
     out.print("</a>");
@@ -285,7 +289,6 @@ private String qualifyActivity(String activity){
     String labelWordCount = bundle.getString("lb_word_count");
     String labelTotalWordCount = bundle.getString("lb_source_word_count_total");
 
-
     String labelAccept = bundle.getString("lb_accept");
     String labelUpdateLeverage = bundle.getString("lb_update_leverage");
     String labelReject = bundle.getString("lb_reject");
@@ -316,18 +319,16 @@ private String qualifyActivity(String activity){
     //Urls of the links on this page
     String acceptUrl = accept.getPageURL() + "&" + WebAppConstants.TASK_ACTION +
         "=" + WebAppConstants.TASK_ACTION_ACCEPT;
-    String updateLeverageUrl = updateLeverage.getPageURL() + "&" + 
-    	WebAppConstants.TASK_ACTION + "=" + WebAppConstants.UPDATE_LEVERAGE + "&" +
-    	WebAppConstants.TASK_ID + "=" + theTask.getId();
+
+    StringBuffer tmpUrl = new StringBuffer(updateLeverage.getPageURL());
+    tmpUrl.append("&").append(WebAppConstants.TASK_ID).append("=").append(theTask.getId()).append("&action=getAvailableJobsForTask");
+    String updateLeverageUrl = tmpUrl.toString();
+    
     String rejectUrl = reject.getPageURL();
-
     String wordCountUrl = wordcountList.getPageURL() + "&action=tpList";
-
     String pageListUrl = pageList.getPageURL() + "&" + JobManagementHandler.PAGE_SEARCH_PARAM + "=" + thisFileSearch;
-
     String dtpDownloadURL = dtpDownload.getPageURL();
     String dtpUploadURL = dtpUpload.getPageURL();
-    
     String editorParaUrl = editorSameWindow.getPageURL();
     String editorListUrl = editor.getPageURL();
     String editorReviewUrl = editor.getPageURL() +
@@ -687,14 +688,7 @@ private String qualifyActivity(String activity){
 <HEAD>
 <!-- This JSP is envoy/tasks/taskDetail.jsp -->
 <TITLE><%= title %></TITLE>
-<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
-<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
-<SCRIPT SRC="/globalsight/includes/modalDialog.js"></SCRIPT>
-<%@ include file="/envoy/common/warning.jspIncl" %>
 <link rel="STYLESHEET" type="text/css" href="/globalsight/includes/ContextMenu.css">
-<script src="/globalsight/includes/ContextMenu.js"></script>
-<script src="/globalsight/includes/ieemu.js"></script>
-<SCRIPT SRC="/globalsight/includes/xmlextras.js"></SCRIPT>
 <style>
 .comment {
   position: absolute;
@@ -731,7 +725,15 @@ thead#scroll td#scroll  {
     top: expression(document.getElementById("data").scrollTop-2); /*IE5+ only*/
     }
 </style>
+<SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
+<SCRIPT SRC="/globalsight/includes/modalDialog.js"></SCRIPT>
+<%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/includes/compatibility.jspIncl" %>
+<script src="/globalsight/includes/ContextMenu.js"></script>
+<script src="/globalsight/includes/ieemu.js"></script>
+<SCRIPT SRC="/globalsight/includes/xmlextras.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <SCRIPT>
 var dirty = false;
 var objectName = "";
@@ -744,6 +746,9 @@ var needWarning = false;
 var helpFile = "<%=helpFile%>";
 
 var conditionUrls = new Array();
+var openIssuesDom = XmlDocument.create();
+var taskId = <%=task_id%>;
+
 function cancelEvent(e)
 {
     var eobj = (window.event)?(window.event):e;
@@ -925,7 +930,21 @@ function warnAboutRejectBeforeAcceptance(url)
 
 function doUpdateLeverage(urlUpdateLeverage)
 {
-	location.replace(urlUpdateLeverage);
+	//for GBS-1939
+	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&t=" + new Date();
+	$.getJSON(url, 
+		function(data) { 
+			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)
+			{
+				alert("<%=bundle.getString("jsmsg_my_activities_cannotupdateleverage_uploading")%>");
+				return;
+			}
+			else
+			{
+				location.replace(urlUpdateLeverage);
+			}
+	});
 }
 
 function doReject(urlSent)
@@ -970,12 +989,30 @@ function recreateGSEdition(urlSent) {
     location.replace(urlSent);
 }
 
+function doFinishedWrapper(urlSent)
+{
+	var taskUploadingStatus = "<%=OfflineConstants.TASK_UPLOADSTATUS_UPLOADING%>";
+	var url = "/globalsight/ControlServlet?linkName=finish&pageName=TK2&taskAction=getTaskStatus&t=" + new Date();
+	$.getJSON(url, 
+		function(data) { 
+			if(taskUploadingStatus == data.uploadStatus && taskId == data.taskId)
+			{
+				alert("<%=bundle.getString("jsmsg_my_activities_cannotcomplete_uploading")%>");
+				return;
+			}
+			else
+			{
+				doFinished(urlSent);
+			}
+	});
+}
+
 function doFinished(urlSent)
 {
-	var stfStatusMessage = "<%=stfStatusMessage%>";
+    var stfStatusMessage = "<%=stfStatusMessage%>";
     var canComplete = "<%=canComplete%>";
-	if(stfStatusMessage!="null"&&canComplete=="false")
-	{
+    if(stfStatusMessage!="null"&&canComplete=="false")
+    {
         if(stfStatusMessage=="inprogress")
         {
             alert("<%=bundle.getString("jsmsg_my_activities_cannotcomplete_inprogress")%>");
@@ -984,7 +1021,7 @@ function doFinished(urlSent)
         {
             alert("<%=bundle.getString("jsmsg_my_activities_cannotcomplete_failed")%>");
         }
-		return false;
+            return false;
 	}
     if(!checkDelayTime())
     {
@@ -1062,20 +1099,7 @@ function doFinished(urlSent)
 		        }
 			}
             if (! b_isReviewActivity) {
-                //check if there are open issues with these target pages, if so,
-                //then change the warning message to indicate that.
-                <%
-                    StringBuffer theURL = new StringBuffer(queryOpenIssuesXml.getPageURL());
-                    theURL.append("&taskId=").append(task_id);
-                    theURL.append(targetPageIdParameter.toString());
-                    theURL.append("&date=").append(System.currentTimeMillis());
-                %>
-                var theURL = '<%=theURL.toString()%>';
-                var dom = XmlDocument.create();
-                dom.preserveWhiteSpace = true;
-                dom.async = false;
-                dom.load(theURL);
-                var root = dom.selectSingleNode("/openTaskIssues");
+                var root = openIssuesDom.selectSingleNode("/openTaskIssues");
                 if (root !=null) {
                    //GBS-344, firefox compatibility
                    var targetPages = null;
@@ -1114,13 +1138,35 @@ function doFinished(urlSent)
                      }//endif
                 } //endif
             }
-            if (confirm(warningMessage))
-            {
+            
+            if (doConfirm(warningMessage)) {
                 document.location.replace(urlSent);
+            } else {
+            	disableButtons(false);
             }
         }
     }
 }
+
+function doConfirm(message)
+{
+	disableButtons(true);
+	return confirm(message);
+}
+
+// Disable/Enable all buttons.
+function disableButtons(status)
+{
+	var inputs = document.getElementsByTagName("input");
+	for(var i=0; i<inputs.length; i++)
+	{
+		if("button" == inputs[i].type)
+		{
+			inputs[i].disabled = status;
+		}
+	}
+}
+
 function submitDtpForm(form, buttonClicked, linkParam)
 {
 	  if (buttonClicked == "DtpDownload")
@@ -1275,6 +1321,24 @@ function doOnload()
 {
   ContextMenu.intializeContextMenu();
   loadGuides();
+  //do this here is better than when it is used
+  preLoadOpenIssuesIntoDom();
+}
+
+//Check if there are open issues for these target pages to be "task completed",
+//if so,then change the warning message to indicate that.
+function preLoadOpenIssuesIntoDom()
+{
+<%
+    StringBuffer theURL = new StringBuffer(queryOpenIssuesXml.getPageURL());
+    theURL.append("&taskId=").append(task_id);
+    theURL.append(targetPageIdParameter.toString());
+    theURL.append("&date=").append(System.currentTimeMillis());
+%>
+    var theURL = '<%=theURL.toString()%>';
+    openIssuesDom.preserveWhiteSpace = true;
+    openIssuesDom.async = false;
+    openIssuesDom.load(theURL);	
 }
 
 function checkDelayTime()
@@ -1605,9 +1669,9 @@ function checkDownloadDelayTime()
                 <!-- Data Table -->
                 <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="3" WIDTH="180" CLASS="detailText">
                 <TD COLSPAN="3"><B> <%= labelSelectActivity %></B></TD>
+                    <COL WIDTH=10>  <!-- Radio button -->
+                    <COL WIDTH=100>  <!-- Column 1 -->
                     <TBODY>
-                        <COL WIDTH=10>  <!-- Radio button -->
-                        <COL WIDTH=100>  <!-- Column 1 -->
                         <%
                            int listSize = condNodeInfo == null ? 0 :
                                           condNodeInfo.size();
@@ -1642,19 +1706,19 @@ function checkDownloadDelayTime()
                     </TBODY>
                 </TABLE><BR>
 <%          }
-            // "Update Leverage" button 
-            if(perms.getPermissionFor(Permission.UPDATE_LEVERAGE)) {
-            	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelUpdateLeverage + "\" ONCLICK=\"doUpdateLeverage('" +
-                	updateLeverageUrl + "'); return false;\">");
-            }
             // "Reject" button after accept
             if(perms.getPermissionFor(Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING)) {
             	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelReject + "\" ONCLICK=\"doReject('" +
                 	rejectUrl + "'); return false;\">");
             }
             // "Task Completed" button
-            out.println("<INPUT TYPE=BUTTON VALUE=\"" + labeltTaskCompleted + "\" ONCLICK=\"doFinished('" +
+            out.println("<INPUT TYPE=BUTTON VALUE=\"" + labeltTaskCompleted + "\" ONCLICK=\"doFinishedWrapper('" +
                 finishUrl+ "'); return false;\">");
+            // "Update Leverage" button 
+            if(perms.getPermissionFor(Permission.ACTIVITIES_UPDATE_LEVERAGE)) {
+            	out.println("<INPUT TYPE=BUTTON VALUE=\"" + labelUpdateLeverage + "\" ONCLICK=\"doUpdateLeverage('" +
+                	updateLeverageUrl + "'); return false;\">");
+            }
         }
     }
     if (!disableButtons &&
@@ -1956,7 +2020,8 @@ function checkDownloadDelayTime()
 boolean isShowSecondaryTargetFile = !perms.getPermissionFor(Permission.ACTIVITIES_SECONDARYTARGETFILE);
 if(isShowSecondaryTargetFile)
 {
-   List stfs = theTask.getWorkflow().getSecondaryTargetFiles();
+   Set<SecondaryTargetFile> stfs = 
+        theTask.getWorkflow().getSecondaryTargetFiles();
    int size1 = stfs == null ? 0 : stfs.size();
    if ((stfCreationState != null && stfCreationState.length() > 0) || size1 > 0)
    {
@@ -2014,9 +2079,8 @@ if(isShowSecondaryTargetFile)
       else if (stfCreationState == null ||
                Task.COMPLETED.equals(stfCreationState))
       {
-            for (int i = 0; i < size1; i++)
+            for (SecondaryTargetFile stf : stfs)
             {
-                SecondaryTargetFile stf = (SecondaryTargetFile)stfs.get(i);
                 String stfName = stf.getStoragePath();
                 String stfPath = WebAppConstants.STF_FILES_URL_MAPPING + stfName;
                 stfPath = URLEncoder.encodeUrlStr(stfPath);
@@ -2207,7 +2271,7 @@ if(je != null) {
     <td><%=theTask.getTargetLocale().getDisplayName()%></td>
   </tr>
   <tr valign="top">
-    <td align="right">
+    <td align="right" class="standardText">
       <amb:tableNav bean="taskCommentList"
       key="<%=CommentConstants.TASK_COMMENT_KEY%>"
       pageUrl="comment" />
@@ -2223,7 +2287,7 @@ if(je != null) {
                <input type="radio" name="radioBtn" value="<%=commentObj.getId()%>">
             </amb:column>
             <amb:column label="lb_comment_creator" width="100px">
-                <%=commentObj.getCreatorId()%>
+                <%=UserUtil.getUserNameById(commentObj.getCreatorId())%>
             </amb:column>
             <amb:column label="lb_date_created" width="100px">
                 <%=commentObj.getCreatedDate()%>

@@ -330,25 +330,14 @@ public class TmReplaceHandler
             boolean targetCaseSensititve, TmConcordanceResult results,
             String[] p_selections) throws Exception 
     {
-        Connection conn = null;
-        try {
-            conn = DbUtil.getConnection();
-            conn.setAutoCommit(false);
-            TableMaker tableMaker = new TableMaker();
-            String tableRows = tableMaker.getTableRows(conn,
-                sourceFindText, sourceCaseSensitive, targetFindText,
-                targetCaseSensititve, results, p_selections);
-            conn.commit();
-            return tableRows;
-        }
-        finally {
-            if (conn != null) {
-                conn.setAutoCommit(true);
-                DbUtil.returnConnection(conn);
-            }
-        }
+    	TableMaker tableMaker = new TableMaker();
+		String tableRows = tableMaker.getTableRows(sourceFindText,
+				sourceCaseSensitive, targetFindText, targetCaseSensititve,
+				results, p_selections);
+
+    	return tableRows;
     }
-    
+
     private void setParameters(HttpServletRequest p_request, String p_rows)
         throws EnvoyServletException
     {

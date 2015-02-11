@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -41,6 +40,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 
 /**
@@ -74,10 +74,11 @@ public class HibernateUtil
         return sessionFactory;
     }
 
-    public static Session openSessionWithConnection(Connection conn) {
+    public static Session openSessionWithConnection(Connection conn)
+    {
         return sessionFactory.openSession(conn);
     }
-    
+
     /**
      * Closes the session in Threadlocal, it will be called by HibernateFilter
      * auto.
@@ -102,6 +103,8 @@ public class HibernateUtil
             sessionContext.set(null);
             s_logger.debug("Hibernate close session");
         }
+        
+        SegmentTuTuvCacheManager.clearCache();
     }
 
     public static void commit(Transaction tx)
@@ -151,9 +154,12 @@ public class HibernateUtil
             }
         }
 
-        if (query.uniqueResult() != null) {
+        if (query.uniqueResult() != null)
+        {
             return ((Integer) query.uniqueResult()).intValue();
-        } else {
+        }
+        else
+        {
             return 0;
         }
     }
@@ -189,7 +195,7 @@ public class HibernateUtil
     }
 
     /**
-     * Delete some instance. More informations you can see
+     * Delete some instance. More information you can see
      * <code>delete(Object object)</code>.
      * 
      * @param objects
@@ -263,8 +269,8 @@ public class HibernateUtil
         if (ob instanceof PersistentObject && isUseActive(ob))
         {
             PersistentObject pOb = (PersistentObject) ob;
-            pOb = (PersistentObject) session.get(ob.getClass(), pOb
-                    .getIdAsLong());
+            pOb = (PersistentObject) session.get(ob.getClass(),
+                    pOb.getIdAsLong());
             pOb.setIsActive(false);
             session.update(pOb);
         }
@@ -371,7 +377,7 @@ public class HibernateUtil
     {
         return get(clazz, new Long(id));
     }
-    
+
     /**
      * Get a persistent instance, you can get more information from
      * <code>public static Object get(Class clazz, Serializable id) throws Exception</code>
@@ -396,11 +402,12 @@ public class HibernateUtil
      * @return
      * @throws Exception
      */
-    public static <T> T getEvenInActic(Class<T> clazz, long id) throws HibernateException
+    public static <T> T getEvenInActic(Class<T> clazz, long id)
+            throws HibernateException
     {
         return get(clazz, new Long(id));
     }
-    
+
     /**
      * Return the persistent instance of the given entity class with the given
      * identifier, or null if there is no such persistent instance. (If the
@@ -415,8 +422,8 @@ public class HibernateUtil
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public static <T> T get(Class<T> clazz, Serializable id, boolean ignoreInActiveOb)
-            throws HibernateException
+    public static <T> T get(Class<T> clazz, Serializable id,
+            boolean ignoreInActiveOb) throws HibernateException
     {
         T result = null;
         if (clazz != null)
@@ -447,7 +454,7 @@ public class HibernateUtil
 
         return result;
     }
-    
+
     public static <T> T get(Class<T> clazz, Serializable id)
             throws HibernateException
     {
@@ -905,12 +912,12 @@ public class HibernateUtil
     }
 
     /**
-     * Either <tt>save()</tt> or <tt>update()</tt> the given instance,
-     * depending upon the value of its identifier property. By default the
-     * instance is always saved. This behaviour may be adjusted by specifying an
-     * <tt>unsaved-value</tt> attribute of the identifier property mapping.
-     * This operation cascades to associated instances if the association is
-     * mapped with <tt>cascade="save-update"</tt>.
+     * Either <tt>save()</tt> or <tt>update()</tt> the given instance, depending
+     * upon the value of its identifier property. By default the instance is
+     * always saved. This behaviour may be adjusted by specifying an
+     * <tt>unsaved-value</tt> attribute of the identifier property mapping. This
+     * operation cascades to associated instances if the association is mapped
+     * with <tt>cascade="save-update"</tt>.
      * 
      * @see Session#save(java.lang.Object)
      * @see Session#update(Object object)
@@ -1022,7 +1029,8 @@ public class HibernateUtil
      *            includes list parameters.
      * @return The search result.
      */
-    public static List<?> search(String hql, Map<String, ?> map, Map<String, Collection<?>> map2)
+    public static List<?> search(String hql, Map<String, ?> map,
+            Map<String, Collection<?>> map2)
     {
         List<?> result = new ArrayList<Object>();
 
@@ -1040,7 +1048,7 @@ public class HibernateUtil
                     query.setParameter(key, map.get(key));
                 }
             }
-            
+
             if (map2 != null)
             {
                 Iterator<String> iterator = map2.keySet().iterator();
@@ -1129,8 +1137,8 @@ public class HibernateUtil
         }
 
         Session session = getSession();
-        result = session.createQuery(hql).setParameter(0, param1).setParameter(
-                1, param2).list();
+        result = session.createQuery(hql).setParameter(0, param1)
+                .setParameter(1, param2).list();
 
         return result;
     }
@@ -1146,8 +1154,8 @@ public class HibernateUtil
         }
 
         Session session = getSession();
-        result = session.createQuery(hql).setParameter(0, param1).setParameter(
-                1, param2).setParameter(2, param3).list();
+        result = session.createQuery(hql).setParameter(0, param1)
+                .setParameter(1, param2).setParameter(2, param3).list();
 
         return result;
     }
@@ -1306,7 +1314,7 @@ public class HibernateUtil
         }
         catch (Exception e1)
         {
-            s_logger.error(e1);
+            s_logger.error(e1.getMessage(), e1);
             connection.rollback();
         }
         finally
@@ -1325,7 +1333,7 @@ public class HibernateUtil
                 }
                 catch (Exception e)
                 {
-                    s_logger.error(e);
+                    s_logger.error(e.getMessage(), e);
                 }
             }
         }

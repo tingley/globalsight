@@ -50,7 +50,7 @@
     String lbUserName = bundle.getString("lb_user_name");
     
     ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(UserConstants.MODIFY_USER_WRAPPER);
-    String userName = wrapper.getUserId();
+    String userName = wrapper.getUserName();
 
     ArrayList<UserDefaultRole> defaultRoles = (ArrayList)sessionMgr.getAttribute("defaultRoles");
 %>

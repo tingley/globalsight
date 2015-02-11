@@ -16,10 +16,17 @@
  */
 package com.globalsight.cxe.adapter.idml;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.util.List;
 
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.util.FileUtil;
+import com.globalsight.util.file.FileWaiter;
 import com.globalsight.util.zip.ZipIt;
 
 public class IdmlConverter
@@ -30,6 +37,11 @@ public class IdmlConverter
                 .getLogger("org.artofsolving.jodconverter");
         jlog.setLevel(java.util.logging.Level.SEVERE);
     }
+    
+    private static String isInstalledInit = null;
+    private static boolean isInstalled = false;
+    
+    private static String convertDir = null;
 
     public String convertIdmlToXml(String p_odFile, String p_dir) throws Exception
     {
@@ -58,5 +70,135 @@ public class IdmlConverter
         ZipIt.compress(xmlDir.getPath(), zipFile);
 
         return zipFile.getPath();
+    }
+    
+    public static boolean isInstalled()
+    {
+        if (isInstalledInit == null)
+        {
+            SystemConfiguration sc = SystemConfiguration.getInstance();
+            String value = sc.getStringParameter(SystemConfigParamNames.INDD_INSTALL_KEY,
+                    CompanyWrapper.SUPER_COMPANY_ID);
+            
+            if (convertDir == null)
+            {
+            	convertDir = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5,
+                        CompanyWrapper.SUPER_COMPANY_ID);
+            }
+
+            isInstalled = "true".equalsIgnoreCase(value);
+            isInstalledInit = "inited";
+        }
+
+        return isInstalled;
+    }
+    
+    private String  getConvertDir()
+    {
+    	if (convertDir == null)
+        {
+    		SystemConfiguration sc = SystemConfiguration.getInstance();
+        	convertDir = sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5,
+                    CompanyWrapper.SUPER_COMPANY_ID);
+        }
+    	
+    	return convertDir;
+    }
+    
+    /**
+     * Actually writes out the command file. The format of the command file is:
+     * ConvertFrom=idml
+     * ConvertTo=pdf
+     * AcceptChanges=true | false | NA
+     */
+    private void writeCommandFile(String p_commandFileName, String from, String to) throws Exception
+    {
+        String convertFrom = "ConvertFrom=" + from;
+        String convertTo = "ConvertTo=" + to;
+        String acceptChanges = "AcceptChanges=NA";
+
+        StringBuffer text = new StringBuffer();
+        text.append(convertFrom).append("\r\n");
+        text.append(convertTo).append("\r\n");
+        text.append(acceptChanges).append("\r\n");
+        text.append("MasterTranslated=true\r\n");
+        text.append("TranslateHiddenLayer=true\r\n");
+
+        FileUtil.writeFileAtomically(new File(p_commandFileName),
+                text.toString(), "US-ASCII");
+    }
+    
+    public void convertToPdf(File p_odFile, File p_pdfFile, String locale) throws Exception
+    {
+    	String name = p_odFile.getName().toLowerCase();
+
+    	String type = "idml";
+    	String folder = "indd";        
+    	
+        String testFile = type + (int) (Math.random() * 1000000) + ".test";
+        File tFile = new File(getConvertDir() + "/" + folder + "/" + testFile);
+        FileUtil.writeFile(tFile, "test converter is start or not");
+        
+        name = (int) (Math.random() * 1000000) + name;
+        String prefixName = name.substring(0, name.lastIndexOf("."));
+        String fileType = name.substring(name.lastIndexOf(".") );
+//		String company = CompanyWrapper.getCompanyNameById(CompanyThreadLocal
+//				.getInstance().getValue());
+		String path = getConvertDir() + "/" + folder + "/" + "/" + locale + "/"
+				+ prefixName;
+        
+        FileUtil.copyFile(p_odFile, new File(path + fileType));
+    	writeCommandFile(path + ".ip_command", type, "pdf");
+
+        // Gather up the filenames.
+        String expectedPdfFileName = path + ".pdf";
+
+        File expectedPdfFile = new File(expectedPdfFileName);
+        
+        String expectedStatus = path + ".ip_status";
+        
+
+        int i = 0;
+        File f = new File(expectedStatus);
+        boolean found = false;
+        while (i++ < 5)
+        {
+        	Thread.sleep(2000);
+        	if (f.exists())
+        	{
+        		found = true;
+        		break;
+        	}
+        }
+        
+        if (!found)
+        {
+        	if (tFile.exists())
+        	{
+        		tFile.delete();
+        		throw new Exception("idml converter is not started");
+        	}
+        }
+                    
+        long maxTimeToWait = 60 * 60 * 1000;
+        FileWaiter waiter = new FileWaiter(2000L, maxTimeToWait,
+        		expectedStatus);
+        waiter.waitForFile();
+        
+        File statusFile = new File(expectedStatus.toString());
+        BufferedReader reader = new BufferedReader(new FileReader(
+                statusFile));
+        String line = reader.readLine();
+        String msg = reader.readLine();
+        String errorCodeString = line.substring(6); // Error:1
+        reader.close();
+        statusFile.delete();
+        int errorCode = Integer.parseInt(errorCodeString);
+        if (errorCode > 0)
+        {
+            throw new Exception(msg);
+        }
+        
+        FileUtil.copyFile(expectedPdfFile, p_pdfFile);
     }
 }

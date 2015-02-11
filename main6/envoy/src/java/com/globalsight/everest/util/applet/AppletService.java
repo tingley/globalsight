@@ -81,7 +81,7 @@ public class AppletService extends HttpServlet
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
         }
         finally
         {
@@ -164,22 +164,42 @@ public class AppletService extends HttpServlet
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
     }
 
+    // For now, this is only being used to "Add Files" on job details UI.
     public void uploadFile()
     {
         PrintWriter writer = null;
         try
         {
             FileUploader uploader = new FileUploader();
-            File file = uploader.upload(request);
+            // Ignore the returned file object here as it can't upload real file
+            // content to server with JRE7, APPLET and HTTPS combination.
+            uploader.upload(request);
 
-            long jobId = Long.parseLong(uploader.getFieldValue("jobId"));
-            companyId = Long.parseLong(uploader
-                    .getFieldValue("currentCompanyId"));
-            CompanyThreadLocal.getInstance().setIdValue("" + companyId);
+            String strJobId = uploader.getFieldValue("jobId");
+            if (strJobId == null || "".equals(strJobId.trim()))
+            {
+                strJobId = request.getParameter("jobId");
+            }
+            long jobId = Long.parseLong(strJobId);
+            String strCompanyId = uploader.getFieldValue("currentCompanyId");
+            if (strCompanyId == null || "".equals(strCompanyId.trim()))
+            {
+                strCompanyId = request.getParameter("currentCompanyId");
+            }
+            companyId = Long.parseLong(strCompanyId);
+            if (companyId > 0)
+            {
+                CompanyThreadLocal.getInstance().setIdValue("" + companyId);
+            }
+
+            String addFileTmpSavingPathName = uploader
+                    .getFieldValue("addFileTmpSavingPathName");
+            File file = new File(AmbFileStoragePathUtils.getCxeDocDir(String
+                    .valueOf(companyId)), addFileTmpSavingPathName);
 
             JobImpl job = HibernateUtil.get(JobImpl.class, jobId);
 
@@ -194,8 +214,9 @@ public class AppletService extends HttpServlet
 
             newPath.append(realJobNamePath).append(File.separator).append(
                     uploader.getFieldValue("path"));
-            File targetFile = new File(AmbFileStoragePathUtils.getCxeDocDir(),
-                    newPath.toString());
+            File targetFile = new File(
+                    AmbFileStoragePathUtils.getCxeDocDir(String
+                            .valueOf(companyId)), newPath.toString());
             
             if (!file.renameTo(targetFile))
             {
@@ -205,10 +226,12 @@ public class AppletService extends HttpServlet
             writer = response.getWriter();
             writer.write(file.getAbsolutePath());
 
+            file.delete();
+            file.getParentFile().delete();
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
         }
         finally
         {
@@ -279,7 +302,7 @@ public class AppletService extends HttpServlet
             }
             catch (Exception e)
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
             }
         }
 
@@ -291,7 +314,7 @@ public class AppletService extends HttpServlet
         }
         catch (IOException e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
         finally
         {
@@ -325,7 +348,7 @@ public class AppletService extends HttpServlet
         }
         catch (IOException e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
         finally
         {
@@ -374,7 +397,7 @@ public class AppletService extends HttpServlet
         }
         catch (IOException e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
         finally
         {

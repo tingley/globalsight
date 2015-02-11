@@ -1104,22 +1104,21 @@ public class ImportUtil
         {
             originalEncode = "UTF-8";
         }
-        String newStr = "";
+        StringBuilder newStr = new StringBuilder();
         BufferedReader in = null;
         try
         {
             in = new BufferedReader(new InputStreamReader(new FileInputStream(
                     absolutePath), originalEncode));
             String str = new String();
-            newStr = "";
             str = in.readLine();
 
-            newStr += str;
-            newStr += "\r\n";
+            newStr.append(str);
+            newStr.append("\r\n");
             while ((str = in.readLine()) != null)
             {
-                newStr += str;
-                newStr += "\r\n";
+                newStr.append(str);
+                newStr.append("\r\n");
             }
         }
         catch (Exception e)
@@ -1137,10 +1136,10 @@ public class ImportUtil
             }
             catch (IOException e)
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
             }
         }
-        writeFile(absolutePath, newStr);
+        writeFile(absolutePath, newStr.toString());
     }
 
     public static void main(String[] args) throws IOException
@@ -1181,7 +1180,7 @@ public class ImportUtil
             }
             catch (IOException e)
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
             }
         }
     }

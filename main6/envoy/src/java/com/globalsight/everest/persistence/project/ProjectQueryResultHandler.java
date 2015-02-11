@@ -97,7 +97,7 @@ public class ProjectQueryResultHandler
         Collection c = new ArrayList();
         if (!v.isEmpty())
         {
-            c.add(v);
+            c.addAll(v);
         }
         return c;
     }

@@ -89,14 +89,14 @@
                      + bundle.getString("lb_colon") + " "
                      + bundle.getString("lb_activity_details")
                      + bundle.getString("lb_colon") + " "
-                     + bundle.getString("lb_download");
-    String title = bundle.getString("lb_download");
+                     + bundle.getString("lb_tab_download");
+    String title = bundle.getString("lb_tab_download");
     String lbDetails = bundle.getString("lb_details");
     String lbComments = bundle.getString("lb_comments");
     String lbStartDownload = bundle.getString("lb_download_start");
     String lbWorkoffline = bundle.getString("lb_work_offline");
-    String lbDownload = bundle.getString("lb_download");
-    String lbUpload = bundle.getString("lb_upload");
+    String lbDownload = bundle.getString("lb_tab_download");
+    String lbUpload = bundle.getString("lb_tab_upload");
     
     String lbDownloadReport = bundle.getString("lb_download_report");
     String lbUploadReport = bundle.getString("lb_upload_report");
@@ -162,6 +162,7 @@
     //   format selector
     String formatValueRtfListView = OfflineConstants.FORMAT_RTF;
     String formatValueRtfListViewTrados = OfflineConstants.FORMAT_RTF_TRADOS;
+    String formatValueRtfListViewTradosOptimized = OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED;
     String formatValueTextListView = OfflineConstants.FORMAT_TEXT;
     String formatValueRtfParaView = OfflineConstants.FORMAT_RTF_PARA_VIEW;
 	
@@ -203,6 +204,7 @@
     String formatStartHere = bundle.getString("lb_start_here");
     String formatRtfListView = bundle.getString("lb_rtf_listview");
     String formatRtfListViewTrados = bundle.getString("lb_rtf_trados");
+    String formatRtfListViewTradosOptimized = bundle.getString("lb_rtf_trados_optimized");
     String formatTextListView = bundle.getString("lb_text");
     String formatRtfParaView = bundle.getString("lb_rtf_paraview_1");
 
@@ -261,9 +263,8 @@
     Collections.sort(U_PTFList, new TargetPageComparator(TargetPageComparator.EXTERNALPAGEID, Locale.getDefault()));
     // get the list of ExtractedPrimaryTargetFiles
     List E_PTFList = workflow.getTargetPages(PrimaryFile.EXTRACTED_FILE);
-    Collections.sort(E_PTFList, new TargetPageComparator(TargetPageComparator.EXTERNALPAGEID, Locale.getDefault()));
     // get the list of SecondaryTargetFiles
-    List STFList = workflow.getSecondaryTargetFiles();
+    Set<SecondaryTargetFile> STFList = workflow.getSecondaryTargetFiles();
 
 
     // Get data for the Hints table
@@ -432,7 +433,8 @@ function setEditorSelector(formSent)
         editorSelect.options[4] = new Option(editorOptNames[0],editorOptValues[0]);
         editorSelect.selectedIndex = 1;
     }
-    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>")
+    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>" 
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
     {
         editorSelect.options[0] = new Option(editorOptNames[5],editorOptValues[5]);
         editorSelect.options[1] = new Option(editorOptNames[1],editorOptValues[1]);
@@ -473,6 +475,7 @@ function setEditorSelector(formSent)
     setResourceSelector(formSent);
     setPopulates(formatSelect);
     setConsolidate(formatSelect);
+    setRepetitions(formatSelect);
     return true;
 }
 
@@ -752,7 +755,8 @@ function setPopulates(formatSelect)
 {
 	var populatefuzzy = document.getElementById("populatefuzzy");
 	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>")
+    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
     {
     	populatefuzzy.style.display = "";
     }
@@ -765,13 +769,30 @@ function setPopulates(formatSelect)
 function setConsolidate(formatSelect) {
 	var consolidate = document.getElementById("needConsolidateBox");
 	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>")
+    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
     {
     	consolidate.style.display = "";
     }
     else
     {
     	consolidate.style.display = "none";
+    }
+}
+
+function setRepetitions(formatSelect) {
+	var includeRepetitionsObj = document.getElementById("includeRepetitionsBox");
+	
+    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
+    {
+    	includeRepetitionsObj.style.display = "";
+    }
+    else
+    {
+    	includeRepetitionsObj.style.display = "none";
     }
 }
 
@@ -854,6 +875,9 @@ function ClientDownloadOptions()
 			
 	this.needConsolidate = "<%=(optionsHash == null) ? request.getAttribute("needConsolidate") :
 			optionsHash.get("needConsolidate")%>";
+			
+	this.includeRepetitions = "<%=(optionsHash == null) ? request.getAttribute("includeRepetitions") :
+			optionsHash.get("includeRepetitions")%>";
 }
 
 /*
@@ -1006,6 +1030,14 @@ function setClientDwnldOptions(formSent)
 		}
 	}
 	
+	if (dwnldOpt.includeRepetitions)
+	{
+		if(dwnldOpt.includeRepetitions == 'false' || dwnldOpt.includeRepetitions == 'no')
+		{
+			document.getElementById("includeRepetitions").checked = false;
+		}
+	}
+	
 	// Set EditExact
 <%  if (editExact.booleanValue()) {%>
     	if(dwnldOpt.editExact) 
@@ -1056,7 +1088,7 @@ function operateConsolidate()
 function operateConsolidateTerm()
 {
     var selector = document.getElementById("termTypeSelector");
-    document.getElementById("consolidateTermCheckBox").disabled=selector.selectedIndex == 0;
+    document.getElementById("consolidateTermCheckBox").disabled = (selector.value == 'termNone');
 }
 
 function saveUserOptions(formSent)
@@ -1105,6 +1137,15 @@ function doOnLoad()
     setClientDwnldOptions(document.downloadForm);
 }
 
+//for GBS-2599
+function handleSelectAll(selectAll,theBoxes) {
+		if (selectAll.checked) {
+			doCheckAll(theBoxes);
+	    }
+	    else {
+			doClearAll(theBoxes); 
+	    }
+}
 </SCRIPT>
 </HEAD>
 
@@ -1189,7 +1230,7 @@ function doOnLoad()
   <FORM NAME="downloadForm" ACTION="<%=urlStartDownload%>" METHOD="POST">
     <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" width="100%">
       <TR>
-        <TD CLASS="tableHeadingBasic" COLSPAN="3"><%= activityContent %></TD>
+        <TD CLASS="tableHeadingBasic" COLSPAN="3"><input type="checkbox" onclick="handleSelectAll(this,'<%=pageCheckBoxes%>')" checked="true"/>&nbsp;<%= activityContent %></TD>
       </TR>
       <TR>
         <TD VALIGN="TOP" width="700px">
@@ -1219,7 +1260,11 @@ function doOnLoad()
         String name = tp.getExternalPageId();
         if(showShortNames)
         {
-            name = DownloadPageHandler.getFileName(name);
+            name = DownloadPageHandler.getFileNameShort(name);
+        }
+        else
+        {
+        	name = DownloadPageHandler.getFileName(name);
         }
 %>
             <TR VALIGN="TOP">
@@ -1260,7 +1305,11 @@ function doOnLoad()
         String name = uf.getStoragePath();
         if(showShortNames)
         {
-            name = DownloadPageHandler.getFileName(name);
+            name = DownloadPageHandler.getFileNameShort(name);
+        }
+        else
+        {
+        	name = DownloadPageHandler.getFileName(name);
         }
         String id = tp.getIdAsLong().toString();
         Date date = uf.getLastModifiedDate();
@@ -1316,7 +1365,8 @@ function doOnLoad()
 <%
     }
 %>
-            <TR>
+            <!--for gbs-2599
+			TR>
             <TD COLSPAN=3><A CLASS="standardHREF" HREF="#"
                             onClick="doCheckAll('<%= pageCheckBoxes %>'); return false;"
                             onFocus="this.blur();"><%= checkAllLinkText %></A> |
@@ -1324,7 +1374,7 @@ function doOnLoad()
                             onClick="doClearAll('<%= pageCheckBoxes %>'); return false;"
                             onFocus="this.blur();"><%= clearAllLinkText %></A>
             </TD>
-            </TR>
+            </TR-->
           </TABLE><%--! END: PRIMARY TARGET FILE LIST ************************* --%>
 <% if(E_PTFList != null || E_PTFList.size() > 0 )
 {
@@ -1345,11 +1395,12 @@ function doOnLoad()
                 <SELECT onChange="setEditorSelector(this.form);" NAME="<%= formatSelector %>" CLASS="standardText" DISABLED="TRUE">
                   <!-- <OPTION VALUE="-"><%= formatStartHere %></OPTION> -->
                   <OPTION VALUE="<%= formatValueRtfListViewTrados %>"><%= formatRtfListViewTrados %></OPTION>
+                  <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>"><%= formatRtfListViewTradosOptimized %></OPTION>
                   <OPTION VALUE="<%= formatValueRtfListView %>"><%= formatRtfListView %></OPTION>
                   <% if(EditHelper.isParagraphEditorInstalled())
                   {
                   %>
-                  <OPTION VALUE="<%= formatValueRtfParaView %>" ><%= formatRtfParaView %></OPTION>
+                  <!-- <OPTION VALUE="<%= formatValueRtfParaView %>" ><%= formatRtfParaView %></OPTION> -->
                   <%
                   }
                   %>
@@ -1471,6 +1522,14 @@ function doOnLoad()
                     </SPAN>
                 </TD>
             </TR>
+            <TR id="includeRepetitionsBox">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_repetition") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="includeRepetitions" name="includeRepetitions" value="true" checked="checked">
+                    </SPAN>
+                </TD>
+            </TR>
             <TR>
                     <TD COLSPAN="3"> &nbsp;  </TD>
             </TR>
@@ -1492,7 +1551,7 @@ function doOnLoad()
             <TD COLSPAN="3"> &nbsp;  </TD>
     </TR>
     <TR>
-            <TD CLASS="tableHeadingBasic" COLSPAN="3"><%= PSHeading %></TD>
+            <TD CLASS="tableHeadingBasic" COLSPAN="3"><input type="checkbox" onclick="handleSelectAll(this,'<%=priSrcCheckBoxes%>')" checked="true"/>&nbsp;<%= PSHeading %></TD>
     </TR>
     <TR>
             <TD VALIGN="TOP" >
@@ -1518,7 +1577,11 @@ function doOnLoad()
             String name = uf.getStoragePath();
             if(showShortNames)
             {
-                name = DownloadPageHandler.getFileName(name);
+                name = DownloadPageHandler.getFileNameShort(name);
+            }
+            else
+            {
+            	name = DownloadPageHandler.getFileName(name);
             }
             name = EditUtil.encodeHtmlEntities(name);
             String id = sp.getIdAsLong().toString();
@@ -1567,7 +1630,8 @@ function doOnLoad()
 <%
         }
 %>
-                    <TR>
+                    <!--for gbs-2599
+					TR>
                         <TD COLSPAN=3><A CLASS="standardHREF" HREF="#"
                             onClick="doCheckAll('<%= priSrcCheckBoxes %>'); return false;"
                             onFocus="this.blur();"><%= checkAllLinkText %></A> |
@@ -1575,7 +1639,7 @@ function doOnLoad()
                             onClick="doClearAll('<%= priSrcCheckBoxes %>'); return false;"
                             onFocus="this.blur();"><%= clearAllLinkText %></A>
                         </TD>
-                    </TR>
+                    </TR-->
                     </TABLE>
             </TD>
     </TR><!-- end unextracted primary source files section -->
@@ -1591,7 +1655,7 @@ function doOnLoad()
             <TD COLSPAN="3"> &nbsp;  </TD>
     </TR>
     <TR>
-            <TD CLASS="tableHeadingBasic" COLSPAN="3"><%= STFHeading %></TD>
+            <TD CLASS="tableHeadingBasic" COLSPAN="3"><input type="checkbox" onclick="handleSelectAll(this,'<%=stfCheckBoxes%>')" checked="true"/>&nbsp;<%= STFHeading %></TD>
     </TR>
     <TR>
             <TD VALIGN="TOP" >
@@ -1605,9 +1669,8 @@ function doOnLoad()
                         </TD>
                     </TR>
 <%
-        for(int i=0; i < STFList.size(); i++ )
+        for(SecondaryTargetFile stf : STFList)
         {
-            SecondaryTargetFile stf = (SecondaryTargetFile)STFList.get(i);
             StringBuffer info = new StringBuffer();
             StringBuffer url = new StringBuffer();
             url.append(WebAppConstants.STF_FILES_URL_MAPPING);
@@ -1615,7 +1678,11 @@ function doOnLoad()
             String name = stf.getStoragePath();
             if(showShortNames)
             {
-                name = DownloadPageHandler.getFileName(name);
+                name = DownloadPageHandler.getFileNameShort(name);
+            }
+            else
+            {
+            	name = DownloadPageHandler.getFileName(name);
             }
             name = EditUtil.encodeHtmlEntities(name);
             String id = stf.getIdAsLong().toString();
@@ -1666,7 +1733,8 @@ function doOnLoad()
 <%
         }
 %>
-                    <TR>
+                    <!--for gbs-2599
+					TR>
                         <TD COLSPAN=3><A CLASS="standardHREF" HREF="#"
                             onClick="doCheckAll('<%= stfCheckBoxes %>'); return false;"
                             onFocus="this.blur();"><%= checkAllLinkText %></A> |
@@ -1674,7 +1742,7 @@ function doOnLoad()
                             onClick="doClearAll('<%= stfCheckBoxes %>'); return false;"
                             onFocus="this.blur();"><%= clearAllLinkText %></A>
                         </TD>
-                    </TR>
+                    </TR-->
                     </TABLE>
             </TD>
     </TR><!-- end secondary target section -->
@@ -1685,7 +1753,7 @@ function doOnLoad()
             <TD COLSPAN="3"> &nbsp;  </TD>
     </TR>
     <TR>
-            <TD CLASS="tableHeadingBasic" COLSPAN="3"><%= glossaryHeading %></TD>
+            <TD CLASS="tableHeadingBasic" COLSPAN="3"><input type="checkbox" onclick="handleSelectAll(this,'<%=glossaryCheckBoxes%>')" checked="true"/>&nbsp;<%= glossaryHeading %></TD>
     </TR>
     <TR>
             <TD VALIGN="TOP" >
@@ -1764,7 +1832,8 @@ function doOnLoad()
 <%
         }
 %>
-                    <TR>
+                    <!--for gbs-2599
+					TR>
                         <TD COLSPAN=2><A CLASS="standardHREF" HREF="#"
                             onClick="doCheckAll('<%= glossaryCheckBoxes%>'); return false;"
                             onFocus="this.blur();"><%= checkAllLinkText %></A> |
@@ -1772,7 +1841,7 @@ function doOnLoad()
                             onClick="doClearAll('<%= glossaryCheckBoxes%>'); return false;"
                             onFocus="this.blur();"><%= clearAllLinkText %></A>
                         </TD>
-                    </TR>
+                    </TR-->
 <%
     }
 %>

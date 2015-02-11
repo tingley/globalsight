@@ -1,0 +1,207 @@
+English,German,Project,Reference,Comments
+IVD authorized representative information,Angaben zum autorisierten IVD-Bevollm?chtigten,Welocalize ,only found as IVD authorized representative,"from the NeoLynx manual und auch im ""GlobalSight micro Neonatal screening system"""
+Quality manager,Qualit?tsmanager,Welocalize ,GlobalSight Premier XE TM,from the NeoLynx manual
+Intended use,Vorgesehener Verwendungszweck,Welocalize ,Aquity TM,from the NeoLynx manual
+"single-quadrupole, atmospheric pressure ionization (API) mass spectrometer",Mono-Quadrupol- Massenspektrometer mit Ionisierung bei Atmosph?rendruck (API)  ,Welocalize ,"Found parts in TM, please check and confirm context,  AG: Single-, Tandem- , Triple- MS (could be mono-, duo-,  triple-) MS",
+Waters SQ Detector Site Preparation Guide,Waters SQ Detector Site Preparation Guide (Anforderungen für den Aufstellort des Waters SQ Detektors),Welocalize ,,"not xlated for FIGS, hence must be bilingual DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+dual orthogonal sampling interface,dual-orthogonale Probeneinlassstelle,Welocalize ,direkt vor dem Probeneinlass,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+atmospheric pressure chemical ionization,Chemische Ionisierung bei Atmosph?rendruck,Welocalize ,GlobalSight Premier XE TM,
+electrospray ionization,Elektrospray-Ionisierung,Welocalize ,GlobalSight Premier XE TM,
+atmospheric pressure photoionization,Photoionisierung bei Atmosph?rendruck,Welocalize ,,
+to tune a detector,Detektor abstimmen,Welocalize ,,"please compare the xlation in ""window Tune"" To tune an MS detector:> So stimmen Sie einen MS-Detektor ab:"
+binary solvent manager,bin?rer Solvent Manager,Welocalize ,Aquity TM,
+sample manager,Sample Manager,Welocalize ,Aquity TM,
+column heater,S?ulenofen,Welocalize ,Aquity TM,Not translated in S/W. Leave as column heater…
+optional sample organizer,optionaler Sample Organizer,Welocalize ,Aquity TM,
+solvent tray,Auffangvorrichtung für L?sungsmittel,Welocalize ,GlobalSight Premier XE TM,
+krypton-discharge ultra-violet lamp,Kryptonentladungs-UV-Lampe,Welocalize ,,DB: Vorschlag
+krypton-discharge ultra-violet (UV) lamp,Kryptonentladungs-UV-Lampe,Welocalize ,,DB: Vorschlag
+orifices,?ffnungen,Welocalize ,GlobalSight Premier XE TM,
+photomultiplier detection system,Fotomuliplier-Detektoreinheit,Welocalize ,GlobalSight XE ,
+Selected Ion Recording (SIR),Selected Ion Recording (SIR) (Erfassen ausgew?hlter Ionen),Welocalize ,,
+split flow turbomolecular pump,Split-Flow-Turbomolekularpumpe,Welocalize ,,DB
+auto-tuning,Automatische Abstimmung,Welocalize ,found tuning as Abstimmung. Automatische Abstimmung?,DB
+auto-calibration,Automatische Kalibrierung,Welocalize ,found calibration as Kalibrierung. Automatische Kalibrierung?,DB
+SQ Detector Tune window,Fenster Tune (Abstimmung) des SQ Detektors,Welocalize ,found only parts of the term in TM,
+Analyser tab,Registerkarte Analyser (Analysator),Welocalize ,,DB
+Flow Control controls,Steuerelemente Flow Control (Flusssteuerung),Welocalize ,found only parts of the term in TM,DB
+MS Methods window,Fenster MS Methods (MS-Methoden),Welocalize ,,DB
+Method Events,Methodenereignisse,Welocalize ,I have seen events as *Ereignisse* and *Funktionen*. Please check,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+Method Events dialog box,Dialogfeld Method Events (Methodenereignisse),Welocalize ,,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+"Combined
+Infusion
+Waste
+No change","Combined (Kombiniert)
+Infusion
+Waste (Abfall)
+No change (Keine ?nderung)",Welocalize ,,flow states
+MassLynx online Help topic “Advanced Methods and Events”,"MassLynx Online-Hilfethema ""Advanced Methods and Events” (Fortgeschrittene Methoden und Ereignisse)",Welocalize ,,"the MassLynx online help is not xlated at all, please provide bilingual DB: ""online Help topic"" m.E. kein Softwarebegriffe, sollte übersetzt werden "
+IntelliStart dialog box,Dialogfeld IntelliStart,Welocalize ,,"""IntelliStart"" is a name and remains as is"
+Click Control > Pump to start the roughing pump.,"Klicken Sie auf Control > Pump (Steuerung > Pumpe), um die Vorpumpe zu starten.",Welocalize ,"AG: Grobpumpe mag richtig sein, klingt aber nach groben Arbeiten, MS ist eine anspruchsvolle Materie --> angemessener w?re darum ""Vorpumpe"", ist auch konsistent mit GlobalSight Premier XE Vokabular.","DB: ""Grobpumpe"" laut Ernst-W?rterbuch "
+The IntelliStart window displays “Instrument in standby”,"Im Fenster IntelliStart wird die Meldung “Instrument in standby” (""Ger?t im Standby"") angezeigt.",Welocalize ,,
+Click Resolve to bring the SQ detector into Operate mode.,"Klicken Sie auf Resolve (Aufl?sen), um den SQ Detektor in den Modus Operate (Betrieb) zu schalten.",Welocalize ,,"DB: ""Resolve"" = ""Aufl?sen"" ist nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+SQ Detector IntelliStart dialog box,Dialogfeld SQ Detector IntelliStart,Welocalize ,,
+"In the ACQUITY UPLC Console system tree, select SQ Detector.",W?hlen Sie im Systemverzeichnis der ACQUITY UPLC Konsole den Eintrag SQ Detector (SQ Detektor) aus.,Welocalize ,,
+Click Configure > IntelliStart Configuration.,Klicken Sie auf Configure > IntelliStart Configuration (Konfigurieren > IntelliStart Konfiguration),Welocalize ,only parts found in TM,DB
+Checks list,Liste Checks (Prüfungen),Welocalize ,,"In the IntelliStart Configuration dialog box, in the Checks list, select the checkboxes for the items you want checked during SQ detector startup. DB"
+Click Apply > OK.,Klicken Sie auf Apply > OK (Anwenden > OK).,Welocalize ,Empower2,"Würde ich besser einheitlich so machen, auch wenn OK nicht übersetzt wird"
+"In the SQ Detector information window, click IntelliStart.",Klicken Sie im Informationsfenster des SQ Detektors auf IntelliStart.,Welocalize ,,
+light emitting diodes,Leuchtdioden,Welocalize ,"Aquity TM, GlobalSight Premier TM; also abbreviated as LED",
+ACQUITY UPLC Console software,Software der ACQUITY UPLC Konsole,Welocalize ,only parts found in TM,DB
+fluidics system,Flüssigkeitssystem,Welocalize ,only parts found in TM,"DB: im TM wird h?ufiger ""Flüssigkeit"" verwendet"
+"Chemical-resistant, powder-free gloves",chemikalienbest?ndige nicht gepuderte Schutzhandschuhe,Welocalize ,only parts found in TM,DB
+reservoir bottle,Vorratsflasche,Welocalize ,,
+Fluidics system diverter valve positions,Umleitventilstellungen für das Flüssigkeitssystem,Welocalize ,only parts found in TM,DB
+Click Control > Show Tune window.,Klicken Sie auf Control > Show Tune window (Steuerung > Fenster Abstimmung anzeigen).,Welocalize ,,DB
+Click Purge.,Klicken Sie auf Purge (Spülen).,Welocalize ,Empower2,
+Reset button,Taste Reset (Zurücksetzen),Welocalize ,"Ayfer: Hier ist ""button"" wirklich eine [physische] Taste und keine Schaltflaeche.",
+Set system shutdown parameters in the Shutdown Editor.,Legen Sie die Ausschaltparameter für das System im Shutdown Editor (Ausschalteditor) fest.,Welocalize ,,
+"In the Flow Control panel, select Waste as the flow state.",W?hlen Sie im Bedienfeld Flow (Fluss) die Option Waste (Abfall) als Flussstatus.,Welocalize ,not found in TM,
+Click Control > Standby.,Klicken Sie auf Control > Standby (Steuerung > Standby).,Welocalize ,,DB
+Click Control > Gas Off.,Klicken Sie auf Control > Gas Off (Steuerung > Gas aus).,Welocalize ,,DB
+Click Control > Vent.,Klicken Sie auf Control > Vent (Steuerung > Entlüften).,Welocalize ,,DB
+ESCi (Combined electrospay and atmospheric pressure chemical ionization),ESCi (Kombinierte Elektrospray-Ionisierung und chemische Ionisierung unter Atmosph?rendruck),Welocalize ,term electrospray misspelled as electrospay. ,
+ESI (Electrospray ionization),ESI (Elektrospray-Ionisierung),Welocalize ,,
+ESI probe,ESI-Sprühkopf,Welocalize ,,
+Probe adjuster assembly,Sprühkopfjustierung,Welocalize ,"only parts found in TM, AG: assembly is not translated here, Assembly : Baugruppe","DB: Kunde m?chte, dass auf Bindestriche m?glichst verzichtet wird"
+Probe adjuster assembly contacts,Anschlüsse der Sprühkopfjustierung,Welocalize ,,DB: s.o.
+Fluidics diverter valve,Flüssigkeitsumleitventil,Welocalize ,,DB: s.o.
+Vernier probe adjuster,Vernier-Sprühkopffeinjustierung,Welocalize ,GlobalSight Premier XE TM,
+Desolvation gas connection,Desolvatationsgasanschluss,Welocalize ,GlobalSight Premier XE TM,
+Nebulizer gas connection,Zerst?ubergasanschluss,Welocalize ,GlobalSight Premier XE TM,
+ESI probe electrical lead,Stromkabel des ESI-Sprühkopfes,Welocalize ,,
+Probe adjuster assembly electrical lead,Stromkabel der Sprühkopfjustierung,Welocalize ,,DB
+HV connection,HV-Anschluss,Welocalize ,GlobalSight Premier XE TM,
+dispersion,Dispersion,Welocalize ,,
+Needle-nose pliers,Spitzzange,Welocalize ,"Term used inconsistently in GlobalSight Premier XE, and Acquity: *Spitzzange*, *Flachzange*, *Pinzette*","DB: ""Spitzzange"" wird am h?ufigsten verwendet "
+Corona pin mounting contact blanking plug,Schutzstecker für den Steckkontakt der Koronanadel,Welocalize ,Please note: Can only be found as Corona *Discharge* Pin Mounting Contact Blanking Plug in TM. Is this the same?,
+Sample cone tip,Spitze des Probeneinlass-Cones,Welocalize ,,DB
+"In the Tune window, click Setup > Inter-scan Setup.",Klicken Sie im Fenster Tune (Abstimmung) auf Setup > Interscan-Setup (Einrichten > Inter-Scan einrichten).,Welocalize ,"Check: inconsistent spelling in German, Interscan - Inter-Scan. What is preferred?",DB
+"In the MassLynx window, click MS Tune.",Klicken Sie im MassLynx Fenster auf MS Tune (MS-Abstimmung).,Welocalize ,,
+"In the Inter-scan Setup dialog box, click Reset to Defaults.",Klicken Sie im Dialogfeld Interscan-Setup (Inter-Scan einrichten) auf Reset to Defaults (Auf Standardeinstellungen zurücksetzen).,Welocalize ,,DB
+"In the MassLynx Tune window, click Ion Mode > ESCi+.",Klicken Sie im MassLynx Fenster Tune (Abstimmung) auf Ion Mode > ESCi+ (Ionisierungsmodus >  ESCi+).,Welocalize ,,
+"In row 1, set Ion Mode to ES",Stellen Sie in der 1. Zeile die Option Ion Mode (Ionisierungsmodus) auf ES ein.,Welocalize ,,
+"In row 2, set Ion Mode to APcI.",Stellen Sie in der 2. Zeile die Option Ion Mode (Ionisierungsmodus) auf APCI ein.,Welocalize ,,
+"In each row, set Mass to 42 and Span to 5.",Setzen Sie in jeder Zeile den Wert für Mass (Masse) auf 42 und den Wert für Span (Bereich) auf 5.,Welocalize ,,
+Capillary (kV) ,Capillary (Kapillare) (kV) ,Welocalize ,,
+"Corona (?A in current mode, or kV in the voltage mode)",Corona (Korona) (?A im Strommodus oder kV im Spannungsmodus),Welocalize ,,DB
+ESI+ and APcI+ signal,ESI+ und APCI+ Signal,Welocalize ,"APcI oder APCI,  m?glichst konsistente Schreibweise im Deutschen, in Englischer Vorlage nicht einheitlich.",
+Install a 10-ml bottle of Waters Setup Solution QP on reservoir A.,Setzen Sie als Vorratsbeh?lter A eine 10-mL-Flasche der Waters Setup Solution QP ein.,Welocalize ,,DB
+"In the Tune window, click Nitrogen to start the desolvation gas flow.","Klicken Sie im Fenster Tune (Abstimmung) auf Nitrogen (Stickstoff), um den Desolvatationsgasfluss zu starten.",Welocalize ,,DB
+Click Operate  to put the instrument in Operate mode.,"Klicken Sie auf Operate (Betrieb), um das Ger?t in Betrieb zu nehmen.",Welocalize ,,
+Click Ion Mode  >  Electrospray+.,Klicken Sie auf Ion Mode > Electrospray+ (Ionisierungsmodus > Electrospray+).,Welocalize ,,DB
+"Click the Analyser tab, and then select Reservoir A.","Klicken Sie auf die Registerkarte Analyser (Analysator), und w?hlen Sie dann Reservoir A (Beh?lter A) aus.",Welocalize ,,DB
+"Select Infusion as the flow state, and then click Start Flow.","W?hlen Sie als Flussstatus Infusion, und klicken Sie dann auf Start Flow (Fluss starten).",Welocalize ,,DB
+Click Calibration > Calibrate Instrument.,Klicken Sie auf Calibration > Calibrate Instrument (Kalibrierung > Ger?t kalibrieren).,Welocalize ,,
+"In the Calibration dialog box, click File > Open, and then select Uncal.cal.",Klicken Sie im Dialogfeld Calibration (Kalibrierung) auf File > Open (Datei > ?ffnen) und danach auf Uncal.cal.,Welocalize ,,DB
+The Calibration dialog box should display “No Calibrations” for all three calibration types.,Das Dialogfeld Calibration (Kalibrierung) sollte für alle drei Kalibrierarten “No Calibrations” (Keine Kalibrierungen) anzeigen.,Welocalize ,,DB
+Click Calibrate > Default.,Klicken Sie auf Calibrate > Default (Kalibrieren > Voreinstellungen).,Welocalize ,"Empower2, AG: Standards und Defaults müssen hier unterschieden werden",
+Click File > Save As.,Klicken Sie auf File > Save As (Datei > Speichern unter).,Welocalize ,Empower2,this is Windows terminology and should be known
+Click File > Exit.,Klicken Sie auf File > Exit (Datei > Beenden).,Welocalize ,Empower2,this is Windows terminology and should be known
+"In the Tune window mass editor, open the four masses shown below",W?hlen Sie im Masseneditor des Fensters Tune (Abstimmung) die vier nachfolgend angezeigten Massen. ,Welocalize ,,"Should ""open"" be xlated as ""check"" [the 4 masses]. Please see the figure. DB: würde ich zun?chst mit ""?ffnen"" übersetzen, da die Massen auch eingetragen werden müssen"
+"On the Source tab, use the Capillary, Cone, and Extractor voltages to optimize all four peak heights.","W?hlen Sie auf der Registerkarte Source (Quelle) die Spannungen für Capillary (Kapillare), Cone und Extractor (Extraktor), um alle vier Peakh?hen zu optimieren.",Welocalize ,,
+"Click Acquire, and then click Start.",Klicken Sie auf Acquire (Erfassen) und anschlie?end auf Start.,Welocalize ,,
+Start Acquisition dialog box,Dialogfeld Start Acquisition (Erfassung starten),Welocalize ,,"Acquisiton is used as Acquisition and Erfassung (as in Data Acquisition) in German. Confirm usage in this context. DB: würde hier ""Erfassung"" verwenden"
+"On the main Masslynx page, click Spectrum.",Klicken Sie auf der Hauptseite von MassLynx auf Spectrum (Spektrum).,Welocalize ,,
+Click Replace New Spectrum.,Klicken Sie auf Replace New Spectrum (Durch neues Spektrum ersetzen).,Welocalize ,AG: meint Spektrum durch neues ersetzen,Not found. Check translation.
+Click Process > Smooth.,Klicken Sie auf Process > Smooth (Prozess > Gl?tten).,Welocalize ,,DB
+Click Display > View.,Klicken Sie auf Display > View (Anzeigen > Ansicht).,Welocalize ,,DB
+Click Display > Peak Annotation.,Klicken Sie auf Display > Peak Annotation (Anzeigen > Peak-Anmerkung).,Welocalize ,,DB
+Waters API Calibration (NaCsI) Solution,Waters API Kalibrierl?sung (NaCsI),Welocalize ,,DB
+"In the Tune window, click Ion Mode > Electrospray+.",Klicken Sie im Fenster Tune (Abstimmung) auf Ion Mode > Electrospray+ (Ionisierungsmodus > Elektrospray+).,Welocalize ,,
+ES+ Source tab,Registerkarte ES+ Source (ES+-Quelle),Welocalize ,,DB
+Set Flow State to Infusion.,Setzen Sie die Option Flow State (Flussstatus) auf Infusion.,Welocalize ,,DB
+Click Start Flow.,Klicken Sie Start Flow (Fluss starten).,Welocalize ,,DB
+Click Setup > Set Instrument Threshold.,Klicken Sie auf Setup > Set Instrument Threshold (Einrichten > Ger?teschwellenwerte festlegen),Welocalize ,,DB
+Instrument Threshold Settings dialog box,Dialogfeld Instrument Threshold Settings (Einstellungen der Ger?teschwellenwerte) ,Welocalize ,,
+Click Calibration > Calibrate Instrument.,Klicken Sie auf Calibration > Calibrate instrument (Kalibrieren > Ger?t kalibrieren).,Welocalize ,,
+"In the Calibration dialog box, click Edit > AutoCal Check Parameters.",Klicken Sie im Dialogfeld Calibration (Kalibrierung) auf Edit > AutoCal Check Parameters (Bearbeiten > Parameter der ?berprüfung der automatischen Kalibrierung).,Welocalize ,,
+Automatic Calibration Check dialog box,Dialogfeld Automatic Calibration Check (Automatische Prüfung der Kalibrierung),Welocalize ,GlobalSight Premier XE TM Please note found (Automatische Kalibrierungsprüfung) or (Automatische Prüfung der Kalibrierung) in TM,
+Click Edit > Calibration Parameters.,Klicken Sie auf Edit > Calibration Parameters (Bearbeiten > Parameter kalibrieren). ,Welocalize ,Empower2,
+Click Edit > Quad Mass Measure parameters.,Klicken Sie auf Edit > Quad Mass Measure Parameters (Bearbeiten > Quadmassenmessungsparameter),Welocalize ,Empower2,
+Mass Measure dialog box,Dialogfeld Mass Measure (Massenmessung),Welocalize ,GlobalSight Premier XE TM,
+Click File > Open.,Klicken Sie auf File > Open (Datei > ?ffnen).,Welocalize ,Empower2,this is Windows terminology and should be known
+Click File > Save.,Klicken Sie auf File > Save (Datei > Speichern).,Welocalize ,Empower2,this is Windows terminology and should be known
+Click Acquisition Parameters.,Klicken Sie auf Acquisition parameters (Erfassungsparameter).,Welocalize ,Empower2,
+Click Process > Verification From File.,Klicken Sie auf Process > Verification From File (Prozess > von Datei verifizieren).,Welocalize ,Please note: Can only be found as *Verification from File*. Is this the same?,"DB: Ohne Zusammenhang kann ich das auch nicht sagen, würde ""aus"" einfügen"
+Display Verification Graphs dialog box,Dialogfeld Display Verification Graphs (Verifizierungsgraphen anzeigen),Welocalize ,,DB
+ACQUITY UPLC Console SQ Detector online Help topic “Troubleshooting the SQ Detector”,"Online-Hilfe zum SQ Detektor der ACQUITY UPLC Konsole ""Troubleshooting the SQ Detector” (Fehlerbehebung beim SQ Detektor) ",Welocalize ,,the help hasn't be translated  DB
+Waters Quality Parts Locator,Waters Quality Parts Locator (Navigator für Waters Qualit?tsersatzteile),Welocalize ,"Has this previously been translated? Or is a new translation required?
+Herr Gerceker, siehe das Arbeitsblatt ""QUESTIONS"" sowie die beiden Abbildungen ueber den ""Locator"", AG: Spare parts Listen teilweise auch auf CDs erh?ltlich (z. B. GPC Alliance)   --> w?hle deshalb Navigator","For spare parts details, see the Waters Quality Parts Locator on the Waters web site’s Services/Support page. --
+option on Waters website"
+Services/Support page,Seite Services/Support (Service/Hilfe),Welocalize ,Has this previously been translated? Or is a new translation required?,"For spare parts details, see the Waters Quality Parts Locator on the Waters web site’s Services/Support page. --
+option on Waters website DB: Vorschlag, kommt darauf an, ob die Waters Internetseite auch auf Deutsch vorliegt"
+intelligent device management (IDM) web service,"Internetservice zum ""Intelligent Device Management"" (IDM)",Welocalize ,,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+Select Troubleshoot > Submit Connections Insight request.,W?hlen Sie Troubleshoot > Submit Connections Insight request (Fehlerbehebung > ConnectionsINSIGHT Anfrage senden).,Welocalize ,"""Connections Insight"" ist eine Marke und daher ohne Bindestrich.","spelling must be:
+Submit Connections Insight Request DB: Vorschlag, ""Connections Insight"" ist wohl ein Name"
+Connections Insight Request dialog box,Dialogfeld Connections Insight Request (ConnectionsINSIGHT Anfrage),Welocalize ,"""Connections Insight"" ist eine Marke und daher ohne Bindestrich.",DB: s.o.
+Click Show Tune.,Klicken Sie auf Show Tune (Abstimmung anzeigen).,Welocalize ,,DB
+Source cleanout tray,Ablageschale für die Quellenreinigung ,Welocalize ,,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+HPLC-grade (or better) methanol,Methanol (HPLC-Qualit?t oder besser),Welocalize ,,
+exhaust trap bottle,Kondensatflasche für Abgas,Welocalize ,,is this the same as exhaust waste bottle? DB: ohne Zusammenhang kann ich diese Frage auch nicht beantworten
+[to] gas ballast the roughing pump,die Vorpumpe unter Gasballast betreiben,Welocalize ,,Gas ballasting purges condensed contaminants from the oil. DB
+MAX level ,Maximaler Füllstand,Welocalize ,,DB
+Ion block assembly,Ionenblock,Welocalize ,in context as *Ionenblock und Cone-Einheit*,
+Source enclosure door,Quellengeh?useabdeckung,Welocalize ,GlobalSight Premier XP,
+Extraction tool,Zerlegewerkzeug,Welocalize ,Werkzeug für den Ausbau eines Teils ,DB
+Cone gas assembly,Cone-Gas-Einheit,Welocalize ,Found in GlobalSight Premier TM as Cone Gas Cone Assembly / Cone-Gas-Cone-Einheit,
+Ion block cover plate securing screw,Sicherungsschraube der Abdeckplatte des Ionenblocks,Welocalize ,GlobalSight Premier XE ,
+ring terminal tags,Anschlussringe,Welocalize ,GlobalSight Premier XE TM,
+heater cartridge assembly heat-shrink tubing,Schrumpfschlauch der Heizpatrone,Welocalize ,heater cartridge assembly > Heizpatroneneinheit,DB
+PEEK terminal block securing screw,Sicherungsschraube der PEEK Klemmleiste,Welocalize ,GlobalSight Premier XE TM,PEEK is a trademark
+Extraction cone aperture,?ffnung des Extraktions-Cones,Welocalize ,GlobalSight Premier XE TM,
+Extraction cone retainer,Halterung des Extraktions-Cones,Welocalize ,found only Extraction cone,
+Hexapole assembly,Hexapol-Einheit,Welocalize ,Hexapol-Einheit,DB: ja
+Adaptor housing,Adaptergeh?use,Welocalize ,is adaptor = adapter,DB: ja
+PEEK ion block support,PEEK Ionenblockhalterung,Welocalize ,GlobalSight Premier XE TM,
+bore tubing,Schlauchleitungdurchlass,Welocalize ,GlobalSight Premier XE TM,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+"In the Source tab, set Desolvation (L/hr) to 650.",Setzen Sie auf der Registerkarte Source (Quelle) die Desolvation (L/hr) (Desolvatation [L/h]) auf 650 ein.,Welocalize ,"Empower2, AG: in Spalte A steht 650 L/h, oder ??",
+Set APcI Probe Temp (°C) to 650.,Stellen Sie die Temperatur des APCI-Sprühkopfes (°C) auf 650 ein.,Welocalize ,,
+end-cover retaining screws,Halteschrauben der Endabdeckung,Welocalize ,,
+UNF coupling,UNF-Kupplung,Welocalize ,GlobalSight Premier XE ,
+ferrule,Quetschhülse,Welocalize ,GlobalSight Premier XE ,
+Flat blade jeweller’s screwdriver,Flachkopf-Uhrmacherschraubendreher,Welocalize ,,
+Waters Micromass Source Pressure Test Unit Operator’s Guide,Waters Micromass Source Pressure Test Unit Operator’s Guide (Benutzerhandbuch für die Waters Micromass Quellendrucktesteinheit),Welocalize ,GlobalSight Premier XE ,"not xlated for FIGS, hence must be bilingual"
+IonSABRE APCI probe,IonSABRE APCI Sprühkopf,Welocalize ,,please leave IonSABRE as is
+Door glass retaining clip,Halteklammer der Glasabdeckung,Welocalize ,GlobalSight Premier XE ,
+Source enclosure door glass seal,Dichtung der Glasabdeckung des Quellengeh?uses,Welocalize ,GlobalSight Premier XE ,DB
+Air filter tab,Luftfilterhalterung,Welocalize ,,"Important: This is not a tab seen in software applications! Please see the image in chapter 5! A similar word is ""flange""."
+Nitrogen inlet,Stickstoffeinlass,Welocalize ,GlobalSight Premier XE ,
+Event inputs and outputs,Ereigniseing?nge und -ausg?nge,Welocalize ,,
+Shielded Ethernet,Abgschirmtes Ethernetkabel,Welocalize ,"Wir sollten das Wort ""Kabel"" hinzufuegen!","add ""cable"""
+Roughing pump relay switch,Relais der Vorpumpe,Welocalize ,Relais ist immer ein Schalter per se,DB
+Turbo vacuum,Turbovakuum,Welocalize ,"This means:
+Vacuum connection for the turbo-pump
+Vacuum connection for the source
+Please see the image in the manual.",
+Exhaust port flange,Flansch des Abgasanschlusses,Welocalize ,,
+Oil filler plug,?leinlassverschraubung,Welocalize ,GlobalSight Premier XE TM,
+Oil-level sight glass,?lstandsichtfenster,Welocalize ,GlobalSight Premier XE TM,
+Drain plug,Ablassschraube,Welocalize ,used in Oil Drain Plug (?lablassschraube),
+Gas ballast valve,Gasballastventil,Welocalize ,found as Gas ballast control - Gasballastventil,
+Elbows,Bogenstücke,Welocalize ,,this is a tube in the shape of an elbow!   DB
+included in the roughing pump connect kit,enthalten im Anschlusskit der Vorpumpe ,Welocalize ,,DB
+1-inch ID vacuum hose,"1 Zoll (2,54-cm) ID-Vakuuumschlauch",Welocalize ,check precise measurements for Europe. Confirm German abbreviation ID (Innendurchmesser),"ID stands for: internal diameter, see previous occurences"
+NW25 tee,NW25 T-Stück ,Welocalize ,please clarify abbreviation,
+Roughing pump relay box connector,Anschluss des Vorpumpenrelaisgeh?uses ,Welocalize ,,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+To power source,Zur Stromversorgung,Welocalize ,,Clearer: To the power source
+To laboratory exhaust port,Zum Laborabzug,Welocalize ,,Clearer:To the laboratory exhaust port
+10-mm OD,10 mm AD,Welocalize ,check precise measurements for Europe. Confirm German abbreviation ID (Innendurchmesser),OD = outer diameter
+From instrument exhaust connection,Vom Abgasauslass des Ger?tes,Welocalize ,GlobalSight Premier XE TM,Clearer: From the instrument exhaust connection
+Barbed fitting,geriffelte Aufsteckhülse,Welocalize ,,
+Drain cup,Ablaufbeh?lter,Welocalize ,Ablauf,"DB: nur Vorschlag, l?sst sich ohne Zusammenhang nicht genau übersetzen"
+Drain lines,Ablaufleitungen,Welocalize ,,
+Analog (Out),Analog (Out) (Analog [Ausgang]),Welocalize ,,Signal connections
+Stop Flow (Out),Stop Flow (Out) (Fluss anhalten [Ausgang]),Welocalize ,,Signal connections
+Inject Start (In),Inject Start (In) (Injektionsstart [Eingang]),Welocalize ,,Signal connections
+Event (In),Event In (Ereigniseingang),Welocalize ,,Signal connections
+Switch 2 (Out),Switch 2 (Out) (Schalter 2 [Ausgang]),Welocalize ,,Signal connections
+Switch 3 (Out),Switch 3 (Out) (Schalter 3 [Ausgang]),Welocalize ,,Signal connections
+Switch 4 (Out),Switch 4 (Out) (Schalter 4 [Ausgang]),Welocalize ,,Signal connections
+self-tapping screw,selbstsichernde Schraube,Welocalize ,Blechschraube? Schneidschraube?,"DB: ohne Zusammenhang kann ich diese Frage auch nicht beantworten
+Ayfer: das Handbuch wurde bereitgestellt, und Sie haetten eine Frage an Waters senden koennen."
+Controlling Contamination in LC/MS Systems,Controlling Contamination in LC/MS Systems (Vermeiden von Kontaminationen in LC/MS-Systemen),Welocalize ,,"not xlated for FIGS, hence must be bilingual  DB"
+Click Services and Support > Support Center.,Klicken Sie auf Services and Support > Support Center (Service und Support > Supportbereich).,,,
+[To] pump down,Vakuum aufbauen,,"evakuieren, Vakuum aufbauen - Herr Gerceker, dies war die Frage, die ich Ihnen einmal geschickt hatte.                           AG: Vakuum aufbauen ist auch gut (allerdings ist ein Vakuum materiefreier Raum, d. h. man entfernt Materie --> deswegen halte ich ""evakuieren"" für sachlich angemessen, ""Vakuum aufbauen"" ist parallel dazu gebr?uchlich.",
+,,,,
+,,,,

@@ -37,72 +37,90 @@ namespace GlobalSight.AdobeConverter
 
                 this.textBox_dir_indesign.Text = inddDir;
                 this.textBox_dir_illustrator.Text = illuDir;
+                this.cbAutoStart.Checked = AppConfig.AutoStart;
             }
             catch { }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            startConverter();
+        }
+
+        private void startConverter()
+        {
             String dirIndd = textBox_dir_indesign.Text;
             String dirIllustrator = textBox_dir_illustrator.Text;
             bool isIndd = checkBox1.Checked;
             bool isIllustrator = checkBox2.Checked;
 
-            if (!dirIndd.Trim().Equals("") && !isInddStarted
-                 && isIndd)
+            if (!isInddStarted && isIndd)
             {
-                if (Directory.Exists(dirIndd))
+                if (!dirIndd.Trim().Equals(""))
                 {
-                    try
+                    if (Directory.Exists(dirIndd))
                     {
-                        AppConfig.UpdateAppConfig(keyInddDir, dirIndd);
+                        try
+                        {
+                            AppConfig.UpdateAppConfig(keyInddDir, dirIndd);
+                        }
+                        catch { }
+                        try
+                        {
+                            InDesignController.start(dirIndd);
+                            isInddStarted = true;
+                            this.checkBox1.ForeColor = System.Drawing.Color.Green;
+                            button1.Enabled = false;
+                            button2.Enabled = true;
+                            //MessageBox.Show("InDesign Converter start successfully.");
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show(this, "InDesign Converter can't be started.");
+                        }
                     }
-                    catch { }
-                    try
+                    else
                     {
-                        InDesignController.start(dirIndd);
-                        isInddStarted = true;
-                        this.checkBox1.ForeColor = System.Drawing.Color.Green;
-                        button1.Enabled = false;
-                        button2.Enabled = true;
-                        //MessageBox.Show("InDesign Converter start successfully.");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("InDesign Converter can't be started.");
+                        MessageBox.Show(this, "InDesign Converter can't be started because of Directory (" + dirIndd + ") does not exists!");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("InDesign Converter can't be started because of Directory (" + dirIndd + ") does not exists!");
+                    MessageBox.Show(this, "Please set the conversion directory first");
                 }
             }
-            if (!dirIllustrator.Trim().Equals("") && !isIllustratorStarted
-                 && isIllustrator)
+            if (!isIllustratorStarted && isIllustrator)
             {
-                if (Directory.Exists(dirIllustrator))
+                if (!dirIllustrator.Trim().Equals(""))
                 {
-                    try
+                    if (Directory.Exists(dirIllustrator))
                     {
-                        AppConfig.UpdateAppConfig(keyIlluDir, dirIllustrator);
+                        try
+                        {
+                            AppConfig.UpdateAppConfig(keyIlluDir, dirIllustrator);
+                        }
+                        catch { }
+                        try
+                        {
+                            IllustratorController.start(dirIllustrator);
+                            isIllustratorStarted = true;
+                            this.checkBox2.ForeColor = System.Drawing.Color.Green;
+                            button1.Enabled = false;
+                            button2.Enabled = true;
+                        }
+                        catch (Exception em)
+                        {
+                            MessageBox.Show(this, "Illustrator Converter can't be started.");
+                        }
                     }
-                    catch { }
-                    try
+                    else
                     {
-                        IllustratorController.start(dirIllustrator);
-                        isIllustratorStarted = true;
-                        this.checkBox2.ForeColor = System.Drawing.Color.Green;
-                        button1.Enabled = false;
-                        button2.Enabled = true;
-                    }
-                    catch (Exception em)
-                    {
-                        MessageBox.Show("Illustrator Converter can't be started.");
+                        MessageBox.Show(this, "Illustrator Converter can't be started because of Directory (" + dirIllustrator + ") does not exists!");
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Illustrator Converter can't be started because of Directory (" + dirIllustrator + ") does not exists!");
+                    MessageBox.Show(this, "Please set the conversion directory first");
                 }
             }
         }
@@ -242,5 +260,29 @@ namespace GlobalSight.AdobeConverter
             }
         }
 
+        private void cbAutoStart_CheckedChanged(object sender, EventArgs e)
+        {
+            AppConfig.AutoStart = cbAutoStart.Checked;
+        }
+
+        public void autoStart()
+        {
+            this.cbAutoStart.Checked = AppConfig.AutoStart;
+            string dir = AppConfig.GetAppConfig(keyInddDir);
+            if (dir == null || "".Equals(dir.Trim()))
+            {
+                return;
+            }
+
+            String oriText = this.cbAutoStart.Text;
+            this.cbAutoStart.Text = "Auto Starting...";
+            this.cbAutoStart.Enabled = false;
+            checkBox1.Checked = true;
+
+            startConverter();
+
+            this.cbAutoStart.Text = oriText;
+            this.cbAutoStart.Enabled = true;
+        }
     }
 }

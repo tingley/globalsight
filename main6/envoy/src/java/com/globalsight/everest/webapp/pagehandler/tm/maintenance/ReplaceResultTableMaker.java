@@ -83,14 +83,13 @@ public class ReplaceResultTableMaker
     /**
      * Converts the replace results into table rows.
      */
-    public String getTableRows(Connection p_connection, TmConcordanceResult p_tmResults,
-        Collection p_replaced)
-        throws EnvoyServletException
+	public String getTableRows(TmConcordanceResult p_tmResults,
+			Collection p_replaced) throws EnvoyServletException
     {
         m_replaced = new HashSet(p_replaced);
 
         StringBuffer sb = new StringBuffer();
-        List<SegmentTmTu> tus = p_tmResults.getTus(p_connection);
+        List<SegmentTmTu> tus = p_tmResults.getTus();
         GlobalSightLocale srcLocale = p_tmResults.getSourceLocale();
         ArrayList trgLocales = p_tmResults.getTargetLocales();
         // NOTE: for now we only display one target locale

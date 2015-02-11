@@ -14,7 +14,6 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.ling.tw.internal;
 
 import java.util.HashSet;
@@ -23,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.globalsight.ling.common.DiplomatBasicParserException;
+import com.globalsight.ling.tw.XmlEntities;
 
 public class InternalTextUtil
 {
@@ -33,11 +33,18 @@ public class InternalTextUtil
     private final static String INTERNAL_START_REGEX_3 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>";
     private final static String INTERNAL_ALL_REGEX_3 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"%n%\"[^>]*?/>(.*?)<ept[^>]*?i=\"%n%\"[^>]*?/>";
 
+    private final static String REGEX_INTERNAL_1 = "<bpt[^>]*?i=\"(\\d*?)\"[^>]*?internal=\"yes\"[^>]*?>[^<]*?</bpt>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</ept>";
+    private final static String REGEX_INTERNAL_2 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</bpt>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?>[^<]*?</ept>";
+    private final static String REGEX_INTERNAL_3 = "<bpt[^>]*?internal=\"yes\"[^>]*?i=\"(\\d*?)\"[^>]*?/>([\\s\\S]*?)<ept[^>]*?i=\"(\\d*?)\"[^>]*?/>";
+
     private static final String TAG_REGEX = "<.pt.*?>[^<]*?</.pt>";
     private static final String TAG_REGEX_ALONE = "<[^>]*?>";
 
     private InternalTexts texts = new InternalTexts();
     private InternalTag internalTag;
+
+    public static final String INSIDE_INTERNAL_BRACKET_LEFT = "GS_INSIDE_INTERNAL_BRACKET_LEFT";
+    public static final String INSIDE_INTERNAL_BRACKET_RIGHT = "GS_INSIDE_INTERNAL_BRACKET_RIGHT";
 
     public InternalTextUtil(InternalTag internalTag)
     {
@@ -73,6 +80,24 @@ public class InternalTextUtil
         return s1;
     }
 
+    /**
+     * Uses special entities to mark the square brackets inside internal tag.
+     * <p>
+     * Need to replace back before displaying to user.
+     */
+    private String convertBrackets(String internalTag)
+    {
+        if (!internalTag.startsWith("[") && !internalTag.endsWith("]"))
+        {
+            return internalTag;
+        }
+        String strInside = internalTag.substring(1, internalTag.length() - 1);
+        strInside = strInside.replace("[", INSIDE_INTERNAL_BRACKET_LEFT)
+                .replace("]", INSIDE_INTERNAL_BRACKET_RIGHT);
+
+        return "[" + strInside + "]";
+    }
+
     private String preProcessInternalText(String segment, String bptRegex,
             String allRegex) throws DiplomatBasicParserException
     {
@@ -94,8 +119,18 @@ public class InternalTextUtil
                 internalSegment = removeWhiteSpace(internalSegment);
                 String replaceTag = internalTag.getInternalTag(internalSegment,
                         matchedSegment, texts);
-                newSegment = newSegment.replace(matchedSegment, replaceTag);
+                // for GBS-2580
+                String wrappedTag = convertBrackets(replaceTag);
                 texts.addInternalTags(replaceTag, matchedSegment);
+                if (!wrappedTag.equals(replaceTag))
+                {
+                    XmlEntities xmlDecoder = new XmlEntities();
+                    texts.addWrappedInternalTags(
+                            xmlDecoder.decodeString(replaceTag),
+                            xmlDecoder.decodeString(wrappedTag));
+                }
+
+                newSegment = newSegment.replace(matchedSegment, replaceTag);
                 m = p.matcher(newSegment);
             }
             else
@@ -121,6 +156,24 @@ public class InternalTextUtil
         return indexs;
     }
 
+    /**
+     * Checks if the segment gxml contains an internal text.
+     */
+    private static boolean isInternalText(String segment, String internalRegex)
+    {
+        Pattern p = Pattern.compile(internalRegex);
+        Matcher m = p.matcher(segment);
+        if (m.find())
+        {
+            String matched = m.group();
+            if (segment.trim().length() == matched.trim().length())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Set<String> getInternalIndex(String segment)
     {
         Set<String> indexs = new HashSet<String>();
@@ -143,5 +196,12 @@ public class InternalTextUtil
 
         texts.setSegment(segment);
         return texts;
+    }
+
+    public static boolean isInternalText(String segment)
+    {
+        return isInternalText(segment, REGEX_INTERNAL_1)
+                || isInternalText(segment, REGEX_INTERNAL_2)
+                || isInternalText(segment, REGEX_INTERNAL_3);
     }
 }

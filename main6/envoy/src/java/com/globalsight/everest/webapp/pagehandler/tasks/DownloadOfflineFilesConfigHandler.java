@@ -69,6 +69,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             DOWNLOAD_OPTIONS.add(OfflineConstants.POPULATE_FUZZY);//11
             DOWNLOAD_OPTIONS.add(OfflineConstants.NEED_CONSOLIDATE);//12
             DOWNLOAD_OPTIONS.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT);//13
+            DOWNLOAD_OPTIONS.add(OfflineConstants.INCLUDE_REPETITIONS);//14
 
             // NOTES:These constants must be added in sequence!!!!
             DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_FORMAT_DEFAULT);//0
@@ -88,6 +89,7 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
             //need consolidate output file (for XLF format)
             DOWNLOAD_OPTIONS_DEFAULT.add("no");//12
             DOWNLOAD_OPTIONS_DEFAULT.add(UserParamNames.DOWNLOAD_OPTION_CHANGE_CREATIONID_FOR_MT_DEFAULT);//13
+            DOWNLOAD_OPTIONS_DEFAULT.add("no");//14
         }
         catch (Throwable ignore)
         {
@@ -204,6 +206,9 @@ public class DownloadOfflineFilesConfigHandler extends PageHandler implements
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
         
         key = OfflineConstants.NEED_CONSOLIDATE;
+        optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
+        
+        key = OfflineConstants.INCLUDE_REPETITIONS;
         optionsHash.put(key, request.getParameter(key) == null ? "no" : "yes");
     }
 

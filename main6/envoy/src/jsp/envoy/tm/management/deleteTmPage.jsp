@@ -1,3 +1,5 @@
+<%@page import="com.globalsight.everest.projecthandler.ProjectTM"%>
+<%@page import="com.globalsight.util.GlobalSightLocale"%>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -18,11 +20,10 @@ ResourceBundle bundle = PageHandler.getBundle(session);
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
         WebAppConstants.SESSION_MANAGER);
 String cancelUrl = cancel.getPageURL();
-String tmIdStr = (String)request.getAttribute(WebAppConstants.TM_TM_ID);
-String xmlDefinition =
-   (String)sessionMgr.getAttribute(WebAppConstants.TM_DEFINITION);
+String tmIdStr = (String) sessionMgr.getAttribute(WebAppConstants.TM_TM_ID);
+HashSet<GlobalSightLocale> tmLocales = (HashSet<GlobalSightLocale>) sessionMgr.getAttribute("tmLocales");
+ArrayList<ProjectTM> tms = (ArrayList<ProjectTM>) sessionMgr.getAttribute("projectTms");
 %>
- <HTML XMLNS:gs>
 <HEAD>
 <TITLE><%=bundle.getString("lb_tm_removing")%></TITLE>
 
@@ -41,40 +42,8 @@ var guideNode = "tm";
     
 function doOnLoad() {
     loadGuides();
-    var dom;
-
-    var xmlStr = "<%=xmlDefinition%>";
-    
-    if(isIE)
-    {
-      dom = oDefinition.XMLDocument;
-    }
-    else if(window.DOMParser)
-    { 
-      var parser = new DOMParser();
-      dom = parser.parseFromString(xmlStr,"text/xml");
-    }
-    
-    var langs = dom.selectNodes("/statistics/languages/language");
-
-    if(langs.length == 0){
-        TMForm.checkboxTm[0].checked = true;
-        TMForm.checkboxTm[1].disabled = true;
-        TMForm.LanguageList.disabled = true;
-    }
-    else {
-        for (var i = 0; i < langs.length; ++i) {
-            var lang = langs[i];
-            var name = lang.selectSingleNode("name").text;
-            var locale = lang.selectSingleNode("localeID").text;
-
-            oOption = document.createElement("OPTION");
-            oOption.text = name;
-            oOption.value = locale;
-            TMForm.LanguageList.add(oOption);
-        }
-    }
 }
+
 function submitForm(selectedButton) {
     if (selectedButton == 'Cancel') {
         window.location.href = "<%=cancelUrl%>";
@@ -112,25 +81,42 @@ function clickRadio(flag) {
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/common/navigation.jspIncl" %>
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
-<XML id="oDefinition" style="display:none"><%=xmlDefinition%></XML>
 <DIV ID="contentLayer"
  STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
 <SPAN CLASS="mainHeading"><%=bundle.getString("lb_tm_removing")%></SPAN>
+<br><br>
 <FORM NAME=TMForm method="post">
 <INPUT TYPE="hidden" NAME="<%=WebAppConstants.TM_TM_ID%>" VALUE="<%=tmIdStr%>">
     <div class='standardText'nowrap>
        <%=bundle.getString("lb_select_entries_to_remove")%>
     </div>
     <div class='standardText'nowrap>
-    <input type="radio" name="checkboxTm" value="deleteTm" onclick="clickRadio(true)"> 
-       <%= bundle.getString("lb_entire_tm")%>
+	    <input type="radio" name="checkboxTm" value="deleteTm" checked onclick="clickRadio(true)"> 
+	       <%= bundle.getString("lb_entire_tm")%>
+	    <br>
+	      <%
+		  for (ProjectTM tm : tms) {
+		      out.print("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>" + tm.getName() + "</i><br>");
+		  }
+		  %>
     </div>
     <br>
     <div class='standardText'nowrap>
-        <input type="radio" name="checkboxTm" value="deleteLanguage" checked onclick="clickRadio(false)">
+        <input type="radio" name="checkboxTm" value="deleteLanguage" onclick="clickRadio(false)">
            <%= bundle.getString("lb_by_language")%>
-        <select name="LanguageList" id="LanguageList">
+        <select name="LanguageList" id="LanguageList" disabled=true>
+          <%
+          GlobalSightLocale locale = null;
+          if (tmLocales != null && tmLocales.size() > 0) {
+              for (Iterator iterator = tmLocales.iterator(); iterator.hasNext();) {
+                 locale = (GlobalSightLocale) iterator.next();
+                 %>
+                 <option value="<%=locale.getId() %>"><%=locale.getDisplayName() %></option>
+                 <%
+              }
+          }
+          %>
        </select>
     </div>
     <br>

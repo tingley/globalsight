@@ -22,20 +22,21 @@ import java.util.List;
 
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.log4j.Logger;
-
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.leverage.SidComparable;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.edit.EditUtil;
 
 public class LeverageMatch extends PersistentObject implements Comparable,
         SidComparable
@@ -60,7 +61,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         catch (RESyntaxException ex)
         {
             // SNH (Should Never Happen)
-            CATEGORY.error(ex, ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new RuntimeException(ex.getMessage());
         }
 
@@ -106,7 +107,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
         // m_tagAligner = new SegmentTagsAligner();
     }
-    
+
     public LeverageMatch(LeverageMatch p_other)
     {
         sourcePageId = p_other.sourcePageId;
@@ -181,11 +182,6 @@ public class LeverageMatch extends PersistentObject implements Comparable,
         m_originalSourceTuvId = p_originalSourceTuvId;
     }
 
-    public void setOriginalSourceTuv(long p_originalSourceTuvId)
-    {
-        m_originalSourceTuvId = p_originalSourceTuvId;
-    }
-
     public long getMatchedTuvId()
     {
         return m_matchedTuvId;
@@ -195,12 +191,12 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     {
         m_matchedTuvId = p_matchedTuvId;
     }
-    
+
     public long getMatchedTableType()
     {
         return matchedTableType;
     }
-    
+
     public void setMatchedTableType(long p_matchedTableType)
     {
         matchedTableType = p_matchedTableType;
@@ -213,17 +209,22 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
     public void setMatchedText(String matchedText)
     {
-        this.matchedText = matchedText;
+        if (matchedText != null)
+        {
+            if (EditUtil.getUTF8Len(matchedText) > CLOB_THRESHOLD)
+            {
+                this.matchedClob = matchedText;
+            }
+            else
+            {
+                this.matchedText = matchedText;
+            }
+        }
     }
 
     public GlobalSightLocale getTargetLocale()
     {
         return m_targetLocale;
-    }
-
-    public void getTargetLocale(GlobalSightLocale targetLocale)
-    {
-        m_targetLocale = targetLocale;
     }
 
     public void setTargetLocale(GlobalSightLocale targetLocale)
@@ -233,7 +234,21 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
     public long getTargetLocaleId()
     {
-        return getTargetLocale().getId();
+        return m_targetLocale == null ? 0 : m_targetLocale.getId();
+    }
+
+    public void setTargetLocaleId(Long targetLocaleId)
+    {
+        try
+        {
+            m_targetLocale = ServerProxy.getLocaleManager().getLocaleById(
+                    targetLocaleId);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to set target locale for targetLocaleId "
+                    + targetLocaleId);
+        }
     }
 
     public String getMatchType()
@@ -383,12 +398,22 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
     public String getMatchedClob()
     {
-        return matchedClob;
+        return matchedClob == null ? matchedText : matchedClob;
     }
 
     public void setMatchedClob(String matchedClob)
     {
-        this.matchedClob = matchedClob;
+        if (matchedClob != null)
+        {
+            if (EditUtil.getUTF8Len(matchedClob) > CLOB_THRESHOLD)
+            {
+                this.matchedClob = matchedClob;
+            }
+            else
+            {
+                this.matchedText = matchedClob;
+            }
+        }
     }
 
     public String getMatchedSid()
@@ -401,13 +426,21 @@ public class LeverageMatch extends PersistentObject implements Comparable,
 
         return sid;
     }
-    
-    public String getOrgSid()
+
+    public String getOrgSid(String companyId)
     {
         if (orgSid == null && m_originalSourceTuvId > 0)
         {
-            TuvImpl tuv = HibernateUtil.get(TuvImpl.class,
-                    m_originalSourceTuvId);
+            TuvImpl tuv = null;
+            try
+            {
+                tuv = SegmentTuvUtil.getTuvById(m_originalSourceTuvId,
+                        companyId);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e.getMessage(), e);
+            }
             if (tuv != null)
             {
                 orgSid = tuv.getSid();
@@ -430,7 +463,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     {
         return getMatchedSid();
     }
-    
+
     public void setMtName(String p_mtName)
     {
         this.mtName = p_mtName;
@@ -450,19 +483,19 @@ public class LeverageMatch extends PersistentObject implements Comparable,
     {
         return this.matchedOriginalSource;
     }
-    
-    public void setJobDataTuId(long p_jobDataTuId) 
+
+    public void setJobDataTuId(long p_jobDataTuId)
     {
         this.jobDataTuId = p_jobDataTuId;
     }
-    
-    public long getJobDataTuId() 
+
+    public long getJobDataTuId()
     {
         return this.jobDataTuId;
     }
 
     /*
-     * Order all the leverage match result by the order score.
+     * Order all the leverage match result by the score_num.
      */
     public static void orderMatchResult(List list)
     {
@@ -483,7 +516,7 @@ public class LeverageMatch extends PersistentObject implements Comparable,
             }
         }
     }
-    
+
     public boolean equals(Object p_obj)
     {
         if (p_obj instanceof LeverageMatch)
@@ -497,17 +530,17 @@ public class LeverageMatch extends PersistentObject implements Comparable,
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     public int hashCode()
     {
-         HashCodeBuilder builder = new HashCodeBuilder(17, 37);
-         builder.append(this.m_originalSourceTuvId);
-         builder.append(this.m_subid);
-         builder.append(this.m_targetLocale);
-         builder.append(this.m_orderNum);
-         return builder.toHashCode();
+        HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+        builder.append(this.m_originalSourceTuvId);
+        builder.append(this.m_subid);
+        builder.append(this.m_targetLocale);
+        builder.append(this.m_orderNum);
+        return builder.toHashCode();
     }
 }

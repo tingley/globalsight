@@ -20,10 +20,12 @@ import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
@@ -36,15 +38,16 @@ import com.globalsight.util.edit.SegmentUtil;
 /**
  * PTag error checker.
  */
-public class PseudoErrorChecker
-    implements PseudoBaseHandler
+public class PseudoErrorChecker implements PseudoBaseHandler
 {
-
     private boolean m_bHasError = false;
     private PseudoData m_PseudoData;
     private boolean m_isSource = false;
     private String m_mockSource = "";
     private String m_mockTarget = "";
+    private String m_oriMockTarget = "";
+    private Vector m_targetTexts = new Vector();
+    private String m_newTarget = "";
     private Vector m_TrgTagList = new Vector();
     private String m_strErrMsg = "";
     private ResourceBundle m_resources = null;
@@ -75,7 +78,7 @@ public class PseudoErrorChecker
 
     private String styles;
     private SegmentUtil segmentUtil;
-    
+
     /**
      * Constructor - uses default locale for error messages.
      */
@@ -95,18 +98,60 @@ public class PseudoErrorChecker
         m_strErrMsg = "";
         m_mockSource = "";
         m_mockTarget = "";
+        m_targetTexts = new Vector();
+        m_newTarget = "";
 
         /*
-        * Do not reset the following
-        *  m_bVerifyLeadingWhiteSpace
-        *  m_bVerifyTrailingWhiteSpace
-        *  m_PseudoData
-        */
+         * Do not reset the following m_bVerifyLeadingWhiteSpace
+         * m_bVerifyTrailingWhiteSpace m_PseudoData
+         */
     }
 
     /**
-     * Checks to see if there was an error during the last
-     * verification attempt.
+     * Get a new target string after fixing moved tag for Office-XML
+     * 
+     * @return the new target String, or "" if do nothing
+     */
+    public String getNewTarget()
+    {
+        if (!isTagUnmovableFormat())
+        {
+            return "";
+        }
+
+        if (m_oriMockTarget.equals(m_mockTarget))
+        {
+            return "";
+        }
+
+        StringBuffer result = new StringBuffer();
+        int tCount = 0;
+        for (int i = 0; i < m_mockTarget.length(); i++)
+        {
+            char c = m_mockTarget.charAt(i);
+
+            if (c == 'T')
+            {
+                String text = (String) m_targetTexts.get(tCount);
+                result.append(text);
+                tCount++;
+            }
+            else if (c == 'E')
+            {
+                continue;
+            }
+            else
+            {
+                result.append(c);
+            }
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Checks to see if there was an error during the last verification attempt.
+     * 
      * @return true if there was an error, otherwise false.
      */
     public boolean hasError()
@@ -116,10 +161,12 @@ public class PseudoErrorChecker
 
     /**
      * Pseudo Parser event handler.
-     * @param originalString - the full token
+     * 
+     * @param originalString
+     *            - the full token
      */
     public void processTag(String p_strTagName, String p_originalString)
-    {        
+    {
         if (m_isSource)
         {
             m_mockSource += p_originalString;
@@ -140,9 +187,14 @@ public class PseudoErrorChecker
         else
         {
             m_mockTarget += isEmpty(p_strText) ? "E" : "T";
+
+            if (!isEmpty(p_strText))
+            {
+                m_targetTexts.add(p_strText);
+            }
         }
     }
-    
+
     private boolean isEmpty(String str)
     {
         if (str == null || "".equals(str) || str.length() == 0)
@@ -151,7 +203,8 @@ public class PseudoErrorChecker
         }
 
         // end of page: #8234 #8236
-        if (str.length() == 2 && 8234 == (int) str.charAt(0) && 8236 == (int) str.charAt(1))
+        if (str.length() == 2 && 8234 == (int) str.charAt(0)
+                && 8236 == (int) str.charAt(1))
         {
             return true;
         }
@@ -160,16 +213,20 @@ public class PseudoErrorChecker
     }
 
     /**
-     * Performs three levels of error checking on the PseudoData provided.<p>
-     * 1) Detects illegal or missing tag names.<p>
-     * 2) Detects a malformed tag sequence.<p>
-     * 3) Detects illegal tag positions (NOT IMPLIMENTED FOR THIS RELEASE).<p>
-     * 4) Detects invalid XML characters
-     * NOTE: No max length check is performed.
-     * @param p_PData - an up to date PsuedoData object.
+     * Performs three levels of error checking on the PseudoData provided.
+     * <p>
+     * 1) Detects illegal or missing tag names.
+     * <p>
+     * 2) Detects a malformed tag sequence.
+     * <p>
+     * 3) Detects illegal tag positions (NOT IMPLIMENTED FOR THIS RELEASE).
+     * <p>
+     * 4) Detects invalid XML characters NOTE: No max length check is performed.
+     * 
+     * @param p_PData
+     *            - an up to date PsuedoData object.
      */
-    public String check(PseudoData p_PData)
-        throws PseudoParserException
+    public String check(PseudoData p_PData) throws PseudoParserException
     {
         m_PseudoData = p_PData;
 
@@ -188,12 +245,12 @@ public class PseudoErrorChecker
                 System.out.println(e.toString());
             }
         }
-        
+
         if (notCountWordsValid())
         {
             return m_strErrMsg;
         }
-        
+
         buildTrgTagList();
         buildSrcTagList();
 
@@ -212,30 +269,151 @@ public class PseudoErrorChecker
             }
 
             // level #3 - Check Rule based movement
-            /*if ( !isMoveValid() )
-            {
-                return m_strErrMsg;
-            }*/
+            /*
+             * if ( !isMoveValid() ) { return m_strErrMsg; }
+             */
 
             // level #4 - Check for invalid XML characters
             if (!isCharactersValid())
             {
                 return m_strErrMsg;
             }
-            
-            // check if tags are moved for special format like office 2010
-            // phase 1, just apply to office 2010
-            if (isTagUnmovableFormat() && isTrgTagMoved())
+
+            if (!checkStyleTag(m_mockSource, m_mockTarget))
             {
                 return m_strErrMsg;
             }
+
+            // check if tags are moved for special format like office 2010
+            // phase 1, just apply to office 2010
+            if (isTagUnmovableFormat() && isTagMoved())
+            {
+                return m_strErrMsg;
+            }
+
+            String newTarget = getNewTarget();
+            if (!"".equals(newTarget))
+            {
+                m_PseudoData.setPTagTargetString(newTarget);
+            }
         }
-        catch (TagNodeException e) 
+        catch (TagNodeException e)
         {
             throw new PseudoParserException(e.toString());
         }
 
         return null;
+    }
+
+    private boolean checkStyleTag(String s1, String s2)
+    {
+        List<String> tags = new ArrayList<String>();
+        tags.add("bold");
+        tags.add("color");
+        tags.add("hyperlink");
+        tags.add("italic");
+        tags.add("superscript");
+        tags.add("underline");
+
+        s1 = s1.replaceAll("[TE]+", "");
+        s2 = s2.replaceAll("[TE]+", "");
+
+        Map<String, List<String>> t1 = getInsideTags(s1);
+        Map<String, List<String>> t2 = getInsideTags(s2);
+
+        for (String s : t2.keySet())
+        {
+            List<String> ts2 = t2.get(s);
+
+            if (ts2.size() > 0)
+            {
+                List<String> errorTag = new ArrayList<String>();
+
+                List<String> ts1 = t1.get(s);
+
+                for (String t : ts2)
+                {
+                    if (!ts1.contains(t))
+                        errorTag.add(t);
+                }
+
+                if (errorTag.size() > 0)
+                {
+                    String errorTagString = errorTag.toString();
+                    errorTagString = errorTagString.substring(1,
+                            errorTagString.length() - 1);
+
+                    m_strErrMsg = MessageFormat.format(
+                            m_resources.getString("ErrorTagInside"),
+                            errorTagString, s);
+
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private Map<String, List<String>> getInsideTags(String s)
+    {
+        List<String> tags = new ArrayList<String>();
+        tags.add("bold");
+        tags.add("color");
+        tags.add("hyperlink");
+        tags.add("italic");
+        tags.add("superscript");
+        tags.add("underline");
+
+        Map<String, List<String>> insideTags = new HashMap<String, List<String>>();
+
+        for (String tag : tags)
+        {
+            Pattern p = Pattern.compile("\\[(" + tag + "[^\\]]*)\\]");
+            Matcher m = p.matcher(s);
+
+            while (m.find())
+            {
+                String t = m.group(1);
+                String content = getContent(s, t);
+                List<String> ts = getAllTags(content);
+
+                insideTags.put(t, ts);
+            }
+        }
+
+        return insideTags;
+    }
+
+    private String getContent(String s, String tag)
+    {
+        Pattern p = Pattern.compile("\\[" + tag + "[^\\]]*\\](.*?)\\[/" + tag
+                + "[^\\]]*\\]");
+        Matcher m = p.matcher(s);
+
+        while (m.find())
+        {
+            return m.group(1);
+        }
+        return null;
+    }
+
+    private List<String> getAllTags(String s)
+    {
+        List<String> tags = new ArrayList<String>();
+        if (s == null || "".equals(s.trim())) {
+        	return tags;
+        }
+
+        Pattern p = Pattern.compile("\\[[^\\]]*\\]");
+        Matcher m = p.matcher(s);
+
+        while (m.find())
+        {
+            tags.add(m.group());
+        }
+
+        return tags;
     }
 
     /**
@@ -247,12 +425,13 @@ public class PseudoErrorChecker
      * @param src
      * @return
      */
-    private String moveBrackets(String src) 
+    private String moveBrackets(String src)
     {
         String regex = "\\[[^\\]]*?\\d+\\]";
         String s = Double.toString(Math.random());
         int n = src.indexOf(s);
-        while (n > -1) {
+        while (n > -1)
+        {
             s = Double.toString(Math.random());
             n = src.indexOf(s);
         }
@@ -262,7 +441,7 @@ public class PseudoErrorChecker
         Pattern p = Pattern.compile(regex);
         Matcher m = p.matcher(src);
         StringBuffer sb = new StringBuffer();
-        while (m.find()) 
+        while (m.find())
         {
             m.appendReplacement(sb, "");
         }
@@ -273,7 +452,7 @@ public class PseudoErrorChecker
 
         return src;
     }
-    
+
     /**
      * Some words are signed to not translate, validate all of them changed or
      * not.
@@ -288,9 +467,9 @@ public class PseudoErrorChecker
         if (src.length() < 1)
         {
             src = m_PseudoData.getPTagSourceString();
-            
+
             // for offline upload
-            Hashtable map= m_PseudoData.getPseudo2TmxMap();
+            Hashtable map = m_PseudoData.getPseudo2TmxMap();
             if (map != null && !map.isEmpty())
             {
                 Set keys = map.keySet();
@@ -303,10 +482,10 @@ public class PseudoErrorChecker
                 }
             }
         }
-        
+
         List notCountWords = getSegmentUtil().getNotTranslateWords(src);
 
-        //Judge.
+        // Judge.
         target = moveBrackets(target);
         List changedWords = new ArrayList();
         String targetString = new String(target);
@@ -316,12 +495,13 @@ public class PseudoErrorChecker
             int index = targetString.indexOf(words);
             if (index < 0)
             {
-                changedWords.add(words);               
+                changedWords.add(words);
                 changed = true;
             }
             else
-            {          
-                targetString = targetString.substring(0, index) + targetString.substring(index + words.length());
+            {
+                targetString = targetString.substring(0, index)
+                        + targetString.substring(index + words.length());
             }
         }
 
@@ -329,14 +509,15 @@ public class PseudoErrorChecker
         if (changedWords.size() > 0)
         {
             String words = changedWords.toString();
-            words = words.substring(1, words.length()-1);
+            words = words.substring(1, words.length() - 1);
             m_strErrMsg = MessageFormat.format(
-                    m_resources.getString("ErrorConstantChanged"), new String[]{words});
+                    m_resources.getString("ErrorConstantChanged"), new String[]
+                    { words });
         }
-        
+
         return changed;
     }
-    
+
     /**
      * Convert all the escapable characters in the given string into their
      * string (escaped) equivalents. Return the converted string.
@@ -364,7 +545,7 @@ public class PseudoErrorChecker
         }
         return sb.toString();
     }
-    
+
     /**
      * Convert all the escaped strings in the given string into their character
      * (unescaped) equivalents. Return the converted string.
@@ -402,31 +583,33 @@ public class PseudoErrorChecker
         }
         return sb.toString();
     }
-    
+
     /**
-     * <p>Validates all the target tag names against the source tag
-     * names.</p>
-     *
-     * <p>This is the lowest level test that is performed first.
-     * Basically, this test will:</p>
-     *
-     *  1. Validate that all the mandatory (non-erasable) tags in the
-     *     source also appear in the target exactly one time each.<p>
-     *  2. Any additional tags that do not appear in the source must be
-     *     of the addable type.
-     *     Right now, this is bold, underline and italic. <p>
-     *  3. Builds one combined error, which reports all missing and
-     *     illegal tags.<p>
-     *
-     * NOTE: This first level of error checking replaces each object
-     * in the target list with a TagNode object - mapped over from the
-     * source list.
-     *
-     * @return False if there are missing or illegal names in the
-     * target. True if all tags are valid.
+     * <p>
+     * Validates all the target tag names against the source tag names.
+     * </p>
+     * 
+     * <p>
+     * This is the lowest level test that is performed first. Basically, this
+     * test will:
+     * </p>
+     * 
+     * 1. Validate that all the mandatory (non-erasable) tags in the source also
+     * appear in the target exactly one time each.
+     * <p>
+     * 2. Any additional tags that do not appear in the source must be of the
+     * addable type. Right now, this is bold, underline and italic.
+     * <p>
+     * 3. Builds one combined error, which reports all missing and illegal tags.
+     * <p>
+     * 
+     * NOTE: This first level of error checking replaces each object in the
+     * target list with a TagNode object - mapped over from the source list.
+     * 
+     * @return False if there are missing or illegal names in the target. True
+     *         if all tags are valid.
      */
-    private boolean isTrgTagListValid()
-        throws TagNodeException
+    private boolean isTrgTagListValid() throws TagNodeException
     {
         String strTrgTagName;
         String invalidNames = "";
@@ -443,7 +626,7 @@ public class PseudoErrorChecker
         // search for illegal names
         while (trgEnumerator.hasMoreElements())
         {
-            strTrgTagName = (String)trgEnumerator.nextElement();
+            strTrgTagName = (String) trgEnumerator.nextElement();
             firstUnusedErasable = firstUnusedNonErasable = null;
 
             // search the source tags for the first two occurances of
@@ -451,31 +634,67 @@ public class PseudoErrorChecker
             Enumeration srcEnumerator = srcTagList.elements();
             while (srcEnumerator.hasMoreElements())
             {
-                if ((firstUnusedErasable != null) &&
-                    (firstUnusedNonErasable != null))
+                if ((firstUnusedErasable != null)
+                        && (firstUnusedNonErasable != null))
                 {
                     break;
                 }
 
-                TagNode srcItem = (TagNode)srcEnumerator.nextElement();
+                TagNode srcItem = (TagNode) srcEnumerator.nextElement();
                 if (srcItem.isMapped())
                     continue;
-                
+
                 String srcItemTag = srcItem.getPTagName();
                 boolean isEquals = srcItemTag.equalsIgnoreCase(strTrgTagName);
+                String encodeTrg = strTrgTagName;
                 if (!isEquals && TagNode.INTERNAL.equals(srcItem.getTmxType()))
                 {
-                    String encodeTrg = escapeString(strTrgTagName);
+                    encodeTrg = escapeString(strTrgTagName);
+                    isEquals = encodeTrg.equalsIgnoreCase(srcItemTag);
+                }
+
+                while (!isEquals && encodeTrg.startsWith("[[")
+                        && encodeTrg.endsWith("]"))
+                {
+                    encodeTrg = encodeTrg.substring(2, encodeTrg.length() - 1);
                     isEquals = encodeTrg.equalsIgnoreCase(srcItemTag);
                 }
                 
+                // make i1 == i, nbsp1 == nbsp
+                if (!isEquals && strTrgTagName.startsWith(srcItemTag))
+                {
+                    String temp = strTrgTagName.substring(srcItemTag.length());
+                    try
+                    {
+                        long tt = Long.parseLong(temp);
+                        isEquals = true;
+                    }
+                    catch (Exception e)
+                    {
+                        isEquals = false;
+                    }
+                }
+                if (!isEquals && srcItemTag.startsWith(strTrgTagName))
+                {
+                    String temp = srcItemTag.substring(strTrgTagName.length());
+                    try
+                    {
+                        long tt = Long.parseLong(temp);
+                        isEquals = true;
+                    }
+                    catch (Exception e)
+                    {
+                        isEquals = false;
+                    }
+                }
+
                 if (isEquals)
                 {
-                    String erasable =
-                        (String)srcItem.getAttributes().get("erasable");
+                    String erasable = (String) srcItem.getAttributes().get(
+                            "erasable");
 
-                    if ((erasable == null) ||
-                        erasable.toLowerCase().equals("no"))
+                    if ((erasable == null)
+                            || erasable.toLowerCase().equals("no"))
                     {
                         if (firstUnusedNonErasable == null)
                         {
@@ -494,7 +713,7 @@ public class PseudoErrorChecker
 
             // If an unmapped match was found in the source, mark the
             // first unused nonerasable one as being mapped.
-            // Otherwise, mark the first unsed earasable one.  If
+            // Otherwise, mark the first unsed earasable one. If
             // neither openings are found, check if it is addable.
             if (firstUnusedNonErasable != null)
             {
@@ -503,7 +722,7 @@ public class PseudoErrorChecker
                 // replace target element with source element that we
                 // mapped to.
                 m_TrgTagList.setElementAt(firstUnusedNonErasable,
-                    m_TrgTagList.indexOf(strTrgTagName));
+                        m_TrgTagList.indexOf(strTrgTagName));
             }
             else if (firstUnusedErasable != null)
             {
@@ -512,7 +731,7 @@ public class PseudoErrorChecker
                 // replace target element with source element that we
                 // mapped to.
                 m_TrgTagList.setElementAt(firstUnusedErasable,
-                    m_TrgTagList.indexOf(strTrgTagName));
+                        m_TrgTagList.indexOf(strTrgTagName));
             }
             else if (m_PseudoData.isAddableAllowed())
             {
@@ -532,36 +751,37 @@ public class PseudoErrorChecker
                         invalidNames += "\n\t";
                     }
 
-                    invalidNames += PseudoConstants.PSEUDO_OPEN_TAG +
-                        strTrgTagName + PseudoConstants.PSEUDO_CLOSE_TAG;
+                    invalidNames += PseudoConstants.PSEUDO_OPEN_TAG
+                            + strTrgTagName + PseudoConstants.PSEUDO_CLOSE_TAG;
                 }
                 else
                 {
                     // build a virtual source element to map to, then
                     // replace target-list element.
-                    PseudoOverrideMapItem POMI =
-                        m_PseudoData.getOverrideMapItem(mapKey);
+                    PseudoOverrideMapItem POMI = m_PseudoData
+                            .getOverrideMapItem(mapKey);
 
                     String tmxName;
                     if (strTrgTagName.startsWith("/"))
                     {
-                        tmxName = (String)POMI.m_hAttributes.get(
-                            PseudoConstants.ADDABLE_TMX_ENDPAIRTAG);
+                        tmxName = (String) POMI.m_hAttributes
+                                .get(PseudoConstants.ADDABLE_TMX_ENDPAIRTAG);
                     }
                     else
                     {
-                        tmxName = (String)POMI.m_hAttributes.get(
-                            PseudoConstants.ADDABLE_TMX_TAG);
+                        tmxName = (String) POMI.m_hAttributes
+                                .get(PseudoConstants.ADDABLE_TMX_TAG);
                     }
 
                     TagNode dynamicMapItem = new TagNode(tmxName,
-                        strTrgTagName, POMI.m_hAttributes);
+                            strTrgTagName, POMI.m_hAttributes);
 
                     m_TrgTagList.setElementAt(dynamicMapItem,
-                        m_TrgTagList.indexOf(strTrgTagName));
+                            m_TrgTagList.indexOf(strTrgTagName));
                 }
             }
-            else // when addables are not allowed
+            else
+            // when addables are not allowed
             {
                 bHasInvalid = true;
                 nInvalidCnt += 1;
@@ -574,8 +794,8 @@ public class PseudoErrorChecker
                 {
                     invalidNames += "\n\t";
                 }
-                invalidNames += PseudoConstants.PSEUDO_OPEN_TAG +
-                    strTrgTagName + PseudoConstants.PSEUDO_CLOSE_TAG;
+                invalidNames += PseudoConstants.PSEUDO_OPEN_TAG + strTrgTagName
+                        + PseudoConstants.PSEUDO_CLOSE_TAG;
             }
         }
 
@@ -584,10 +804,16 @@ public class PseudoErrorChecker
         while (srcEnumerator.hasMoreElements())
         {
             TagNode srcItem = (TagNode) srcEnumerator.nextElement();
-            String erasable = (String)srcItem.getAttributes().get("erasable");
+            
+            if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
+            {
+                continue;
+            }
+            
+            String erasable = (String) srcItem.getAttributes().get("erasable");
 
-            if (!srcItem.isMapped() &&
-                (erasable == null || erasable.toLowerCase().equals("no")))
+            if (!srcItem.isMapped()
+                    && (erasable == null || erasable.toLowerCase().equals("no")))
             {
                 bHasMissing = true;
                 nMissingCnt += 1;
@@ -602,10 +828,10 @@ public class PseudoErrorChecker
                 }
 
                 String tag = srcItem.getPTagName();
-                if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
-                {
-                    tag = unescapeString(tag);
-                }
+//                if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
+//                {
+//                    tag = unescapeString(tag);
+//                }
                 missingNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
                         + PseudoConstants.PSEUDO_CLOSE_TAG;
             }
@@ -617,26 +843,30 @@ public class PseudoErrorChecker
             if (bHasMissing && !bHasInvalid)
             {
                 // ErrorMissingTags
-                String[] args = { missingNames };
+                String[] args =
+                { missingNames };
                 m_strErrMsg = MessageFormat.format(
-                    m_resources.getString("ErrorMissingTags"), args);
+                        m_resources.getString("ErrorMissingTags"), args);
             }
             else if (!bHasMissing && bHasInvalid)
             {
                 // ErrorInvalidAdd
-                String[] args = { invalidNames };
+                String[] args =
+                { invalidNames };
                 m_strErrMsg = MessageFormat.format(
-                    m_resources.getString("ErrorInvalidAdd"), args);
+                        m_resources.getString("ErrorInvalidAdd"), args);
             }
             else
             {
                 // combined error
-                String[] args = { missingNames };
+                String[] args =
+                { missingNames };
                 String s1 = MessageFormat.format(
-                    m_resources.getString("ErrorMissingTags"), args);
-                args = new String[] { invalidNames };
+                        m_resources.getString("ErrorMissingTags"), args);
+                args = new String[]
+                { invalidNames };
                 String s2 = MessageFormat.format(
-                    m_resources.getString("ErrorInvalidAdd"), args);
+                        m_resources.getString("ErrorInvalidAdd"), args);
 
                 m_strErrMsg = s1 + "\n" + s2;
             }
@@ -649,39 +879,44 @@ public class PseudoErrorChecker
     }
 
     /**
-     * <p>Builds the Pseudo tag list for the target string.</p>
-     *
-     * <p>NOTE: Later, during the first level of error checking, each
-     * object in the list gets replaced with a TagNode object as it is
-     * mapped to the source.</p>
+     * <p>
+     * Builds the Pseudo tag list for the target string.
+     * </p>
+     * 
+     * <p>
+     * NOTE: Later, during the first level of error checking, each object in the
+     * list gets replaced with a TagNode object as it is mapped to the source.
+     * </p>
      */
     private void buildTrgTagList() throws PseudoParserException
     {
         m_isSource = false;
         PseudoParser parser = new PseudoParser(this);
-        parser.tokenize(m_PseudoData.getPTagTargetString());
+        parser.tokenize(m_PseudoData.getWrappedPTagTargetString());
         return;
     }
-    
+
     /**
-     * <p>Builds the Pseudo tag list for the source string.</p>
-     *
+     * <p>
+     * Builds the Pseudo tag list for the source string.
+     * </p>
+     * 
      */
     private void buildSrcTagList() throws PseudoParserException
     {
         m_isSource = true;
         PseudoParser parser = new PseudoParser(this);
-        parser.tokenize(m_PseudoData.getPTagSourceString());
+        parser.tokenize(m_PseudoData.getWrappedPTagSourceString());
         return;
     }
 
     /**
-    * Verifies the position of each tag against the source tree.
-    *
-    * !!! Not implemented in this release.
-    *
-    * @return  - true if succeeds, otherwise false.
-    */
+     * Verifies the position of each tag against the source tree.
+     * 
+     * !!! Not implemented in this release.
+     * 
+     * @return - true if succeeds, otherwise false.
+     */
     private boolean isTrgPositionValid()
     {
         m_PseudoData.resetAllSourceListNodes();
@@ -689,9 +924,10 @@ public class PseudoErrorChecker
     }
 
     /**
-    * Verifies that a Pseudo tagged string is well formed.
-    * @return true if well formed, otherwise false.
-    */
+     * Verifies that a Pseudo tagged string is well formed.
+     * 
+     * @return true if well formed, otherwise false.
+     */
     private boolean isTrgTagListWellFormed()
     {
         boolean hasError = false;
@@ -703,7 +939,7 @@ public class PseudoErrorChecker
         // Match open-close pairs
         for (int i = 0; i < size; i++)
         {
-            TagNode curNode = (TagNode)m_TrgTagList.elementAt(i);
+            TagNode curNode = (TagNode) m_TrgTagList.elementAt(i);
             String curPTag = curNode.getPTagName();
 
             // skip nodes that have already been matched or are not paired.
@@ -723,14 +959,15 @@ public class PseudoErrorChecker
                 // mapped.
                 for (int j = i + 1; j < size; j++)
                 {
-                    TagNode searchNode = (TagNode)m_TrgTagList.elementAt(j);
+                    TagNode searchNode = (TagNode) m_TrgTagList.elementAt(j);
                     String searchTag = searchNode.getPTagName();
-                    if (searchTag.startsWith(
-                        String.valueOf(PseudoConstants.PSEUDO_END_TAG_MARKER)))
+                    if (searchTag.startsWith(String
+                            .valueOf(PseudoConstants.PSEUDO_END_TAG_MARKER)))
                     {
-                        if (!searchNode.isMapped() && searchNode.isPaired() &&
-                            curPTag.toLowerCase().equals(
-                                searchTag.substring(1).toLowerCase()))
+                        if (!searchNode.isMapped()
+                                && searchNode.isPaired()
+                                && curPTag.toLowerCase().equals(
+                                        searchTag.substring(1).toLowerCase()))
                         {
                             curNode.setMapped(true);
                             searchNode.setMapped(true);
@@ -744,29 +981,30 @@ public class PseudoErrorChecker
         // Traverse again looking for any unmapped nodes.
         for (int i = 0; i < size; i++)
         {
-            TagNode searchNode = (TagNode)m_TrgTagList.elementAt(i);
+            TagNode searchNode = (TagNode) m_TrgTagList.elementAt(i);
             if (!searchNode.isMapped())
             {
                 hasError = true;
 
-                if (unbalancedTags.length() > 0 )
+                if (unbalancedTags.length() > 0)
                 {
                     unbalancedTags += ", ";
                 }
 
-                unbalancedTags += PseudoConstants.PSEUDO_OPEN_TAG +
-                    searchNode.getPTagName() +
-                    PseudoConstants.PSEUDO_CLOSE_TAG;
+                unbalancedTags += PseudoConstants.PSEUDO_OPEN_TAG
+                        + searchNode.getPTagName()
+                        + PseudoConstants.PSEUDO_CLOSE_TAG;
             }
         }
 
         // report errors
         if (hasError)
         {
-            //ErrorUnbalancedTags
-            String[] args = { unbalancedTags };
+            // ErrorUnbalancedTags
+            String[] args =
+            { unbalancedTags };
             m_strErrMsg = MessageFormat.format(
-                m_resources.getString("ErrorUnbalancedTags"), args );
+                    m_resources.getString("ErrorUnbalancedTags"), args);
 
             return false;
         }
@@ -775,18 +1013,24 @@ public class PseudoErrorChecker
     }
 
     /**
-     * Performs four levels of error checking on the PseudoData provided.<p>
-     * 1) Detects illegal or missing tag names.<p>
-     * 2) Detects a malformed tag sequence.<p>
-     * 3) Detects illegal tag positions (NOT IMPLIMENTED FOR THIS RELEASE).<p>
-     * 4) Detects invalid XML characters
-     * 5) Detects segments exceeding the maximum lengths.
-     * @param p_PData - an up to date PsuedoData object.
+     * Performs four levels of error checking on the PseudoData provided.
+     * <p>
+     * 1) Detects illegal or missing tag names.
+     * <p>
+     * 2) Detects a malformed tag sequence.
+     * <p>
+     * 3) Detects illegal tag positions (NOT IMPLIMENTED FOR THIS RELEASE).
+     * <p>
+     * 4) Detects invalid XML characters 5) Detects segments exceeding the
+     * maximum lengths.
+     * 
+     * @param p_PData
+     *            - an up to date PsuedoData object.
      */
     public String check(PseudoData p_PData, String p_sourceWithSubContent,
-        int p_gxmlMaxLen, String p_gxmlStorageEncoding,
-        int p_nativeContentMaxLen, String p_nativeStorageEncoding)
-        throws PseudoParserException
+            int p_gxmlMaxLen, String p_gxmlStorageEncoding,
+            int p_nativeContentMaxLen, String p_nativeStorageEncoding)
+            throws PseudoParserException
     {
         // new data needed for length validation
         m_sourceWithSubContent = p_sourceWithSubContent;
@@ -798,16 +1042,16 @@ public class PseudoErrorChecker
         try
         {
             String errMsg = check(p_PData); // normal syntax check
-            if(errMsg!=null)
-            { 
+            if (errMsg != null)
+            {
                 return errMsg;
             }
-            
-            // ***  NOTE: LENGTH CHECK MUST COME LAST. AFTER NORMAL CHECK ***
+
+            // *** NOTE: LENGTH CHECK MUST COME LAST. AFTER NORMAL CHECK ***
             // Because we must have a valid string to build the native version.
 
             // level #5 - Validate gxml Target length -storage in
-            // system3 database 
+            // system3 database
             if (!isTrgGxmlLengthValid())
             {
                 return m_strErrMsg;
@@ -832,14 +1076,12 @@ public class PseudoErrorChecker
         return null;
     }
 
-
-
     /**
      * Verifies that the resulting gxml length is valid.
+     * 
      * @return true if valid, otherwise false.
      */
-    private boolean isTrgGxmlLengthValid( )
-        throws Exception
+    private boolean isTrgGxmlLengthValid() throws Exception
     {
         TmxPseudo converter = new TmxPseudo();
 
@@ -850,9 +1092,9 @@ public class PseudoErrorChecker
         }
 
         // NOTE: WE ASSUME THE NORMAL SOURCE SEGMENT (WITH SUB
-        // PLACEHOLDERS) WAS SET LAST.  If normal source-segment was
+        // PLACEHOLDERS) WAS SET LAST. If normal source-segment was
         // set last it will have sub place holders and the calculation
-        // for gxml storage will be accurate as can be.  If a
+        // for gxml storage will be accurate as can be. If a
         // map-segment was set last it will have full subs - with the
         // sub length longer than reality for our DB storage.
 
@@ -862,17 +1104,16 @@ public class PseudoErrorChecker
 
         try
         {
-            int diplomatLen =
-                diplomatGxml.getBytes(m_encodingGxmlMaxLen).length;
+            int diplomatLen = diplomatGxml.getBytes(m_encodingGxmlMaxLen).length;
 
             if (diplomatLen > m_gxmlMaxLen)
             {
                 m_strErrMsg = m_resources.getString("MaxLengthMsg");
-                return false; //invalid
+                return false; // invalid
             }
             else
             {
-                return true; //valid
+                return true; // valid
             }
         }
         catch (UnsupportedEncodingException e)
@@ -888,13 +1129,14 @@ public class PseudoErrorChecker
      */
     private boolean isTagUnmovableFormat()
     {
-        String dataType = (m_PseudoData != null) ? m_PseudoData.getDataType() : null;
-        
+        String dataType = (m_PseudoData != null) ? m_PseudoData.getDataType()
+                : null;
+
         if (dataType == null)
         {
             return false;
         }
-        
+
         if (dataType.equals("office-xml"))
         {
             return true;
@@ -902,110 +1144,173 @@ public class PseudoErrorChecker
 
         return false;
     }
-    
-    /**
-     * Checking if the tag and text position is valid
-     * @return
-     */
-    private boolean isTrgTagMoved()
+
+    private boolean isTagMoved()
     {
         // no tag
         if (m_TrgTagList.size() == 0)
         {
             return false;
         }
-        
+
         m_mockSource = fixMockSegment(m_mockSource);
         m_mockTarget = fixMockSegment(m_mockTarget);
+        m_oriMockTarget = new String(m_mockTarget);
 
+        if (!m_mockSource.contains("T") && m_mockTarget.contains("T"))
+        {
+            m_strErrMsg = MessageFormat
+                    .format("Text cannot be added into segment ({0}) which only contain tags",
+                            m_PseudoData.getPTagSourceString());
+            return true;
+        }
+
+        boolean result = fixMovedTag(false);
+
+        return result;
+    }
+
+    /**
+     * Checking if the tag and text position is valid
+     * 
+     * @return
+     */
+    private boolean fixMovedTag(boolean doFix)
+    {
         // tag not moved
         if (m_mockSource.equals(m_mockTarget))
         {
             return false;
         }
-        
+
         boolean isTagMoved = false;
         String firstMovedTag = "";
-        
+
         // length is not same, this issue should be checked by other checking
         // should not true here, just output this situation if true
         if (m_mockSource.length() != m_mockTarget.length())
         {
             System.out.println(MessageFormat.format(
-                    "Length of target \"{0}\" is not same as \"{1}\"", m_mockTarget, m_mockSource));
+                    "Length of target \"{0}\" is not same as \"{1}\"",
+                    m_mockTarget, m_mockSource));
             return false;
         }
-        
+
         int length = m_mockSource.length();
         char srcChar, trgChar;
-        
-        for(int i = 0; i < length; i++)
+        StringBuffer newSource = new StringBuffer(m_mockSource);
+        StringBuffer newTarget = new StringBuffer(m_mockTarget);
+
+        for (int i = 0; i < length; i++)
         {
             srcChar = m_mockSource.charAt(i);
             trgChar = m_mockTarget.charAt(i);
-            
+
             // continuew if source, target are same or 'T', 'E'
             if (srcChar == trgChar || trgChar == 'E')
             {
                 continue;
             }
-            else // not same, and target is 'T'
+            else
+            // not same, and target is 'T'
             {
                 isTagMoved = true;
-                String suffix = m_mockTarget.substring(i + 1);
-                String prefix = m_mockTarget.substring(0, i);
-                
-                
+                String suffix = m_mockSource.substring(i + 1);
+                String prefix = m_mockSource.substring(0, i);
+
                 if ((suffix.contains("T") && suffix.contains("["))
                         || (suffix.contains("[") && !prefix.contains("[")))
                 {
                     int index = suffix.indexOf("[");
                     int index_end = suffix.indexOf("]", index);
                     firstMovedTag = suffix.substring(index, index_end + 1);
+
+                    if (doFix)
+                    {
+                        newSource.insert(i + 1 + index_end + 1, "T");
+                        newSource.deleteCharAt(i);
+                        newTarget.insert(i + 1 + index_end + 1, "T");
+                        newTarget.deleteCharAt(i);
+                    }
                 }
                 else
                 {
-                    int index = prefix.lastIndexOf("[");
-                    int index_end = prefix.indexOf("]", index);
-                    firstMovedTag = prefix.substring(index, index_end + 1);
+                    int index = prefix.lastIndexOf("T") + 1;
+                    int index_end = i;
+                    firstMovedTag = prefix.substring(index, index_end);
+
+                    if (doFix)
+                    {
+                        newSource.deleteCharAt(i);
+                        newSource.insert(index, "T");
+                        newTarget.deleteCharAt(i);
+                        newTarget.insert(index, "T");
+                    }
                 }
-                
-                break;
+
+                if (doFix)
+                {
+                    m_mockSource = newSource.toString();
+                    m_mockTarget = newTarget.toString();
+                    return fixMovedTag(doFix);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
-        
+
         if (isTagMoved)
         {
             m_strErrMsg = MessageFormat.format(
                     m_resources.getString("ErrorTagMoved"), firstMovedTag);
         }
-        
+
         return isTagMoved;
     }
-    
+
     private String fixMockSegment(String ori)
     {
-        String newstr = ori.replaceAll("T+", "T");
-        
+        Pattern p = Pattern.compile("\\[([^/][^\\[]*)\\]");
+        Matcher m = p.matcher(ori);
+
+        while (m.find())
+        {
+            String tag = m.group(1);
+            String tmx = (String) m_PseudoData.m_hPseudo2TmxMap.get(tag);
+            if (tmx != null && tmx.contains("erasable=\"yes\""))
+            {
+                ori = ori.replace("[" + tag + "]", "");
+                ori = ori.replace("[/" + tag + "]", "");
+            }
+            else if (tmx == null && m_PseudoData.getInternalTexts().containsKey("[" + tag + "]"))
+            {
+            	ori = ori.replace("[" + tag + "]", "");
+            }
+        }
+
+        String newstr = ori.replaceAll("[TE]+", "T");
+
         if (newstr.startsWith("["))
         {
-            newstr = "E" + newstr;
+            newstr = "T" + newstr;
         }
-        
+
         if (newstr.endsWith("]"))
         {
-            newstr = newstr + "E";
+            newstr = newstr + "T";
         }
-        
+
         return newstr;
     }
 
     /**
      * Verifies that the resulting native content length is valid.
+     * 
      * @return True if valid, otherwise false.
      */
-    private boolean isTrgNativeLengthValid()
-        throws Exception
+    private boolean isTrgNativeLengthValid() throws Exception
     {
         TmxPseudo converter = new TmxPseudo();
 
@@ -1025,8 +1330,7 @@ public class PseudoErrorChecker
 
             pdataTmp.setMode(m_PseudoData.getMode());
 
-            if (m_PseudoData.getAddableMode() ==
-                PseudoConstants.ADDABLES_AS_HTML)
+            if (m_PseudoData.getAddableMode() == PseudoConstants.ADDABLES_AS_HTML)
             {
                 pdataTmp.setAddables("HTML");
             }
@@ -1039,13 +1343,13 @@ public class PseudoErrorChecker
             // get resulting native content with full subs in place.
 
             // NOTE: The pseudo2Tmx conversion now builds native
-            // string as well.  It was better to do this than
+            // string as well. It was better to do this than
             // duplicate code in another handler.
             converter.pseudo2Tmx(pdataTmp);
             String nativeContent = converter.getLastPseudo2TmxNativeResult();
 
-            int nativeLen =
-                nativeContent.getBytes(m_encodingNativeContentMaxLen).length;
+            int nativeLen = nativeContent
+                    .getBytes(m_encodingNativeContentMaxLen).length;
 
             if (nativeLen > m_nativeContentMaxLen)
             {
@@ -1061,15 +1365,16 @@ public class PseudoErrorChecker
         catch (UnsupportedEncodingException e)
         {
             throw new Exception(
-                "Bad encoding for native-content length validation.");
+                    "Bad encoding for native-content length validation.");
         }
     }
-    
-   /**
-    * Verifies that the segment contains no invalid XML characters 
-    * in the unicode range 0000 - 001f.
-    * @return true if range is not present, otherwise false.
-    */
+
+    /**
+     * Verifies that the segment contains no invalid XML characters in the
+     * unicode range 0000 - 001f.
+     * 
+     * @return true if range is not present, otherwise false.
+     */
     private boolean isCharactersValid()
     {
         boolean found = true;
@@ -1079,30 +1384,39 @@ public class PseudoErrorChecker
         for (int i = 0; i < len; i++)
         {
             char ch = str.charAt(i);
-            
-            if(ch <= '\u001f' && // detect full control char range and...
-               ch != '\u0009' && // allow horizontal tab
-               ch != '\r' &&     // allow linefeed
-               ch != '\n')       // allow carriage return
+
+            if (ch <= '\u001f' && // detect full control char range and...
+                    ch != '\u0009' && // allow horizontal tab
+                    ch != '\r' && // allow linefeed
+                    ch != '\n') // allow carriage return
             {
                 String tmp = "\\0x" + Integer.toHexString(ch);
-                int leftBegin = i>25 ? i-25 : 0; // show up to 25 chars before
-                int leftEnd = i;                 // skip invalid char position
-                int rightBegin = (i+1)<len-1 ? i+1 : i;     // skip invalid char position
-                int rightEnd = (i+25)<len-1 ? i+25 : len-1; // show up to 25 chars after
-                String head = leftBegin>0 ? ".... " : "";
-                String tail = rightEnd<len-1 ? " ...." : "";
-                
-                String[] args = { tmp, 
-                                  head + str.substring(leftBegin, leftEnd) + "**" + tmp + "**" + str.substring(rightBegin, rightEnd) + tail };
+                int leftBegin = i > 25 ? i - 25 : 0; // show up to 25 chars
+                                                     // before
+                int leftEnd = i; // skip invalid char position
+                int rightBegin = (i + 1) < len - 1 ? i + 1 : i; // skip invalid
+                                                                // char position
+                int rightEnd = (i + 25) < len - 1 ? i + 25 : len - 1; // show up
+                                                                      // to 25
+                                                                      // chars
+                                                                      // after
+                String head = leftBegin > 0 ? ".... " : "";
+                String tail = rightEnd < len - 1 ? " ...." : "";
+
+                String[] args =
+                {
+                        tmp,
+                        head + str.substring(leftBegin, leftEnd) + "**" + tmp
+                                + "**" + str.substring(rightBegin, rightEnd)
+                                + tail };
                 m_strErrMsg = MessageFormat.format(
-                    m_resources.getString("invalidXMLCharacter"), args );
+                        m_resources.getString("invalidXMLCharacter"), args);
                 found = false;
                 break;
             }
         }
         return found;
-    }    
+    }
 
     public SegmentUtil getSegmentUtil()
     {
@@ -1110,7 +1424,7 @@ public class PseudoErrorChecker
         {
             segmentUtil = new SegmentUtil(styles);
         }
-        
+
         return segmentUtil;
     }
 

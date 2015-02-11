@@ -28,6 +28,7 @@
          com.globalsight.everest.webapp.pagehandler.projects.workflows.JobManagementHandler,
          com.globalsight.everest.util.comparator.CommentComparator,
          com.globalsight.everest.foundation.User,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          com.globalsight.util.AmbFileStoragePathUtils,
          java.text.MessageFormat,
          java.text.NumberFormat,
@@ -361,6 +362,27 @@ function getSelectedRadio(buttonGroup)
    return -1;
 }
 
+//for GBS-2599
+function handleMultiSelectAll_1() {
+	if (CommentForm) {
+		if (CommentForm.multiSelectAll_1.checked) {
+			doCheckAll('checkboxBtn');
+	    }
+	    else {
+			doClearAll('checkboxBtn');
+	    }
+	}
+}
+function handleMultiSelectAll_2() {
+	if (CommentForm) {
+		if (CommentForm.multiSelectAll_2.checked) {
+			doCheckAll('ActivityCheckboxBtn');
+	    }
+	    else {
+			doClearAll('ActivityCheckboxBtn');
+	    }
+	}
+}
 </SCRIPT>
 <style type="text/css">
 .list {
@@ -429,7 +451,7 @@ function getSelectedRadio(buttonGroup)
 <!-- Job Comments data table -->
 
 <amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_VIEW%>"> 	  
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="80%" style="min-width:1024px;">
   <tr>
     <td>
       <b><%=bundle.getString("lb_job")%> <%=bundle.getString("lb_comments")%></b>
@@ -454,13 +476,14 @@ function getSelectedRadio(buttonGroup)
                	   	  onclick="enableButtons('jobCommEditBtn')">
               </amb:permission>
             </amb:column>
-            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="15%">
-                <%=jobComment.getCreatorId()%>
+            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="10%">
+                <%=UserUtil.getUserNameById(jobComment.getCreatorId())%>
             </amb:column>
             <amb:column label="lb_date_created" sortBy="<%=CommentComparator.DATE%>" width="15%">
                 <%=jobComment.getCreatedDate()%>
             </amb:column>
-            <amb:column label="lb_comments" width="400px">
+            <amb:column label="lb_comments" width="45%" style="word-wrap:break-word;word-break:break-all">
+            <div style="width:45%">
                 <%
                     String com = jobComment.getComment();
                     if (com.length() > 200)
@@ -475,8 +498,10 @@ function getSelectedRadio(buttonGroup)
                     else
                         out.println(jobComment.getComment());
                 %>
+            </div>
             </amb:column>
-            <amb:column label="lb_attached_files" width="200px" style="word-wrap:break-word;word-break:break-all">
+			<amb:column label="multiCheckbox_1" align="right" width="5px"></amb:column>
+            <amb:column label="lb_attached_files" width="30%" style="word-wrap:break-word;word-break:break-all">
             <%
                  String commentId = (new Long(jobComment.getId())).toString();
                  ArrayList commentReferences = null;
@@ -510,7 +535,7 @@ function getSelectedRadio(buttonGroup)
                         }
 
 %>						
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT>"); %>
+                        <div style="width:100%">
       					<amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_DOWNLOAD%>" >
                         	<input type="checkbox" id="<%=commentId%>" name="checkboxBtn" value="<%=commentId + ":" + file.getFileAccess() + ":" + file.getFilename()%>">
                         </amb:permission>
@@ -524,7 +549,6 @@ path = URLEncoder.encodeUrlStr(path);
                         <A class="standardHREF" target="_blank" href="<%=path %>">
                         <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
                         </A>
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
                         <SPAN CLASS=smallText>
                         <%=numberFormat.format(filesize)%>k
 <%
@@ -538,6 +562,7 @@ path = URLEncoder.encodeUrlStr(path);
                         }
 %>
                         </SPAN>
+						</div>
                         <br>
 <%
                     }
@@ -549,14 +574,15 @@ path = URLEncoder.encodeUrlStr(path);
   </tr>
   <tr>
   	 <td align="right" >
-		 <amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_DOWNLOAD%>" >
+		 <%--for gbs-2599
+		 amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_DOWNLOAD%>" >
 		          <A CLASS="standardHREF" HREF="#"
 		              onClick="doCheckAll('checkboxBtn'); return false;"
 		              onFocus="this.blur();">CheckAll</A> |
 			  	  <A CLASS="standardHREF" HREF="#"
 		              onClick="doClearAll('checkboxBtn'); return false;"
 		              onFocus="this.blur();">ClearAll</A>
-		 </amb:permission>
+		 </amb:permission--%>
 		 <amb:permission name="<%=Permission.ACTIVITIES_JOB_COMMENTS_EDIT%>" >
             <INPUT TYPE="BUTTON" id="jobCommEditBtn" VALUE="<%=editButton%>" disabled onClick="submitFormForJob('Edit');">
          </amb:permission>
@@ -570,12 +596,10 @@ path = URLEncoder.encodeUrlStr(path);
 </amb:permission>
 
 <!-- Task Comments data table -->
-<table cellpadding=0 cellspacing=0 border=0 class="standardText">
+<table cellpadding=0 cellspacing=0 border=0 class="standardText" width="80%" style="min-width:1024px;">
   <tr>
     <td>
-      <b><%=bundle.getString("lb_activity")%>
-      <%=bundle.getString("lb_comments")%>: </b>
-      <%=task.getTaskDisplayName()%>
+      <b><%=bundle.getString("lb_activity")%><%=bundle.getString("lb_comments")%>: </b><%=task.getTaskDisplayName()%>
     </td>
   </tr>
   <tr>
@@ -583,9 +607,7 @@ path = URLEncoder.encodeUrlStr(path);
   </tr>
   <tr valign="top">
     <td align="right">
-      <amb:tableNav bean="taskCommentList"
-      key="<%=CommentConstants.TASK_COMMENT_KEY%>"
-      pageUrl="comment" />
+      <amb:tableNav bean="taskCommentList" key="<%=CommentConstants.TASK_COMMENT_KEY%>" pageUrl="comment" />
     </td>
   </tr>
   <tr>
@@ -597,14 +619,14 @@ path = URLEncoder.encodeUrlStr(path);
             <amb:column label="" width="15px">
                <input type="radio" name="radioBtn" value="<%=commentObj.getId()%>">
             </amb:column>
-            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="120px">
-                <%=commentObj.getCreatorId()%>
+            <amb:column label="lb_comment_creator" sortBy="<%=CommentComparator.CREATOR%>" width="10%">
+                <%=UserUtil.getUserNameById(commentObj.getCreatorId())%>
             </amb:column>
-            <amb:column label="lb_date_created" sortBy="<%=CommentComparator.DATE%>" width="130px">
+            <amb:column label="lb_date_created" sortBy="<%=CommentComparator.DATE%>" width="15%">
                 <%=commentObj.getCreatedDate()%>
             </amb:column>
-            <amb:column label="lb_comments" width="350px" style="word-wrap:break-word;word-break:break-all">
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:350px\'>\");}</SCRIPT>"); %>
+            <amb:column label="lb_comments" width="45%" style="word-wrap:break-word;word-break:break-all">
+            <div style="width:45%">
                 <%
                     String com = commentObj.getComment();
                     if (com.length() > 200)
@@ -619,9 +641,10 @@ path = URLEncoder.encodeUrlStr(path);
                     else
                         out.println(commentObj.getComment());
                 %>
-<%				out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
+            </div>
             </amb:column>
-            <amb:column label="lb_attached_files" width="200px" style="word-wrap:break-word;word-break:break-all">
+			<amb:column label="multiCheckbox_2" align="right" width="5px"></amb:column>
+            <amb:column label="lb_attached_files" width="30%" style="word-wrap:break-word;word-break:break-all">
 
 <%
                  String commentId = (new Long(commentObj.getId())).toString();
@@ -657,7 +680,7 @@ path = URLEncoder.encodeUrlStr(path);
                         }
 
 %>
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT>"); %>
+                        <div style="width:100%">
 						<amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
                         	<input type="checkbox" id="<%=commentId%>" name="ActivityCheckboxBtn" value="<%=commentId + ":" + file.getFileAccess() + ":" + file.getFilename()%>">
                         </amb:permission>
@@ -671,7 +694,6 @@ path = URLEncoder.encodeUrlStr(path);
                         <A class="standardHREF" target="_blank" href="<%=path %>">
                         <%=EditUtil.encodeHtmlEntities(file.getFilename())%>
                         </A>
-<%						out.print("<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT>"); %>
                         <SPAN CLASS=smallText>
                         <%=numberFormat.format(filesize)%>k
 <%
@@ -685,6 +707,7 @@ path = URLEncoder.encodeUrlStr(path);
                         }
 %>
                         </SPAN>
+						</div>
                         <br>
 <%
                     }
@@ -699,14 +722,15 @@ path = URLEncoder.encodeUrlStr(path);
   <TR>
     <TD align=right>
       <P>
-      <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
+      <%--for gbs-2599
+	  amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_DOWNLOAD%>" >
 	      <A CLASS="standardHREF" HREF="#"
 	              onClick="doCheckAll('ActivityCheckboxBtn'); return false;"
 	              onFocus="this.blur();">CheckAll</A> |
 		  <A CLASS="standardHREF" HREF="#"
 	              onClick="doClearAll('ActivityCheckboxBtn'); return false;"
 	              onFocus="this.blur();">ClearAll</A>
-      </amb:permission>
+      </amb:permission--%>
       <%if (enableComment){%>
       <amb:permission name="<%=Permission.ACTIVITIES_COMMENTS_EDIT%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=editButton%>" onClick="submitForm('Edit');" <%= (taskCommentList==null||taskCommentList.size()==0)?"DISABLED":""%>>
@@ -722,7 +746,7 @@ path = URLEncoder.encodeUrlStr(path);
   </TR>
 </TABLE>
 <P>
-<TABLE>
+<TABLE width="80%" style="min-width:1024px;">
   <TR>
     <TD>
       <!-- Segment Comments data table -->

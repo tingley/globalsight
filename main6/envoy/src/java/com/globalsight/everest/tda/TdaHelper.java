@@ -142,7 +142,7 @@ public class TdaHelper
      */
     public void leverageTDA(TDATM tda, File needLeverageXliffFile,
             String storePath, String fileName, String sourceLocal,
-            String targetLocal, long tmProfileThreshold)
+            String targetLocal)
     {
         int timeoutConnection = 15000;
 

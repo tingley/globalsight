@@ -20,13 +20,15 @@ package com.globalsight.ling.docproc.extractor.xml.xmlrule;
 import java.util.HashSet;
 import java.util.Map;
 
+import javax.xml.xpath.XPathExpressionException;
+
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.globalsight.ling.docproc.extractor.xml.Rule;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 
 public class OtherRuleItem extends XmlRuleItem
 {
@@ -43,6 +45,10 @@ public class OtherRuleItem extends XmlRuleItem
             if (attrName.equals("loctype"))
             {
                 rule.setTranslatable("translatable".equals(nodeValue));
+            }
+            else if (attrName.equals("priority"))
+            {
+                rule.setPriority(Integer.parseInt(attr.getNodeValue()));
             }
             else if (attrName.equals("datatype"))
             {
@@ -91,13 +97,11 @@ public class OtherRuleItem extends XmlRuleItem
     public void applyRule(Node ruleNode, Document toBeExtracted, Map ruleMap,
             Object[] namespaces) throws Exception
     {
-        Rule rule = createRule(ruleNode);
         NamedNodeMap attributes = ruleNode.getAttributes();
 
         // find the nodes this rule applies to
         String xpath = attributes.getNamedItem("path").getNodeValue();
-        NodeList affectedNodes = XPathAPI.selectNodeList(toBeExtracted
-                .getDocumentElement(), xpath);
+        NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         if (affectedNodes.getLength() == 0)
         {
             if (xpath.indexOf("XMLNS") != -1)
@@ -107,6 +111,7 @@ public class OtherRuleItem extends XmlRuleItem
                 int count = s.length - 1;
                 for (int m = 0; m < namespaces.length; m++)
                 {
+                    Rule rule = createRule(ruleNode);
                     xpath = temp.replaceFirst("XMLNS", (String) namespaces[m]);
                     replaceXpath(xpath, count - 1, namespaces, toBeExtracted
                             .getDocumentElement(), ruleMap, rule, true);
@@ -117,6 +122,7 @@ public class OtherRuleItem extends XmlRuleItem
         {
             for (int l = 0; l < affectedNodes.getLength(); ++l)
             {
+                Rule rule = createRule(ruleNode);
                 Node node = affectedNodes.item(l);
                 Rule previousRule = (Rule) ruleMap.get(node);
                 Rule newRule = rule;

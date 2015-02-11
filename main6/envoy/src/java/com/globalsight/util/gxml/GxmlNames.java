@@ -142,4 +142,6 @@ public final class GxmlNames
     public static final String COLUMN_CONTENTMODE = "contentMode";
     public static final String CONTEXT_NUMROWS = "numRows";
     public static final String CONTEXT_NUMCOLS = "numCols";
+    
+    public static final String INTERNAL = "internal";
 }

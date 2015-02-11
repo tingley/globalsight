@@ -22,7 +22,7 @@
         "Entry"
         {
         "MsmKey" = "8:_C00E1364A5AAD45F142045F37707F50B"
-        "OwnerKey" = "8:_DC0316A618741DB24A012424D551296C"
+        "OwnerKey" = "8:_E21FC6D20D40C51949E8BA5F9C300311"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -33,20 +33,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_DC0316A618741DB24A012424D551296C"
+        "MsmKey" = "8:_E21FC6D20D40C51949E8BA5F9C300311"
         "OwnerKey" = "8:_D79D1D6137134859917367AF75BE4120"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_DC0316A618741DB24A012424D551296C"
+        "OwnerKey" = "8:_D79D1D6137134859917367AF75BE4120"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D79D1D6137134859917367AF75BE4120"
+        "OwnerKey" = "8:_E21FC6D20D40C51949E8BA5F9C300311"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -67,6 +67,27 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
+            }
         }
         "Release"
         {
@@ -83,6 +104,27 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5.SP1"
+                    {
+                    "Name" = "8:.NET Framework 3.5 SP1"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5.SP1"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
+            }
         }
     }
     "Deployable"
@@ -148,18 +190,18 @@
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
-            "Exclude" = "11:FALSE"
+            "Exclude" = "11:TRUE"
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_DC0316A618741DB24A012424D551296C"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_E21FC6D20D40C51949E8BA5F9C300311"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
             "AssemblyAsmDisplayName" = "8:Interop.PassoloU, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_DC0316A618741DB24A012424D551296C"
+                    "_E21FC6D20D40C51949E8BA5F9C300311"
                     {
                     "Name" = "8:Interop.PassoloU.dll"
                     "Attributes" = "3:512"
@@ -257,7 +299,7 @@
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:8.2"
+        "ProductVersion" = "8:8.2.1"
         "Manufacturer" = "8:Welocalize"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

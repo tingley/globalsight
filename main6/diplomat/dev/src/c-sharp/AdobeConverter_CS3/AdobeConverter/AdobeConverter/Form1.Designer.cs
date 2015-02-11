@@ -52,7 +52,7 @@ namespace WindowsApplication1
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(156, 16);
             this.checkBox1.TabIndex = 0;
-            this.checkBox1.Text = "InDesign Converter CS3";
+            this.checkBox1.Text = "InDesign Converter CS2";
             this.checkBox1.UseVisualStyleBackColor = true;
             this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
             // 
@@ -93,6 +93,7 @@ namespace WindowsApplication1
             this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "Adobe Converter";
             this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_Click);
             // 
             // textBox1
             // 
@@ -131,13 +132,12 @@ namespace WindowsApplication1
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(117, 23);
+            this.label1.Font = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Location = new System.Drawing.Point(149, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(183, 20);
+            this.label1.Size = new System.Drawing.Size(143, 16);
             this.label1.TabIndex = 10;
-            this.label1.Text = "Adobe CS3 Converter";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
+            this.label1.Text = "Adobe Converter";
             // 
             // folderBrowserDialog1
             // 
@@ -165,7 +165,8 @@ namespace WindowsApplication1
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe CS3 Converter - Version: 8.2";
+            this.Text = "Adobe Converter";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_Close);
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.ResumeLayout(false);
             this.PerformLayout();

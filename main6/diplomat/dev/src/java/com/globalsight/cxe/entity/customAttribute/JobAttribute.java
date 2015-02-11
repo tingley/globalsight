@@ -86,17 +86,29 @@ public class JobAttribute extends PersistentObject
         }
         else if (Attribute.TYPE_FLOAT.equals(type))
         {
-            floatValue = (Float) ob;
+            if (ob instanceof String) {
+                floatValue = Float.parseFloat((String) ob);
+            } else {
+                floatValue = (Float) ob;                
+            }
             return true;
         }
         else if (Attribute.TYPE_INTEGER.equals(type))
         {
-            integerValue = (Integer) ob;
+            if (ob instanceof String) {
+                integerValue = Integer.parseInt((String) ob);
+            } else {
+                integerValue = (Integer) ob;                
+            }
             return true;
         }
         else if (Attribute.TYPE_DATE.equals(type))
         {
-            dateValue = (Date) ob;
+            if (ob instanceof String) {
+                dateValue = new Date(Long.parseLong((String) ob));
+            } else {
+                dateValue = (Date) ob;
+            }
             return true;
         }
         else if (Attribute.TYPE_CHOICE_LIST.equals(type))
@@ -441,7 +453,7 @@ public class JobAttribute extends PersistentObject
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -451,7 +463,7 @@ public class JobAttribute extends PersistentObject
             }
             catch (IOException e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }
@@ -480,7 +492,7 @@ public class JobAttribute extends PersistentObject
             }
             catch (IOException e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
     }

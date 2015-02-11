@@ -26,6 +26,7 @@ import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.everest.glossaries.GlossaryFile;
 import java.util.Iterator;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.io.File;
@@ -41,6 +42,10 @@ public class OEMProcessStatus
     private int m_totalFiles = 0;
     private DownloadParams m_dldParams;
     private StringBuffer p_results_sb = new StringBuffer();
+    
+    private boolean useProcess = false;
+    private int process = 0;
+    
 
     /** Creates a new instance of OEMProcessStatus. */
     public OEMProcessStatus()
@@ -291,6 +296,11 @@ public class OEMProcessStatus
                 count += fileNumber;
             }
         }
+        
+        if (p_params.isIncludeRepetitions())
+        {
+            count += 1;
+        }
 
         // An additional 1 is added so that additional files and
         // parameters can be downloaded while the percentage shows 99%,
@@ -302,5 +312,33 @@ public class OEMProcessStatus
 
 	public void setTotalFiles(int files) {
 		m_totalFiles = files;
+	}
+	
+	public void updateProcess(int n)
+	{
+		if (!useProcess)
+			return;
+		
+		process = n;
+	}
+
+	public boolean isUseProcess() 
+	{
+		return useProcess;
+	}
+
+	public void setUseProcess(boolean useProcess) 
+	{
+		this.useProcess = useProcess;
+	}
+
+	public int getProcess() 
+	{
+		return process;
+	}
+
+	public void setProcess(int process) 
+	{
+		this.process = process;
 	}
 }

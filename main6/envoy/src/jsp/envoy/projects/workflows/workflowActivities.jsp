@@ -19,6 +19,7 @@
          com.globalsight.everest.webapp.WebAppConstants,
          com.globalsight.everest.workflowmanager.Workflow,
          com.globalsight.everest.workflow.WfTaskInfo,
+         com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
          com.globalsight.everest.foundation.Timestamp,
          java.text.DateFormat, 
          java.text.NumberFormat,
@@ -131,13 +132,13 @@ var w_viewer;
 				<OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
 				WIDTH = "90%" HEIGHT = "95%" NAME = "GPUI"  
                 codebase="<%=httpProtocolToUse%>://java.sun.com/products/plugin/autodl/jinstall-1_4_2-windows-i586.cab#Version=1,4">
+				<PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" >
 				<%} else {%>           
                 <SPAN CLASS="standardText"><%=bundle.getString("applet_need_java_support")%></SPAN>
                 <BR>
                 <APPLET type="application/x-java-applet;jpi-version=1.6"
-                height="95%" width="90%" pluginspage="http://java.sun.com/products/plugin/index.html#download">
+                height="95%" width="90%" pluginspage="http://java.sun.com/products/plugin/index.html#download" code="com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class">
                 <%}%>
-				<PARAM NAME = CODE VALUE = "com.globalsight.everest.webapp.applet.admin.graphicalworkflow.gui.planview.GVApplet.class" >
 				<!-- PARAM NAME = CODEBASE VALUE = "/classes/" -->
 				
 				<PARAM NAME = "cache_option" VALUE = "Plugin" >
@@ -187,6 +188,7 @@ var w_viewer;
         <TD><%=bundle.getString("lb_acceptor")%></TD>
         <TD><%=bundle.getString("lb_duration")%></TD>
         <TD><%=bundle.getString("lb_date_completed")%></TD>
+        <TD><%=bundle.getString("status")%></TD>
     </TR>
     <%=request.getAttribute(JobManagementHandler.WORKFLOW_ACTIVITIES_SCRIPTLET)%>
 </TABLE>
@@ -242,7 +244,7 @@ if(targetPages != null && targetPages.size() > 0)
     <%out.print(sizePutfStr);%>K<BR> 
     <SPAN CLASS="smallText">
     <%out.print(bundle.getString("lb_last_modified") +  ": " + lastModified);%><BR>
-    <%out.print(bundle.getString("lb_modified_by") +  ": " + putf.getLastModifiedBy());%>
+    <%out.print(bundle.getString("lb_modified_by") +  ": " + UserUtil.getUserNameById(putf.getLastModifiedBy()));%>
     </SPAN>
     </TD>
     </TR>
@@ -297,7 +299,7 @@ if(stfArrayList != null && stfArrayList.size() > 0)
     <%out.print(sizeStfStr);%>K<BR>
     <SPAN CLASS="smallText">
     <%out.print(bundle.getString("lb_last_modified") +  ": " + ts.toString());%><BR>
-    <%out.print(bundle.getString("lb_modified_by") +  ": " + stf.getModifierUserId());%>
+    <%out.print(bundle.getString("lb_modified_by") +  ": " + UserUtil.getUserNameById(stf.getModifierUserId()));%>
     </SPAN>
     </TD>
     </TR>

@@ -17,5 +17,7 @@
 	<classpathentry kind="var" path="JUNIT_HOME/junit.jar" sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.1.0/src/org.junit_3.8.1/junitsrc.zip"/>
 	<classpathentry kind="lib" path="src/lib/junit.jar"/>
 	<classpathentry kind="lib" path="src/lib/mysql-connector-java-5.1.6-bin.jar"/>
+	<classpathentry kind="lib" path="src/lib/google-collect-1.0.jar"/>
+	<classpathentry kind="lib" path="src/lib/selenium-java-2.0a4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

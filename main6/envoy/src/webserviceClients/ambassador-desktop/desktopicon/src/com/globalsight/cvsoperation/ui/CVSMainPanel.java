@@ -639,7 +639,7 @@ public class CVSMainPanel extends JPanel
 				}
 				catch (Exception ex) 
 				{	
-					log.error(ex.getMessage());
+					log.error(ex.getMessage(), ex);
 					ex.printStackTrace();
 				}
 			}

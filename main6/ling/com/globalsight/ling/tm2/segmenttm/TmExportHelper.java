@@ -11,7 +11,6 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.exporter.ExportUtil;
-import com.globalsight.everest.tm.exporter.ReaderThread;
 import com.globalsight.terminology.util.SqlUtil;
 
 /**
@@ -30,6 +29,33 @@ public class TmExportHelper {
     static int getAllTuCount(Connection conn, Tm tm, String createdAfter, String createdBefore)
             throws SQLException
     {
+        int result = getAllCount(conn, tm, createdAfter, createdBefore, "TU");
+        return result;
+    }
+    
+    /**
+     * Get the count of all TUs in the TM.
+     */
+    static int getAllTuCount(Connection conn, Tm tm, long startTUId)
+            throws SQLException
+    {
+        int result = getAllCount(conn, tm, startTUId, "TU");
+        return result;
+    }
+
+    /**
+     * Get the count of all TUVs in the TM.
+     */
+    static int getAllTuvCount(Connection conn, Tm tm, String createdAfter,
+            String createdBefore) throws SQLException
+    {
+        int result = getAllCount(conn, tm, createdAfter, createdBefore, "TUV");
+        return result;
+    }
+
+    private static int getAllCount(Connection conn, Tm tm, String createdAfter,
+            String createdBefore, String type) throws SQLException
+    {
         int result = 0;
 
         Statement stmt = null;
@@ -37,16 +63,147 @@ public class TmExportHelper {
 
         try
         {
-            String sql = "SELECT COUNT(DISTINCT tu.id) "
-                    + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
-                    + "  WHERE tu.id = tuv.tu_id and tu.tm_id = "
-                    + tm.getId();
+            String sql ="";
+            if("TU".equals(type))
+            {
+                sql = "SELECT COUNT(DISTINCT tu.id) ";
+                        
+            }
+            else
+            {
+                // TUV
+                sql = "SELECT COUNT(tu.id) ";
+            }
+            sql += "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
+                    + "  WHERE tu.id = tuv.tu_id and tu.tm_id = " + tm.getId();
             sql += getSqlExpression("tuv", createdAfter, createdBefore);
             stmt = conn.createStatement();
             rset = stmt.executeQuery(sql);
             if (rset.next())
             {
                 result = rset.getInt(1);
+            }
+        }
+        catch (SQLException e)
+        {
+            try
+            {
+                conn.rollback();
+            }
+            catch (Throwable ignore)
+            {
+            }
+            CATEGORY.warn("can't read TM data", e);
+
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                if (rset != null)
+                    rset.close();
+                if (stmt != null)
+                    stmt.close();
+            }
+            catch (Throwable ignore)
+            {
+            }
+
+        }
+
+        return result;
+    }
+
+    private static int getAllCount(Connection conn, Tm tm, long startTUId, String type) throws SQLException
+    {
+        int result = 0;
+
+        Statement stmt = null;
+        ResultSet rset = null;
+
+        try
+        {
+            String sql ="";
+            if("TU".equals(type))
+            {
+                sql = "SELECT COUNT(DISTINCT tu.id) ";
+                        
+            }
+            else
+            {
+                // TUV
+                sql = "SELECT COUNT(tu.id) ";
+            }
+            sql += "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
+                    + "  WHERE tu.id = tuv.tu_id and tu.tm_id = "
+                    + tm.getId()
+                    + " and tu.id > "
+                    + startTUId;
+            
+            stmt = conn.createStatement();
+            rset = stmt.executeQuery(sql);
+            if (rset.next())
+            {
+                result = rset.getInt(1);
+            }
+        }
+        catch (SQLException e)
+        {
+            try
+            {
+                conn.rollback();
+            }
+            catch (Throwable ignore)
+            {
+            }
+            CATEGORY.warn("can't read TM data", e);
+
+            throw e;
+        }
+        finally
+        {
+            try
+            {
+                if (rset != null)
+                    rset.close();
+                if (stmt != null)
+                    stmt.close();
+            }
+            catch (Throwable ignore)
+            {
+            }
+
+        }
+
+        return result;
+    }
+
+    /**
+     * Gets all TU IDs in the TM.
+     */
+    static List<Long> getAllTuIds(Connection conn, Tm tm, String createdAfter, String createdBefore)
+            throws SQLException
+    {
+        List<Long> result = new ArrayList<Long>();
+
+        Statement stmt = null;
+        ResultSet rset = null;
+
+        try
+        {
+            String sql = "SELECT DISTINCT tu.id "
+                    + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
+                    + "  WHERE tu.id = tuv.tu_id and tu.tm_id = "
+                    + tm.getId();
+            sql += getSqlExpression("tuv", createdAfter, createdBefore);
+            sql += " ORDER by tu.id ASC";
+            stmt = conn.createStatement();
+            rset = stmt.executeQuery(sql);
+
+            while (rset.next())
+            {
+                result.add(new Long(rset.getLong(1)));
             }
         }
         catch (SQLException e)
@@ -77,11 +234,11 @@ public class TmExportHelper {
 
         return result;
     }
-    
+
     /**
      * Gets all TU IDs in the TM.
      */
-    static List<Long> getAllTuIds(Connection conn, Tm tm, String createdAfter, String createdBefore)
+    static List<Long> getAllTuIds(Connection conn, Tm tm, long startTUId)
             throws SQLException
     {
         List<Long> result = new ArrayList<Long>();
@@ -94,8 +251,10 @@ public class TmExportHelper {
             String sql = "SELECT DISTINCT tu.id "
                     + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
                     + "  WHERE tu.id = tuv.tu_id and tu.tm_id = "
-                    + tm.getId();
-            sql += getSqlExpression("tuv", createdAfter, createdBefore);
+                    + tm.getId()
+                    + " and tu.id > "
+                    + startTUId;
+            
             sql += " ORDER by tu.id ASC";
             stmt = conn.createStatement();
             rset = stmt.executeQuery(sql);

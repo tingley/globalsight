@@ -24,31 +24,31 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * This class holds all the static definitions of permissions.
- *
- * NOTE: When adding new permission constants to this class,
- * be sure to update the static section where the HashMap
- * is filled.
+ * 
+ * NOTE: When adding new permission constants to this class, be sure to update
+ * the static section where the HashMap is filled.
  */
 public class Permission
 {
-    static private final Logger s_logger =
-            Logger.getLogger(
-                Permission.class);
+    static private final Logger logger = Logger.getLogger(Permission.class);
 
     /**
-     * Static permission definitions -- see below for mapping
-     * when you add a permission, you must add it to the
-     * allAllPermissions() call otherwise it won't be recognized.
+     * Static permission definitions -- see below for mapping when you add a
+     * permission, you must add it to the allAllPermissions() call otherwise it
+     * won't be recognized.
      */
     static public final String LOGS_VIEW = "logs.view";
     static public final String SHUTDOWN_SYSTEM = "shutdown.system";
@@ -71,6 +71,7 @@ public class Permission
     static public final String COMPANY_EDIT = "company.edit";
     static public final String COMPANY_NEW = "company.new";
     static public final String COMPANY_REMOVE = "company.remove";
+    static public final String COMPANY_MIGRATE = "company.migrate";
     static public final String PROJECTS_MANAGE = "projects.manage";
     static public final String PROJECTS_MANAGE_WORKFLOWS = "projects.manage.workflows";
     static public final String CALENDAR_ADMINISTER = "calendar.administer";
@@ -103,6 +104,8 @@ public class Permission
     static public final String USERS_ACCESS_CCEMAIL = "users.access.ccEmail";
     static public final String USERS_ACCESS_BCCEMAIL = "users.access.bccEmail";
     static public final String USERS_NEW = "users.new";
+    static public final String USERS_IMPORT = "users.import";
+    static public final String USERS_EXPORT = "users.export";
     static public final String USERS_PROJECT_MEMBERSHIP = "users.projects.membership";
     static public final String TM_VIEW = "tm.view";
     static public final String TM_BROWSER = "tm.browser";
@@ -115,9 +118,13 @@ public class Permission
     static public final String TM_EDIT = "tm.edit";
     static public final String TM_NEW = "tm.new";
     static public final String TM_DELETE = "tm.delete";
-    static public final String SERVICE_TM_SEARCH_ENTRY = "service.tm.searchEntries";
-    static public final String SERVICE_TM_CREATE_ENTRY = "service.tm.createEntries";
-    static public final String SERVICE_TM_EDIT_ENTRY = "service.tm.editEntries";
+    static public final String TM_SEARCH = "tm.search";
+    static public final String TM_DELETE_ENTRY = "tm.deleteEntries";
+    static public final String TM_ADD_ENTRY = "tm.addEntries";
+    static public final String TM_EDIT_ENTRY = "tm.editEntries";
+    static public final String TM_SEARCH_ADVANCED = "tm.search.advanced";
+
+    static public final String TM_ENABLE_TM_ATTRIBUTES = "tm.enableTMAttributes";
     static public final String TMP_VIEW = "tmp.view";
     static public final String TMP_EDIT = "tmp.edit";
     static public final String TMP_NEW = "tmp.new";
@@ -134,6 +141,7 @@ public class Permission
     static public final String TERMINOLOGY_EXPORT = "terminology.export";
     static public final String TERMINOLOGY_MAINTENANCE = "terminology.maintenance";
     static public final String TERMINOLOGY_INPUT_MODELS = "terminology.inputModels";
+    static public final String TERMINOLOGY_SEARCH = "terminology.search";
     static public final String PROJECTS_VIEW = "projects.view";
     static public final String PROJECTS_IMPORT = "projects.import";
     static public final String PROJECTS_EXPORT = "projects.export";
@@ -219,24 +227,22 @@ public class Permission
     static public final String JOBS_MAKE_READY = "jobs.makeready";
     static public final String JOBS_PLANNEDCOMPDATE = "jobs.plannedcompdate";
     static public final String FILE_PROFILES_SEARCH = "fileprofiles.search";
-    
+
     // For sla report issue
-    static public final String JOBS_ESTIMATEDCOMPDATE = 
-        "jobs.estimatedcompdate";
-    static public final String JOBS_ESTIMATEDTRANSLATECOMPDATE = 
-        "jobs.estimatedtranslatecompdate";
-    
+    static public final String JOBS_ESTIMATEDCOMPDATE = "jobs.estimatedcompdate";
+    static public final String JOBS_ESTIMATEDTRANSLATECOMPDATE = "jobs.estimatedtranslatecompdate";
+
     static public final String JOB_COMMENTS_VIEW = "job.comments.view";
     static public final String JOB_COMMENTS_EDIT = "job.comments.edit";
     static public final String JOB_COMMENTS_NEW = "job.comments.new";
     static public final String JOB_COSTING_VIEW = "job.costing.view";
 
     static public final String ACTIVITIES_COMMENTS_DOWNLOAD = "activities.comments.download";
-    
+
     // for job costing issue
     static public final String COSTING_EXPENSE_VIEW = "job.costing.expense.view";
     static public final String COSTING_REVENUE_VIEW = "job.costing.revenue.view";
-    
+
     static public final String JOB_COSTING_EDIT = "job.costing.edit";
     static public final String JOB_COSTING_REPORT = "job.costing.report";
     static public final String JOB_FILES_VIEW = "job.files.view";
@@ -268,14 +274,17 @@ public class Permission
     static public final String JOB_WORKFLOWS_PRIORITY = "job.workflows.priority";
     static public final String ACTIVITY_DASHBOARD_VIEW = "activity.dashboard.view";
     static public final String ACTIVITIES_VIEW = "activities.view";
-    static public final String ACTIVITIES_ACCEPT = "activities.accept"; 
+    static public final String ACTIVITIES_OFFLINEUPLOAD = "activities.offlineUpload";
+    static public final String ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY = "activities.offlineUpload.fromAnyActivity";
+    static public final String ACTIVITIES_ACCEPT = "activities.accept";
     static public final String ACTIVITIES_ACCEPT_ALL = "activities.accept.all";
     static public final String ACTIVITIES_BATCH_COMPLETE_ACTIVITY = "activities.batch.complete.activity";
     static public final String ACTIVITIES_BATCH_COMPLETE_WORKFLOW = "activities.batch.complete.workflow";
     static public final String ACTIVITIES_DOWNLOAD_ALL = "activities.download.all";
+    static public final String ACTIVITIES_DOWNLOAD_COMBINED = "activities.download.combined";
     static public final String ACTIVITIES_REJECT_BEFORE_ACCEPTING = "activities.rejectBeforeAccepting";
     static public final String ACTIVITIES_REJECT_AFTER_ACCEPTING = "activities.rejectAfterAccepting";
-    static public final String ACTIVITIES_EXPORT = "activities.export"; 
+    static public final String ACTIVITIES_EXPORT = "activities.export";
     static public final String ACTIVITIES_EXPORT_INPROGRESS = "activities.export.inprogress";
     static public final String ACTIVITIES_WORKOFFLINE = "activities.workoffline";
     static public final String ACTIVITIES_UPLOAD_SUPPORT_FILES = "activities.upload.supportfiles";
@@ -285,7 +294,7 @@ public class Permission
     static public final String ACTIVITIES_FILES_EDIT = "activities.files.edit";
     static public final String ACTIVITIES_JOB_COMMENTS_VIEW = "activities.jobcomments.view";
     static public final String ACTIVITIES_JOB_COMMENTS_EDIT = "activities.jobcomments.edit";
-    static public final String ACTIVITIES_JOB_COMMENTS_NEW  = "activities.jobcomments.new";  
+    static public final String ACTIVITIES_JOB_COMMENTS_NEW = "activities.jobcomments.new";
     static public final String ACTIVITIES_JOB_COMMENTS_DOWNLOAD = "activities.jobcomments.download";
     static public final String ACTIVITIES_COMMENTS_VIEW = "activities.comments.view";
     static public final String ACTIVITIES_COMMENTS_EDIT = "activities.comments.edit";
@@ -294,6 +303,8 @@ public class Permission
     static public final String ACTIVITIES_SUMMARY_STATISTICS = "activities.summaryStatistics";
     static public final String ACTIVITIES_SECONDARYTARGETFILE = "activities.secondaryTargetFile";
     static public final String ACTIVITIES_CROWDSIGHT = "activities.crowdsight";
+    static public final String ACTIVITIES_TM_SEARCH = "activities.tm.search";
+    static public final String ACTIVITIES_TB_SEARCH = "activities.tb.search";
     static public final String REPORTS_MAIN = "reports.main";
     static public final String REPORTS_ADMIN = "reports.admin";
     static public final String REPORTS_COMPOSER = "reports.composer";
@@ -311,6 +322,7 @@ public class Permission
     static public final String VENDORS_RATING_REMOVE = "vendors.rating.remove";
     static public final String CONTENT_MANAGER = "contentmanager";
     static public final String CUSTOMER_UPLOAD = "customer.upload";
+    static public final String CUSTOMER_UPLOAD_VIA_WEBSERVICE = "customer.upload.via.webservice";
     static public final String GET_ALL_PROJECTS = "projects.getall";
     static public final String GET_PROJECTS_I_MANAGE = "projects.getmanage";
     static public final String GET_PROJECTS_I_BELONG = "projects.getbelong";
@@ -319,6 +331,8 @@ public class Permission
     static public final String ACCOUNT_NOTIFICATION_SYSTEM = "account.notification.system";
     static public final String ACCOUNT_NOTIFICATION_WFMGMT = "account.notification.wfmgmt";
     static public final String ACCOUNT_NOTIFICATION_GENERAL = "account.notification.general";
+    static public final String ACCOUNT_NOTIFICATION_NOMATCHES = "account.notification.noMatchesInJobEmail";
+    static public final String ACCOUNT_NOTIFICATION_REPETITIONS = "account.notification.repetitionsInJobEmail";
     static public final String SOURCE_PAGE_EDIT = "sourcepage.edit";
     static public final String COMMENT_ACCESS_RESTRICTED = "comment.access.restricted";
     static public final String JOB_SOURCE_WORDCOUNT_TOTAL = "job.source.wordcount.total";
@@ -327,8 +341,8 @@ public class Permission
     static public final String FILE_PROFILES_SEE_ALL = "fileprofiles.seeAll";
     static public final String USERS_VIEW_SEE_ALL = "users.view.seeAll";
 
-    //add a permission for each report!
-    static public final String REPORTS_WORD_COUNT = "reports.word_count"; 
+    // add a permission for each report!
+    static public final String REPORTS_WORD_COUNT = "reports.word_count";
     static public final String REPORTS_JOB_COST = "reports.job_cost";
     static public final String REPORTS_TM = "reports.tm";
     static public final String REPORTS_WF_STATUS = "reports.wf_status";
@@ -348,17 +362,18 @@ public class Permission
     static public final String REPORTS_DELL_FILE_LIST = "reports.dell.file_list";
     // For Lisa QA report issue
     static public final String REPORTS_REVIEWER_LISA_QA = "reports.reviewer.lisa_qa";
-    
+
     static public final String REPORTS_COMMENTS_ANALYSIS = "reports.comments.analysis";
     static public final String REPORTS_TRANSLATIONS_EDIT = "reports.translations.edit";
     static public final String REPORTS_LANGUAGE_SIGN_OFF = "reports.language.sign.off";
     static public final String REPORTS_CHARACTER_COUNT = "reports.character.count";
-    
+
     static public final String REPORTS_TRANSLATION_PROGRESS = "reports.translation.progress";
+    static public final String REPORTS_SUMMARY = "reports.summary";
 
     // For sla report issue
     static public final String REPORTS_SLA = "reports.sla";
-     
+
     // For Segmentation Rule
     static public final String SEGMENTATIONRULE_VIEW = "segmentationrule.view";
     static public final String SEGMENTATIONRULE_NEW = "segmentationrule.new";
@@ -366,27 +381,28 @@ public class Permission
     static public final String SEGMENTATIONRULE_EXPORT = "segmentationrule.export";
     static public final String SEGMENTATIONRULE_REMOVE = "segmentationrule.remove";
     static public final String SEGMENTATIONRULE_DUP = "segmentationrule.duplicate";
-    
+
     // For implemented comments check report issue
     static public final String REPORTS_IMPLEMENTED_COMMENTS_CHECK = "reports.implemented.comments.check";
 
     // For "Add job id into online job report" issue
     static public final String REPORTS_DELL_ONLINE_JOBS_ID = "reports.dell.online_jobs.id";
-    
+
     // For job attribute report
     static public final String JOB_ATTRIBUTE_REPORT = "reports.jobAttribute";
-    
-    // For "Grey out the edit buttons once the quote approve has been selected" issue
+
+    // For "Grey out the edit buttons once the quote approve has been selected"
+    // issue
     static public final String JOB_COSTING_REEDIT = "job.costing.reedit";
-    
+
     // For " Quotation process for WebEx " issue
     static public final String JOB_QUOTE_APPROVE = "job.quote.approve";
     static public final String JOB_QUOTE_PONUMBER_VIEW = "job.quote.ponumber.view";
     static public final String JOB_QUOTE_PONUMBER_EDIT = "job.quote.ponumber.edit";
-    
+
     static public final String IN_CONTEXT_MATCH = "tmProfile.in.context.match";
-    
-    //  For " add download button to my activities " issue    
+
+    // For " add download button to my activities " issue
     static public final String ACTIVITIES_DOWNLOAD = "activities.download";
     static public final String CHANGE_OWN_PASSWORD = "activities.change.own.password";
     static public final String SERVICE_TM_GET_ALL_TMPROFILES = "service.tm.getAllTMProfiles";
@@ -394,34 +410,35 @@ public class Permission
     static public final String SERVICE_TB_SEARCH_ENTRY = "service.tb.searchEntries";
     static public final String SERVICE_TB_EDIT_ENTRY = "service.tb.editEntries";
     static public final String SERVICE_TB_GET_ALL_TB = "service.tb.getAllTermbases";
-    
+
     static public final String CONNECT_TO_CVS = "desktopicon.connect.cvs";
-    
-    //For CVS function
+
+    // For CVS function
+    static public final String CVS_ADMIN = "cvs.admin";
     static public final String CVS_OPERATE = "cvs.operate";
-    
+
     static public final String CVS_Servers = "cvs.servers";
     static public final String CVS_Servers_NEW = "cvs.servers.new";
     static public final String CVS_Servers_EDIT = "cvs.servers.edit";
     static public final String CVS_Servers_REMOVE = "cvs.servers.remove";
-    
+
     static public final String CVS_MODULES = "cvs.modules";
     static public final String CVS_MODULES_NEW = "cvs.modules.new";
     static public final String CVS_MODULES_EDIT = "cvs.modules.edit";
     static public final String CVS_MODULES_REMOVE = "cvs.modules.remove";
     static public final String CVS_MODULES_CHECKOUT = "cvs.modules.checkout";
-    
+
     static public final String CVS_MODULE_MAPPING = "cvs.module.mapping";
     static public final String CVS_MODULE_MAPPING_NEW = "cvs.module.mapping.new";
     static public final String CVS_MODULE_MAPPING_EDIT = "cvs.module.mapping.edit";
     static public final String CVS_MODULE_MAPPING_REMOVE = "cvs.module.mapping.remove";
-    
+
     static public final String CVS_FILE_PROFILES = "cvs.file.profiles";
     static public final String CVS_FILE_PROFILES_NEW = "cvs.file.profiles.new";
     static public final String CVS_FILE_PROFILES_EDIT = "cvs.file.profiles.edit";
     static public final String CVS_FILE_PROFILES_REMOVE = "cvs.file.profiles.remove";
-    
-    //For attribute
+
+    // For attribute
     static public final String ATTRIBUTE_VIEW = "attribute.view";
     static public final String ATTRIBUTE_NEW = "attribute.new";
     static public final String ATTRIBUTE_REMOVE = "attribute.remove";
@@ -432,22 +449,21 @@ public class Permission
     static public final String ATTRIBUTE_GROUP_EDIT = "attributeGroup.edit";
     static public final String JOB_ATTRIBUTE_VIEW = "job.attribute.view";
     static public final String JOB_ATTRIBUTE_EDIT = "job.attribute.edit";
-    
 
-    //For locale languages
+    // For locale languages
     static public final String UILOCALE_VIEW = "uilocale.view";
     static public final String UILOCALE_REMOVE = "uilocale.remove";
     static public final String UILOCALE_DOWNLOAD_RES = "uilocale.downloadres";
     static public final String UILOCALE_UPLOAD_RES = "uilocale.uploadres";
     static public final String UILOCALE_SET_DEFAULT = "uilocale.setdefault";
     static public final String UILOCALE_NEW = "uilocale.new";
-      
-    //For filter configuration.
+
+    // For filter configuration.
     static public final String FILTER_CONFIGURATION_VIEW = "filter.configuration";
     static public final String FILTER_CONFIGURATION_REMOVE_FILTERS = "filter.configuration.remove.filters";
     static public final String FILTER_CONFIGURATION_ADD_FILTER = "filter.configuration.add.filter";
     static public final String FILTER_CONFIGURATION_EDIT_FILTER = "filter.configuration.edit.filter";
-    
+
     static public final String GSEDITION_VIEW = "gsedition.view";
     static public final String GSEDITION_REMOVE = "gsedition.remove";
     static public final String GSEDITION_EDIT = "gsedition.edit";
@@ -456,65 +472,59 @@ public class Permission
     static public final String GSEDITION_ACTIONS_REMOVE = "gseditionActions.remove";
     static public final String GSEDITION_ACTIONS_EDIT = "gseditionActions.edit";
     static public final String GSEDITION_ACTIONS_NEW = "gseditionActions.new";
-    
+
     static public final String ADD_SOURCE_FILES = "sourceFiles.add";
     static public final String DELETE_SOURCE_FILES = "sourceFiles.delete";
     static public final String EDIT_SOURCE_FILES = "sourceFiles.edit";
 
-    //For BlogSmith. Added by Vincent, 2010-03-31
+    // For BlogSmith.
     static public final String RSS_READER = "rss.reader";
     static public final String RSS_JOB = "rss.job";
-    
+
     static public final String SET_DEFAULT_ROLES = "admin.setDefaultRoles";
-    
-    //For Job Search
+
+    // For Job Search
     static public final String JOB_SCOPE_MYPROJECTS = "jobscope.myProjects";
 
-    static public final String UPDATE_LEVERAGE = "updateLeverage";
-    static public final String UPDATE_WORD_COUNTS = "jobs.updateWordCounts";
-    
+    static public final String JOB_UPDATE_LEVERAGE = "jobs.updateLeverage";
+    static public final String JOB_UPDATE_WORD_COUNTS = "jobs.updateWordCounts";
+    static public final String ACTIVITIES_UPDATE_LEVERAGE = "activities.updateLeverage";
+
+    // For Job creation
+    static public final String CREATE_JOB = "createjob";
     // Limit the range of global LP permissions,super LocalizationParticipant
     // user can only edit below permissions.
-    static public final String[] GLOBAL_LP_PERMS = {
-                    ACTIVITIES_VIEW, ACTIVITIES_ACCEPT, 
-                    ACTIVITIES_REJECT_BEFORE_ACCEPTING,
-                    ACTIVITIES_REJECT_AFTER_ACCEPTING,
-                    ACTIVITIES_WORKOFFLINE, ACTIVITIES_SEARCHREPLACE,
-                    ACTIVITIES_FILES_VIEW, ACTIVITIES_FILES_EDIT,
-                    ACTIVITIES_COMMENTS_VIEW, ACTIVITIES_COMMENTS_EDIT,
-                    CONTENT_MANAGER, ACCOUNT_NOTIFICATION_GENERAL, 
-                    ACTIVITIES_EXPORT, ACTIVITIES_EXPORT_INPROGRESS,
-                    ACTIVITIES_DOWNLOAD, ACTIVITIES_ACCEPT_ALL, 
-                    ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES,  
-                    ACTIVITIES_DOWNLOAD_ALL,
-                    ACTIVITIES_UPLOAD_SUPPORT_FILES,
-                    ACTIVITIES_DETAIL_STATISTICS,
-                    ACTIVITIES_SUMMARY_STATISTICS,
-                    SOURCE_PAGE_EDIT,
-                    COMMENT_ACCESS_RESTRICTED,
-                    ACTIVITIES_COMMENTS_NEW,
-                    ACTIVITIES_COMMENTS_JOB,
-                    ACTIVITIES_COMMENTS_DOWNLOAD,
-                    ACTIVITIES_SECONDARYTARGETFILE,
-                    ACTIVITIES_JOB_COMMENTS_VIEW,
-                    ACTIVITIES_JOB_COMMENTS_EDIT,
-                    ACTIVITIES_JOB_COMMENTS_NEW,
-                    ACTIVITIES_JOB_COMMENTS_DOWNLOAD,
-                    REPORTS_TRANSLATIONS_EDIT,
-                    REPORTS_CHARACTER_COUNT,
-                    ACTIVITY_DASHBOARD_VIEW,
-                    ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
-                    ACTIVITIES_BATCH_COMPLETE_WORKFLOW,
-                    UPDATE_LEVERAGE
-     };
+    static public final String[] GLOBAL_LP_PERMS =
+    { ACTIVITIES_VIEW, ACTIVITIES_ACCEPT, ACTIVITIES_REJECT_BEFORE_ACCEPTING,
+            ACTIVITIES_REJECT_AFTER_ACCEPTING, ACTIVITIES_WORKOFFLINE,
+            ACTIVITIES_SEARCHREPLACE, ACTIVITIES_FILES_VIEW,
+            ACTIVITIES_FILES_EDIT, ACTIVITIES_COMMENTS_VIEW,
+            ACTIVITIES_COMMENTS_EDIT, CONTENT_MANAGER,
+            ACCOUNT_NOTIFICATION_GENERAL, ACTIVITIES_EXPORT,
+            ACTIVITIES_EXPORT_INPROGRESS, ACTIVITIES_DOWNLOAD,
+            ACTIVITIES_ACCEPT_ALL, ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES,
+            ACTIVITIES_DOWNLOAD_ALL, ACTIVITIES_UPLOAD_SUPPORT_FILES,
+            ACTIVITIES_DETAIL_STATISTICS, ACTIVITIES_SUMMARY_STATISTICS,
+            SOURCE_PAGE_EDIT, COMMENT_ACCESS_RESTRICTED,
+            ACTIVITIES_COMMENTS_NEW, ACTIVITIES_COMMENTS_JOB,
+            ACTIVITIES_COMMENTS_DOWNLOAD, ACTIVITIES_SECONDARYTARGETFILE,
+            ACTIVITIES_JOB_COMMENTS_VIEW, ACTIVITIES_JOB_COMMENTS_EDIT,
+            ACTIVITIES_JOB_COMMENTS_NEW, ACTIVITIES_JOB_COMMENTS_DOWNLOAD,
+            REPORTS_TRANSLATIONS_EDIT, REPORTS_LANGUAGE_SIGN_OFF,
+            REPORTS_CHARACTER_COUNT, ACTIVITY_DASHBOARD_VIEW,
+            ACTIVITIES_BATCH_COMPLETE_ACTIVITY,
+            ACTIVITIES_BATCH_COMPLETE_WORKFLOW, ACTIVITIES_UPDATE_LEVERAGE,
+            ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY, TM_VIEW, TM_SEARCH,
+            ACTIVITIES_TM_SEARCH, ACTIVITIES_TB_SEARCH, TERMINOLOGY_VIEW,
+            TERMINOLOGY_SEARCH, ACTIVITIES_DOWNLOAD_COMBINED };
 
     /**
-     * You should add any new permissions to this call so that the
-     * permission can be registered upon startup.
-     *
-     * NOTE: DO NOT ADD PERMISSIONS IN LOGICAL GROUPINGS,
-     * ONLY ADD NEW PERMISSIONS TO THE BOTTOM OF THE LIST
-     * AND DO NOT REORDER THIS LIST EVER!!!!
+     * You should add any new permissions to this call so that the permission
+     * can be registered upon startup.
+     * 
+     * NOTE: DO NOT ADD PERMISSIONS IN LOGICAL GROUPINGS, ONLY ADD NEW
+     * PERMISSIONS TO THE BOTTOM OF THE LIST AND DO NOT REORDER THIS LIST
+     * EVER!!!!
      */
     static private boolean addAllPermissions()
     {
@@ -523,437 +533,477 @@ public class Permission
         // SEE NOTE ABOVE!!!!!!!
         // Just add any new perm you have to the BOTTOM of this list
         // not near any logically similar permission.
-        added = addPermission(LOGS_VIEW) || added;
-        added = addPermission(SHUTDOWN_SYSTEM) || added;
-        added = addPermission(LOCALE_PAIRS_VIEW) || added;
-        added = addPermission(LOCALE_PAIRS_REMOVE) || added;
-        added = addPermission(LOCALE_PAIRS_NEW) || added;
-        added = addPermission(ACTIVITY_TYPES_VIEW) || added;
-        added = addPermission(ACTIVITY_TYPES_REMOVE) || added;
-        added = addPermission(ACTIVITY_TYPES_EDIT) || added;
-        added = addPermission(ACTIVITY_TYPES_NEW) || added;
-        added = addPermission(CURRENCY_VIEW) || added;
-        added = addPermission(CURRENCY_EDIT) || added;
-        added = addPermission(CURRENCY_NEW) || added;
-        added = addPermission(PROJECTS_MANAGE) || added;
-        added = addPermission(PROJECTS_MANAGE_WORKFLOWS) || added;
-        added = addPermission(CALENDAR_ADMINISTER) || added;
-        added = addPermission(WORKFLOW_CANCEL) || added;
-        added = addPermission(RATES_VIEW) || added;
-        added = addPermission(RATES_EDIT) || added;
-        added = addPermission(RATES_NEW) || added;
-        added = addPermission(SYS_CAL_VIEW) || added;
-        added = addPermission(SYS_CAL_DUP) || added;
-        added = addPermission(SYS_CAL_DEFAULT) || added;
-        added = addPermission(SYS_CAL_REMOVE) || added;
-        added = addPermission(SYS_CAL_EDIT) || added;
-        added = addPermission(SYS_CAL_NEW) || added;
-        added = addPermission(USER_CAL_VIEW) || added;
-        added = addPermission(USER_CAL_EDIT) || added;
-        added = addPermission(USER_CAL_EDIT_YOURS) || added;
-        added = addPermission(HOLIDAY_VIEW) || added;
-        added = addPermission(HOLIDAY_REMOVE) || added;
-        added = addPermission(HOLIDAY_EDIT) || added;
-        added = addPermission(HOLIDAY_NEW) || added;
-        added = addPermission(PERMGROUPS_VIEW) || added;
-        added = addPermission(PERMGROUPS_REMOVE) || added;
-        added = addPermission(PERMGROUPS_EDIT) || added;
-        added = addPermission(PERMGROUPS_NEW) || added;
-        added = addPermission(USERS_VIEW) || added;
-        added = addPermission(USERS_EDIT) || added;
-        added = addPermission(USERS_REMOVE) || added;
-        added = addPermission(USERS_NEW) || added;
-        added = addPermission(USERS_PROJECT_MEMBERSHIP) || added;
-        added = addPermission(TM_VIEW) || added;
-        added = addPermission(TM_BROWSER) || added;
-        added = addPermission(TM_STATS) || added;
-        added = addPermission(TM_MAINTENANCE) || added;
-        added = addPermission(TM_IMPORT) || added;
-        added = addPermission(TM_EXPORT) || added;
-        added = addPermission(TM_REINDEX) || added;
-        added = addPermission(TM_DUPLICATE) || added;
-        added = addPermission(TM_EDIT) || added;
-        added = addPermission(TM_NEW) || added;
-        added = addPermission(TMP_VIEW) || added;
-        added = addPermission(TMP_EDIT) || added;
-        added = addPermission(TMP_NEW) || added;
-        added = addPermission(TERMINOLOGY_VIEW) || added;
-        added = addPermission(TERMINOLOGY_STATS) || added;
-        added = addPermission(TERMINOLOGY_INDEXES) || added;
-        added = addPermission(TERMINOLOGY_REMOVE) || added;
-        added = addPermission(TERMINOLOGY_DUPLICATE) || added;
-        added = addPermission(TERMINOLOGY_EDIT) || added;
-        added = addPermission(TERMINOLOGY_NEW) || added;
-        added = addPermission(TERMINOLOGY_BROWSE) || added;
-        added = addPermission(TERMINOLOGY_IMPORT) || added;
-        added = addPermission(TERMINOLOGY_EXPORT) || added;
-        added = addPermission(TERMINOLOGY_MAINTENANCE) || added;
-        added = addPermission(TERMINOLOGY_INPUT_MODELS) || added;
-        added = addPermission(PROJECTS_VIEW) || added;
-        added = addPermission(PROJECTS_IMPORT) || added;
-        added = addPermission(PROJECTS_EXPORT) || added;
-        added = addPermission(PROJECTS_EDIT) || added;
-        added = addPermission(PROJECTS_EDIT_PM) || added;
-        added = addPermission(PROJECTS_NEW) || added;
-        added = addPermission(WORKFLOWS_VIEW) || added;
-        added = addPermission(WORKFLOWS_DUPLICATE) || added;
-        added = addPermission(WORKFLOWS_REMOVE) || added;
-        added = addPermission(WORKFLOWS_EDIT) || added;
-        added = addPermission(WORKFLOWS_NEW) || added;
-        added = addPermission(LOCPROFILES_VIEW) || added;
-        added = addPermission(LOCPROFILES_REMOVE) || added;
-        added = addPermission(LOCPROFILES_DETAILS) || added;
-        added = addPermission(LOCPROFILES_DUP) || added;
-        added = addPermission(LOCPROFILES_EDIT) || added;
-        added = addPermission(LOCPROFILES_NEW) || added;
-        added = addPermission(SNIPPET_IMPORT) || added;
-        added = addPermission(SYSTEM_PARAMS) || added;
-        added = addPermission(SUPPORT_FILES_VIEW) || added;
-        added = addPermission(SUPPORT_FILES_REMOVE) || added;
-        added = addPermission(SUPPORT_FILES_UPLOAD) || added;
-        added = addPermission(FILE_PROFILES_VIEW) || added;
-        added = addPermission(FILE_PROFILES_REMOVE) || added;
-        added = addPermission(FILE_PROFILES_EDIT) || added;
-        added = addPermission(FILE_PROFILES_NEW) || added;
-        added = addPermission(FILE_EXT_VIEW) || added;
-        added = addPermission(FILE_EXT_NEW) || added;
-        added = addPermission(XMLRULE_VIEW) || added;
-        added = addPermission(XMLRULE_DUP) || added;
-        added = addPermission(XMLRULE_EDIT) || added;
-        added = addPermission(XMLRULE_NEW) || added;
-        added = addPermission(SGMLRULE_VIEW) || added;
-        added = addPermission(SGMLRULE_UPLOAD) || added;
-        added = addPermission(SGMLRULE_CREATE) || added;
-        added = addPermission(SGMLRULE_REMOVE) || added;
-        added = addPermission(SGMLRULE_EDIT) || added;
-        added = addPermission(IMPORT) || added;
-        added = addPermission(SERVICEWARE_IMPORT) || added;
-        added = addPermission(SNIPPET_ADD) || added;
-        added = addPermission(SNIPPET_EDIT) || added;
-        added = addPermission(TEAMSITE_SERVER_VIEW) || added;
-        added = addPermission(TEAMSITE_SERVER_REMOVE) || added;
-        added = addPermission(TEAMSITE_SERVER_CREATE) || added;
-        added = addPermission(TEAMSITE_SERVER_EDIT) || added;
-        added = addPermission(TEAMSITE_SERVER_NEW) || added;
-        added = addPermission(TEAMSITE_PROFILES_VIEW) || added;
-        added = addPermission(TEAMSITE_PROFILES_REMOVE) || added;
-        added = addPermission(TEAMSITE_PROFILES_NEW) || added;
-        added = addPermission(DATABASE_INTEGRATION) || added;
-        added = addPermission(EXPORT_LOC_VIEW) || added;
-        added = addPermission(EXPORT_LOC_REMOVE) || added;
-        added = addPermission(EXPORT_LOC_DEFAULT) || added;
-        added = addPermission(EXPORT_LOC_EDIT) || added;
-        added = addPermission(EXPORT_LOC_NEW) || added;
-        added = addPermission(VIGNETTE_IMPORT) || added;
-        added = addPermission(CORPUS_ALIGNER_VIEW) || added;
-        added = addPermission(CORPUS_ALIGNER_CREATE) || added;
-        added = addPermission(CORPUS_ALIGNER_DOWNLOAD) || added;
-        added = addPermission(CORPUS_ALIGNER_UPLOAD) || added;
-        added = addPermission(JOB_SCOPE_ALL) || added;
-        added = addPermission(JOBS_VIEW) || added;
-        added = addPermission(JOBS_SEARCH_REPLACE) || added;
-        added = addPermission(JOBS_CHANGE_WFM) || added;
-        added = addPermission(JOBS_DISCARD) || added;
-        added = addPermission(JOBS_DISPATCH) || added;
-        added = addPermission(JOBS_EXPORT_SOURCE) || added;
-        added = addPermission(JOBS_EXPORT) || added;
-        added = addPermission(JOBS_REEXPORT) || added;
-        added = addPermission(JOBS_DETAILS) || added;
-        added = addPermission(JOBS_VIEW_ERROR) || added;
-        added = addPermission(JOBS_ARCHIVE) || added;
-        added = addPermission(JOBS_DOWNLOAD) || added;
-        added = addPermission(JOBS_MAKE_READY) || added;
-        added = addPermission(JOBS_PLANNEDCOMPDATE) || added;
-        added = addPermission(JOB_COMMENTS_VIEW) || added;
-        added = addPermission(JOB_COMMENTS_EDIT) || added;
-        added = addPermission(JOB_COSTING_VIEW) || added;
-        added = addPermission(JOB_COSTING_EDIT) || added;
-        added = addPermission(JOB_COSTING_REPORT) || added;
-        added = addPermission(JOB_FILES_VIEW) || added;
-        added = addPermission(JOB_FILES_EDIT) || added;
-        added = addPermission(JOB_WORKFLOWS_VIEW) || added;
-        added = addPermission(JOB_WORKFLOWS_DISCARD) || added;
-        added = addPermission(JOB_WORKFLOWS_VIEW_ERROR) || added;
-        added = addPermission(JOB_WORKFLOWS_WORDCOUNT) || added;
-        added = addPermission(JOB_WORKFLOWS_RATEVENDOR) || added;
-        added = addPermission(JOB_WORKFLOWS_ARCHIVE) || added;
-        added = addPermission(JOB_WORKFLOWS_DETAILS) || added;
-        added = addPermission(JOB_WORKFLOWS_EXPORT) || added;
-        added = addPermission(JOB_WORKFLOWS_ADD) || added;
-        added = addPermission(JOB_WORKFLOWS_EDIT) || added;
-        added = addPermission(JOB_WORKFLOWS_DISPATCH) || added;
-        added = addPermission(JOB_WORKFLOWS_ESTCOMPDATE) || added;
-        added = addPermission(JOB_WORKFLOWS_PLANNEDCOMPDATE) || added;
-        added = addPermission(JOB_WORKFLOWS_EDITEXPORTLOC) || added;
-        added = addPermission(ACTIVITIES_VIEW) || added;
-        added = addPermission(ACTIVITIES_ACCEPT) || added;
-        added = addPermission(ACTIVITIES_EXPORT) || added;
-        added = addPermission(ACTIVITIES_EXPORT_INPROGRESS) || added;
-        added = addPermission(ACTIVITIES_WORKOFFLINE) || added;
-        added = addPermission(ACTIVITIES_UPLOAD_SUPPORT_FILES) || added;
-        added = addPermission(ACTIVITIES_SEARCHREPLACE) || added;
-        added = addPermission(ACTIVITIES_FILES_VIEW) || added;
-        added = addPermission(ACTIVITIES_FILES_EDIT) || added;
-        added = addPermission(ACTIVITIES_COMMENTS_VIEW) || added;
-        added = addPermission(ACTIVITIES_COMMENTS_EDIT) || added;
-        added = addPermission(REPORTS_MAIN) || added;
-        added = addPermission(REPORTS_ADMIN) || added;
-        added = addPermission(REPORTS_COMPOSER) || added;
-        added = addPermission(VENDORS_NEW) || added;
-        added = addPermission(VENDORS_VIEW) || added;
-        added = addPermission(VENDORS_EDIT) || added;
-        added = addPermission(VENDORS_REMOVE) || added;
-        added = addPermission(VENDORS_DETAILS) || added;
-        added = addPermission(VENDORS_CUSTOMFORM) || added;
-        added = addPermission(VENDORS_RATING_NEW) || added;
-        added = addPermission(VENDORS_RATING_VIEW) || added;
-        added = addPermission(VENDORS_RATING_EDIT) || added;
-        added = addPermission(VENDORS_RATING_REMOVE) || added;
-        added = addPermission(CONTENT_MANAGER) || added;
-        added = addPermission(CUSTOMER_UPLOAD) || added;
-        added = addPermission(DOCUMENTUM_IMPORT) || added;
-        added = addPermission(GET_ALL_PROJECTS) || added;
-        added = addPermission(GET_PROJECTS_I_MANAGE) || added;
-        added = addPermission(GET_PROJECTS_I_BELONG) || added;
-        added = addPermission(REPORTS_CUSTOM_EXTERNAL) || added;
-        added = addPermission(PERMGROUPS_DETAILS) || added;
-        added = addPermission(ACTIVITIES_COMMENTS_NEW) || added;
-        added = addPermission(JOB_COMMENTS_NEW) || added;
-        added = addPermission(ACCOUNT_NOTIFICATION_SYSTEM) || added;
-        added = addPermission(ACCOUNT_NOTIFICATION_WFMGMT) || added;
-        added = addPermission(ACCOUNT_NOTIFICATION_GENERAL) || added;
-        added = addPermission(SOURCE_PAGE_EDIT) || added;
-        added = addPermission(COMMENT_ACCESS_RESTRICTED) || added;
-        added = addPermission(USERS_EDIT_ASSIGN_ANY_PERMGROUPS) || added;
-        added = addPermission(JOB_SOURCE_WORDCOUNT_TOTAL) || added;
-        added = addPermission(JOBS_CLEAR_ERRORS) || added;
-        added = addPermission(JOB_WORKFLOWS_REASSIGN) || added;
-        added = addPermission(TM_DELETE) || added;
-        added = addPermission(COMMENT_EDIT_ALL_COMMENTS) || added;
-        added = addPermission(FILE_PROFILES_SEE_ALL) || added;
-        added = addPermission(REPORTS_WORD_COUNT) || added;
-        added = addPermission(REPORTS_CUSTOM) || added;
-        added = addPermission(REPORTS_JOB_COST) || added;
-        added = addPermission(REPORTS_TM) || added;
-        added = addPermission(REPORTS_WF_STATUS) || added;
-        added = addPermission(REPORTS_JOB_DETAILS) || added;
-        added = addPermission(REPORTS_AVG_PER_COMP) || added;
-        added = addPermission(REPORTS_MISSING_TERMS) || added;
-        added = addPermission(REPORTS_TERM_AUDIT) || added;
-        added = addPermission(REPORTS_DELL_JOB_STATUS) || added;
-        added = addPermission(REPORTS_DELL_ACT_DUR) || added;
-        added = addPermission(REPORTS_DELL_ONLINE_JOBS) || added;
-        added = addPermission(REPORTS_DELL_ONLINE_REVIEW_STATUS) || added;
-        added = addPermission(JOB_WORKFLOWS_ESTREVIEWSTART) || added;
-        added = addPermission(JOB_WORKFLOWS_DETAIL_STATISTICS) || added;
-        added = addPermission(JOB_WORKFLOWS_SUMMARY_STATISTICS) || added;
-        added = addPermission(ACTIVITIES_DETAIL_STATISTICS) || added;
-        added = addPermission(ACTIVITIES_SUMMARY_STATISTICS) || added;
-        added = addPermission(REPORTS_DELL_ONLINE_JOBS_RECALC) || added;
-        added = addPermission(REPORTS_DELL_VENDOR_PO) || added;
-        added = addPermission(REPORTS_COMMENT) || added;
-        added = addPermission(REPORTS_DELL_REVIEWER_VENDOR_PO) || added;
-        added = addPermission(COMPANY_VIEW) || added;
-        added = addPermission(COMPANY_EDIT) || added;
-        added = addPermission(COMPANY_NEW) || added;
-        added = addPermission(COMPANY_REMOVE) || added;
-        added = addPermission(REPORTS_CUSTOMIZE) || added;
-        added = addPermission(JOB_QUOTE_VIEW) || added;
-        added = addPermission(JOB_QUOTE_SEND) || added;
-        added = addPermission(JOB_QUOTE_STATUS_VIEW) || added;
-        added = addPermission(COSTING_EXPENSE_VIEW) || added;
-        added = addPermission(COSTING_REVENUE_VIEW) || added;
-        added = addPermission(REPORTS_REVIEWER_LISA_QA) || added;
+        added = addPermission(1, LOGS_VIEW) || added;
+        added = addPermission(2, SHUTDOWN_SYSTEM) || added;
+        added = addPermission(3, LOCALE_PAIRS_VIEW) || added;
+        added = addPermission(4, LOCALE_PAIRS_REMOVE) || added;
+        added = addPermission(5, LOCALE_PAIRS_NEW) || added;
+        added = addPermission(6, ACTIVITY_TYPES_VIEW) || added;
+        added = addPermission(7, ACTIVITY_TYPES_REMOVE) || added;
+        added = addPermission(8, ACTIVITY_TYPES_EDIT) || added;
+        added = addPermission(9, ACTIVITY_TYPES_NEW) || added;
+        added = addPermission(10, CURRENCY_VIEW) || added;
+        added = addPermission(11, CURRENCY_EDIT) || added;
+        added = addPermission(12, CURRENCY_NEW) || added;
+        added = addPermission(13, PROJECTS_MANAGE) || added;
+        added = addPermission(14, PROJECTS_MANAGE_WORKFLOWS) || added;
+        added = addPermission(15, CALENDAR_ADMINISTER) || added;
+        added = addPermission(16, WORKFLOW_CANCEL) || added;
+        added = addPermission(17, RATES_VIEW) || added;
+        added = addPermission(18, RATES_EDIT) || added;
+        added = addPermission(19, RATES_NEW) || added;
+        added = addPermission(20, SYS_CAL_VIEW) || added;
+        added = addPermission(21, SYS_CAL_DUP) || added;
+        added = addPermission(22, SYS_CAL_DEFAULT) || added;
+        added = addPermission(23, SYS_CAL_REMOVE) || added;
+        added = addPermission(24, SYS_CAL_EDIT) || added;
+        added = addPermission(25, SYS_CAL_NEW) || added;
+        added = addPermission(26, USER_CAL_VIEW) || added;
+        added = addPermission(27, USER_CAL_EDIT) || added;
+        added = addPermission(28, USER_CAL_EDIT_YOURS) || added;
+        added = addPermission(29, HOLIDAY_VIEW) || added;
+        added = addPermission(30, HOLIDAY_REMOVE) || added;
+        added = addPermission(31, HOLIDAY_EDIT) || added;
+        added = addPermission(32, HOLIDAY_NEW) || added;
+        added = addPermission(33, PERMGROUPS_VIEW) || added;
+        added = addPermission(34, PERMGROUPS_REMOVE) || added;
+        added = addPermission(35, PERMGROUPS_EDIT) || added;
+        added = addPermission(36, PERMGROUPS_NEW) || added;
+        added = addPermission(37, USERS_VIEW) || added;
+        added = addPermission(38, USERS_EDIT) || added;
+        added = addPermission(39, USERS_REMOVE) || added;
+        added = addPermission(40, USERS_NEW) || added;
+        added = addPermission(41, USERS_PROJECT_MEMBERSHIP) || added;
+        added = addPermission(42, TM_VIEW) || added;
+        added = addPermission(43, TM_BROWSER) || added;
+        added = addPermission(44, TM_STATS) || added;
+        added = addPermission(45, TM_MAINTENANCE) || added;
+        added = addPermission(46, TM_IMPORT) || added;
+        added = addPermission(47, TM_EXPORT) || added;
+        added = addPermission(48, TM_REINDEX) || added;
+        added = addPermission(49, TM_DUPLICATE) || added;
+        added = addPermission(50, TM_EDIT) || added;
+        added = addPermission(51, TM_NEW) || added;
+        added = addPermission(52, TMP_VIEW) || added;
+        added = addPermission(53, TMP_EDIT) || added;
+        added = addPermission(54, TMP_NEW) || added;
+        added = addPermission(55, TERMINOLOGY_VIEW) || added;
+        added = addPermission(56, TERMINOLOGY_STATS) || added;
+        added = addPermission(57, TERMINOLOGY_INDEXES) || added;
+        added = addPermission(58, TERMINOLOGY_REMOVE) || added;
+        added = addPermission(59, TERMINOLOGY_DUPLICATE) || added;
+        added = addPermission(60, TERMINOLOGY_EDIT) || added;
+        added = addPermission(61, TERMINOLOGY_NEW) || added;
+        added = addPermission(62, TERMINOLOGY_BROWSE) || added;
+        added = addPermission(63, TERMINOLOGY_IMPORT) || added;
+        added = addPermission(64, TERMINOLOGY_EXPORT) || added;
+        added = addPermission(65, TERMINOLOGY_MAINTENANCE) || added;
+        added = addPermission(66, TERMINOLOGY_INPUT_MODELS) || added;
+        added = addPermission(67, PROJECTS_VIEW) || added;
+        added = addPermission(68, PROJECTS_IMPORT) || added;
+        added = addPermission(69, PROJECTS_EXPORT) || added;
+        added = addPermission(70, PROJECTS_EDIT) || added;
+        added = addPermission(71, PROJECTS_EDIT_PM) || added;
+        added = addPermission(72, PROJECTS_NEW) || added;
+        added = addPermission(73, WORKFLOWS_VIEW) || added;
+        added = addPermission(74, WORKFLOWS_DUPLICATE) || added;
+        added = addPermission(75, WORKFLOWS_REMOVE) || added;
+        added = addPermission(76, WORKFLOWS_EDIT) || added;
+        added = addPermission(77, WORKFLOWS_NEW) || added;
+        added = addPermission(78, LOCPROFILES_VIEW) || added;
+        added = addPermission(79, LOCPROFILES_REMOVE) || added;
+        added = addPermission(80, LOCPROFILES_DETAILS) || added;
+        added = addPermission(81, LOCPROFILES_DUP) || added;
+        added = addPermission(82, LOCPROFILES_EDIT) || added;
+        added = addPermission(83, LOCPROFILES_NEW) || added;
+        added = addPermission(84, SNIPPET_IMPORT) || added;
+        added = addPermission(85, SYSTEM_PARAMS) || added;
+        added = addPermission(86, SUPPORT_FILES_VIEW) || added;
+        added = addPermission(87, SUPPORT_FILES_REMOVE) || added;
+        added = addPermission(88, SUPPORT_FILES_UPLOAD) || added;
+        added = addPermission(89, FILE_PROFILES_VIEW) || added;
+        added = addPermission(90, FILE_PROFILES_REMOVE) || added;
+        added = addPermission(91, FILE_PROFILES_EDIT) || added;
+        added = addPermission(92, FILE_PROFILES_NEW) || added;
+        added = addPermission(93, FILE_EXT_VIEW) || added;
+        added = addPermission(94, FILE_EXT_NEW) || added;
+        added = addPermission(95, XMLRULE_VIEW) || added;
+        added = addPermission(96, XMLRULE_DUP) || added;
+        added = addPermission(97, XMLRULE_EDIT) || added;
+        added = addPermission(98, XMLRULE_NEW) || added;
+        added = addPermission(99, SGMLRULE_VIEW) || added;
+        added = addPermission(100, SGMLRULE_UPLOAD) || added;
+        added = addPermission(101, SGMLRULE_CREATE) || added;
+        added = addPermission(102, SGMLRULE_REMOVE) || added;
+        added = addPermission(103, SGMLRULE_EDIT) || added;
+        added = addPermission(104, IMPORT) || added;
+        added = addPermission(105, SERVICEWARE_IMPORT) || added;
+        added = addPermission(106, SNIPPET_ADD) || added;
+        added = addPermission(107, SNIPPET_EDIT) || added;
+        added = addPermission(108, TEAMSITE_SERVER_VIEW) || added;
+        added = addPermission(109, TEAMSITE_SERVER_REMOVE) || added;
+        added = addPermission(110, TEAMSITE_SERVER_CREATE) || added;
+        added = addPermission(111, TEAMSITE_SERVER_EDIT) || added;
+        added = addPermission(112, TEAMSITE_SERVER_NEW) || added;
+        added = addPermission(113, TEAMSITE_PROFILES_VIEW) || added;
+        added = addPermission(114, TEAMSITE_PROFILES_REMOVE) || added;
+        added = addPermission(115, TEAMSITE_PROFILES_NEW) || added;
+        added = addPermission(116, DATABASE_INTEGRATION) || added;
+        added = addPermission(117, EXPORT_LOC_VIEW) || added;
+        added = addPermission(118, EXPORT_LOC_REMOVE) || added;
+        added = addPermission(119, EXPORT_LOC_DEFAULT) || added;
+        added = addPermission(120, EXPORT_LOC_EDIT) || added;
+        added = addPermission(121, EXPORT_LOC_NEW) || added;
+        added = addPermission(122, VIGNETTE_IMPORT) || added;
+        added = addPermission(123, CORPUS_ALIGNER_VIEW) || added;
+        added = addPermission(124, CORPUS_ALIGNER_CREATE) || added;
+        added = addPermission(125, CORPUS_ALIGNER_DOWNLOAD) || added;
+        added = addPermission(126, CORPUS_ALIGNER_UPLOAD) || added;
+        added = addPermission(127, JOB_SCOPE_ALL) || added;
+        added = addPermission(128, JOBS_VIEW) || added;
+        added = addPermission(129, JOBS_SEARCH_REPLACE) || added;
+        added = addPermission(130, JOBS_CHANGE_WFM) || added;
+        added = addPermission(131, JOBS_DISCARD) || added;
+        added = addPermission(132, JOBS_DISPATCH) || added;
+        added = addPermission(133, JOBS_EXPORT_SOURCE) || added;
+        added = addPermission(134, JOBS_EXPORT) || added;
+        added = addPermission(135, JOBS_REEXPORT) || added;
+        added = addPermission(136, JOBS_DETAILS) || added;
+        added = addPermission(137, JOBS_VIEW_ERROR) || added;
+        added = addPermission(138, JOBS_ARCHIVE) || added;
+        added = addPermission(139, JOBS_DOWNLOAD) || added;
+        added = addPermission(140, JOBS_MAKE_READY) || added;
+        added = addPermission(141, JOBS_PLANNEDCOMPDATE) || added;
+        added = addPermission(142, JOB_COMMENTS_VIEW) || added;
+        added = addPermission(143, JOB_COMMENTS_EDIT) || added;
+        added = addPermission(144, JOB_COSTING_VIEW) || added;
+        added = addPermission(145, JOB_COSTING_EDIT) || added;
+        added = addPermission(146, JOB_COSTING_REPORT) || added;
+        added = addPermission(147, JOB_FILES_VIEW) || added;
+        added = addPermission(148, JOB_FILES_EDIT) || added;
+        added = addPermission(149, JOB_WORKFLOWS_VIEW) || added;
+        added = addPermission(150, JOB_WORKFLOWS_DISCARD) || added;
+        added = addPermission(151, JOB_WORKFLOWS_VIEW_ERROR) || added;
+        added = addPermission(152, JOB_WORKFLOWS_WORDCOUNT) || added;
+        added = addPermission(153, JOB_WORKFLOWS_RATEVENDOR) || added;
+        added = addPermission(154, JOB_WORKFLOWS_ARCHIVE) || added;
+        added = addPermission(155, JOB_WORKFLOWS_DETAILS) || added;
+        added = addPermission(156, JOB_WORKFLOWS_EXPORT) || added;
+        added = addPermission(157, JOB_WORKFLOWS_ADD) || added;
+        added = addPermission(158, JOB_WORKFLOWS_EDIT) || added;
+        added = addPermission(159, JOB_WORKFLOWS_DISPATCH) || added;
+        added = addPermission(160, JOB_WORKFLOWS_ESTCOMPDATE) || added;
+        added = addPermission(161, JOB_WORKFLOWS_PLANNEDCOMPDATE) || added;
+        added = addPermission(162, JOB_WORKFLOWS_EDITEXPORTLOC) || added;
+        added = addPermission(163, ACTIVITIES_VIEW) || added;
+        added = addPermission(164, ACTIVITIES_ACCEPT) || added;
+        added = addPermission(165, ACTIVITIES_EXPORT) || added;
+        added = addPermission(166, ACTIVITIES_EXPORT_INPROGRESS) || added;
+        added = addPermission(167, ACTIVITIES_WORKOFFLINE) || added;
+        added = addPermission(168, ACTIVITIES_UPLOAD_SUPPORT_FILES) || added;
+        added = addPermission(169, ACTIVITIES_SEARCHREPLACE) || added;
+        added = addPermission(170, ACTIVITIES_FILES_VIEW) || added;
+        added = addPermission(171, ACTIVITIES_FILES_EDIT) || added;
+        added = addPermission(172, ACTIVITIES_COMMENTS_VIEW) || added;
+        added = addPermission(173, ACTIVITIES_COMMENTS_EDIT) || added;
+        added = addPermission(174, REPORTS_MAIN) || added;
+        added = addPermission(175, REPORTS_ADMIN) || added;
+        added = addPermission(176, REPORTS_COMPOSER) || added;
+        added = addPermission(177, VENDORS_NEW) || added;
+        added = addPermission(178, VENDORS_VIEW) || added;
+        added = addPermission(179, VENDORS_EDIT) || added;
+        added = addPermission(180, VENDORS_REMOVE) || added;
+        added = addPermission(181, VENDORS_DETAILS) || added;
+        added = addPermission(182, VENDORS_CUSTOMFORM) || added;
+        added = addPermission(183, VENDORS_RATING_NEW) || added;
+        added = addPermission(184, VENDORS_RATING_VIEW) || added;
+        added = addPermission(185, VENDORS_RATING_EDIT) || added;
+        added = addPermission(186, VENDORS_RATING_REMOVE) || added;
+        added = addPermission(187, CONTENT_MANAGER) || added;
+        added = addPermission(188, CUSTOMER_UPLOAD) || added;
+        added = addPermission(189, DOCUMENTUM_IMPORT) || added;
+        added = addPermission(190, GET_ALL_PROJECTS) || added;
+        added = addPermission(191, GET_PROJECTS_I_MANAGE) || added;
+        added = addPermission(192, GET_PROJECTS_I_BELONG) || added;
+        added = addPermission(193, REPORTS_CUSTOM_EXTERNAL) || added;
+        added = addPermission(194, PERMGROUPS_DETAILS) || added;
+        added = addPermission(195, ACTIVITIES_COMMENTS_NEW) || added;
+        added = addPermission(196, JOB_COMMENTS_NEW) || added;
+        added = addPermission(197, ACCOUNT_NOTIFICATION_SYSTEM) || added;
+        added = addPermission(198, ACCOUNT_NOTIFICATION_WFMGMT) || added;
+        added = addPermission(199, ACCOUNT_NOTIFICATION_GENERAL) || added;
+        added = addPermission(200, SOURCE_PAGE_EDIT) || added;
+        added = addPermission(201, COMMENT_ACCESS_RESTRICTED) || added;
+        added = addPermission(202, USERS_EDIT_ASSIGN_ANY_PERMGROUPS) || added;
+        added = addPermission(203, JOB_SOURCE_WORDCOUNT_TOTAL) || added;
+        added = addPermission(204, JOBS_CLEAR_ERRORS) || added;
+        added = addPermission(205, JOB_WORKFLOWS_REASSIGN) || added;
+        added = addPermission(206, TM_DELETE) || added;
+        added = addPermission(207, COMMENT_EDIT_ALL_COMMENTS) || added;
+        added = addPermission(208, FILE_PROFILES_SEE_ALL) || added;
+        added = addPermission(209, REPORTS_WORD_COUNT) || added;
+        added = addPermission(210, REPORTS_CUSTOM) || added;
+        added = addPermission(211, REPORTS_JOB_COST) || added;
+        added = addPermission(212, REPORTS_TM) || added;
+        added = addPermission(213, REPORTS_WF_STATUS) || added;
+        added = addPermission(214, REPORTS_JOB_DETAILS) || added;
+        added = addPermission(215, REPORTS_AVG_PER_COMP) || added;
+        added = addPermission(216, REPORTS_MISSING_TERMS) || added;
+        added = addPermission(217, REPORTS_TERM_AUDIT) || added;
+        added = addPermission(218, REPORTS_DELL_JOB_STATUS) || added;
+        added = addPermission(219, REPORTS_DELL_ACT_DUR) || added;
+        added = addPermission(220, REPORTS_DELL_ONLINE_JOBS) || added;
+        added = addPermission(221, REPORTS_DELL_ONLINE_REVIEW_STATUS) || added;
+        added = addPermission(222, JOB_WORKFLOWS_ESTREVIEWSTART) || added;
+        added = addPermission(223, JOB_WORKFLOWS_DETAIL_STATISTICS) || added;
+        added = addPermission(224, JOB_WORKFLOWS_SUMMARY_STATISTICS) || added;
+        added = addPermission(225, ACTIVITIES_DETAIL_STATISTICS) || added;
+        added = addPermission(226, ACTIVITIES_SUMMARY_STATISTICS) || added;
+        added = addPermission(227, REPORTS_DELL_ONLINE_JOBS_RECALC) || added;
+        added = addPermission(228, REPORTS_DELL_VENDOR_PO) || added;
+        added = addPermission(229, REPORTS_COMMENT) || added;
+        added = addPermission(230, REPORTS_DELL_REVIEWER_VENDOR_PO) || added;
+        added = addPermission(231, COMPANY_VIEW) || added;
+        added = addPermission(232, COMPANY_EDIT) || added;
+        added = addPermission(233, COMPANY_NEW) || added;
+        added = addPermission(234, COMPANY_REMOVE) || added;
+        added = addPermission(235, REPORTS_CUSTOMIZE) || added;
+        added = addPermission(236, JOB_QUOTE_VIEW) || added;
+        added = addPermission(237, JOB_QUOTE_SEND) || added;
+        added = addPermission(238, JOB_QUOTE_STATUS_VIEW) || added;
+        added = addPermission(239, COSTING_EXPENSE_VIEW) || added;
+        added = addPermission(240, COSTING_REVENUE_VIEW) || added;
+        added = addPermission(241, REPORTS_REVIEWER_LISA_QA) || added;
         // For sla report issue
-        added = addPermission(JOBS_ESTIMATEDCOMPDATE) || added;
-        added = addPermission(JOBS_ESTIMATEDTRANSLATECOMPDATE) || added;
-        added = addPermission(REPORTS_SLA) || added;
-        
-        added = addPermission(ACTIVITIES_REJECT_BEFORE_ACCEPTING) || added;
-        added = addPermission(ACTIVITIES_REJECT_AFTER_ACCEPTING) || added;
-        
-        // For "Add job id into online job report"  issue
-        added = addPermission(REPORTS_DELL_ONLINE_JOBS_ID) || added;
-        
-        // For "Grey out the edit buttons once the quote approve has been selected" issue
-        added = addPermission(JOB_COSTING_REEDIT) || added;
-        
-        // For "FileProfiles Search" issue" 
-        added = addPermission(FILE_PROFILES_SEARCH) || added; 
-               
-        
+        added = addPermission(242, JOBS_ESTIMATEDCOMPDATE) || added;
+        added = addPermission(243, JOBS_ESTIMATEDTRANSLATECOMPDATE) || added;
+        added = addPermission(244, REPORTS_SLA) || added;
+
+        added = addPermission(245, ACTIVITIES_REJECT_BEFORE_ACCEPTING) || added;
+        added = addPermission(246, ACTIVITIES_REJECT_AFTER_ACCEPTING) || added;
+
+        // For "Add job id into online job report" issue
+        added = addPermission(247, REPORTS_DELL_ONLINE_JOBS_ID) || added;
+
+        // For
+        // "Grey out the edit buttons once the quote approve has been selected"
+        // issue
+        added = addPermission(248, JOB_COSTING_REEDIT) || added;
+
+        // For "FileProfiles Search" issue"
+        added = addPermission(249, FILE_PROFILES_SEARCH) || added;
+
         // For " Quotation process for WebEx " issue
-        added = addPermission(JOB_QUOTE_APPROVE) || added;
-        added = addPermission(JOB_QUOTE_PONUMBER_EDIT) || added;
-        added = addPermission(JOB_QUOTE_PONUMBER_VIEW) || added;
+        added = addPermission(250, JOB_QUOTE_APPROVE) || added;
+        added = addPermission(251, JOB_QUOTE_PONUMBER_EDIT) || added;
+        added = addPermission(252, JOB_QUOTE_PONUMBER_VIEW) || added;
 
-        //  For " add download button to my activities " issue
-        added = addPermission(ACTIVITIES_DOWNLOAD) || added;
-      
-        //For add accept all button to my activities
-        added = addPermission(ACTIVITIES_ACCEPT_ALL) || added;
-        
-        //For CC&BCC email access.
-        added = addPermission(USERS_ACCESS_CCEMAIL) || added;
-        added = addPermission(USERS_ACCESS_BCCEMAIL) || added;
+        // For " add download button to my activities " issue
+        added = addPermission(253, ACTIVITIES_DOWNLOAD) || added;
 
-        added = addPermission(REPORTS_COMMENTS_ANALYSIS) || added;
-        added = addPermission(REPORTS_TRANSLATIONS_EDIT) || added;
-        added = addPermission(REPORTS_LANGUAGE_SIGN_OFF) || added;
-        
-        added = addPermission(REPORTS_TRANSLATION_PROGRESS) || added;
-        
-        added = addPermission(ACTIVITIES_COMMENTS_JOB) || added;
-        
-        // For Implemented Comments Check 
-        added = addPermission(REPORTS_IMPLEMENTED_COMMENTS_CHECK) || added;
-        
+        // For add accept all button to my activities
+        added = addPermission(254, ACTIVITIES_ACCEPT_ALL) || added;
+
+        // For CC&BCC email access.
+        added = addPermission(255, USERS_ACCESS_CCEMAIL) || added;
+        added = addPermission(256, USERS_ACCESS_BCCEMAIL) || added;
+
+        added = addPermission(257, REPORTS_COMMENTS_ANALYSIS) || added;
+        added = addPermission(258, REPORTS_TRANSLATIONS_EDIT) || added;
+        added = addPermission(259, REPORTS_LANGUAGE_SIGN_OFF) || added;
+
+        added = addPermission(260, REPORTS_TRANSLATION_PROGRESS) || added;
+
+        added = addPermission(261, ACTIVITIES_COMMENTS_JOB) || added;
+
+        // For Implemented Comments Check
+        added = addPermission(262, REPORTS_IMPLEMENTED_COMMENTS_CHECK) || added;
+
         // Segmentation Rule
-        added = addPermission(SEGMENTATIONRULE_VIEW) || added;
-        added = addPermission(SEGMENTATIONRULE_NEW) || added;
-        added = addPermission(SEGMENTATIONRULE_EDIT) || added;
-        added = addPermission(SEGMENTATIONRULE_EXPORT) || added;
-        added = addPermission(SEGMENTATIONRULE_REMOVE) || added;
-        added = addPermission(SEGMENTATIONRULE_DUP) || added;
-        
-        added = addPermission(REPORTS_CHARACTER_COUNT) || added;
-        added = addPermission(IN_CONTEXT_MATCH) || added;
-        
+        added = addPermission(263, SEGMENTATIONRULE_VIEW) || added;
+        added = addPermission(264, SEGMENTATIONRULE_NEW) || added;
+        added = addPermission(265, SEGMENTATIONRULE_EDIT) || added;
+        added = addPermission(266, SEGMENTATIONRULE_EXPORT) || added;
+        added = addPermission(267, SEGMENTATIONRULE_REMOVE) || added;
+        added = addPermission(268, SEGMENTATIONRULE_DUP) || added;
+
+        added = addPermission(269, REPORTS_CHARACTER_COUNT) || added;
+        added = addPermission(270, IN_CONTEXT_MATCH) || added;
+
         /* skip activities */
-        added= addPermission(JOB_WORKFLOWS_SKIP) || added;
-        
-        added= addPermission(LOCALE_NEW) || added;
+        added = addPermission(271, JOB_WORKFLOWS_SKIP) || added;
 
-        added= addPermission(ACTIVITIES_COMMENTS_DOWNLOAD) || added;
-        added= addPermission(CHANGE_OWN_PASSWORD) || added;
-        
-        added= addPermission(SERVICE_TM_SEARCH_ENTRY) || added;
-        added= addPermission(SERVICE_TM_CREATE_ENTRY) || added;
-        added= addPermission(SERVICE_TM_EDIT_ENTRY) || added;
-        
-        added= addPermission(SERVICE_TM_GET_ALL_TMPROFILES) || added;
+        added = addPermission(272, LOCALE_NEW) || added;
 
-        added= addPermission(SERVICE_TB_SEARCH_ENTRY) || added;
-        added= addPermission(SERVICE_TB_CREATE_ENTRY) || added;
-        added= addPermission(SERVICE_TB_EDIT_ENTRY) || added;
-        added= addPermission(SERVICE_TB_GET_ALL_TB) || added;
+        added = addPermission(273, ACTIVITIES_COMMENTS_DOWNLOAD) || added;
+        added = addPermission(274, CHANGE_OWN_PASSWORD) || added;
 
-        added= addPermission(ACTIVITIES_DOWNLOAD_ALL) || added;
+        added = addPermission(278, SERVICE_TM_GET_ALL_TMPROFILES) || added;
 
-        added = addPermission(FILE_EXT_REMOVE) || added;
-        
-        added = addPermission(ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES) || added;
+        added = addPermission(279, SERVICE_TB_SEARCH_ENTRY) || added;
+        added = addPermission(280, SERVICE_TB_CREATE_ENTRY) || added;
+        added = addPermission(281, SERVICE_TB_EDIT_ENTRY) || added;
+        added = addPermission(282, SERVICE_TB_GET_ALL_TB) || added;
 
-        added = addPermission(JOB_FILES_DOWNLOAD) || added;
-        
-        added = addPermission(CONNECT_TO_CVS) || added;
-        
-        added = addPermission(XMLRULE_REMOVE) || added;
-        
-        added = addPermission(TMP_REMOVE) || added;
-        
-        added = addPermission(PROJECTS_REMOVE) || added;
-        
-        added = addPermission(REPORTS_DELL_FILE_LIST) || added;
-        
-        //For Filter configuration
-        added = addPermission(FILTER_CONFIGURATION_VIEW) || added;
-        added = addPermission(FILTER_CONFIGURATION_REMOVE_FILTERS) || added;
-        added = addPermission(FILTER_CONFIGURATION_ADD_FILTER) || added;
-        added = addPermission(FILTER_CONFIGURATION_EDIT_FILTER) || added;
-        
-        //added = addPermission(ACTIVITIES_CROWDSIGHT) || added;
-        
-        //XML DTD
-        added = addPermission(XMLDTD_VIEW) || added;
-        added = addPermission(XMLDTD_EDIT) || added;
-        added = addPermission(XMLDTD_NEW) || added;
-        added = addPermission(XMLDTD_REMOVE) || added;
-        added = addPermission(CVS_OPERATE) || added;
+        added = addPermission(283, ACTIVITIES_DOWNLOAD_ALL) || added;
 
-        //AUTOMATIC ACTION
-        added = addPermission(AUTOMATIC_ACTIONS_VIEW) || added;
-        added = addPermission(AUTOMATIC_ACTIONS_REMOVE) || added;
-        added = addPermission(AUTOMATIC_ACTIONS_EDIT) || added;
-        added = addPermission(AUTOMATIC_ACTIONS_NEW) || added;
-        //END
-        added = addPermission(JOB_WORKFLOWS_PRIORITY) || added;
-        
-        added = addPermission(UILOCALE_VIEW) || added;
-        added = addPermission(UILOCALE_REMOVE) || added;
-        added = addPermission(UILOCALE_DOWNLOAD_RES) || added;
-        added = addPermission(UILOCALE_UPLOAD_RES) || added;
-        added = addPermission(UILOCALE_SET_DEFAULT) || added;
-        added = addPermission(UILOCALE_NEW) || added;
-        added = addPermission(ACTIVITIES_SECONDARYTARGETFILE) || added;
-        
-        added = addPermission(ATTRIBUTE_VIEW) || added;
-        added = addPermission(ATTRIBUTE_NEW) || added;
-        added = addPermission(ATTRIBUTE_REMOVE) || added;
-        added = addPermission(ATTRIBUTE_EDIT) || added;
-        added = addPermission(ATTRIBUTE_GROUP_NEW) || added;
-        added = addPermission(ATTRIBUTE_GROUP_REMOVE) || added;
-        added = addPermission(ATTRIBUTE_GROUP_EDIT) || added;
-        added = addPermission(JOB_ATTRIBUTE_VIEW) || added;
-        added = addPermission(JOB_ATTRIBUTE_EDIT) || added;
-        added = addPermission(ATTRIBUTE_GROUP_VIEW) || added;
-        
-        added = addPermission(ACTIVITIES_JOB_COMMENTS_VIEW) || added;
-        added = addPermission(ACTIVITIES_JOB_COMMENTS_EDIT) || added;
-        added = addPermission(ACTIVITIES_JOB_COMMENTS_NEW) || added;
-        added = addPermission(ACTIVITIES_JOB_COMMENTS_DOWNLOAD) || added;
-        
-        //For BlogSmith. Added by Vincent, 2010-03-31
-        added = addPermission(RSS_READER) || added;
-        added = addPermission(RSS_JOB) || added;
-        
-        added = addPermission(JOB_ATTRIBUTE_REPORT) || added;
-        
-        //GSEdition
-        added = addPermission(GSEDITION_VIEW) || added;
-        added = addPermission(GSEDITION_REMOVE) || added;
-        added = addPermission(GSEDITION_EDIT) || added;
-        added = addPermission(GSEDITION_NEW) || added;
-        
-        //GSEdition ACTION
-        added = addPermission(GSEDITION_ACTIONS_VIEW) || added;
-        added = addPermission(GSEDITION_ACTIONS_REMOVE) || added;
-        added = addPermission(GSEDITION_ACTIONS_EDIT) || added;
-        added = addPermission(GSEDITION_ACTIONS_NEW) || added;
-        
-        added = addPermission(CVS_Servers) || added;
-        added = addPermission(CVS_Servers_NEW) || added;
-        added = addPermission(CVS_Servers_EDIT) || added;
-        added = addPermission(CVS_Servers_REMOVE) || added;
-        added = addPermission(CVS_MODULES) || added;
-        added = addPermission(CVS_MODULES_NEW) || added;
-        added = addPermission(CVS_MODULES_EDIT) || added;
-        added = addPermission(CVS_MODULES_REMOVE) || added;
-        added = addPermission(CVS_MODULES_CHECKOUT) || added;
-        added = addPermission(CVS_MODULE_MAPPING) || added;
-        added = addPermission(CVS_MODULE_MAPPING_NEW) || added;
-        added = addPermission(CVS_MODULE_MAPPING_EDIT) || added;
-        added = addPermission(CVS_MODULE_MAPPING_REMOVE) || added;
-        added = addPermission(CVS_FILE_PROFILES) || added;
-        added = addPermission(CVS_FILE_PROFILES_NEW) || added;
-        added = addPermission(CVS_FILE_PROFILES_EDIT) || added;
-        added = addPermission(CVS_FILE_PROFILES_REMOVE) || added;
-        //SEE NOTE ABOVE!!!!
-        
-        added = addPermission(SET_DEFAULT_ROLES) || added;
-        
-        added = addPermission(ADD_SOURCE_FILES) || added;
-        added = addPermission(DELETE_SOURCE_FILES) || added;
-        added = addPermission(EDIT_SOURCE_FILES) || added;
-        
-        added = addPermission(JOB_SCOPE_MYPROJECTS)||added;
-        added = addPermission(ACTIVITY_DASHBOARD_VIEW)||added;
-        added = addPermission(ACTIVITIES_BATCH_COMPLETE_ACTIVITY) || added;
-        added = addPermission(ACTIVITIES_BATCH_COMPLETE_WORKFLOW) || added;
-        
-		added = addPermission(UPDATE_LEVERAGE) || added;
-        added = addPermission(UPDATE_WORD_COUNTS) || added;
+        added = addPermission(284, FILE_EXT_REMOVE) || added;
 
+        added = addPermission(285, ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES) || added;
+
+        added = addPermission(286, JOB_FILES_DOWNLOAD) || added;
+
+        added = addPermission(287, CONNECT_TO_CVS) || added;
+
+        added = addPermission(288, XMLRULE_REMOVE) || added;
+
+        added = addPermission(289, TMP_REMOVE) || added;
+
+        added = addPermission(290, PROJECTS_REMOVE) || added;
+
+        added = addPermission(291, REPORTS_DELL_FILE_LIST) || added;
+
+        // For Filter configuration
+        added = addPermission(292, FILTER_CONFIGURATION_VIEW) || added;
+        added = addPermission(293, FILTER_CONFIGURATION_REMOVE_FILTERS)
+                || added;
+        added = addPermission(294, FILTER_CONFIGURATION_ADD_FILTER) || added;
+        added = addPermission(295, FILTER_CONFIGURATION_EDIT_FILTER) || added;
+
+        // added = addPermission(ACTIVITIES_CROWDSIGHT) || added;
+
+        // XML DTD
+        added = addPermission(296, XMLDTD_VIEW) || added;
+        added = addPermission(297, XMLDTD_EDIT) || added;
+        added = addPermission(298, XMLDTD_NEW) || added;
+        added = addPermission(299, XMLDTD_REMOVE) || added;
+        added = addPermission(300, CVS_ADMIN) || added;
+        added = addPermission(301, CVS_OPERATE) || added;
+
+        // AUTOMATIC ACTION
+        added = addPermission(302, AUTOMATIC_ACTIONS_VIEW) || added;
+        added = addPermission(303, AUTOMATIC_ACTIONS_REMOVE) || added;
+        added = addPermission(304, AUTOMATIC_ACTIONS_EDIT) || added;
+        added = addPermission(305, AUTOMATIC_ACTIONS_NEW) || added;
+        // END
+        added = addPermission(306, JOB_WORKFLOWS_PRIORITY) || added;
+
+        added = addPermission(307, UILOCALE_VIEW) || added;
+        added = addPermission(308, UILOCALE_REMOVE) || added;
+        added = addPermission(309, UILOCALE_DOWNLOAD_RES) || added;
+        added = addPermission(310, UILOCALE_UPLOAD_RES) || added;
+        added = addPermission(311, UILOCALE_SET_DEFAULT) || added;
+        added = addPermission(312, UILOCALE_NEW) || added;
+        added = addPermission(313, ACTIVITIES_SECONDARYTARGETFILE) || added;
+
+        added = addPermission(314, ATTRIBUTE_VIEW) || added;
+        added = addPermission(315, ATTRIBUTE_NEW) || added;
+        added = addPermission(316, ATTRIBUTE_REMOVE) || added;
+        added = addPermission(317, ATTRIBUTE_EDIT) || added;
+        added = addPermission(318, ATTRIBUTE_GROUP_NEW) || added;
+        added = addPermission(319, ATTRIBUTE_GROUP_REMOVE) || added;
+        added = addPermission(320, ATTRIBUTE_GROUP_EDIT) || added;
+        added = addPermission(321, JOB_ATTRIBUTE_VIEW) || added;
+        added = addPermission(322, JOB_ATTRIBUTE_EDIT) || added;
+        added = addPermission(323, ATTRIBUTE_GROUP_VIEW) || added;
+
+        added = addPermission(324, ACTIVITIES_JOB_COMMENTS_VIEW) || added;
+        added = addPermission(325, ACTIVITIES_JOB_COMMENTS_EDIT) || added;
+        added = addPermission(326, ACTIVITIES_JOB_COMMENTS_NEW) || added;
+        added = addPermission(327, ACTIVITIES_JOB_COMMENTS_DOWNLOAD) || added;
+
+        // For BlogSmith. Added by Vincent, 2010-03-31
+        added = addPermission(328, RSS_READER) || added;
+        added = addPermission(329, RSS_JOB) || added;
+
+        added = addPermission(330, JOB_ATTRIBUTE_REPORT) || added;
+
+        // GSEdition
+        added = addPermission(331, GSEDITION_VIEW) || added;
+        added = addPermission(332, GSEDITION_REMOVE) || added;
+        added = addPermission(333, GSEDITION_EDIT) || added;
+        added = addPermission(334, GSEDITION_NEW) || added;
+
+        // GSEdition ACTION
+        added = addPermission(335, GSEDITION_ACTIONS_VIEW) || added;
+        added = addPermission(336, GSEDITION_ACTIONS_REMOVE) || added;
+        added = addPermission(337, GSEDITION_ACTIONS_EDIT) || added;
+        added = addPermission(338, GSEDITION_ACTIONS_NEW) || added;
+
+        added = addPermission(339, CVS_Servers) || added;
+        added = addPermission(340, CVS_Servers_NEW) || added;
+        added = addPermission(341, CVS_Servers_EDIT) || added;
+        added = addPermission(342, CVS_Servers_REMOVE) || added;
+        added = addPermission(343, CVS_MODULES) || added;
+        added = addPermission(344, CVS_MODULES_NEW) || added;
+        added = addPermission(345, CVS_MODULES_EDIT) || added;
+        added = addPermission(346, CVS_MODULES_REMOVE) || added;
+        added = addPermission(347, CVS_MODULES_CHECKOUT) || added;
+        added = addPermission(348, CVS_MODULE_MAPPING) || added;
+        added = addPermission(349, CVS_MODULE_MAPPING_NEW) || added;
+        added = addPermission(350, CVS_MODULE_MAPPING_EDIT) || added;
+        added = addPermission(351, CVS_MODULE_MAPPING_REMOVE) || added;
+        added = addPermission(352, CVS_FILE_PROFILES) || added;
+        added = addPermission(353, CVS_FILE_PROFILES_NEW) || added;
+        added = addPermission(354, CVS_FILE_PROFILES_EDIT) || added;
+        added = addPermission(355, CVS_FILE_PROFILES_REMOVE) || added;
+        // SEE NOTE ABOVE!!!!
+
+        added = addPermission(356, SET_DEFAULT_ROLES) || added;
+
+        added = addPermission(357, ADD_SOURCE_FILES) || added;
+        added = addPermission(358, DELETE_SOURCE_FILES) || added;
+        added = addPermission(359, EDIT_SOURCE_FILES) || added;
+
+        added = addPermission(360, JOB_SCOPE_MYPROJECTS) || added;
+        added = addPermission(361, ACTIVITY_DASHBOARD_VIEW) || added;
+        added = addPermission(362, ACTIVITIES_BATCH_COMPLETE_ACTIVITY) || added;
+        added = addPermission(363, ACTIVITIES_BATCH_COMPLETE_WORKFLOW) || added;
+
+        added = addPermission(364, ACTIVITIES_UPDATE_LEVERAGE) || added;
+        added = addPermission(365, JOB_UPDATE_WORD_COUNTS) || added;
+
+        // Unused permission(ACTIVITIES_OFFLINEUPLOAD), do not delete
+        added = addPermission(366, ACTIVITIES_OFFLINEUPLOAD) || added;
+
+        // For GBS-2113, create job permission
+        added = addPermission(367, CREATE_JOB) || added;
+
+        // For GBS-2394, upload file via web service permission
+        added = addPermission(368, CUSTOMER_UPLOAD_VIA_WEBSERVICE) || added;
+
+        added = addPermission(369, JOB_UPDATE_LEVERAGE) || added;
+
+        // For GBS-2393
+        added = addPermission(370, ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY)
+                || added;
+        added = addPermission(371, TM_SEARCH) || added;
+
+        added = addPermission(372, TERMINOLOGY_SEARCH) || added;
+        added = addPermission(373, ACTIVITIES_TM_SEARCH) || added;
+        added = addPermission(374, ACTIVITIES_TB_SEARCH) || added;
+
+        // TUV Attributes
+        added = addPermission(375, TM_ENABLE_TM_ATTRIBUTES) || added;
+
+        // GBS-2591: Add New Words and Repetition counts in Job Created email.
+        added = addPermission(376, ACCOUNT_NOTIFICATION_NOMATCHES) || added;
+        added = addPermission(377, ACCOUNT_NOTIFICATION_REPETITIONS) || added;
+
+        // for GBS-2300
+        added = addPermission(378, USERS_IMPORT) || added;
+        added = addPermission(379, USERS_EXPORT) || added;
+
+        added = addPermission(380, TM_ADD_ENTRY) || added;
+        added = addPermission(381, TM_EDIT_ENTRY) || added;
+        added = addPermission(382, TM_DELETE_ENTRY) || added;
+        added = addPermission(383, TM_SEARCH_ADVANCED) || added;
+
+        // GBS-2384
+        added = addPermission(384, COMPANY_MIGRATE) || added;
+        added = addPermission(385, REPORTS_SUMMARY) || added;
+        added = addPermission(386, ACTIVITIES_DOWNLOAD_COMBINED) || added;
+        
         return added;
     }
 
@@ -964,52 +1014,53 @@ public class Permission
     static private HashMap s_idMap = new HashMap();
 
     /** The permission XML. **/
-    //static private String s_permissionXml = null;
+    // static private String s_permissionXml = null;
 
     /** SQL Statements. */
     static private final String SQL_SELECT_ALL = "Select id, name from permission";
-    //Use max(id)+1 instead of permission_seq to ensure permission ids continuous
+    // Use max(id)+1 instead of permission_seq to ensure permission ids
+    // continuous
     // now use mysql to ensure the continous
-    static private final String SQL_INSERT_PERM =
-        "insert into PERMISSION values(null, ?)";
+    static private final String SQL_INSERT_PERM = "insert into PERMISSION values(?, ?)";
 
-    static private final String SQL_INSERT_FIRST_PERM = 
-        "insert into permission values(1, 'logs.view')";
+    static private final String SQL_INSERT_FIRST_PERM = "insert into permission values(1, 'logs.view')";
 
-    static private final String PERMISSION_XML_URL =
-        "/globalsight/envoy/administration/permission/permissionXml.jsp";
+    static private final String PERMISSION_XML_URL = "/globalsight/envoy/administration/permission/permissionXml.jsp";
+
+    static private final String SQL_SELECT_300TH = "select name from permission where id = 300";
+    static private final String SQL_EMPTY_PERMISSION_TABLE = "delete from permission";
+    static private final String SQL_SELECT_PERMISSION_SET_FROM_PERMISSION_GROUP = "select a.id, a.permission_set from permissiongroup as a";
+    static private final String SQL_UPDATE_PERMISSION_SET = "update permissiongroup set permission_set = ? where id = ?";
 
     /*
-     * The default permission groups. This is a carryover from
-     * the original Access Groups, and should not be used. This can continue
-     * to be used by old code that checks to see if someone is "an Admin" or
-     * "a PM" , etc. But eventually that old code should all be changed to check
-     * for the specific permission of interest, and not for the person's group
+     * The default permission groups. This is a carryover from the original
+     * Access Groups, and should not be used. This can continue to be used by
+     * old code that checks to see if someone is "an Admin" or "a PM" , etc. But
+     * eventually that old code should all be changed to check for the specific
+     * permission of interest, and not for the person's group
      */
-    static public final String GROUP_ADMINISTRATOR            = "Administrator";
-    static public final String GROUP_PROJECT_MANAGER          = "ProjectManager";
-    static public final String GROUP_LOCALE_MANAGER           = "LocaleManager";
-    static public final String GROUP_WORKFLOW_MANAGER         = "WorkflowManager";
+    static public final String GROUP_ADMINISTRATOR = "Administrator";
+    static public final String GROUP_PROJECT_MANAGER = "ProjectManager";
+    static public final String GROUP_LOCALE_MANAGER = "LocaleManager";
+    static public final String GROUP_WORKFLOW_MANAGER = "WorkflowManager";
     static public final String GROUP_LOCALIZATION_PARTICIPANT = "LocalizationParticipant";
-    static public final String GROUP_CUSTOMER                 = "Customer";
-    static public final String GROUP_VENDOR_ADMIN             = "VendorAdministrator";
-    static public final String GROUP_VENDOR_MANAGER           = "VendorManager";
-    static public final String GROUP_VENDOR_VIEWER            = "VendorViewer";
+    static public final String GROUP_CUSTOMER = "Customer";
+    static public final String GROUP_VENDOR_ADMIN = "VendorAdministrator";
+    static public final String GROUP_VENDOR_MANAGER = "VendorManager";
+    static public final String GROUP_VENDOR_VIEWER = "VendorViewer";
 
     /* The old group modules */
-    static public final String GROUP_MODULE_GLOBALSIGHT =
-        "GlobalSight";
-    static public final String GROUP_MODULE_VENDOR_MANAGER =
-        "VendorManagement";
+    static public final String GROUP_MODULE_GLOBALSIGHT = "GlobalSight";
+    static public final String GROUP_MODULE_VENDOR_MANAGER = "VendorManagement";
 
     /**
-     * Should be called during GlobalSight startup
-     * to initialize permissions. This will load all
-     * permissions from the database, add only the new permissions,
-     * and re-load permissions into the hashap.
+     * Should be called during GlobalSight startup to initialize permissions.
+     * This will load all permissions from the database, add only the new
+     * permissions, and re-load permissions into the hashap.
      */
     static public void initialize()
     {
+        updatePermissions();
         loadPermissions();
 
         if (addAllPermissions())
@@ -1018,15 +1069,14 @@ public class Permission
             loadPermissions();
         }
 
-        s_logger.info("Initialized to contain " + s_idMap.size() +
-                      " flexible user permissions.");
+        logger.info("Initialized to contain " + s_idMap.size()
+                + " flexible user permissions.");
     }
 
-
     /**
-     * Returns the PermissionXML which describes all the permissions
-     * in the system and their hierarchy.
-     *
+     * Returns the PermissionXML which describes all the permissions in the
+     * system and their hierarchy.
+     * 
      * @return String of XML
      */
     static public synchronized String getPermissionXml()
@@ -1038,21 +1088,24 @@ public class Permission
             {
                 SystemConfiguration sc = SystemConfiguration.getInstance();
 
-                //http is ok for a reference to this host
+                // http is ok for a reference to this host
                 StringBuffer permXmlUrl = new StringBuffer("http://");
-                permXmlUrl.append(sc.getStringParameter(
-                    SystemConfigParamNames.SERVER_HOST));
+                permXmlUrl
+                        .append(sc
+                                .getStringParameter(SystemConfigParamNames.SERVER_HOST));
                 permXmlUrl.append(":");
-                permXmlUrl.append(sc.getStringParameter(
-                    SystemConfigParamNames.SERVER_PORT));
+                permXmlUrl
+                        .append(sc
+                                .getStringParameter(SystemConfigParamNames.SERVER_PORT));
                 permXmlUrl.append(PERMISSION_XML_URL);
                 String companyId = CompanyThreadLocal.getInstance().getValue();
                 permXmlUrl.append("?companyId=").append(companyId);
-                s_logger.info("permXmlUrl : " + permXmlUrl);
-                
+                logger.info("permXmlUrl : " + permXmlUrl);
+
                 URL u = new URL(permXmlUrl.toString());
                 InputStream is = u.openStream();
-                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(is));
                 String s = null;
                 StringBuffer sb = new StringBuffer();
 
@@ -1063,11 +1116,11 @@ public class Permission
                 br.close();
 
                 s_permissionXml = sb.toString();
-                s_logger.debug("s_permissionXml" + s_permissionXml);
+                logger.debug("s_permissionXml" + s_permissionXml);
             }
             catch (Exception ex)
             {
-                s_logger.error ("Failed to read permission xml.", ex);
+                logger.error("Failed to read permission xml.", ex);
                 s_permissionXml = null;
             }
         }
@@ -1077,7 +1130,7 @@ public class Permission
 
     /**
      * Temporary way to get the PermissionManager.
-     *
+     * 
      * @return PermissionManager
      */
     static public PermissionManager getPermissionManager()
@@ -1090,7 +1143,7 @@ public class Permission
             }
             catch (Exception ex)
             {
-                s_logger.error("Failed to create PermissionManager", ex);
+                logger.error("Failed to create PermissionManager", ex);
             }
         }
 
@@ -1099,23 +1152,106 @@ public class Permission
 
     /** Returns the mapped integer value to the given permission. */
     static int getBitValueForPermission(String p_perm)
-        throws PermissionException
+            throws PermissionException
     {
-        Long id = (Long)s_idMap.get(p_perm);
+        Long id = (Long) s_idMap.get(p_perm);
 
         if (id == null)
         {
-            throw new PermissionException("Permission '" + p_perm +
-                                          "' does not exist.");
+            throw new PermissionException("Permission '" + p_perm
+                    + "' does not exist.");
         }
 
         // possible impedance mismatch...
-        return(int)id.longValue();
+        return (int) id.longValue();
     }
 
     /**
-     * Clears and fills the s_idMap with the current permissions from
-     * the database.
+     * There is a permission id problem since 7.1.8.0. This function is to
+     * resolve the problem.
+     */
+    static private void updatePermissions()
+    {
+        String name = null;
+        List<?> list = HibernateUtil.searchWithSql(SQL_SELECT_300TH, null);
+        if (list != null && list.size() > 0)
+        {
+            name = (String) list.get(0);
+        }
+        if (name != null && name.equals(CVS_OPERATE))
+        {
+            try
+            {
+                HibernateUtil.executeSql(SQL_EMPTY_PERMISSION_TABLE);
+                updateUnbalancedPermissionGroupSet();
+            }
+            catch (Exception e)
+            {
+                logger.error("Error to empty permission table.");
+            }
+        }
+    }
+
+    /**
+     * Update Table permissiongroup. If permission id is greater than 300, the
+     * id should plus 1. Then update permission_set to new string.
+     */
+    private static void updateUnbalancedPermissionGroupSet()
+    {
+        Connection c = null;
+        PreparedStatement stmt = null;
+        PreparedStatement stmt1 = null;
+        ResultSet rs = null;
+        try
+        {
+            c = ConnectionPool.getConnection();
+            stmt = c.prepareStatement(SQL_SELECT_PERMISSION_SET_FROM_PERMISSION_GROUP);
+            stmt1 = c.prepareStatement(SQL_UPDATE_PERMISSION_SET);
+            rs = stmt.executeQuery();
+
+            while (rs.next())
+            {
+                long id = rs.getLong(1);
+                String permissionSet = rs.getString(2);
+                String[] permissionIdArray = permissionSet.split("\\|");
+
+                StringBuffer newPermissionSet = new StringBuffer();
+                for (String permissionId : permissionIdArray)
+                {
+                    if (StringUtils.isNotEmpty(permissionId))
+                    {
+                        long lId = Long.parseLong(permissionId);
+                        if (lId >= 300)
+                        {
+                            lId += 1;
+                        }
+                        newPermissionSet.append("|").append(lId);
+                    }
+                }
+                newPermissionSet.append("|");
+                stmt1.setString(1, newPermissionSet.toString());
+                stmt1.setLong(2, id);
+                stmt1.addBatch();
+            }
+
+            stmt1.executeBatch();
+        }
+        catch (Exception e)
+        {
+            logger.error("Failed to update permission_group from database.", e);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(rs);
+            ConnectionPool.silentClose(stmt);
+            ConnectionPool.silentClose(stmt1);
+            ConnectionPool.silentReturnConnection(c);
+        }
+    }
+
+    /**
+     * Clears and fills the s_idMap with the current permissions from the
+     * database.
      */
     static private void loadPermissions()
     {
@@ -1139,15 +1275,15 @@ public class Permission
                 // the key is the permission name
                 s_idMap.put(name, new Long(id));
 
-                if (s_logger.isDebugEnabled())
+                if (logger.isDebugEnabled())
                 {
-                    s_logger.debug("Adding permission to map: " + id + "," + name);
+                    logger.debug("Adding permission to map: " + id + "," + name);
                 }
             }
         }
         catch (Exception ex)
         {
-            s_logger.error("Failed to load permissions from database.", ex);
+            logger.error("Failed to load permissions from database.", ex);
         }
         finally
         {
@@ -1158,56 +1294,58 @@ public class Permission
     }
 
     /**
-     * Adds the given permission to the database PERMISSION table if
-     * it does not already exist in the map.
-     * This does update one by one, but this method should almost
-     * never be called except on startup and if new permissions were
-     * actually added, so there is no reason to batch.
-     *
-     * @param p_added set to true if anything was added
-     * @param p_perm  permission name (should be above defined constant)
+     * Adds the given permission to the database PERMISSION table if it does not
+     * already exist in the map. This does update one by one, but this method
+     * should almost never be called except on startup and if new permissions
+     * were actually added, so there is no reason to batch.
+     * 
+     * @param p_added
+     *            set to true if anything was added
+     * @param p_perm
+     *            permission name (should be above defined constant)
      */
-    static private boolean addPermission(String p_perm)
+    static private boolean addPermission(long id, String p_perm)
     {
         boolean added = false;
-        
+
         Connection c = null;
         PreparedStatement stmt = null;
-        
+
         try
         {
             c = ConnectionPool.getConnection();
-                
+
             if (s_idMap.isEmpty())
             {
                 stmt = c.prepareStatement(SQL_INSERT_FIRST_PERM);
                 stmt.executeUpdate();
                 s_idMap.put(p_perm, new Long(1));
-                
-                if (s_logger.isDebugEnabled())
+
+                if (logger.isDebugEnabled())
                 {
-                    s_logger.debug("Added " + p_perm + " to the table.");
+                    logger.debug("Added " + p_perm + " to the table.");
                 }
             }
             else if (!s_idMap.containsKey(p_perm))
             {
                 stmt = c.prepareStatement(SQL_INSERT_PERM);
-                stmt.setString(1, p_perm);
+                stmt.setLong(1, id);
+                stmt.setString(2, p_perm);
                 stmt.executeUpdate();
-                
+
                 added = true;
-                
-                if (s_logger.isDebugEnabled())
+
+                if (logger.isDebugEnabled())
                 {
-                    s_logger.debug("Added " + p_perm + " to the table.");
+                    logger.debug("Added " + p_perm + " to the table.");
                 }
             }
-            
+
         }
         catch (Exception ex)
         {
-            s_logger.error("Failed to add permission" + p_perm +
-                               " to the database.", ex);
+            logger.error("Failed to add permission" + p_perm
+                    + " to the database.", ex);
             added = false;
         }
         finally
@@ -1215,11 +1353,12 @@ public class Permission
             ConnectionPool.silentClose(stmt);
             ConnectionPool.silentReturnConnection(c);
         }
-        
+
         return added;
     }
-    
-    public static HashMap getAllPermissions(){
+
+    public static HashMap getAllPermissions()
+    {
         return s_idMap;
     }
 }

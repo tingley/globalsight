@@ -11,6 +11,7 @@
             com.globalsight.everest.servlet.util.SessionManager,
             com.globalsight.util.resourcebundle.ResourceBundleConstants,
             com.globalsight.util.resourcebundle.SystemResourceBundle,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.util.Locale,
             java.util.ResourceBundle"
     session="true"
@@ -92,7 +93,7 @@ function closeThis()
   </TR>
   <TR class="standardText">
     <TD><B><%=bundle.getString("lb_modify_by")%>:</B></TD>
-    <TD><%=str_lastModifyUser%></TD>
+    <TD><%=UserUtil.getUserNameById(str_lastModifyUser)%></TD>
   </TR>
   
 </TABLE>

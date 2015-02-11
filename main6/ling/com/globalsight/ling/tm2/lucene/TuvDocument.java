@@ -16,22 +16,20 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
-import com.globalsight.util.GlobalSightLocale;
-
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.PerFieldAnalyzerWrapper;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.queryParser.ParseException;
+import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.Query;
+
+import com.globalsight.util.GlobalSightLocale;
 
 
 /**
@@ -61,27 +59,27 @@ class TuvDocument
     private Integer m_totalTokenCount = null;
     
 
-    public TuvDocument(String p_text, long p_tuvId, long p_tuId,
-        long p_tmId, boolean p_isSourceLocale,
-        Set<String> p_targetLocales, Analyzer p_analyzer)
+    public TuvDocument(String text, long tuvId, long tuId,
+        long tmId, boolean isSourceLocale,
+        Set<String> targetLocales, Analyzer analyzer)
         throws Exception
     {
-        m_text = p_text;
-        m_tuvId = new Long(p_tuvId);
-        m_tuId = new Long(p_tuId);
-        m_tmId = new Long(p_tmId);
-        m_isSourceLocale = new Boolean(p_isSourceLocale);
-        m_targetLocales = p_targetLocales;
+        m_text = text;
+        m_tuvId = new Long(tuvId);
+        m_tuId = new Long(tuId);
+        m_tmId = new Long(tmId);
+        m_isSourceLocale = new Boolean(isSourceLocale);
+        m_targetLocales = targetLocales;
         m_totalTokenCount
-            = new Integer(getTotalTokenCount(p_text, p_analyzer));
+            = new Integer(getTotalTokenCount(text, analyzer));
 
         m_document = createDocument();
     }
 
 
-    public TuvDocument(Document p_document)
+    public TuvDocument(Document document)
     {
-        m_document = p_document;
+        m_document = document;
     }
     
 
@@ -168,11 +166,11 @@ class TuvDocument
         return m_isSourceLocale.booleanValue();
     }
     
-    private int getTotalTokenCount(String p_text, Analyzer p_analyzer)
+    private int getTotalTokenCount(String text, Analyzer analyzer)
         throws Exception
     {
-        TokenStream tokenStream = p_analyzer.tokenStream(
-            "blah", new StringReader(p_text));
+        TokenStream tokenStream = analyzer.tokenStream(
+            "blah", new StringReader(text));
         
         int tokenCount = 0;
         while(tokenStream.next() != null)
@@ -238,9 +236,9 @@ class TuvDocument
      * Create an Analyzer for TuvDocuments, using the given analyzer for the
      * text, that will also analyze the target locales correctly.
      */
-    public static Analyzer makeAnalyzer(Analyzer p_analyzer)
+    public static Analyzer makeAnalyzer(Analyzer analyzer)
     {
-        PerFieldAnalyzerWrapper r = new PerFieldAnalyzerWrapper(p_analyzer);
+        PerFieldAnalyzerWrapper r = new PerFieldAnalyzerWrapper(analyzer);
         r.addAnalyzer(TARGET_LOCALES_FIELD, new WhitespaceAnalyzer());
         return r;
     }
@@ -248,21 +246,83 @@ class TuvDocument
     /**
      * Create a query for TuvDocuments, optionally filtered by target locale.
      *
-     * @param p_analyzer An analyzer contructed by makeAnalyzer
-     * @param p_query A Lucene query for the text
-     * @param p_targetLocale p_targetLocale filter on target locale (TM3) (null
+     * @param analyzer An analyzer contructed by makeAnalyzer
+     * @param query A Lucene query for the text
+     * @param targetLocale targetLocale filter on target locale (TM3) (null
      * for TM2)
      */
-    public static Query makeQuery(Analyzer p_analyzer, String p_query,
-        GlobalSightLocale p_targetLocale)
+    public static Query makeQuery(Analyzer analyzer, String query,
+        GlobalSightLocale targetLocale)
         throws ParseException
     {
-        if (p_targetLocale != null) {
-            // this case is handled at a higher level by TM2
-            p_query =
-                (p_query.trim().equals("*") ? "" : p_query + " AND ") +
-                TARGET_LOCALES_FIELD + ":" + p_targetLocale.toString();
+        //escape reserved word of Lucene, // + - & | ! ( ) { } [ ] ^ ~ * ? : \
+        query = replaceReservedWordForLucenne(query);
+        query = QueryParser.escape(query);
+        if (targetLocale != null) {
+            // from TM3
+            if ("".equals(query.trim()))
+            {
+                return null;
+            }
+            query = query + " AND ";
+            query = query + TARGET_LOCALES_FIELD + ":"
+                    + targetLocale.toString();
         }
-        return QueryParser.parse(p_query, TEXT_FIELD, p_analyzer);
+        else
+        {
+            // From TM2
+            if ("".equals(query.trim()))
+            {
+                return null;
+            }
+        }
+        return QueryParser.parse(query, TEXT_FIELD, analyzer);
+    }
+
+    /**
+     * Fix the reserved word for Lucene by leon
+     * 
+     * @param pattern
+     * @return
+     */
+    private static String replaceReservedWordForLucenne(String pattern)
+    {
+        //For AND, OR, NOT
+        pattern = replace(pattern, "AND");
+        pattern = replace(pattern, "OR");
+        pattern = replace(pattern, "NOT");
+
+        return pattern.trim();
+    }
+
+    /**
+     * Replace AND OR NOT
+     * 
+     * @param pattern
+     * @param replaceStr
+     * @return
+     */
+    private static String replace(String pattern, String replaceStr)
+    {
+        while (pattern.indexOf(" " + replaceStr + " ") > 0)
+        {
+            pattern = pattern.replace(" " + replaceStr + " ", " ");
+        }
+        if (pattern.startsWith(replaceStr + " "))
+        {
+            pattern = pattern.substring(replaceStr.length(), pattern.length());
+        }
+
+        if (pattern.endsWith(" " + replaceStr))
+        {
+            pattern = pattern.substring(0,
+                    pattern.length() - replaceStr.length());
+        }
+
+        if (pattern.trim().equals(replaceStr))
+        {
+            pattern = "";
+        }
+        return pattern;
     }
 }

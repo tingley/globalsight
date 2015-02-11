@@ -193,8 +193,7 @@ public class CVSWorkingOutput extends JFrame//implements Runnable
         {
         	updateTAContents(ioe.getMessage());
         	backInfo += "\n" + ioe.getMessage();
-        	log.error(ioe.getMessage());
-        	log.error(ioe.getCause());
+        	log.error(ioe.getMessage(), ioe);
         }
         catch (Exception ex)
         {
@@ -249,7 +248,7 @@ public class CVSWorkingOutput extends JFrame//implements Runnable
 			catch (Exception e)
 			{
 				line = "\n***** CVS exited failure *****\n" + e.getMessage();
-				log.error(e.getMessage());
+				log.error(e.getMessage(), e);
 			}
 			result += "\n" + line;
 			updateTAContents(line);
@@ -257,7 +256,7 @@ public class CVSWorkingOutput extends JFrame//implements Runnable
 		}
 		catch (InterruptedException e) 
 		{
-			log.error(e.getMessage());
+			log.error(e.getMessage(), e);
 			throw new InterruptedException(e.getMessage());
 		}
 		finally 

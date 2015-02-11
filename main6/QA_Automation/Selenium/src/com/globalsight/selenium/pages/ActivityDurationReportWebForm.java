@@ -1,11 +1,11 @@
 package com.globalsight.selenium.pages;
 
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 public class ActivityDurationReportWebForm
 {
     public static final String REPORT_LINK = "link="
-            + ConfigUtil.getConfigData("COMPANY_NAME") + " Activity Duration";
+            + ConfigUtil.getConfigData("company") + " Activity Duration";
     public static final String POPUP_WINDOW_NAME = "ActivityDurationundefined1";
     public static final String PROJECTS_SELECTOR = "projectId";
     public static final String JOBSTATUS_SELECTOR = "status";

@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.tm2.segmenttm;
 
 import static com.globalsight.ling.tm2.segmenttm.TmRemoveHelper.Query.REMOVE_TUV_L;
@@ -20,6 +36,8 @@ import java.util.Set;
 
 import org.hibernate.Session;
 
+import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.projecthandler.ProjectTmTuT;
 import com.globalsight.everest.projecthandler.ProjectTmTuvT;
@@ -44,229 +62,281 @@ import com.globalsight.ling.tm2.leverage.SegmentTmLeverager;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.ling.tm2.population.TmPopulator;
-import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
 
-public class Tm2SegmentTmInfo implements SegmentTmInfo {
-    
-    
+public class Tm2SegmentTmInfo implements SegmentTmInfo
+{
+
     @Override
     public LeverageMatchResults leverage(Session pSession, List<Tm> pTms,
-            LeverageDataCenter pLeverageDataCenter) throws Exception {
-        return new SegmentTmLeverager().leverage(pSession.connection(), pTms, pLeverageDataCenter);
+            LeverageDataCenter pLeverageDataCenter, String companyId)
+            throws Exception
+    {
+        return new SegmentTmLeverager().leverage(pSession.connection(), pTms,
+                pLeverageDataCenter, companyId);
     }
 
     @Override
-    public LeverageMatches leverageSegment(Session pSession, 
+    public LeverageMatches leverageSegment(Session pSession,
             BaseTmTuv pSourceTuv, LeverageOptions pLeverageOptions,
-            List<Tm> pTms) throws Exception {
-        return new SegmentTmLeverager().leverageSegment(pSession.connection(), 
-                                    pSourceTuv, pLeverageOptions, pTms);
+            List<Tm> pTms) throws Exception
+    {
+        return new SegmentTmLeverager().leverageSegment(pSession.connection(),
+                pSourceTuv, pLeverageOptions, pTms);
     }
 
     @Override
     public void deleteSegmentTmTus(Session pSession, Tm p_tm,
-            Collection<SegmentTmTu> p_tus) throws Exception {
+            Collection<SegmentTmTu> p_tus) throws Exception
+    {
         new TmTuRemover().deleteTus(pSession.connection(), p_tus);
     }
-    
+
     @Override
     public void deleteSegmentTmTuvs(Session pSession, Tm p_tm,
-            Collection<SegmentTmTuv> p_tus) throws Exception {
+            Collection<SegmentTmTuv> p_tus) throws Exception
+    {
         new TmTuRemover().deleteTuvs(pSession.connection(), p_tus);
     }
-    
-    // This handles saving for both "save" and "populatePage" calls in the TmCoreManager.
+
+    // This handles saving for both "save" and "populatePage" calls in the
+    // TmCoreManager.
     @Override
-    public TuvMappingHolder saveToSegmentTm(Session p_session, 
+    public TuvMappingHolder saveToSegmentTm(Session p_session,
             Collection<? extends BaseTmTu> p_segmentsToSave,
             GlobalSightLocale p_sourceLocale, Tm p_tm,
-            Set<GlobalSightLocale> p_targetLocales, int p_mode, 
-            boolean p_fromTmImport) throws LingManagerException {
+            Set<GlobalSightLocale> p_targetLocales, int p_mode,
+            boolean p_fromTmImport) throws LingManagerException
+    {
 
-        try {
-            return new SegmentTmPopulator(p_session.connection()).populateSegmentTm(
-                            p_segmentsToSave, p_sourceLocale, 
-                            p_tm, p_targetLocales, p_mode, p_fromTmImport);
+        try
+        {
+            SegmentTmPopulator segTmPopulator = new SegmentTmPopulator(
+                    p_session.connection());
+            segTmPopulator.setJob(getJob());
+            return segTmPopulator.populateSegmentTm(p_segmentsToSave,
+                    p_sourceLocale, p_tm, p_targetLocales, p_mode,
+                    p_fromTmImport);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
 
     @Override
-    public void updateSegmentTmTuvs(Session p_session, Tm p_tm, 
-            Collection<SegmentTmTuv> p_tuvs) throws LingManagerException {
+    public void updateSegmentTmTuvs(Session p_session, Tm p_tm,
+            Collection<SegmentTmTuv> p_tuvs) throws LingManagerException
+    {
         TmPopulator tmPopulator = new TmPopulator(p_session);
         tmPopulator.updateSegmentTmTuvs(p_tm, p_tuvs);
     }
 
     /**
-     * Remove an entire TM.  
+     * Remove an entire TM.
      */
     @Override
-    public boolean removeTmData(Session pSession, Tm pTm, ProgressReporter pReporter,
-            InterruptMonitor pMonitor) throws LingManagerException {
-        if (checkRemoveInterrupt(pReporter, pMonitor)) {
+    public boolean removeTmData(Session pSession, Tm pTm,
+            ProgressReporter pReporter, InterruptMonitor pMonitor)
+            throws LingManagerException
+    {
+        if (checkRemoveInterrupt(pReporter, pMonitor))
+        {
             return false;
         }
 
         long tmId = pTm.getId();
-        
-        pReporter.setMessageKey("lb_tm_remove_removing_tm_index", "Removing Tm index ...");
-        pReporter.setPercentage(20);
+        String tmName = pTm.getName();
+
+        // pReporter.setMessageKey("lb_tm_remove_removing_tm_index",
+        // "Removing Tm index ...");
+        // pReporter.setPercentage(20);
 
         Connection conn = pSession.connection();
         try
-        {           
+        {
             TmRemoveHelper.removeIndex(tmId);
             SegmentTmPersistence persistence = new SegmentTmPersistence(conn);
 
             // get lock on Tm tables
             persistence.lockSegmentTmTables();
 
-            if (checkRemoveInterrupt(pReporter, pMonitor)) {
+            if (checkRemoveInterrupt(pReporter, pMonitor))
+            {
                 return false;
             }
-            pReporter.setMessageKey("lb_tm_remove_removing_tuv_t", 
-                    "Removing translatable TUVs ...");
-            pReporter.setPercentage(35);
+            // pReporter.setMessageKey("lb_tm_remove_removing_tuv_t",
+            // "Removing translatable TUVs ...");
+            // pReporter.setPercentage(35);
             TmRemoveHelper.removeData(conn, tmId, REMOVE_TUV_T);
 
-            if (checkRemoveInterrupt(pReporter, pMonitor)) {
+            if (checkRemoveInterrupt(pReporter, pMonitor))
+            {
                 return false;
             }
-            pReporter.setMessageKey("lb_tm_remove_removing_tu_t", 
-                    "Removing translatable TUs ...");
-            pReporter.setPercentage(50);
+            // pReporter.setMessageKey("lb_tm_remove_removing_tu_t",
+            // "Removing translatable TUs ...");
+            // pReporter.setPercentage(50);
             TmRemoveHelper.removeData(conn, tmId, REMOVE_TU_T);
 
-            if (checkRemoveInterrupt(pReporter, pMonitor)) {
+            if (checkRemoveInterrupt(pReporter, pMonitor))
+            {
                 return false;
             }
-            pReporter.setMessageKey("lb_tm_remove_removing_tuv_l", 
-                    "Removing localizable TUVs ...");
-            pReporter.setPercentage(65);
+            // pReporter.setMessageKey("lb_tm_remove_removing_tuv_l",
+            // "Removing localizable TUVs ...");
+            // pReporter.setPercentage(65);
             TmRemoveHelper.removeData(conn, tmId, REMOVE_TUV_L);
 
-            if (checkRemoveInterrupt(pReporter, pMonitor)) {
+            if (checkRemoveInterrupt(pReporter, pMonitor))
+            {
                 return false;
             }
-            pReporter.setMessageKey("lb_tm_remove_removing_tu_l", 
-                    "Removing localizable TUs ...");
-            pReporter.setPercentage(80);
+            // pReporter.setMessageKey("lb_tm_remove_removing_tu_l",
+            // "Removing localizable TUs ...");
+            // pReporter.setPercentage(80);
             TmRemoveHelper.removeData(conn, tmId, REMOVE_TU_L);
 
-        } catch (Exception e) {
+            pReporter.setMessageKey("", tmName
+                    + " has been successfully removed.");
+        }
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
         finally
         {
-            try {
+            try
+            {
                 DbUtil.unlockTables(conn);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new LingManagerException(e);
             }
         }
 
-        if (checkRemoveInterrupt(pReporter, pMonitor)) {
+        if (checkRemoveInterrupt(pReporter, pMonitor))
+        {
             return false;
         }
-        
+
         return true;
- 
+
     }
 
-    public boolean removeTmData(Session pSession, Tm pTm, GlobalSightLocale pLocale,
-            ProgressReporter pReporter, InterruptMonitor pMonitor)
-            throws LingManagerException {
-        if (checkRemoveInterrupt(pReporter, pMonitor)) {
+    public boolean removeTmData(Session pSession, Tm pTm,
+            GlobalSightLocale pLocale, ProgressReporter pReporter,
+            InterruptMonitor pMonitor) throws LingManagerException
+    {
+        if (checkRemoveInterrupt(pReporter, pMonitor))
+        {
             return false;
         }
+        String tmName = pTm.getName();
+
         Connection conn = pSession.connection();
-        try {
-            SegmentTmPersistence persistence = new SegmentTmPersistence(conn);
+        try
+        {
+            Set<GlobalSightLocale> tmLocales = LingServerProxy
+                    .getTmCoreManager().getTmLocales(pTm);
+            if (tmLocales.contains(pLocale))
+            {
+                SegmentTmPersistence persistence = new SegmentTmPersistence(
+                        conn);
 
-            // get lock on Tm tables
-            persistence.lockSegmentTmTables();
+                // get lock on Tm tables
+                persistence.lockSegmentTmTables();
 
-            if (checkRemoveInterrupt(pReporter, pMonitor)) {
-                return false;
+                if (checkRemoveInterrupt(pReporter, pMonitor))
+                {
+                    return false;
+                }
+
+                long tmId = pTm.getId();
+                long localeId = pLocale.getId();
+
+                TmRemoveHelper.removeDataByLocale(conn, tmId, localeId,
+                        REMOVE_TUV_T_BY_LANGUAGE);
+
+                if (checkRemoveInterrupt(pReporter, pMonitor))
+                {
+                    return false;
+                }
+
+                TmRemoveHelper.removeDataByLocale(conn, tmId, localeId,
+                        REMOVE_TUV_L_BY_LANGUAGE);
             }
-            
-            long tmId = pTm.getId();
-            long localeId = pLocale.getId();
 
-            pReporter.setMessageKey("lb_tm_remove_removing_tuv_t", 
-                    "Removing translatable TUVs ...");
-            pReporter.setPercentage(30);
-            TmRemoveHelper.removeDataByLocale(conn, tmId, localeId, 
-                    REMOVE_TUV_T_BY_LANGUAGE);
-            
-            if (checkRemoveInterrupt(pReporter, pMonitor)) {
-                return false;
-            }
-            
-            pReporter.setMessageKey("lb_tm_remove_removing_tuv_l", 
-                    "Removing localizable TUVs ...");
-            pReporter.setPercentage(60);
-            TmRemoveHelper.removeDataByLocale(conn, tmId, localeId, 
-                    REMOVE_TUV_L_BY_LANGUAGE);
-        } catch (Exception e) {
+            pReporter.setMessageKey("",
+                    tmName + " - " + pLocale.getDisplayName()
+                            + " has been successfully removed.");
+            return true;
+        }
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
         finally
         {
-            try {
+            try
+            {
                 DbUtil.unlockTables(conn);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new LingManagerException(e);
             }
         }
-        
-        pReporter.setMessageKey("lb_tm_remove_tmlang_success", 
-                "Tm language has been successfully removed.");
-        pReporter.setPercentage(100);
-        return true;
     }
-    
+
     private boolean checkRemoveInterrupt(ProgressReporter pReporter,
-                        InterruptMonitor pMonitor) {
-        if (pMonitor.hasInterrupt()) {
-            pReporter.setMessageKey("lb_tm_remove_cancel_by_user", 
-                        "Tm removal has been cancelled by user request.");
+            InterruptMonitor pMonitor)
+    {
+        if (pMonitor.hasInterrupt())
+        {
+            pReporter.setMessageKey("lb_tm_remove_cancel_by_user",
+                    "Tm removal has been cancelled by user request.");
             return true;
         }
         return false;
     }
 
     @Override
-    public StatisticsInfo getStatistics(Session session, Tm pTm, Locale pUILocale,
-            boolean p_includeProjects) throws LingManagerException {
+    public StatisticsInfo getStatistics(Session session, Tm pTm,
+            Locale pUILocale, boolean p_includeProjects)
+            throws LingManagerException
+    {
         Connection conn = session.connection();
-        return TmStatisticsHelper.getStatistics(conn, pTm, pUILocale, p_includeProjects);
+        return TmStatisticsHelper.getStatistics(conn, pTm, pUILocale,
+                p_includeProjects);
     }
 
     @Override
     // note this doesn't need the Tm, but it is needed in TM3 and we go along
     public List<SegmentTmTu> getSegmentsById(Session session, Tm tm,
-            List<Long> tuIds) throws LingManagerException {
+            List<Long> tuIds) throws LingManagerException
+    {
         TuReader r = new TuReader(session);
         List<SegmentTmTu> tus = new ArrayList<SegmentTmTu>();
-        try {
+        try
+        {
             r.batchReadTus(tuIds, 0, tuIds.size(), null);
-            for (SegmentTmTu tu = r.getNextTu(); tu != null; tu = r.getNextTu()) {
+            for (SegmentTmTu tu = r.getNextTu(); tu != null; tu = r.getNextTu())
+            {
                 tus.add(tu);
             }
             return tus;
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
-        finally {
+        finally
+        {
             r.batchReadDone();
         }
     }
@@ -274,39 +344,81 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
     static final int EXPORT_BATCH_SIZE = 200;
 
     @Override
-    public SegmentResultSet getAllSegments(Session session, Tm tm, String createdBefore,
-            String createdAfter) throws LingManagerException {
-        try {
-            return new Tm2SegmentResultSet(session, 
-                TmExportHelper.getAllTuIds(session.connection(), tm, createdAfter, createdBefore), 
-                EXPORT_BATCH_SIZE);
+    public SegmentResultSet getAllSegments(Session session, Tm tm,
+            String createdBefore, String createdAfter)
+            throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(session, TmExportHelper.getAllTuIds(
+                    session.connection(), tm, createdAfter, createdBefore),
+                    EXPORT_BATCH_SIZE);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
-    }   
+    }
+
+    @Override
+    public SegmentResultSet getAllSegments(Session session, Tm tm,
+            long startTUId) throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(session, TmExportHelper.getAllTuIds(
+                    session.connection(), tm, startTUId), EXPORT_BATCH_SIZE);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
 
     @Override
     public int getAllSegmentsCount(Session session, Tm tm,
             String createdBefore, String createdAfter)
-            throws LingManagerException {
-        try {
-            return TmExportHelper.getAllTuCount(session.connection(), tm, createdAfter, createdBefore);
+            throws LingManagerException
+    {
+        try
+        {
+            return TmExportHelper.getAllTuCount(session.connection(), tm,
+                    createdAfter, createdBefore);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
-        }    
+        }
     }
 
     @Override
-    public SegmentResultSet getSegmentsByLocale(Session session, Tm tm, String locale,
-            String createdBefore, String createdAfter)
-            throws LingManagerException {
-        try {
-            return new Tm2SegmentResultSet(session, TmExportHelper.getFilteredTuIds(tm, locale, 
-                    createdBefore, createdAfter), EXPORT_BATCH_SIZE);
+    public int getAllSegmentsCount(Session session, Tm tm, long startTUId)
+            throws LingManagerException
+    {
+        try
+        {
+            return TmExportHelper.getAllTuCount(session.connection(), tm,
+                    startTUId);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+    }
+
+    @Override
+    public SegmentResultSet getSegmentsByLocale(Session session, Tm tm,
+            String locale, String createdBefore, String createdAfter)
+            throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(session,
+                    TmExportHelper.getFilteredTuIds(tm, locale, createdBefore,
+                            createdAfter), EXPORT_BATCH_SIZE);
+        }
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
@@ -314,24 +426,32 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
     @Override
     public int getSegmentsCountByLocale(Session session, Tm tm, String locale,
             String createdBefore, String createdAfter)
-            throws LingManagerException {
-        try {
-            return TmExportHelper.getFilteredTuCount(tm, locale, createdAfter, createdBefore);
+            throws LingManagerException
+    {
+        try
+        {
+            return TmExportHelper.getFilteredTuCount(tm, locale, createdAfter,
+                    createdBefore);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
-    
+
     @Override
     public SegmentResultSet getSegmentsByProjectName(Session session, Tm tm,
             String projectName, String createdBefore, String createdAfter)
-            throws LingManagerException {
-        try {
-            return new Tm2SegmentResultSet(session, TmExportHelper.getProjectNameTuIds(tm, projectName, 
-                    createdBefore, createdAfter), EXPORT_BATCH_SIZE);
+            throws LingManagerException
+    {
+        try
+        {
+            return new Tm2SegmentResultSet(session,
+                    TmExportHelper.getProjectNameTuIds(tm, projectName,
+                            createdBefore, createdAfter), EXPORT_BATCH_SIZE);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
@@ -339,32 +459,40 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
     @Override
     public int getSegmentsCountByProjectName(Session session, Tm tm,
             String projectName, String createdBefore, String createdAfter)
-            throws LingManagerException {
-        try {
-            return TmExportHelper.getProjectTuCount(tm, projectName, createdAfter, createdBefore);
+            throws LingManagerException
+    {
+        try
+        {
+            return TmExportHelper.getProjectTuCount(tm, projectName,
+                    createdAfter, createdBefore);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
-    
+
     @Override
-    public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query, 
-            GlobalSightLocale sourceLocale, GlobalSightLocale targetLocale)
-            throws LingManagerException {
-        TmConcordanceQuery q = new TmConcordanceQuery(HibernateUtil.getSession().connection());
-        try {
+    public List<TMidTUid> tmConcordanceQuery(List<Tm> tms, String query,
+            GlobalSightLocale sourceLocale, GlobalSightLocale targetLocale,
+            Connection conn) throws LingManagerException
+    {
+        TmConcordanceQuery q = new TmConcordanceQuery(conn);
+        try
+        {
             return q.query(tms, query, sourceLocale, targetLocale);
-        } 
-        catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
-    
+
     // Originally from TmManagerLocal.doGetProjectTmLocales
     @Override
-    public Set<GlobalSightLocale> getLocalesForTm(Session session, Tm tm) 
-                    throws LingManagerException {
+    public Set<GlobalSightLocale> getLocalesForTm(Session session, Tm tm)
+            throws LingManagerException
+    {
         Set<GlobalSightLocale> result = new HashSet<GlobalSightLocale>();
 
         Statement stmt = null;
@@ -373,11 +501,10 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
         try
         {
             stmt = conn.createStatement();
-            rset = stmt.executeQuery(
-                "SELECT distinct tuv.locale_id " +
-                "FROM project_tm_tuv_t tuv, project_tm_tu_t tu " +
-                "WHERE tu.tm_id = " + tm.getId() +
-                "  AND tu.id = tuv.tu_id");
+            rset = stmt.executeQuery("SELECT distinct tuv.locale_id "
+                    + "FROM project_tm_tuv_t tuv, project_tm_tu_t tu "
+                    + "WHERE tu.tm_id = " + tm.getId()
+                    + "  AND tu.id = tuv.tu_id");
 
             LocaleManager mgr = ServerProxy.getLocaleManager();
             while (rset.next())
@@ -397,59 +524,87 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
         {
             try
             {
-                if (rset != null) rset.close();
-                if (stmt != null) stmt.close();
+                if (rset != null)
+                    rset.close();
+                if (stmt != null)
+                    stmt.close();
             }
-            catch (Throwable ignore) {}
+            catch (Throwable ignore)
+            {
+            }
 
         }
         return result;
     }
-    
+
     @Override
-    public int getSegmentCountForReindex(Session session, Tm tm) {
-        return getAllSegmentsCount(session, tm, null, null);
+    public int getSegmentCountForReindex(Session session, Tm tm)
+    {
+        int i = 0;
+        try
+        {
+            i = TmExportHelper.getAllTuvCount(session.connection(), tm, null,
+                    null);
+        }
+        catch (Exception e)
+        {
+            throw new LingManagerException(e);
+        }
+        return i;
     }
-    
+
     @Override
-    public boolean reindexTm(Session session, Tm tm, Reindexer reindexer) {
-        try {
+    public boolean reindexTm(Session session, Tm tm, Reindexer reindexer)
+    {
+        try
+        {
             return new Tm2Reindexer(session).reindexTm(tm, reindexer);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new LingManagerException(e);
         }
     }
-    
+
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(Object o)
+    {
         return (o != null && o instanceof Tm2SegmentTmInfo);
     }
-    
+
     @Override
-    public String getCreatingUserByTuvId(Session session, Tm tm, long tuvId) {
+    public String getCreatingUserByTuvId(Session session, Tm tm, long tuvId)
+    {
         ProjectTmTuvT ptuv = HibernateUtil.get(ProjectTmTuvT.class, tuvId);
         return (ptuv != null) ? ptuv.getCreationUser() : null;
     }
 
     @Override
-    public Date getModifyDateByTuvId(Session session, Tm tm, long tuvId) {
+    public Date getModifyDateByTuvId(Session session, Tm tm, long tuvId)
+    {
         ProjectTmTuvT ptuv = HibernateUtil.get(ProjectTmTuvT.class, tuvId);
         return (ptuv != null) ? ptuv.getModifyDate() : null;
     }
 
     @Override
-    public String getSidByTuvId(Session session, Tm tm, long tuvId) {
+    public String getSidByTuvId(Session session, Tm tm, long tuvId)
+    {
         ProjectTmTuvT ptuv = HibernateUtil.get(ProjectTmTuvT.class, tuvId);
         return (ptuv != null) ? ptuv.getSid() : null;
     }
 
     @Override
-    public String getSourceTextByTuvId(Session session, Tm tm, long tuvId, long srcLocaleId) {
+    public String getSourceTextByTuvId(Session session, Tm tm, long tuvId,
+            long srcLocaleId)
+    {
         ProjectTmTuvT ptuv = HibernateUtil.get(ProjectTmTuvT.class, tuvId);
-        if (ptuv != null) {
+        if (ptuv != null)
+        {
             ProjectTmTuT ptu = ptuv.getTu();
-            for (ProjectTmTuvT tuv : ptu.getTuvs()) {
-                if (tuv.getLocale().getId() == srcLocaleId) {
+            for (ProjectTmTuvT tuv : ptu.getTuvs())
+            {
+                if (tuv.getLocale().getId() == srcLocaleId)
+                {
                     return tuv.getSegmentString();
                 }
             }
@@ -463,11 +618,24 @@ public class Tm2SegmentTmInfo implements SegmentTmInfo {
     {
         ProjectTmTuvT ptuv = HibernateUtil.get(ProjectTmTuvT.class, tuvId);
         return (ptuv == null) ? null : new TuvBasicInfo(
-                ptuv.getSegmentString(), ptuv.getSegmentClob(), ptuv
-                        .getExactMatchKey(), ptuv.getLocale(), ptuv
-                        .getCreationDate(), ptuv.getCreationUser(), ptuv
-                        .getModifyDate(), ptuv.getModifyUser(), ptuv
-                        .getUpdatedByProject(), ptuv.getSid());
+                ptuv.getSegmentString(), ptuv.getSegmentClob(),
+                ptuv.getExactMatchKey(), ptuv.getLocale(),
+                ptuv.getCreationDate(), ptuv.getCreationUser(),
+                ptuv.getModifyDate(), ptuv.getModifyUser(),
+                ptuv.getUpdatedByProject(), ptuv.getSid());
     }
 
+    private Job m_job;
+
+    @Override
+    public void setJob(Job job)
+    {
+        m_job = job;
+    }
+
+    @Override
+    public Job getJob()
+    {
+        return m_job;
+    }
 }

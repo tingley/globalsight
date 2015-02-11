@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.webapp.tags;
@@ -44,7 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.javabean.NavigationBean;
 
 /**
- * This writes a table tag.  It uses styles to conform to an 
+ * This writes a table tag.  It uses styles to conform to an
  * "ambassodor" table look and feel.
  *
  * This iterates over a table's body contents.  The first time
@@ -57,7 +57,7 @@ public class TableTag extends BodyTagSupport
     protected String        bean;           // bean name
     protected String        id;             // for scripting variable
     protected String        key;            // unique key on page for hidden fields
-    protected String        emptyTableMsg;  // message if empty table 
+    protected String        emptyTableMsg;  // message if empty table
     protected String        pageUrl;        // url to call for sort, navigating, etc
     protected String        filterMethod;   // used for filtering out a row
     protected Object        filterData;     // used for filtering out a row
@@ -73,6 +73,7 @@ public class TableTag extends BodyTagSupport
     private String          otherUrl = null;
 
     private String          taskListStart;
+    private boolean         hasFilter;
 
     public String getTaskListStart()
     {
@@ -215,11 +216,11 @@ public class TableTag extends BodyTagSupport
         {
             return pageUrl + "&" + otherUrl;
         }
-        
+
         return pageUrl;
     }
 
-    /** 
+    /**
      * Set the width of the table.  Default is 100%.
      */
     public void setWidth(String width)
@@ -283,14 +284,14 @@ public class TableTag extends BodyTagSupport
             // Write html table tag.
             if (width==null)
             {
-            	out.println("<table cellspacing=\"0\" cellpadding=\"6\" border=\"0\" class=\"listborder\" width=\"100%\">");
+            	out.println("<table cellspacing=\"0\" cellpadding=\"1\" border=\"0\" class=\"listborder\" width=\"100%\">");
 			}
-            else 
+            else
             {
-				out.println("<table cellspacing=\"0\" cellpadding=\"6\" border=\"0\" class=\"listborder\" width=\"" +getWidth() + ">");
+				out.println("<table cellspacing=\"0\" cellpadding=\"1\" border=\"0\" class=\"listborder\" width=\"" +getWidth() + ">");
 			}
 
-            out.println("  <tr class=\"tableHeadingBasic\" valign=\"bottom\" style=\"padding-bottom: 3px;\">");
+            out.println("  <tr class=\"tableHeadingBasicTM\">");
 
             return EVAL_BODY_AGAIN;
         }
@@ -320,6 +321,11 @@ public class TableTag extends BodyTagSupport
                 }
                 index++;
             }
+            if (showHeader && isHasFilter()) {
+                out.print("</tr><tr class='tableHeadingFilter'>");
+                String filterContent = (String) pageContext.getAttribute("filterContent");
+                out.print(filterContent);
+            }
             showHeader = false;
             if (skip == false)
                 out.println("  </tr>");
@@ -332,8 +338,8 @@ public class TableTag extends BodyTagSupport
 
         // clear up so the next time the body content is empty
         body.clearBody();
-        
-        
+
+
         try
         {
             skip = false;
@@ -366,12 +372,12 @@ public class TableTag extends BodyTagSupport
 
                 if (evenRow)
                 {
-                    out.println("  <tr class=tableRowEven>");
+                    out.println("  <tr class=tableRowEvenTM vAlign=top>");
                     evenRow = false;
                 }
                 else
                 {
-                    out.println("  <tr class=tableRowOdd>");
+                    out.println("  <tr class=tableRowOddTM vAlign=top>");
                     evenRow = true;
                 }
                 pageContext.setAttribute(id, data.get(index));
@@ -415,7 +421,7 @@ public class TableTag extends BodyTagSupport
         return EVAL_PAGE;
     }
 
-    public void release() 
+    public void release()
     {
         init();
     }
@@ -442,5 +448,15 @@ public class TableTag extends BodyTagSupport
     public void setOtherUrl(String otherUrl)
     {
         this.otherUrl = otherUrl;
+    }
+
+    public boolean isHasFilter()
+    {
+        return hasFilter;
+    }
+
+    public void setHasFilter(boolean hasFilter)
+    {
+        this.hasFilter = hasFilter;
     }
 }

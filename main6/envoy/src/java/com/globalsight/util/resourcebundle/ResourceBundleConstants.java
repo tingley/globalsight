@@ -19,22 +19,23 @@ package com.globalsight.util.resourcebundle;
 import java.util.Locale;
 
 /**
- * This interface contains all of the resource bundle related
- * constants, which seem to be the locales into which the System 4 UI
- * has been localized.
+ * This interface contains all of the resource bundle related constants, which
+ * seem to be the locales into which the System 4 UI has been localized.
  */
 public interface ResourceBundleConstants
 {
 
     /**
-     * The location where all the message resource bundles
-     * are located.
+     * The location where all the message resource bundles are located.
      */
     static final String BUNDLE_LOCATION = "com/globalsight/resources/messages/";
-    public static final String LOCALE_RESOURCE_NAME = BUNDLE_LOCATION + "LocaleResource";
-    public static final String EMAIL_RESOURCE_NAME = BUNDLE_LOCATION + "EmailMessageResource";
-    public static final String EXCEPTION_RESOURCE_NAME = BUNDLE_LOCATION + "ExceptionResource";
-    
+    public static final String LOCALE_RESOURCE_NAME = BUNDLE_LOCATION
+            + "LocaleResource";
+    public static final String EMAIL_RESOURCE_NAME = BUNDLE_LOCATION
+            + "EmailMessageResource";
+    public static final String EXCEPTION_RESOURCE_NAME = BUNDLE_LOCATION
+            + "ExceptionResource";
+
     public static final int INITIAL_MAP_SIZE = 15;
     // English
     public static final Locale EN = new Locale("en", "US", "");
@@ -47,6 +48,6 @@ public interface ResourceBundleConstants
     // Spanish
     public static final Locale ES = new Locale("es", "ES", "");
 
-    public static final Locale[] SUPPORTED_LOCALES = { EN, FR, DE, JA, ES };
+    public static final Locale[] SUPPORTED_LOCALES =
+    { EN, FR, DE, JA, ES };
 }
-

@@ -563,10 +563,11 @@ public class ProcessImplDefaultPathFinder
     {
         Vector arrows = p_task.getOutgoingArrows();
         Enumeration e = arrows.elements();
+        WorkflowTaskInstance targetTask = null;
         while (e.hasMoreElements())
         {
             WorkflowArrow arrow = (WorkflowArrow) e.nextElement();
-            WorkflowTaskInstance targetTask = (WorkflowTaskInstance) arrow
+            targetTask = (WorkflowTaskInstance) arrow
                     .getTargetNode();
             if (p_task.getConditionSpec().getBranchSpec(arrow.getName())
                     .isDefault())
@@ -575,7 +576,7 @@ public class ProcessImplDefaultPathFinder
             }
         }
 
-        return null;
+        return targetTask;
     }
 
     /**

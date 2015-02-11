@@ -47,7 +47,7 @@ public class TaskComparator extends StringComparator
     public static final int TOTAL_FUZZY         = 15;
     public static final int IN_CONTEXT          = 16;
     public static final int NO_USE_IN_CONTEXT   = 17;
-    public static final int NO_USE_EXACT        = 18;
+    public static final int TOTAL_EXACT        = 18;
     public static final int DEFAULT_CONTEXT_EXACT = 19;
     public static final int HIFUZZYREPETITION   = 20;
     public static final int MEDHIFUZZYREPETITION   = 21;
@@ -224,9 +224,9 @@ public class TaskComparator extends StringComparator
                rv = -1;
             break;
 
-        case NO_USE_EXACT:  // JPF- fix when have back end
-            aint = a.getWorkflow().getNoUseExactMatchWordCount();
-            bint = b.getWorkflow().getNoUseInContextMatchWordCount();
+        case TOTAL_EXACT:  // JPF- fix when have back end
+            aint = a.getWorkflow().getTotalExactMatchWordCount();
+            bint = b.getWorkflow().getTotalExactMatchWordCount();
             if (aint > bint)
                rv = 1;
             else if (aint == bint)

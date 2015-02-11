@@ -30,6 +30,7 @@ public class Company extends PersistentObject
 {
     private static final long serialVersionUID = 3382538647678827006L;
 
+    public static final String STATE_DELETING = "DELETING";
     // company description
     private String m_companyDescription;
     // enable IP filter when using Desktop Icon (company level)
@@ -43,14 +44,19 @@ public class Company extends PersistentObject
     private String m_ssoWSEndpoint;
     private boolean m_enableSSOLogin = false;
     private String sessionTime;
-    
+
     // Company Email Address
     private String m_email;
-    
+
     // Segment TM version - 2 for TM2, 3 for TM3
     private int m_tmVersion = TmVersion.TM2.getValue();
 
     public boolean useActive = true;
+
+    private String m_state;
+
+    private int m_separateTmTuTuvTables = 1;
+    private int m_migrateProcessing = 0;
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -74,10 +80,10 @@ public class Company extends PersistentObject
     /**
      * Company constructor used for creating a new company.
      * 
-     * @param p_companyName -
-     *            The company name.
-     * @param p_companyDescription -
-     *            The description of the company.
+     * @param p_companyName
+     *            - The company name.
+     * @param p_companyDescription
+     *            - The description of the company.
      */
     public Company(String p_companyName, String p_companyDescription)
     {
@@ -129,32 +135,32 @@ public class Company extends PersistentObject
     {
         m_companyDescription = p_newDescription;
     }
-    
+
     public boolean getEnableIPFilter()
     {
-    	return m_enableIPFilter;
+        return m_enableIPFilter;
     }
-    
+
     public void setEnableIPFilter(boolean p_enableIPFilter)
     {
-    	this.m_enableIPFilter = p_enableIPFilter;
+        this.m_enableIPFilter = p_enableIPFilter;
     }
-    
+
     public boolean getEnableTMAccessControl()
     {
         return m_enableTMAccessControl;
     }
-    
+
     public void setEnableTMAccessControl(boolean p_EnableTMTBAccessControl)
     {
         m_enableTMAccessControl = p_EnableTMTBAccessControl;
     }
-    
+
     public boolean getEnableTBAccessControl()
     {
         return m_enableTBAccessControl;
     }
-    
+
     public void setEnableTBAccessControl(boolean p_EnableTMTBAccessControl)
     {
         m_enableTBAccessControl = p_EnableTMTBAccessControl;
@@ -177,8 +183,10 @@ public class Company extends PersistentObject
      */
     public boolean equals(Object p_company)
     {
-        if (p_company instanceof Company) { return (getId() == ((Company) p_company)
-                .getId()); }
+        if (p_company instanceof Company)
+        {
+            return (getId() == ((Company) p_company).getId());
+        }
         return false;
     }
 
@@ -201,7 +209,7 @@ public class Company extends PersistentObject
     {
         m_companyDescription = description;
     }
-    
+
     public String getSsoIdpUrl()
     {
         return m_ssoIdpUrl;
@@ -241,7 +249,7 @@ public class Company extends PersistentObject
     {
         this.sessionTime = sessionTime;
     }
-    
+
     public String getSsoWSEndpoint()
     {
         return m_ssoWSEndpoint;
@@ -265,25 +273,29 @@ public class Company extends PersistentObject
     /**
      * Internal getter/setter for use by Hibernate.
      */
-    protected int getTmVersionVal() {
-        return m_tmVersion;   
+    protected int getTmVersionVal()
+    {
+        return m_tmVersion;
     }
-    
-    protected void setTmVersionVal(int tmVersion) {
+
+    protected void setTmVersionVal(int tmVersion)
+    {
         this.m_tmVersion = tmVersion;
     }
-    
+
     /**
      * Public getter/setter to use from calling code.
      */
-    public TmVersion getTmVersion() {
+    public TmVersion getTmVersion()
+    {
         return TmVersion.fromValue(m_tmVersion);
     }
-    
-    public void setTmVersion(TmVersion version) {
+
+    public void setTmVersion(TmVersion version)
+    {
         this.m_tmVersion = version.getValue();
     }
-    
+
     public String getEmail()
     {
         return m_email;
@@ -292,5 +304,40 @@ public class Company extends PersistentObject
     public void setEmail(String email)
     {
         this.m_email = email;
+    }
+
+    public void setState(String p_state)
+    {
+        if (p_state != null)
+        {
+            p_state = p_state.toUpperCase();
+        }
+
+        m_state = p_state;
+    }
+
+    public String getState()
+    {
+        return m_state;
+    }
+
+    public int getSeparateTmTuTuvTables()
+    {
+        return m_separateTmTuTuvTables;
+    }
+
+    public void setSeparateTmTuTuvTables(int p_separateTmTuTuvTables)
+    {
+        this.m_separateTmTuTuvTables = p_separateTmTuTuvTables;
+    }
+
+    public int getMigrateProcessing()
+    {
+        return m_migrateProcessing;
+    }
+
+    public void setMigrateProcessing(int p_migrateProcessing)
+    {
+        this.m_migrateProcessing = p_migrateProcessing;
     }
 }

@@ -196,6 +196,9 @@
               xlzFile = new File(curDoc.getAbsoluteFile() + ".xlz");
               if (xlzFile.exists() && xlzFile.isFile())
                   continue;
+              String tmp = curDoc.getAbsolutePath();
+              if (tmp.endsWith(".sub"))
+                  continue;
               
               if(downloadName != null && downloadName.length() != 0)
               {
@@ -292,10 +295,11 @@
         }
 
         String fileNameValue = DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document);
-        // Escape the backslashes for javascript
+        // Escape Javascript special characters, such as "\", "'".
         String fileNameValueEscaped =
             replace(DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document),
                     "\\", "\\\\");
+        fileNameValueEscaped = fileNameValueEscaped.replace("\'", "\\'");
         String displayNameValue =
             DownloadFileHandler.getRelativePath(p_document.getParentFile(), p_document);
         out.println("<TR VALIGN=TOP>\n");
@@ -315,6 +319,7 @@
     throws IOException
     {
         String fileName = DownloadFileHandler.getRelativePath(DownloadFileHandler.getCXEBaseDir(), p_document);
+        fileName = URLEncoder.encode(fileName);
         out.println("<TR VALIGN=TOP>\n");
         out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + fileName + "\"></TD>");
         out.println("<TD STYLE=\"padding-top: 2px\"><IMG SRC=\"/globalsight/images/file.gif\" HEIGHT=15 WIDTH=13></TD>");
@@ -439,11 +444,6 @@ function addRemoveFiles(fileAction)
       }
    }
 
-   if (fileAction == "add")
-   {
-      file = file.replace(/\+/g,"%2B");
-   }
-
    form.file.value = file;
    form.submit();
 }
@@ -453,6 +453,18 @@ function navigateDirectories (folder)
    navigateDirectoriesForm.<%=DownloadFileHandler.PARAM_CURRENT_FOLDER%>.value = folder;
    navigateDirectoriesForm.submit();
 }
+
+//for GBS-2599
+function handleSelectAll(selectAll,theForm) {
+	if (theForm) {
+		if (selectAll.checked) {
+			checkAll(theForm);
+	    }
+	    else {
+			clearAll(theForm); 
+	    }
+	}
+}
 </script>
 <STYLE type="text/css">
 .importList {
@@ -461,7 +473,7 @@ function navigateDirectories (folder)
     height: 300px;
     overflow-y: auto;
     overflow-x: auto;
-        border: solid silver 1px;
+    border: solid silver 1px;
     padding: 0px;
 }
 </STYLE>
@@ -505,13 +517,12 @@ function navigateDirectories (folder)
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 100px; LEFT: 0px;">
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH=320>
-  <TBODY>
     <COL WIDTH=21>   <!-- Checkbox -->
     <COL WIDTH=22>   <!-- Folder/File icon -->
     <COL WIDTH=259>  <!-- File -->
     <COL WIDTH=18>   <!-- Up Folder (for header) -->
     <TR CLASS="tableHeadingBasic" VALIGN="TOP">
-      <TD>&nbsp;</TD>
+      <TD><input type="checkbox" onclick="handleSelectAll(this,'availableFilesForm')"/></TD>
       <TD><IMG SRC="/globalsight/images/folderopen.gif" HEIGHT=13 WIDTH=16 VSPACE=3></TD>
       <TD STYLE="word-wrap: break-word; padding-top: 2px"><%=folderSelectedAbs%></TD>
       <TD ALIGN="RIGHT"><%
@@ -546,14 +557,15 @@ function navigateDirectories (folder)
 </DIV>
 </FORM>
 
-<DIV ID="AvailableCheckAllLayer"
+<!--for gbs-2599
+DIV ID="AvailableCheckAllLayer"
   STYLE="POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 400px; LEFT: 0px;"
   CLASS=standardText>
   <A CLASS="standardHREF" HREF="#"
   ONCLICK="checkAll('availableFilesForm')"><%=bundle.getString("lb_check_all")%></A> |
   <A CLASS="standardHREF" HREF="#"
   ONCLICK="clearAll('availableFilesForm')"><%=bundle.getString("lb_clear_all")%></A>
-</DIV>
+</DIV-->
 <!-- End Availabe Files -->
 
 <!-- Add/Remove buttons -->
@@ -580,12 +592,11 @@ function navigateDirectories (folder)
 
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH=320>
-  <TBODY>
     <COL WIDTH=21>   <!-- Checkbox -->
     <COL WIDTH=22>   <!-- File icon -->
     <COL WIDTH=277>  <!-- File -->
     <TR CLASS="tableHeadingBasic">
-      <TD>&nbsp;</TD>
+      <TD><input type="checkbox" onclick="handleSelectAll(this,'selectedFilesForm')"/></TD>
       <TD><IMG SRC="/globalsight/images/file.gif" HEIGHT=15 WIDTH=13 VSPACE=2></TD>
       <TD><%=bundle.getString("lb_file")%></TD>
     </TR>
@@ -603,7 +614,7 @@ function navigateDirectories (folder)
     {
         String curDoc = (String)importFileList.get(i);
         out.println("<TR VALIGN=TOP>");
-        out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + curDoc + "\"></TD>");
+        out.println("<TD><INPUT TYPE=CHECKBOX NAME=file VALUE=\"" + URLEncoder.encode(curDoc) + "\"></TD>");
         out.println("<TD STYLE=\"padding-top: 2px\"><IMG SRC=\"/globalsight/images/file.gif\" HEIGHT=15 WIDTH=13></TD>");
         out.println("<TD STYLE=\"word-wrap: break-word;\">" + curDoc + "</TD>");
         out.println("</TR>");
@@ -627,13 +638,14 @@ function navigateDirectories (folder)
 <!-- End Selected Files -->
 </FORM>
 
-<DIV ID="ImportCheckAllLayer" CLASS="standardText"
+<!--for gbs-2599
+DIV ID="ImportCheckAllLayer" CLASS="standardText"
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 7; TOP: 400px; LEFT: 420px;">
 <A CLASS="standardHREF" HREF="#"
  onclick="checkAll('selectedFilesForm')"><%=bundle.getString("lb_check_all")%></A> |
 <A CLASS="standardHREF" HREF="#"
  onclick="clearAll('selectedFilesForm')"><%=bundle.getString("lb_clear_all")%></A>
-</DIV>
+</DIV-->
 
 <DIV ALIGN="RIGHT" STYLE="POSITION: ABSOLUTE; Z-INDEX: 7; TOP: 415px; LEFT: 420px; WIDTH: 338">
 <FORM METHOD="post" NAME="downloadFilesForm">

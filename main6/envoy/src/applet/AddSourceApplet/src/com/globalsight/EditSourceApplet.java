@@ -10,22 +10,25 @@ import java.awt.Rectangle;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -61,15 +64,19 @@ import com.globalsight.table.RowVo;
 import com.globalsight.util.AuthenticationPrompter;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.XmlUtil;
-import com.globalsight.vo.AddFileVo;
 import com.globalsight.vo.FileProfileVo;
 import com.globalsight.vo.ProfileInfo;
+import com.globalsight.webservices.client2.Ambassador2;
+import com.globalsight.webservices.client2.WebService2ClientHelper;
 import com.sun.java.browser.net.ProxyInfo;
 import com.sun.java.browser.net.ProxyService;
 
 public class EditSourceApplet extends Applet
 {
+    private static int MAX_SEND_SIZE = 5 * 1000 * 1024; // 5M
+
     private static final long serialVersionUID = 1L;
+
     private JPanel jPanel = null;
     private JButton bRemoveFiles = null;
     private JButton bAddFiles = null;
@@ -96,6 +103,8 @@ public class EditSourceApplet extends Applet
     private String companyId = null; // @jve:decl-index=0:
     private String projectId = null;
     private String pageLocale = null;
+    private String userId = null;
+    private String password = null;
     private JPanel jPanel1 = null;
     private AuthenticationPrompter s_authPrompter = new AuthenticationPrompter();
 
@@ -137,6 +146,26 @@ public class EditSourceApplet extends Applet
         return jobId;
     }
 
+    public String getUserId()
+    {
+        if (userId == null)
+        {
+            userId = getParameter("userId");
+        }
+        
+        return userId;
+    }
+    
+    public String getPassword()
+    {
+        if (password == null)
+        {
+            password = getParameter("password");
+        }
+        
+        return password;
+    }
+    
     private String getPageLocale()
     {
         if (pageLocale == null)
@@ -438,10 +467,6 @@ public class EditSourceApplet extends Applet
             {
                 public void mouseClicked(java.awt.event.MouseEvent e)
                 {
-                    AddFileVo vo = new AddFileVo();
-                    List<String> paths = new ArrayList<String>();
-                    List<Long> fileProfileIds = new ArrayList<Long>();
-
                     List<RowVo> rows = fileTableModel.getRows();
                     if (rows.size() < 1)
                     {
@@ -725,6 +750,7 @@ public class EditSourceApplet extends Applet
                 s.append("&").append(key).append("=").append(args.get(key));
             }
         }
+        s.append("&currentCompanyId=").append(getCompanyId());
 
         PostMethod filePost = new UTF8PostMethod(s.toString());
 
@@ -732,7 +758,11 @@ public class EditSourceApplet extends Applet
         {
             try
             {
-                int size = 2;
+                // upload file via web service here.
+                String addFileTmpSavingPathName = getRandomSavingPath(file);
+                this.uploadFileViaWebService(addFileTmpSavingPathName, file);
+
+                int size = 3;
                 if (parms != null)
                 {
                     size += parms.size();
@@ -740,11 +770,12 @@ public class EditSourceApplet extends Applet
 
                 Part[] parts = new Part[size];
                 parts[0] = new FilePart(file.getName(), file);
-                parts[1] = new StringPart("currentCompanyId", getCompanyId());
+                parts[1] = new StringPart("addFileTmpSavingPathName", addFileTmpSavingPathName);
+                parts[2] = new StringPart("currentCompanyId", getCompanyId());
 
                 if (parms != null)
                 {
-                    int i = 2;
+                    int i = 3;
                     for (String key : parms.keySet())
                     {
                         parts[i] = new StringPart(key, parms.get(key), "utf-8");
@@ -760,6 +791,10 @@ public class EditSourceApplet extends Applet
             catch (FileNotFoundException e)
             {
                 e.printStackTrace();
+            }
+            catch (Exception ex)
+            {
+                ex.printStackTrace();
             }
         }
         else
@@ -1066,6 +1101,92 @@ public class EditSourceApplet extends Applet
             });
         }
         return jSlider;
+    }
+
+    
+    private void uploadFileViaWebService(String addFileTmpSavingPathName, File file)
+            throws Exception
+    {
+        MySecurityManager mySM = new MySecurityManager();
+        SecurityManager sm = System.getSecurityManager();
+        if (sm != null)
+        {
+            System.setSecurityManager(mySM);
+        }
+
+        if (!file.exists())
+        {
+            throw new Exception("File(" + file.getPath() + ") does not exist.");
+        }
+
+        int len = (int) file.length();
+        BufferedInputStream inputStream = null;
+        ArrayList<byte[]> fileByteList = new ArrayList<byte[]>();
+        try
+        {
+            inputStream = new BufferedInputStream(new FileInputStream(file));
+            int size = len / MAX_SEND_SIZE;
+            // Separates the file to several parts according to the size.
+            for (int i = 0; i < size; i++)
+            {
+                byte[] fileBytes = new byte[MAX_SEND_SIZE];
+                inputStream.read(fileBytes);
+                fileByteList.add(fileBytes);
+            }
+            if (len % MAX_SEND_SIZE > 0)
+            {
+                byte[] fileBytes = new byte[len % MAX_SEND_SIZE];
+                inputStream.read(fileBytes);
+                fileByteList.add(fileBytes);
+            }
+            // Uploads all parts of files.
+            URL url = this.getCodeBase();
+            String hostName = url.getHost();
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            boolean enableHttps = protocol.contains("s") ? true : false;
+
+            Ambassador2 ambassador = WebService2ClientHelper
+                    .getClientAmbassador2(hostName, String.valueOf(port),
+                            getUserId(), getPassword(), enableHttps);
+            String fullAccessToken = ambassador.dummyLogin(getUserId(),
+                    getPassword());
+            for (int i = 0; i < fileByteList.size(); i++)
+            {
+                ambassador.uploadFiles(fullAccessToken, getCompanyId(), 3,
+                        addFileTmpSavingPathName, (byte[]) fileByteList.get(i));
+            }
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+        finally
+        {
+            if (inputStream != null)
+            {
+                inputStream.close();
+            }
+        }
+    }
+
+    private class MySecurityManager extends SecurityManager
+    {
+        MySecurityManager()
+        {
+            super();
+        }
+
+        public void checkPermission(Permission permission)
+        {
+        }
+    }
+    
+    private String getRandomSavingPath(File file)
+    {
+        Random rand = new Random(System.currentTimeMillis());
+        return "addFiles_tmp" + File.separator + rand.nextLong()
+                + File.separator + file.getName(); 
     }
 
 } // @jve:decl-index=0:visual-constraint="17,10"

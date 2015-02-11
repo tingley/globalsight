@@ -126,7 +126,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
     }
     catch (Exception e)
     {
-        s_logger.error(e);    
+        s_logger.error(e.getMessage(), e);    
     }
     if (aUser == null)
     {
@@ -385,7 +385,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
     }
     catch(RESyntaxException exc)
     {
-        s_logger.error(exc);
+        s_logger.error(exc.getMessage(), exc);
       // do something???? ********************************
     }
 
@@ -451,7 +451,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
       }
       catch(EnvoyServletException e)
       {
-          s_logger.error(e);
+          s_logger.error(e.getMessage(), e);
           throw new EnvoyServletException(e);
       }
     return convertedFilePath;
@@ -481,7 +481,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
             JSPCallingUtility.invokeMessageJSP(getServletContext(), theRequest, theResponse, message);
         }
         catch(IOException exc1)
-        {s_logger.error(exc1);}
+        {s_logger.error(exc1.getMessage(), exc1);}
         return;
     }
     long fpId = 0;
@@ -519,7 +519,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
         }
         catch(Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
             throw new EnvoyServletException(e);
         }
     }
@@ -537,7 +537,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
                 JSPCallingUtility.invokeMessageJSP(getServletContext(), theRequest, theResponse, message);
         }
         catch(IOException exc1)
-        {s_logger.error(exc1);}
+        {s_logger.error(exc1.getMessage(), exc1);}
         return;
     }
     fpId = new Integer(fileProfileId).longValue();
@@ -560,17 +560,17 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
         }
         catch (NamingException ne)
         {
-            s_logger.error(ne);
+            s_logger.error(ne.getMessage(), ne);
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ne);
         }
         catch (RemoteException re)
         {
-            s_logger.error(re);
+            s_logger.error(re.getMessage(), re);
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, re);
         }
         catch (GeneralException ge)
         {
-            s_logger.error(ge);
+            s_logger.error(ge.getMessage(), ge);
             throw new EnvoyServletException(EnvoyServletException.EX_GENERAL, ge);
         }
 
@@ -664,13 +664,13 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
             reportFailure(theRequest, theResponse, message);
             JSPCallingUtility.invokeMessageJSP(getServletContext(), theRequest, theResponse, message);
         }
-        catch(IOException exc1) {s_logger.error(exc1);}
+        catch(IOException exc1) {s_logger.error(exc1.getMessage(), exc1);}
         return;
       }
     }
     catch(Exception exc)
     {
-        s_logger.error(exc);
+        s_logger.error(exc.getMessage(), exc);
       try
       {
           String message = "The selected files were not routed to Welocalize GlobalSight";
@@ -678,7 +678,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
           JSPCallingUtility.invokeMessageJSP(getServletContext(), theRequest, theResponse,message );
       }
       catch(IOException exc1)
-      {s_logger.error(exc1);}
+      {s_logger.error(exc1.getMessage(), exc1);}
       return;
     }
 
@@ -687,7 +687,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
         JSPCallingUtility.invokeMessageJSP(getServletContext(), theRequest, theResponse, MessageJSP_msg);
     }
     catch(IOException exc2)
-    {s_logger.error(exc2);}
+    {s_logger.error(exc2.getMessage(), exc2);}
   }
 
   /**
@@ -781,7 +781,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
       }
       catch (Exception e)
       {
-          s_logger.error(e);
+          s_logger.error(e.getMessage(), e);
           throw new EnvoyServletException(e);
       }
       return all;
@@ -872,7 +872,7 @@ public class TranslateServlet extends HttpServlet implements SingleThreadModel
       }
       catch (Exception e)
       {
-          s_logger.error(e);
+          s_logger.error(e.getMessage(), e);
           // nothing
       }
   }

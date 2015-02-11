@@ -116,7 +116,7 @@ public class CommentUploadHandler extends PageHandler implements
         {
             EnvoyServletException e = new EnvoyServletException(
                     "WorkObjectNotFound", null, null);
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
             throw e;
         }
 
@@ -389,7 +389,7 @@ public class CommentUploadHandler extends PageHandler implements
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
         }
     }
 
@@ -406,7 +406,7 @@ public class CommentUploadHandler extends PageHandler implements
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
         }
     }
 

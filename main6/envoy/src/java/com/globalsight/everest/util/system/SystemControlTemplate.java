@@ -17,13 +17,16 @@
 
 package com.globalsight.everest.util.system;
 
+import java.sql.PreparedStatement;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
+import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.system.ConfigException;
 
 /**
@@ -92,7 +95,7 @@ public abstract class SystemControlTemplate
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
 
             throw new SystemStartupException(
                 SystemStartupException.EX_SERVERCLASSNAMES, e);
@@ -234,15 +237,14 @@ public abstract class SystemControlTemplate
                     throw new SystemStartupException(
                         SystemStartupException.EX_FAILEDTOCREATESERVER, ie);
                 }
-                catch (Throwable t)
+                catch (Exception t)
                 {
                     cleanupAfterException = true;
                     CATEGORY.error("server=" +
                         (server != null ? server.toString() : "null"), t);
 
                     throw new SystemStartupException(
-                        SystemStartupException.EX_FAILEDTOCREATESERVER,
-                        GeneralException.getStackTraceString(t));
+                        SystemStartupException.EX_FAILEDTOCREATESERVER, t);
                 }
                 finally
                 {
@@ -325,8 +327,28 @@ public abstract class SystemControlTemplate
     {
         try
         {
-            String sql = "delete from jms_messages";
-            HibernateUtil.executeSql(sql);
+            // Backup JMS messages
+            String sql1 = "INSERT INTO jms_messages_debug "
+                    + "(MESSAGEID, DESTINATION, TXID, TXOP, MESSAGEBLOB, BACKUP_TIME) "
+                    + "SELECT MESSAGEID, DESTINATION, TXID, TXOP, MESSAGEBLOB, now() "
+                    + "FROM jms_messages ";
+            Session session = TmUtil.getStableSession();
+            PreparedStatement ps = null;
+            try {
+                ps = session.connection().prepareStatement(sql1);
+                ps.execute();
+            } catch (Exception e){
+                CATEGORY.warn("Fail to backup jms messages when restart server", e);
+            } finally {
+                DbUtil.silentClose(ps);
+                if (session != null){
+                    TmUtil.closeStableSession(session);
+                }
+            }
+
+            // Clear JMS messages
+            String sql2 = "delete from jms_messages";
+            HibernateUtil.executeSql(sql2);
         }
         catch (Exception e)
         {

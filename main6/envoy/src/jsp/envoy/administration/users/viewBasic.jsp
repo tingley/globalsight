@@ -50,7 +50,7 @@
     if (userTitle == null||"null".equals(userTitle)) userTitle = "";
     String companyName = user.getCompanyName();
     if (companyName == null) companyName = "";
-    String userName  = user.getUserId();
+    String userName  = user.getUserName();
     if (userName == null) userName = "";
     String ambGroupName  = (String)request.getAttribute("ambGroup");
     if (ambGroupName == null) ambGroupName = "";

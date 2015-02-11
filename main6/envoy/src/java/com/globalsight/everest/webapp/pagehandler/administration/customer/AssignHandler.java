@@ -93,10 +93,8 @@ public class AssignHandler
             {
                 Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(st.nextToken()));
                 // Get the workflows and search for the workflow with this target locale
-                List workflows = (List)job.getWorkflows();
-                for (int i=0; i < workflows.size(); i++)
+                for (Workflow wf : job.getWorkflows())
                 {
-                    Workflow wf = (Workflow)workflows.get(i);
                     if (!wf.getState().equals(Workflow.CANCELLED) && 
                         wf.getTargetLocale().toString().equals(targLocale))
                     {

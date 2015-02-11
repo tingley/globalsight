@@ -94,7 +94,8 @@ public class PlannedCompletionDateHandler extends PageHandler
 
         initWorkflowTable(request, session, sessionMgr, 
                           filterValidWorkflows(
-                              (List)job.getWorkflows(), request, sessionMgr));
+                              new ArrayList<Workflow>(job.getWorkflows()),
+                              request, sessionMgr));
     }
 
     private void initWorkflowTable(HttpServletRequest request,

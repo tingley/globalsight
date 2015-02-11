@@ -16,39 +16,24 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import java.io.IOException;
-
-import java.util.ArrayList;
+import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Locale;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
 
-import java.rmi.RemoteException;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
-// globalsight
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
 
 public class JobSearchHandlerHelper 
 {
@@ -83,18 +68,18 @@ public class JobSearchHandlerHelper
         List projectInfos = null;
         if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
         {
-            projectInfos =
-                WorkflowTemplateHandlerHelper.getAllProjectInfos(uiLocale);
+            projectInfos = WorkflowTemplateHandlerHelper
+                    .getAllProjectInfos(uiLocale);
         }
         else if (perms.getPermissionFor(Permission.GET_PROJECTS_I_MANAGE))
         {
-            projectInfos =
-                WorkflowTemplateHandlerHelper.getAllProjectInfosForUser(user, uiLocale);
+            projectInfos = WorkflowTemplateHandlerHelper
+                    .getAllProjectInfosForUser(user, uiLocale);
         }
         else // for WFM and other VALID future access group (i.e. JobManager)
         {
-            projectInfos = WorkflowTemplateHandlerHelper.
-                getProjectInfosByUser(userName, uiLocale);
+            projectInfos = WorkflowTemplateHandlerHelper.getProjectInfosByUser(
+                    userName, uiLocale);
         }
 
         request.setAttribute("projects", projectInfos);

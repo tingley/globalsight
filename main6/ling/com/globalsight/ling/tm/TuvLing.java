@@ -22,22 +22,19 @@ import java.util.Properties;
 import java.util.Stack;
 
 import com.globalsight.everest.persistence.PersistentObject;
-import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.ExactMatchFormatHandler;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.TuvSegmentBaseHandler;
-import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.gxml.GxmlNames;
 
 /**
  * Please add documentation.
  */
-abstract public class TuvLing
-    extends PersistentObject
-    implements Serializable, TuvLingConstants
+abstract public class TuvLing extends PersistentObject implements Serializable,
+        TuvLingConstants
 {
     // Cache field for formatted strings
     protected String m_exactMatchFormat = null;
@@ -47,7 +44,7 @@ abstract public class TuvLing
 
     /**
      * Get the native formatted string - used to generate CRCs.
-     *
+     * 
      * @return The native formatted string..
      */
     public String getExactMatchFormat()
@@ -55,8 +52,8 @@ abstract public class TuvLing
         if (m_exactMatchFormat == null)
         {
             ExactMatchFormatHandler handler = new ExactMatchFormatHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
+            DiplomatBasicParser diplomatParser = new DiplomatBasicParser(
+                    handler);
 
             try
             {
@@ -73,12 +70,10 @@ abstract public class TuvLing
         return m_exactMatchFormat;
     }
 
-
     /**
-     * Get translatable and localizable content only from the Tuv -
-     * used to generate fuzzy indexes. That is, the text plus subflows
-     * in order.
-     *
+     * Get translatable and localizable content only from the Tuv - used to
+     * generate fuzzy indexes. That is, the text plus subflows in order.
+     * 
      * @return tuv without formatting.
      */
     public String getFuzzyMatchFormat()
@@ -86,8 +81,8 @@ abstract public class TuvLing
         if (m_fuzzyMatchFormat == null)
         {
             FuzzyMatchFormatHandler handler = new FuzzyMatchFormatHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
+            DiplomatBasicParser diplomatParser = new DiplomatBasicParser(
+                    handler);
 
             try
             {
@@ -100,9 +95,9 @@ abstract public class TuvLing
 
             m_fuzzyMatchFormat = handler.toString();
 
-            // Fri Apr 12 16:33:22 2002 CvdL: GSDEF 6275.  For fuzzy
+            // Fri Apr 12 16:33:22 2002 CvdL: GSDEF 6275. For fuzzy
             // matching, normalize whitespace in the TUV regardless of
-            // the data type the TU might have.  The match result will
+            // the data type the TU might have. The match result will
             // be a 100% fuzzy match and post-processing will
             // determine if it is an exact match (whitespace matches
             // exactly) or needs to be penalized to 99% fuzzy match
@@ -114,8 +109,9 @@ abstract public class TuvLing
     }
 
     /**
-     * Get translatable content only from the Tuv - used to generate
-     * term indexes. That is, the text without translatable subflows.
+     * Get translatable content only from the Tuv - used to generate term
+     * indexes. That is, the text without translatable subflows.
+     * 
      * @return tuv without formatting.
      */
     public String getTermMatchFormat()
@@ -123,8 +119,8 @@ abstract public class TuvLing
         if (m_termMatchFormat == null)
         {
             TermMatchFormatHandler handler = new TermMatchFormatHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
+            DiplomatBasicParser diplomatParser = new DiplomatBasicParser(
+                    handler);
 
             try
             {
@@ -139,7 +135,7 @@ abstract public class TuvLing
 
             // Fri Apr 12 16:33:22 2002 CvdL: For term matching,
             // normalize whitespace in the TUV regardless of the data
-            // type the TU might have.  See the comment made earlier
+            // type the TU might have. See the comment made earlier
             // in getFuzzyMatchFormat().
             m_termMatchFormat = Text.normalizeWhiteSpaces(m_termMatchFormat);
         }
@@ -147,10 +143,9 @@ abstract public class TuvLing
         return m_termMatchFormat;
     }
 
-
     /**
      * Get a string without tags nor subflows.
-     *
+     * 
      * @return Tuv without tags and subflows.
      */
     public String getGxmlWithoutTags()
@@ -158,8 +153,8 @@ abstract public class TuvLing
         if (m_gxmWithoutTagsFormat == null)
         {
             GxmlWithoutTagsHandler handler = new GxmlWithoutTagsHandler();
-            DiplomatBasicParser diplomatParser =
-                new DiplomatBasicParser(handler);
+            DiplomatBasicParser diplomatParser = new DiplomatBasicParser(
+                    handler);
 
             try
             {
@@ -176,67 +171,62 @@ abstract public class TuvLing
         return m_gxmWithoutTagsFormat;
     }
 
-
-    //// setters and getters /////////////////
+    // // setters and getters /////////////////
 
     /**
      * Get the GlobalSightLocale.
+     * 
      * @return GlobalSightLocale of this Tuv
      */
     abstract public GlobalSightLocale getGlobalSightLocale();
 
-
-    /**
-     * Get the localize type
-     * @return Localize type. The possible values are
-     *         TuvLing.LOCALIZABLE and TuvLing.TRANSLATABLE.
-     */
-    abstract public long getLocType();
-
-
     /**
      * Get the exact match key (CRC)
+     * 
      * @return Exact match key of this Tuv
      */
     abstract public long getExactMatchKey();
 
-
     /**
      * Set the exact match key (CRC)
-     * @param p_exactMatchKey new exact match key
+     * 
+     * @param p_exactMatchKey
+     *            new exact match key
      */
     abstract public void setExactMatchKey(long p_exactMatchKey);
 
-
     /**
      * Get the segment string of this Tuv
+     * 
      * @return Segment string
      */
     abstract public String getGxml();
 
     /**
      * Set the segment string of this Tuv
-     * @param p_segment Gxml String.
+     * 
+     * @param p_segment
+     *            Gxml String.
      */
     abstract public void setGxml(String p_segment);
 
-
     /**
      * Get the TuLing assosiated with this Tuv
+     * 
      * @return TuLing
      */
-    abstract public TuLing getTuLing();
-
+    // abstract public TuLing getTuLing();
 
     /**
      * Test if this Tuv is completed.
+     * 
      * @return true if completed, false if not.
      */
     abstract public boolean isCompleted();
 
-
     /**
      * Get the word count of this Tuv
+     * 
      * @return Word count
      */
     abstract public int getWordCount();
@@ -253,24 +243,25 @@ abstract public class TuvLing
 
     /**
      * Get Tuv Locale identifier.
+     * 
      * @return Tuv Locale identifier.
      */
     abstract public long getLocaleId();
 
-
     /**
      * Am I localizable or translatable?
+     * 
      * @return true if localizable, false if translatable.
      */
-    abstract public boolean isLocalizable();
+    abstract public boolean isLocalizable(String companyId);
 
     /**
      * Returns a localize type string which is used for persistence.
-     *
-     * @param p_locType localize type in int. The possible values are
-     * TuvLing.TRANSLATABLE and TuvLing.LOCALIZABLE.
-     * @return Localize type string. "T" if translatable, "L" if
-     * localizable.
+     * 
+     * @param p_locType
+     *            localize type in int. The possible values are
+     *            TuvLing.TRANSLATABLE and TuvLing.LOCALIZABLE.
+     * @return Localize type string. "T" if translatable, "L" if localizable.
      */
     public static String getLocTypeString(long p_locType)
     {
@@ -288,12 +279,10 @@ abstract public class TuvLing
         return locType;
     }
 
-
-    /////////// Handler inner classes //////////
+    // ///////// Handler inner classes //////////
 
     // Used in getFuzzyMatchFormat method
-    private static class FuzzyMatchFormatHandler
-        extends TuvSegmentBaseHandler
+    private static class FuzzyMatchFormatHandler extends TuvSegmentBaseHandler
     {
         protected StringBuffer m_content = new StringBuffer(200);
         protected Stack m_addsText = new Stack();
@@ -313,7 +302,7 @@ abstract public class TuvLing
         // Overridden method
         public void handleText(String p_text)
         {
-            if ((Boolean)m_addsText.peek() == Boolean.TRUE)
+            if ((Boolean) m_addsText.peek() == Boolean.TRUE)
             {
                 // add only main text and subflow text (no formatting code)
                 m_content.append(m_xmlDecoder.decodeStringBasic(p_text));
@@ -322,11 +311,11 @@ abstract public class TuvLing
 
         // Overridden method
         public void handleStartTag(String p_name, Properties p_atributes,
-            String p_originalString)
+                String p_originalString)
         {
-            if (p_name.equals(GxmlNames.SUB) ||
-                p_name.equals(GxmlNames.SEGMENT) ||
-                p_name.equals(GxmlNames.LOCALIZABLE))
+            if (p_name.equals(GxmlNames.SUB)
+                    || p_name.equals(GxmlNames.SEGMENT)
+                    || p_name.equals(GxmlNames.LOCALIZABLE))
             {
                 m_addsText.push(Boolean.TRUE);
             }
@@ -348,23 +337,23 @@ abstract public class TuvLing
 
     }
 
-    private static class TermMatchFormatHandler
-        extends FuzzyMatchFormatHandler
+    private static class TermMatchFormatHandler extends FuzzyMatchFormatHandler
     {
         // Overridden method
         public void handleStartTag(String p_name, Properties p_atributes,
-            String p_originalString)
+                String p_originalString)
         {
-            /* Fri Nov 19 22:00:29 2004 CvdL: I'm only interested the main segment.
-            boolean isTranslatableSub =
-                (p_name.equals(GxmlNames.SUB) &&
-                    p_atributes.getProperty(GxmlNames.SUB_LOCTYPE).equals(
-                        GxmlNames.TRANSLATABLE));
-            */
+            /*
+             * Fri Nov 19 22:00:29 2004 CvdL: I'm only interested the main
+             * segment. boolean isTranslatableSub =
+             * (p_name.equals(GxmlNames.SUB) &&
+             * p_atributes.getProperty(GxmlNames.SUB_LOCTYPE).equals(
+             * GxmlNames.TRANSLATABLE));
+             */
 
-            if (/*isTranslatableSub ||*/
-                p_name.equals(GxmlNames.SEGMENT) ||
-                p_name.equals(GxmlNames.LOCALIZABLE))
+            if (/* isTranslatableSub || */
+            p_name.equals(GxmlNames.SEGMENT)
+                    || p_name.equals(GxmlNames.LOCALIZABLE))
             {
                 m_addsText.push(Boolean.TRUE);
             }
@@ -375,10 +364,8 @@ abstract public class TuvLing
         }
     }
 
-
     // Used in getGxmlWithoutTags method
-    private static class GxmlWithoutTagsHandler
-        extends TuvSegmentBaseHandler
+    private static class GxmlWithoutTagsHandler extends TuvSegmentBaseHandler
     {
         private StringBuffer m_content = new StringBuffer(200);
         private int m_nestLevel = 0;
@@ -403,7 +390,7 @@ abstract public class TuvLing
 
         // Overridden method
         public void handleStartTag(String p_name, Properties p_atributes,
-            String p_originalString)
+                String p_originalString)
         {
             m_nestLevel++;
         }
@@ -420,41 +407,39 @@ abstract public class TuvLing
 
     }
 
-
     protected static String stateId2StateName(int p_stateId)
     {
         String name = null;
 
         switch (p_stateId)
         {
-        case NOT_LOCALIZED:
-            name = NOT_LOCALIZED_NAME;
-            break;
-        case LOCALIZED:
-            name = LOCALIZED_NAME;
-            break;
-        case OUT_OF_DATE:
-            name = OUT_OF_DATE_NAME;
-            break;
-        case COMPLETE:
-            name = COMPLETE_NAME;
-            break;
-        case EXACT_MATCH_LOCALIZED:
-            name = EXACT_MATCH_LOCALIZED_NAME;
-            break;
-        case LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED:
-            name = LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED_NAME;
-            break;
-        case ALIGNMENT_LOCALIZED:
-            name = ALIGNMENT_LOCALIZED_NAME;
-            break;
-        default:
-            name = UNKNOWN_NAME;
+            case NOT_LOCALIZED:
+                name = NOT_LOCALIZED_NAME;
+                break;
+            case LOCALIZED:
+                name = LOCALIZED_NAME;
+                break;
+            case OUT_OF_DATE:
+                name = OUT_OF_DATE_NAME;
+                break;
+            case COMPLETE:
+                name = COMPLETE_NAME;
+                break;
+            case EXACT_MATCH_LOCALIZED:
+                name = EXACT_MATCH_LOCALIZED_NAME;
+                break;
+            case LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED:
+                name = LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED_NAME;
+                break;
+            case ALIGNMENT_LOCALIZED:
+                name = ALIGNMENT_LOCALIZED_NAME;
+                break;
+            default:
+                name = UNKNOWN_NAME;
         }
 
         return name;
     }
-
 
     protected static int stateName2StateId(String p_stateName)
     {
@@ -484,7 +469,7 @@ abstract public class TuvLing
         {
             id = LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED;
         }
-        else if(p_stateName.equals(ALIGNMENT_LOCALIZED_NAME))
+        else if (p_stateName.equals(ALIGNMENT_LOCALIZED_NAME))
         {
             id = ALIGNMENT_LOCALIZED;
         }

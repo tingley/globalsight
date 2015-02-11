@@ -21,15 +21,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
-import com.globalsight.cxe.util.EventFlowXmlParser;
 
 /**
  * This class provides all the peristence calls (read, update, insert) for a
@@ -37,8 +36,7 @@ import com.globalsight.cxe.util.EventFlowXmlParser;
  */
 public class RequestPersistenceAccessor
 {
-    private static Logger c_logger = Logger
-            .getLogger("IMPORT");
+    private static Logger c_logger = Logger.getLogger("IMPORT");
 
     /**
      * Finds the particular request in the cache/database.
@@ -48,7 +46,8 @@ public class RequestPersistenceAccessor
     {
         try
         {
-            return setPriorityForRequestIfNon((Request) HibernateUtil.get(RequestImpl.class, p_requestId));
+            return setPriorityForRequestIfNon((Request) HibernateUtil.get(
+                    RequestImpl.class, p_requestId));
         }
         catch (Exception e)
         {
@@ -76,8 +75,8 @@ public class RequestPersistenceAccessor
 
         try
         {
-            List result = session.createQuery(hql).setLong("sourcePageId",
-                    p_pageId).list();
+            List result = session.createQuery(hql)
+                    .setLong("sourcePageId", p_pageId).list();
 
             if (result == null || result.size() == 0)
             {
@@ -100,7 +99,7 @@ public class RequestPersistenceAccessor
         }
         finally
         {
-            //session.close();
+            // session.close();
         }
     }
 
@@ -137,12 +136,11 @@ public class RequestPersistenceAccessor
     public static Collection findRequestsStillImporting()
             throws RequestHandlerException
     {
-        String sql = "select * from REQUEST "
-        	    + "where PAGE_ID is null "
-                + "and ID not in (select id from DELAYED_IMPORT_REQUEST) "
-                + "and TYPE != 'REQUEST_WITH_IMPORT_ERROR'";
+        String sql = "select * from REQUEST " + "where PAGE_ID is null "
+                + "and ID not in (select id from DELAYED_IMPORT_REQUEST)";
 
-        return setPrioritiesForRequestIfNon(HibernateUtil.searchWithSql(sql, null, RequestImpl.class));
+        return setPrioritiesForRequestIfNon(HibernateUtil.searchWithSql(sql,
+                null, RequestImpl.class));
     }
 
     /*
@@ -157,8 +155,9 @@ public class RequestPersistenceAccessor
         }
         catch (Exception e)
         {
-            c_logger.error("Failed to insert the new request "
-                    + p_request.getExternalPageId(), e);
+            c_logger.error(
+                    "Failed to insert the new request "
+                            + p_request.getExternalPageId(), e);
 
             // takes in three arguments - external page id, data
             // source type, data source id
@@ -185,8 +184,9 @@ public class RequestPersistenceAccessor
         }
         catch (Exception e)
         {
-            c_logger.error("Failed to insert the new request "
-                    + p_request.getExternalPageId(), e);
+            c_logger.error(
+                    "Failed to insert the new request "
+                            + p_request.getExternalPageId(), e);
 
             // takes in three arguments - external page id, data
             // source type, data source id
@@ -215,8 +215,9 @@ public class RequestPersistenceAccessor
         }
         catch (Exception pe)
         {
-            c_logger.error("Failed to set an exception in request "
-                    + p_request.getId(), pe);
+            c_logger.error(
+                    "Failed to set an exception in request "
+                            + p_request.getId(), pe);
 
             String[] args = new String[2];
             args[0] = Long.toString(p_request.getId());
@@ -276,7 +277,7 @@ public class RequestPersistenceAccessor
         }
         finally
         {
-            //session.close();
+            // session.close();
         }
     }
 
@@ -342,7 +343,7 @@ public class RequestPersistenceAccessor
             session.saveOrUpdate(request);
 
             tx.commit();
-            //session.close();
+            // session.close();
         }
         catch (Exception e)
         {
@@ -366,36 +367,39 @@ public class RequestPersistenceAccessor
                     args, e);
         }
     }
-    
+
     private static Request setPriorityForRequestIfNon(Request request)
     {
         if (request == null)
         {
             return request;
         }
-        
+
         if (request.getPriority() != null)
         {
             return request;
         }
-        
-        String eventFlowXml = request.getEventFlowXml(); 
+
+        String eventFlowXml = request.getEventFlowXml();
         if (eventFlowXml != null)
         {
             String priority = null;
-            
+
             try
             {
                 EventFlowXmlParser p = new EventFlowXmlParser();
                 p.parse(eventFlowXml);
-                priority = EventFlowXmlParser.getSingleElementValue(p.getSingleElement("batchInfo"), "priority");
+                priority = EventFlowXmlParser.getSingleElementValue(
+                        p.getSingleElement("batchInfo"), "priority");
             }
             catch (Exception e)
             {
                 // ignore any exception here just log
-                c_logger.error("The parser to get priority from eventFlowXml failed", e);
+                c_logger.error(
+                        "The parser to get priority from eventFlowXml failed",
+                        e);
             }
-            
+
             if (priority != null)
             {
                 request.setPriority(priority);
@@ -406,23 +410,23 @@ public class RequestPersistenceAccessor
             }
 
         }
-        
+
         return request;
     }
-    
 
-    private static Collection setPrioritiesForRequestIfNon(List<RequestImpl> requests)
+    private static Collection setPrioritiesForRequestIfNon(
+            List<RequestImpl> requests)
     {
         if (requests == null || requests.size() == 0)
         {
             return requests;
         }
-        
+
         for (RequestImpl requestImpl : requests)
         {
             setPriorityForRequestIfNon(requestImpl);
         }
-        
+
         return requests;
     }
 }

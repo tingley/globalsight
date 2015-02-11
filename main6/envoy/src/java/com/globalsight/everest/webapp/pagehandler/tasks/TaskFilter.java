@@ -147,7 +147,6 @@ public class TaskFilter
             IOException
     {
         String key = authority(p_request);
-        
         boolean result = key == null;
 
         if (!result)
@@ -190,7 +189,7 @@ public class TaskFilter
         catch (Exception e)
         {
             // Only remove the cookie, ignore the exception.
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
         }
 
         // forward to the jsp page.

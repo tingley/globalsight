@@ -239,5 +239,12 @@ public class MockTM3Tm implements TM3Tm<GSTuvData> {
         
     }
 
+    @Override
+    public boolean doesAttributeExist(String name)
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
     
 }

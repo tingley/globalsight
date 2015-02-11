@@ -10,7 +10,7 @@
          com.globalsight.everest.webapp.pagehandler.administration.fileprofile.FileProfileConstants,
          com.globalsight.everest.util.comparator.FileProfileComparator,
          com.globalsight.everest.foundation.SearchCriteriaParameters,
-         com.globalsight.everest.servlet.util.ServerProxy,
+         com.globalsight.everest.company.CompanyWrapper,
          com.globalsight.cxe.entity.xmldtd.XmlDtdImpl,
          java.util.ArrayList,
          java.util.Locale, java.util.Hashtable, java.util.ResourceBundle,
@@ -231,7 +231,7 @@ function enableButtons()
                 </amb:column>
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" sortBy="<%=FileProfileComparator.ASC_COMPANY%>">
-                    <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(fp.getCompanyId())).getCompanyName()%>
+                    <%=CompanyWrapper.getCompanyNameById(fp.getCompanyId())%>
                 </amb:column>
                 <% } %>
               </amb:table>

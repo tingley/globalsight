@@ -36,9 +36,9 @@ public class DiplomatBasicParser
     StringBuffer m_tagName;
     StringBuffer m_attrName;
     StringBuffer m_attrValue;
-    Properties   m_attributes;
+    Properties m_attributes;
     private CxeMessage cxeMessage = null;
-    
+
     public CxeMessage getCxeMessage()
     {
         return cxeMessage;
@@ -84,8 +84,8 @@ public class DiplomatBasicParser
     }
 
     /**
-     * Frees used resources. Objects will be garbage-collected if this
-     * objectd is free'd.
+     * Frees used resources. Objects will be garbage-collected if this objectd
+     * is free'd.
      */
     private void exit()
     {
@@ -96,15 +96,13 @@ public class DiplomatBasicParser
     }
 
     /**
-     * Parses a TMX string and generates events for a
-     * DiplomatBasicHandler can catch. Decoding the string (if it is
-     * in UTF-8, for instance) is not implemented by this class but
-     * must be implemented by the handler.
-     *
+     * Parses a TMX string and generates events for a DiplomatBasicHandler can
+     * catch. Decoding the string (if it is in UTF-8, for instance) is not
+     * implemented by this class but must be implemented by the handler.
+     * 
      * @see DiplomatBasicHandler
      */
-    public void parse(String p_tmx)
-        throws DiplomatBasicParserException
+    public void parse(String p_tmx) throws DiplomatBasicParserException
     {
         init(p_tmx);
 
@@ -130,7 +128,7 @@ public class DiplomatBasicParser
                         m_end = i + 1;
                         String subStr = p_tmx.substring(m_start, m_end);
                         isExtracted = subStr.indexOf("isTranslate=") != -1;
-                        
+
                         if (subStr.startsWith("<ph "))
                         {
                             int subi = 0;
@@ -146,54 +144,63 @@ public class DiplomatBasicParser
                                 isInPhStack.push(true);
                             }
                         }
-                        
-                        if (subStr.indexOf("</ph>") != -1 && isInPhStack.size() > 0 && isInPhStack.peek())
+
+                        if (subStr.indexOf("</ph>") != -1
+                                && isInPhStack.size() > 0 && isInPhStack.peek())
                         {
                             isInPhStack.pop();
                         }
-                        
+
                         if (subStr.indexOf("<it") != -1)
                         {
                             tagStack.push("start");
                         }
-                        
-                        if(tagStack.size() > 0 && subStr.indexOf("</it>") != -1)
+
+                        if (tagStack.size() > 0
+                                && subStr.indexOf("</it>") != -1)
                         {
-                            tagStack.pop(); 
+                            tagStack.pop();
                         }
-                        
-                        if(isExtracted)
+
+                        if (isExtracted)
                         {
-                            if(subStr.indexOf("<bpt") != -1)
+                            if (subStr.indexOf("<bpt") != -1)
                             {
                                 extractedStack.push(isExtracted);
                                 tagStack.push("start");
                             }
-                            else if(subStr.indexOf("</bpt>") != -1)
+                            else if (subStr.indexOf("</bpt>") != -1)
                             {
                                 tagStack.push("end");
                             }
                         }
                         else
                         {
-                            if(extractedStack.size() > 0 && extractedStack.peek())
+                            if (extractedStack.size() > 0
+                                    && extractedStack.peek())
                             {
-                                if(subStr.indexOf("</bpt>") != -1)
+                                if (subStr.indexOf("<bpt") != -1)
+                                {
+                                    tagStack.push("start");
+                                }
+                                else if (subStr.indexOf("</bpt>") != -1)
                                 {
                                     tagStack.push("end");
                                 }
                             }
-                            if(tagStack.size() > 0 && subStr.indexOf("<ept") != -1)
+                            if (tagStack.size() > 0
+                                    && subStr.indexOf("<ept") != -1)
                             {
-                                tagStack.pop(); 
+                                tagStack.pop();
                             }
-                            
-                            if(tagStack.size() > 0 && subStr.indexOf("</ept") != -1)
+
+                            if (tagStack.size() > 0
+                                    && subStr.indexOf("</ept") != -1)
                             {
                                 tagStack.pop();
                             }
                         }
-                        
+
                         processTag(p_tmx, m_start, m_end);
 
                         bInTag = false;
@@ -206,7 +213,8 @@ public class DiplomatBasicParser
 
                     if (m_start < m_end)
                     {
-                        boolean isInPh = (isInPhStack.size() > 0) ? isInPhStack.peek() : false;
+                        boolean isInPh = (isInPhStack.size() > 0) ? isInPhStack
+                                .peek() : false;
                         String subString = p_tmx.substring(m_start, m_end);
                         if (isInPh)
                         {
@@ -222,20 +230,25 @@ public class DiplomatBasicParser
                                 subString = subString.replace("\\", "\\\\");
                                 subString = subString.replace("&apos;", "\\q");
                                 subString = subString.replace("`", "\\Q");
-                                subString = subString.replace("&amp;gt;", "\\>");
+                                subString = subString
+                                        .replace("&amp;gt;", "\\>");
                                 subString = subString.replace("&gt;", "\\>");
                             }
-                            isExtracted = (extractedStack.size() > 0) ? extractedStack.peek() : false;
-                            String tag = (tagStack.size() > 0) ? tagStack.peek() : "start";
+                            isExtracted = (extractedStack.size() > 0) ? extractedStack
+                                    .peek() : false;
+                            String tag = (tagStack.size() > 0) ? tagStack
+                                    .peek() : "start";
 
                             if (tagStack.size() == 0)
                             {
                                 tag = "end";
                             }
 
-                            if (isExtracted && "end".equals(tag) && m_handler instanceof Tmx2PseudoHandler)
+                            if (isExtracted && "end".equals(tag)
+                                    && m_handler instanceof Tmx2PseudoHandler)
                             {
-                                ((Tmx2PseudoHandler) m_handler).handleIsExtractedText(subString);
+                                ((Tmx2PseudoHandler) m_handler)
+                                        .handleIsExtractedText(subString);
                             }
                             else
                             {
@@ -254,15 +267,15 @@ public class DiplomatBasicParser
                 if (bInTag)
                 {
                     throw new DiplomatBasicParserException(
-                        "Invalid GXML string `" + p_tmx + "'");
+                            "Invalid GXML string `" + p_tmx + "'");
                 }
                 else
                 {
                     m_end = m_maxLen;
                     p_tmx = p_tmx.substring(m_start, m_end);
                     if (cxeMessage != null
-                            && cxeMessage.getMessageType().getName().equals(
-                                    "MIF_LOCALIZED_EVENT"))
+                            && cxeMessage.getMessageType().getName()
+                                    .equals("MIF_LOCALIZED_EVENT"))
                     {
                         p_tmx = p_tmx.replace("\\", "\\\\");
                         p_tmx = p_tmx.replace("&apos;", "\\q");
@@ -276,8 +289,8 @@ public class DiplomatBasicParser
         }
         catch (IndexOutOfBoundsException e)
         {
-            throw new DiplomatBasicParserException(
-                "Error parsing GXML: " + e.toString());
+            throw new DiplomatBasicParserException("Error parsing GXML: "
+                    + e.toString());
         }
 
         m_handler.handleStop();
@@ -291,12 +304,13 @@ public class DiplomatBasicParser
         {
             return true;
         }
-        
+
         return false;
     }
 
     /**
      * Skips over whitespace in the input string.
+     * 
      * @return int first index of non-white space following the offset
      */
     private int eatWhitespaces(String p_tmx, int p_index)
@@ -312,12 +326,11 @@ public class DiplomatBasicParser
     }
 
     /**
-     * Reads a tag. Assumes that all atributes are correct.
-     * Input is the tag including &lt; and &gt;.
+     * Reads a tag. Assumes that all atributes are correct. Input is the tag
+     * including &lt; and &gt;.
      */
     private void processTag(String p_tmx, int p_min, int p_max)
-        throws IndexOutOfBoundsException,
-               DiplomatBasicParserException
+            throws IndexOutOfBoundsException, DiplomatBasicParserException
     {
         int i = eatWhitespaces(p_tmx, p_min + 1);
         char ch = p_tmx.charAt(i);
@@ -396,11 +409,10 @@ public class DiplomatBasicParser
                 else
                 {
                     throw new DiplomatBasicParserException(
-                        "Invalid GXML string `" + p_tmx + "'");
+                            "Invalid GXML string `" + p_tmx + "'");
                 }
 
-                m_attributes.put(
-                    m_attrName.toString(), m_attrValue.toString());
+                m_attributes.put(m_attrName.toString(), m_attrValue.toString());
 
                 m_attrName.setLength(0);
                 m_attrValue.setLength(0);
@@ -418,14 +430,14 @@ public class DiplomatBasicParser
         {
             // An empty is rare, so we can construct temp strings.
             m_handler.handleStartTag(tag, m_attributes,
-                p_tmx.substring(p_min, i - 1) + ">");
+                    p_tmx.substring(p_min, i - 1) + ">");
 
             m_handler.handleEndTag(tag, "</" + tag + ">");
         }
         else
         {
             m_handler.handleStartTag(tag, m_attributes,
-                p_tmx.substring(p_min, p_max));
+                    p_tmx.substring(p_min, p_max));
         }
     }
 }

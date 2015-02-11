@@ -44,7 +44,7 @@ public class Dom4jUtil
         }
         catch (IOException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
             return document.asXML();
         }
         

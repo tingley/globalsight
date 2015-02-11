@@ -10,7 +10,7 @@
         com.globalsight.everest.webapp.webnavigation.LinkHelper,
         com.globalsight.everest.util.comparator.TermbaseInfoComparator,
         com.globalsight.util.edit.EditUtil,
-        com.globalsight.everest.servlet.util.ServerProxy,
+		com.globalsight.everest.company.CompanyWrapper,
         com.globalsight.everest.projecthandler.ProjectImpl,
         java.util.List,
          java.text.MessageFormat,
@@ -36,7 +36,7 @@
 <jsp:useBean id="self" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <!-- York added on 2009-03-19 //--> 
-<jsp:useBean id="presearchterm" scope="request"
+<jsp:useBean id="termSearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="namelist" scope="request" class="java.util.ArrayList" />
 <jsp:useBean id="users" scope="request"
@@ -55,7 +55,7 @@ String urlStatistics = statistics.getPageURL();
 String urlInputModels = inputmodels.getPageURL();
 String urlMaintenance = maintenance.getPageURL();
 String urlIndexes = indexes.getPageURL();
-String urlPreSearchTerm = presearchterm.getPageURL(); //York added on 2009-03-19
+String urlTermSearch = termSearch.getPageURL(); //York added on 2009-03-19
 String urlUsers = users.getPageURL();
 
 boolean isSuperAdmin = (Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN);
@@ -84,7 +84,7 @@ if(sessionMgr.getAttribute("projectsByTermbaseDepended") != null) {
 %>
 <HTML>
 <HEAD>
-<TITLE><%=bundle.getString("lb_terminology_management")%></TITLE>
+<TITLE><%=bundle.getString("lb_terminology")%></TITLE>
 
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
@@ -367,9 +367,9 @@ function doLoad()
 }
 //York added on 2009-03-19
 function searchTerms(){
-	var url = '<%=urlPreSearchTerm +
+	var url = '<%=urlTermSearch +
         "&" + WebAppConstants.TERMBASE_ACTION +
-        "=" + WebAppConstants.TERMBASE_ACTION_PRE_SEARCH_TERM%>';
+        "=" + WebAppConstants.TERMBASE_ACTION_TERM_SEARCH%>';
 
 //    alert("searchTerms() url: " + url);
     window.location.href = url;
@@ -386,7 +386,7 @@ function searchTerms(){
 <DIV ID="contentLayer"
  STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
 
-<SPAN CLASS="mainHeading"><%=bundle.getString("lb_terminology_management")%></SPAN>
+<SPAN CLASS="mainHeading"><%=bundle.getString("lb_terminology")%></SPAN>
 
 <P>
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
@@ -404,9 +404,6 @@ function searchTerms(){
     <div></TD>
   </TR>
 </TABLE>
-
-<P>
-<SPAN CLASS="standardText"><B><%=bundle.getString("lb_termbases")%></B></SPAN>
 <FORM NAME=termbaseForm method="post">
         <table cellpadding=0 cellspacing=0 border=0 class="standardText">
         <tr valign="top">
@@ -432,7 +429,7 @@ function searchTerms(){
             </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=TermbaseInfoComparator.ASC_COMPANY%>">
-                <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(tb.getCompanyId())).getCompanyName()%>
+                <%=CompanyWrapper.getCompanyNameById(tb.getCompanyId())%>
             </amb:column>
             <% } %>
           </amb:table>
@@ -503,11 +500,6 @@ function searchTerms(){
      TITLE="<%=bundle.getString("helper_text_tb_input_models") %>">
     </amb:permission>
     <!-- York added on 2009-03-19  //-->
-	<amb:permission name="<%=Permission.SERVICE_TB_SEARCH_ENTRY%>" >
-    <INPUT CLASS="standardText" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_terminology_search_entries") %>..."
-     ID="idSearchTerm" onclick="searchTerms()" name="searchTermBtn"
-     TITLE="<%=bundle.getString("helper_text_tb_search") %>">
-    </amb:permission>
     <%if(enableTBAccessControl&&isAdmin)
     {%>
     <INPUT CLASS="standardText" TYPE="BUTTON" name="usersBtn" disabled
@@ -515,6 +507,11 @@ function searchTerms(){
          ID="idUsers" onclick="modifyUsers()"
          TITLE="<%=bundle.getString("helper_text_tb_users")%>">
     <%}%>
+    <amb:permission name="<%=Permission.TERMINOLOGY_SEARCH%>" >
+    <INPUT CLASS="standardText" TYPE="BUTTON" VALUE="<%=bundle.getString("lb_search") %>..."
+     ID="idSearchTerm" onclick="searchTerms()" name="searchTermBtn"
+     TITLE="<%=bundle.getString("lb_search") %>">
+    </amb:permission>
     </DIV>
     </TD>
     </DIV>

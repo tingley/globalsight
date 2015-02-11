@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 
+import org.apache.log4j.Logger;
+import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.ExtractorException;
@@ -39,6 +41,8 @@ import com.oroinc.text.regex.Perl5Matcher;
 
 public class Extractor extends AbstractExtractor
 {
+    private static final Logger logger = Logger.getLogger("Extractor");
+
     private static int index = 1;
 
     private static final boolean WITH_RETURN = true;
@@ -52,6 +56,12 @@ public class Extractor extends AbstractExtractor
      * used to mark whether the previous line is string
      */
     private boolean inString = false;
+
+    /**
+     * used to mark whether it is "Callout"(Callout string should be extracted).
+     */
+    private boolean inCalloutPgfTag = false;
+
     /**
      * used to mark whether the current line is in font
      */
@@ -63,7 +73,10 @@ public class Extractor extends AbstractExtractor
     private boolean inMarker = false;
     private boolean inPage = false;
     private boolean translatable = false;
-    private boolean inFrame = false;
+    // in case of nested frames, the flag is a number. 
+    // As long as the number is bigger than 0, it means it's in a frame area.
+    // When entering a frame, the tag plus 1. And when leaving, the tag minus 1.
+    private int inFrame = 0;  
     private boolean inTextRect = false;
     private boolean inGroup = false;
     private boolean inVariable = false;
@@ -82,7 +95,7 @@ public class Extractor extends AbstractExtractor
     public Extractor()
     {
         super();
-
+        
         specialCharMap.put("EnDash", "\u2013");
         specialCharMap.put("EmDash", "\u2014");
         specialCharMap.put("NoHyphen", "\u200d");
@@ -102,6 +115,7 @@ public class Extractor extends AbstractExtractor
         inlineTags.add("&lt;$chapnum\\&gt;");
 
         m_xmlEncoder = new XmlEntities();
+        
     }
 
     /**
@@ -112,14 +126,18 @@ public class Extractor extends AbstractExtractor
         Output output = getOutput();
         setMainFormat(ExtractorRegistry.FORMAT_MIF);
         Parser parser = new Parser(readInput());
+        FMFilter filter = null;
+        if (getMainFilter() != null)
+        {
+            filter = (FMFilter) getMainFilter();
+        }
 
-        List<String> lineList = parser.getLineList();// all the contents in mif
-                                                     // file
+        List<String> lineList = parser.getLineList();// all the contents in mif file
 
-        extractContent(lineList, output);
+        extractContent(lineList, output, filter);
     }
 
-    private void extractContent(List<String> lineList, Output output)
+    private void extractContent(List<String> lineList, Output output, FMFilter filter)
             throws ExtractorException
     {
         StringBuffer tmpString = new StringBuffer("");
@@ -136,10 +154,13 @@ public class Extractor extends AbstractExtractor
         TextRectInFrame textRectInFrameMap = new TextRectInFrame();
 
         // used to store whether the table should be translated
-        Map<String, Boolean> TableMap = new HashMap<String, Boolean>();
+        Map<String, Boolean> tableMap = new HashMap<String, Boolean>();
 
         // used to store whether the frame should be translated
-        Map<String, Boolean> FrameMap = new HashMap<String, Boolean>();
+        Map<String, Boolean> frameMap = new HashMap<String, Boolean>();
+
+        // save all the translatable textrect for "Callout".
+        List<String> textRectIdListForCallout = new ArrayList<String>();
 
         /*
          * the extractor needs 2 loops. In the 1st loop, find out translatable
@@ -147,28 +168,29 @@ public class Extractor extends AbstractExtractor
          * file.
          */
         firstLoop(lineList, pageType, textRectListInBodyPage,
-                textRectListInFrame, TableMap, FrameMap, textRectInFrameMap,
-                frame_Id);
+                textRectListInFrame, tableMap, frameMap, textRectInFrameMap,
+                frame_Id, textRectIdListForCallout, filter);
 
         reset();
         Marker marker = new Marker();
 
-        secondLoop(lineList, output, FrameMap, TableMap,
-                textRectListInBodyPage, textRectListInFrame, tmpString, marker);
+        secondLoop(lineList, output, frameMap, tableMap,
+                textRectListInBodyPage, textRectListInFrame, tmpString, marker,
+                textRectIdListForCallout);
     }
 
     private void firstLoop(List<String> lineList, String pageType,
             List<String> textRectListInBodyPage,
-            List<String> textRectListInFrame, Map<String, Boolean> TableMap,
-            Map<String, Boolean> FrameMap, TextRectInFrame textRectInFrameMap,
-            String frame_Id)
+            List<String> textRectListInFrame, Map<String, Boolean> tableMap,
+            Map<String, Boolean> frameMap, TextRectInFrame textRectInFrameMap,
+            String frame_Id, List<String> textRectIdListForCallout, FMFilter filter)
     {
         for (int lineNo = 0; lineNo < lineList.size(); lineNo++)
         {
             String line = lineList.get(lineNo);
-            if (line.startsWith(Tag.MIF_FILE_HEAD)) // <MIFFile
+            if (line.trim().startsWith(Tag.MIF_FILE_HEAD)) // <MIFFile
             {
-                String mifVersion = this.getContent(line, Tag.MIF_FILE_HEAD);
+                String mifVersion = Parser.getTagContent(line, Tag.MIF_FILE_HEAD);
                 double version = Double.parseDouble(mifVersion);
                 if (version < 9)
                 {
@@ -176,30 +198,50 @@ public class Extractor extends AbstractExtractor
                             ExtractorExceptionConstants.MIF_VERSION_ERROR);
                 }
             }
-            else if (line.startsWith(Tag.PAGETYPE_HEAD)) // <PageType
+            else if (line.trim().startsWith(Tag.PAGETYPE_HEAD)) // <PageType
             {
                 inPage = true;
-                pageType = this.getContent(line, Tag.PAGETYPE_HEAD);
+                pageType = Parser.getTagContent(line, Tag.PAGETYPE_HEAD);
             }
-            else if (inPage && line.startsWith(Tag.TEXT_RECT_ID)) // <ID,
-                                                                  // textrects
-                                                                  // in page tag
+            // <ID, textrects in page tag
+            else if (inPage && line.trim().startsWith(Tag.TEXT_RECT_ID))
             {
                 if (pageType.equalsIgnoreCase("BodyPage"))
                 {
-                    String textRectID = this.getContent(line, Tag.TEXT_RECT_ID);
+                    String textRectID = Parser.getTagContent(line, Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+                else if (pageType.equalsIgnoreCase("LeftMasterPage")
+                        && filter != null && filter.isExposeLeftMasterPage())
+                {
+                    String textRectID = Parser.getTagContent(line, Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+                else if (pageType.equalsIgnoreCase("RightMasterPage")
+                        && filter != null && filter.isExposeRightMasterPage())
+                {
+                    String textRectID = Parser.getTagContent(line, Tag.TEXT_RECT_ID);
+                    textRectListInBodyPage.add(textRectID);
+                    translatable = true;
+                }
+                else if (pageType.equalsIgnoreCase("OtherMasterPage")
+                        && filter != null && filter.isExposeOtherMasterPage())
+                {
+                    String textRectID = Parser.getTagContent(line, Tag.TEXT_RECT_ID);
                     textRectListInBodyPage.add(textRectID);
                     translatable = true;
                 }
             }
-            else if (line.equals(Tag.PAGE_END)) // # end of Page
+            else if (line.trim().equals(Tag.PAGE_END)) // # end of Page
             {
                 inPage = false;
                 translatable = false;
             }
-            else if (line.startsWith(Tag.TEXTRECTID_HEAD)) // <TextRectID
+            else if (line.trim().startsWith(Tag.TEXTRECTID_HEAD)) // <TextRectID
             {
-                String rectID = this.getContent(line, Tag.TEXTRECTID_HEAD);
+                String rectID = Parser.getTagContent(line, Tag.TEXTRECTID_HEAD);
                 if (textRectListInBodyPage.contains(rectID)
                         || textRectListInFrame.contains(rectID))
                 {
@@ -209,17 +251,23 @@ public class Extractor extends AbstractExtractor
                 {
                     translatable = false;
                 }
+                
+                if (inCalloutPgfTag)
+                {
+                    translatable = true;
+                    textRectIdListForCallout.add(rectID);
+                }
             }
-            else if (line.startsWith(Tag.A_TABLE_ID)) // <ATbl
+            else if (line.trim().startsWith(Tag.A_TABLE_ID)) // <ATbl
             {
-                String referedTableId = this.getContent(line, Tag.A_TABLE_ID);
-                TableMap.put(referedTableId, translatable);
+                String referedTableId = Parser.getTagContent(line, Tag.A_TABLE_ID);
+                tableMap.put(referedTableId, translatable);
             }
-            else if (line.startsWith(Tag.A_FRAME_ID)
-                    && !line.equals("<AFrames")) // <AFrame
+            else if (line.trim().startsWith(Tag.A_FRAME_ID)
+                    && !line.trim().equals("<AFrames")) // <AFrame
             {
-                String referedFrameId = this.getContent(line, Tag.A_FRAME_ID);
-                FrameMap.put(referedFrameId, translatable);
+                String referedFrameId = Parser.getTagContent(line, Tag.A_FRAME_ID);
+                frameMap.put(referedFrameId, translatable);
                 List<String> textRectInFrame = textRectInFrameMap
                         .getTextRectInFrame(referedFrameId);
                 if (translatable)
@@ -227,39 +275,48 @@ public class Extractor extends AbstractExtractor
                     textRectListInFrame.addAll(textRectInFrame);
                 }
             }
-            else if (line.equals(Tag.FRAME_HEAD)) // <Frame
+            else if (line.trim().equals(Tag.FRAME_HEAD)) // <Frame
             {
-                inFrame = true;
+                inFrame++;
             }
-            else if (line.equals(Tag.FRAME_END)) // > # end of Frame
+            else if (line.trim().equals(Tag.FRAME_END)) // > # end of Frame
             {
-                inFrame = false;
+                inFrame--;
             }
-            else if (line.equals(Tag.TEXTRECT_HEAD)) // <TextRect
+            else if (line.trim().equals(Tag.TEXTRECT_HEAD)) // <TextRect
             {
                 inTextRect = true;
             }
-            else if (line.equals(Tag.TEXTRECT_END)) // > # end of TextRect
+            else if (line.trim().equals(Tag.TEXTRECT_END)) // > # end of TextRect
             {
                 inTextRect = false;
             }
-            else if (line.equals(Tag.GROUP_HEAD)) // <Group
+            else if (line.trim().equals(Tag.GROUP_HEAD)) // <Group
             {
                 inGroup = true;
             }
-            else if (line.equals(Tag.GROUP_END)) // # end of Group
+            else if (line.trim().equals(Tag.GROUP_END)) // # end of Group
             {
                 inGroup = false;
             }
-            else if (inFrame && inTextRect && line.startsWith(Tag.TEXT_RECT_ID)) // <ID
+            else if (inFrame > 0 && inTextRect && line.trim().startsWith(Tag.TEXT_RECT_ID)) // <ID
             {
-                String textRectID = this.getContent(line, Tag.TEXT_RECT_ID);
+                String textRectID = Parser.getTagContent(line, Tag.TEXT_RECT_ID);
                 textRectInFrameMap.saveRect(frame_Id, textRectID);
             }
-            else if (inFrame && !inGroup && !inTextRect
-                    && line.startsWith(Tag.FRAME_ID)) // <ID
+            else if (inFrame > 0 && !inGroup && !inTextRect
+                    && line.trim().startsWith(Tag.FRAME_ID)) // <ID
             {
-                frame_Id = this.getContent(line, Tag.FRAME_ID);
+                frame_Id = Parser.getTagContent(line, Tag.FRAME_ID);
+            }
+            else if (line.trim().equals(Tag.PGFTAG_CALLOUT))
+            {
+                inCalloutPgfTag = true;
+            }
+            else if (line.trim().equals(Tag.PARA_END))
+            {
+                // As callout pgfTag is always in "para", when para ends, set this to false.
+                inCalloutPgfTag = false;
             }
         }
     }
@@ -268,13 +325,18 @@ public class Extractor extends AbstractExtractor
             Map<String, Boolean> FrameMap, Map<String, Boolean> TableMap,
             List<String> textRectListInBodyPage,
             List<String> textRectListInFrame, StringBuffer tmpString,
-            Marker marker)
+            Marker marker, List<String> textRectIdListForCallout)
     {
         Stack<String> tagLevel = new Stack<String>();
+        // this is a flag, saving whether or not it's translatable when entering
+        // a footnote area. When leaving footnote, translatable flag should remain
+        // as what it is when entering footnote.
+        boolean translatableOutsideNote = false;
 
         for (int lineNo = 0; lineNo < lineList.size(); lineNo++)
         {
-            String line = lineList.get(lineNo);
+            String line = lineList.get(lineNo).trim();
+            String lineWithWhiteSpace = lineList.get(lineNo);
             if (line.startsWith("<") && !line.endsWith(">") && lineNo > 0)
             {
                 tagLevel.push(line.substring(1));
@@ -283,64 +345,63 @@ public class Extractor extends AbstractExtractor
             {
                 if (line.equals(">") && !tagLevel.empty() && translatable)
                 {
-                    line += " # end of " + tagLevel.peek();
+                    String l = tagLevel.peek();
+                    line += " # end of " + l;
+                    lineWithWhiteSpace += " # end of " + l;
                 }
                 tagLevel.pop();
             }
 
             if (line.equals(Tag.FRAME_HEAD)) // <Frame
             {
-                inFrame = true;
-                addSkeleton(output, line, WITH_RETURN);
+                inFrame++;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
-            else if (inFrame && !inGroup && !inTextRect
+            else if (inFrame > 0 && !inGroup && !inTextRect
                     && line.startsWith(Tag.FRAME_ID)) // <ID
             {
-                String frameId = this.getContent(line, Tag.FRAME_ID);
+                String frameId = Parser.getTagContent(lineWithWhiteSpace, Tag.FRAME_ID);
                 translatable = FrameMap.get(frameId);
-                addSkeleton(output, line, WITH_RETURN);
-                /*
-                 * frameid and textRectId are both <ID>, in order to make sure
-                 * that only frameid is added, inframe will close as soon as the
-                 * frameid is found.
-                 */
-                inFrame = false;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.equals(Tag.FRAME_END)) // > # end of Frame
             {
-                inFrame = false;
-                translatable = false;
-                addSkeleton(output, line, WITH_RETURN);
+                inFrame--;
+                // Nested "Frame":inner Frames have no "ID".
+                if (inFrame == 0){
+                    translatable = false;
+                }
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.equals(Tag.GROUP_HEAD)) // <Group
             {
                 inGroup = true;
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.equals(Tag.GROUP_END)) // # end of Group
             {
                 inGroup = false;
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.equals(Tag.TEXTRECT_HEAD)) // <TextRect
             {
                 inTextRect = true;
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.equals(Tag.TEXTRECT_END)) // > # end of TextRect
             {
                 inTextRect = false;
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.startsWith(Tag.TABLE_ID)) // <TblID
             {
-                String tableId = getContent(line, Tag.TABLE_ID);
+                String tableId = Parser.getTagContent(lineWithWhiteSpace, Tag.TABLE_ID);
                 translatable = TableMap.get(tableId);
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else if (line.equals(Tag.TABLE_END)) // > # end of Tbl
             {
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
                 translatable = false;
             }
             else if (line.equals(Tag.PARA_END)) // # end of Para
@@ -350,12 +411,12 @@ public class Extractor extends AbstractExtractor
                     addTranslatableTmx(getStringPhEnd());
                     addSkeleton(output, Tag.PARALINE_END, WITH_RETURN);
                 }
-                addSkeleton(output, Tag.PARA_END, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
                 inString = false;
             }
             else if (line.startsWith(Tag.TEXTRECTID_HEAD)) // <TextRectID
             {
-                String rectID = this.getContent(line, Tag.TEXTRECTID_HEAD);
+                String rectID = Parser.getTagContent(lineWithWhiteSpace, Tag.TEXTRECTID_HEAD);
                 if (textRectListInBodyPage.contains(rectID)
                         || textRectListInFrame.contains(rectID))
                 {
@@ -365,21 +426,25 @@ public class Extractor extends AbstractExtractor
                 {
                     translatable = false;
                 }
+                if (inCalloutPgfTag && textRectIdListForCallout.contains(rectID)){
+                    translatable = true;
+                }
+
                 if (inString)
                 {
                     addTranslatableTmx(getStringPhEnd());
-                    addTranslatableTmx(handleInlineTag(line, Tag.TEXTRECTID,
+                    addTranslatableTmx(handleInlineTag(lineWithWhiteSpace, Tag.TEXTRECTID,
                             true));
                     addTranslatableTmx(getStringPhStart());
                 }
                 else
                 {
-                    addSkeleton(output, line, WITH_RETURN);
+                    addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
                 }
             }
             else if (translatable && line.startsWith(Tag.XREFEND_HEAD)) // <XRefEnd
             {
-                tmpString.append(line);
+                tmpString.append(lineWithWhiteSpace);
                 addTranslatableTmx(handleInlineTag(tmpString.toString(),
                         Tag.XREF, true));
                 tmpString.setLength(0);
@@ -389,20 +454,20 @@ public class Extractor extends AbstractExtractor
             {
                 endStringTag(output);
                 inXrefTag = true;
-                tmpString.append(line).append("\n");
+                tmpString.append(lineWithWhiteSpace).append("\n");
             }
             else if (line.equals(Tag.PARALINE_HEAD)) // <ParaLine
             {
                 if (!inString)
                 {
-                    addSkeleton(output, line, WITH_RETURN);
+                    addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
                 }
             }
             else if (line.equals(Tag.PARALINE_END)) // # end of ParaLine
             {
                 if (!inString)
                 {
-                    addSkeleton(output, line, WITH_RETURN);
+                    addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
                 }
             }
             else if (line.startsWith(Tag.STRING_HEAD) && translatable) // <String
@@ -412,13 +477,13 @@ public class Extractor extends AbstractExtractor
                     addTranslatableTmx(getStringPhStart());
                 }
                 inString = true;
-                // output.addTranslatable(this.getStringContent(line));
-                addTranslatable(this.getStringContent(line));
+                // output.addTranslatable(Parser.getStringContent(line));
+                addTranslatable(Parser.getStringContent(lineWithWhiteSpace));
             }
             else if (translatable && line.equals(Tag.FONT_END)) // > # end of
                                                                 // Font
             {
-                tmpString.append(line);
+                tmpString.append(lineWithWhiteSpace);
                 addTranslatableTmx(handleInlineTag(tmpString.toString(),
                         Tag.FONT, true));
                 tmpString.setLength(0);
@@ -428,7 +493,7 @@ public class Extractor extends AbstractExtractor
             {
                 endStringTag(output);
                 inFontTag = true;
-                tmpString.append(line).append("\n");
+                tmpString.append(lineWithWhiteSpace).append("\n");
             }
             else if (translatable && line.equals(Tag.MARKER_END)) // > # end of
                                                                   // Marker
@@ -442,36 +507,36 @@ public class Extractor extends AbstractExtractor
                 inMarker = true;
                 if (line.startsWith(Tag.UNIQUE_HEAD)) // <Unique
                 {
-                    marker.setUnique(this.getContent(line, Tag.UNIQUE_HEAD));
+                    marker.setUnique(Parser.getTagContent(lineWithWhiteSpace, Tag.UNIQUE_HEAD));
                 }
                 else if (line.startsWith(Tag.MTYPENAME_HEAD)) // <MTypeName
                 {
-                    marker.setMTypeName(this.getStringContent(line));
+                    marker.setMTypeName(Parser.getStringContent(lineWithWhiteSpace));
                 }
                 else if (line.startsWith(Tag.MTYPE_HEAD)) // <MType
                 {
-                    marker.setMType(this.getContent(line, Tag.MTYPE_HEAD));
+                    marker.setMType(Parser.getTagContent(lineWithWhiteSpace, Tag.MTYPE_HEAD));
                 }
                 else if (line.startsWith(Tag.MTEXT_HEAD)) // <MText
                 {
-                    marker.setMText(line.substring(line.indexOf("`") + 1,
-                            line.indexOf("'")));
+                    marker.setMText(lineWithWhiteSpace.substring(lineWithWhiteSpace.indexOf("`") + 1,
+                            lineWithWhiteSpace.indexOf("'")));
                 }
                 else if (line.startsWith(Tag.MCURRPAGE_HEAD)) // <MCurrPage
                 {
-                    marker.setMCurrPage(this.getStringContent(line));
+                    marker.setMCurrPage(Parser.getStringContent(lineWithWhiteSpace));
                 }
             }
             else if (inString && line.startsWith(Tag.CHAR_HEAD)) // <Char
             {
-                String nextLine = lineList.get(lineNo + 1);
-                addTranslatableTmx(handleChar(line, nextLine));
+//                String nextLine = lineList.get(lineNo + 1);
+                addTranslatableTmx(handleChar(lineWithWhiteSpace));
             }
             else if (translatable && line.equals(Tag.VARIABLE_END)) // > # end
                                                                     // of
                                                                     // Variable
             {
-                tmpString.append(line);
+                tmpString.append(lineWithWhiteSpace);
                 addTranslatableTmx(handleInlineTag(tmpString.toString(),
                         Tag.VARIABLE, true));
                 tmpString.setLength(0);
@@ -482,7 +547,7 @@ public class Extractor extends AbstractExtractor
             {
                 endStringTag(output);
                 inVariable = true;
-                tmpString.append(line).append("\n");
+                tmpString.append(lineWithWhiteSpace).append("\n");
             }
             else if (line.startsWith(Tag.VARIABLE_DEF_HEAD)
                     || line.startsWith(Tag.XREF_DEF_HEAD)
@@ -490,7 +555,7 @@ public class Extractor extends AbstractExtractor
                                                                // <XRefDef &
                                                                // <PgfNumFormat
             {
-                exposeDef(line, output, "text");
+                exposeDef(lineWithWhiteSpace, output, "text");
             }
             // else if (line.startsWith(Tag.PGF_NUMBER_STRING)) // <PgfNumString
             // {
@@ -500,7 +565,7 @@ public class Extractor extends AbstractExtractor
                                                                        // end of
                                                                        // Conditional
             {
-                tmpString.append(line);
+                tmpString.append(lineWithWhiteSpace);
                 addTranslatableTmx(handleInlineTag(tmpString.toString(),
                         Tag.CONDITIONAL, true));
                 tmpString.setLength(0);
@@ -511,17 +576,55 @@ public class Extractor extends AbstractExtractor
             {
                 endStringTag(output);
                 inConditional = true;
-                tmpString.append(line).append("\n");
+                tmpString.append(lineWithWhiteSpace).append("\n");
             }
             else if (translatable && line.startsWith(Tag.UNCONDITIONAL)) // <Unconditional
             {
                 endStringTag(output);
-                addTranslatableTmx(handleInlineTag(line, Tag.CONDITIONAL, true));
+                addTranslatableTmx(handleInlineTag(lineWithWhiteSpace, Tag.CONDITIONAL, true));
+            }
+            else if (line.equals(Tag.NOTES_HEAD))                           // <Notes
+            {
+                translatableOutsideNote = translatable;
+                translatable = true;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (line.equals(Tag.NOTES_END))                            // > # end of Notes
+            {
+                translatable = translatableOutsideNote;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (translatable && line.startsWith(Tag.NOTES_REF)
+                    && line.endsWith(">"))                            // <FNote
+            {
+                if (inString)
+                {
+                    addTranslatableTmx(getStringPhEnd());
+                    addTranslatableTmx(handleInlineTag(lineWithWhiteSpace,
+                            Tag.NOTES, true));
+                    addTranslatableTmx(getStringPhStart());
+                }
+                else 
+                {
+                    addTranslatableTmx(handleInlineTag(lineWithWhiteSpace,
+                            Tag.NOTES, true));
+                }
+            }
+            else if (line.equals(Tag.PGFTAG_CALLOUT))
+            {
+                inCalloutPgfTag = true;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
+            }
+            else if (line.equals(Tag.PARA_END))
+            {
+                // As callout pgfTag is always in "para", when para ends, set this to false.
+                inCalloutPgfTag = false;
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
             else
             {
                 endStringTag(output);
-                addSkeleton(output, line, WITH_RETURN);
+                addSkeleton(output, lineWithWhiteSpace, WITH_RETURN);
             }
         }
     }
@@ -590,7 +693,7 @@ public class Extractor extends AbstractExtractor
                 middle = middle.substring(2); // remove the front 2 characters
             }
 
-            String def = this.replaceSpecialCharactor(middle);
+            String def = this.replaceSpecialCharactor(middle, true);
             if (def.length() == 0)
             {
                 this.addSkeleton(output, tail, WITH_RETURN);
@@ -603,6 +706,7 @@ public class Extractor extends AbstractExtractor
 
                 try
                 {
+                	inline = replaceUnicodeCharacter(inline);
                     while ((syntax = getSyntax(inline, regexp1)) != null)
                     {
                         String inlineSyntax = this.handleInlineTag(syntax,
@@ -619,6 +723,7 @@ public class Extractor extends AbstractExtractor
                     return;
                 }
 
+                inline = revertUnicodeCharacter(inline);
                 String meaningful = getContentsBetweenPh(inline);
                 if (meaningful.trim().matches("\\W*"))
                 {
@@ -652,12 +757,15 @@ public class Extractor extends AbstractExtractor
     }
 
     /**
-     * Transfer \xnn and \\t into inline tags
-     * 
-     * @param content
-     * @return
-     */
-    private String replaceSpecialCharactor(String content)
+	 * Transfer \xnn and \\t into inline tags
+	 * 
+	 * @param content
+	 * @param protectDblQuotations
+	 *            - boolean: if there are unicode "double quotation marks", put
+	 *            them into PH tags.
+	 * @return
+	 */
+    private String replaceSpecialCharactor(String content, boolean protectDblQuotations)
     {
         String regexp = "\\\\x[\\w]{2}[\\s]?";
         java.util.regex.Pattern PATTERN = java.util.regex.Pattern
@@ -691,7 +799,32 @@ public class Extractor extends AbstractExtractor
                     handleInlineTag(result, "text", false));
         }
 
-        return content;
+        if (protectDblQuotations)
+        { 
+            // if there are unicode "double quotation marks", put them into PH tags.
+            boolean isInTag = false;
+            StringBuilder newContent = new StringBuilder();
+            char[] chars = content.toCharArray();
+            for (int i=0; i<chars.length; i++) {
+            	char ch = chars[i];
+            	if (!isInTag && (ch == '\u201c' || ch == '\u201d') ) {
+            		newContent.append(handleInlineTag(String.valueOf(ch), "text", false));
+            	} else {
+            		newContent.append(ch);
+                	if (ch == '<') {
+                		isInTag = true;
+                	} else if (ch == '>') {
+                		isInTag = false;
+                	}	
+            	}
+            }
+
+            return newContent.toString();        	
+        }
+        else
+        {
+        	return content;
+        }
     }
 
     /**
@@ -760,9 +893,9 @@ public class Extractor extends AbstractExtractor
      * @param line
      * @return
      */
-    private String handleChar(String line, String nextLine)
+    private String handleChar(String line)
     {
-        String key = getContent(line, Tag.CHAR_HEAD);
+        String key = Parser.getTagContent(line, Tag.CHAR_HEAD);
 
         // hardreturn, Tab, HardSpace will convert to inline tags
         if (key.equalsIgnoreCase("HardReturn") || key.equalsIgnoreCase("Tab")
@@ -804,52 +937,6 @@ public class Extractor extends AbstractExtractor
         else
         {
             return " ";
-        }
-    }
-
-    /**
-     * Get string line content
-     * 
-     * @param line
-     * @return
-     */
-    private String getStringContent(String line)
-    {
-        int start = line.indexOf("`");
-        int end = line.indexOf("'");
-        if (start != -1 && end != -1)
-        {
-            String tmp = line.substring(start + 1, end);
-            tmp = tmp.replace("\\>", ">");
-            tmp = tmp.replace("\\Q", "`");
-            tmp = tmp.replace("\\q", "'");
-            tmp = tmp.replace("\\\\", "\\");
-            return tmp;
-        }
-        else
-        {
-            return line;
-        }
-    }
-
-    /**
-     * Get content in line that don't have a ` and '
-     * 
-     * @param line
-     * @param tag
-     * @return
-     */
-    private String getContent(String line, String tag)
-    {
-        try
-        {
-            int end = line.indexOf(">");
-            String value = line.substring(tag.length() + 1, end);
-            return value;
-        }
-        catch (Exception e)
-        {
-            return line;
         }
     }
 
@@ -931,13 +1018,72 @@ public class Extractor extends AbstractExtractor
         }
         else
         {
-            output.addTranslatableTmx(content.trim());
+            // GBS-2622 problem #3.
+            content = changeTypeForSuperscript(content);
+            output.addTranslatableTmx(content);
         }
         if (!tailAndContent[0].equals(""))
         {
             output.addSkeleton(m_xmlEncoder
                     .decodeStringBasic(tailAndContent[0]));
         }
+    }
+    
+    /**
+     * If the translatable content has "Superscript",change its default "type"
+     * to "superscript".
+     */
+    private String changeTypeForSuperscript(String p_content)
+    {
+        if (p_content == null || p_content.indexOf("Superscript") == -1){
+            return p_content;
+        }
+
+        try {
+            StringBuilder result = new StringBuilder();
+            String strFirst, strMiddle, strLast;
+            strLast = new String(p_content);
+            int phStartIndex = -1;
+            int phEndIndex = -1;
+            while (strLast.indexOf("Superscript") > -1)
+            {
+                phStartIndex = strLast.indexOf("<ph");
+                phEndIndex = strLast.indexOf("</ph>");
+
+                strFirst = strLast.substring(0, phStartIndex);
+                strMiddle = strLast.substring(phStartIndex, phEndIndex+5);
+                strLast = strLast.substring(phEndIndex+5);
+
+                result.append(strFirst);
+                if (strMiddle.indexOf("Superscript") == -1){
+                    result.append(strMiddle);
+                } else {
+                    result.append(changeType(strMiddle));
+                }
+
+                phStartIndex = -1;
+                phEndIndex = -1;
+                strFirst = "";
+                strMiddle = "";
+
+                changeTypeForSuperscript(strLast);
+            }
+            
+            if (strLast.length() > 0){
+                result.append(strLast);
+            }
+
+            return result.toString();            
+        } catch (Exception e) {
+            logger.warn("Error when changeTypeForSuperscript() for " + p_content);
+            return p_content;
+        }
+
+    }
+    
+    private String changeType(String p_str)
+    {
+        return p_str.replaceFirst("type=\"text\"", "type=\"superscript\"");
     }
 
     /**
@@ -1068,7 +1214,7 @@ public class Extractor extends AbstractExtractor
     private void addTranslatable(String content)
     {
         String tmp = m_xmlEncoder.encodeStringBasic(content);
-        tmp = this.replaceSpecialCharactor(tmp);
+        tmp = this.replaceSpecialCharactor(tmp, false);
         addTranslatableTmx(tmp);
     }
 
@@ -1083,7 +1229,7 @@ public class Extractor extends AbstractExtractor
      */
     private void handleNumString(String line, Output output)
     {
-        String content = this.getStringContent(line);
+        String content = Parser.getStringContent(line);
         int start = line.indexOf("`");
         int end = line.indexOf("'");
         if (start != -1 && end != -1)
@@ -1095,7 +1241,7 @@ public class Extractor extends AbstractExtractor
                                                       // with no return
             if (content.length() > 0)
             {
-                String tmp = getContentsBetweenPh(replaceSpecialCharactor(content));
+                String tmp = getContentsBetweenPh(replaceSpecialCharactor(content, false));
                 if (tmp.trim().matches("\\W*"))
                 {
                     // add content as skeleton, with no return
@@ -1178,11 +1324,12 @@ public class Extractor extends AbstractExtractor
         inMarker = false;
         inPage = false;
         translatable = false;
-        inFrame = false;
+        inFrame = 0;
         inTextRect = false;
         inGroup = false;
         inVariable = false;
         inConditional = false;
+        inCalloutPgfTag = false;
     }
 
     private class Marker
@@ -1269,10 +1416,36 @@ public class Extractor extends AbstractExtractor
             return map.get(frameId);
         }
     }
+    
+    private String replaceUnicodeCharacter(String inline)
+    {
+    	if (inline == null) {
+    		return null;
+    	}
+    	
+    	inline = inline.replace("\u201c", "_U201C_");
+    	inline = inline.replace("\u201d", "_U201D_");
+    	
+    	return inline;
+    }
+    
+    private String revertUnicodeCharacter(String inline)
+    {
+    	if (inline == null) {
+    		return null;
+    	}
+
+    	inline = inline.replace("_U201C_", "\u201c");
+    	inline = inline.replace("_U201D_", "\u201d");
+    	
+    	return inline;
+    }
 
     public void loadRules() throws ExtractorException
     {
-
+//        String str_rules = getInput().getRules();
+//        m_rules.loadRules(str_rules);
+//        m_rules.loadRules(getDynamicRules());
     }
 
 }

@@ -162,7 +162,7 @@ public class DownloadAction extends Action {
             }
             catch (UnsupportedEncodingException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
 	        
 	        List<FileMapped> files = p_job.getFileMappedList();

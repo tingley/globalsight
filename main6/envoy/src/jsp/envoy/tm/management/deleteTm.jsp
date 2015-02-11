@@ -51,8 +51,8 @@ String error = (String)sessionMgr.getAttribute(WebAppConstants.TM_ERROR);
 if (error != null)
 {
   errorScript = "var error = new Error();" + "error.message = '" +
-    EditUtil.toJavascript(bundle.getString("lb_tm_remove_error")) + "';" +
-    "error.description = '" + EditUtil.toJavascript(error) +
+    bundle.getString("lb_tm_remove_error") + "';" +
+    "error.description = '" + error +
     "'; showError(error);";
 }
 sessionMgr.removeElement(WebAppConstants.TM_ERROR);
@@ -93,7 +93,7 @@ var objectName = "";
 var guideNode = "tm";
 var helpFile = "<%=bundle.getString("help_tm_remove")%>";
 
-eval("<%=errorScript%>");
+<%=errorScript%> 
 
 function doOk()
 {
@@ -126,7 +126,7 @@ var wheelCounter = 0;
 function getProgressText(counter, percentage)
 {
     var wheelIndex = wheelCounter++ % 4;
-    return percentage + "%   " + wheel[wheelIndex];
+    return percentage + "%   " + (percentage != 100 ? wheel[wheelIndex] : "");
 }
 
 function doOnLoad()
@@ -138,7 +138,7 @@ function doOnLoad()
 
    // initial progress bar values
    setProgressData(<%=counter%>, <%=percentage%>, "<%=errorState%>",
-       "<%=EditUtil.toJavascript(replacingMessage)%>", null);
+       "<%=EditUtil.decodeXmlEntities(replacingMessage)%>", null);
 
    if ("<%=hasFinished%>" == "true")
    {

@@ -32,7 +32,7 @@
 <jsp:useBean id="self" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobDetails" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
 <jsp:useBean id="jobComments" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
-
+<jsp:useBean id="jobReports" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager) session
@@ -55,9 +55,12 @@
     String deleteFilesUrl = selfIdUrl + "&action=" + AttributeConstant.DELETE_FILES;
     String downloadFilesUrl = selfIdUrl + "&action=" + AttributeConstant.DOWNLOAD_FILES;
     
-    String jobCommentsURL = jobComments.getPageURL()
-    + "&" + JobManagementHandler.JOB_ID
-    + "=" + sessionMgr.getAttribute(JobManagementHandler. JOB_ID);
+    String jobCommentsURL = jobComments.getPageURL() 
+    		+ "&" + JobManagementHandler.JOB_ID 
+    		+ "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
+	String jobReportsURL = jobReports.getPageURL() 
+			+ "&" + JobManagementHandler.JOB_ID 
+			+ "=" + sessionMgr.getAttribute(JobManagementHandler.JOB_ID);
     
     String title = bundle.getString("lb_job_attributes");
 
@@ -514,7 +517,16 @@
         <TD CLASS="tableHeadingListOff"><IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=jobCommentsURL%>"><%=labelComments%></A><IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0"></TD>                
         <TD WIDTH="2"></TD>
         </amb:permission>
-        <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=selfIdUrl%>"><%=bundle.getString("lb_job_attributes") %></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>       
+        <TD CLASS="tableHeadingListOn"><IMG SRC="/globalsight/images/tab_left_blue.gif" BORDER="0"><A CLASS="sortHREFWhite" HREF="<%=selfIdUrl%>"><%=bundle.getString("lb_job_attributes") %></A><IMG SRC="/globalsight/images/tab_right_blue.gif" BORDER="0"></TD>  
+        
+        <amb:permission  name="<%=Permission.REPORTS_MAIN%>" >
+	    <TD WIDTH="2"></TD>
+	    <TD CLASS="tableHeadingListOff">
+		    <IMG SRC="/globalsight/images/tab_left_gray.gif" BORDER="0">
+		    <A CLASS="sortHREFWhite" HREF="<%=jobReportsURL%>"><%=bundle.getString("lb_reports") %></A>
+		    <IMG SRC="/globalsight/images/tab_right_gray.gif" BORDER="0">
+	    </TD>
+	    </amb:permission>     
     </TR>
 </TABLE>
 <!-- End Tabs table -->

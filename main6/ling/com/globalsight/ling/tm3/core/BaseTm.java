@@ -3,7 +3,6 @@ package com.globalsight.ling.tm3.core;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,10 +20,13 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import com.globalsight.ling.tm3.integration.GSTuvData;
+import com.globalsight.ling.tm3.integration.segmenttm.Tm3SegmentTmInfo;
+
 /**
  * Base TM implementation.
  */
-abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
+public abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
     private static Logger LOGGER = Logger.getLogger(BaseTm.class);
     
     private Long id;
@@ -173,7 +175,7 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
         }
     }
 
-    void addAttribute(TM3Attribute attr) throws HibernateException {
+    public void addAttribute(TM3Attribute attr) throws HibernateException {
         getSession().persist(attr);
         attributes.add(attr);
     }
@@ -418,32 +420,32 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
                     }
                 }
                 else {
-                    List<TM3Tuv<T>> addedTuv = new ArrayList<TM3Tuv<T>>();
-                    List<TM3Tuv<T>> deletedTuv = new ArrayList<TM3Tuv<T>>();
                     switch (mode) {
                     case DISCARD:
                         break;
                     case OVERWRITE:
-                        // collect up the new locales, remove everything
-                        // currently in those locales, then add the new tuvs
-                        Set<TM3Locale> targetLocales = new HashSet<TM3Locale>();
-                        for (TM3Saver<T>.Tuv tuv : tuData.targets) {
-                            targetLocales.add(tuv.locale);
-                        }
-                        for (TM3Locale locale : targetLocales) {
-                            deletedTuv.addAll(tu.getLocaleTuvs(locale));
-                            tu.removeTargetTuvByLocale(locale);
-                        }
+                        //Delete old TU, then create a new TU
+                        tuStorage.deleteTu(tu);
+                        Tm3SegmentTmInfo.tusRemove
+                                .add((TM3Tu<GSTuvData>) tu);
+                        TM3Tu<T> newTu = tuStorage.createTu(tuData.srcTuv.locale, 
+                                tuData.srcTuv.content, tuData.attrs,
+                                tuData.srcTuv.event); // Includes source tuv
                         for (TM3Saver<T>.Tuv tuvData : tuData.targets) {
-                            // they could have given use the same data twice
-                            TM3Tuv<T> newTuv = tu.addTargetTuv(tuvData.locale,
-                                    tuvData.content, tuvData.event);
-                            if (newTuv != null) {
-                                addedTuv.add(newTuv);
+                            newTu.addTargetTuv(tuvData.locale, tuvData.content, tuvData.event);
+                        }
+                        tuStorage.saveTu(conn, newTu);
+                        getStorageInfo().getFuzzyIndex().index(newTu.getSourceTuv());
+                        if (indexTarget) {
+                            for (TM3Tuv<T> tuv : newTu.getTargetTuvs()) {
+                                getStorageInfo().getFuzzyIndex().index(tuv);
                             }
                         }
+                        saved.add(newTu);
                         break;
                     case MERGE:
+                            List<TM3Tuv<T>> addedTuv = new ArrayList<TM3Tuv<T>>();
+                        List<TM3Tuv<T>> deletedTuv = new ArrayList<TM3Tuv<T>>();
                         for (TM3Saver<T>.Tuv tuvData : tuData.targets) {
                             TM3Tuv<T> newTuv = tu.addTargetTuv(tuvData.locale,
                                     tuvData.content, tuvData.event);
@@ -451,14 +453,33 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
                                 addedTuv.add(newTuv);
                             }
                         }
-                        break;
-                    }
-                    tuStorage.addTuvs(tu, addedTuv);
-                    tuStorage.deleteTuvs(deletedTuv);
-                    if (indexTarget) {
+						tuStorage.addTuvs(tu, addedTuv);
+                        tuStorage.deleteTuvs(deletedTuv);
+                        if (indexTarget) {
                         for (TM3Tuv<T> tuv : addedTuv) {
                             getStorageInfo().getFuzzyIndex().index(tuv);
+                         }
                         }
+                        //When merge, update the attribute or added new attribute
+                        if (!customAttributes.isEmpty())
+                        {
+                            long tuId = tu.getId();
+                            for (Map.Entry<TM3Attribute, String> e : customAttributes.entrySet())
+                            {
+                                TM3Attribute tm3a = e.getKey();
+                                boolean exists = tuStorage.doesCustomAttribtueExist(tuId, tm3a.getId());
+                                
+                                if (exists)
+                                {
+                                    tuStorage.updateCustomAttribute(tuId, tm3a, e.getValue());
+                                }
+                                else
+                                {
+                                    tuStorage.saveCustomAttribute(tuId, tm3a, e.getValue());
+                                }
+                            }
+                        }
+                        break;
                     }
                 }
                 saved.add(tu);
@@ -520,69 +541,85 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
         }
         return null;
     }
+    
+    public boolean doesAttributeExist(String name) {
+        for (TM3Attribute attr : getAttributes()) {
+            if (attr.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
-    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event) throws TM3Exception {
+    public TM3Tu<T> modifyTu(TM3Tu<T> tu, TM3Event event) throws TM3Exception
+    {
         // The strategy for now is to blindly replace the existing data.
-        // This could be simpler if we just deleted the old rows, but then we 
+        // This could be simpler if we just deleted the old rows, but then we
         // would lose the segment history.
-        if (tu.getId() == null) {
+        if (tu.getId() == null)
+        {
             throw new IllegalArgumentException("Can't update a transient TU");
         }
-        if (event == null) {
+        if (event == null)
+        {
             throw new IllegalArgumentException("Null event value");
         }
-        
+
         TuStorage<T> storage = getStorageInfo().getTuStorage();
-        try {
+        try
+        {
             // Lock the TM to avoid racing
             lockForWrite();
-            
+
+            List<TM3Tuv<T>> deleted = new ArrayList<TM3Tuv<T>>();
+            List<TM3Tuv<T>> added = new ArrayList<TM3Tuv<T>>();
+            List<TM3Tuv<T>> modified = new ArrayList<TM3Tuv<T>>();
+
             TM3Tu<T> copy = storage.getTu(tu.getId(), true);
-            
-            // Check for source updates.  If there is one, we delete the
-            // existing TU and recreate it, in order to both re-persist
-            // all the proper data and also handle merging with another TU.
-            // XXX this causes a glitch in the search and replace UI: if you
-            // change the source, it shows a blank result because it can't find
-            // the old tu id
-            TM3Tuv<T> srcTuv = tu.getSourceTuv();
-            if (!copy.getSourceTuv().getContent().equals(srcTuv.getContent())) {
-                // XXX If I ever lazily load parts of TU data, this will break
-                // in possibly nasty ways.  I would need to do something like
-                // tu.ensureLoaded() first.
-                storage.deleteTu(tu);
-                TM3Saver<T> saver = createSaver();
-                TM3Saver<T>.Tu newTu = 
-                    saver.tu(srcTuv.getContent(), srcTuv.getLocale(), event)
-                         .attrs(tu.getAttributes());
-                for (TM3Tuv<T> tuv : tu.getTargetTuvs()) {
-                    newTu.target(tuv.getContent(), tuv.getLocale(), event);
-                }
-                List<TM3Tu<T>> saved = save(saver, TM3SaveMode.MERGE);
-                return saved.get(0);
+            // For GBS-2442,
+            // 1. If edit source, source TUV need to update
+            // 2. If the SID or target changed, the modify date and modify user
+            // for target TUV should be updated.
+
+            // Now check the attributes
+            boolean sidNeedUpdate = false;
+            if (!copy.getAttributes().equals(tu.getAttributes()))
+            {
+                storage.updateAttributes(tu,
+                        getInlineAttributes(tu.getAttributes()),
+                        getCustomAttributes(tu.getAttributes()));
+                sidNeedUpdate = true;
             }
-            
+            TM3Tuv<T> srcTuv = tu.getSourceTuv();
+            if (!copy.getSourceTuv().getContent().equals(srcTuv.getContent()))
+            {
+                modified.add(srcTuv);
+            }
             // Now check target TUVs
             Map<Long, TM3Tuv<T>> oldMap = buildIdMap(copy.getTargetTuvs());
             Map<Long, TM3Tuv<T>> newMap = buildIdMap(tu.getTargetTuvs());
             // First, check for deleted or added TUVs
-            List<TM3Tuv<T>> deleted = new ArrayList<TM3Tuv<T>>();
-            for (TM3Tuv<T> tuv : oldMap.values()) {
-                if (!newMap.containsKey(tuv.getId())) {
+
+            for (TM3Tuv<T> tuv : oldMap.values())
+            {
+                if (!newMap.containsKey(tuv.getId()))
+                {
                     deleted.add(tuv);
                 }
             }
             // Now check for added... modified at the same time?
-            List<TM3Tuv<T>> added = new ArrayList<TM3Tuv<T>>();
-            List<TM3Tuv<T>> modified = new ArrayList<TM3Tuv<T>>();
-            for (TM3Tuv<T> tuv : newMap.values()) {
+            for (TM3Tuv<T> tuv : newMap.values())
+            {
                 TM3Tuv<T> oldTuv = oldMap.get(tuv.getId());
-                if (oldTuv == null) {
+                if (oldTuv == null)
+                {
                     added.add(tuv);
                 }
-                else if (!oldTuv.getSerializedForm()
-                                .equals(tuv.getSerializedForm())) {
+                else if (!oldTuv.getSerializedForm().equals(
+                        tuv.getSerializedForm())
+                        || sidNeedUpdate)
+                {
                     modified.add(tuv);
                 }
             }
@@ -591,31 +628,30 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
             storage.updateTuvs(tu, modified, event);
             // delete old fingerprints from updated tuv even without
             // indexTarget, because it might have been indexed in the past
-            for (TM3Tuv<T> tuv : modified) {
+            for (TM3Tuv<T> tuv : modified)
+            {
                 getStorageInfo().getFuzzyIndex().deleteFingerprints(tuv);
             }
-            if (indexTarget) {
-                for (TM3Tuv<T> tuv : added) {
+            if (indexTarget)
+            {
+                for (TM3Tuv<T> tuv : added)
+                {
                     getStorageInfo().getFuzzyIndex().index(tuv);
                 }
-                for (TM3Tuv<T> tuv : modified) {
+                for (TM3Tuv<T> tuv : modified)
+                {
                     getStorageInfo().getFuzzyIndex().index(tuv);
                 }
             }
-            
-            // Now check the attributes
-            if (!copy.getAttributes().equals(tu.getAttributes())) {
-                storage.updateAttributes(tu,
-                    getInlineAttributes(tu.getAttributes()),
-                    getCustomAttributes(tu.getAttributes()));
-            }
-            
+
             return tu;
         }
-        catch (HibernateException e) {
+        catch (HibernateException e)
+        {
             throw new TM3Exception(e);
         }
-        catch (SQLException e) {
+        catch (SQLException e)
+        {
             throw new TM3Exception(e);
         }
     }
@@ -671,9 +707,12 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
         TuStorage<T> storage = getStorageInfo().getTuStorage();
         try {
             TM3Tu<T> tu = storage.getTuByTuvId(tuvId);
-            for (TM3Tuv<T> tuv : tu.getAllTuv()) {
-                if (tuv.getId().equals(tuvId)) {
-                    return tuv;
+            if(tu!=null)
+            {
+                for (TM3Tuv<T> tuv : tu.getAllTuv()) {
+                    if (tuv.getId().equals(tuvId)) {
+                        return tuv;
+                    }
                 }
             }
             return null;

@@ -14,6 +14,7 @@ public class OfflineDownload
     public static final String POPULATE100TARGETSEGMENT = "populate100CheckBox";
     public static final String POPULATEFUZZYCHECKBOX = "populatefuzzyCheckBox";
 
-    public static final String STARTDOWNLOAD = "css=input[name=Start Download]";
-    public static final String DOWNLOADAGAIN = "idCancelOk";
+    public static final String START_DOWNLOAD_BUTTON = "//input[@name='Start Download']";
+    public static final String DONE_BUTTON = "//input[@value='Done']";
+    public static final String DOWNLOAD_AGAIN_BUTTON = "idCancelOk";
 }

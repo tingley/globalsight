@@ -11,7 +11,7 @@
                   com.globalsight.util.resourcebundle.ResourceBundleConstants,
                   com.globalsight.util.resourcebundle.SystemResourceBundle,
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
-                  com.globalsight.everest.servlet.util.ServerProxy,
+                  com.globalsight.everest.company.CompanyWrapper,
                   com.globalsight.everest.servlet.EnvoyServletException,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
@@ -159,7 +159,7 @@ function submitForm(selectedButton)
             </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=HolidayComparator.ASC_COMPANY%>">
-              <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(holiday.getCompanyId())).getCompanyName()%>
+              <%=CompanyWrapper.getCompanyNameById(holiday.getCompanyId())%>
             </amb:column>
             <% } %>
           </amb:table>

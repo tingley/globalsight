@@ -105,7 +105,7 @@ function loadPage()
    if (JobForm.transCheckbox || JobForm.dtpCheckbox) 
    {
        document.all.ButtonLayer.style.visibility = "visible";
-       document.all.CheckAllLayer.style.visibility = "visible";
+//       document.all.CheckAllLayer.style.visibility = "visible";
    }
    // Load the Guide
    loadGuides();
@@ -215,7 +215,7 @@ function submitForm(buttonClicked)
 	            }
 	            valuesArray = getRadioValues(JobForm.transCheckbox[i].value);
 	            jobId += valuesArray[0];
-	            if( valuesArray[1] == "IMPORT_FAILED" )
+	            if(valuesArray[1] == "IMPORT_FAILED" || valuesArray[1] == "INITIALIZE_FAILED")
 	            {
 	                erroredJobSelected = true;
 	            }
@@ -230,7 +230,7 @@ function submitForm(buttonClicked)
 	      {
 	         valuesArray = getRadioValues(JobForm.transCheckbox.value);
 	         jobId += valuesArray[0];
-	         if( valuesArray[1] == "IMPORT_FAILED" )
+	         if(valuesArray[1] == "IMPORT_FAILED" || valuesArray[1] == "INITIALIZE_FAILED")
 	         {
 	             erroredJobSelected = true;
 	         }
@@ -251,7 +251,7 @@ function submitForm(buttonClicked)
 	            }
 	            valuesArray = getRadioValues(JobForm.dtpCheckbox[i].value);
 	            jobId += valuesArray[0];
-	            if( valuesArray[1] == "IMPORT_FAILED" )
+	            if(valuesArray[1] == "IMPORT_FAILED" || valuesArray[1] == "INITIALIZE_FAILED")
 	            {
 	                erroredJobSelected = true;
 	            }
@@ -266,14 +266,13 @@ function submitForm(buttonClicked)
 	      {
 	         valuesArray = getRadioValues(JobForm.dtpCheckbox.value);
 	         jobId += valuesArray[0];
-	         if( valuesArray[1] == "IMPORT_FAILED" )
+	         if(valuesArray[1] == "IMPORT_FAILED" || valuesArray[1] == "INITIALIZE_FAILED")
 	         {
 	             erroredJobSelected = true;
 	         }
 	      }
 	   }
    }
-   
    if (buttonClicked == "Error")
    {
       if (!erroredJobSelected)
@@ -318,6 +317,19 @@ function submitForm(buttonClicked)
    JobForm.submit();
 }
 
+//for GBS-2599
+function handleSelectAll() {
+	if (JobForm && JobForm.selectAll) {
+		if (JobForm.selectAll.checked) {
+			checkAll('JobForm');
+			setButtonState();
+	    }
+	    else {
+			clearAll('JobForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 </HEAD>
 
@@ -379,7 +391,6 @@ is defined in header.jspIncl which must be included in the body.
 
 <!-- Data Table  -->             
 <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0"  CLASS="list">
-<TBODY>
 <COL> <!-- Radio button -->
 <COL> <!-- Priority -->
 <COL> <!-- Job ID -->
@@ -390,7 +401,7 @@ is defined in header.jspIncl which must be included in the body.
 <COL> <!-- Date Created -->
 
 <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM">
-    <TD CLASS="headerCell"></TD>
+    <TD CLASS="headerCell"><input type="checkbox" onclick="handleSelectAll()" name="selectAll"/></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=pendingURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PRIORITY%>"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 BORDER=0 ALT="<%=bundle.getString("lb_priority")%>"></A><%=jobPrioritySortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=pendingURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_ID%>"><%=bundle.getString("lb_job_id")%></A><%=jobIdSortArrow%></TD>
     <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=pendingURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_NAME%>"><%=bundle.getString("lb_job_name")%></A><%=jobNameSortArrow%></TD>
@@ -406,7 +417,8 @@ is defined in header.jspIncl which must be included in the body.
          
         </TD>
      </TR>
-     <TR>
+     <!--for GBS-2599
+	 TR>
         <TD CLASS="standardText">
             <DIV ID="CheckAllLayer" STYLE="visibility: hidden">
                 <A CLASS="standardHREF" 
@@ -415,7 +427,7 @@ is defined in header.jspIncl which must be included in the body.
                    HREF="javascript:clearAll('JobForm');setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
             </DIV>
          </TD>
-     </TR>
+     </TR-->
 </TABLE> 
 
 </TD></TR>

@@ -72,24 +72,30 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     protected int m_priority = -1;
     protected GlobalSightLocale m_sourceLocale = null;
     protected boolean m_autoDispatch = true;
+    
     // used to save translation workflow template information
-    protected Hashtable m_workflowTemplateInfoMap = new Hashtable(0);
+    protected Hashtable<GlobalSightLocale, WorkflowTemplateInfo> 
+        workflowTemplateInfoMap = new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(0);
     // used to save dtp workflow template information
-    protected Hashtable m_dtpWorkflowTemplateInfoMap = new Hashtable(0);
+    protected Hashtable<GlobalSightLocale, WorkflowTemplateInfo> 
+        dtpWorkflowTemplateInfoMap = new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(0);
+
     // used for mapping between L10N Profile and WorkflowTemplateInfo
-    protected Vector m_workflowTemplateInfoList = new Vector();
+    private Set<WorkflowTemplateInfo> workflowTemplatesSet = new HashSet<WorkflowTemplateInfo>();
     protected DispatchCriteria m_dispatchCriteria = null;
-    protected int m_tmChoice = -1;
+    protected int tmChoice = -1;
     protected boolean m_runScript = false;
     protected String m_jobCreationScriptName = null;
     protected boolean m_isExactMatchEditing = false;
-    protected Vector m_tmProfileList = new Vector();
+    private Set<TranslationMemoryProfile> tmProfilesSet = 
+            new HashSet<TranslationMemoryProfile>();
     
     private AttributeSet attributeSet = null;
 
     public boolean useActive = true;
     
-    private Set m_fileProfiles;
+    private Set m_fileProfiles = new HashSet();
+    private String tuTypes = new String();
 
     /**
      * Default constructor.
@@ -108,9 +114,12 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public BasicL10nProfile(String p_name)
     {
         m_name = p_name;
-        m_workflowTemplateInfoMap = new Hashtable(5);
-        m_dtpWorkflowTemplateInfoMap = new Hashtable(5);
-        m_workflowTemplateInfoList = new Vector();
+        workflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(5);
+        dtpWorkflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(5);
+        workflowTemplatesSet = new HashSet<WorkflowTemplateInfo>();
+        tmProfilesSet = new HashSet<TranslationMemoryProfile>();
         m_dispatchCriteria = new DispatchCriteria();
     }
 
@@ -127,11 +136,14 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
         m_description = null;
         m_sourceLocale = null;
         m_autoDispatch = true;
-        m_workflowTemplateInfoMap = new Hashtable();
-        m_dtpWorkflowTemplateInfoMap = new Hashtable();
-        m_workflowTemplateInfoList = new Vector();
+        workflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>();
+        dtpWorkflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>();
+        workflowTemplatesSet = new HashSet<WorkflowTemplateInfo>();
+        tmProfilesSet = new HashSet<TranslationMemoryProfile>();
         m_dispatchCriteria = new DispatchCriteria();
-        m_tmChoice = -1;
+        tmChoice = -1;
     }
 
     /**
@@ -169,113 +181,77 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public void addWorkflowTemplateInfo(
             WorkflowTemplateInfo p_workflowTemplateInfo)
     {
-        if (!m_workflowTemplateInfoList.contains(p_workflowTemplateInfo))
+        if (!workflowTemplatesSet.contains(p_workflowTemplateInfo))
         {
-            m_workflowTemplateInfoList.addElement(p_workflowTemplateInfo);
+            workflowTemplatesSet.add(p_workflowTemplateInfo);
         }
+        
         updateWorkflowTemplateInfoMap();
-        // Set the back pointer from WorkflowTemplateInfo to
-        // L10nProfile.
+        // Set the back pointer from WorkflowTemplateInfo to L10nProfile.
         p_workflowTemplateInfo.setL10nProfile(this);
     }
 
     /**
-     * Clear m_workflowTemplateInfoList
-     * 
-     * @param targetLocale
-     * 
+     * Remove workflow template info from workflowTemplatesSet by specified
+     * target locale.
      */
     public void clearWorkflowTemplateInfo(GlobalSightLocale targetLocale)
     {
-        for (int i = 0; i < m_workflowTemplateInfoList.size(); i++)
-        {
-            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) m_workflowTemplateInfoList
-                    .get(i);
-            if (targetLocale.getId() == wfti.getTargetLocale().getId())
-            {
-                m_workflowTemplateInfoList.removeElementAt(i);
-                i--;
+        for (Iterator it = workflowTemplatesSet.iterator(); it.hasNext();) {
+            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) it.next();
+            if (targetLocale.getId() == wfti.getTargetLocale().getId()) {
+                it.remove();
             }
         }
+        updateWorkflowTemplateInfoMap();
     }
 
-    /**
-     * Get the WorkflowTemplateInfoList for this localization profile
-     * 
-     * @return Vector The WorkflowTemplateInfoList for this localization profile
-     */
-    public Vector getWorkflowTemplateInfoList()
+    // setter
+    public void setWorkflowTemplates(
+            Set<WorkflowTemplateInfo> p_workflowTemplatesSet)
     {
+        workflowTemplatesSet = p_workflowTemplatesSet;
         updateWorkflowTemplateInfoMap();
-        return m_workflowTemplateInfoList;
     }
     
-    public Set getWorkflowTemplates()
+    // getter
+    public Set<WorkflowTemplateInfo> getWorkflowTemplates()
     {
-        Collection infos = getWorkflowTemplateInfoList();
-        Set infoSet = null;
-        if (infos != null)
-        {
-            infoSet = new HashSet(infos);
-        }
-        return infoSet;
+        return this.workflowTemplatesSet;
     }
 
     private void updateWorkflowTemplateInfoMap()
     {
-        m_workflowTemplateInfoMap = new Hashtable();
-        m_dtpWorkflowTemplateInfoMap = new Hashtable();
-        for (int i = 0; i < m_workflowTemplateInfoList.size(); i++)
+        workflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>();
+        dtpWorkflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>();
+        
+        for (Iterator ite = workflowTemplatesSet.iterator(); ite.hasNext();)
         {
-            WorkflowTemplateInfo wt = (WorkflowTemplateInfo) m_workflowTemplateInfoList
-                    .get(i);
+            WorkflowTemplateInfo wt = (WorkflowTemplateInfo) ite.next();
+            
             if (WorkflowTemplateInfo.TYPE_TRANSLATION.equals(wt
                     .getWorkflowType()))
             {
-                m_workflowTemplateInfoMap.put(wt.getTargetLocale(), wt);
+                workflowTemplateInfoMap.put(wt.getTargetLocale(), wt);
             }
             else
             {
-                m_dtpWorkflowTemplateInfoMap.put(wt.getTargetLocale(), wt);
+                dtpWorkflowTemplateInfoMap.put(wt.getTargetLocale(), wt);
             }
         }
-
-    }
-
-    /**
-     * Set the WorkflowTemplateInfoList for this localization profile
-     * 
-     * @param p_templateInfoList
-     *            specify the WorkflowTemplateInfoList of this localization
-     *            profile
-     * 
-     */
-    public void setWorkflowTemplateInfoList(Vector p_templateInfoList)
-    {
-        m_workflowTemplateInfoList = p_templateInfoList;
-        updateWorkflowTemplateInfoMap();
-    }
-    
-    public void setWorkflowTemplates(Set p_templateInfoList)
-    {
-        m_workflowTemplateInfoList =new Vector();
-        if (p_templateInfoList != null)
-        {
-            m_workflowTemplateInfoList = new Vector(p_templateInfoList);
-        }
-        
-        updateWorkflowTemplateInfoMap();
     }
 
     public void addTMProfile(TranslationMemoryProfile p_tmProfile)
     {
-        if (m_tmProfileList.size() > 0)
-        {
-            m_tmProfileList.clear();
+        if (tmProfilesSet.size() > 0) {
+            tmProfilesSet.clear();
         }
-        if (p_tmProfile != null)
-        {
-            m_tmProfileList.add(p_tmProfile);
+        
+        if (p_tmProfile != null) {
+            tmProfilesSet.add(p_tmProfile);
+            tuTypes = p_tmProfile.getTuTypes();
             p_tmProfile.setL10nProfile(this);
         }
     }
@@ -286,14 +262,9 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      * @param p_tmChoice
      *            0, 1 or 2 are the permitted values
      */
-    public void setTMChoice(int p_tmChoice)
-    {
-        m_tmChoice = p_tmChoice;
-    }
-
     public void setTmChoice(int p_tmChoice)
     {
-        m_tmChoice = p_tmChoice;
+        tmChoice = p_tmChoice;
     }
 
     /**
@@ -301,14 +272,9 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      * 
      * @return int The TM Choice for this localization profile
      */
-    public int getTMChoice()
-    {
-        return m_tmChoice;
-    }
-
     public int getTmChoice()
     {
-        return m_tmChoice;
+        return tmChoice;
     }
 
     /**
@@ -316,7 +282,8 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      */
     public String getCodeSet(GlobalSightLocale p_targetLocale)
     {
-        WorkflowTemplateInfo wfTemplateInfo = (WorkflowTemplateInfo) getWorkflowTemplateInfo(p_targetLocale);
+        WorkflowTemplateInfo wfTemplateInfo = 
+                (WorkflowTemplateInfo) getWorkflowTemplateInfo(p_targetLocale);
         return wfTemplateInfo.getCodeSet();
     }
 
@@ -331,14 +298,13 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public WorkflowTemplateInfo removeWorkflowTemplateInfo(
             GlobalSightLocale p_targetLocale)
     {
-        return (WorkflowTemplateInfo) m_workflowTemplateInfoMap
+        return (WorkflowTemplateInfo) workflowTemplateInfoMap
                 .remove(p_targetLocale);
     }
     
     public void removeWfInfo(GlobalSightLocale p_targetLocale)
     {
-    	Set s = m_workflowTemplateInfoMap.entrySet();   
-    	Iterator it = s.iterator();
+    	Iterator it = workflowTemplateInfoMap.entrySet().iterator();
     	while(it.hasNext())
     	{
     		Map.Entry entry = (Entry) it.next();
@@ -352,10 +318,9 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public WorkflowTemplateInfo removeDtpWorkflowTemplateInfo(
             GlobalSightLocale p_targetLocale)
     {
-        return (WorkflowTemplateInfo) m_dtpWorkflowTemplateInfoMap
+        return (WorkflowTemplateInfo) dtpWorkflowTemplateInfoMap
                 .remove(p_targetLocale);
     }
-    
     
     /**
      * Put workflow information into this localization profile, removing any
@@ -393,7 +358,6 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      *         otherwise.
      */
     public boolean dispatchIsAutomatic()
-
     {
         return m_autoDispatch;
     }
@@ -493,94 +457,76 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      */
     public GlobalSightLocale[] getTargetLocales()
     {
-        HashSet targetLocalSet = new HashSet();
-        for (int i = 0; i < m_workflowTemplateInfoList.size(); i++)
-        {
-            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) m_workflowTemplateInfoList
-                    .get(i);
-            long workflowId = wfti.getId();
-    		long l10nProfileId = this.getId();
-    		boolean isActive = true;
-    		try 
-    		{
-				isActive = ServerProxy.getProjectHandler().getL10nProfileWfTemplateInfo(l10nProfileId, workflowId).getIsActive();
-			} 
-    		catch (Exception e) 
-    		{
-    			c_logger.error(e.getMessage());
-			}
-    		if(isActive)
-    		{
-    			targetLocalSet.add(wfti.getTargetLocale());
-    		}
-        }
-        GlobalSightLocale[] targetLocales = new GlobalSightLocale[targetLocalSet
-                .size()];
-        Iterator it = targetLocalSet.iterator();
+        HashSet<GlobalSightLocale> targetLocalSet = new HashSet<GlobalSightLocale>();
 
-        int i = 0;
-        while (it.hasNext())
-        {
-            targetLocales[i] = (GlobalSightLocale) it.next();
-            i++;
+        for (Iterator it = workflowTemplatesSet.iterator(); it.hasNext();) {
+            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) it.next();
+            boolean isActive = true;
+            try {
+                isActive = ServerProxy
+                        .getProjectHandler()
+                        .getL10nProfileWfTemplateInfo(this.getId(),
+                                wfti.getId()).getIsActive();
+            } catch (Exception e) {
+                c_logger.error(e.getMessage(), e);
+            }
+            if (isActive) {
+                targetLocalSet.add(wfti.getTargetLocale());
+            }
+        }
+        
+        GlobalSightLocale[] trgLocales = 
+                new GlobalSightLocale[targetLocalSet.size()];
+        int count = 0;
+        for (Iterator it2 = targetLocalSet.iterator(); it2.hasNext();) {
+            GlobalSightLocale gsl = (GlobalSightLocale) it2.next();
+            trgLocales[count] = gsl;
+            count++;
         }
 
-        return targetLocales;
+        return trgLocales;
     }
     
-	public List<GlobalSightLocale> getUnActiveLocales() {
-		List<GlobalSightLocale> unActiveLocales = new ArrayList<GlobalSightLocale>();
-		Iterator<GlobalSightLocale> it = m_workflowTemplateInfoMap.keySet().iterator();
-		while(it.hasNext())
-    	{
-    		GlobalSightLocale targetLocale = it.next();
-    		WorkflowTemplateInfo wkInfo = (WorkflowTemplateInfo)m_workflowTemplateInfoMap.get(targetLocale);
-    		long workflowId = wkInfo.getId();
-    		long l10nProfileId = this.getId();
-    		boolean isActive = true;
-    		try 
-    		{
-				isActive = ServerProxy.getProjectHandler().getL10nProfileWfTemplateInfo(l10nProfileId, workflowId).getIsActive();
-			} 
-    		catch (Exception e) 
-    		{
-    			c_logger.error(e.getMessage());
-			}
-    		if( ! isActive)
-    		{
-    			unActiveLocales.add(targetLocale);
-    		}
-    	}
+	public List<GlobalSightLocale> getUnActiveLocales() 
+	{
+        List<GlobalSightLocale> unActiveLocales = new ArrayList<GlobalSightLocale>();
+        
+        for (Iterator it = workflowTemplateInfoMap.entrySet().iterator(); 
+                it.hasNext();)
+        {
+            Map.Entry entry = (Map.Entry) it.next();
+            GlobalSightLocale targetLocale = (GlobalSightLocale) entry.getKey();
+            WorkflowTemplateInfo wkInfo = (WorkflowTemplateInfo) entry.getValue();
+            boolean isActive = true;
+            try {
+                isActive = ServerProxy
+                        .getProjectHandler()
+                        .getL10nProfileWfTemplateInfo(this.getId(), wkInfo.getId())
+                        .getIsActive();
+            } catch (Exception e) {
+                c_logger.error(e.getMessage(), e);
+            }
+            
+            if(!isActive) {
+                unActiveLocales.add(targetLocale);
+            }
+        }
+        
 		return unActiveLocales;
 	}
-
     
     public List<Long> getUnActivelocaleIds()
     {
     	List<Long> unActiveLocaleIds = new ArrayList<Long>();
-    	Iterator<GlobalSightLocale> it = m_workflowTemplateInfoMap.keySet().iterator();
-    	while(it.hasNext())
-    	{
-    		GlobalSightLocale targetLocale = it.next();
-    		WorkflowTemplateInfo wkInfo = (WorkflowTemplateInfo)m_workflowTemplateInfoMap.get(targetLocale);
-    		long workflowId = wkInfo.getId();
-    		long l10nProfileId = this.getId();
-    		boolean isActive = true;
-    		try 
-    		{
-				isActive = ServerProxy.getProjectHandler().getL10nProfileWfTemplateInfo(l10nProfileId, workflowId).getIsActive();
-			} 
-    		catch (Exception e) 
-    		{
-    			c_logger.error(e.getMessage());
-			}
-    		if( ! isActive)
-    		{
-    			unActiveLocaleIds.add(targetLocale.getId());
-    		}
+    	
+    	for (Iterator it = getUnActiveLocales().iterator(); it.hasNext();) {
+    	    GlobalSightLocale gsl = (GlobalSightLocale) it.next();
+    	    unActiveLocaleIds.add(gsl.getIdAsLong());
     	}
+
     	return unActiveLocaleIds;
     }
+    
     /**
      * Get the list of leveraging locales in this localization profile.
      * Leveraging locales are target locales and groups of extra locales users
@@ -591,22 +537,18 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public LeveragingLocales getLeveragingLocales()
     {
         LeveragingLocales leveragingLocales = new LeveragingLocales();
-        Iterator it = m_workflowTemplateInfoMap.keySet().iterator();
-        while (it.hasNext())
+        
+        for (Iterator it = workflowTemplateInfoMap.entrySet().iterator(); 
+                it.hasNext();)
         {
-            GlobalSightLocale targetLocale = (GlobalSightLocale) it.next();
-
-            WorkflowTemplateInfo wkInfo = (WorkflowTemplateInfo) m_workflowTemplateInfoMap
-                    .get(targetLocale);
-            Collection c = wkInfo.getLeveragingLocales();
-            if (c == null)
-            {
+            Map.Entry entry = (Map.Entry) it.next();
+            GlobalSightLocale targetLocale = (GlobalSightLocale) entry.getKey();
+            WorkflowTemplateInfo wkInfo = (WorkflowTemplateInfo) entry.getValue();
+            Set<GlobalSightLocale> levLocales = wkInfo.getLeveragingLocales();
+            if (levLocales == null || levLocales.size()==0) {
                 leveragingLocales.setLeveragingLocale(targetLocale, null);
-            }
-            else
-            {
-                leveragingLocales.setLeveragingLocale(targetLocale,
-                        new HashSet(c));
+            } else {
+                leveragingLocales.setLeveragingLocale(targetLocale, levLocales);
             }
         }
 
@@ -625,22 +567,24 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
             GlobalSightLocale p_targetLocale)
     {
         WorkflowTemplateInfo transWfti = null;
-        for (int i = 0; i < m_workflowTemplateInfoList.size(); i++)
+        
+        for (Iterator it = workflowTemplatesSet.iterator(); it.hasNext();)
         {
-            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) m_workflowTemplateInfoList
-                    .get(i);
-            if (WorkflowTemplateInfo.TYPE_TRANSLATION.equals(wfti
-                    .getWorkflowType())
-                    && wfti.getTargetLocale().equals(p_targetLocale))
+            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) it.next();
+            String wfType = wfti.getWorkflowType();
+            if (WorkflowTemplateInfo.TYPE_TRANSLATION.equals(wfType)
+                    && wfti.getTargetLocale().equals(p_targetLocale)) 
             {
                 transWfti = wfti;
+                break;
             }
         }
-        if (transWfti == null)
-        {
-            transWfti = (WorkflowTemplateInfo) m_workflowTemplateInfoList
-                    .get(0);
+        // Necessary??
+        if (transWfti == null) {
+            transWfti = (WorkflowTemplateInfo)
+                    workflowTemplatesSet.iterator().next();
         }
+
         return transWfti;
     }
 
@@ -655,14 +599,16 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public WorkflowTemplateInfo getDtpWorkflowTemplateInfo(
             GlobalSightLocale p_targetLocale)
     {
-
-        for (int i = 0; i < m_workflowTemplateInfoList.size(); i++)
+        for (Iterator it = workflowTemplatesSet.iterator(); it.hasNext();)
         {
-            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) m_workflowTemplateInfoList
-                    .get(i);
+            WorkflowTemplateInfo wfti = (WorkflowTemplateInfo) it.next();
             if (WorkflowTemplateInfo.TYPE_DTP.equals(wfti.getWorkflowType())
-                    && wfti.getTargetLocale().equals(p_targetLocale)) { return wfti; }
+                    && wfti.getTargetLocale().equals(p_targetLocale)) 
+            { 
+                return wfti; 
+            }
         }
+        
         return null;
     }
 
@@ -776,7 +722,7 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      */
     public String toDebugString()
     {
-        m_workflowTemplateInfoMap.size();
+        workflowTemplateInfoMap.size();
 
         return super.toString()
                 + " m_projectId="
@@ -791,16 +737,16 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
                 + " m_autoDispatch="
                 + new Boolean(m_autoDispatch).toString()
                 + "\nm_workflowTemplateInfoMap="
-                + (m_workflowTemplateInfoMap == null ? "null"
-                        : m_workflowTemplateInfoMap.toString())
+                + (workflowTemplateInfoMap == null ? "null"
+                        : workflowTemplateInfoMap.toString())
                 + "\nm_dtpWorkflowTemplateInfoMap="
-                + (m_dtpWorkflowTemplateInfoMap == null ? "null"
-                        : m_dtpWorkflowTemplateInfoMap.toString())
+                + (dtpWorkflowTemplateInfoMap == null ? "null"
+                        : dtpWorkflowTemplateInfoMap.toString())
                 + "\nm_dispatchCriteria="
                 + (m_dispatchCriteria == null ? "null" : m_dispatchCriteria
                         .toString())
                 + " m_tmChoice="
-                + Integer.toString(m_tmChoice)
+                + Integer.toString(tmChoice)
                 + " m_runScript="
                 + new Boolean(m_runScript).toString()
                 + " m_jobCreationScriptName="
@@ -821,7 +767,7 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     {
         // touch workflow infos - since they are set up to only
         // populate when needed
-        m_workflowTemplateInfoList.size();
+        workflowTemplatesSet.size();
 
         // call the default writeObject
         out.defaultWriteObject();
@@ -1010,35 +956,23 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      */
     public Collection getWorkflowTemplateInfos()
     {
-        return m_workflowTemplateInfoMap.values();
+        return workflowTemplateInfoMap.values();
     }
 
     /**
      * @returns Collection of dtp WorkflowTemplateInfo objects.
      */
-    public Collection getDtpWorkflowTemplateInfos()
+    public Collection<WorkflowTemplateInfo> getDtpWorkflowTemplateInfos()
     {
-        return m_dtpWorkflowTemplateInfoMap.values();
+        return dtpWorkflowTemplateInfoMap.values();
     }
 
     /**
      * @return Translation Memory Profile
      */
-    public Collection getTranslationMemoryProfiles()
+    public Set<TranslationMemoryProfile> getTmProfiles()
     {
-        return m_tmProfileList;
-    }
-    
-    public Set getTmProfiles()
-    {
-        Set files = null;
-        {
-            if (m_tmProfileList != null)
-            {
-                files = new HashSet(m_tmProfileList);
-            }
-        }
-        return files;
+        return tmProfilesSet;
     }
 
     /**
@@ -1048,13 +982,12 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
      */
     public TranslationMemoryProfile getTranslationMemoryProfile()
     {
-        TranslationMemoryProfile profile = null;
-        if (m_tmProfileList.size() > 0)
-        {
-            profile = (TranslationMemoryProfile) m_tmProfileList.get(0);
+        Iterator ite = tmProfilesSet.iterator();
+        if(ite.hasNext()) {
+            return (TranslationMemoryProfile) ite.next();
         }
 
-        return profile;
+        return null;
     }
 
     /**
@@ -1066,14 +999,13 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public void setWorkflowTemplateInfos(Vector p_workflowTemplateInfos)
     {
         // throw away any old WorkflowTemplateInfos
-        m_workflowTemplateInfoMap = new Hashtable(5);
+        workflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(5);
 
-        Iterator it = p_workflowTemplateInfos.iterator();
-        while (it.hasNext())
+        for (Iterator it = p_workflowTemplateInfos.iterator(); it.hasNext();)
         {
             addWorkflowTemplateInfo((WorkflowTemplateInfo) it.next());
         }
-
     }
 
     /**
@@ -1085,39 +1017,24 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public void setDtpWorkflowTemplateInfos(Vector p_dtpWorkflowTemplateInfos)
     {
         // throw away any old DTP WorkflowTemplateInfos
-        m_dtpWorkflowTemplateInfoMap = new Hashtable(5);
+        dtpWorkflowTemplateInfoMap = 
+                new Hashtable<GlobalSightLocale, WorkflowTemplateInfo>(5);
 
         Iterator it = p_dtpWorkflowTemplateInfos.iterator();
         while (it.hasNext())
         {
             addWorkflowTemplateInfo((WorkflowTemplateInfo) it.next());
         }
-
-    }
-
-    public void setTMProfiles(Vector p_tmProfiles)
-    {
-        Iterator it = p_tmProfiles.iterator();
-        if (m_tmProfileList.size() > 0)
-        {
-            m_tmProfileList.clear();
-        }
-        while (it.hasNext())
-        {
-            addTMProfile((TranslationMemoryProfile) it.next());
-        }
     }
     
-    public void setTmProfiles(Collection p_tmProfiles)
+    public void setTmProfiles(Set<TranslationMemoryProfile> p_tmProfiles)
     {
-        Iterator it = p_tmProfiles.iterator();
-        if (m_tmProfileList.size() > 0)
+        tmProfilesSet = p_tmProfiles;
+        
+        TranslationMemoryProfile tmp = getTranslationMemoryProfile();
+        if (tmp != null)
         {
-            m_tmProfileList.clear();
-        }
-        while (it.hasNext())
-        {
-            addTMProfile((TranslationMemoryProfile) it.next());
+            tuTypes = tmp.getTuTypes();
         }
     }
 
@@ -1129,16 +1046,6 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     public void setAutoDispatch(boolean dispatch)
     {
         m_autoDispatch = dispatch;
-    }
-
-    public TranslationMemoryProfile getTmProfile()
-    {
-        return getTranslationMemoryProfile();
-    }
-
-    public void setTmProfile(TranslationMemoryProfile tmProfile)
-    {
-        addTMProfile(tmProfile);
     }
 
     public AttributeSet getAttributeSet()
@@ -1157,5 +1064,13 @@ public class BasicL10nProfile extends PersistentObject implements L10nProfile,
     
     public void setFileProfiles(Set fileprofiles) {
         this.m_fileProfiles = fileprofiles;
+    }
+    
+    public String getTuTypes() {
+        return tuTypes;
+    }
+    
+    public void setTuTypes(String tuTypes) {
+        this.tuTypes = tuTypes;
     }
 }

@@ -1,0 +1,2 @@
+#For GBS-2439: add "Translate ToolTips" option in office 2010 filter
+ALTER TABLE `office2010_filter` ADD COLUMN `IS_TOOLTIPS_TRANSLATE` CHAR(1) NOT NULL DEFAULT 'N' AFTER `IS_EXCEL_TAB_NAMES_TRANSLATE`;

@@ -11,7 +11,7 @@
             com.globalsight.cxe.entity.xmldtd.XmlDtdImpl,
             com.globalsight.everest.util.comparator.XmlDtdComparator,
             com.globalsight.everest.permission.PermissionSet,
-            com.globalsight.everest.servlet.util.ServerProxy,java.util.*"
+            com.globalsight.everest.company.CompanyWrapper,java.util.*"
     session="true"
 %>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
@@ -180,6 +180,20 @@ function setButtonState()
         }
     }
 }
+
+//for GBS-2599
+function handleSelectAll() {
+	if (xmlForm && xmlForm.selectAll) {
+		if (xmlForm.selectAll.checked) {
+			checkAllWithName('xmlForm', 'selectXmlDtdIds');
+			setButtonState();
+	    }
+	    else {
+			clearAll('xmlForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -208,7 +222,7 @@ function setButtonState()
        dataClass="com.globalsight.cxe.entity.xmldtd.XmlDtdImpl"
        pageUrl="self"
        emptyTableMsg="msg_no_xmldtdfile" >
-        <amb:column label="">
+        <amb:column label="checkbox">
           <input type="checkbox" name="selectXmlDtdIds" value="<%=xmlDtd.getId()%>" onclick="setButtonState()">
            <%
              boolean isReferenced = xmlDtd.referenced();
@@ -248,17 +262,18 @@ function setButtonState()
             if (isSuperAdmin) {
         %>
         <amb:column label="lb_company_name" sortBy="<%=XmlDtdComparator.ASC_COMPANY%>">
-            <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(xmlDtd.getCompanyId())).getCompanyName()%>
+            <%=CompanyWrapper.getCompanyNameById(xmlDtd.getCompanyId())%>
         </amb:column>
         <% } %>
       </amb:table>
       
-      <DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
+      <!--for gbs-2599
+	  DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
         <A CLASS="standardHREF"
            HREF="javascript:checkAllWithName('xmlForm', 'selectXmlDtdIds'); setButtonState()"><%=bundle.getString("lb_check_all")%></A> |
         <A CLASS="standardHREF"
            HREF="javascript:clearAll('xmlForm'); setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
-    </DIV>
+    </DIV-->
     </td>
   </tr>
   <tr>

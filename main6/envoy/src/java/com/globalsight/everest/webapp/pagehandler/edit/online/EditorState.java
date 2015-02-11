@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import com.globalsight.everest.edit.SynchronizationStatus;
 import com.globalsight.everest.edit.online.CommentThreadView;
+import com.globalsight.everest.edit.online.OnlineEditorConstants;
 import com.globalsight.everest.edit.online.OnlineEditorManager;
 import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
@@ -57,8 +58,8 @@ public class EditorState extends PersistentObject implements EditorConstants
         public boolean m_hasGsaTags;
         public String m_workflowState;
 
-        private HashMap m_target = new HashMap();
-        private HashMap m_targetIds = new HashMap();
+        private HashMap<String, Long> m_target = new HashMap<String, Long>();
+        private HashMap<Long, GlobalSightLocale> m_targetIds = new HashMap<Long, GlobalSightLocale>();
 
         public PagePair (Long p_srcPageId, GlobalSightLocale p_srcLocale,
             String p_pageName, boolean p_hasGsaTags, String p_workflowState)
@@ -503,7 +504,7 @@ public class EditorState extends PersistentObject implements EditorConstants
     private String m_pageFormat = null;
 
     /** Array of HTML codes for source page views (a UI layer cache). */
-    private ArrayList m_sourcePageHtml = new ArrayList(VIEWMODE_MAX);
+    private ArrayList<String> m_sourcePageHtml = new ArrayList<String>(VIEWMODE_MAX);
 
     /** HTML code for target page view */
     private String m_targetPageHtml = null;
@@ -602,6 +603,10 @@ public class EditorState extends PersistentObject implements EditorConstants
 	private boolean isFirstBatch = true;
 	private boolean isLastBatch = true;
 	private String needUpdatePopUpEditor = null;
+
+	private boolean needFindRepeatedSegments = false;
+	private boolean needShowPTags = false;
+	private String segmentFilter = OnlineEditorConstants.SEGMENT_FILTER_ALL;
 
 	//
     // Constructors
@@ -1012,7 +1017,7 @@ public class EditorState extends PersistentObject implements EditorConstants
             HibernateUtil.get(SourcePage.class, m_currentPage.getSourcePageId());
         if (sourcePage != null)
         {
-            Vector locales = new Vector();
+            Vector<GlobalSightLocale> locales = new Vector<GlobalSightLocale>();
             for (TargetPage t : sourcePage.getTargetPages())
             {
                 String wfState = t.getWorkflowInstance().getState();
@@ -1199,72 +1204,103 @@ public class EditorState extends PersistentObject implements EditorConstants
 		this.needUpdatePopUpEditor = needUpdatePopUpEditor;
 	}
 	
+	public boolean getNeedFindRepeatedSegments() {
+	    return this.needFindRepeatedSegments;
+	}
+	
+	public void setNeedFindRepeatedSegments(boolean p_needFindRepeatedSegments) {
+	    this.needFindRepeatedSegments = p_needFindRepeatedSegments;
+	}
+	
+    public GlobalSightLocale getAllTargetViewLocale()
+    {
+        return m_allTargetViewLocale;
+    }
+
+    public void setAllTargetViewLocale(GlobalSightLocale m_allTargetViewLocale)
+    {
+        this.m_allTargetViewLocale = m_allTargetViewLocale;
+    }
+
+    public boolean getNeedShowPTags()
+    {
+        return needShowPTags;
+    }
+
+    public void setNeedShowPTags(boolean needShowPTags)
+    {
+        this.needShowPTags = needShowPTags;
+    }
+    
+    public String getSegmentFilter()
+    {
+        return segmentFilter;
+    }
+
+    public void setSegmentFilter(String segmentFilter)
+    {
+        this.segmentFilter = segmentFilter;
+    }
+    
     /**
      * Clone state object manually.
      * 
      * @param p_state
      * @return
      */
-	public static EditorState cloneState(EditorState p_state)
-	{
-	    EditorState result = new EditorState();
-	    if (p_state == null)
-	    {
-	        return null;
-	    }
-	    
-	    result.setUserIsPm(p_state.getUserIsPm());
-	    result.setEditorManager(p_state.getEditorManager());
-	    result.setOptions(p_state.getOptions());
-	    result.setLayout(p_state.getLayout());
-	    result.setRenderingOptions(p_state.getRenderingOptions());
-	    result.setReadOnly(p_state.isReadOnly());
-	    result.setAllowEditSnippets(p_state.canEditSnippets());
-	    result.setEditAllState(p_state.getEditAllState());
-	    result.setAllowEditAll(p_state.canEditAll());
-	    result.setCanShowMt(p_state.canShowMt());
-	    result.setPTagFormat(p_state.getPTagFormat());
-	    result.setExcludedItems(p_state.getExcludedItems());
-	    result.setPages(p_state.getPages());
-	    result.setCurrentPage(p_state.getCurrentPage());
-	    result.setIsFirstPage(p_state.isFirstPage());
-	    result.setIsLastPage(p_state.isLastPage());
-	    result.setPageFormat(p_state.getPageFormat());
-	    result.m_sourcePageHtml = p_state.m_sourcePageHtml;//
-	    result.setTargetPageHtml(p_state.getTargetPageHtml());
-	    result.setPageInfo(p_state.getPageInfo());
-	    result.setOldSynchronizationStatus(p_state.getOldSynchronizationStatus());
-	    result.setNewSynchronizationStatus(p_state.getNewSynchronizationStatus());
-	    result.setIsReviewActivity(p_state.getIsReviewActivity());
-	    result.setCommentThreads(p_state.getCommentThreads());
-	    result.setTuIds(p_state.getTuIds());
-	    result.setTuId(p_state.getTuId());
-	    result.setTuvId(p_state.getTuvId());
-	    result.setSubId(p_state.getSubId());
-	    result.setEditorType(p_state.getEditorType());
-	    result.m_editorMode = p_state.m_editorMode;//
-	    result.setLinkStyles(p_state.getLinkStyles());
-	    result.setJobTargetLocales(p_state.getJobTargetLocales());
-	    result.setTargetViewLocale(p_state.getTargetViewLocale());
-	    result.setDefaultTermbaseName(p_state.getDefaultTermbaseName());
-	    result.setDefaultTermbaseId(p_state.getDefaultTermbaseId());
-	    result.setTermbaseNames(p_state.getTermbaseNames());
-	    result.setTmNames(p_state.getTmNames());
-	    result.setTmProfile(p_state.getTmProfile());
-	    result.setUserName(p_state.getUserName());
-	    result.setPaginateInfo(p_state.getPaginateInfo());
-	    result.setNeedUpdatePopUpEditor(p_state.getNeedUpdatePopUpEditor());
-	    
-	    return result;
-	}
-
-    public GlobalSightLocale getM_allTargetViewLocale()
+    public static EditorState cloneState(EditorState p_state)
     {
-        return m_allTargetViewLocale;
-    }
-
-    public void setM_allTargetViewLocale(GlobalSightLocale m_allTargetViewLocale)
-    {
-        this.m_allTargetViewLocale = m_allTargetViewLocale;
+        EditorState result = new EditorState();
+        if (p_state == null)
+        {
+            return null;
+        }
+        
+        result.setUserIsPm(p_state.getUserIsPm());
+        result.setEditorManager(p_state.getEditorManager());
+        result.setOptions(p_state.getOptions());
+        result.setLayout(p_state.getLayout());
+        result.setRenderingOptions(p_state.getRenderingOptions());
+        result.setReadOnly(p_state.isReadOnly());
+        result.setAllowEditSnippets(p_state.canEditSnippets());
+        result.setEditAllState(p_state.getEditAllState());
+        result.setAllowEditAll(p_state.canEditAll());
+        result.setCanShowMt(p_state.canShowMt());
+        result.setPTagFormat(p_state.getPTagFormat());
+        result.setExcludedItems(p_state.getExcludedItems());
+        result.setPages(p_state.getPages());
+        result.setCurrentPage(p_state.getCurrentPage());
+        result.setIsFirstPage(p_state.isFirstPage());
+        result.setIsLastPage(p_state.isLastPage());
+        result.setPageFormat(p_state.getPageFormat());
+        result.m_sourcePageHtml = p_state.m_sourcePageHtml;//
+        result.setTargetPageHtml(p_state.getTargetPageHtml());
+        result.setPageInfo(p_state.getPageInfo());
+        result.setOldSynchronizationStatus(p_state.getOldSynchronizationStatus());
+        result.setNewSynchronizationStatus(p_state.getNewSynchronizationStatus());
+        result.setIsReviewActivity(p_state.getIsReviewActivity());
+        result.setCommentThreads(p_state.getCommentThreads());
+        result.setTuIds(p_state.getTuIds());
+        result.setTuId(p_state.getTuId());
+        result.setTuvId(p_state.getTuvId());
+        result.setSubId(p_state.getSubId());
+        result.setEditorType(p_state.getEditorType());
+        result.m_editorMode = p_state.m_editorMode;//
+        result.setLinkStyles(p_state.getLinkStyles());
+        result.setJobTargetLocales(p_state.getJobTargetLocales());
+        result.setTargetViewLocale(p_state.getTargetViewLocale());
+        result.setDefaultTermbaseName(p_state.getDefaultTermbaseName());
+        result.setDefaultTermbaseId(p_state.getDefaultTermbaseId());
+        result.setTermbaseNames(p_state.getTermbaseNames());
+        result.setTmNames(p_state.getTmNames());
+        result.setTmProfile(p_state.getTmProfile());
+        result.setUserName(p_state.getUserName());
+        result.setPaginateInfo(p_state.getPaginateInfo());
+        result.setNeedUpdatePopUpEditor(p_state.getNeedUpdatePopUpEditor());
+        result.setNeedFindRepeatedSegments(p_state.getNeedFindRepeatedSegments());
+        result.setNeedShowPTags(p_state.getNeedShowPTags());
+        result.setSegmentFilter(p_state.getSegmentFilter());
+        
+        return result;
     }
 }

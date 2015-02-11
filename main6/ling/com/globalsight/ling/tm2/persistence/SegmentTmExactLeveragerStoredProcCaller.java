@@ -48,7 +48,7 @@ class SegmentTmExactLeveragerStoredProcCaller implements
     private Connection m_connection;
     private long m_sourceLocaleId;
     private long m_translatable;
-    private long m_isMultiLingLeveraging;
+    private long lookupTarget;
 
     private Collection m_tmsToLeverageFrom;
     private Collection m_targetLocales;
@@ -79,14 +79,14 @@ class SegmentTmExactLeveragerStoredProcCaller implements
      */
     SegmentTmExactLeveragerStoredProcCaller(Connection p_connection,
             Collection p_tmsToLeverageFrom, GlobalSightLocale p_sourceLocale,
-            Collection p_targetLocales, boolean p_isMultiLingLeveraging,
+            Collection p_targetLocales, boolean p_lookupTarget,
             Collection p_segments, boolean p_isTranslatable) throws Exception
     {
         m_connection = p_connection;
         m_tmsToLeverageFrom = p_tmsToLeverageFrom;
         m_sourceLocaleId = p_sourceLocale.getId();
         m_targetLocales = p_targetLocales;
-        m_isMultiLingLeveraging = p_isMultiLingLeveraging ? 1 : 0;
+        lookupTarget = p_lookupTarget ? 1 : 0;
         splitTuvParam(p_segments);
         m_translatable = p_isTranslatable ? 1 : 0;
         
@@ -112,7 +112,7 @@ class SegmentTmExactLeveragerStoredProcCaller implements
             while (m_exactMatchKeyIt.hasNext())
             {
                 resultSet = callProc(m_tmsToLeverageFrom, m_sourceLocaleId,
-                        m_translatable, m_isMultiLingLeveraging,
+                        m_translatable, lookupTarget,
                         m_targetLocales, (ArrayList) m_exactMatchKeyIt.next(),
                         (ArrayList) m_orgTuvIdIt.next(),
                         (ArrayList) m_orgSubIdIt.next());

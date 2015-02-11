@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:iws="http://www.idiominc.com/ws/asset">
+	<iws:tm-attribute-metadata>
+		<iws:attribute-descr name="_tm_created_by" ui_name="Created By" type="text" flags="2" display_order="-6"/>
+		<iws:attribute-descr name="_tm_created_date" ui_name="Created On" type="date" flags="2" display_order="-5"/>
+		<iws:attribute-descr name="_tm_modified_by" ui_name="Modified By" type="text" flags="2" display_order="-4"/>
+		<iws:attribute-descr name="_tm_modified_date" ui_name="Modified On" type="date" flags="2" display_order="-3"/>
+		<iws:attribute-descr name="_tm_sid" ui_name="SID" type="text" flags="2" display_order="-2"/>
+		<iws:attribute-descr name="_tm_import_job" ui_name="Import Job Id" type="integer" flags="2" display_order="-1"/>
+	</iws:tm-attribute-metadata>
+	<iws:project-attribute-metadata>
+		<iws:attribute-descr name="#project_name#" ui_name="Project Name" type="text" flags="2" display_order="-3"/>
+		<iws:attribute-descr name="#project_descr#" ui_name="Project Description" type="text" flags="2" display_order="-2"/>
+		<iws:attribute-descr name="#project_id#" ui_name="Project Id" type="integer" flags="2" display_order="-1"/>
+	</iws:project-attribute-metadata>
+	<iws:project-attributes>
+		<iws:attribute name="#project_name#">65.0_Sanity_EMAIL_vendor_ru_RU</iws:attribute>
+		<iws:attribute name="#project_descr#"/>
+		<iws:attribute name="#project_id#">33065</iws:attribute>
+	</iws:project-attributes>
+	<iws:quality-model/>
+	<iws:project-ais-property-metadata/>
+	<iws:scoping-configuration name="WorldServer default configuration">
+		<iws:scoping-range start="0" end="60"/>
+		<iws:scoping-range start="60" end="70"/>
+		<iws:scoping-range start="70" end="80"/>
+		<iws:scoping-range start="80" end="90"/>
+		<iws:scoping-range start="90" end="100"/>
+	</iws:scoping-configuration>
+	<iws:dwb-project-info project_name="65.0_Sanity_EMAIL_vendor_ru_RU_ru_RU_20100913_140546" ws_url="http://sjd-entws-030.corp.ebay.com:8080/ws" session_id="1891520191" session_fingerprint="ObRPVMM0sO07BO05SHGR44ixG3k=" instance_id="-315934218" live_tm="false"/>
+	<iws:extension-level version="000001"/>
+	<file source-language="en-US" content="gen" datatype="x-text/xpt" original="/MajorB/en_US/pexml/content/email_pimp/pages/default/en_US/transaction/seller/RequestorPaymentReceipt.aml" target-language="fr_FR" tool="Idiom WorldServer 9.0.5" build-num="38" xml:space="default">
+		<header>
+			<phase-group>
+				<phase phase-name="Vendor PM Review (15)" process-name="XPT Workflow with MT and Validation" date="2010-09-13T22:05:10Z" company-name="eBay_50" contact-name="Welocalize" contact-email="paypal_welocalize@welocalize.com"/>
+			</phase-group>
+			<count-group name="Total Word Count">
+				<count count-type="total">623</count>
+			</count-group>
+			<glossary>
+				<external-file href="terminology_data.tbx"/>
+			</glossary>
+			<iws:split-merge disable="true"/>
+			<iws:merge-across-markup disable="true"/>
+			<iws:create-background-job disable="false"/>
+			<iws:create-foreground-job disable="false"/>
+			<iws:asset-data>
+				<iws:seg_asset_id>1372965</iws:seg_asset_id>
+				<iws:task_id>1185252</iws:task_id>
+				<iws:display_task_id>2</iws:display_task_id>
+				<iws:ais_src_path>/MajorB/en_US/pexml/content/email_pimp/pages/default/en_US/transaction/seller/RequestorPaymentReceipt.aml</iws:ais_src_path>
+				<iws:src_fingerprint>ZYkhm4HgRkuWYR7C0u5MUbgmmmA=</iws:src_fingerprint>
+				<iws:ais_tgt_path>/MajorB/ru_RU/pexml/content/email_pimp/pages/default/en_US/transaction/seller/RequestorPaymentReceipt.aml</iws:ais_tgt_path>
+				<iws:tgt_fingerprint/>
+				<iws:steplock>None</iws:steplock>
+				<iws:steptype>None</iws:steptype>
+				<iws:source_lang_id>1033</iws:source_lang_id>
+				<iws:target_lang_id>1049</iws:target_lang_id>
+				<iws:show_markup>true</iws:show_markup>
+				<iws:tm_id>1190</iws:tm_id>
+				<iws:tm_name>ru_RU_Email_Group</iws:tm_name>
+				<iws:tm_group>
+					<iws:tm name="ru_RU_Email" penalty="0.0"/>
+					<iws:tm name="ru_RU_XPT" penalty="0.05"/>
+					<iws:tm name="ru_RU_Layout" penalty="0.05"/>
+					<iws:tm name="ru_RU_Webforms" penalty="0.05"/>
+					<iws:tm name="ru_RU_Help" penalty="0.05"/>
+					<iws:tm name="ru_RU_Kana" penalty="0.05"/>
+					<iws:tm name="ru_RU_IPhone" penalty="0.1"/>
+					<iws:tm name="ru_RU_Misc" penalty="0.05"/>
+					<iws:tm name="ru_RU_Sparta" penalty="0.05"/>
+				</iws:tm_group>
+				<iws:asset-encoding source="UTF8" target="UTF8"/>
+				<iws:asset-properties/>
+			</iws:asset-data>
+			<iws:TM-Weights>
+				<iws:tm_score_number_weight weight="0.2"/>
+				<iws:tm_score_outer_placeholder_weight weight="0.1"/>
+				<iws:tm_score_inner_placeholder_weight weight="0.25"/>
+			</iws:TM-Weights>
+			<iws:TM-Penalties>
+				<iws:tm_score_capitalization_penalty penalty="0.01"/>
+				<iws:tm_score_punctuation_penalty penalty="0.0050"/>
+				<iws:tm_score_placeholder_sequence_penalty penalty="0.01"/>
+				<iws:tm_score_maximum_target_length_penalty penalty="0.01"/>
+				<iws:tm_score_number_difference_penalty penalty="0.2"/>
+				<iws:tm_score_asset_mismatch_penalty penalty="0.0"/>
+				<iws:tm_score_metadata_mismatch_penalty penalty="0.0"/>
+				<iws:tm_score_multiple_exact_match_penalty penalty="0.0"/>
+				<iws:tm_score_whitespace_difference_penalty penalty="0.0"/>
+				<iws:tm_score_unreviewed_match_penalty penalty="0.0"/>
+				<iws:tm_score_reverse_leverage_penalty penalty="0.0"/>
+			</iws:TM-Penalties>
+			<iws:update-translation-memory-setting update="false" default="false"/>
+			<iws:exclude_segment_filter type="None"/>
+			<iws:treat-whitespace-as-significant significant="false"/>
+			<iws:comment-on-locked-segments disable="true"/>
+		</header>
+		<body>
+			<trans-unit id="0000000021" datatype="x-application/vnd.ms-excel" restype="string">
+				<source>""<ph id="6" x="@@itemName@@">{6}</ph>" will be downloaded to My Movies."</source>
+				<target>
+					<ph id="6" x="@@itemName@@">{6}</ph>
+				</target>
+				<alt-trans match-quality="99.67" origin="Apple_iTunes-Default_TM">
+					<source><ph id="1">{1}</ph>@@" will be downloaded to My Movies.</source>
+					<target><ph id="1">{1}</ph>@@" は「マイムービー」にダウンロードされます。</target>
+					<iws:tm_entry_id tm_entry_id_value="28891383"/>
+					<iws:is-reverse-leveraged reverse="false"/>
+					<iws:is-repaired-match repaired="true"/>
+					<iws:status translation_status="finished"/>
+					<iws:asset-origin origin="/Welocalize_RWS/Apple_itunes/Projects/4997_071210 JP Movies/Source-en/JP moviestows.xls"/>
+					<iws:attribute name="_tm_created_by">System</iws:attribute>
+					<iws:attribute name="_tm_created_date">1279324884120</iws:attribute>
+					<iws:attribute name="_tm_modified_by">Rachel Carruthers</iws:attribute>
+					<iws:attribute name="_tm_modified_date">1279324884120</iws:attribute>
+				</alt-trans>
+				<iws:segment-metadata tm_score="99.67" ws_word_count="6" max_segment_length="0" sid="0001">
+					<iws:status tm_origin="from_ws_tm" translation_type="machine_translation" source_content="repeated" target_content="placeholders_only"/>
+				</iws:segment-metadata>
+				<iws:markup-seg sequence="0000000020">&lt;/cell&gt;&lt;cell row="11" col="1"&gt;</iws:markup-seg>
+			</trans-unit>
+		</body>
+	</file>
+</xliff>

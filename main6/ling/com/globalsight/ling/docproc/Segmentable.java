@@ -114,6 +114,11 @@ public abstract class Segmentable
             {
                 attribs.setProperty(DiplomatNames.Attribute.PRESERVEWHITESPACE, "yes");
             }
+            
+            if (node.getSrcComment() != null && !"".equals(node.getSrcComment().trim()))
+            {
+                attribs.setProperty("srcComment", node.getSrcComment());
+            }
 
             writer.element(DiplomatNames.Element.SEGMENT, attribs, node
                     .getSegment(), false);

@@ -473,7 +473,7 @@ public class CacheSegmentViewDataThread extends MultiCompanySupportedThread
         {
             CATEGORY.error("Failed to reset tuID,tuvID and subID for key : "
                     + p_key);
-            CATEGORY.error(e.getMessage());
+            CATEGORY.error(e.getMessage(), e);
         }
     }
     

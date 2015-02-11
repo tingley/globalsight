@@ -50,7 +50,7 @@ public class InternalTextHelper
     private static String REGEX_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>.*?</bpt>(.*?)<ept[^>]*i=\"{0}\"[^>]*>.*?</ept>";
     private static String REGEX_ALL_2 = "<bpt[^>]*i=\"{0}\"[^>]*/>(.*?)<ept[^>]*i=\"{0}\"[^>]*/>";
     private static String REGEX_GSINTERNALTEXT = "<GS-INTERNAL-TEXT[^>]*>[^<]*</GS-INTERNAL-TEXT>";
-    
+
     public static String GS_INTERNALT_TAG_START = "<GS-INTERNAL-TEXT>";
     public static String GS_INTERNALT_TAG_END = "</GS-INTERNAL-TEXT>";
     public static String REG_INTERNAL_TEXT = "<(GS-INTERNAL-TEXT)>(.*)</GS-INTERNAL-TEXT>";
@@ -65,8 +65,8 @@ public class InternalTextHelper
      *            true to use bpt/ept tag; false to use GS-INTERNAL-TEXT tag
      * @return
      */
-    public static String handleString(String oriStr, List<InternalText> internalTexts,
-            String format, boolean useBpt)
+    public static String handleString(String oriStr,
+            List<InternalText> internalTexts, String format, boolean useBpt)
     {
         if (oriStr == null || oriStr.length() == 0)
             return oriStr;
@@ -74,13 +74,14 @@ public class InternalTextHelper
         if (internalTexts == null || internalTexts.size() == 0)
             return oriStr;
 
-        List<String> sList = handleStringWithListReturn(oriStr, internalTexts, format);
+        List<String> sList = handleStringWithListReturn(oriStr, internalTexts,
+                format);
 
         if (useBpt)
         {
             assignIndexToBpt(1, sList);
         }
-        
+
         return listToString(sList);
     }
 
@@ -128,24 +129,25 @@ public class InternalTextHelper
     }
 
     /**
-     * Assign id 
+     * Assign id
+     * 
      * @param startIndex
      * @param sList
      * @return
      */
     public static int assignIndexToBpt(int startIndex, List<String> sList)
-    {        
+    {
         int i = startIndex;
         for (int j = 0; j < sList.size(); j++)
         {
             String s = sList.get(j);
-            
+
             if (s.startsWith(GS_INTERNALT_TAG_START))
             {
                 s = s.replace(GS_INTERNALT_TAG_START, BPT_START);
                 s = s.replace(GS_INTERNALT_TAG_END, EPT_END);
             }
-            
+
             if (s.startsWith(BPT_START))
             {
                 String news = s.replace("i=\"iii\"", "i=\"" + i + "\"");
@@ -153,7 +155,7 @@ public class InternalTextHelper
                 sList.set(j, news);
             }
         }
-        
+
         return i;
     }
 
@@ -183,7 +185,8 @@ public class InternalTextHelper
      * @param format
      * @return
      */
-    private static List<String> handleStringByOneRule(String s, InternalText it, String format)
+    private static List<String> handleStringByOneRule(String s,
+            InternalText it, String format)
     {
         String tagStart = GS_INTERNALT_TAG_START;
         String tagEnd = GS_INTERNALT_TAG_END;
@@ -230,13 +233,13 @@ public class InternalTextHelper
                 while (m.find())
                 {
                     String internalText = m.group();
-                    
+
                     // if the length of internal text is 0, continue
                     if (internalText.length() == 0)
                     {
                         continue;
                     }
-                    
+
                     int i = s.indexOf(internalText, fromIndex);
                     String first = s.substring(fromIndex, i);
                     end = s.substring(i + internalText.length());
@@ -245,8 +248,9 @@ public class InternalTextHelper
                     {
                         result.add(first);
                     }
-                    
-                    String itext = resolveInternalTextValue(internalText, format);
+
+                    String itext = resolveInternalTextValue(internalText,
+                            format);
                     result.add(tagStart + itext + tagEnd);
 
                     fromIndex = i + internalText.length();
@@ -259,8 +263,8 @@ public class InternalTextHelper
             }
             catch (Exception e)
             {
-                String msg = "Exception in handleStringByOneRule, re rule:" + it.getName()
-                        + " text:" + s;
+                String msg = "Exception in handleStringByOneRule, re rule:"
+                        + it.getName() + " text:" + s;
                 CATEGORY.error(msg, e);
                 result.clear();
                 result.add(s);
@@ -276,27 +280,27 @@ public class InternalTextHelper
         {
             return name;
         }
-        
+
         if (IFormatNames.FORMAT_XML.equals(format))
         {
             return m_xmlEncoder.decodeStringBasic(name);
         }
-        
+
         if (IFormatNames.FORMAT_HTML.equals(format))
         {
             return m_htmlDecoder.decodeStringBasic(name);
         }
-        
+
         if (IFormatNames.FORMAT_JAVAPROP_HTML.equals(format)
                 || IFormatNames.FORMAT_JAVAPROP_MSG.equals(format)
                 || IFormatNames.FORMAT_JAVAPROP.equals(format))
         {
             return m_tmx.encode(name);
         }
-        
+
         return name;
     }
-    
+
     private static String resolveInternalTextValue(String p_value, String format)
     {
         if (format == null)
@@ -304,12 +308,13 @@ public class InternalTextHelper
             return p_value;
         }
 
-        if (IFormatNames.FORMAT_XML.equals(format))
+        if (IFormatNames.FORMAT_XML.equals(format)
+                || IFormatNames.FORMAT_OFFICE_XML.equals(format))
         {
             return m_xmlEncoder.encodeStringBasic(p_value);
         }
 
-        if (IFormatNames.FORMAT_HTML.equals(format) 
+        if (IFormatNames.FORMAT_HTML.equals(format)
                 || IFormatNames.FORMAT_WORD_HTML.equals(format)
                 || IFormatNames.FORMAT_EXCEL_HTML.equals(format)
                 || IFormatNames.FORMAT_POWERPOINT_HTML.equals(format))
@@ -322,6 +327,7 @@ public class InternalTextHelper
 
     /**
      * Protect internal text for segmentation
+     * 
      * @param p_output
      * @return
      */
@@ -329,61 +335,64 @@ public class InternalTextHelper
     {
         List<String> internalTexts = new ArrayList<String>();
         int i = 0;
-        for (Iterator it = p_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = p_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
                 case DocumentElement.TRANSLATABLE:
                 {
-                    TranslatableElement elem = (TranslatableElement)de;
+                    TranslatableElement elem = (TranslatableElement) de;
                     String temp = elem.getChunk();
                     List<String> its = getInternalTexts(temp);
-                    
+
                     if (!its.isEmpty())
-                    {                        
+                    {
                         for (String itext : its)
                         {
-                            String key = INTERNAL_TEXT_KEY + i + INTERNAL_TEXT_KEY_END;
+                            String key = INTERNAL_TEXT_KEY + i
+                                    + INTERNAL_TEXT_KEY_END;
                             i++;
                             temp = replaceFirstText(temp, itext, key);
                             internalTexts.add(itext);
                         }
-                        
+
                         elem.setChunk(temp);
                     }
-                    
+
                     break;
                 }
-                
+
                 default:
                     // skip all others
                     break;
             }
         }
-        
+
         return internalTexts;
     }
 
     /**
      * Restore internal text from protect
+     * 
      * @param p_output
      * @param internalTexts
      */
-    public static void restoreInternalTexts(Output p_output, List<String> internalTexts)
+    public static void restoreInternalTexts(Output p_output,
+            List<String> internalTexts)
     {
-        for (Iterator it = p_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = p_output.documentElementIterator(); it.hasNext();)
         {
-            DocumentElement de = (DocumentElement)it.next();
+            DocumentElement de = (DocumentElement) it.next();
 
             switch (de.type())
             {
                 case DocumentElement.TRANSLATABLE:
                 {
-                    TranslatableElement elem = (TranslatableElement)de;
+                    TranslatableElement elem = (TranslatableElement) de;
                     ArrayList segments = elem.getSegments();
-                    
+
                     if (segments != null && !segments.isEmpty())
                     {
                         for (Object object : segments)
@@ -395,31 +404,35 @@ public class InternalTextHelper
                             {
                                 for (int i = 0; i < internalTexts.size(); i++)
                                 {
-                                    String key = INTERNAL_TEXT_KEY + i + INTERNAL_TEXT_KEY_END;
+                                    String key = INTERNAL_TEXT_KEY + i
+                                            + INTERNAL_TEXT_KEY_END;
                                     String ori = internalTexts.get(i);
-                                    segment = replaceFirstText(segment, key, ori);
+                                    segment = replaceFirstText(segment, key,
+                                            ori);
                                 }
                                 snode.setSegment(segment);
                             }
                         }
                     }
-                    
+
                     break;
                 }
-                
+
                 default:
                     // skip all others
                     break;
             }
         }
     }
-    
+
     /**
      * Protect internal text for segmentation
+     * 
      * @param p_output
      * @return
      */
-    public static String protectInternalTexts(String p_text, List<String> internalTexts)
+    public static String protectInternalTexts(String p_text,
+            List<String> internalTexts)
     {
         int i = 0;
 
@@ -442,10 +455,12 @@ public class InternalTextHelper
 
     /**
      * Restore internal text from protect
+     * 
      * @param p_output
      * @param internalTexts
      */
-    public static String restoreInternalTexts(String p_text, List<String> internalTexts)
+    public static String restoreInternalTexts(String p_text,
+            List<String> internalTexts)
     {
         String temp = p_text;
         if (temp.contains(INTERNAL_TEXT_KEY))
@@ -460,8 +475,9 @@ public class InternalTextHelper
 
         return temp;
     }
-    
-    private static String replaceFirstText(String src, String subtext, String newtext)
+
+    private static String replaceFirstText(String src, String subtext,
+            String newtext)
     {
         int index = src.indexOf(subtext);
         if (index != -1)
@@ -485,7 +501,8 @@ public class InternalTextHelper
         for (int i = 0; i < ids.size(); i++)
         {
             String id = (String) ids.get(i);
-            Object[] ob = { id };
+            Object[] ob =
+            { id };
             String regex = MessageFormat.format(REGEX_ALL, ob);
             Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
             Matcher matcher = pattern.matcher(src);
@@ -495,7 +512,7 @@ public class InternalTextHelper
                 String s = matcher.group();
                 internalTexts.add(s);
             }
-            
+
             String regex2 = MessageFormat.format(REGEX_ALL_2, ob);
             Pattern pattern2 = Pattern.compile(regex2, Pattern.DOTALL);
             Matcher matcher2 = pattern2.matcher(src);
@@ -506,14 +523,14 @@ public class InternalTextHelper
                 internalTexts.add(s);
             }
         }
-        
+
         Matcher m = Pattern.compile(REGEX_GSINTERNALTEXT).matcher(src);
         while (m.find())
         {
             String s = m.group();
             internalTexts.add(s);
         }
-        
+
         return internalTexts;
     }
 }

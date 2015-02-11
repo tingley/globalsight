@@ -12,7 +12,7 @@ import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.DownloadFileRead.FileRead;
 import com.globalsight.selenium.pages.JobDetailsReportWebForm;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 /**
@@ -29,7 +29,7 @@ public class JobDetailsReport
     @BeforeClass
     public void beforeClass()
     {
-        selenium = CommonFuncs.initSelenium();
+        selenium = CommonFuncs.getSelenium();
         CommonFuncs.loginSystemWithAdmin(selenium);
     }
 
@@ -42,8 +42,8 @@ public class JobDetailsReport
     @Test
     public void generateReport()
     {
-        selenium.click(MainFrame.Reports_MENU);
-        selenium.click(MainFrame.MainReportsPage_SUBMENU);
+        selenium.click(MainFrame.REPORTS_MENU);
+        selenium.click(MainFrame.REPORTS_MAIN_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(JobDetailsReportWebForm.REPORT_LINK);
         selenium.selectWindow(JobDetailsReportWebForm.POPUP_WINDOW_NAME);

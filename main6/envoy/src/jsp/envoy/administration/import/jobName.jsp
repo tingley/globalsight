@@ -137,7 +137,7 @@ function submitForm()
 
    // Do not allow "\",  "/", ":" and other characters in the job name
    // that are not valid in Windows (or Unix) filenames.
-   var jobNameRegex = /[\\/:;\*\?\|\"\'<>&%]/;
+   var jobNameRegex = /[\\/:;\*\?\|\"<>&%]/;
    if (jobNameRegex.test(jobForm.jobName.value))
    {
       alert("<%=EditUtil.toJavascript(bundle.getString("jsmsg_invalid_job_name"))%>");

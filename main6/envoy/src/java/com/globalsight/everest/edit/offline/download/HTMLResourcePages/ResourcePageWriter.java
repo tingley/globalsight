@@ -14,24 +14,29 @@
  *  limitations under the License.
  *  
  */
-
-
-
 package com.globalsight.everest.edit.offline.download.HTMLResourcePages;
+
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
+import com.globalsight.everest.edit.offline.upload.UploadPageSaverException;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.localemgr.LocaleManager;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.docproc.IFormatNames;
-import com.globalsight.ling.tm.LingManagerException;
 import com.globalsight.ling.tw.HtmlTableWriter;
 import com.globalsight.ling.tw.PseudoParserException;
 import com.globalsight.ling.tw.PtagStringFormatter;
@@ -41,33 +46,18 @@ import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.lang.StringBuffer;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.ResourceBundle;
-import java.text.DecimalFormat;
-import java.text.MessageFormat;
-
 /**
  * Generates a segment resource page in html.
- *
- * A resource page consists of one or more of the following:
- * 1. Segment id (parent and/or subflow)
- * 2. Source segment in p-tag format.
- * 3. P-tag to Native mapping table.
- * 4. Optional Fuzzy TM matches.
- * 5. Optional Term matches.
+ * 
+ * A resource page consists of one or more of the following: 1. Segment id
+ * (parent and/or subflow) 2. Source segment in p-tag format. 3. P-tag to Native
+ * mapping table. 4. Optional Fuzzy TM matches. 5. Optional Term matches.
  */
-public class ResourcePageWriter
-    extends DownloadWriter
-    implements DownloadWriterInterface
+public class ResourcePageWriter extends DownloadWriter implements
+        DownloadWriterInterface
 {
-    static private final Logger CATEGORY =
-        Logger.getLogger(
-            ResourcePageWriter.class);
+    static private final Logger CATEGORY = Logger
+            .getLogger(ResourcePageWriter.class);
 
     static private final String RESOURCE_PAGE_START = "ResourcePageStart";
     static private final String RESOURCE_PAGE_HEADER = "ResourcePageHeader";
@@ -107,8 +97,7 @@ public class ResourcePageWriter
     /**
      * Constructor.
      */
-    public ResourcePageWriter()
-        throws AmbassadorDwUpException
+    public ResourcePageWriter() throws AmbassadorDwUpException
     {
         super();
 
@@ -127,20 +116,20 @@ public class ResourcePageWriter
     }
 
     /**
-     * Builds the final html page from the cumulative segment data
-     * pre-formatted in HTML.
-     *
+     * Builds the final html page from the cumulative segment data pre-formatted
+     * in HTML.
+     * 
      * @return the full page in a StringBuffer.
      */
-    protected StringBuffer buildPage()
-        throws AmbassadorDwUpException
+    protected StringBuffer buildPage() throws AmbassadorDwUpException
     {
         StringBuffer page = new StringBuffer();
         page.append(m_resource.getString(RESOURCE_PAGE_START));
 
         // Format = <BODY>\r\n<H1>[Title]</H1>
         // For now, the page is always generaly LTR
-        // page.append( m_rtlTargetLocale ? "<BODY DIR=\"RTL\">\r\n" : "<BODY>\r\n");
+        // page.append( m_rtlTargetLocale ? "<BODY DIR=\"RTL\">\r\n" :
+        // "<BODY>\r\n");
         page.append("<BODY>\r\n");
         page.append("<H1>");
         page.append(m_resource.getString(LABEL_PAGE_TITLE));
@@ -152,35 +141,39 @@ public class ResourcePageWriter
     }
 
     /**
-     * Extracts segment data from the page object, formats the data as
-     * an HTML snippet and then stores it to be used later to build
-     * the final page.
-     *
-     * @param p_page com.globalsight.everest.edit.offline.OfflinePageData
+     * Extracts segment data from the page object, formats the data as an HTML
+     * snippet and then stores it to be used later to build the final page.
+     * 
+     * @param p_page
+     *            com.globalsight.everest.edit.offline.OfflinePageData
      */
     public void processOfflinePageData(OfflinePageData p_page)
-        throws AmbassadorDwUpException
+            throws AmbassadorDwUpException
     {
-        setPageLocales(p_page.getSourceLocaleName(), p_page.getTargetLocaleName());
+        String companyId = p_page.getCompanyId() + "";
+        setPageLocales(p_page.getSourceLocaleName(),
+                p_page.getTargetLocaleName());
         m_rtlSourceLocale = EditUtil.isRTLLocale(m_sourceLocale);
         m_rtlTargetLocale = EditUtil.isRTLLocale(m_targetLocale);
 
         m_resource = loadProperties(getClass().getName(), getLocale(m_uiLocale));
 
-        for (ListIterator it = p_page.getSegmentIterator(); it.hasNext(); )
+        for (ListIterator it = p_page.getSegmentIterator(); it.hasNext();)
         {
-            OfflineSegmentData segment = (OfflineSegmentData)it.next();
+            OfflineSegmentData segment = (OfflineSegmentData) it.next();
 
             if (!areParamsValid(segment))
             {
                 throw new AmbassadorDwUpException(
-                    AmbassadorDwUpExceptionConstants.WRITER_INVALID_PARAMETER,
-                    this.getClass().getName());
+                        AmbassadorDwUpExceptionConstants.WRITER_INVALID_PARAMETER,
+                        this.getClass().getName());
             }
 
-            // A single segment entry includes id, native map, tm matches and terms
-            // Format = <P><SPAN CLASS="number"><A NAME="[LinkId]">[SegId]</A></SPAN><BR>[SrcSeg]</P>[AllTables]*/
-            String [] args = makeParamList(segment);
+            // A single segment entry includes id, native map, tm matches and
+            // terms
+            // Format = <P><SPAN CLASS="number"><A
+            // NAME="[LinkId]">[SegId]</A></SPAN><BR>[SrcSeg]</P>[AllTables]*/
+            String[] args = makeParamList(segment, companyId);
             boolean containsBidiChar = false;
 
             StringBuffer sb = new StringBuffer();
@@ -228,15 +221,15 @@ public class ResourcePageWriter
 
         if (p_segment.getDisplaySourceText() == null)
         {
-            CATEGORY.error("SourceText is null. SEGID=" +
-                p_segment.getDisplaySegmentID());
+            CATEGORY.error("SourceText is null. SEGID="
+                    + p_segment.getDisplaySegmentID());
             return false;
         }
 
         if (p_segment.getPTag2NativeMap() == null)
         {
-            CATEGORY.error("PTagMap is null. SEGID=" +
-                p_segment.getDisplaySegmentID());
+            CATEGORY.error("PTagMap is null. SEGID="
+                    + p_segment.getDisplaySegmentID());
             return false;
         }
 
@@ -244,31 +237,23 @@ public class ResourcePageWriter
     }
 
     /**
-     * Positions in the array are as follows:
-     * {1}  : Segment id hyperlink name
-     * {2}  : Segment id
-     * {3}  : The segment text
-     * {4}  : Mapping Table title
-     * {5}  : Column name "placeholder"
-     * {6}  : Column name "native content"
-     * {7}  : Mapping table
-     * {8}  : TM table title
-     * {9}  : TM Column name "score"
-     * {10} : TM Column name "fuzzy segment"
-     * {11} : TM table
-     * {12} : Term table tile
-     * {13} : Term Column name "source term"
-     * {14} : Term Column name "target term"
-     * {15} : Term table
-     *
+     * Positions in the array are as follows: {1} : Segment id hyperlink name
+     * {2} : Segment id {3} : The segment text {4} : Mapping Table title {5} :
+     * Column name "placeholder" {6} : Column name "native content" {7} :
+     * Mapping table {8} : TM table title {9} : TM Column name "score" {10} : TM
+     * Column name "fuzzy segment" {11} : TM table {12} : Term table tile {13} :
+     * Term Column name "source term" {14} : Term Column name "target term" {15}
+     * : Term table
+     * 
      * @return java.lang.String[]
      */
-    private String[] makeParamList(OfflineSegmentData p_segment)
-        throws AmbassadorDwUpException
+    private String[] makeParamList(OfflineSegmentData p_segment,
+            String companyId) throws AmbassadorDwUpException
     {
         StringBuffer sb = new StringBuffer();
         boolean needTitle = false;
-        Object[] args = {"-", "-", "-", "-", "-"};
+        Object[] args =
+        { "-", "-", "-", "-", "-" };
         String[] params = new String[SEG_PARAM_COUNT];
 
         try
@@ -278,17 +263,18 @@ public class ResourcePageWriter
 
             params[1] = id;
             params[2] = id;
-            
+
             String sourceStr = EditUtil.encodeHtmlEntities(p_segment
                     .getDisplaySourceText());
 
-            //If the job is created by xliff file, need restore the source content
+            // If the job is created by xliff file, need restore the source
+            // content
             if (p_segment.getSourceTuv() != null)
             {
                 Tuv sourceTuv = p_segment.getSourceTuv();
 
-                if (sourceTuv.getTu().getDataType().equals(
-                        IFormatNames.FORMAT_XLIFF))
+                if (sourceTuv.getTu(companyId).getDataType()
+                        .equals(IFormatNames.FORMAT_XLIFF))
                 {
                     sourceStr = EditUtil.encodeHtmlEntities(SegmentUtil
                             .restoreSegment(p_segment.getDisplaySourceText(),
@@ -309,8 +295,8 @@ public class ResourcePageWriter
             // Build all resources
 
             // native map
-            String map = HtmlTableWriter.getSortedHtmlRows(
-                p_segment.getPTag2NativeMap());
+            String map = HtmlTableWriter.getSortedHtmlRows(p_segment
+                    .getPTag2NativeMap());
             if (map != null && map.length() > 0)
             {
                 args[1] = m_resource.getString(LABEL_PMAP_TITLE);
@@ -319,12 +305,12 @@ public class ResourcePageWriter
                 args[4] = m_PtagFormat.htmlPlain(map);
 
                 sb.append(MessageFormat.format(
-                    m_resource.getString(HTML_TEMPLATE_FUZZY_TABLE), args));
+                        m_resource.getString(HTML_TEMPLATE_FUZZY_TABLE), args));
             }
         }
         catch (PseudoParserException ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(ex);
         }
 
@@ -338,7 +324,7 @@ public class ResourcePageWriter
             args[4] = tmp;
 
             sb.append(MessageFormat.format(
-                m_resource.getString(HTML_TEMPLATE_TERM_TABLE), args));
+                    m_resource.getString(HTML_TEMPLATE_TERM_TABLE), args));
         }
 
         // Get/format fuzzy matches.
@@ -353,7 +339,7 @@ public class ResourcePageWriter
             args[4] = tmp;
 
             sb.append(MessageFormat.format(
-                m_resource.getString(HTML_TEMPLATE_FUZZY_TABLE),args ));
+                    m_resource.getString(HTML_TEMPLATE_FUZZY_TABLE), args));
         }
 
         params[4] = sb.toString();
@@ -363,40 +349,45 @@ public class ResourcePageWriter
 
     /**
      * Returns TM matches as html table rows.
+     * 
      * @return String - HTML table rows, caller should wrap the rows in a table.
      */
     public String getFuzzyMatchTableRows(OfflineSegmentData p_segData)
-        throws AmbassadorDwUpException
+            throws AmbassadorDwUpException
     {
         StringBuffer sb = new StringBuffer();
 
-        String[] args = {"---", "---"};
+        String[] args =
+        { "---", "---" };
 
         List l1 = p_segData.getOriginalFuzzyLeverageMatchList();
         List l2 = p_segData.getDisplayFuzzyMatchList();
-		
+
         for (int i = 0; l1 != null && i < l1.size(); i++)
         {
-            LeverageMatch lm = (LeverageMatch)l1.get(i);
+            LeverageMatch lm = (LeverageMatch) l1.get(i);
 
-            args[0] = (lm == null) ? "??" : "" + StringUtil.formatPercent(lm.getScoreNum(), 2) + "%";
+            args[0] = (lm == null) ? "??" : ""
+                    + StringUtil.formatPercent(lm.getScoreNum(), 2) + "%";
 
             try
             {
                 if (m_rtlTargetLocale)
                 {
-                    args[1] = (l2.get(i) == null) ? "---" : m_PtagFormat.htmlLtrPtags(
-                        EditUtil.encodeHtmlEntities((String)l2.get(i)));
+                    args[1] = (l2.get(i) == null) ? "---" : m_PtagFormat
+                            .htmlLtrPtags(EditUtil
+                                    .encodeHtmlEntities((String) l2.get(i)));
                 }
                 else
                 {
-                    args[1] = (l2.get(i) == null) ? "---" : m_PtagFormat.htmlPlain(
-                        EditUtil.encodeHtmlEntities((String)l2.get(i)));
+                    args[1] = (l2.get(i) == null) ? "---" : m_PtagFormat
+                            .htmlPlain(EditUtil.encodeHtmlEntities((String) l2
+                                    .get(i)));
                 }
             }
             catch (PseudoParserException ex)
             {
-                CATEGORY.error(ex);
+                CATEGORY.error(ex.getMessage(), ex);
                 throw new AmbassadorDwUpException(ex);
             }
 
@@ -407,8 +398,8 @@ public class ResourcePageWriter
 
             if (m_rtlTargetLocale)
             {
-                sb.append(Text.containsBidiChar(args[1]) ?
-                    "<TD DIR=\"RTL\">" : "<TD DIR=\"LTR\">");
+                sb.append(Text.containsBidiChar(args[1]) ? "<TD DIR=\"RTL\">"
+                        : "<TD DIR=\"LTR\">");
             }
             else
             {
@@ -424,13 +415,15 @@ public class ResourcePageWriter
 
     /**
      * Returns Term matches as html table rows.
+     * 
      * @return String - HTML table rows, caller should wrap the rows in a table.
      */
     public String getTermMatchTableRows(OfflineSegmentData p_segment)
     {
         StringBuffer sbResult = new StringBuffer();
         StringBuffer sbTargets = new StringBuffer();
-        String [] args = {"---", "---"};
+        String[] args =
+        { "---", "---" };
         String nextTarget = null;
         TermLeverageMatchResult tlm = null;
         List matchList = p_segment.getTermLeverageMatchList();
@@ -439,7 +432,7 @@ public class ResourcePageWriter
         {
             for (int i = 0; i < matchList.size(); i++)
             {
-                tlm = (TermLeverageMatchResult)matchList.get(i);
+                tlm = (TermLeverageMatchResult) matchList.get(i);
 
                 args[0] = tlm.getSourceTerm();
                 sbTargets.append(tlm.getFirstTargetTerm());
@@ -452,14 +445,15 @@ public class ResourcePageWriter
                 args[1] = EditUtil.encodeHtmlEntities(sbTargets.toString());
                 sbTargets.delete(0, sbTargets.length());
 
-                //Format of TermRow = <TR><TD align="center">[src term]</TD><TD>[trg term(s)]</TD></TR>
+                // Format of TermRow = <TR><TD align="center">[src
+                // term]</TD><TD>[trg term(s)]</TD></TR>
                 sbResult.append("<TR>");
-                sbResult.append(m_rtlSourceLocale ?
-                    "<TD align=\"center\" DIR=\"RTL\">" : "<TD>");
+                sbResult.append(m_rtlSourceLocale ? "<TD align=\"center\" DIR=\"RTL\">"
+                        : "<TD>");
                 sbResult.append(args[0]);
                 sbResult.append("</TD>");
-                sbResult.append(m_rtlTargetLocale ?
-                    "<TD align=\"center\" DIR=\"RTL\">" : "<TD>");
+                sbResult.append(m_rtlTargetLocale ? "<TD align=\"center\" DIR=\"RTL\">"
+                        : "<TD>");
                 sbResult.append(args[1]);
                 sbResult.append("</TD>");
                 sbResult.append("</TR>");
@@ -469,13 +463,13 @@ public class ResourcePageWriter
         return sbResult.toString();
     }
 
-
     /**
      * Sets Globalsight Locale objects.
+     * 
      * @exception UploadPageSaverException
      */
     private void setPageLocales(String p_sourceLocale, String p_targetLocale)
-        throws AmbassadorDwUpException
+            throws AmbassadorDwUpException
     {
         LocaleManager mgr = null;
 
@@ -483,14 +477,13 @@ public class ResourcePageWriter
         {
             mgr = ServerProxy.getLocaleManager();
 
-            m_sourceLocale =  mgr.getLocaleByString(p_sourceLocale);
-            m_targetLocale =  mgr.getLocaleByString(p_targetLocale);
+            m_sourceLocale = mgr.getLocaleByString(p_sourceLocale);
+            m_targetLocale = mgr.getLocaleByString(p_targetLocale);
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(ex);
         }
     }
 }
-

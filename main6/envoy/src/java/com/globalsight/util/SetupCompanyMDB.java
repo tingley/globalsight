@@ -21,8 +21,10 @@ import java.awt.Point;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
@@ -58,6 +60,7 @@ import com.globalsight.everest.webapp.pagehandler.administration.calendars.Calen
 import com.globalsight.everest.webapp.pagehandler.administration.projects.ProjectHandlerHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.CreateUserWrapper;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.SystemAction;
 import com.globalsight.everest.workflow.WorkflowConditionSpec;
@@ -78,13 +81,13 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  * <li>Activities</li>
  * <li>Users</li>
  * <li>A Project</li>
- * <li>Work flows</li>
+ * <li>Workflows</li>
  * </ul>
  */
 public class SetupCompanyMDB extends GenericQueueMDB
 {
-    private static Logger CATEGORY = Logger
-            .getLogger(SetupCompanyMDB.class.getName());
+    private static Logger CATEGORY = Logger.getLogger(SetupCompanyMDB.class
+            .getName());
 
     private static final long serialVersionUID = 1L;
 
@@ -117,21 +120,22 @@ public class SetupCompanyMDB extends GenericQueueMDB
 
     private final long IT_IT_LOCALE_ID = 64;
 
-    private final long[] LOCALE_TO = { DE_DE_LOCALE_ID, ES_ES_LOCALE_ID,
-            FR_FR_LOCALE_ID, IT_IT_LOCALE_ID };
+    private final long[] LOCALE_TO =
+    { DE_DE_LOCALE_ID, ES_ES_LOCALE_ID, FR_FR_LOCALE_ID, IT_IT_LOCALE_ID };
 
     // For adding activities
     private static final String DEFAULT_DECCRIPTION = "";
 
-    private static final String[] TRANS = { "Translation1", "Translation2",
-            "Translation3", "Translation4", "Dtp1", "Dtp2", "Dtp3", "Dtp4",
-            "Gs_dtpSO1", "Gs_dtpSO2", "GSPM1", "GSPM2", "GSPM3", "GSPM4",
-            "GSPM5", "LSO", "Null", "Final_approval", "DTP_postLSO",
-            "DTP_Preview" };
+    private static final String[] TRANS =
+    { "Translation1", "Translation2", "Translation3", "Translation4", "Dtp1",
+            "Dtp2", "Dtp3", "Dtp4", "Gs_dtpSO1", "Gs_dtpSO2", "GSPM1", "GSPM2",
+            "GSPM3", "GSPM4", "GSPM5", "LSO", "Null", "Final_approval",
+            "DTP_postLSO", "DTP_Preview" };
 
-    private static final String[] REVIEWERS = { "review_linguistc1",
-            "review_linguistc2", "review_linguistc3", "review_linguistc4",
-            "review_dtp1", "review_dtp2", "review_dtp3", "review_dtp4" };
+    private static final String[] REVIEWERS =
+    { "review_linguistc1", "review_linguistc2", "review_linguistc3",
+            "review_linguistc4", "review_dtp1", "review_dtp2", "review_dtp3",
+            "review_dtp4" };
 
     // For creating users
     private final String DEFAULT_PASSWORD = "password";
@@ -140,7 +144,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
 
     private final String DEFAULT_UI_LOCALE = "en_US";
 
-    private final String[] PM_ACTIVITIES = { "GSPM1", "GSPM2", "GSPM3", "GSPM4" };
+    private final String[] PM_ACTIVITIES =
+    { "GSPM1", "GSPM2", "GSPM3", "GSPM4" };
 
     // For create project
     private final String DEFAULT_PROJECT_NAME = "Template";
@@ -174,23 +179,27 @@ public class SetupCompanyMDB extends GenericQueueMDB
 
     private final String END_TYPE = "1";
 
-    private final String[][] TO_TASKS = { // real x,y need * X_RATIO or
-    // Y_RATIO.
-            // name(0) type(1) activity (2) x(3) y(4)
+    private final String[][] TO_TASKS =
+    { // real x,y need * X_RATIO or
+      // Y_RATIO.
+      // name(0) type(1) activity (2) x(3) y(4)
             { START_NODE, START_TYPE, null, "10", "20" }, // 0
             { "", NODE_TYPE, "Translation1", "24", "35" }, // 1
             { "", NODE_TYPE, "GSPM1", "41", "35" }, // 2
             { END_NODE, END_TYPE, null, "55", "20" } // 3
     };
 
-    private final String[][] TO_ARROWS = {
+    private final String[][] TO_ARROWS =
+    {
             // name(0) type(1) start note(2) end note(3)
-            { "Action75", "1", "0", "1" }, { "Action76", "1", "1", "2" },
+            { "Action75", "1", "0", "1" },
+            { "Action76", "1", "1", "2" },
             { "Action77", "1", "2", "3" } };
 
-    private final String[][] TR_TASKS = { // real x,y need * X_RATIO or
-    // Y_RATIO.
-            // name(0) type(1) activity (2) x(3) y(4)
+    private final String[][] TR_TASKS =
+    { // real x,y need * X_RATIO or
+      // Y_RATIO.
+      // name(0) type(1) activity (2) x(3) y(4)
             { "", NODE_TYPE, "Translation1", "10", "20" }, // 0
             { "", NODE_TYPE, "review_linguistc1", "26", "20" }, // 1
             { "", NODE_TYPE, "Translation2", "42", "20" }, // 2
@@ -213,24 +222,34 @@ public class SetupCompanyMDB extends GenericQueueMDB
             { "", NODE_TYPE, "GSPM2", "70", "80" }, // 16
     };
 
-    private final String[][] TR_ARROWS = {
+    private final String[][] TR_ARROWS =
+    {
             // name(0) type(1) start note(2) end note(3)
-            { "Action1", "1", "6", "0" }, { "Action2", "1", "0", "1" },
-            { "Action3", "1", "1", "7" }, { "Edits Required", "1", "7", "2" },
-            { "Action5", "1", "2", "3" }, { "Action6", "1", "3", "8" },
-            { "Edits Required", "1", "8", "4" }, { "Action8", "1", "4", "5" },
+            { "Action1", "1", "6", "0" },
+            { "Action2", "1", "0", "1" },
+            { "Action3", "1", "1", "7" },
+            { "Edits Required", "1", "7", "2" },
+            { "Action5", "1", "2", "3" },
+            { "Action6", "1", "3", "8" },
+            { "Edits Required", "1", "8", "4" },
+            { "Action8", "1", "4", "5" },
             { "Action97", "1", "5", "9" },
             { "Edits Required:to PM", "1", "9", "10" },
-            { "To SignOff", "1", "7", "13" }, { "To SignOff", "1", "8", "13" },
-            { "To SignOff", "1", "9", "13" }, { "Action99", "1", "10", "14" },
-            { "Action123", "1", "12", "11" }, { "Action122", "1", "13", "12" },
+            { "To SignOff", "1", "7", "13" },
+            { "To SignOff", "1", "8", "13" },
+            { "To SignOff", "1", "9", "13" },
+            { "Action99", "1", "10", "14" },
+            { "Action123", "1", "12", "11" },
+            { "Action122", "1", "13", "12" },
             { "To SignOff", "1", "14", "13" },
             { "Translation", "1", "14", "15" },
-            { "Action102", "1", "15", "16" }, { "Action106", "1", "16", "13" } };
+            { "Action102", "1", "15", "16" },
+            { "Action106", "1", "16", "13" } };
 
-    private final String[][] TRD_TASKS = { // real x,y need * X_RATIO or
-    // Y_RATIO.
-            // name(0) type(1) activity (2) x(3) y(4)
+    private final String[][] TRD_TASKS =
+    { // real x,y need * X_RATIO or
+      // Y_RATIO.
+      // name(0) type(1) activity (2) x(3) y(4)
             { "", NODE_TYPE, "Translation1", "10", "20" }, // 0
             { "", NODE_TYPE, "review_linguistc1", "26", "20" }, // 1
             { "", NODE_TYPE, "Translation2", "42", "20" }, // 2
@@ -275,36 +294,50 @@ public class SetupCompanyMDB extends GenericQueueMDB
             { "", NODE_TYPE, "Dtp4", "70", "170" } // 33
     };
 
-    private final String[][] TRD_ARROWS = {
+    private final String[][] TRD_ARROWS =
+    {
             // name(0) type(1) start note(2) end note(3)
-            { "Action1", "1", "6", "0" }, { "Action2", "1", "0", "1" },
-            { "Action3", "1", "1", "7" }, { "Edits Required", "1", "7", "2" },
-            { "Action5", "1", "2", "3" }, { "Action6", "1", "3", "8" },
-            { "Edits Required", "1", "8", "4" }, { "Action8", "1", "4", "5" },
+            { "Action1", "1", "6", "0" },
+            { "Action2", "1", "0", "1" },
+            { "Action3", "1", "1", "7" },
+            { "Edits Required", "1", "7", "2" },
+            { "Action5", "1", "2", "3" },
+            { "Action6", "1", "3", "8" },
+            { "Edits Required", "1", "8", "4" },
+            { "Action8", "1", "4", "5" },
             { "Action97", "1", "5", "9" },
             { "Edits Required:to PM", "1", "9", "10" },
             { "Approved for DTP", "1", "7", "13" },
             { "Approved for DTP", "1", "8", "13" },
             { "Approved for DTP", "1", "9", "13" },
-            { "Action99", "1", "10", "14" }, { "Action105", "1", "12", "11" },
+            { "Action99", "1", "10", "14" },
+            { "Action105", "1", "12", "11" },
             { "Action104", "1", "13", "12" },
             { "Approved for DTP", "1", "14", "13" },
             { "Translation", "1", "14", "15" },
-            { "Action102", "1", "15", "16" }, { "Action103", "1", "16", "13" },
-            { "Action106", "1", "11", "17" }, { "Action107", "1", "17", "18" },
-            { "Action108", "1", "18", "23" }, { "dtp edits", "1", "23", "19" },
-            { "Action110", "1", "19", "20" }, { "Action111", "1", "20", "24" },
-            { "dtp edits", "1", "24", "21" }, { "Action113", "1", "21", "29" },
+            { "Action102", "1", "15", "16" },
+            { "Action103", "1", "16", "13" },
+            { "Action106", "1", "11", "17" },
+            { "Action107", "1", "17", "18" },
+            { "Action108", "1", "18", "23" },
+            { "dtp edits", "1", "23", "19" },
+            { "Action110", "1", "19", "20" },
+            { "Action111", "1", "20", "24" },
+            { "dtp edits", "1", "24", "21" },
+            { "Action113", "1", "21", "29" },
             { "Action123", "1", "25", "22" },
             { "Approved for SO", "1", "23", "27" },
             { "Approved for SO", "1", "24", "27" },
-            { "Action122", "1", "26", "25" }, { "Action121", "1", "27", "26" },
+            { "Action122", "1", "26", "25" },
+            { "Action121", "1", "27", "26" },
             { "Approved for SO", "1", "28", "27" },
             { "Action114", "1", "29", "28" },
             { "Approved for SO", "1", "30", "27" },
             { "dtp edits:to PM", "1", "28", "31" },
-            { "Action117", "1", "31", "30" }, { "Action118", "1", "30", "33" },
-            { "Action119", "1", "33", "32" }, { "Action120", "1", "32", "27" } };
+            { "Action117", "1", "31", "30" },
+            { "Action118", "1", "30", "33" },
+            { "Action119", "1", "33", "32" },
+            { "Action120", "1", "32", "27" } };
 
     public SetupCompanyMDB()
     {
@@ -330,12 +363,10 @@ public class SetupCompanyMDB extends GenericQueueMDB
      * @throws GeneralException
      * @throws NamingException
      */
-    private void addDefaultItems() throws JobException, RemoteException,
-            GeneralException, NamingException
+    private void addDefaultItems() throws Exception
     {
-        CATEGORY.info("Begin to create default items for new company "
-                + "(company name: " + this.companyName + " company id: "
-                + this.companyId + ")");
+        CATEGORY.info("Creating default items for new company "
+                + this.companyName);
 
         createLanguagePairs();
         createActivities();
@@ -343,7 +374,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
         createProject();
         createWorkflows();
 
-        CATEGORY.info("Default items have been created successfully.");
+        CATEGORY.info("Done creating default items for company "
+                + this.companyName);
     }
 
     /**
@@ -357,8 +389,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
      */
     private void createLanguagePairs()
     {
-        CATEGORY.info("Begin to create locale pairs for company "
-                + this.companyName);
+        CATEGORY.info("Creating locale pairs for company " + this.companyName);
 
         long srcId = EN_US_LOCALE_ID;
 
@@ -383,18 +414,19 @@ public class SetupCompanyMDB extends GenericQueueMDB
                 // locale.
                 try
                 {
-                    LocalePair lp = new LocalePair(srcLocale, targLocale, Long
-                            .toString(companyId));
+                    LocalePair lp = new LocalePair(srcLocale, targLocale,
+                            Long.toString(companyId));
                     HibernateUtil.saveOrUpdate(lp);
                     localePairs.add(lp);
                 }
                 catch (Exception e)
                 {
-                    CATEGORY.error("Failed to add a locale pair"
-                            + srcLocale.toString() + " : "
-                            + targLocale.toString(), e);
-                    String args[] = { srcLocale.toString(),
-                            targLocale.toString() };
+                    CATEGORY.error(
+                            "Failed to add a locale pair"
+                                    + srcLocale.toString() + " : "
+                                    + targLocale.toString(), e);
+                    String args[] =
+                    { srcLocale.toString(), targLocale.toString() };
                     throw new LocaleManagerException(
                             LocaleManagerException.MSG_FAILED_TO_ADD_LOCALE_PAIR,
                             args, e);
@@ -407,7 +439,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
                     lme);
         }
 
-        CATEGORY.info("Locale pairs have been created successfully.");
+        CATEGORY.info("Done creating locale pairs for company "
+                + this.companyName);
     }
 
     /**
@@ -428,12 +461,10 @@ public class SetupCompanyMDB extends GenericQueueMDB
      * @throws GeneralException
      * @throws NamingException
      */
-    private void createActivities() throws JobException, RemoteException,
-            GeneralException, NamingException
+    private void createActivities() throws Exception
     {
 
-        CATEGORY.info("Begin to create activities for company "
-                + this.companyName);
+        CATEGORY.info("Creating activities for company " + this.companyName);
 
         activities = new ArrayList<Activity>();
 
@@ -464,7 +495,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
             activities.add(act);
         }
 
-        CATEGORY.info("Activities have been created successfully.");
+        CATEGORY.info("Done creating activities for company "
+                + this.companyName);
     }
 
     /**
@@ -514,7 +546,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
      */
     private void createUsers()
     {
-        CATEGORY.info("Begin to create users for company " + this.companyName);
+        CATEGORY.info("Creating users for company " + this.companyName);
         this.pmName = getPmName();
         this.adminName = getAdminName();
         this.lpName = getLpName();
@@ -551,7 +583,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
             this.lpName = null;
         }
 
-        CATEGORY.info("Users have been created successfully.");
+        CATEGORY.info("Done creating users for company " + this.companyName);
     }
 
     /**
@@ -582,8 +614,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
             }
             else
             {
-                CATEGORY
-                        .error("Could not get the activity:" + PM_ACTIVITIES[i]);
+                CATEGORY.error("Could not get the activity:" + PM_ACTIVITIES[i]);
             }
         }
 
@@ -595,8 +626,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
      * Creates a workflow template.
      * 
      * <p>
-     * <code>tasksInfo</code> and <code>arrowsInfo</code> include
-     * informations about the template.
+     * <code>tasksInfo</code> and <code>arrowsInfo</code> include informations
+     * about the template.
      * 
      * @param name
      *            The name of the template.
@@ -674,7 +705,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
         task.setCompletedTime(WorkflowConstants.complete_time);
         task.setOverdueToPM(WorkflowConstants.overDuePM_time);
         task.setOverdueToUser(WorkflowConstants.overDueUser_time);
-        
+
         task.setDisplayRoleName(this.DEFAULT_ROLE);
         task.setActionType(SystemAction.NO_ACTION);
         task.setConditionSpec(new WorkflowConditionSpec());
@@ -684,10 +715,11 @@ public class SetupCompanyMDB extends GenericQueueMDB
         {
             StringBuffer role = new StringBuffer();
             role.append(activity.getId()).append(" ")
-                    .append(activity.getName()).append(" ").append(
-                            localePair.getSource()).append(" ").append(
-                            localePair.getTarget());
-            String[] roles = { role.toString() };
+                    .append(activity.getName()).append(" ")
+                    .append(localePair.getSource()).append(" ")
+                    .append(localePair.getTarget());
+            String[] roles =
+            { role.toString() };
             task.setRoles(roles);
         }
         else if (CONDITION_NODE.equals(name))
@@ -721,24 +753,24 @@ public class SetupCompanyMDB extends GenericQueueMDB
         ArrayList<String> managerIds = new ArrayList<String>();
         if (this.pmName != null)
         {
-            managerIds.add(this.pmName);
+            managerIds.add(UserUtil.getUserIdByName(this.pmName));
         }
 
         if (this.adminName != null)
         {
-            managerIds.add(this.adminName);
+            managerIds.add(UserUtil.getUserIdByName(this.adminName));
         }
 
         // Sets leverage locale.
-        Vector<LeverageLocales> leveragingLocales = new Vector<LeverageLocales>();
-        LeverageLocales leverageLocale = new LeverageLocales(localePair
-                .getTarget());
+        Set<LeverageLocales> leveragingLocales = new HashSet<LeverageLocales>();
+        LeverageLocales leverageLocale = new LeverageLocales(
+                localePair.getTarget());
         leveragingLocales.add(leverageLocale);
 
         // Sets workflowtemplateInfo.
         WorkflowTemplateInfo wfti = new WorkflowTemplateInfo(name, "", project,
-                true, managerIds, localePair.getSource(), localePair
-                        .getTarget(), EN_US_ENCODING, leveragingLocales);
+                true, managerIds, localePair.getSource(),
+                localePair.getTarget(), EN_US_ENCODING, leveragingLocales);
 
         wfti.setWorkflowType(WorkflowTypeConstants.TYPE_TRANSLATION);
 
@@ -763,9 +795,9 @@ public class SetupCompanyMDB extends GenericQueueMDB
      *            It is used to get the name of workflow template info and
      *            template.
      *            <ul>
-     *            <li><code>T</code> means Translation_Only</li>
-     *            <li><code>TR</code> Translation_Review</li>
-     *            <li><code>TRD</code> Translation_Review_DTP</li>
+     *            <li><code>T</code> means Translation_Only</li> <li><code>TR
+     *            </code> Translation_Review</li> <li><code>TRD</code>
+     *            Translation_Review_DTP</li>
      *            </ul>
      * @param lPair
      * @param tasksInfo
@@ -801,8 +833,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
     }
 
     /**
-     * Creates a workflow, the nameSuffix is <code>_T</code>, the tasksInfo
-     * is <code>this.TO_TASKS</code>, and the arrowsInfo is
+     * Creates a workflow, the nameSuffix is <code>_T</code>, the tasksInfo is
+     * <code>this.TO_TASKS</code>, and the arrowsInfo is
      * <code>this.TO_ARROWS</code>
      * 
      * @param localePair
@@ -813,8 +845,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
     }
 
     /**
-     * Creates a workflow, the nameSuffix is <code>_TR</code>, the tasksInfo
-     * is <code>this.TR_TASKS</code>, and the arrowsInfo is
+     * Creates a workflow, the nameSuffix is <code>_TR</code>, the tasksInfo is
+     * <code>this.TR_TASKS</code>, and the arrowsInfo is
      * <code>this.TR_ARROWS</code>
      * 
      * @param localePair
@@ -825,8 +857,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
     }
 
     /**
-     * Creates a workflow, the nameSuffix is <code>_TRD</code>, the tasksInfo
-     * is <code>this.TRD_TASKS</code>, and the arrowsInfo is
+     * Creates a workflow, the nameSuffix is <code>_TRD</code>, the tasksInfo is
+     * <code>this.TRD_TASKS</code>, and the arrowsInfo is
      * <code>this.TRD_ARROWS</code>
      * 
      * @param localePair
@@ -841,8 +873,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
      */
     private void createWorkflows()
     {
-        CATEGORY.info("Begin to create workflows for company "
-                + this.companyName);
+        CATEGORY.info("Creating workflows for company " + this.companyName);
 
         if (this.project == null)
         {
@@ -858,7 +889,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
             createTRDWorkflow(localePair);
         }
 
-        CATEGORY.info("Workflows have been created successfully.");
+        CATEGORY.info("Done creating Workflows for company " + this.companyName);
     }
 
     /**
@@ -890,7 +921,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
                 this.createUser);
 
         // Sets default informations
-        wrapper.setUserId(name);
+        wrapper.setUserId(UserUtil.newUserId(name));
+        wrapper.setUserName(name);
         wrapper.setFirstName(name);
         wrapper.setLastName(name);
         wrapper.setCompanyName(this.companyName);
@@ -936,8 +968,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
         // Adds calendar
         FluxCalendar baseCal = CalendarHelper.getDefaultCalendar(Long
                 .toString(companyId));
-        UserFluxCalendar cal = new UserFluxCalendar(baseCal.getId(), wrapper
-                .getUserId(), baseCal.getTimeZoneId());
+        UserFluxCalendar cal = new UserFluxCalendar(baseCal.getId(),
+                wrapper.getUserId(), baseCal.getTimeZoneId());
         CalendarHelper.updateUserCalFieldsFromBase(baseCal, cal);
         wrapper.setCalendar(cal);
 
@@ -948,8 +980,9 @@ public class SetupCompanyMDB extends GenericQueueMDB
         ArrayList<String> users = new ArrayList<String>(1);
         users.add(wrapper.getUserId());
 
-        Collection<PermissionGroup> allPermGroups = Permission.getPermissionManager()
-                .getAllPermissionGroupsByCompanyId(Long.toString(companyId));
+        Collection<PermissionGroup> allPermGroups = Permission
+                .getPermissionManager().getAllPermissionGroupsByCompanyId(
+                        Long.toString(companyId));
         Iterator<PermissionGroup> iter = allPermGroups.iterator();
         while (iter.hasNext())
         {
@@ -1010,15 +1043,13 @@ public class SetupCompanyMDB extends GenericQueueMDB
      * <p>
      * The name of the default project is <code>this.DEFAULT_PROJECT_NAME</code>
      */
-    private void createProject()
+    private void createProject() throws Exception
     {
-        CATEGORY
-                .info("Begin to create project for company " + this.companyName);
+        CATEGORY.info("Creating project for company " + this.companyName);
 
         if (this.pmName == null)
         {
-            CATEGORY
-                    .error("Could not create project because the project manager hasn't been found");
+            CATEGORY.error("Could not create project because the project manager hasn't been found");
             return;
         }
 
@@ -1029,22 +1060,22 @@ public class SetupCompanyMDB extends GenericQueueMDB
         project.setName(DEFAULT_PROJECT_NAME);
         project.setQuotePerson(null);
 
-        User pm = UserHandlerHelper.getUser(this.pmName);
+        User pm = ServerProxy.getUserManager().getUserByName(this.pmName);
         project.setProjectManager(pm);
 
         // Adds default users for the project.
         TreeSet<String> users = new TreeSet<String>();
         if (this.pmName != null)
         {
-            users.add(this.pmName);
+            users.add(UserUtil.getUserIdByName(this.pmName));
         }
         if (this.adminName != null)
         {
-            users.add(this.adminName);
+            users.add(UserUtil.getUserIdByName(this.adminName));
         }
         if (this.lpName != null)
         {
-            users.add(this.lpName);
+            users.add(UserUtil.getUserIdByName(this.lpName));
         }
 
         project.setUserIds(users);
@@ -1052,7 +1083,7 @@ public class SetupCompanyMDB extends GenericQueueMDB
         ProjectHandlerHelper.addProject(project);
         this.project = project;
 
-        CATEGORY.info("Projects have been created successfully.");
+        CATEGORY.info("Done creating project for company " + this.companyName);
     }
 
     /**
@@ -1064,7 +1095,8 @@ public class SetupCompanyMDB extends GenericQueueMDB
     {
         try
         {
-            ArrayList<?> msg = (ArrayList<?>) ((ObjectMessage) message).getObject();
+            ArrayList<?> msg = (ArrayList<?>) ((ObjectMessage) message)
+                    .getObject();
             this.companyName = (String) msg.get(0);
             this.companyId = Long.parseLong((String) msg.get(1));
             this.createUser = (User) msg.get(2);

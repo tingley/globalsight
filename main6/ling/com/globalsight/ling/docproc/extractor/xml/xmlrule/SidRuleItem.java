@@ -27,12 +27,11 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.globalsight.ling.docproc.extractor.xml.Rule;
-import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
 
 
 public class SidRuleItem extends XmlRuleItem
 {
-    private static final String NAME = "sid";
+    public static final String NAME = "sid";
 
     private NotTranslateRuleItem item = new NotTranslateRuleItem();
 
@@ -82,8 +81,7 @@ public class SidRuleItem extends XmlRuleItem
             name = nameNode.getNodeValue();
         }
 
-        NodeList affectedNodes = XPathAPI.selectNodeList(toBeExtracted
-                .getDocumentElement(), xpath);
+        NodeList affectedNodes = selectNodeList(toBeExtracted, xpath);
         if (affectedNodes != null)
         {
             for (int l = 0; l < affectedNodes.getLength(); ++l)

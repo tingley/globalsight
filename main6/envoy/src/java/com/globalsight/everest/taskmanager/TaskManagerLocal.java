@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -31,7 +32,6 @@ import java.util.TimeZone;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -135,11 +135,33 @@ public class TaskManagerLocal implements TaskManager
      * @param isSkipped
      *            If this task is being skipped.
      * 
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
-	public void acceptTask(String p_userId, Task p_task,
-			boolean isSkipped) throws RemoteException, TaskException
+    public void acceptTask(String p_userId, Task p_task, boolean isSkipped)
+            throws RemoteException, TaskException
+    {
+        Map<String, Object> data = new HashMap<String, Object>();
+        data.put("isSkipped", isSkipped);
+        acceptTask(p_userId, p_task, data);
+    }
+
+    /**
+     * To accept a Task. It invokes Iflow to accept a task, also saved accepted
+     * time to database task_info table.
+     * 
+     * @param p_userId
+     *            the Id of the user who accepts the task.
+     * @param p_task
+     *            The task to be accepted.
+     * @param data
+     *            Keeps the data for this method.
+     * 
+     * @throws RemoteException
+     *             , TaskException
+     */
+    public void acceptTask(String p_userId, Task p_task,
+            Map<String, Object> data) throws RemoteException, TaskException
     {
         Task task = validateTaskForAcceptance(p_userId, p_task);
         // this would be the base date in case of an exception
@@ -179,8 +201,8 @@ public class TaskManagerLocal implements TaskManager
             if (wfClone.isEstimatedTranslateCompletionDateOverrided())
             {
                 m_workflowManager.updateEstimatedTranslateCompletionDate(
-                        wfClone.getId(), wfClone
-                                .getEstimatedTranslateCompletionDate());
+                        wfClone.getId(),
+                        wfClone.getEstimatedTranslateCompletionDate());
             }
         }
         catch (Exception te)
@@ -205,7 +227,19 @@ public class TaskManagerLocal implements TaskManager
         {
             TaskEmailInfo emailInfo = createTaskEmailInfo(wfClone.getJob(),
                     p_task, null);
-            printDebuggingInfo(p_task);
+            // printDebuggingInfo(p_task);
+            if (data.get("ignoredReceipt") != null)
+            {
+                HashSet<String> ignoredReceipt = (HashSet) data
+                        .get("ignoredReceipt");
+                emailInfo.setIgnoredReceipt(ignoredReceipt);
+            }
+            boolean isSkipped = false;
+            if (data.get("isSkipped") != null)
+            {
+                isSkipped = (Boolean) data.get("isSkipped");
+            }
+
             m_workflowServer.acceptTask(wfClone, p_userId, p_task.getId(),
                     taskInfo, emailInfo, isSkipped);
         }
@@ -215,7 +249,7 @@ public class TaskManagerLocal implements TaskManager
             try
             {
                 unacceptTask(task, wfTaskInfos, originalCompletedBy, p_userId,
-                        null, null);
+                        null);
             }
             catch (Exception te)
             {
@@ -232,8 +266,8 @@ public class TaskManagerLocal implements TaskManager
             { "WorkflowServer error!" };
             CATEGORY.error("acceptTask(): " + we.toString() + " p_task="
                     + WorkflowHelper.toDebugString(p_task), we);
-            throw new TaskException(we.getMessageKey(), we
-                    .getMessageArguments(), we, we.getPropertyFileName());
+            throw new TaskException(we.getMessageKey(),
+                    we.getMessageArguments(), we, we.getPropertyFileName());
         }
     }
 
@@ -245,18 +279,19 @@ public class TaskManagerLocal implements TaskManager
      *            the Id of the user who completes the task.
      * @param p_task
      *            The task to be completed.
-     * @param p_destinationArrow -
-     *            The name of the outgoing arrow of a condition node (if the
+     * @param p_destinationArrow
+     *            - The name of the outgoing arrow of a condition node (if the
      *            next node of this task is a condition node). This is used for
      *            making decision.
      * @param skipping
      *            Indicates this task is being skipped.
      * 
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
     public void completeTask(String p_userId, Task p_task,
-            String p_destinationArrow, String skipping) throws RemoteException, TaskException
+            String p_destinationArrow, String skipping) throws RemoteException,
+            TaskException
     {
         validateStateOfPages(p_task);
         try
@@ -266,8 +301,8 @@ public class TaskManagerLocal implements TaskManager
         }
         catch (WorkflowManagerException wfe)
         {
-            throw new TaskException(wfe.getMessageKey(), wfe
-                    .getMessageArguments(), wfe, wfe.getPropertyFileName());
+            throw new TaskException(wfe.getMessageKey(),
+                    wfe.getMessageArguments(), wfe, wfe.getPropertyFileName());
         }
         catch (Exception e)
         {
@@ -283,18 +318,18 @@ public class TaskManagerLocal implements TaskManager
      *            the Id of the user.
      * @param p_taskId
      *            The id of the target task.
-     * @param p_state -
-     *            The state of the task to be retrieved. Since a list of
+     * @param p_state
+     *            - The state of the task to be retrieved. Since a list of
      *            activities are displayed based on their state, it's important
      *            to pass the state in order to get the appropriate details
      *            info.
      * 
      * @return a Task object
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
-    public Task getTask(String p_userId, long p_taskId,
-            int p_state) throws RemoteException, TaskException
+    public Task getTask(String p_userId, long p_taskId, int p_state)
+            throws RemoteException, TaskException
     {
         // get the WorkflowTaskInstance from IFLow
         WorkflowTaskInstance wfTask;
@@ -315,8 +350,9 @@ public class TaskManagerLocal implements TaskManager
         {
             String[] msgArgs =
             { "" + p_taskId };
-            CATEGORY.error("getTask(): " + we.toString() + " p_taskId="
-                    + Long.toString(p_taskId), we);
+            CATEGORY.error(
+                    "getTask(): " + we.toString() + " p_taskId="
+                            + Long.toString(p_taskId), we);
 
             throw new TaskException(
                     TaskException.MSG_FAILED_TO_GET_TASK_IN_TRANSIT, msgArgs,
@@ -357,11 +393,12 @@ public class TaskManagerLocal implements TaskManager
         {
             // set WorkflowTaskInstance to Task
             task.setWorkflowTask(wfTask);
-            
+
             // set project manager name to Task
             if (!"".equals(task.getProjectManagerId()))
             {
-                String projName = getProjectManagerName(task.getProjectManagerId());
+                String projName = getProjectManagerName(task
+                        .getProjectManagerId());
                 task.setProjectManagerName(projName);
             }
         }
@@ -377,8 +414,8 @@ public class TaskManagerLocal implements TaskManager
      * 
      * @return a hashtable containing workflowIds as key and task completed time
      *         as value
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
     public Collection getFirstCompletedActivityTime(long p_jobId)
             throws RemoteException, TaskException
@@ -427,8 +464,9 @@ public class TaskManagerLocal implements TaskManager
         {
             String[] msgArgs =
             { "TopLink access error!" };
-            CATEGORY.error("getTask(): " + te.toString() + " p_taskId="
-                    + Long.toString(p_taskId), te);
+            CATEGORY.error(
+                    "getTask(): " + te.toString() + " p_taskId="
+                            + Long.toString(p_taskId), te);
             throw new TaskException(TaskException.MSG_FAILED_TO_GET_TASK,
                     msgArgs, te);
         }
@@ -444,8 +482,8 @@ public class TaskManagerLocal implements TaskManager
      * @exception RemoteException
      * @exception TaskException
      */
-    public Map getWFTasks(User p_user, int p_taskState)
-            throws RemoteException, TaskException
+    public Map getWFTasks(User p_user, int p_taskState) throws RemoteException,
+            TaskException
     {
         String userId = p_user.getUserId();
         boolean isProjManager = isProjectManager(p_user);
@@ -512,15 +550,15 @@ public class TaskManagerLocal implements TaskManager
      *            The state of the target tasks.
      * 
      * @return a Map of taskId and Task key value pair
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
     public List getTasks(String p_userId, int p_taskState)
             throws RemoteException, TaskException
     {
         List tasks = null;
-        Map wfTasks = getWFTasks(ServerProxy.getUserManager()
-                .getUser(p_userId), p_taskState);
+        Map wfTasks = getWFTasks(
+                ServerProxy.getUserManager().getUser(p_userId), p_taskState);
 
         if (wfTasks != null && wfTasks.size() != 0)
         {
@@ -576,7 +614,7 @@ public class TaskManagerLocal implements TaskManager
             throws RemoteException, TaskException
     {
         HashMap<String, String> pmIdName = new HashMap<String, String>();
-        
+
         Iterator iter = p_tasks.iterator();
         HashMap activities = new HashMap();
         // Link each WorkflowTaskInstance with its corresponding Task
@@ -655,12 +693,12 @@ public class TaskManagerLocal implements TaskManager
         Integer state = (Integer) params.get(new Integer(
                 TaskSearchParameters.STATE));
         Map wfTasks = getWFTasks(user, state.intValue());
-        
+
         if (wfTasks.isEmpty())
         {
             return new ArrayList();
         }
-        
+
         p_searchParameters.setIds(wfTasks.keySet());
         List tasks = (List) TaskPersistenceAccessor
                 .getTasks(p_searchParameters);
@@ -682,10 +720,10 @@ public class TaskManagerLocal implements TaskManager
             String sql = TaskDescriptorModifier.TASKS_BY_NAME_AND_JOB_ID_SQL;
             if (p_taskName != null && p_taskName.trim().length() > 0)
             {
-            	sql = sql + " AND t.NAME = :taskName";
+                sql = sql + " AND t.NAME = :taskName";
                 map.put(TaskDescriptorModifier.TASK_NAME_ARG, p_taskName);
             }
-            
+
             tasks = HibernateUtil.searchWithSql(sql, map, TaskImpl.class);
         }
         catch (Exception pe)
@@ -877,8 +915,8 @@ public class TaskManagerLocal implements TaskManager
             {
                 TaskInfo tInfo = new TaskInfo(task.getId(), task.getTaskName(),
                         task.getState(), task.getEstimatedAcceptanceDate(),
-                        task.getEstimatedCompletionDate(), task
-                                .getAcceptedDate(), task.getCompletedDate(),
+                        task.getEstimatedCompletionDate(),
+                        task.getAcceptedDate(), task.getCompletedDate(),
                         task.getType());
                 String acceptor = task.getAcceptor();
                 if (acceptor != null && acceptor.length() > 0)
@@ -1035,8 +1073,8 @@ public class TaskManagerLocal implements TaskManager
         String taskName = sb.toString();
 
         ReservedTime rt = new ReservedTime(taskName, p_reservedTimeType, start,
-                start.getHour(), start.getMinute(), end, end.getHour(), end
-                        .getMinute(), null, p_clonedTask.getIdAsLong());
+                start.getHour(), start.getMinute(), end, end.getHour(),
+                end.getMinute(), null, p_clonedTask.getIdAsLong());
 
         p_calClone.addReservedTime(rt);
         p_session.save(rt);
@@ -1048,8 +1086,8 @@ public class TaskManagerLocal implements TaskManager
             bufferEnd.setDate(end.getDate());
             bufferEnd.add(Timestamp.HOUR, p_calClone.getActivityBuffer());
             ReservedTime buffer = new ReservedTime(taskName,
-                    ReservedTime.TYPE_BUFFER, end, end.getHour(), end
-                            .getMinute(), bufferEnd, bufferEnd.getHour(),
+                    ReservedTime.TYPE_BUFFER, end, end.getHour(),
+                    end.getMinute(), bufferEnd, bufferEnd.getHour(),
                     bufferEnd.getMinute(), null, p_clonedTask.getIdAsLong());
 
             p_calClone.addReservedTime(buffer);
@@ -1206,10 +1244,9 @@ public class TaskManagerLocal implements TaskManager
         }
         catch (Exception e)
         {
-            CATEGORY
-                    .error(
-                            "Failed to notify Project Manager about stf creation failure.",
-                            e);
+            CATEGORY.error(
+                    "Failed to notify Project Manager about stf creation failure.",
+                    e);
         }
     }
 
@@ -1221,7 +1258,8 @@ public class TaskManagerLocal implements TaskManager
      * CATEGORY.error("rollBackDBTaskCompletion(): " + te.toString() + "
      * p_task=" + WorkflowHelper.toDebugString(p_task) + " p_originalDate=" +
      * WorkflowHelper.toDebugString(p_originalDate), te); throw new
-     * TaskException(TaskException.MSG_FAILED_TO_COMPLETE_TASK, msgArgs, te); } }
+     * TaskException(TaskException.MSG_FAILED_TO_COMPLETE_TASK, msgArgs, te); }
+     * }
      */
 
     /**
@@ -1233,8 +1271,8 @@ public class TaskManagerLocal implements TaskManager
     }
 
     /**
-     * This method checks to see if the person has the "projects.manage"
-     * permission.
+     * This method checks to see if the person has the permission to get task
+     * without assignee check.
      */
     private boolean canManageProjects(String p_userId) throws RemoteException,
             TaskException
@@ -1246,7 +1284,8 @@ public class TaskManagerLocal implements TaskManager
             // projects
             PermissionSet perms = Permission.getPermissionManager()
                     .getPermissionSetForUser(p_userId);
-            result = perms.getPermissionFor(Permission.PROJECTS_MANAGE);
+            result = perms.getPermissionFor(Permission.PROJECTS_MANAGE)
+                    || perms.getPermissionFor(Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY);
         }
         catch (Exception e)
         {
@@ -1321,9 +1360,9 @@ public class TaskManagerLocal implements TaskManager
         WorkflowTemplateInfo wfti = p_job.getL10nProfile()
                 .getWorkflowTemplateInfo(p_task.getTargetLocale());
 
-        TaskEmailInfo emailInfo = new TaskEmailInfo(p_task
-                .getProjectManagerId(), wf
-                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+        TaskEmailInfo emailInfo = new TaskEmailInfo(
+                p_task.getProjectManagerId(),
+                wf.getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                 wfti.notifyProjectManager(), p_job.getPriority(),
                 p_rejectComment);
 
@@ -1358,16 +1397,13 @@ public class TaskManagerLocal implements TaskManager
      * process. Otherwise, just set the task comments and clear the acceptor
      * name.
      */
-    public void rejectTask(String p_userId,
-            String p_userName, Task p_task, String p_rejectComment)
+    public void rejectTask(String p_userId, Task p_task, String p_rejectComment)
             throws RemoteException, TaskException
     {
-
         TaskInfo taskInfo = null;
         try
         {
-            taskInfo = rejectTask(p_task, p_userId, p_userName,
-                    p_rejectComment);
+            taskInfo = rejectTask(p_task, p_userId, p_rejectComment);
         }
         catch (Exception te)
         {
@@ -1387,15 +1423,15 @@ public class TaskManagerLocal implements TaskManager
                     p_rejectComment);
             printDebuggingInfo(p_task);
 
-            m_workflowServer.rejectTask(p_userId, p_task.getId(),
-                    taskInfo, emailInfo);
+            m_workflowServer.rejectTask(p_userId, p_task.getId(), taskInfo,
+                    emailInfo);
         }
         catch (WorkflowException we)
         {
             try
             {
                 // rollback the above DB action for transaction consistence
-                Comment taskComment = new CommentImpl(new Date(), p_userName,
+                Comment taskComment = new CommentImpl(new Date(), p_userId,
                         p_rejectComment, p_task);
                 p_task.removeTaskComment(taskComment);
                 TaskPersistenceAccessor.updateTask(p_task);
@@ -1416,8 +1452,8 @@ public class TaskManagerLocal implements TaskManager
             CATEGORY.error("rejectTask(): " + we.toString() + " p_task="
                     + WorkflowHelper.toDebugString(p_task), we);
             ;
-            throw new TaskException(we.getMessageKey(), we
-                    .getMessageArguments(), we, we.getPropertyFileName());
+            throw new TaskException(we.getMessageKey(),
+                    we.getMessageArguments(), we, we.getPropertyFileName());
         }
     }
 
@@ -1426,9 +1462,8 @@ public class TaskManagerLocal implements TaskManager
      * process. Otherwise, just set the task comments and clear the acceptor
      * name.
      */
-    private TaskInfo rejectTask(Task p_task,
-            String p_rejectorId, String p_rejectorName, String p_rejectComment)
-            throws Exception
+    private TaskInfo rejectTask(Task p_task, String p_rejectorId,
+            String p_rejectComment) throws Exception
     {
 
         if (p_task.getState() == Task.STATE_ACCEPTED)
@@ -1439,12 +1474,12 @@ public class TaskManagerLocal implements TaskManager
                     null, p_task.getWorkflow().getId(), -1);
 
             unacceptTask(p_task, wfTaskInfos, null, p_rejectorId,
-                    p_rejectorName, p_rejectComment);
+                    p_rejectComment);
         }
         else
         {
             // Save reject comment to DB
-            Comment taskComment = new CommentImpl(new Date(), p_rejectorName,
+            Comment taskComment = new CommentImpl(new Date(), p_rejectorId,
                     p_rejectComment, p_task);
             p_task.addTaskComment(taskComment);
             p_task.setAcceptor(null);
@@ -1455,9 +1490,10 @@ public class TaskManagerLocal implements TaskManager
             removeScheduledActivity(p_task.getId(), p_rejectorId);
         }
 
-        return new TaskInfo(p_task.getId(), p_task.getTaskName(), p_task
-                .getState(), p_task.getEstimatedAcceptanceDate(), p_task
-                .getEstimatedCompletionDate(), null, null, p_task.getType());
+        return new TaskInfo(p_task.getId(), p_task.getTaskName(),
+                p_task.getState(), p_task.getEstimatedAcceptanceDate(),
+                p_task.getEstimatedCompletionDate(), null, null,
+                p_task.getType());
     }
 
     /*
@@ -1501,7 +1537,7 @@ public class TaskManagerLocal implements TaskManager
      * dates, acceptor, acceptance date, and so on).
      */
     private void unacceptTask(Task task, List wfTaskInfos, Date p_completedby,
-            String p_userId, String p_userFullName, String p_rejectComment) throws Exception
+            String p_userId, String p_rejectComment) throws Exception
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
@@ -1526,8 +1562,8 @@ public class TaskManagerLocal implements TaskManager
             // only during a rejection of a task
             if (p_rejectComment != null)
             {
-                Comment taskComment = new CommentImpl(new Date(),
-                        p_userFullName, p_rejectComment, task_temp);
+                Comment taskComment = new CommentImpl(new Date(), p_userId,
+                        p_rejectComment, task_temp);
                 task_temp.addTaskComment(taskComment);
             }
 
@@ -1536,8 +1572,8 @@ public class TaskManagerLocal implements TaskManager
             // now update the estimated acceptance/completion for the rest
             // of the tasks in the default path (following the accepted
             // task) and the workflow's completion time.
-            updateDefaultPathTasks(p_completedby, wfTaskInfos, wf, task_temp
-                    .getId(), session);
+            updateDefaultPathTasks(p_completedby, wfTaskInfos, wf,
+                    task_temp.getId(), session);
 
             // at this point we should create a proposed reserved time for
             // assigness
@@ -1555,9 +1591,11 @@ public class TaskManagerLocal implements TaskManager
                 EnvoyWorkItem ewi = (EnvoyWorkItem) workItems.get(i);
                 if (ewi.getWorkItemState() == WorkflowConstants.TASK_DEACTIVE)
                 {
-                    createReservedTime(baseDate, task_temp, task_temp
-                            .getTaskAcceptDuration()
-                            + task_temp.getTaskDuration(),
+                    createReservedTime(
+                            baseDate,
+                            task_temp,
+                            task_temp.getTaskAcceptDuration()
+                                    + task_temp.getTaskDuration(),
                             ReservedTime.TYPE_PROPOSED, ewi.getAssignee(),
                             session);
                 }
@@ -1573,8 +1611,8 @@ public class TaskManagerLocal implements TaskManager
         catch (Exception e)
         {
             tx.rollback();
-//            e.printStackTrace();
-            CATEGORY.error(e);
+            // e.printStackTrace();
+            CATEGORY.error(e.getMessage(), e);
         }
         finally
         {
@@ -1593,51 +1631,60 @@ public class TaskManagerLocal implements TaskManager
             String p_userId, Session p_session) throws Exception
     {
         JobEditionInfo je = getGSEditionJobByJobID(p_clonedTask.getJobId());
-        
-        if(je != null) {
-           String wsdl = je.getUrl();
-           Ambassador ambassador = 
-               WebServiceClientHelper.getClientAmbassador(wsdl, je.getUserName(), je.getPassword());
-           String fullAccessToken = ambassador.login(je.getUserName(), je.getPassword());
-           String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-           ambassador.updateTaskState(realAccessToken, 
-                                      je.getOriginalTaskId(), 
-                                      Long.toString(Task.STATE_IN_TRANSLATION));
+
+        if (je != null)
+        {
+            String wsdl = je.getUrl();
+            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
+                    wsdl, je.getUserName(), je.getPassword());
+            String fullAccessToken = ambassador.login(je.getUserName(),
+                    je.getPassword());
+            String realAccessToken = WebServiceClientHelper
+                    .getRealAccessToken(fullAccessToken);
+            ambassador.updateTaskState(realAccessToken, je.getOriginalTaskId(),
+                    Long.toString(Task.STATE_IN_TRANSLATION));
         }
-        
+
         p_clonedTask.setState(Task.STATE_ACCEPTED);
 
         p_clonedTask.setAcceptor(p_userId);
-        
-		// retrieve the overdue value from the jbpm task instance config xml.
-		JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-		TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
-				.getTaskInstance(p_clonedTask.getId(), ctx);
-		String config = WorkflowJbpmUtil.getConfigure(taskInstance.getTask()
-				.getTaskNode());
-		WorkflowNodeParameter param = WorkflowNodeParameter
-				.createInstance(config);
-		long overdueToPM = param.getLongAttribute(
-				WorkflowConstants.FIELD_OVERDUE_PM_TIME,
-				WorkflowTaskInstance.NO_RATE);
-		long overdueToUser = param.getLongAttribute(
-				WorkflowConstants.FIELD_OVERDUE_USER_TIME,
-				WorkflowTaskInstance.NO_RATE);
-		ctx.close();
 
-		Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
-				p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
-				p_userId, p_session);
-		p_clonedTask.setAcceptedDate(p_baseDate);
-		p_clonedTask.setEstimatedCompletionDate(estimatedDate);
+        // retrieve the overdue value from the jbpm task instance config xml.
+        JbpmContext ctx = null;
+        try
+        {
+            ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+            TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
+                    .getTaskInstance(p_clonedTask.getId(), ctx);
+            String config = WorkflowJbpmUtil.getConfigure(taskInstance.getTask()
+                    .getTaskNode());
+            WorkflowNodeParameter param = WorkflowNodeParameter
+                    .createInstance(config);
+            long overdueToPM = param.getLongAttribute(
+                    WorkflowConstants.FIELD_OVERDUE_PM_TIME,
+                    WorkflowTaskInstance.NO_RATE);
+            long overdueToUser = param.getLongAttribute(
+                    WorkflowConstants.FIELD_OVERDUE_USER_TIME,
+                    WorkflowTaskInstance.NO_RATE);
+            
+            Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
+                    p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
+                    p_userId, p_session);
+            p_clonedTask.setAcceptedDate(p_baseDate);
+            p_clonedTask.setEstimatedCompletionDate(estimatedDate);
 
-		TaskInfo taskInfo = new TaskInfo(p_clonedTask.getId(), p_clonedTask
-				.getTaskName(), p_clonedTask.getState(), null, estimatedDate,
-				p_baseDate, null, p_clonedTask.getType());
-		taskInfo.setOverdueToPM(overdueToPM);
-		taskInfo.setOverdueToUser(overdueToUser);
+            TaskInfo taskInfo = new TaskInfo(p_clonedTask.getId(),
+                    p_clonedTask.getTaskName(), p_clonedTask.getState(), null,
+                    estimatedDate, p_baseDate, null, p_clonedTask.getType());
+            taskInfo.setOverdueToPM(overdueToPM);
+            taskInfo.setOverdueToUser(overdueToUser);
 
-		return taskInfo;
+            return taskInfo;
+        }
+        finally
+        {
+            ctx.close();
+        }
     }
 
     /*
@@ -1649,6 +1696,7 @@ public class TaskManagerLocal implements TaskManager
      * @param p_baseDate - The based date used for finding dates based on
      * durations. @param p_wfTaskInfos - The tasks (as WfTaskInfo objects) in
      * default path. @param p_wfClone - The workflow that needs to be udpated.
+     * 
      * @param p_completedTaskId - The id of the base task. @param p_uow - Unit
      * of work for persistance purposes.
      */
@@ -1719,8 +1767,8 @@ public class TaskManagerLocal implements TaskManager
     /*
      * Check the state of the task before performing the acceptance process.
      */
-    private Task validateTaskForAcceptance(String p_userId,
-            Task p_task) throws TaskException, RemoteException
+    private Task validateTaskForAcceptance(String p_userId, Task p_task)
+            throws TaskException, RemoteException
     {
         // first check and make sure none of the pages of this task
         // are in the updating process
@@ -1741,11 +1789,13 @@ public class TaskManagerLocal implements TaskManager
 
         return task;
     }
-    
-    private JobEditionInfo getGSEditionJobByJobID(long jobID) {
+
+    private JobEditionInfo getGSEditionJobByJobID(long jobID)
+    {
         JobEditionInfo je = new JobEditionInfo();
-        
-        try {
+
+        try
+        {
             String hql = "from JobEditionInfo a where a.jobId = :id";
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("id", Long.toString(jobID));
@@ -1753,10 +1803,24 @@ public class TaskManagerLocal implements TaskManager
             Iterator i = servers.iterator();
             je = i.hasNext() ? (JobEditionInfo) i.next() : null;
         }
-        catch (Exception pe) {
-            CATEGORY.error("Persistence Exception when retrieving JobEditionInfo", pe);
+        catch (Exception pe)
+        {
+            CATEGORY.error(
+                    "Persistence Exception when retrieving JobEditionInfo", pe);
         }
-        
+
         return je;
+    }
+
+    /**
+     * Get all active tasks by Job ID.
+     */
+    public List<TaskImpl> getActivieTasks(long p_jobId)
+    {
+        Map params = new HashMap();
+        params.put(TaskDescriptorModifier.JOB_ID_ARG, p_jobId);
+        return HibernateUtil.searchWithSql(
+                TaskDescriptorModifier.ACTIVE_TASKS_BY_JOB_ID_SQL, params,
+                TaskImpl.class);
     }
 }

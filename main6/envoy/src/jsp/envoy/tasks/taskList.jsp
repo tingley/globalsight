@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.webapp.pagehandler.tasks.TaskListHandler"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page 
         contentType="text/html; charset=UTF-8"
@@ -23,6 +24,8 @@
                  com.globalsight.util.resourcebundle.ResourceBundleConstants,
                  com.globalsight.util.resourcebundle.SystemResourceBundle,
                  com.globalsight.everest.workflow.WorkflowConstants,
+                 com.globalsight.everest.jobhandler.JobHandler,
+                 com.globalsight.everest.servlet.util.ServerProxy,
                  java.lang.Boolean,
                  java.text.MessageFormat,
                  java.util.Date,
@@ -62,6 +65,14 @@
     PermissionSet perms = (PermissionSet)session.getAttribute(WebAppConstants.PERMISSIONS);
     String title= bundle.getString("lb_my_activities");
     
+    String userFormat = PageHandler.getUserParameter(session, UserParamNames.DOWNLOAD_OPTION_FORMAT).getValue();
+    boolean isCombinedFormat = false;
+    if (OfflineConstants.FORMAT_RTF_TRADOS.equals(userFormat)
+    		|| OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED.equals(userFormat))
+    {
+    	isCombinedFormat = true;
+    }
+    
     boolean canManageProjects = perms.getPermissionFor(Permission.PROJECTS_MANAGE);
     boolean canManageWorkflows = perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS);
 
@@ -94,6 +105,7 @@
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");
     String mAbbr = bundle.getString("lb_abbreviation_minute");
+    String offlineUpload = bundle.getString("lb_offline_upload");
          
     //Urls of the links on this page
     String selfUrl = self.getPageURL();
@@ -108,7 +120,8 @@
     String acceptAndDownloadUrl = self.getPageURL() + "&" + WebAppConstants.TASK_ACTION + 
         "=" + WebAppConstants.TASK_ACTION_ACCEPT_AND_DOWNLOAD;
     String sendDownloadFileUrl = invokedownload.getPageURL();
-
+    String url_offlineUploadPage =
+            "/globalsight/ControlServlet?activityName=simpleofflineupload";
     // Label and links for dates (accepted by, due by, or completed) 
     // decided based on the selected state
     String labelABorDBorCODate;
@@ -139,6 +152,8 @@
     String selectedColumn = ((Integer)request.getAttribute(columnNumParam)).toString();
     String sortAscStr = (String)request.getAttribute(sortAscParam); // should never be null
     boolean sortAsc = sortAscStr.toLowerCase().equals("true") ? true : false;
+    
+    String errorMsg = (String) sessionMgr.getAttribute("taskList_errorMsg");
 
     // common info used for column header links
 
@@ -196,6 +211,12 @@
         acceptDownloadRequested = new Boolean(false);
     }
     
+    Boolean isDownloadCombined = (Boolean)request.getAttribute("isDownloadCombined");
+    if( isDownloadCombined == null)
+    {
+        isDownloadCombined = new Boolean(false);
+    }
+    
     String taskParam =
         (String)request.getAttribute("taskParam");
     if(taskParam == null)
@@ -229,6 +250,7 @@
     String helperText = "";
     String helpFile = bundle.getString("help_main");
     String subTitle = "";
+    String tdSizeInProgress = "";
     switch (state)
     {
         case stateAvailable:
@@ -243,6 +265,7 @@
             helperText = bundle.getString("helper_text_task_available");
             helpFile = bundle.getString("help_available_activities");
             subTitle = bundle.getString("lb_available");
+            tdSizeInProgress = "";
             break;
         case stateInProgress:
             statusSelected = 1;
@@ -252,6 +275,7 @@
             helpFile = bundle.getString("help_inprogress_activities");
             subTitle = bundle.getString("lb_inprogress");
             sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,"tasks");
+            tdSizeInProgress = "width:280px";
             break;
         case WorkflowConstants.TASK_GSEDITION_IN_PROGESS:
             statusSelected = 2;
@@ -261,6 +285,7 @@
             helpFile = bundle.getString("help_inprogress_activities");
             subTitle = bundle.getString("lb_inprogress") + "(" + bundle.getString("lb_gsedition") + ")";
             sessionMgr.setAttribute(JobManagementHandler.EXPORT_INIT_PARAM,"tasks");
+            tdSizeInProgress = "";
             break;
         
         case stateFinished:
@@ -271,6 +296,7 @@
             helperText = bundle.getString("helper_text_task_finished");
             helpFile = bundle.getString("help_finished_activities");
             subTitle = bundle.getString("lb_finished");
+            tdSizeInProgress = "";
             break;
         case stateRejected:
             statusSelected = 4;
@@ -279,6 +305,7 @@
             helperText = bundle.getString("helper_text_task_rejected");
             helpFile = bundle.getString("help_rejected_activities");
             subTitle = bundle.getString("lb_rejected");
+            tdSizeInProgress = "";
             break;
         case Task.STATE_ALL:
             statusSelected = 5;
@@ -286,12 +313,14 @@
             dateColumn = 7;
             labelABorDBorCODate = labelAcceptBy;
             urlABorDBorCOColLink = prefix + WorkflowTaskDataComparator.ACCEPT_DATE + headerSuffix;
+            tdSizeInProgress = "";
             break;
         default:
             statusSelected = 0;
             dateColumn = 7;
             labelABorDBorCODate = labelAcceptBy;
             urlABorDBorCOColLink = prefix + WorkflowTaskDataComparator.ACCEPT_DATE + headerSuffix;
+            tdSizeInProgress = "";
             break;
     }             
     
@@ -445,6 +474,7 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
@@ -460,6 +490,8 @@
     var wfIds = new Array();
     var jobIds = new Array();
     var taskIds = new Array();
+    var targetLocales = new Array();
+    var l10nProfileIds = new Array();
     var helpFile = "<%=helpFile%>";
 
     // Constructor
@@ -498,7 +530,13 @@
         {
             if ("<%=taskParam%>".length>0)
             {
-                var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=downloadALLOfflineFiles"%>";
+            	var actionValue = "downloadALLOfflineFiles";
+            	if (<%= isDownloadCombined %>)
+            	{
+            		actionValue = "downloadALLOfflineFilesCombined";
+            	}
+            	
+                var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "="%>" + actionValue;
                 action += "&taskParam=" + "<%=taskParam%>";
                 ActivityForm.action = action;
                 ActivityForm.submit();
@@ -533,6 +571,12 @@
         
         // Load the guides
         loadGuides();
+        
+        updateButtonState();
+        
+        <% if (errorMsg != null && errorMsg.length() > 0) {%>
+        alert("<%= errorMsg %>");
+        <% } %>
     }
     function submitForm(selectedButton)
     {
@@ -595,10 +639,22 @@
        {
            if(confirm('<%=bundle.getString("jsmsg_batch_complete_activity")%>')) 
            {
-               var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeActivity"%>";
-               action += "&taskParam=" + selectedTasks;
-               ActivityForm.action = action;
-               ActivityForm.submit();
+			    //for GBS-1939
+				var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
+				urlJSON += "&taskParam=" + selectedTasks;
+				$.getJSON(urlJSON, function(data) {
+					if (data.isUploadingJobName)
+					{
+						alert("<%=bundle.getString("jsmsg_my_activities_multi_cannotcomplete_uploading")%>" +"\n" + data.isUploadingJobName);
+					}
+					if (data.isFinishedTaskId)
+					{
+						var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeActivity"%>";
+						action += "&taskParam=" + data.isFinishedTaskId;
+						ActivityForm.action = action;
+						ActivityForm.submit();
+					}
+				});
            }
            return;
        }
@@ -608,10 +664,22 @@
        {
            if(confirm('<%=bundle.getString("jsmsg_batch_complete_workflow")%>')) 
            {
-               var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
-               action += "&taskParam=" + selectedTasks;
-               ActivityForm.action = action;
-               ActivityForm.submit();
+			    //for GBS-1939
+				var urlJSON = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=selectedTasksStatus"%>";
+				urlJSON += "&taskParam=" + selectedTasks;
+				$.getJSON(urlJSON, function(data) {
+					if (data.isUploadingJobName)
+					{
+						alert("<%=bundle.getString("jsmsg_my_activities_multi_cannotcomplete_workflow_uploading")%>" +"\n" + data.isUploadingJobName);
+					}
+					if (data.isFinishedTaskId)
+					{
+					   var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION + "=completeWorkflow"%>";
+					   action += "&taskParam=" + selectedTasks;
+					   ActivityForm.action = action;
+					   ActivityForm.submit();
+					}
+				});			
            }
            return;
        }
@@ -624,10 +692,25 @@
             ActivityForm.submit();
             return;
         }
+        if(selectedButton == "DownloadAllOfflineFilesCombined")
+        {
+            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=downloadALLOfflineFilesCombined"%>";
+            action += "&taskParam=" + selectedTasks;
+            ActivityForm.action = action;
+            ActivityForm.submit();
+            return;
+        }
+        if(selectedButton == "DownloadCombined")
+        {
+            var action = "<%=selfUrl + "&" + WebAppConstants.TASK_ACTION +"=DownloadCombined"%>";
+            action += "&taskParam=" + selectedTasks;
+            ActivityForm.action = action;
+            ActivityForm.submit();
+            return;
+        }
         if ( !isRadioChecked(ActivityForm.SelectedActivity) )
         {
-                 return false;
-
+        	return false;
         }
         
         if (selectedButton == "WordCount")
@@ -705,11 +788,17 @@
       {
             if (ActivityForm.DownloadButton)
                 ActivityForm.DownloadButton.disabled = false;
+            
+            if (ActivityForm.CombinedButton)
+                ActivityForm.CombinedButton.disabled = false;
       }
       else
       {
             if (ActivityForm.DownloadButton)
                 ActivityForm.DownloadButton.disabled = true;
+            
+            if (ActivityForm.CombinedButton)
+                ActivityForm.CombinedButton.disabled = true;
       }
       <% } %>      
     }
@@ -793,6 +882,9 @@
         if (ActivityForm.ExportButton) {
           ActivityForm.ExportButton.disabled = false;
         }
+        if (ActivityForm.CombinedButton) {
+            ActivityForm.CombinedButton.disabled = false;
+          }
       } else {
         ActivityForm.WordCountButton.disabled = true;
         if (ActivityForm.ExportButton) {
@@ -810,6 +902,9 @@
         if (ActivityForm.ExportButton) {
           ActivityForm.ExportButton.disabled = false;
         }
+        if (ActivityForm.DownloadCombinedButton) {
+          ActivityForm.DownloadCombinedButton.disabled = false;
+        }
       } else {
         ActivityForm.WordCountButton.disabled = true;
         if (ActivityForm.SearchButton) {
@@ -821,6 +916,68 @@
       }
       <% } %>
       
+      <% if (state == stateAvailable || state == stateInProgress) {%>
+      <% if (!isCombinedFormat) {%>
+      if (ActivityForm.DownloadCombinedButton) {
+          ActivityForm.DownloadCombinedButton.disabled = true;
+        }
+      if (ActivityForm.CombinedButton) {
+          ActivityForm.CombinedButton.disabled = true;
+        }
+      <% } else { %>
+   	  // check if disable download combined 
+      // have same l10n profile and target locale
+      if (selectedIndex().length > 1)
+      {
+      	var allindex = selectedIndex();
+      	var tlocale_0 = targetLocales[allindex[0]];
+      	var l10nProfileId_0 = l10nProfileIds[allindex[0]];
+      	for(var i = 1; i < allindex.length; i++)
+      	{
+      		var cindex = allindex[i];
+      		var tlocale = targetLocales[cindex];
+      		var l10nProfileId = l10nProfileIds[cindex];
+          	
+          	if (tlocale == tlocale_0 && l10nProfileId == l10nProfileId_0)
+          	{
+          		if (ActivityForm.DownloadCombinedButton) 
+          		{
+          			ActivityForm.DownloadCombinedButton.disabled = false;
+                }
+          		if (ActivityForm.CombinedButton) 
+          		{
+          			ActivityForm.CombinedButton.disabled = false;
+                }
+          		continue;
+          	}
+          	else
+          	{
+          		if (ActivityForm.DownloadCombinedButton) 
+          		{
+          			ActivityForm.DownloadCombinedButton.disabled = true;
+                }
+          		if (ActivityForm.CombinedButton) 
+          		{
+          			ActivityForm.CombinedButton.disabled = true;
+                }
+          		break;
+          	}
+      	}
+      }
+      <% } %>
+      <% } %>
+      
+      if (selectedIndex().length == 0)
+      {
+    	  if (ActivityForm.DownloadCombinedButton) 
+    	  {
+    		  ActivityForm.DownloadCombinedButton.disabled = false;
+          }
+    	  if (ActivityForm.CombinedButton) 
+    	  {
+    	      ActivityForm.CombinedButton.disabled = false;
+          }
+      }
     }
     
     function selectedIndex() 
@@ -854,6 +1011,20 @@
 		ActivityForm.action = action;
 		ActivityForm.submit();
     }
+
+	//for GBS-2599
+	function handleSelectAll() {
+		if (ActivityForm && ActivityForm.selectAll) {
+			if (ActivityForm.selectAll.checked) {
+				checkAllWithName('ActivityForm', 'SelectedActivity');
+				updateButtonState();
+			}
+			else {
+				clearAll('ActivityForm');
+				updateButtonState();
+			}
+		}
+	}
 </SCRIPT>
 <STYLE type="text/css">
 .list {
@@ -1017,23 +1188,27 @@
 <FORM NAME="ActivityForm" METHOD="POST">
 <!-- Data Table -->
 <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="6" CLASS="list">
+    <COL>   <!-- Radio button (page icon) for download -->
+    <COL>   <!-- Priority -->
+    <COL>   <!-- Overdue (clock icon) -->
+    <COL>   <!-- Job ID -->
+    <COL width="130px">  <!-- Job Name -->
+    <COL>   <!-- Spacer column -->
+    <COL>   <!-- Due/Accept By -->
+    <%
+        if (state == stateAvailable) 
+        {
+            out.println("<COL>  <!-- Time to Complete --> ");
+        }
+    %>
+    <COL>  <!-- Locales -->
     <TBODY>
-        <COL>   <!-- Radio button (page icon) for download -->
-        <COL>   <!-- Priority -->
-        <COL>   <!-- Overdue (clock icon) -->
-        <COL>   <!-- Job ID -->
-        <COL width="130px">  <!-- Job Name -->
-        <COL>   <!-- Spacer column -->
-        <COL>   <!-- Due/Accept By -->
-        <%
-            if (state == stateAvailable) 
-            {
-                out.println("<COL>  <!-- Time to Complete --> ");
-            }
-        %>
-        <COL>  <!-- Locales -->
         <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM" STYLE="padding-bottom: 3px;">
-            <TD CLASS="headerCell" ALIGN="CENTER">&nbsp;</TD>
+            <TD>
+			<% if ((state == stateInProgress || state == stateAvailable) && tasks != null && tasks.size() > 0) { %>
+				<input type="checkbox" onclick="handleSelectAll()" name="selectAll"/>
+			<% } %>			
+			</TD>
             <TD STYLE="padding-left: 3px;padding-right: 3px;" ALIGN="CENTER"><A CLASS="sortHREFWhite" HREF="<%=jobPriorityColLink%>"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 ALT="Priority" BORDER=0></A><%=jobPrioritySortArrow%></TD>
             <TD STYLE="padding-left: 3px;padding-right: 3px;" ALIGN="CENTER"><IMG SRC="/globalsight/images/clock.gif" HEIGHT=12 WIDTH=12 ALT="Overdue"></TD>
             <TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=jobIdColLink%>"><%=labelJobId%><%=jobIdSortArrow%></A></TD>
@@ -1049,8 +1224,8 @@
         <%
             }
         %>
-            <TD STYLE="padding-right: 10px;" CLASS="headerCell"><SPAN CLASS="sortHREFWhite"><%=bundle.getString("lb_locales")%></SPAN></TD>
-            <TD STYLE="padding-right: 10px;" CLASS="headerCell"><SPAN CLASS="sortHREFWhite"><%=bundle.getString("lb_task_type")%></SPAN></TD>
+            <TD STYLE="padding-right: 10px; width:300px" CLASS="headerCell"><SPAN CLASS="sortHREFWhite"><%=bundle.getString("lb_locales")%></SPAN></TD>
+            <TD STYLE="padding-right: 10px; <%=tdSizeInProgress%>" CLASS="headerCell"><SPAN CLASS="sortHREFWhite"><%=bundle.getString("lb_task_type")%></SPAN></TD>
         <%if(state == Task.STATE_ALL || state == WorkflowConstants.TASK_GSEDITION_IN_PROGESS){%>    
             <TD STYLE="padding-right: 10px;" CLASS="headerCell"><SPAN CLASS="sortHREFWhite"><%=bundle.getString("lb_task_status")%></SPAN></TD>
         <%}%>
@@ -1090,6 +1265,10 @@
                 String valueABorDBorCODate;
                 String assignees = canManageProjects ? tsk.getAllAssigneesAsString() : "";
                 String pmAssigneeTable = "";
+                
+                JobHandler jobHandler = ServerProxy.getJobHandler(); 
+                String l10nProfileId = jobHandler.getL10nProfileByJobId(tsk.getJobId()) + "";
+                
                 if (canManageProjects) {
                     StringBuffer pmAssigneeTableBuffer = new StringBuffer();
                     pmAssigneeTableBuffer.append("<TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=smallText>");
@@ -1186,6 +1365,8 @@
                 wfIds[<%=javascript_array_index%>] = "<%=tsk.getWorkflow().getId()%>";
                 jobIds[<%=javascript_array_index%>] = "<%=tsk.getJobId()%>";
                 taskIds[<%=javascript_array_index%>] = "<%=tsk.getId()%>";
+                targetLocales[<%=javascript_array_index%>] = "<%=targetLocale%>";
+                l10nProfileIds[<%=javascript_array_index%>] = "<%=l10nProfileId%>";
 </script>
 <%                
                 // The Priority column
@@ -1339,16 +1520,18 @@
    <TR>
         <TD CLASS="standardText">
             <DIV ID="CheckAllLayer" STYLE="visibility: visible">
-                <A CLASS="standardHREF"
+                <!--for gbs-2599
+				A CLASS="standardHREF"
                    HREF="javascript:checkAllWithName('ActivityForm', 'SelectedActivity'); updateButtonState(); ">
-                   <%=bundle.getString("lb_check_all")%></A> |
+                   <%=bundle.getString("lb_check_all")%></A--> 
 <% if (state == stateInProgress && (canManageWorkflows || canManageProjects) && searchEnabled) { %>
                 <A CLASS="standardHREF"
-                   HREF="javascript:checkAll('ActivityForm');"><%=bundle.getString("lb_check_all_pages")%></A> |
+                   HREF="javascript:checkAll('ActivityForm'); updateButtonState();"><%=bundle.getString("lb_check_all_pages")%></A> 
 <% } %>
-                <A CLASS="standardHREF"
+                <!--for gbs-2599
+				A CLASS="standardHREF"
                    HREF="javascript:clearAll('ActivityForm');updateButtonState();">
-                   <%=bundle.getString("lb_clear_all")%></A>
+                   <%=bundle.getString("lb_clear_all")%></A-->
             </DIV>
          </TD>
      </TR>                
@@ -1406,7 +1589,23 @@ if (state==stateAvailable || state==stateInProgress) {
     <INPUT TYPE="BUTTON" NAME="DownloadAllButton" VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('DownloadAllOfflineFiles');" >
     </amb:permission>
 <% } %>
-
+<% if (state == stateAvailable) { %>
+    <amb:permission name="<%=Permission.ACTIVITIES_WORKOFFLINE%>" >
+    <amb:permission name="activities.download.combined" >
+    <INPUT TYPE="BUTTON" NAME="CombinedButton" VALUE="<%=bundle.getString("lb_download_combined")%>..." onClick="submitForm('DownloadCombined');">
+    </amb:permission>
+    </amb:permission>
+<% } %>
+<% if (state == stateInProgress) { %>
+	<amb:permission name="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>" >
+    <amb:permission name="activities.download.combined" >
+    <INPUT TYPE="BUTTON" NAME="DownloadCombinedButton" VALUE="<%=bundle.getString("lb_download_combined")%>..." onClick="submitForm('DownloadAllOfflineFilesCombined');" >
+    </amb:permission>
+    </amb:permission>
+<% } %>
+    <amb:permission name="<%=Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY%>" >
+    <INPUT TYPE="BUTTON" NAME="offlineUpload" VALUE="<%=bundle.getString("lb_offline_upload")%>" onClick="window.location.href = '<%=url_offlineUploadPage%>'">
+    </amb:permission>
 </DIV>
 <%
 Iterator iter = languageSet.iterator();

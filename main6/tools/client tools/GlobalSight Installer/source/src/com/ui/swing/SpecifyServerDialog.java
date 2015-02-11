@@ -201,7 +201,7 @@ public class SpecifyServerDialog extends JDialog
                     }
                     catch (IOException e1)
                     {
-                        log.error(e1);
+                        log.error(e1.getMessage(), e1);
                     }
                 }
 

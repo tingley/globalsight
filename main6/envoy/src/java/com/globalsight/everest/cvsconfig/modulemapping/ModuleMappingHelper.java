@@ -33,7 +33,7 @@ public class ModuleMappingHelper {
 			}
 			return subFolders;
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			return subFolders;
 		}
 	}
@@ -88,7 +88,7 @@ public class ModuleMappingHelper {
 				mms.add(mm);
 			}
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 		}
 		return mms;
 	}
@@ -153,7 +153,7 @@ public class ModuleMappingHelper {
 //				}
 			}
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			try {
 				stmt.close();

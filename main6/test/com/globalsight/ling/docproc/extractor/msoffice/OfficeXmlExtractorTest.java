@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.globalsight.cxe.adapter.msoffice.OfficeXmlConverter;
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.everest.unittest.util.FileUtil;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatCtrlCharConverter;
@@ -141,6 +142,54 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
         
         Assert.assertTrue(wordDocument.exists());
     }
+    
+    /**
+     * Test WORD 2010 filter options
+     */
+    @Test
+    public void testWord2010FilterOptions()
+    {
+        OfficeXmlHelper helper = new OfficeXmlHelper();
+        helper.setParametersForTesting(OfficeXmlHelper.OFFICE_DOCX, true, false, false, false, false, false);
+        String[] files = helper.getLocalizeXmlFiles(wordDir);
+        System.out.println(files.length);
+        System.out.println(files[files.length - 1]);
+        
+        Assert.assertEquals("File count is not right.", 3, files.length);
+        Assert.assertTrue("The last file is not right.", files[files.length -1].endsWith("header1.xml"));
+        
+        helper.setParametersForTesting(OfficeXmlHelper.OFFICE_DOCX, false, false, false, false, false, false);
+        files = helper.getLocalizeXmlFiles(wordDir);
+        System.out.println(files.length);
+        System.out.println(files[files.length - 1]);
+        
+        Assert.assertEquals("File count is not right.", 1, files.length);
+        Assert.assertTrue("The last file is not right.", files[files.length -1].endsWith("document.xml"));
+    }
+    
+    /**
+     * Test PPT 2010 filter options
+     */
+    @Test
+    public void testPPT2010FilterOptions()
+    {
+        OfficeXmlHelper helper = new OfficeXmlHelper();
+        helper.setParametersForTesting(OfficeXmlHelper.OFFICE_PPTX, false, true, true, true, true, true);
+        String[] files = helper.getLocalizeXmlFiles(pptDir);
+        System.out.println(files.length);
+        System.out.println(files[files.length - 1]);
+        
+        Assert.assertEquals("File count is not right.", 20, files.length);
+        Assert.assertTrue("The last file is not right.", files[files.length -1].endsWith("handoutMaster1.xml"));
+        
+        helper.setParametersForTesting(OfficeXmlHelper.OFFICE_PPTX, false, false, false, false, false, false);
+        files = helper.getLocalizeXmlFiles(pptDir);
+        System.out.println(files.length);
+        System.out.println(files[files.length - 1]);
+        
+        Assert.assertEquals("File count is not right.", 6, files.length);
+        Assert.assertTrue("The last file is not right.", files[files.length -1].endsWith("slide6.xml"));
+    }
 
     // //////////////////////////////////////////////////////////////////////
     // GBS-1930 : Base Filter Unittest: Office 2010
@@ -208,6 +257,132 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
         }
 
     }
+    
+    /**
+     * Test extract word 2010 header and footer.
+     */
+    @Test
+    public void testExtractWordHeader()
+    {
+        try
+        {
+            ArrayList fileSet = (ArrayList) fileSets.get("testExtractWordHeader");
+            if (fileSet != null && fileSet.size() > 0)
+            {
+                Iterator it = fileSet.iterator();
+                while (it.hasNext())
+                {
+                    FileSet fs = (FileSet) it.next();
+                    File sourceFile = fs.getSourceFile();
+                    File answerFile = fs.getAnswerFile();
+                    File roundtripFile = fs.getRoundtripFile();
+
+                    if (sourceFile.exists() && sourceFile.isFile())
+                    {
+                        // extract source file with default xml filter
+                        Output output = doExtract(sourceFile.getAbsolutePath(), getRuleFile(sourceFile.getPath()));
+                        // do segment
+                        output = doSegment(output);
+                        // get translatable text content
+                        String resultContent = getTranslatableTextContent(output);
+                        // generate result file for compare purpose
+                        File tmpResultFile = new File(answerFile.getParentFile().getAbsolutePath()
+                                + File.separator + sourceFile.getName() + ".tmp");
+                        generateFile(tmpResultFile, resultContent, UTF8);
+
+                        // compare result file to answer file
+                        if (fileCompareNoCareEndLining(tmpResultFile, answerFile))
+                        {
+                            tmpResultFile.delete();
+                            
+                            // generate target file
+                            String gxml = DiplomatWriter.WriteXML(output);
+                            byte[] mergeResult = getTargetFileContent(gxml, UTF8);
+                            String s = new String(mergeResult, UTF8);
+                            
+                            // restore invalid unicode char for merged result
+                            s = SegmentUtil.restoreInvalidUnicodeChar(s);
+                            generateFile(roundtripFile, s, UTF8);
+                            Assert.assertTrue(roundtripFile.exists());
+                            Assert.assertTrue(s.contains("sample document for testing purpose"));
+                        }
+                        else
+                        {
+                            fail("\n" + tmpResultFile + "\n and \n" + answerFile + " not equal");
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+
+    }
+    
+    /**
+     * Test extract ppt 2010 files.
+     */
+    @Test
+    public void testExtractPPTFiles()
+    {
+        try
+        {
+            ArrayList fileSet = (ArrayList) fileSets.get("testExtractPPTFiles");
+            if (fileSet != null && fileSet.size() > 0)
+            {
+                Iterator it = fileSet.iterator();
+                while (it.hasNext())
+                {
+                    FileSet fs = (FileSet) it.next();
+                    File sourceFile = fs.getSourceFile();
+                    File answerFile = fs.getAnswerFile();
+                    File roundtripFile = fs.getRoundtripFile();
+
+                    if (sourceFile.exists() && sourceFile.isFile())
+                    {
+                        // extract source file with default xml filter
+                        Output output = doExtract(sourceFile.getAbsolutePath(), getRuleFile(sourceFile.getPath()));
+                        // do segment
+                        output = doSegment(output);
+                        // get translatable text content
+                        String resultContent = getTranslatableTextContent(output);
+                        // generate result file for compare purpose
+                        File tmpResultFile = new File(answerFile.getParentFile().getAbsolutePath()
+                                + File.separator + sourceFile.getName() + ".tmp");
+                        generateFile(tmpResultFile, resultContent, UTF8);
+
+                        // compare result file to answer file
+                        if (fileCompareNoCareEndLining(tmpResultFile, answerFile))
+                        {
+                            tmpResultFile.delete();
+                            
+                            // generate target file
+                            String gxml = DiplomatWriter.WriteXML(output);
+                            byte[] mergeResult = getTargetFileContent(gxml, UTF8);
+                            String s = new String(mergeResult, UTF8);
+                            
+                            // restore invalid unicode char for merged result
+                            s = SegmentUtil.restoreInvalidUnicodeChar(s);
+                            generateFile(roundtripFile, s, UTF8);
+                            Assert.assertTrue(roundtripFile.exists());
+                            Assert.assertTrue(s.contains("GlobalSight"));
+                        }
+                        else
+                        {
+                            fail("\n" + tmpResultFile + "\n and \n" + answerFile + " not equal");
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
+
+    }
 
     @Override
     public AbstractExtractor initExtractor()
@@ -227,8 +402,28 @@ public class OfficeXmlExtractorTest extends BaseExtractorTestClass
                         "xlsx_sample_document.sharedStringsxml.txt",
                         "xlsx_sample_document.sharedStringsxml.xml" },
                 { "testExtractor", "pptx_sample_document.pptx.2/ppt/slides/slide1.xml",
-                        "pptx_sample_document.slide1xml.txt",
-                        "pptx_sample_document.slide1xml.xml" }};
+                        "pptx_sample_document.slide1xml.txt", "pptx_sample_document.slide1xml.xml" },
+                { "testExtractWordHeader", "docx_sample_document.docx.0/word/header1.xml",
+                        "docx_sample_document.header1.xml.txt",
+                        "docx_sample_document.header1.xml.xml" },
+                { "testExtractWordHeader", "docx_sample_document.docx.0/word/footer1.xml",
+                        "docx_sample_document.footer1.xml.txt",
+                        "docx_sample_document.footer1.xml.xml" },
+                { "testExtractPPTFiles", "pptx_sample_document.pptx.2/ppt/notesSlides/notesSlide1.xml",
+                        "pptx_sample_document.notesSlide1.xml.txt",
+                        "pptx_sample_document.notesSlide1.xml.xml" },
+                { "testExtractPPTFiles", "pptx_sample_document.pptx.2/ppt/slideMasters/slideMaster1.xml",
+                        "pptx_sample_document.slideMaster1.xml.txt",
+                        "pptx_sample_document.slideMaster1.xml.xml" },
+                { "testExtractPPTFiles", "pptx_sample_document.pptx.2/ppt/slideLayouts/slideLayout1.xml",
+                        "pptx_sample_document.slideLayout1.xml.txt",
+                        "pptx_sample_document.slideLayout1.xml.xml" },
+                { "testExtractPPTFiles", "pptx_sample_document.pptx.2/ppt/notesMasters/notesMaster1.xml",
+                        "pptx_sample_document.notesMaster1.xml.txt",
+                        "pptx_sample_document.notesMaster1.xml.xml" },
+                { "testExtractPPTFiles", "pptx_sample_document.pptx.2/ppt/handoutMasters/handoutMaster1.xml",
+                        "pptx_sample_document.handoutMaster1.xml.txt",
+                        "pptx_sample_document.handoutMaster1.xml.xml" } };
 
         return formFileSets(fileSet, OfficeXmlExtractorTest.class);
     }

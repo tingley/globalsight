@@ -98,13 +98,13 @@ var helpFile = "<%=bundle.getString("help_customer_upload_select")%>";
             <OBJECT classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
             WIDTH = 90% HEIGHT = 95% NAME = "FSV"  
             codebase="<%=httpProtocolToUse%>://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab#Version=1,6">
+            <PARAM NAME = "CODE" VALUE = "com.globalsight.everest.webapp.applet.admin.customer.FileSystemApplet" >
             <%}  else {%>                                    
             <%=bundle.getString("applet_need_java_support")%>
             <BR>
             <APPLET type="application/x-java-applet;jpi-version=1.6"
-              height=95% width=90% pluginspage="http://java.sun.com/products/plugin/index.html#download">
+              height=95% width=90% pluginspage="http://java.sun.com/products/plugin/index.html#download" code="com.globalsight.everest.webapp.applet.admin.customer.FileSystemApplet.class">
             <%}%>
-            <PARAM NAME = "CODE" VALUE = "com.globalsight.everest.webapp.applet.admin.customer.FileSystemApplet.class" >
             <!-- PARAM NAME = CODEBASE VALUE = "classes/"-->
             <PARAM NAME = "cache_option" VALUE = "Plugin" >
             <PARAM NAME = "cache_archive" VALUE = "applet/lib/customer.jar,applet/lib/commons-codec-1.3.jar,applet/lib/commons-httpclient-3.0-rc2.jar,applet/lib/commons-logging.jar,applet/lib/ant.jar">

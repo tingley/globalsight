@@ -45,6 +45,7 @@ public class IssueOptions
         c_allStatus.add(Issue.STATUS_OPEN);
         c_allStatus.add(Issue.STATUS_QUERY);
         c_allStatus.add(Issue.STATUS_CLOSED);
+        c_allStatus.add(Issue.STATUS_REJECTED);
 
         c_allPriorities.put(new Integer(1), Issue.PRI_URGENT);
         c_allPriorities.put(new Integer(2), Issue.PRI_HIGH);

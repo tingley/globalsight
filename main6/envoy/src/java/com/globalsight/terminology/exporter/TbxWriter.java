@@ -112,7 +112,7 @@ public class TbxWriter implements IWriter, TermbaseExceptionMessages {
         m_output.print("<?xml version=\"1.0\" encoding=\"");
         m_output.print(ianaEncoding);
         m_output.println("\" ?>");
-        m_output.println("<!DOCTYPE martif SYSTEM \"http://www.lisa.org/fileadmin/standards/tbx/TBXcoreStructV02.dtd\">");
+        m_output.println("<!DOCTYPE martif PUBLIC 'ISO 12200:1999A//DTD MARTIF core (DXFcdV04)//EN' 'TBXcdv04.dtd'>");
         m_output.print("<martif type=\"TBX\" xml:lang=\"");
         m_output.print(m_options.getSelectLanguage());
         m_output.println("\">");
@@ -123,7 +123,7 @@ public class TbxWriter implements IWriter, TermbaseExceptionMessages {
         m_output.println("</sourceDesc>");
         m_output.println("</fileDesc>");
         m_output.println("<encodingDesc>");
-        m_output.println("<p type=\"XCSURI\">http://www.lisa.org/fileadmin/standards/tbx/TBXXCSV02.xcs</p>");
+        m_output.println("<p type=\"DCSName\">SYSTEM 'xcs.xml'</p>");
         m_output.println("</encodingDesc>");
         m_output.println("</martifHeader>");
         m_output.println("<text>");

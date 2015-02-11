@@ -18,6 +18,7 @@ package com.globalsight.everest.jobhandler.jobcreation;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -76,128 +77,128 @@ import com.globalsight.util.GlobalSightLocale;
 
 /**
  * This class handles the Rules for creating a job and adding requests to a job.
- *
+ * 
  * It also provides functionality for finding a pending job to add a request to.
  * <p>
  */
 public class JobAdditionEngine
 {
-	private static final Logger c_logger = Logger
-			.getLogger(JobAdditionEngine.class.getName());
+    private static final Logger c_logger = Logger
+            .getLogger(JobAdditionEngine.class.getName());
 
-	private static WorkflowServer c_wfServer = null;
+    private static WorkflowServer c_wfServer = null;
 
-	private static CostingEngine c_ce = null;
+    private static CostingEngine c_ce = null;
 
-	public JobAdditionEngine() throws JobCreationException
-	{
-		lookupWFServer();
-	}
+    public JobAdditionEngine() throws JobCreationException
+    {
+        lookupWFServer();
+    }
 
-	private void persistJobs(JobImpl job, RequestImpl request,
-			List listOfWorkflows, Session session) throws PersistenceException
-	{
-		try
-		{
-			String companyId = request.getCompanyId();
+    private void persistJobs(JobImpl job, RequestImpl request,
+            List listOfWorkflows, Session session) throws PersistenceException
+    {
+        try
+        {
+            String companyId = request.getCompanyId();
 
-			job.setCreateDate(new Timestamp(System.currentTimeMillis()));
-			job.setPriority(request.getL10nProfile().getPriority());
-			job.setIsWordCountReached(false);
-			job.setTimestamp(new Timestamp(System.currentTimeMillis()));
-			job.setPageCount(1);
-			job.setCompanyId(companyId);
-			request.setJob(job);
-			boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(request);
-			boolean isInContextMatch = PageHandler.isInContextMatch(request);
-			if(isDefaultContextMatch)
-			{
-			    job.setLeverageOption(Job.DEFAULT_CONTEXT);
-			}
-			else if(isInContextMatch)
-			{
-			    job.setLeverageOption(Job.IN_CONTEXT);
-			}
-			else
-			{
-			    job.setLeverageOption(Job.EXACT_ONLY);
-			}
-			request.setTimestamp(new Timestamp(System.currentTimeMillis()));
-			List requtests = new ArrayList();
-			requtests.add(request);
-			job.setRequestList(requtests);
+            job.setCreateDate(new Timestamp(System.currentTimeMillis()));
+            job.setPriority(request.getL10nProfile().getPriority());
+            job.setIsWordCountReached(false);
+            job.setTimestamp(new Timestamp(System.currentTimeMillis()));
+            job.setPageCount(1);
+            job.setCompanyId(companyId);
+            request.setJob(job);
+            boolean isDefaultContextMatch = PageHandler
+                    .isDefaultContextMatch(request);
+            boolean isInContextMatch = PageHandler.isInContextMatch(request);
+            if (isDefaultContextMatch)
+            {
+                job.setLeverageOption(Job.DEFAULT_CONTEXT);
+            }
+            else if (isInContextMatch)
+            {
+                job.setLeverageOption(Job.IN_CONTEXT);
+            }
+            else
+            {
+                job.setLeverageOption(Job.EXACT_ONLY);
+            }
+            request.setTimestamp(new Timestamp(System.currentTimeMillis()));
+            List requtests = new ArrayList();
+            requtests.add(request);
+            job.setRequestList(requtests);
 
-			List workflows = new ArrayList();
-			Iterator it = listOfWorkflows.iterator();
-			while (it.hasNext())
-			{
-				WorkflowImpl workflow = (WorkflowImpl) it.next();
-				workflow.setJob(job);
-				workflow
-						.setTimestamp(new Timestamp(System.currentTimeMillis()));
-				workflow.setCompanyId(companyId);
-				workflow.setPriority(job.getPriority());
+            List workflows = new ArrayList();
+            Iterator it = listOfWorkflows.iterator();
+            while (it.hasNext())
+            {
+                WorkflowImpl workflow = (WorkflowImpl) it.next();
+                workflow.setJob(job);
+                workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                workflow.setCompanyId(companyId);
+                workflow.setPriority(job.getPriority());
 
-				workflows.add(workflow);
+                workflows.add(workflow);
 
-				// create the workflow owners for each workflow
-				List wfOwners = workflow.getWorkflowOwners();
+                // create the workflow owners for each workflow
+                List wfOwners = workflow.getWorkflowOwners();
 
-				for (int i = 0; i < wfOwners.size(); i++)
-				{
-					WorkflowOwner wfo = (WorkflowOwner) wfOwners.get(i);
-					wfo.setWorkflow(workflow);
-				}
+                for (int i = 0; i < wfOwners.size(); i++)
+                {
+                    WorkflowOwner wfo = (WorkflowOwner) wfOwners.get(i);
+                    wfo.setWorkflow(workflow);
+                }
 
-				// go through all tasks for the workflow
-				Collection tasks = workflow.getTasks().values();
-				for (Iterator i = tasks.iterator(); i.hasNext();)
-				{
-					TaskImpl t = (TaskImpl) i.next();
-					t.setStateStr("DEACTIVE");
-					t.setCompanyId(companyId);
-				}
-			}
-			job.setWorkflowInstances(workflows);
+                // go through all tasks for the workflow
+                Collection tasks = workflow.getTasks().values();
+                for (Iterator i = tasks.iterator(); i.hasNext();)
+                {
+                    TaskImpl t = (TaskImpl) i.next();
+                    t.setStateStr("DEACTIVE");
+                    t.setCompanyId(companyId);
+                }
+            }
+            job.setWorkflowInstances(workflows);
 
-			session.save(job);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			throw new PersistenceException(e);
-		}
-	}
+            session.save(job);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            throw new PersistenceException(e);
+        }
+    }
 
-	/*
-	 * Create a new job with the specified state and job name. Add the request
-	 * to the job and create workflow instances.
-	 *
-	 * @param p_request The request to add to the job. @param p_state The state
-	 * the new job should be in. @param p_jobName The name of the job (this can
-	 * be null, then a job name will be generated).
-	 */
-	Job createNewJob(Request p_request, String p_state, String p_jobName,
-			HashMap p_targetPages) throws JobCreationException
-	{
-		Session session = null;
-		Transaction transaction = null;
-		JobImpl newJob = null;
-		List listOfWorkflows = null;
-		if (p_jobName == null || p_jobName.length() == 0)
-		{
-			p_jobName = generateJobName(p_request);
-		}
-		try
-		{
-			session = HibernateUtil.getSession();
-			transaction = session.beginTransaction();
+    /*
+     * Create a new job with the specified state and job name. Add the request
+     * to the job and create workflow instances.
+     * 
+     * @param p_request The request to add to the job. @param p_state The state
+     * the new job should be in. @param p_jobName The name of the job (this can
+     * be null, then a job name will be generated).
+     */
+    Job createNewJob(Request p_request, String p_state, String p_jobName,
+            HashMap p_targetPages) throws JobCreationException
+    {
+        Session session = null;
+        Transaction transaction = null;
+        JobImpl newJob = null;
+        List listOfWorkflows = null;
+        if (p_jobName == null || p_jobName.length() == 0)
+        {
+            p_jobName = generateJobName(p_request);
+        }
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
 
-			newJob = new JobImpl();
-			//newJob.setPriority(p_request.getL10nProfile().getPriority());
-			//newJob.setPriority(Integer.parseInt(p_request.getPriority()));
-            if(!(p_request.getPriority().equals("null"))) {
-                newJob.setPriority(Integer.parseInt(p_request.getPriority()));
+            newJob = new JobImpl();
+            String priority = p_request.getPriority();
+            if (priority !=null && !("null").equals(priority))
+            {
+                newJob.setPriority(Integer.parseInt(priority));
             }
 
             EventFlowXmlParser parser = new EventFlowXmlParser();
@@ -211,93 +212,106 @@ public class JobAdditionEngine
             }
             newJob.setUuid(uuid);
 
-			newJob.setState(p_state);
-			newJob.setJobName(p_jobName);
-			newJob.setLeverageMatchThreshold((int) p_request.getL10nProfile()
-					.getTranslationMemoryProfile().getFuzzyMatchThreshold());
-			newJob.setCreateDate(new Date());
-			listOfWorkflows = createWorkflowInstances(p_request, newJob, p_targetPages);
-			RequestImpl request = (RequestImpl) p_request;
-			persistJobs(newJob, request, listOfWorkflows, session);
+            newJob.setState(p_state);
+            newJob.setJobName(p_jobName);
+            newJob.setLeverageMatchThreshold((int) p_request.getL10nProfile()
+                    .getTranslationMemoryProfile().getFuzzyMatchThreshold());
+            newJob.setCreateDate(new Date());
+            listOfWorkflows = createWorkflowInstances(p_request, newJob,
+                    p_targetPages);
+            RequestImpl request = (RequestImpl) p_request;
+            persistJobs(newJob, request, listOfWorkflows, session);
 
-			// verify if there are target pages add them to the workflow(s)
-			// if only error pages then target pages won't exist.
-			if (p_targetPages != null && p_targetPages.size() > 0)
-			{
-				Collection c = p_targetPages.values();
-				Iterator it = c.iterator();
-				String hql = "from WorkflowImpl w where w.job.id = :jId "
-						+ "and w.targetLocale.id = :tId";
-				Map map = new HashMap();
-				map.put("jId", newJob.getIdAsLong());
-				while (it.hasNext())
-				{
-					TargetPage tp = (TargetPage) it.next();
-					map.put("tId", new Long(tp.getLocaleId()));
-					WorkflowImpl w = (WorkflowImpl) HibernateUtil.search(hql,
-							map).get(0);
-					tp.setWorkflowInstance(w);
-					w.addTargetPage(tp);
-				    tp.setCVSTargetModule(getTargetModule(tp));
-					tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
-					session.update(tp);
-					session.update(w);
-				}
-			}
+            // verify if there are target pages add them to the workflow(s)
+            // if only error pages then target pages won't exist.
+            if (p_targetPages != null && p_targetPages.size() > 0)
+            {
+                Collection c = p_targetPages.values();
+                Iterator it = c.iterator();
+                String hql = "from WorkflowImpl w where w.job.id = :jId "
+                        + "and w.targetLocale.id = :tId";
+                Map map = new HashMap();
+                map.put("jId", newJob.getIdAsLong());
+                Connection connection = null;
+                try
+                {
+                    connection = ConnectionPool.getConnection();
 
-			transaction.commit();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
+                    while (it.hasNext())
+                    {
+                        TargetPage tp = (TargetPage) it.next();
+                        map.put("tId", new Long(tp.getLocaleId()));
+                        WorkflowImpl w = (WorkflowImpl) HibernateUtil.search(
+                                hql, map).get(0);
+                        tp.setWorkflowInstance(w);
+                        w.addTargetPage(tp);
+                        tp.setCVSTargetModule(getTargetModule(tp, connection));
+                        tp.setTimestamp(new Timestamp(System
+                                .currentTimeMillis()));
+                        session.update(tp);
+                        session.update(w);
+                    }
+                }
+                catch (Exception e)
+                {
+                    c_logger.error("Error found in createJob.", e);
+                }
+                finally
+                {
+                    ConnectionPool.silentReturnConnection(connection);
+                }
+            }
 
-			try
-			{
-				transaction.rollback();
-				c_logger.error("Failed to create a new job for request "
-						+ p_request.getId(), e);
-				String args[] = new String[1];
-				args[0] = Long.toString(p_request.getId());
+            transaction.commit();
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                transaction.rollback();
+                c_logger.error("Failed to create a new job for request "
+                        + p_request.getId(), e);
+                String args[] = new String[1];
+                args[0] = Long.toString(p_request.getId());
 
-				throw new JobCreationException(
-						JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
-						args, e);
-			}
-			catch (Exception sqle)
-			{
-				String args[] = new String[1];
-				args[0] = Long.toString(p_request.getId());
-				throw new JobCreationException(
-						JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
-						args, e);
-			}
-		}
-		finally
-		{
-			if (session != null)
-			{
-				// session.close();
-			}
-		}
+                throw new JobCreationException(
+                        JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
+                        args, e);
+            }
+            catch (Exception sqle)
+            {
+                String args[] = new String[1];
+                args[0] = Long.toString(p_request.getId());
+                throw new JobCreationException(
+                        JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
+                        args, e);
+            }
+        }
+        finally
+        {
+            if (session != null)
+            {
+                // session.close();
+            }
+        }
 
-		try
-		{
-			getJobDispatchEngine().createDispatcher(newJob);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			long id = newJob == null ? -1 : newJob.getId();
-			c_logger.error("Failed to create a dispatcher for the job " + id);
-		}
-		addJobNote(p_targetPages, newJob);
+        try
+        {
+            getJobDispatchEngine().createDispatcher(newJob);
+        }
+        catch (Exception e)
+        {
+            long id = newJob == null ? -1 : newJob.getId();
+            c_logger.error("Failed to create a dispatcher for the job " + id, e);
+        }
+        addJobNote(p_targetPages, newJob);
 
-		return newJob;
-	}
+        return newJob;
+    }
 
     /**
      * To add comment and attached file to a job according with target pages
-     *
+     * 
      * @param p_targetPages
      *            Target pages
      * @param p_job
@@ -331,7 +345,8 @@ public class JobAdditionEngine
                 StringBuffer finalPath = null;
 
                 Connection conn = null;
-                Statement stmt = null;
+                PreparedStatement pstmt = null;
+                PreparedStatement pstmt2 = null;
                 ResultSet rs = null;
 
                 for (Iterator iter = c.iterator(); iter.hasNext();)
@@ -360,12 +375,13 @@ public class JobAdditionEngine
                         {
                             temp = temp.substring(index + 1);
                             // Get the real job name
-                            uploadedJobName = temp.substring(0, temp
-                                    .indexOf('\\'));
+                            uploadedJobName = temp.substring(0,
+                                    temp.indexOf('\\'));
                             isFromDI = true;
                         }
-                        jobnotesFile = new File(AmbFileStoragePathUtils
-                                .getCxeDocDir(), uploadedJobName + ".txt");
+                        jobnotesFile = new File(
+                                AmbFileStoragePathUtils.getCxeDocDir(),
+                                uploadedJobName + ".txt");
                         if (jobnotesFile.exists())
                         {
                             // read job note, content formart
@@ -415,7 +431,7 @@ public class JobAdditionEngine
                                     }
                                     srcFolder.delete();
                                 }
-                          }
+                            }
 
                             jobnotesFile.delete();
                         }
@@ -423,30 +439,34 @@ public class JobAdditionEngine
                         {
                             // Update CVS files status
                             conn = ConnectionPool.getConnection();
-                            stmt = conn.createStatement();
-                            rs = stmt
-                                    .executeQuery("select * from cvs_source_files where status=1 and job_name='"
-                                            + uploadedJobName + "'");
+                            String sql = "select * from cvs_source_files where status=1 and job_name = ?";
+                            pstmt = conn.prepareStatement(sql);
+                            pstmt.setString(1, uploadedJobName);
+                            rs = pstmt.executeQuery();
                             if (rs.next())
                             {
                                 // Change the status of uploaded cvs files
-                                stmt
-                                        .executeUpdate("update cvs_source_files set status=2, job_id='"
-                                                + p_job.getJobId()
-                                                + "' where job_name='"
-                                                + uploadedJobName + "'");
+                                String sql2 = "update cvs_source_files set status=2, job_id=? where job_name=?";
+                                pstmt2 = conn.prepareStatement(sql2);
+                                pstmt2.setLong(1, p_job.getJobId());
+                                pstmt2.setString(2, uploadedJobName);
+                                pstmt2.executeUpdate();
                             }
                         }
                         catch (SQLException se)
                         {
-                            c_logger.error("Can NOT update CVS files status. "
-                                    + se.toString());
+                            c_logger.error("Can NOT update CVS files status. ", se);
                         }
                         finally
                         {
                             try
                             {
-                                stmt.close();
+                                if (pstmt != null)
+                                    pstmt.close();
+
+                                if (pstmt2 != null)
+                                    pstmt2.close();
+
                                 ConnectionPool.returnConnection(conn);
                             }
                             catch (Exception e)
@@ -460,557 +480,565 @@ public class JobAdditionEngine
             {
                 // do nothing but write log, because this exception
                 // is not important
-                c_logger
-                        .info(
-                                "Error when add "
-                                        + p_job.getJobName()
-                                        + " ("
-                                        + p_job.getJobId()
-                                        + ")"
-                                        + " job's notes (added when uploading) into GlobalSight DB",
-                                e);
+                c_logger.info(
+                        "Error when add "
+                                + p_job.getJobName()
+                                + " ("
+                                + p_job.getJobId()
+                                + ")"
+                                + " job's notes (added when uploading) into GlobalSight DB",
+                        e);
             }
         }
     }
 
-	public void addDtpWorkflowToJob(List p_wfList)
-			throws JobCreationException
-	{
-		if (p_wfList == null)
-		{
-			return;
-		}
-		Job p_job = ((Workflow) p_wfList.iterator().next()).getJob();
-		Connection connection = null;
-		List listOfWorkflows = null;
-		try
-		{
-			connection = PersistenceService.getInstance()
-					.getConnectionForImport();
-			connection.setAutoCommit(false);
-			listOfWorkflows = createDtpWorkflowInstances(p_job, p_wfList);
-			// All DTP Workflow
-			if (listOfWorkflows.size() == 0)
-			{
-				return;
-			}
-			InsertDtpJobCommand ijc = new InsertDtpJobCommand(p_job,
-					listOfWorkflows);
-			ijc.persistObjects(connection);
+    public void addDtpWorkflowToJob(List p_wfList) throws JobCreationException
+    {
+        if (p_wfList == null)
+        {
+            return;
+        }
+        Job p_job = ((Workflow) p_wfList.iterator().next()).getJob();
+        Connection connection = null;
+        List listOfWorkflows = null;
+        try
+        {
+            connection = PersistenceService.getInstance()
+                    .getConnectionForImport();
+            connection.setAutoCommit(false);
+            listOfWorkflows = createDtpWorkflowInstances(p_job, p_wfList);
+            // All DTP Workflow
+            if (listOfWorkflows.size() == 0)
+            {
+                return;
+            }
+            InsertDtpJobCommand ijc = new InsertDtpJobCommand(p_job,
+                    listOfWorkflows);
+            ijc.persistObjects(connection);
 
-			connection.commit();
+            connection.commit();
 
-			// Just for reflush the cache of the toplink
-			ServerProxy.getJobHandler().refreshJob(p_job);
+            // Just for reflush the cache of the toplink
+            ServerProxy.getJobHandler().refreshJob(p_job);
 
-		}
-		catch (Exception e)
-		{
-			try
-			{
-				c_logger.error(
-						"Failed to create a Dtp Workflow Instance for job "
-								+ p_job.getId(), e);
-				String args[] = new String[1];
-				args[0] = Long.toString(p_job.getId());
-				connection.rollback();
-				throw new JobCreationException(
-						JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
-						args, e);
-			}
-			catch (Exception sqle)
-			{
-				String args[] = new String[1];
-				args[0] = Long.toString(p_job.getId());
-				throw new JobCreationException(
-						JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
-						args, e);
-			}
-		}
-		finally
-		{
-			try
-			{
-				PersistenceService.getInstance().returnConnection(connection);
-			}
-			catch (Exception e)
-			{
-				c_logger.error("Could not return connection to the pool");
-			}
-		}
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                c_logger.error(
+                        "Failed to create a Dtp Workflow Instance for job "
+                                + p_job.getId(), e);
+                String args[] = new String[1];
+                args[0] = Long.toString(p_job.getId());
+                connection.rollback();
+                throw new JobCreationException(
+                        JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
+                        args, e);
+            }
+            catch (Exception sqle)
+            {
+                String args[] = new String[1];
+                args[0] = Long.toString(p_job.getId());
+                throw new JobCreationException(
+                        JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
+                        args, e);
+            }
+        }
+        finally
+        {
+            try
+            {
+                PersistenceService.getInstance().returnConnection(connection);
+            }
+            catch (Exception e)
+            {
+                c_logger.error("Could not return connection to the pool");
+            }
+        }
 
-		try
-		{
-			Iterator it = listOfWorkflows.iterator();
-			while (it.hasNext())
-			{
-				Workflow workflow = (Workflow) it.next();
+        try
+        {
+            Iterator it = listOfWorkflows.iterator();
+            while (it.hasNext())
+            {
+                Workflow workflow = (Workflow) it.next();
 
-				if (workflow.getState().equals(Workflow.PENDING))
-				{
-					workflow = ServerProxy.getWorkflowManager()
-							.getWorkflowByIdRefresh(workflow.getId());
-					ServerProxy.getWorkflowManager().dispatch(workflow);
-				}
+                if (workflow.getState().equals(Workflow.PENDING))
+                {
+                    workflow = ServerProxy.getWorkflowManager()
+                            .getWorkflowByIdRefresh(workflow.getId());
+                    ServerProxy.getWorkflowManager().dispatch(workflow);
+                }
 
-			}
+            }
 
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			c_logger.error("Failed to create a dispatcher for the job "
-					+ p_job.getId());
-		}
-	}
+        }
+        catch (Exception e)
+        {
+            c_logger.error(
+                    "Failed to create a dispatcher for the job "
+                            + p_job.getId(), e);
+        }
+    }
 
-	/*
-	 * connection.commit();
-	 *  // Just for reflush the cache of the toplink
-	 * ServerProxy.getJobHandler().refreshJob(p_job);
-	 *  } catch (Exception e) { try { c_logger.error( "Failed to create a Dtp
-	 * Workflow Instance for job " + p_job.getId(), e); String args[] = new
-	 * String[1]; args[0] = Long.toString(p_job.getId()); connection.rollback();
-	 * throw new JobCreationException(
-	 * JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES, args,
-	 * e); } catch (Exception sqle) { String args[] = new String[1]; args[0] =
-	 * Long.toString(p_job.getId()); throw new JobCreationException(
-	 * JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES, args,
-	 * e); } } finally { try { ps.returnConnection(connection); } catch
-	 * (Exception e) { c_logger.error("Could not return connection to the
-	 * pool"); } }
-	 *
-	 * try { Iterator it = listOfWorkflows.iterator(); while (it.hasNext()) {
-	 * Workflow workflow = (Workflow) it.next();
-	 *
-	 * if (workflow.getState().equals(Workflow.PENDING)) { workflow =
-	 * ServerProxy.getWorkflowManager() .getWorkflowById(p_seesionId,
-	 * workflow.getId()); ServerProxy.getWorkflowManager().dispatch(workflow); }
-	 *  }
-	 *  } catch (Exception e) { e.printStackTrace(); c_logger.error("Failed to
-	 * create a dispatcher for the job " + p_job.getId()); } }
-	 *  /* Generate a unique job name.
-	 */
-	String generateJobName(Request p_request)
-	{
-		String jobName = new String();
-		jobName += p_request.getL10nProfile().getName();
-		jobName += " " + p_request.getDataSourceType();
-		jobName += " " + p_request.getId();
-		return jobName;
-	}
+    /*
+     * connection.commit(); // Just for reflush the cache of the toplink
+     * ServerProxy.getJobHandler().refreshJob(p_job); } catch (Exception e) {
+     * try { c_logger.error( "Failed to create a Dtp Workflow Instance for job "
+     * + p_job.getId(), e); String args[] = new String[1]; args[0] =
+     * Long.toString(p_job.getId()); connection.rollback(); throw new
+     * JobCreationException(
+     * JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES, args,
+     * e); } catch (Exception sqle) { String args[] = new String[1]; args[0] =
+     * Long.toString(p_job.getId()); throw new JobCreationException(
+     * JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES, args,
+     * e); } } finally { try { ps.returnConnection(connection); } catch
+     * (Exception e) { c_logger.error("Could not return connection to the
+     * pool"); } }
+     * 
+     * try { Iterator it = listOfWorkflows.iterator(); while (it.hasNext()) {
+     * Workflow workflow = (Workflow) it.next();
+     * 
+     * if (workflow.getState().equals(Workflow.PENDING)) { workflow =
+     * ServerProxy.getWorkflowManager() .getWorkflowById(p_seesionId,
+     * workflow.getId()); ServerProxy.getWorkflowManager().dispatch(workflow); }
+     * } } catch (Exception e) { c_logger.error("Failed to create a dispatcher
+     * for the job " + p_job.getId(), e); } } /* Generate a unique job name.
+     */
+    String generateJobName(Request p_request)
+    {
+        String jobName = new String();
+        jobName += p_request.getL10nProfile().getName();
+        jobName += " " + p_request.getDataSourceType();
+        jobName += " " + p_request.getId();
+        return jobName;
+    }
 
-	/**
-	 * Create the Dtp workflow instances that are part of the new job.
-	 */
-	private List createDtpWorkflowInstances(Job p_job, List p_wfList)
-			throws JobCreationException
-	{
-		L10nProfile l10n = p_job.getL10nProfile();
-		ArrayList listOfWorkflows = new ArrayList();
-		try
-		{
-			GlobalSightLocale[] targetLocales = new GlobalSightLocale[p_wfList
-					.size()];// l10n.getTargetLocales();
-			int i = 0;
-			for (Iterator it = p_wfList.iterator(); it.hasNext();)
-			{
-				Workflow workflow = (Workflow) it.next();
-				if (WorkflowTypeConstants.TYPE_DTP.equals(workflow
-						.getWorkflowType())
-						|| !Workflow.LOCALIZED.equals(workflow.getState()))
-				{
-					continue;
+    /**
+     * Create the Dtp workflow instances that are part of the new job.
+     */
+    private List createDtpWorkflowInstances(Job p_job, List p_wfList)
+            throws JobCreationException
+    {
+        L10nProfile l10n = p_job.getL10nProfile();
+        ArrayList listOfWorkflows = new ArrayList();
+        try
+        {
+            GlobalSightLocale[] targetLocales = new GlobalSightLocale[p_wfList
+                    .size()];// l10n.getTargetLocales();
+            int i = 0;
+            for (Iterator it = p_wfList.iterator(); it.hasNext();)
+            {
+                Workflow workflow = (Workflow) it.next();
+                if (WorkflowTypeConstants.TYPE_DTP.equals(workflow
+                        .getWorkflowType())
+                        || !Workflow.LOCALIZED.equals(workflow.getState()))
+                {
+                    continue;
 
-				}
-				targetLocales[i] = workflow.getTargetLocale();
-				i++;
-			}
-			// ignore DTP workflow
-			if (i < 1)
-			{
-				return listOfWorkflows;
-			}
-			for (i = 0; i < targetLocales.length; i++)
-			{
-				WorkflowTemplateInfo wfInfo = l10n
-						.getDtpWorkflowTemplateInfo(targetLocales[i]);
-				// just make DTP workflow instance
-				// wfInfo maybe null here.
-				if (wfInfo == null
-						|| !WorkflowTemplateInfo.TYPE_DTP.equals(wfInfo
-								.getWorkflowType()))
-				{
-					continue;
-				}
-				long wfTemplateId = wfInfo.getWorkflowTemplateId();
-				WorkflowInstance wfInstance = c_wfServer
-						.createWorkflowInstance(wfTemplateId);
+                }
+                targetLocales[i] = workflow.getTargetLocale();
+                i++;
+            }
+            // ignore DTP workflow
+            if (i < 1)
+            {
+                return listOfWorkflows;
+            }
+            for (i = 0; i < targetLocales.length; i++)
+            {
+                WorkflowTemplateInfo wfInfo = l10n
+                        .getDtpWorkflowTemplateInfo(targetLocales[i]);
+                // just make DTP workflow instance
+                // wfInfo maybe null here.
+                if (wfInfo == null
+                        || !WorkflowTemplateInfo.TYPE_DTP.equals(wfInfo
+                                .getWorkflowType()))
+                {
+                    continue;
+                }
+                long wfTemplateId = wfInfo.getWorkflowTemplateId();
+                WorkflowInstance wfInstance = c_wfServer
+                        .createWorkflowInstance(wfTemplateId);
 
-				Workflow wf = new WorkflowImpl();
-				wf.setWorkflowType(wfInfo.getWorkflowType());
-				wf.setId(wfInstance.getId());
-				wf.setIflowInstance(wfInstance);
-				wf.setState(Workflow.PENDING);
-				wf.setTargetLocale(targetLocales[i]);
-				wf.setDuration(calculateDuration(wfInstance));
-				wf.setJob(p_job);
-				wf.setCompanyId(p_job.getCompanyId());
+                Workflow wf = new WorkflowImpl();
+                wf.setWorkflowType(wfInfo.getWorkflowType());
+                wf.setId(wfInstance.getId());
+                wf.setIflowInstance(wfInstance);
+                wf.setState(Workflow.PENDING);
+                wf.setTargetLocale(targetLocales[i]);
+                wf.setDuration(calculateDuration(wfInstance));
+                wf.setJob(p_job);
+                wf.setCompanyId(p_job.getCompanyId());
 
-				// set workflow owners (PM and WFM)
-				wf.addWorkflowOwner(new WorkflowOwner(wfInfo
-						.getProjectManagerId(),
-						Permission.GROUP_PROJECT_MANAGER));
+                // set workflow owners (PM and WFM)
+                wf.addWorkflowOwner(new WorkflowOwner(wfInfo
+                        .getProjectManagerId(),
+                        Permission.GROUP_PROJECT_MANAGER));
 
-				List wfms = wfInfo.getWorkflowManagerIds();
-				if (wfms != null)
-				{
-					for (Iterator wfi = wfms.iterator(); wfi.hasNext();)
-					{
-						wf.addWorkflowOwner(new WorkflowOwner((String) wfi
-								.next(), Permission.GROUP_WORKFLOW_MANAGER));
-					}
-				}
+                List wfms = wfInfo.getWorkflowManagerIds();
+                if (wfms != null)
+                {
+                    for (Iterator wfi = wfms.iterator(); wfi.hasNext();)
+                    {
+                        wf.addWorkflowOwner(new WorkflowOwner((String) wfi
+                                .next(), Permission.GROUP_WORKFLOW_MANAGER));
+                    }
+                }
 
-				// create the tasks and add them to the workflow
-				createTasks(wf);
-				listOfWorkflows.add(wf);
-			}
+                // create the tasks and add them to the workflow
+                createTasks(wf);
+                listOfWorkflows.add(wf);
+            }
 
-		}
-		catch (Exception e)
-		{
-			c_logger.error(
-					"Failed to create dtp workflow instances for the new "
-							+ "of job " + p_job.getId(), e);
-			String args[] = new String[1];
-			args[0] = Long.toString(p_job.getId());
-			throw new JobCreationException(
-					JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
-					args, e);
-		}
+        }
+        catch (Exception e)
+        {
+            c_logger.error(
+                    "Failed to create dtp workflow instances for the new "
+                            + "of job " + p_job.getId(), e);
+            String args[] = new String[1];
+            args[0] = Long.toString(p_job.getId());
+            throw new JobCreationException(
+                    JobCreationException.MSG_FAILED_TO_CREATE_DTP_WORKFLOW_INSTANCES,
+                    args, e);
+        }
 
-		return listOfWorkflows;
-	}
+        return listOfWorkflows;
+    }
 
-	/*
-	 * Create the workflow instances that are part of the new job.
-	 */
-	private List createWorkflowInstances(Request p_request, JobImpl p_job, HashMap p_targetPages)
-			throws JobCreationException
-	{
-	    GlobalSightLocale[] targetLocales = p_request
-        .getTargetLocalesToImport();
-	    
-		L10nProfile l10n = p_request.getL10nProfile();
-		ArrayList listOfWorkflows = new ArrayList();
-		try
-		{
-			for (int i = 0; i < targetLocales.length; i++)
-			{
-				WorkflowTemplateInfo wfInfo = l10n
-						.getWorkflowTemplateInfo(targetLocales[i]);
-				L10nProfileWFTemplateInfo l10nProfileWFTemplateInfo = ServerProxy.getProjectHandler().getL10nProfileWfTemplateInfo(l10n.getId(), wfInfo.getId());
-				// just make translation workflow instance
-				if(! l10nProfileWFTemplateInfo.getIsActive())
-				{
-					continue;
-				}
-				if (( ! l10nProfileWFTemplateInfo.getIsActive()) && !wfInfo.getWorkflowType().equals(
-						WorkflowTemplateInfo.TYPE_TRANSLATION))
-				{
-					continue;
-				}
-				long wfTemplateId = wfInfo.getWorkflowTemplateId();
-				WorkflowInstance wfInstance = c_wfServer
-						.createWorkflowInstance(wfTemplateId);
+    /*
+     * Create the workflow instances that are part of the new job.
+     */
+    List<Workflow> createWorkflowInstances(Request p_request, JobImpl p_job,
+            HashMap p_targetPages) throws JobCreationException
+    {
+        GlobalSightLocale[] targetLocales = p_request
+                .getTargetLocalesToImport();
 
-				Workflow wf = new WorkflowImpl();
-				wf.setWorkflowType(wfInfo.getWorkflowType());
-				wf.setId(wfInstance.getId());
-				wf.setIflowInstance(wfInstance);
-				wf.setState(Workflow.PENDING);
-				wf.setTargetLocale(targetLocales[i]);
-				wf.setDuration(calculateDuration(wfInstance));
+        L10nProfile l10n = p_request.getL10nProfile();
+        List<Workflow> listOfWorkflows = new ArrayList<Workflow>();
+        try
+        {
+            for (int i = 0; i < targetLocales.length; i++)
+            {
+                WorkflowTemplateInfo wfInfo = l10n
+                        .getWorkflowTemplateInfo(targetLocales[i]);
+                L10nProfileWFTemplateInfo l10nProfileWFTemplateInfo = ServerProxy
+                        .getProjectHandler().getL10nProfileWfTemplateInfo(
+                                l10n.getId(), wfInfo.getId());
+                // just make translation workflow instance
+                if (!l10nProfileWFTemplateInfo.getIsActive())
+                {
+                    continue;
+                }
+                if ((!l10nProfileWFTemplateInfo.getIsActive())
+                        && !wfInfo.getWorkflowType().equals(
+                                WorkflowTemplateInfo.TYPE_TRANSLATION))
+                {
+                    continue;
+                }
+                long wfTemplateId = wfInfo.getWorkflowTemplateId();
+                WorkflowInstance wfInstance = c_wfServer
+                        .createWorkflowInstance(wfTemplateId);
 
-				// set workflow owners (PM and WFM)
-				wf.addWorkflowOwner(new WorkflowOwner(wfInfo
-						.getProjectManagerId(),
-						Permission.GROUP_PROJECT_MANAGER));
+                Workflow wf = new WorkflowImpl();
+                wf.setWorkflowType(wfInfo.getWorkflowType());
+                wf.setId(wfInstance.getId());
+                wf.setIflowInstance(wfInstance);
+                wf.setState(Workflow.PENDING);
+                wf.setTargetLocale(targetLocales[i]);
+                wf.setDuration(calculateDuration(wfInstance));
 
-				List wfms = wfInfo.getWorkflowManagerIds();
-				if (wfms != null)
-				{
-					for (Iterator wfi = wfms.iterator(); wfi.hasNext();)
-					{
-						wf.addWorkflowOwner(new WorkflowOwner((String) wfi
-								.next(), Permission.GROUP_WORKFLOW_MANAGER));
-					}
-				}
+                // set workflow owners (PM and WFM)
+                wf.addWorkflowOwner(new WorkflowOwner(wfInfo
+                        .getProjectManagerId(),
+                        Permission.GROUP_PROJECT_MANAGER));
 
-				// create the tasks and add them to the workflow
-				createTasks(wf);
-				listOfWorkflows.add(wf);
-			}
-		}
-		catch (Exception e)
-		{
-			c_logger.error("Failed to create workflow instances for the new "
-					+ "of request " + p_request.getId(), e);
-			String args[] = new String[1];
-			args[0] = Long.toString(p_request.getId());
-			throw new JobCreationException(
-					JobCreationException.MSG_FAILED_TO_CREATE_WORKFLOW_INSTANCES,
-					args, e);
+                List wfms = wfInfo.getWorkflowManagerIds();
+                if (wfms != null)
+                {
+                    for (Iterator wfi = wfms.iterator(); wfi.hasNext();)
+                    {
+                        wf.addWorkflowOwner(new WorkflowOwner((String) wfi
+                                .next(), Permission.GROUP_WORKFLOW_MANAGER));
+                    }
+                }
 
-		}
-		return listOfWorkflows;
-	}
+                // create the tasks and add them to the workflow
+                createTasks(wf);
+                listOfWorkflows.add(wf);
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Failed to create workflow instances for the new "
+                    + "of request " + p_request.getId(), e);
+            String args[] = new String[1];
+            args[0] = Long.toString(p_request.getId());
+            throw new JobCreationException(
+                    JobCreationException.MSG_FAILED_TO_CREATE_WORKFLOW_INSTANCES,
+                    args, e);
 
-	/**
-	 * Create all the tasks of the workflow from the WorkflowTaskInstances. This
-	 * creates a task for each task within iflow - and provides a place to store
-	 * information in the System4 DB and not in iflow. Like rates, accept time,
-	 * complete time, hours to work on task, etc..
-	 */
-	private void createTasks(Workflow p_wf)
-	{
-		Vector tasks = p_wf.getIflowInstance().getWorkflowInstanceTasks();
-		for (int i = 0; i < tasks.size(); i++)
-		{
-			WorkflowTaskInstance wti = (WorkflowTaskInstance) tasks.get(i);
-			// no need to create task for start, exit, and condition node.
-			if (wti.getType() == WorkflowConstants.ACTIVITY)
-			{
-				TaskImpl task = new TaskImpl(p_wf);
-				task.setId(wti.getTaskId());
-				task.setName(wti.getActivityName());
-				task.setType(getActivityType(task.getName()));
-				task.setCompanyId(p_wf.getCompanyId());
-				// set Task Type; Translation Task or DTP Task
-				task.setTaskType(p_wf.getWorkflowType());
-				task.setRateSelectionCriteria(wti.getRateSelectionCriteria());
-				// if an expense rate is specified
-				if (wti.getExpenseRateId() > 0)
-				{
-					try
-					{
-						Rate r = lookupCostingEngine().getRate(
-								wti.getExpenseRateId());
-						task.setExpenseRate(r);
-					}
-					catch (Exception e)
-					{
-						// couldn't find the rate so left to be null
-						c_logger
-								.error("Couldn't find the expense rate for task "
-										+ wti.getTaskId()
-										+ " of workflow "
-										+ p_wf.getId());
-					}
-				}
-				// if a revenuve rate is specified
-				if (wti.getRevenueRateId() > 0)
-				{
-					try
-					{
-						Rate r = lookupCostingEngine().getRate(
-								wti.getRevenueRateId());
-						task.setRevenueRate(r);
-					}
-					catch (Exception e)
-					{
-						// couldn't find the rate so left to be null
-						c_logger.error("Couldn't find the rate for task "
-								+ wti.getTaskId() + " of workflow "
-								+ p_wf.getId());
-					}
-				}
-				p_wf.addTask(task);
-			}
+        }
+        return listOfWorkflows;
+    }
 
-		}
+    /**
+     * Create all the tasks of the workflow from the WorkflowTaskInstances. This
+     * creates a task for each task within iflow - and provides a place to store
+     * information in the System4 DB and not in iflow. Like rates, accept time,
+     * complete time, hours to work on task, etc..
+     */
+    private void createTasks(Workflow p_wf)
+    {
+        Vector tasks = p_wf.getIflowInstance().getWorkflowInstanceTasks();
+        for (int i = 0; i < tasks.size(); i++)
+        {
+            WorkflowTaskInstance wti = (WorkflowTaskInstance) tasks.get(i);
+            // no need to create task for start, exit, and condition node.
+            if (wti.getType() == WorkflowConstants.ACTIVITY)
+            {
+                TaskImpl task = new TaskImpl(p_wf);
+                task.setId(wti.getTaskId());
+                task.setName(wti.getActivityName());
+                task.setType(getActivityType(task.getName()));
+                task.setCompanyId(p_wf.getCompanyId());
+                // set Task Type; Translation Task or DTP Task
+                task.setTaskType(p_wf.getWorkflowType());
+                task.setRateSelectionCriteria(wti.getRateSelectionCriteria());
+                // if an expense rate is specified
+                if (wti.getExpenseRateId() > 0)
+                {
+                    try
+                    {
+                        Rate r = lookupCostingEngine().getRate(
+                                wti.getExpenseRateId());
+                        task.setExpenseRate(r);
+                    }
+                    catch (Exception e)
+                    {
+                        // couldn't find the rate so left to be null
+                        c_logger.error("Couldn't find the expense rate for task "
+                                + wti.getTaskId()
+                                + " of workflow "
+                                + p_wf.getId());
+                    }
+                }
+                // if a revenuve rate is specified
+                if (wti.getRevenueRateId() > 0)
+                {
+                    try
+                    {
+                        Rate r = lookupCostingEngine().getRate(
+                                wti.getRevenueRateId());
+                        task.setRevenueRate(r);
+                    }
+                    catch (Exception e)
+                    {
+                        // couldn't find the rate so left to be null
+                        c_logger.error("Couldn't find the rate for task "
+                                + wti.getTaskId() + " of workflow "
+                                + p_wf.getId());
+                    }
+                }
+                task.setIsUploading('N');//for GBS-1939
+                p_wf.addTask(task);
+            }
 
-	}
+        }
 
-	/*
-	 * Calculate the duration of the workflow as number of 'minutes'.
-	 */
-	private long calculateDuration(WorkflowInstance wfi)
-	{
-		long durationInMilli = 0;
-		long minutes = 0;
-		try
-		{
-			// -1 indicates that the default path would begin from the
-			// START node.
-			List wfTaskInfos = c_wfServer.timeDurationsInDefaultPath(wfi
-					.getId(), -1, null, wfi);
+    }
 
-			for (Iterator it = wfTaskInfos.iterator(); it.hasNext();)
-			{
-				WfTaskInfo taskInfo = (WfTaskInfo) it.next();
-				{
-					durationInMilli += taskInfo.getCompletionDuration();
-				}
-			}
-			// convert the millisec to minutes since it's the smallest unit
-			// of time used for each activity of a workflow.
-			minutes = (long) durationInMilli / 60000L;
+    /*
+     * Calculate the duration of the workflow as number of 'minutes'.
+     */
+    private long calculateDuration(WorkflowInstance wfi)
+    {
+        long durationInMilli = 0;
+        long minutes = 0;
+        try
+        {
+            // -1 indicates that the default path would begin from the
+            // START node.
+            List wfTaskInfos = c_wfServer.timeDurationsInDefaultPath(
+                    wfi.getId(), -1, null, wfi);
 
-		}
-		catch (Exception e)
-		{
-			// if this fails just flag an error - and leave the cost at 0
-			c_logger.error("Failed to calculate the cost for workflow "
-					+ wfi.getId(), e);
-		}
-		return minutes;
-	}
+            for (Iterator it = wfTaskInfos.iterator(); it.hasNext();)
+            {
+                WfTaskInfo taskInfo = (WfTaskInfo) it.next();
+                {
+                    durationInMilli += taskInfo.getCompletionDuration();
+                }
+            }
+            // convert the millisec to minutes since it's the smallest unit
+            // of time used for each activity of a workflow.
+            minutes = (long) durationInMilli / 60000L;
 
-	/**
-	 * Converts the tasks to the
-	 *
-	 * @{code WorkflowInstance} array.
-	 *
-	 * @param tasks
-	 *            The vector of the {@code WorkflowInstance}
-	 * @return
-	 */
-	private WorkflowTaskInstance[] convertToArray(Vector tasks)
-	{
-		WorkflowTaskInstance[] taskInstances = new WorkflowTaskInstance[tasks
-				.size()];
+        }
+        catch (Exception e)
+        {
+            // if this fails just flag an error - and leave the cost at 0
+            c_logger.error(
+                    "Failed to calculate the cost for workflow " + wfi.getId(),
+                    e);
+        }
+        return minutes;
+    }
 
-		int i = 0;
-		for (Enumeration e = tasks.elements(); e.hasMoreElements();)
-		{
-			taskInstances[i++] = (WorkflowTaskInstance) e.nextElement();
-		}
+    /**
+     * Converts the tasks to the
+     * 
+     * @{code WorkflowInstance} array.
+     * 
+     * @param tasks
+     *            The vector of the {@code WorkflowInstance}
+     * @return
+     */
+    private WorkflowTaskInstance[] convertToArray(Vector tasks)
+    {
+        WorkflowTaskInstance[] taskInstances = new WorkflowTaskInstance[tasks
+                .size()];
 
-		return taskInstances;
-	}
+        int i = 0;
+        for (Enumeration e = tasks.elements(); e.hasMoreElements();)
+        {
+            taskInstances[i++] = (WorkflowTaskInstance) e.nextElement();
+        }
 
-	/*
-	 * Get the reference to the workflow server.
-	 */
-	private void lookupWFServer() throws JobCreationException
-	{
-		try
-		{
-			if (c_wfServer == null)
-				c_wfServer = ServerProxy.getWorkflowServer();
-		}
-		catch (GeneralException ge)
-		{
-			c_logger.error("Failed to lookup the Workflow server.", ge);
-			throw new JobCreationException(
-					JobCreationException.MSG_FAILED_TO_FIND_WORKFLOW_SERVER,
-					null, ge);
-		}
-	}
+        return taskInstances;
+    }
 
-	/**
-	 * Return the activity's type.
-	 */
-	private int getActivityType(String p_activityName)
-	{
-		// default
-		int type = TaskImpl.TYPE_TRANSLATE;
-		try
-		{
-			Activity act = ServerProxy.getJobHandler().getActivity(
-					p_activityName);
-			type = act.getType();
+    /*
+     * Get the reference to the workflow server.
+     */
+    private void lookupWFServer() throws JobCreationException
+    {
+        try
+        {
+            if (c_wfServer == null)
+                c_wfServer = ServerProxy.getWorkflowServer();
+        }
+        catch (GeneralException ge)
+        {
+            c_logger.error("Failed to lookup the Workflow server.", ge);
+            throw new JobCreationException(
+                    JobCreationException.MSG_FAILED_TO_FIND_WORKFLOW_SERVER,
+                    null, ge);
+        }
+    }
 
-			// for sla report issue
-			if ((type == Activity.TYPE_REVIEW) && act.getIsEditable())
-			{
-				type = TaskImpl.TYPE_REVIEW_EDITABLE;
-			}
-		}
-		catch (Exception e)
-		{
-			// do nothing just return the default
-		}
-		return type;
-	}
+    /**
+     * Return the activity's type.
+     */
+    private int getActivityType(String p_activityName)
+    {
+        // default
+        int type = TaskImpl.TYPE_TRANSLATE;
+        try
+        {
+            Activity act = ServerProxy.getJobHandler().getActivity(
+                    p_activityName);
+            type = act.getType();
 
-	/*
-	 * Get the reference to the costing engine.
-	 */
-	private CostingEngine lookupCostingEngine() throws JobCreationException
-	{
-		try
-		{
-			if (c_ce == null) c_ce = ServerProxy.getCostingEngine();
-			return c_ce;
-		}
-		catch (GeneralException ge)
-		{
-			c_logger.error("Failed to lookup the Costing Engine.", ge);
-			throw new JobCreationException(
-					JobCreationException.MSG_FAILED_TO_FIND_COSTING_ENGINE,
-					null, ge);
-		}
-	}
+            // for sla report issue
+            if ((type == Activity.TYPE_REVIEW) && act.getIsEditable())
+            {
+                type = TaskImpl.TYPE_REVIEW_EDITABLE;
+            }
+        }
+        catch (Exception e)
+        {
+            // do nothing just return the default
+        }
+        return type;
+    }
 
-	/**
-	 * Get the reference to the job dispatcher.
-	 */
-	private JobDispatchEngine getJobDispatchEngine()
-			throws JobCreationException
-	{
-		JobDispatchEngine jobDispatchEngine = null;
-		try
-		{
-			jobDispatchEngine = ServerProxy.getJobDispatchEngine();
-		}
-		catch (Exception e)
-		{
-			c_logger.error("Unable to retrieve JobDispatch Engine", e);
-			throw new JobCreationException(
-					JobCreationException.MSG_FAILED_TO_FIND_JOB_DISPATCHER,
-					null, e);
-		}
-		return jobDispatchEngine;
-	}
+    /*
+     * Get the reference to the costing engine.
+     */
+    private CostingEngine lookupCostingEngine() throws JobCreationException
+    {
+        try
+        {
+            if (c_ce == null)
+                c_ce = ServerProxy.getCostingEngine();
+            return c_ce;
+        }
+        catch (GeneralException ge)
+        {
+            c_logger.error("Failed to lookup the Costing Engine.", ge);
+            throw new JobCreationException(
+                    JobCreationException.MSG_FAILED_TO_FIND_COSTING_ENGINE,
+                    null, ge);
+        }
+    }
 
-	private String getTargetModule(TargetPage p_tp) {
-		if (p_tp == null) {
-			return "";
-		}
-		Connection conn = null;
-		Statement stmt = null;
-		try {
-			String sourceLocale = p_tp.getSourcePage().getGlobalSightLocale().toString();
-			String targetLocale = p_tp.getGlobalSightLocale().toString();
-			String jobName = p_tp.getWorkflowInstance().getJob().getJobName();
+    /**
+     * Get the reference to the job dispatcher.
+     */
+    private JobDispatchEngine getJobDispatchEngine()
+            throws JobCreationException
+    {
+        JobDispatchEngine jobDispatchEngine = null;
+        try
+        {
+            jobDispatchEngine = ServerProxy.getJobDispatchEngine();
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Unable to retrieve JobDispatch Engine", e);
+            throw new JobCreationException(
+                    JobCreationException.MSG_FAILED_TO_FIND_JOB_DISPATCHER,
+                    null, e);
+        }
+        return jobDispatchEngine;
+    }
 
-			//get "sourceModule"
-			String tmp = p_tp.getExternalPageId();
-			tmp = tmp.replace("\\", "/");
-			int fileNameIndex = tmp.lastIndexOf("/") + 1;
-			tmp = tmp.substring(0, fileNameIndex);
-			int index = tmp.indexOf(jobName) + jobName.length() + 1;
-			tmp = tmp.substring(index);
-			String sourceModule = tmp.substring(tmp.indexOf("/"));
+    String getTargetModule(TargetPage p_tp, Connection connection)
+    {
+        if (p_tp == null)
+        {
+            return "";
+        }
+        Statement stmt = null;
+        try
+        {
+            String sourceLocale = p_tp.getSourcePage().getGlobalSightLocale()
+                    .toString();
+            String targetLocale = p_tp.getGlobalSightLocale().toString();
+            String jobName = p_tp.getWorkflowInstance().getJob().getJobName();
 
-			conn = ConnectionPool.getConnection();
-			stmt = conn.createStatement();
-			StringBuffer sql = new StringBuffer();
-			sql.append("select * from module_mapping where is_active='1' and source_locale='").append(sourceLocale).append("' and target_locale='");
-			sql.append(targetLocale).append("' and source_module='").append(sourceModule).append("'");
-			ResultSet rs = stmt.executeQuery(sql.toString());
-			if (rs.next())
-				return rs.getString("Target_Module");
-			else
-				return "";
-		} catch (Exception se) {
-			//c_logger.error("Error found in getTargetModule(). Msg: " + se.toString());
-			return "";
-		} finally {
-            ConnectionPool.silentReturnConnection(conn);
-		}
-	}
+            // get "sourceModule"
+            String tmp = p_tp.getExternalPageId();
+            tmp = tmp.replace("\\", "/");
+            int fileNameIndex = tmp.lastIndexOf("/") + 1;
+            tmp = tmp.substring(0, fileNameIndex);
+            int index = tmp.indexOf(jobName) + jobName.length() + 1;
+            tmp = tmp.substring(index);
+            String sourceModule = tmp.substring(tmp.indexOf("/"));
+
+            stmt = connection.createStatement();
+            StringBuffer sql = new StringBuffer();
+            sql.append(
+                    "select * from module_mapping where is_active='1' and source_locale='")
+                    .append(sourceLocale).append("' and target_locale='");
+            sql.append(targetLocale).append("' and source_module='")
+                    .append(sourceModule).append("'");
+            ResultSet rs = stmt.executeQuery(sql.toString());
+            if (rs.next())
+                return rs.getString("Target_Module");
+            else
+                return "";
+        }
+        catch (Exception se)
+        {
+            return "";
+        }
+        finally
+        {
+            ConnectionPool.silentClose(stmt);
+        }
+    }
 }

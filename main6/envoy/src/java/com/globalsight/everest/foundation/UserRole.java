@@ -22,12 +22,19 @@ public interface UserRole extends java.io.Serializable
     public static final String ROLE_TYPE_VALUE = "U";
 
     public String getUser();
+
     public void setUser(String p_user);
 
+    public String getUserName();
+
+    public void setUserName(String p_userName);
+
     public String getCost();
+
     public void setCost(String p_cost);
 
     public String getRate();
+
     public void setRate(String p_rate);
 
 }

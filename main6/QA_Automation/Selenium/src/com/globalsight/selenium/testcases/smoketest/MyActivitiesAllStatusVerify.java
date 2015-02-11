@@ -5,17 +5,10 @@ import junit.framework.Assert;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyActivities;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /*
  * TestCaseName: MyActivityAllStatusVerify.java 
@@ -26,60 +19,37 @@ import com.thoughtworks.selenium.Selenium;
  * 2011-6-22 First Version Jester
  */
 
-public class MyActivitiesAllStatusVerify {
+public class MyActivitiesAllStatusVerify extends BaseTestCase
+{
 
-	/**
-	 * Common variables
-	 */
-	private Selenium selenium;
+    /**
+     * Common variables
+     */
 
-	/**
-	 * Verify the button Detailed Word Counts and Export exist under all Status
-	 * page.
-	 */
-	@Test
-	public void verifyActivityFinished() {
-		selenium.click(MainFrame.MyActivities_MENU);
-		selenium.click(MainFrame.AllStatus2_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		Assert.assertTrue(selenium
-				.isElementPresent(MyActivities.DetailedWordCounts_BUTTON));
-		Assert.assertTrue(selenium.isElementPresent(MyActivities.Export_BUTTON));
-	}
+    /**
+     * Verify the button Detailed Word Counts and Export exist under all Status
+     * page.
+     */
+    @Test
+    public void verifyActivityFinished()
+    {
+        openMenuItemAndWait(selenium, MainFrame.MY_ACTIVITIES_MENU,
+                MainFrame.MY_ACTIVITIES_ALL_STATUS_SUBMENU);
 
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithPM(selenium);
-	}
+        Assert.assertTrue(selenium
+                .isElementPresent(MyActivities.DETAILED_WORD_COUNTS_BUTTON));
+        Assert.assertTrue(selenium.isElementPresent(MyActivities.EXPORT_BUTTON));
+    }
 
-	@AfterMethod
-	public void afterMethod() {
-		CommonFuncs.logoutSystem(selenium);
-	}
+    @BeforeMethod
+    public void beforeMethod()
+    {
+        CommonFuncs.loginSystemWithPM(selenium);
+    }
 
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
+    @AfterMethod
+    public void afterMethod()
+    {
+        CommonFuncs.logoutSystem(selenium);
+    }
 }

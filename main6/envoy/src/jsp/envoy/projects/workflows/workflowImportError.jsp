@@ -102,11 +102,11 @@ function submitForm()
 
 <FORM NAME="JobForm" METHOD="POST">
 <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0">
-    <TBODY>
     <COL>               <!-- checkbox -->
     <COL WIDTH="200">   <!-- pages -->
     <COL>               <!-- status -->
     <COL WIDTH="300">   <!-- message -->
+    <TBODY>
     <TR CLASS="tableHeadingBasic">
         <TD></TD>
         <TD><%=bundle.getString("lb_page")%></TD>

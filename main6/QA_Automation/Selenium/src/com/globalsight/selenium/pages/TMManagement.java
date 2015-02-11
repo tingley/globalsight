@@ -3,32 +3,32 @@ package com.globalsight.selenium.pages;
 public class TMManagement
 {
     public static final String New_BUTTON = "idNew";
-    public static final String Edit_BUTTON = "idModify";
+    public static final String EDIT_BUTTON = "idModify";
     public static final String Demo = "TMId";
 
-    public static final String TMMangement_TABLE = "//div[@id='contentLayer']//form//table//tbody//tr[2]//td//table//tbody";
+    public static final String TM_MANAGEMENT_TABLE = "//div[@id='contentLayer']//form//table//tbody//tr[2]//td//table//tbody";
 
     
     public static final String CorpusBrowser_BUTTON="idCorpusBrowser";
     public static final String Statistics_BUTTON="idStatistics";
-    public static final String Maintenance_BUTTON="idMaintenance";
-    public static final String Export_BUTTON="idExport";
-    public static final String Reindex_BUTTON="idReindex";
-    public static final String Duplicate_BUTTON="idClone";
-    public static final String Remove_BUTTON="idRemove";
+    public static final String MAINTENANCE_BUTTON="idMaintenance";
+    public static final String EXPORT_BUTTON="idExport";
+    public static final String REINDEX_BUTTON="idReindex";
+    public static final String DUPLICATE_BUTTON="idClone";
+    public static final String REMOVE_BUTTON="idRemove";
     
     // Define New TM
     public static final String Name_TEXT_FIELD = "name";
-    public static final String Domain_TEXT_FIELD = "domain";
-    public static final String Organization_TEXT_FIELD = "organization";
-    public static final String Description_TEXT_FIELD = "description";
+    public static final String DOMAIN_TEXT = "domain";
+    public static final String ORGANIZATION_TEXT = "organization";
+    public static final String DESCRIPTION_TEXT = "description";
     public static final String RemoteTM_CHECKBOX = "idRemoteTm";
     public static final String import_path = "//input[@id='idFilename']"; 
     public static final String import_name = "sourceTmName";
     public static final String import_format = "idTtmxRtf";
 
     public static final String Cancel_BUTTON = "Cancel";
-    public static final String Save_BUTTON = "OK";
+    public static final String SAVE_BUTTON = "OK";
     
     
     //TM Statistics
@@ -49,44 +49,44 @@ public class TMManagement
     public static final String StatusMessageTop_TEXT="statusMessageTop";
     
     //Maintenance
-    public static final String FIND_TEXTFIELD="SourceFindText";
-    public static final String InSourceLocale_SELECT="TmSourceSearchLocaleSelector";
-    public static final String ShowTargetLocale_SELECT="TmTargetSearchLocaleSelector";
-    public static final String Next_BUTTON="Search";
+    public static final String SEARCH_TEXT="SourceFindText";
+    public static final String SOURCE_LOCALE_SELECT="TmSourceSearchLocaleSelector";
+    public static final String TARGET_LOCALE_SELECT="TmTargetSearchLocaleSelector";
+    public static final String NEXT_BUTTON="Search";
     public static final String Progress_MSG="idProgress";
     
-    public static final String Continue_BUTTON="//input[@value='Continue']";
+    public static final String CONTINUE_BUTTON="//input[@value='Continue']";
     public static final String Cancel_BUTTON_BOTTOM="CancelBtnBottom";
-    public static final String Cancel_BUTTON_TOP="CancelBtnTop";
+    public static final String CANCEL_TOP_BUTTON="CancelBtnTop";
     
     //Reindex
-    public static final String SelectedTM_RADIO="idSelectedTm";
+    public static final String SELECTED_TM_RADIO="idSelectedTm";
     public static final String AllTms_RADIO="idAllTms";
-    public static final String Next_BUTTON_REINDEX="//button[@onclick='doNext();']";
-    public static final String ReindexMessages_MSG="idMessage";
+    public static final String REINDEX_NEXT_BUTTON="//button[@onclick='doNext();']";
+    public static final String REINDEX_MESSAGE="idMessage";
     public static final String ReindexProgress_MSG="idProgress";
     //idProgressContainer
-    public static final String OK_BUTTON_REINDEX="idCancelOk";
+    public static final String REINDEX_OK_BUTTON="idCancelOk";
     
     //Duplicate Define New TM
-    public static final String Name_TEXT_FIELD_DUPLICATE="name";
-    public static final String Ok_BUTTON_DUPLICATE="OK";
-    public static final String Cancel_BUTTON_DUPLICATE="Cancel";
+    public static final String DUPLICATE_NAME_TEXT="name";
+    public static final String DUPLICATE_OK_BUTTON="OK";
+    public static final String DUPLICATE_CANCEL_BUTTON="Cancel";
     
     
     //Remove the TM
-    public static final String EntrieTM_RADIO="checkboxTm";
-    public static final String OK_BUTTON_REMOVE="//input[@value='OK']";
+    public static final String ENTRIE_TM_RADIO="checkboxTm";
+    public static final String REMOVE_OK_BUTTON="//input[@value='OK']";
     public static final String RemoveMessages_MSG="idMessage";
     public static final String RemoveProgress_MSG="idProgress";
-    public static final String OK_BUTTON_REMOVE2="idCancelOk";
+    public static final String REMOVE2_OK_BUTTON="idCancelOk";
     
     //Export TM
-    public static final String Next_BUTTON_EXPORT="//button[@onclick='doNext();']";
-    public static final String OK_BUTTON_EXPORT="idCancelOk";
-    public static final String Download_File_BUTTON = "idRefreshResult";
+    public static final String EXPORT_NEXT_BUTTON="//button[@onclick='doNext();']";
+    public static final String EXPORT_OK_BUTTON="idCancelOk";
+    public static final String DOWNLOAD_FILE_BUTTON = "idRefreshResult";
     
-    public static final String ExportMessages_MSG="idMessages";
-    public static final String ExportProgress_MSG="idProgress";
+    public static final String EXPORT_MESSAGE="idMessages";
+    public static final String EXPORT_PROGRESS_MSG="idProgress";
     
 }

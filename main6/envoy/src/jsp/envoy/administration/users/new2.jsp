@@ -77,7 +77,7 @@ String roleAdded = (String) sessionMgr.getAttribute("roleAdded");
 CreateUserWrapper wrapper = (CreateUserWrapper)sessionMgr.getAttribute(
   UserConstants.CREATE_USER_WRAPPER);
 boolean promptIsActive = wrapper.promptIsActive();
-String userName = wrapper.getUserId();
+String userName = wrapper.getUserName();
 %>
 <HTML>
 <!-- This JSP is envoy/administratin/users/new2.jsp-->
@@ -85,6 +85,7 @@ String userName = wrapper.getUserId();
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
@@ -318,6 +319,14 @@ function setTargets(selectedIndexSent)
       }
    }
 }
+
+function check_all(){
+	if($("#checkAll").is(":checked")){
+		$(":checkbox").attr("checked","true");
+	} else {
+		$(":checkbox").removeAttr("checked");
+	}
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -395,7 +404,7 @@ function setTargets(selectedIndexSent)
     <TABLE CELLSPACING="0" CELLPADDING="2" BORDER="0" CLASS="standardText">
       <TR>
 	<TD>
-	  <%= lbActivityTypes %><SPAN CLASS="asterisk">*</SPAN>:&nbsp;&nbsp;&nbsp;&nbsp;
+	  <input type="checkbox" id="checkAll" onclick="check_all()"/><%= lbActivityTypes %><SPAN CLASS="asterisk">*</SPAN>:&nbsp;&nbsp;&nbsp;&nbsp;
 	</TD>
 	<% if (isJobCosting) { %>
 	<TD>

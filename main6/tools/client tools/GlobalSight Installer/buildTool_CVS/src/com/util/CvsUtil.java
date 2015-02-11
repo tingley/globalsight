@@ -55,6 +55,7 @@ public class CvsUtil
     private static String DEPLOY_PATH = SERVER_NAME
             + "/jboss/jboss_server/server/default/deploy/";
     private static String NEW_EAR_PATH = DEPLOY_PATH + "globalsight.ear";
+    private static String NEW_JMX_CONSOLE_CLASS = DEPLOY_PATH + "jmx-console.war/WEB-INF/classes";
 
     private static String SERVER_BIN_PATH = SERVER_NAME
             + "/jboss/jboss_server/bin/";
@@ -84,55 +85,76 @@ public class CvsUtil
     private static Map<String, String> SPECIAL_FILES = new HashMap<String, String>();
     static
     {
-        SPECIAL_FILES.put("/jboss.xml", NEW_EAR_PATH + "/cxe-ejb.jar/META-INF/jboss.xml");
-        SPECIAL_FILES.put("/ejb-jar.xml", NEW_EAR_PATH + "/cxe-ejb.jar/META-INF/ejb-jar.xml");
-        SPECIAL_FILES.put("/tools/lib/MANIFEST.MF", NEW_EAR_PATH + "/cxe-ejb.jar/META-INF/MANIFEST.MF");
-        SPECIAL_FILES.put("/web.xml.template",
-                NEW_EAR_PATH + "/globalsight-web.war/WEB-INF/web.xml.template");
-        SPECIAL_FILES.put("/server.xml.template",
-                SERVER_NAME +"/jboss/server.xml.template");
-        SPECIAL_FILES.put("/globalsight.tld",
-                NEW_EAR_PATH + "/globalsight-web.war/WEB-INF/tlds/globalsight.tld");
-        SPECIAL_FILES.put("/conf/globalsight_ori.keystore",
-                SERVER_NAME + "/jboss/jboss_server/server/default/conf/globalsight_ori.keystore");
-        SPECIAL_FILES.put("/default/conf/standardjboss.xml",
-                SERVER_NAME + "/jboss/jboss_server/server/default/conf/standardjboss.xml");
-        SPECIAL_FILES.put("/mail-service.xml.template",
-                SERVER_NAME +"/jboss/mail-service.xml.template");
-        SPECIAL_FILES.put("/uil2-service.xml.template",
-                SERVER_NAME +"/jboss/uil2-service.xml.template");
-        SPECIAL_FILES.put("/startJboss.sh.template",
-                SERVER_NAME +"/jboss/startJboss.sh.template");
-        SPECIAL_FILES.put("/jboss-service.xml.template",
-                SERVER_NAME +"/jboss/jboss-service.xml.template");
-        SPECIAL_FILES.put("/envoy/src/web.xml.template",
-                NEW_EAR_PATH + "/globalsight-web.war/WEB-INF/web.xml.template");
-        SPECIAL_FILES.put("/server/default/conf/readme.txt",
-                SERVER_NAME + "/jboss/jboss_server/server/default/conf/readme.txt");
-        SPECIAL_FILES.put("/server/default/conf/OpenSSL_Sign.txt",
-                SERVER_NAME + "/jboss/jboss_server/server/default/conf/OpenSSL_Sign.txt");
-        SPECIAL_FILES.put("/terminology/importer/TBXcdv04.dtd",
-                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/resources/TBXcdv04.dtd");
-        SPECIAL_FILES.put("/SRX2.0.xsd.template",
-                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/SRX2.0.xsd.template");
-        SPECIAL_FILES.put("/extractor/xml/xml.xsd",
-                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/xml.xsd");
-        SPECIAL_FILES.put("/util/startJboss.cmd.template",
-                SERVER_NAME + "/jboss/startJboss.cmd.template");
-        SPECIAL_FILES.put("/server-config.wsdd",
-                SERVER_NAME + "/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/WEB-INF/server-config.wsdd");
+        SPECIAL_FILES.put("/jboss.xml", NEW_EAR_PATH
+                + "/cxe-ejb.jar/META-INF/jboss.xml");
+        SPECIAL_FILES.put("/ejb-jar.xml", NEW_EAR_PATH
+                + "/cxe-ejb.jar/META-INF/ejb-jar.xml");
+        SPECIAL_FILES.put("/tools/lib/MANIFEST.MF", NEW_EAR_PATH
+                + "/cxe-ejb.jar/META-INF/MANIFEST.MF");
+        SPECIAL_FILES.put("/web.xml.template", NEW_EAR_PATH
+                + "/globalsight-web.war/WEB-INF/web.xml.template");
+        SPECIAL_FILES.put("/server.xml.template", SERVER_NAME
+                + "/jboss/server.xml.template");
+        SPECIAL_FILES.put("/globalsight.tld", NEW_EAR_PATH
+                + "/globalsight-web.war/WEB-INF/tlds/globalsight.tld");
+        SPECIAL_FILES
+                .put("/conf/globalsight_ori.keystore",
+                        SERVER_NAME
+                                + "/jboss/jboss_server/server/default/conf/globalsight_ori.keystore");
+        SPECIAL_FILES.put("/default/conf/standardjboss.xml", SERVER_NAME
+                + "/jboss/jboss_server/server/default/conf/standardjboss.xml");
+        SPECIAL_FILES.put("/mail-service.xml.template", SERVER_NAME
+                + "/jboss/mail-service.xml.template");
+        SPECIAL_FILES.put("/uil2-service.xml.template", SERVER_NAME
+                + "/jboss/uil2-service.xml.template");
+        SPECIAL_FILES.put("/startJboss.sh.template", SERVER_NAME
+                + "/jboss/startJboss.sh.template");
+        SPECIAL_FILES.put("/jboss-service.xml.template", SERVER_NAME
+                + "/jboss/jboss-service.xml.template");
+        SPECIAL_FILES.put("/envoy/src/web.xml.template", NEW_EAR_PATH
+                + "/globalsight-web.war/WEB-INF/web.xml.template");
+        SPECIAL_FILES.put("/server/default/conf/readme.txt", SERVER_NAME
+                + "/jboss/jboss_server/server/default/conf/readme.txt");
+        SPECIAL_FILES.put("/server/default/conf/OpenSSL_Sign.txt", SERVER_NAME
+                + "/jboss/jboss_server/server/default/conf/OpenSSL_Sign.txt");
+        SPECIAL_FILES
+                .put("/terminology/importer/TBXcdv04.dtd",
+                        SERVER_NAME
+                                + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/resources/TBXcdv04.dtd");
+        SPECIAL_FILES
+                .put("/SRX2.0.xsd.template",
+                        SERVER_NAME
+                                + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/SRX2.0.xsd.template");
+        SPECIAL_FILES
+                .put("/extractor/xml/xml.xsd",
+                        SERVER_NAME
+                                + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/classes/properties/xml.xsd");
+        SPECIAL_FILES.put("/util/startJboss.cmd.template", SERVER_NAME
+                + "/jboss/startJboss.cmd.template");
+        SPECIAL_FILES
+                .put("/server-config.wsdd",
+                        SERVER_NAME
+                                + "/jboss/jboss_server/server/default/deploy/globalsight.ear/globalsight-web.war/WEB-INF/server-config.wsdd");
         SPECIAL_FILES.put("/jboss_server/server/default/conf/log4j.xml",
-        		SERVER_NAME
-    			+ "/jboss/jboss_server/server/default/conf/log4j.xml"); 
+                SERVER_NAME
+                        + "/jboss/jboss_server/server/default/conf/log4j.xml");
+        SPECIAL_FILES.put("/mysql/mysql-connector-java-5.1.18-bin.jar",
+                SERVER_NAME
+                        + "/jboss/jboss_server/server/default/deploy/globalsight.ear/lib/mysql-connector-java-5.1.18-bin.jar");
+        SPECIAL_FILES.put("/default/lib/mysql-connector-java-5.1.18-bin.jar",
+                SERVER_NAME
+                        + "/jboss/jboss_server/server/default/lib/mysql-connector-java-5.1.18-bin.jar");
+        
     }
 
     private static Map<String, String> BIN_FILES = new HashMap<String, String>();
     static
     {
         BIN_FILES.put("/j2eeVendor/jboss/jboss_server/bin/run.bat", "run.bat");
-        BIN_FILES.put("/j2eeVendor/jboss/jboss_server/bin/run.conf", "run.conf");
+        BIN_FILES
+                .put("/j2eeVendor/jboss/jboss_server/bin/run.conf", "run.conf");
     }
-    
+
     private static List<String> PROPERTIES_FILES = new ArrayList<String>();
     static
     {
@@ -155,6 +177,8 @@ public class CvsUtil
         PROPERTIES_FILES.add("AdobeAdapter.properties");
         PROPERTIES_FILES.add("Passolo.properties");
         PROPERTIES_FILES.add("PassoloAdapter.properties");
+        PROPERTIES_FILES.add("WindowsPEAdapter.properties");
+        PROPERTIES_FILES.add("WhitespaceForExport.properties");
     }
 
     private static List<String> UNDER_WAR_FILTER = new ArrayList<String>();
@@ -168,6 +192,9 @@ public class CvsUtil
         UNDER_WAR_FILTER.add("/envoy/src/dojo/");
         UNDER_WAR_FILTER.add("/envoy/src/dijit/");
         UNDER_WAR_FILTER.add("/envoy/src/dojox/");
+        UNDER_WAR_FILTER.add("/envoy/src/jquery/");
+        UNDER_WAR_FILTER.add("/envoy/src/helptb/");
+        UNDER_WAR_FILTER.add("/envoy/src/FCKeditor/");
     }
 
     private static List<String> INSTALL_DATA_FILTER = new ArrayList<String>();
@@ -196,9 +223,12 @@ public class CvsUtil
     private static List<String> IGNORE_FILTER = new ArrayList<String>();
     static
     {
+        IGNORE_FILTER.add("/.gitignore");
+        IGNORE_FILTER.add("/visual-basic/");
+        IGNORE_FILTER.add("/QA_Automation/");
         IGNORE_FILTER.add("GlobalSight Installer");
-        IGNORE_FILTER.add("/main6/docs/");
-        IGNORE_FILTER.add("/main6/test/");
+        IGNORE_FILTER.add("main6/docs/");
+        IGNORE_FILTER.add("main6/test/");
         IGNORE_FILTER.add("/envoy/hibernatetest/");
         IGNORE_FILTER.add("(from");
         IGNORE_FILTER.add("/ambassador-desktop/");
@@ -212,16 +242,25 @@ public class CvsUtil
         IGNORE_FILTER.add("/build/buildnum.txt");
         IGNORE_FILTER.add("/diplomat/dev/doc/");
         IGNORE_FILTER.add("build.xml");
-        IGNORE_FILTER.add("/main6/diplomat/dev/src/c-sharp/");
+        IGNORE_FILTER.add("main6/diplomat/dev/src/c-sharp/");
         IGNORE_FILTER.add(".review");
         IGNORE_FILTER.add(".jupiter");
-        IGNORE_FILTER.add("/main6/tools/sso/");
+        IGNORE_FILTER.add("main6/tools/sso/");
         IGNORE_FILTER.add("/ling/test/");
         IGNORE_FILTER.add("/pramati_client_all.jar");
         IGNORE_FILTER.add("/WEB-INF/lib/xerces.jar");
         IGNORE_FILTER.add("/tm3tool.cmd");
         IGNORE_FILTER.add("/tm3tool.sh");
-        IGNORE_FILTER.add("/main6/tools/converters/build/dist/");
+        IGNORE_FILTER.add("main6/tools/converters/build/dist/");
+        IGNORE_FILTER.add("/tools/gsjava/");
+        IGNORE_FILTER.add("/tools/lingtools/");
+        IGNORE_FILTER.add("/dev/src/web-doc/");
+    }
+
+    private static List<String> NO_PRINT_IGNORE = new ArrayList<String>();
+    static
+    {
+        NO_PRINT_IGNORE.add("/QA_Automation/");
     }
 
     private static List<String> DEPLOY_FILTER = new ArrayList<String>();
@@ -294,8 +333,8 @@ public class CvsUtil
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            log.error(e);
+        	log.error("File Path: " + file.getAbsolutePath());
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -341,6 +380,7 @@ public class CvsUtil
         Set<String> binFiles = new HashSet<String>();
         Set<String> commonJars = new HashSet<String>();
         Set<String> ssoJars = new HashSet<String>();
+        Set<String> jmxConsoles = new HashSet<String>();
 
         Set<String> files = CvsUtil.getChangedFiles();
         
@@ -354,6 +394,14 @@ public class CvsUtil
             if (inInclude(f, SPECIAL_FILES.keySet()))
             {
                 specialFiles.add(f);
+            }
+            else if (f.indexOf("/jmx-console.war/WEB-INF/classes") > 0)
+            {
+            	jmxConsoles.add(f);
+            }
+            else if (inInclude(f, NO_PRINT_IGNORE))
+            {
+                // do nothing
             }
             else if (inInclude(f, IGNORE_FILTER))
             {
@@ -444,6 +492,7 @@ public class CvsUtil
         }
 
         print(specialFiles, "Special files:");
+        print(jmxConsoles, "Jmx consoles files:");
         print(propertiesFiles, "Property files without company:");
         print(javas, "Java files:");
         print(underClassFiles, "Under class root files:");
@@ -458,6 +507,7 @@ public class CvsUtil
 
         log("");
         log("Special files:" + specialFiles.size());
+        log("Jmx consoles files:" + jmxConsoles.size());
         log("Property files:" + propertiesFiles.size());
         log("Java files:" + javas.size());
         log("Under class root files:" + underClassFiles.size());
@@ -473,6 +523,7 @@ public class CvsUtil
         log("Copy classes:" + Main.IS_PATCH);
 
         copySpecialFiles(specialFiles);
+        copyJmxConsoles(jmxConsoles);
         copyPropertyFiles(propertiesFiles);
         copyClass(javas);
         JarManager.addJars();
@@ -501,8 +552,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -529,7 +579,7 @@ public class CvsUtil
                         }
                         catch (Exception e)
                         {
-                            log.error(e);
+                            log.error(e.getMessage(), e);
                         }
                         break;
                     }
@@ -572,7 +622,7 @@ public class CvsUtil
                     }
                     catch (Exception e)
                     {
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                     }
                 }
             }
@@ -604,8 +654,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -630,7 +679,7 @@ public class CvsUtil
                     }
                     catch (Exception e)
                     {
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                     }
                     break;
                 }
@@ -659,7 +708,7 @@ public class CvsUtil
                     }
                     catch (Exception e)
                     {
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                     }
                     break;
                 }
@@ -723,8 +772,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -747,8 +795,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -769,8 +816,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -791,8 +837,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -802,19 +847,39 @@ public class CvsUtil
         for (String f : files)
         {
             String path = f.substring(f.indexOf("/main6"));
-            String realPath = f.substring(f.indexOf("/tools/lib/common/")
-                        + "/tools/lib/common/".length());
+            String realPath = f.substring(f.indexOf("/tools/lib/sso/")
+                        + "/tools/lib/sso/".length());
 
             File src = new File(BuildUtil.ROOT + path);
             try
             {
-                FileUtil.copyFile(src, new File(NEW_EAR_PATH + "/lib/" + realPath));
+                FileUtil.copyFile(src, new File(NEW_EAR_PATH + "/lib/sso/" + realPath));
                 log("Add: " + realPath);
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    private static void copyJmxConsoles(Set<String> files)
+    {
+        for (String f : files)
+        {
+            String path = f.substring(f.indexOf("/main6"));
+            String realPath = f.substring(f.indexOf("/jmx-console.war/WEB-INF/classes")
+                        + "/jmx-console.war/WEB-INF/classes".length());
+
+            File src = new File(BuildUtil.ROOT + path);
+            try
+            {
+                FileUtil.copyFile(src, new File(NEW_JMX_CONSOLE_CLASS + realPath));
+                log("Add: " + realPath);
+            }
+            catch (Exception e)
+            {
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -847,8 +912,7 @@ public class CvsUtil
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }

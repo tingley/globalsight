@@ -45,13 +45,17 @@ session.removeAttribute("Comparator");
 // ("/globalsight/ControlServlet?activityName=") so the sessionMgr still holds
 // the data of the current activity and we can go back to it.
 boolean b_calledFromActivityPage = false;
+boolean b_calledFromSimpleUploadPage = false;
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
   WebAppConstants.SESSION_MANAGER);
 if (sessionMgr.getAttribute(WebAppConstants.WORK_OBJECT) != null)
 {
   b_calledFromActivityPage = true;
 }
-
+if(sessionMgr.getAttribute(WebAppConstants.UPLOAD_ORIGIN) != null)
+{
+    b_calledFromSimpleUploadPage = true;
+}
 String title = bundle.getString("lb_supportFiles");
 
 String url_upload  = upload.getPageURL();
@@ -66,6 +70,8 @@ String url_sort_nam = url_refresh + "&" + GlossaryConstants.SORT + "=4";
 
 String url_activityUploadPage =
   "/globalsight/ControlServlet?linkName=upload&pageName=TK2";
+String url_offlineUploadPage =
+  "/globalsight/ControlServlet?activityName=simpleofflineupload";
 
 String lb_fileNotSelected = bundle.getString("jsmsg_file_not_selected");
 String lb_duuudeDoYouWantToDoThis = bundle.getString("msg_remove_glossary_file");
@@ -76,12 +82,14 @@ String lb_fileName = bundle.getString("lb_filename");
 String lb_upload = bundle.getString("lb_upload");
 String lb_remove = bundle.getString("lb_remove");
 String lb_return_to_activity = bundle.getString("lb_return_to_activity");
+String lb_return_to_offlineUpload = bundle.getString("lb_return_to_offlineUpload");
 
 %>
 <HTML>
 <!-- administration/glossaries/main.jsp -->
 <HEAD>
 <TITLE><%=title%></TITLE>
+<script SRC="/globalsight/includes/utilityScripts.js"></script>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT SRC="/globalsight/includes/modalDialog.js"></SCRIPT>
@@ -114,6 +122,11 @@ function loadPage()
 function returnToActivity()
 {
    window.location.href = "<%=url_activityUploadPage%>";
+}
+
+function returnToOfflineUpload()
+{
+	window.location.href = "<%=url_offlineUploadPage%>";
 }
 
 function optionTest(formSent)
@@ -165,6 +178,18 @@ function submitForm(form)
         theForm.submit();
     }
 }
+
+//for GBS-2599
+function handleSelectAll() {
+	if (deleteForm && deleteForm.selectAll) {
+		if (deleteForm.selectAll.checked) {
+			checkAllWithName('deleteForm', '<%=GlossaryConstants.FILE_CHECKBOXES%>'); 
+	    }
+	    else {
+			clearAll('deleteForm'); 
+	    }
+	}
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -188,7 +213,7 @@ function submitForm(form)
 <INPUT TYPE="hidden" NAME="<%=GlossaryConstants.DELETE%>" VALUE=""></INPUT>
 <TABLE BORDER="0" CELLPADDING="3" CELLSPACING="0">
   <TR CLASS="tableHeadingBasic">
-    <TD>&nbsp;</TD>
+    <TD><input type="checkbox" onclick="handleSelectAll()" name="selectAll"></TD>
     <TD>
       <A CLASS="sortHREFWhite" HREF="<%=url_sort_src%>" onclick-"<%session.setAttribute("Comparator", state.getComparator());%>"><%=lb_sourceLocale%></A>
       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -316,10 +341,7 @@ if (glossaries != null)
   <TR>
     <TD COLSPAN=4 ALIGN="RIGHT"></TD>
   </TR>
-<%
-if (b_calledFromActivityPage)
-{ // Allow translator to get back to the activity's upload screen.
-%>
+
   <TR>
     <TD COLSPAN=4 ALIGN="RIGHT">
     <amb:permission name="<%=Permission.SUPPORT_FILES_REMOVE%>" >
@@ -333,23 +355,25 @@ if (b_calledFromActivityPage)
     </TD>
   </TR>
   
+<%
+if (b_calledFromActivityPage)
+{ // Allow translator to get back to the activity's upload screen.
+%>
   <TR>
     <TD COLSPAN=4 ALIGN="RIGHT">
       <INPUT TYPE="BUTTON" VALUE="<%=lb_return_to_activity%>" 
       onclick="returnToActivity()">
     </TD>
   </TR>
-<% } else { %>
+<%
+}
+else if(b_calledFromSimpleUploadPage)
+{ 
+%>
   <TR>
     <TD COLSPAN=4 ALIGN="RIGHT">
-    <amb:permission name="<%=Permission.SUPPORT_FILES_REMOVE%>" >
-      <INPUT TYPE="BUTTON" NAME="<%=lb_remove%>" VALUE="<%=lb_remove%>" 
-      onclick="submitForm()">&nbsp;
-    </amb:permission>
-    <amb:permission name="<%=Permission.SUPPORT_FILES_UPLOAD%>" >
-      <INPUT TYPE="BUTTON" NAME="<%=lb_upload%>" VALUE="<%=lb_upload%>..." 
-      onclick="createModalDialog('<%=url_upload%>',600,260,200,200)">  
-    </amb:permission>
+      <INPUT TYPE="BUTTON" VALUE="<%=lb_return_to_offlineUpload%>" 
+      onclick="returnToOfflineUpload()">
     </TD>
   </TR>
 <% } %>

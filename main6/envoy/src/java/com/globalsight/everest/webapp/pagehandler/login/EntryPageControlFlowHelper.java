@@ -19,11 +19,9 @@ package com.globalsight.everest.webapp.pagehandler.login;
 import java.net.InetAddress;
 import java.net.URL;
 import java.rmi.RemoteException;
-import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
@@ -54,7 +52,6 @@ import com.globalsight.everest.util.netegrity.Netegrity;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.administration.company.CompanyConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 import com.globalsight.ling.common.URLDecoder;
@@ -107,15 +104,21 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 return loginFailed(null);
             }
         }
-        
+
         // convert to unicode from utf-8
         // to pass on to LDAP for authentication
-        String userName = m_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD);
+        String userName = m_request
+                .getParameter(WebAppConstants.LOGIN_NAME_FIELD);
         if (userName != null)
         {
             userName = EditUtil.utf8ToUnicode(userName).trim();
         }
-        
+
+        String userId = UserUtil.getUserIdByName(userName);
+        if (userId == null)
+        {
+            return loginFailed(null);
+        }
         String userPassword;
         if (Netegrity.isNetegrityEnabled())
         {
@@ -125,11 +128,12 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         }
         else
         {
-            userPassword = m_request.getParameter(WebAppConstants.PASSWORD_NAME_FIELD);
+            userPassword = m_request
+                    .getParameter(WebAppConstants.PASSWORD_NAME_FIELD);
             if (userPassword != null)
                 userPassword = EditUtil.utf8ToUnicode(userPassword);
         }
-        
+
         // SSO user
         String isSSO = m_request.getParameter("isSSO");
         boolean isSsoUser = (isSSO != null && isSSO.equalsIgnoreCase("on"));
@@ -137,45 +141,49 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         {
             String requestUrl = m_request.getRequestURL().toString();
             String backToUrl = requestUrl;
-            
-            if (backToUrl != null && backToUrl.toLowerCase().contains("/globalsight"))
+
+            if (backToUrl != null
+                    && backToUrl.toLowerCase().contains("/globalsight"))
             {
                 int index = backToUrl.indexOf("/globalsight");
-                backToUrl = backToUrl.substring(0, index) + "/globalsight/ControlServlet";
+                backToUrl = backToUrl.substring(0, index)
+                        + "/globalsight/ControlServlet";
             }
-            
+
             String ssoIdpUrl = m_request.getParameter("ssoIdpUrlField");
-            String ssoUserName = userName;
+            String ssoUserId = userId;
             String ssoUserPwd = userPassword;
-            
+
             // get user mapping
-            List<SSOUserMapping> userMap = SSOUserUtil.getUserMappingBySSOUser(ssoUserName);
+            List<SSOUserMapping> userMap = SSOUserUtil
+                    .getUserMappingBySSOUser(ssoUserId);
             SSOUserMapping ssoUser = null;
-            
+
             if (userMap == null || userMap.size() == 0)
             {
                 ssoUser = null;
             }
-            
+
             if (userMap.size() == 1)
             {
                 ssoUser = userMap.get(0);
             }
-            
+
             if (userMap.size() > 1)
             {
                 for (SSOUserMapping ssoUserMapping : userMap)
                 {
                     long companyId = ssoUserMapping.getCompanyId();
                     Company c = CompanyWrapper.getCompanyById(companyId + "");
-                    if (c.getEnableSSOLogin() && c.getSsoIdpUrl().equalsIgnoreCase(ssoIdpUrl))
+                    if (c.getEnableSSOLogin()
+                            && c.getSsoIdpUrl().equalsIgnoreCase(ssoIdpUrl))
                     {
                         ssoUser = ssoUserMapping;
                         break;
                     }
                 }
             }
-            
+
             if (ssoUser == null)
             {
                 return loginFailed(null);
@@ -187,7 +195,7 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 String companyName = c.getCompanyName();
                 String idpUrl = c.getSsoIdpUrl();
                 m_request.setAttribute("sso_back_to", backToUrl);
-                m_request.setAttribute("sso_username", ssoUserName);
+                m_request.setAttribute("sso_username", ssoUserId);
                 m_request.setAttribute("sso_password", ssoUserPwd);
                 m_request.setAttribute("sso_idp_url", idpUrl);
                 m_request.setAttribute("sso_company_name", companyName);
@@ -195,7 +203,7 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 return "ssologon";
             }
         }
-        
+
         // SSO response
         String ssoResponseData = m_request.getParameter("ssoResponseData");
         if (ssoResponseData != null)
@@ -203,7 +211,7 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
             SSOResponse resp = null;
             try
             {
-                boolean useSaml = !ssoResponseData.contains("|");                
+                boolean useSaml = !ssoResponseData.contains("|");
                 SSOSPHelper helper = SSOSPHelper.createInstance(useSaml);
                 resp = helper.handleSSOResponse(ssoResponseData);
             }
@@ -217,20 +225,21 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 String ssoUserId = resp.getUserId();
                 String companyName = resp.getCompanyName();
                 String inResponseTo = resp.getInResponseTo();
-                
+
                 SSOParameter para = SSOSPHelper.getParameter(inResponseTo);
                 if (para != null)
                 {
                     companyName = para.getParameter(SSOParameter.COMPANY_NAME);
                     ssoUserId = para.getParameter(SSOParameter.SSO_USER_NAME);
                 }
-                
+
                 Company c = CompanyWrapper.getCompanyByName(companyName);
                 long companyId = c.getId();
-                
-                SSOUserMapping userMapping = SSOUserUtil.getUserMappingBySSOUser(companyId, ssoUserId);
-                userName = userMapping.getUserId();
-                User user = UserUtil.getUserById(userName);
+
+                SSOUserMapping userMapping = SSOUserUtil
+                        .getUserMappingBySSOUser(companyId, ssoUserId);
+                userId = userMapping.getUserId();
+                User user = UserUtil.getUserById(userId);
                 userPassword = user.getPassword();
             }
             else
@@ -244,21 +253,21 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 && userPassword.length() > 0)
         {
             // invoke the login confirmation page (welcome page)
-            return loginUser(userName, userPassword);
+            return loginUser(userId, userPassword);
         }
         else
         {
             return loginFailed(null);
         }
     }
-    
+
     private String getCookieValue(Cookie[] cookies, String name)
     {
         if (cookies == null || name == null)
         {
             return null;
         }
-        
+
         for (Cookie cookie : cookies)
         {
             if (name.equals(cookie.getName()))
@@ -266,14 +275,14 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 return cookie.getValue();
             }
         }
-        
+
         return null;
     }
 
     /**
      * Login the user.
      */
-    private String loginUser(String p_userName, String p_password)
+    private String loginUser(String p_userId, String p_password)
             throws EnvoyServletException
     {
         // create a session
@@ -294,16 +303,16 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         try
         {
             // do authentication...
-            user = performLogin(p_userName, p_password, session.getId());
+            user = performLogin(p_userId, p_password, session.getId());
 
-            session.setAttribute(WebAppConstants.USER_NAME, user.getUserId());
-            session.setAttribute(UserLdapHelper.LDAP_ATTR_COMPANY, user
-                    .getCompanyName());
+            session.setAttribute(WebAppConstants.USER_NAME, p_userId);
+            session.setAttribute(UserLdapHelper.LDAP_ATTR_COMPANY,
+                    user.getCompanyName());
 
             CompanyThreadLocal.getInstance().setValue(user.getCompanyName());
-            boolean isSuperAdmin = UserUtil.isSuperAdmin(user.getUserId());
-            session.setAttribute(WebAppConstants.IS_SUPER_ADMIN, Boolean
-                    .valueOf(isSuperAdmin));
+            boolean isSuperAdmin = UserUtil.isSuperAdmin(p_userId);
+            session.setAttribute(WebAppConstants.IS_SUPER_ADMIN,
+                    Boolean.valueOf(isSuperAdmin));
         }
         catch (EnvoyServletException ese)
         {
@@ -311,14 +320,16 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         }
 
         // Load the user parameters and store them in the session.
-        HashMap params = loadUserParameters(p_userName);
-        
+        HashMap params = loadUserParameters(p_userId);
+
         Company c = CompanyWrapper.getCompanyByName(user.getCompanyName());
-        if (!StringUtil.isEmpty(c.getSessionTime()) && c.getSessionTime().matches("\\d*"))
+        if (!StringUtil.isEmpty(c.getSessionTime())
+                && c.getSessionTime().matches("\\d*"))
         {
-            session.setMaxInactiveInterval(60 * Integer.parseInt(c.getSessionTime()));
+            session.setMaxInactiveInterval(60 * Integer.parseInt(c
+                    .getSessionTime()));
         }
-        
+
         session.setAttribute(WebAppConstants.USER_PARAMS, params);
 
         // Get the applet directory and store the session in it (uid
@@ -336,11 +347,12 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         try
         {
             perms = Permission.getPermissionManager().getPermissionSetForUser(
-                    p_userName);
+                    p_userId);
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to get permissions for user " + p_userName,
+            CATEGORY.error(
+                    "Failed to get permissions for user " + user.getUserName(),
                     e);
             throw new EnvoyServletException(e);
         }
@@ -355,8 +367,11 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         // use user default UI locale
         Locale uiLocale = null;
         if (loginLocale == null
-                || PageHandler.getUILocale(loginLocale).getDisplayLanguage().equals(
-                        PageHandler.getUILocale(user.getDefaultUILocale()).getDisplayLanguage()))
+                || PageHandler
+                        .getUILocale(loginLocale)
+                        .getDisplayLanguage()
+                        .equals(PageHandler.getUILocale(
+                                user.getDefaultUILocale()).getDisplayLanguage()))
         {
             // If user default language is the same as the login language, use
             // use user default UI locale
@@ -369,13 +384,12 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         }
 
         session.setAttribute(WebAppConstants.UILOCALE, uiLocale);
-        loadAdditionalUserInfo(session, user.getUserId());
+        loadAdditionalUserInfo(session, p_userId);
 
         // set the most recently used job id's for this user in the session
-        loadJobIds(session, user.getUserId(),
-                JobSearchConstants.MRU_JOBS_COOKIE, JobSearchConstants.MRU_JOBS);
-        loadJobIds(session, user.getUserId(),
-                JobSearchConstants.MRU_TASKS_COOKIE,
+        loadJobIds(session, p_userId, JobSearchConstants.MRU_JOBS_COOKIE,
+                JobSearchConstants.MRU_JOBS);
+        loadJobIds(session, p_userId, JobSearchConstants.MRU_TASKS_COOKIE,
                 JobSearchConstants.MRU_TASKS);
 
         // Get user's login protocol and port and put these info into session
@@ -404,7 +418,7 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
      * User login process: 1. SecurityManager perform authentication and return
      * the User object 2. Login to IFlow
      */
-    private User performLogin(String p_userName, String p_password,
+    private User performLogin(String p_userId, String p_password,
             String p_sessionId) throws EnvoyServletException
     {
         User user = null;
@@ -412,23 +426,24 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         try
         {
             // first do authentication
-            user = ServerProxy.getSecurityManager().authenticateUser(
-                    p_userName, p_password);
+            user = ServerProxy.getSecurityManager().authenticateUser(p_userId,
+                    p_password);
         }
         catch (GeneralException ge)
         {
-            String[] msgArgs = { "Failed to authenticate user!" };
+            String[] msgArgs =
+            { "Failed to authenticate user!" };
 
-            CATEGORY.error("EnvoyServletException is thrown from: "
-                    + "EnvoyServletException::performLogin(): " + msgArgs[0]);
-            CATEGORY.error("Invalid login attempt for user '" + p_userName
+            // TODO distinguish the different error cases
+            CATEGORY.warn("Invalid login attempt for user '"
+                    + UserUtil.getUserNameById(p_userId)
                     + "' possibly due to the wrong password.");
             throw new EnvoyServletException(
                     EnvoyServletException.MSG_FAILED_TO_LOGIN, msgArgs, ge);
         }
         catch (RemoteException e)
         {
-            CATEGORY.warn(e);
+            CATEGORY.warn(e.getMessage(), e);
 
             throw new EnvoyServletException(GeneralException.EX_REMOTE, e);
         }
@@ -436,13 +451,15 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
         try
         {
             // calculate the users that logged in the system.
-            ServerProxy.getUserManager().loggedInUsers(p_userName, p_sessionId);
+            ServerProxy.getUserManager().loggedInUsers(user.getUserName(),
+                    p_sessionId);
         }
         catch (Exception e)
         {
             CATEGORY.debug(e);
 
-            String[] msgArgs = { "Failed to calculate the logged users." };
+            String[] msgArgs =
+            { "Failed to calculate the logged users." };
             throw new EnvoyServletException(
                     EnvoyServletException.MSG_FAILED_TO_LOGIN, msgArgs, e);
         }
@@ -479,8 +496,8 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
      */
     private String loginFailed(EnvoyServletException ese)
     {
-        String failureString = m_request.getMethod().equals("POST") ?
-            "generalFail" : "notALogin";
+        String failureString = m_request.getMethod().equals("POST") ? "generalFail"
+                : "notALogin";
 
         if (ese != null)
         {
@@ -558,8 +575,8 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
                 {
                     try
                     {
-                        p_session.setAttribute(p_sessionConstant, URLDecoder
-                                .decode(cookie.getValue()));
+                        p_session.setAttribute(p_sessionConstant,
+                                URLDecoder.decode(cookie.getValue()));
                     }
                     catch (Exception e)
                     {

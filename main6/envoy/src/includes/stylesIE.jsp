@@ -51,7 +51,7 @@ errorPage="/envoy/common/error.jsp" session="false" %>
     /*word-break: normal;*/
 }
 
-.editorSegment {
+.editorSegment, .editorSegmentRepetition {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
     /*word-break: break-all;*/
@@ -248,6 +248,11 @@ errorPage="/envoy/common/error.jsp" session="false" %>
     font-size: 9pt;
 }
 
+.standardTextNew {
+    font-family:Verdana,Arial;
+    font-size: 9pt;
+}
+
 .standardTextBold {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9pt;
@@ -375,12 +380,17 @@ errorPage="/envoy/common/error.jsp" session="false" %>
     color: #FFFFFF
 }
 
+.tableHeadingFilter {
+    height:10px;
+    background: #738EB5;
+}
+
 .tableRowEven {
-    background: #FFFFFF
+    background: #FFFFFF;
 }
 
 .tableRowOdd {
-    background: #EEEEEE
+    background: #EEEEEE;
 }
 
 .warningHREF {
@@ -685,4 +695,31 @@ a.wordCountLinks:link {
     font-size: 10pt;
     /*word-break: break-all;*/
     word-wrap: break-word;
+}
+.tip{
+    position:absolute;
+    border:1px solid #000000;
+    display:none;
+    background:#FFFFE1;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+}
+
+.tableHeadingBasicTM {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: bold;
+    color: white;
+    background: #0C1476;
+    height:30px;
+}
+
+.tableRowEvenTM {
+	height:30px;
+    background: #FFFFFF
+}
+
+.tableRowOddTM {
+	height:30px;
+    background: #EEEEEE
 }

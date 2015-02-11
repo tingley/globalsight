@@ -26,6 +26,7 @@
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
             com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper,
             com.globalsight.config.UserParamNames,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.util.*"
     session="true"
 %>
@@ -637,7 +638,7 @@ $(document).ready(function(){
 %>
   <TR key="<%=key%>" commentId="<%=issue.getId()%>">
     <TD><%=key.substring(0, key.indexOf('_'))%></TD>
-    <TD><%=issue.getCreatorId()%></TD>
+    <TD><%=UserUtil.getUserNameById(issue.getCreatorId())%></TD>
     <TD align="<%=issueAlign%>">
       <DIV class="commentTitle" dir="<%=titleDir%>">
         <%=EditUtil.encodeHtmlEntities(issue.getTitle())%>
@@ -653,7 +654,7 @@ $(document).ready(function(){
 %>
       <DIV style="width:100%" align="<%=commentAlign%>">
        	<SPAN class="commentBy">
-        	<%=EditUtil.encodeHtmlEntities(history.reportedBy())%>
+        	<%=EditUtil.encodeHtmlEntities(UserUtil.getUserNameById(history.reportedBy()))%>
        	</SPAN>
       	<SPAN class="commentDate"><%=history.dateReported()%></SPAN>
       	<DIV class="comment" dir="<%=commentDir%>">

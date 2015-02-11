@@ -90,14 +90,15 @@ public class LocProfileHandlerHelper
      * @exception GeneralException.  Miscellaneous exception; most likely
      *            occuring in the persistence component.
      */
-    public static void modifyL10nProfile(L10nProfile p_l10nProfile, Vector<WorkflowInfos> workflowInfos)
-    throws EnvoyServletException
+    public static void modifyL10nProfile(L10nProfile p_l10nProfile,
+            Vector<WorkflowInfos> workflowInfos, long originalLocId)
+            throws EnvoyServletException
     {
         try
         {
-            ServerProxy.getProjectHandler().modifyL10nProfile(p_l10nProfile, workflowInfos);
-        }
-        catch (Exception e)
+            ServerProxy.getProjectHandler().modifyL10nProfile(p_l10nProfile,
+                    workflowInfos, originalLocId);
+        } catch (Exception e)
         {
             throw new EnvoyServletException(GeneralException.EX_GENERAL, e);
         }
@@ -355,6 +356,19 @@ public class LocProfileHandlerHelper
         try
         {
             return ServerProxy.getProjectHandler().getAllL10nProfilesForGUI();
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(GeneralException.EX_GENERAL, e);
+        }
+    }
+    
+    public static Vector getAllL10nProfilesForGUI(String[] filterParams, Locale uiLocale)
+            throws EnvoyServletException
+    {
+        try
+        {
+            return ServerProxy.getProjectHandler().getAllL10nProfilesForGUI(filterParams, uiLocale);
         }
         catch (Exception e)
         {

@@ -91,7 +91,7 @@ public class JobAttributeReportHandler extends PageActionHandler
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 

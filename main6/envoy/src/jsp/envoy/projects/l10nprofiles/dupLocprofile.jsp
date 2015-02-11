@@ -366,6 +366,7 @@ function confirmForm() {
     <!-- left table -->
     <TABLE CELLSPACING="8" CELLPADDING="0" BORDER="0" CLASS="standardText">
 	<form name="dupTemplateForm" method="post">
+		<input type="hidden" name="DupLocProfile" value='<%=request.getAttribute("DupLocProfile")%>'/>
         <INPUT TYPE="HIDDEN" NAME="formAction" VALUE="">
         <TR>
             <TD>

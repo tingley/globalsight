@@ -1,0 +1,755 @@
+<?xml version='1.0' encoding='utf-8'?> 
+<!DOCTYPE martif PUBLIC 'ISO 12200:1999A//DTD MARTIF core (DXFcdV04)//EN' 'TBXcdv04.dtd'>
+
+<martif type='TBX' xml:lang='en'>
+  <martifHeader>
+    <fileDesc>
+      <titleStmt>
+        <title>fr_FR_glossary</title>
+      </titleStmt>
+      <sourceDesc>
+        <p>A Term Database exported from WorldServer</p>
+      </sourceDesc>
+    </fileDesc>
+    <encodingDesc>
+      <p type='DCSName'>SYSTEM 'xcs.xml'</p>
+    </encodingDesc>
+  </martifHeader>
+  <text><body>
+    <termEntry>
+      <descrip type='Definition'>Reversal of ELV payment triggered by buyer, e.g. due to unauthorized account access, or by bank, e.g. due to insufficient funds.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>Return</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>Renvoyer</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>Card Verification Value. In U.S. credit card industry terminology, a three-digit code printed on the back of a credit card to enhance fraud protection when the credit card number is used over the Internet or telephone.</descrip>
+      <descrip type='Context'>See [card security code].</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>CVV2</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>cryptogramme visuel</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>Card Verification Value. In U.S. credit card industry terminology, a three-digit code printed on the back of a credit card to enhance fraud protection when the credit card number is used over the Internet or telephone.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>CVV</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>cryptogramme visuel</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>applies to PayPal users in Australia</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>Product Disclosure Statement</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>Document d&apos;information sur les produits</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>The MasterCard can be used anywhere MasterCard is accepted, and features 3X reward points on gas/restaurants, 2X on PayPal/eBay purchases and 1X per $ spent on everything else.  These are redeemable for cash back in your wallet, gift cards, merchandise and travel.</descrip>
+      <descrip type='Notes'>new name for the PayPal Plus MasterCard</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Solenn Marchand</transacNote>
+        <date>2010-08-31T10:20:52</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Solenn Marchand</transacNote>
+        <date>2010-08-31T10:21:17</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>PayPal Extras MasterCard</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Solenn Marchand</transacNote>
+            <date>2010-08-31T10:20:52</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Solenn Marchand</transacNote>
+            <date>2010-08-31T10:20:52</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>PayPal Extras MasterCard</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Solenn Marchand</transacNote>
+            <date>2010-08-31T10:20:52</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Solenn Marchand</transacNote>
+            <date>2010-08-31T10:20:52</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>Application Programming Interface. Allows a computer program to access PayPal functions instead of a human being performing the actions through the website.</descrip>
+      <descrip type='Context'>API, API calls, API certificate and API signature can be found in the Developer Glossary.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>API</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>API</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>A transaction is an exchange or transfer of goods, services, or funds that involves at least two people. Once a [payment] has been accepted and the buyer&#8217;s account charged, then it becomes a transaction.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>transaction</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>transaction</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>payment method</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>mode de paiement</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>In most cases, use money, funds, or payment as a substitute for cash. For legal reasons, do not use the word cash unless you are referring explicitly to the physical currency - for example, a reference to taking cash from ATMs: &quot;Get cash from your PayPal account from any ATM.&quot;</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Solenn Marchand</transacNote>
+        <date>2010-09-07T10:13:50</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>cash</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>argent / espèces</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Context'>earn cash back when using PayPal (US only)</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>cash back</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>remise en argent</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>button</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>bouton</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>Use &quot;validate&quot; when something conforms to a set of rules. Example: JohnSmith@gmail.com is a valid email address because it fits the DNS rules of proper address configuration. Inline checks in the signup flow validate the configuration of email addresses, phone numbers, etc.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Solenn Marchand</transacNote>
+        <date>2010-09-07T12:07:47</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>validate</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>valider</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>PayPal may place a hold on a payment you receive for an eBay transaction when PayPal believes there may be a high level of risk associated with the transaction.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>Hold</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>Suspension</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:18</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>Buyer Protection</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>Protection des Achats</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:18</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+    <termEntry>
+      <descrip type='Definition'>A seller is someone who sells goods and services, normally on a smaller scale &#8211; for example, an eBay seller. Compare to merchant.</descrip>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>origination</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <transacGrp>
+        <transac type='terminologyManagementTransactions'>modification</transac>
+        <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+        <date>2010-07-29T13:24:19</date>
+      </transacGrp>
+      <langSet xml:lang='en-US'>
+        <descrip type='langId'>1033</descrip>
+        <tig>
+          <term>seller</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+      <langSet xml:lang='fr-FR'>
+        <descrip type='langId'>1036</descrip>
+        <tig>
+          <term>vendeur</term>
+          <termNote type='processingStatus'>processed</termNote>
+          <termNote type='administrativeStatus'>admittedTerm-admn-sts</termNote>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>origination</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+          <transacGrp>
+            <transac type='terminologyManagementTransactions'>modification</transac>
+            <transacNote type='responsibility'>Kaori Enomoto</transacNote>
+            <date>2010-07-29T13:24:19</date>
+          </transacGrp>
+        </tig>
+      </langSet>
+    </termEntry>
+  </body></text>
+</martif>

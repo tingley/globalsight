@@ -256,6 +256,34 @@
                 </subscription-durability>
             </message-driven-destination>
         </message-driven>
+        
+        <!-- Windows PE Adapters -->
+        <message-driven>
+            <ejb-name>WindowsPESourceAdapterMDB</ejb-name>
+            <ejb-class>
+                com.globalsight.cxe.adaptermdb.windowspe.WindowsPESourceAdapterMDB
+            </ejb-class>
+            <transaction-type>Bean</transaction-type>
+            <message-driven-destination>
+                <destination-type>javax.jms.Topic</destination-type>
+                <subscription-durability>
+                    Durable
+                </subscription-durability>
+            </message-driven-destination>
+        </message-driven>
+        <message-driven>
+            <ejb-name>WindowsPETargetAdapterMDB</ejb-name>
+            <ejb-class>
+                com.globalsight.cxe.adaptermdb.windowspe.WindowsPETargetAdapterMDB
+            </ejb-class>
+            <transaction-type>Bean</transaction-type>
+            <message-driven-destination>
+                <destination-type>javax.jms.Topic</destination-type>
+                <subscription-durability>
+                    Durable
+                </subscription-durability>
+            </message-driven-destination>
+        </message-driven>
 
 		<!-- TeamSite Adapters -->
 		<message-driven>

@@ -20,9 +20,12 @@
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.foundation.SearchCriteriaParameters,
             com.globalsight.everest.projecthandler.WfTemplateSearchParameters,
-            com.globalsight.util.GeneralException,
-            com.globalsight.everest.servlet.util.ServerProxy,
+            com.globalsight.util.GeneralException,          
+            com.globalsight.everest.company.CompanyWrapper,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.text.MessageFormat,
+	    com.globalsight.util.GlobalSightLocale,
+            com.globalsight.everest.projecthandler.ProjectInfo,
             java.util.*"
     session="true" 
 %>
@@ -33,10 +36,6 @@
 <jsp:useBean id="duplicate" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="_import" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="search" scope="request"
- class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="advsearch" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="templates" scope="request" class="java.util.ArrayList" />
 <% 
@@ -55,7 +54,6 @@
     String dupButton = bundle.getString("lb_duplicate");
     String impButton = bundle.getString("lb_import");
     String expButton = bundle.getString("lb_export");
-    String searchButton = bundle.getString("lb_search");
 
     //Urls of the links on this page
     String action = WorkflowTemplateConstants.ACTION; 
@@ -66,8 +64,7 @@
     String newUrl = selfUrl + "&" + action + "=" + WorkflowTemplateConstants.NEW_ACTION;
     String modifyUrl = modify.getPageURL()+ "&" + action + "=" + WorkflowTemplateConstants.EDIT_ACTION;
     String dupUrl = duplicate.getPageURL()+ "&" + action + "=" + WorkflowTemplateConstants.DUPLICATE_ACTION;
-    String advsearchUrl = advsearch.getPageURL() + "&" + action + "=" + WorkflowTemplateConstants.ADV_SEARCH_ACTION;
-    String searchUrl = search.getPageURL() + "&" + action + "=" + WorkflowTemplateConstants.SEARCH_ACTION;
+    String filterUrl = selfUrl + "&" + action + "=" + WebAppConstants.FILTER_SEARCH;
     
     boolean isSuperAdmin = ((Boolean) session.getAttribute(WebAppConstants.IS_SUPER_ADMIN)).booleanValue();
     
@@ -80,6 +77,17 @@
     {
         emptyMsg = "msg_no_workflows_search";
     }
+    PermissionSet userPermissions = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+    //For dropbox
+    List srcLocales = (List)request.getAttribute(WorkflowTemplateConstants.SOURCE_LOCALES);
+    List targLocales = (List)request.getAttribute(WorkflowTemplateConstants.TARGET_LOCALES);
+    List projectInfos = (List)request.getAttribute(WorkflowTemplateConstants.PROJECTS);
+	//Filter Parameters
+    String nameFilter = (String) sessionManager.getAttribute("nameField");
+    String srcLocaleFilter = (String) sessionManager.getAttribute("srcLocale");
+    String targLocaleFilter = (String) sessionManager.getAttribute("targLocale");
+    String projectFilter = (String) sessionManager.getAttribute("project");
+    String companyNameFilter = (String) sessionManager.getAttribute("companyName");
 %>
 <%!
 // Is mass duplication enabled
@@ -104,6 +112,7 @@ static {
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/cookieUtil.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/common/header.jspIncl" %>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -114,16 +123,25 @@ var helpFile = "<%=bundle.getString("help_workflows")%>";
 
 function enableButtons()
 {
-<% if (s_duplicationEnabled) { %>
-    if (WfTemplateForm.dupBtn)
-        WfTemplateForm.dupBtn.disabled = false;
-<% } %>
-    if (WfTemplateForm.removeBtn)
-        WfTemplateForm.removeBtn.disabled = false;
-    if (WfTemplateForm.editBtn)
-        WfTemplateForm.editBtn.disabled = false;
-    if (WfTemplateForm.editBtn)
-        WfTemplateForm.expBtn.disabled = false;
+	if ($(":checked").not($("option")).not($("#selectAll")).length == 1) {
+		<% if (s_duplicationEnabled) { %>
+		    if (WfTemplateForm.dupBtn)
+		        WfTemplateForm.dupBtn.disabled = false;
+		<% } %>
+		    if (WfTemplateForm.removeBtn)
+		        WfTemplateForm.removeBtn.disabled = false;
+		    if (WfTemplateForm.expBtn)
+		        WfTemplateForm.expBtn.disabled = false;
+	} else {
+		<% if (s_duplicationEnabled) { %>
+	    	if (WfTemplateForm.dupBtn)
+	        	WfTemplateForm.dupBtn.disabled = true;
+		<% } %>
+		    if (WfTemplateForm.removeBtn)
+		        WfTemplateForm.removeBtn.disabled = true;
+		    if (WfTemplateForm.expBtn)
+		        WfTemplateForm.expBtn.disabled = true;
+	}
 }
 
 function submitForm(selectedButton) 
@@ -170,18 +188,6 @@ function submitForm(selectedButton)
       WfTemplateForm.submit();
       return;
    }
-   else if (selectedButton=='Search')
-   {          
-      WfTemplateForm.action = "<%=searchUrl%>";
-      WfTemplateForm.submit();
-      return;
-   }
-   else if (selectedButton=='Search')
-   {          
-      WfTemplateForm.action = "<%=advsearchUrl%>";
-      WfTemplateForm.submit();
-      return;
-   }
 
    // otherwise do the following
    if (!checked) 
@@ -196,10 +202,6 @@ function submitForm(selectedButton)
          if(!confirm('<%=EditUtil.toJavascript(confirmRemove)%>')) return false;
          WfTemplateForm.action = "<%=removeUrl%>&<%=WorkflowTemplateConstants.WF_TEMPLATE_INFO_ID%>=" + selectedRadioBtn;
       }
-      else if (selectedButton == 'Edit')
-      {          
-         WfTemplateForm.action = "<%=modifyUrl%>&<%=WorkflowTemplateConstants.WF_TEMPLATE_INFO_ID%>=" + selectedRadioBtn;
-      }
       else if (selectedButton == 'Duplicate')
       {          
          WfTemplateForm.action = "<%=dupUrl%>&<%=WorkflowTemplateConstants.WF_TEMPLATE_INFO_ID%>=" + selectedRadioBtn;
@@ -212,6 +214,44 @@ function submitForm(selectedButton)
       WfTemplateForm.submit();
    }               
 }
+
+function handleSelectAll() {
+	  var selectAll = $("#selectAll").is(":checked");
+	  if (selectAll) {
+		  $(":checkbox").attr("checked","true");
+	  }else{
+		  $(":checkbox").removeAttr("checked");
+	  }
+	  enableButtons();
+}
+
+function editWorkflow(workflowId){
+	var url = "<%=modifyUrl%>&wfTemplateInfoId=" + workflowId;
+	$("[name=WfTemplateForm]").attr("action",url).submit();
+}
+
+function filterItems(e) {
+	e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+	if (keyCode == 222) {
+		alert("Invalid character \"\'\" is input.");
+		return false;
+	}
+	if (keyCode == 13) {
+		WfTemplateForm.action = "<%=filterUrl%>";
+		WfTemplateForm.submit();
+	}
+}
+
+function filterSelectItems(e) {
+	e = e ? e : window.event;
+    var keyCode = e.which ? e.which : e.keyCode;
+	if (keyCode == 13) {
+		WfTemplateForm.action = "<%=filterUrl%>";
+		WfTemplateForm.submit();
+	}
+}
+
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" 
@@ -222,37 +262,8 @@ function submitForm(selectedButton)
 <amb:header title="<%=title%>" helperText="<%=helperText%>" />
 
 <FORM NAME="WfTemplateForm" METHOD="POST">
-<table border="0" class="standardText" cellpadding="2">
-  <tr>
-    <td class="standardText">
-      <%=bundle.getString("lb_name")%>:
-    </td>
-    <td class="standardText">
-      <select name="nameOptions">
-	<option value='<%=SearchCriteriaParameters.BEGINS_WITH%>'>
-	  <%= bundle.getString("lb_begins_with") %>
-	</option>
-	<option value='<%=SearchCriteriaParameters.ENDS_WITH%>'>
-	  <%= bundle.getString("lb_ends_with") %>
-	</option>
-	<option value='<%=SearchCriteriaParameters.CONTAINS%>'>
-	  <%= bundle.getString("lb_contains") %>
-	</option>
-      </select>
-      <input type="text" size="30" name="nameField">
-    </td>
-    <td>
-      <input type="button" value="<%=searchButton%>..." onclick="submitForm('Search');">
-    </td>
-    <td class="standardText" style="padding-bottom: 2px">
-      <a class="standardHREF" href="<%=advsearchUrl%>"><%=bundle.getString("lb_advanced_search") %></a>
-    </td>
-  </tr>
-</table>
 
-<p>
-
-<table cellpadding=0 cellspacing=0 border=0 CLASS="standardText">
+<table cellpadding=0 cellspacing=0 border=0 CLASS="standardText" width="100%" style="min-width:1024px;">
   <tr valign="top">    
     <td align="right">
       <amb:tableNav bean="templates" key="<%=WorkflowTemplateConstants.KEY%>"
@@ -265,24 +276,37 @@ function submitForm(selectedButton)
                  key="<%=WorkflowTemplateConstants.KEY%>"
                  dataClass="com.globalsight.everest.projecthandler.WorkflowTemplateInfo"
                  pageUrl="self" 
-                 emptyTableMsg="<%=emptyMsg%>" >
-      <amb:column label="" width="20px">
-          <input type=radio name=RadioBtn value="<%=wft.getId()%>" onclick="enableButtons()" >
+                 emptyTableMsg="<%=emptyMsg%>" hasFilter="true">
+      <amb:column label="checkbox" width="2%">
+          <input type="checkbox" name="RadioBtn" value="<%=wft.getId()%>" onclick="enableButtons()" >
       </amb:column>
-      <amb:column label="lb_name" width="100px" sortBy="<%=WorkflowTemplateInfoComparator.NAME%>">
-          <%= wft.getName() %>
+      <amb:column label="lb_name" sortBy="<%=WorkflowTemplateInfoComparator.NAME%>" filter="nameField" filterValue="<%=nameFilter%>" width="13%">
+               	<%
+					if (userPermissions.getPermissionFor(Permission.WORKFLOWS_EDIT))
+					    out.print("<a href='javascript:void(0)' title='Edit Workflow' onclick='editWorkflow(" + wft.getId() + ")'>" + wft.getName() + "</a>");
+					else
+					  	out.print(wft.getName());
+				%>
       </amb:column>
-      <amb:column label="lb_description" width="200px" sortBy="<%=WorkflowTemplateInfoComparator.DESCRIPTION%>">
+      <amb:column label="lb_description" sortBy="<%=WorkflowTemplateInfoComparator.DESCRIPTION%>" width="15%">
           <%=(wft.getDescription() == null ? "" : wft.getDescription())%>
       </amb:column>
-      <amb:column label="lb_locale_pair" width="200px" sortBy="<%=WorkflowTemplateInfoComparator.LOCALEPAIR%>">
-          <%=wft.getSourceLocale().getDisplayName(uiLocale)%> &#x2192;
+      <amb:column label="lb_source_locale" sortBy="<%=WorkflowTemplateInfoComparator.SOURCE_LOCALE%>" filter="srcLocale" filterValue="<%=srcLocaleFilter%>" width="15%">
+          <%=wft.getSourceLocale().getDisplayName(uiLocale)%>
+      </amb:column>
+      <amb:column label="lb_target_locale" sortBy="<%=WorkflowTemplateInfoComparator.TARGET_LOCALE%>" filter="targLocale" filterValue="<%=targLocaleFilter%>" width="15%">
           <%=wft.getTargetLocale().getDisplayName(uiLocale)%>
       </amb:column>
-      <amb:column label="lb_project_manager" width="100px"  sortBy="<%=WorkflowTemplateInfoComparator.PROJECTMGR%>">
-          <%=wft.getProjectManagerId()%>
+      <amb:column label="lb_project" sortBy="<%=WorkflowTemplateInfoComparator.PROJECT%>" filter="project" filterValue="<%=projectFilter%>" width="8%">
+          <%=wft.getProject().getName()%>
       </amb:column>
-      <amb:column label="lb_workflow_type" width="100px" sortBy="<%=WorkflowTemplateInfoComparator.WORKFLOW_TYPE%>">
+      <amb:column label="lb_project_manager" sortBy="<%=WorkflowTemplateInfoComparator.PROJECTMGR%>" width="8%">
+          <%=UserUtil.getUserNameById(wft.getProjectManagerId())%>
+      </amb:column>
+      <amb:column label="lb_target_encoding" sortBy="<%=WorkflowTemplateInfoComparator.TARGET_ENCODING%>"  width="8%">
+          <%=wft.getEncoding()%>
+      </amb:column>
+      <amb:column label="lb_workflow_type" sortBy="<%=WorkflowTemplateInfoComparator.WORKFLOW_TYPE%>" width="8%">
       
       <%// ======================= ugly, code directly =================== %>
 	<%String workflowType = wft.getWorkflowType();
@@ -290,16 +314,21 @@ function submitForm(selectedButton)
       %>
 	  </amb:column>
       <% if (isSuperAdmin) { %>
-      <amb:column label="lb_company_name" sortBy="<%=WorkflowTemplateInfoComparator.ASC_COMPANY%>">
-          <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(wft.getCompanyId())).getCompanyName()%>
+      <amb:column label="lb_company_name" sortBy="<%=WorkflowTemplateInfoComparator.ASC_COMPANY%>"  filter="companyName" filterValue="<%=companyNameFilter%>" width="8%">
+          <%=CompanyWrapper.getCompanyNameById(wft.getCompanyId())%>
       </amb:column>
       <% } %>
       </amb:table>
     </td>
   </tr>
   <tr>
+  	<td>
+		<amb:tableNav bean="templates" key="<%=WorkflowTemplateConstants.KEY%>" pageUrl="self" scope="10,20,50,All" showTotalCount="false"/>         	
+  	</td>
+  </tr> 
+  <tr>
     <td style="padding-top:5px">
-      <DIV ID="DownloadButtonLayer" ALIGN="RIGHT" STYLE="visibility: visible">
+      <DIV ID="DownloadButtonLayer" ALIGN="left" STYLE="visibility:visible">
     <amb:permission name="<%=Permission.WORKFLOWS_REMOVE%>" >
       <INPUT TYPE="BUTTON" name="removeBtn" VALUE="<%=removeButton%>"
       disabled onclick="submitForm('Remove');"> 
@@ -315,10 +344,6 @@ function submitForm(selectedButton)
       disabled onclick="submitForm('Export');">    
       <INPUT TYPE="BUTTON" name="impBtn" VALUE="<%=impButton%>"
       onclick="submitForm('Import');">    
-    <amb:permission name="<%=Permission.WORKFLOWS_EDIT%>" >
-      <INPUT TYPE="BUTTON" name="editBtn" VALUE="<%=editButton%>..."
-      disabled onclick="submitForm('Edit');">
-    </amb:permission>
     <amb:permission name="<%=Permission.WORKFLOWS_NEW%>" >
       <INPUT TYPE="BUTTON" VALUE="<%=newButton%>..."
       onclick="submitForm('New');">    

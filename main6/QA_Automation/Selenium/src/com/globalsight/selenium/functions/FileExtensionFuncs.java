@@ -46,8 +46,10 @@ public class FileExtensionFuncs extends BasicFuncs {
             return;
         }
     	selenium.click(FileExtensions.Remove_BUTTON);
-    	boolean actual = selenium.getConfirmation().equals("Do you really want to remove this File Extension from the system?");
-    	Assert.assertEquals(actual,true);
+    	if (selenium.isConfirmationPresent()) {
+    	    boolean actual = selenium.getConfirmation().equals("Do you really want to remove this File Extension from the system?");
+    	    Assert.assertEquals(actual,true);
+    	}
         
     	selected = selectRadioButtonFromTable(selenium, MAIN_TABLE, iFileExtensionName);
         if (!selected)

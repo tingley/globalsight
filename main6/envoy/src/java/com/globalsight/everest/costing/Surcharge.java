@@ -18,7 +18,8 @@
  
 package com.globalsight.everest.costing;
 
-// globalsight
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import com.globalsight.everest.persistence.PersistentObject;
 
 
@@ -28,6 +29,8 @@ import com.globalsight.everest.persistence.PersistentObject;
  * All subclasses of surcharges should implement the specified
  * method that is used by the costing engine to determine the
  * surcharge amount to add to the cost.
+ * 
+ * The name of every Surcharge is Unique.
  */
 public abstract class Surcharge
     extends PersistentObject
@@ -86,5 +89,28 @@ public abstract class Surcharge
     public void setCost(Cost p_cost)
     {
         m_cost = p_cost;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+        builder.append(m_name);
+        return builder.toHashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (getClass() != obj.getClass())
+            return false;
+
+        Surcharge other = (Surcharge) obj;
+        if (m_name == null || !m_name.equals(other.m_name))
+            return false;
+
+        return true;
     }
 }

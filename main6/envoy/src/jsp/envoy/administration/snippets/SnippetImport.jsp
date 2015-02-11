@@ -25,7 +25,7 @@ String urlCancel = cancel.getPageURL();
 %>
 <HTML XMLNS:gs>
 <HEAD>
-<TITLE><%=bundle.getString("lb_snippet_file_import")%></TITLE>
+<TITLE><%=bundle.getString("lb_snippet_import")%></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -184,7 +184,7 @@ function doOnLoad()
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 <DIV ID="contentLayer" 
     STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
-<SPAN CLASS="mainHeading" ID="idHeading"><%=bundle.getString("lb_import_snippet_file")%></SPAN>
+<SPAN CLASS="mainHeading" ID="idHeading"><%=bundle.getString("lb_snippet_import")%></SPAN>
 
 <div style="display:none">
 <XML id="oImportOptions"><%=xmlImportOptions%></XML>

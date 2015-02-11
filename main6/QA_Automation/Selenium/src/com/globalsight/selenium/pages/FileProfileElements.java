@@ -5,6 +5,8 @@ public class FileProfileElements
     // main page
     public static final String MAIN_NEW_BUTTON = "//input[@value='New...']";
     public static final String MAIN_REMOVE_BUTTON = "//input[@value='Remove']";
+    public static final String MAIN_NAME_FIELD_TEXT = "name=nameField";
+    public static final String Search_BUTTON="//input[@value='Search...']";
     
     // create page
     public static final String NEW_NAME_TEXT = "fpName";

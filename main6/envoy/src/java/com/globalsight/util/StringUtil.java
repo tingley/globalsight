@@ -1,26 +1,30 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 package com.globalsight.util;
 
 import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +36,10 @@ public class StringUtil
     public static boolean isEmpty(String s)
     {
         return s == null || s.trim().length() == 0;
+    }
+
+    public static boolean isNotEmpty(String s) {
+        return !isEmpty(s);
     }
 
     public static String replace(String src, String oldString, String newString)
@@ -53,6 +61,34 @@ public class StringUtil
         }
 
         return src;
+    }
+
+    public static void replaceStringBuffer(StringBuffer src, String oldString, String newString,
+            boolean oneTime)
+    {
+        if (src == null || oldString == null)
+        {
+            return;
+        }
+
+        if (newString == null)
+        {
+            newString = "";
+        }
+
+        int oldLen = oldString.length();
+        int newLen = newString.length();
+        int index = src.indexOf(oldString);
+        while (index > -1)
+        {
+            src = src.replace(index, index + oldLen, newString);
+            index = src.indexOf(oldString, index + newLen);
+
+            if (oneTime)
+            {
+                break;
+            }
+        }
     }
 
     public static List getIncludedInts(String src)
@@ -133,7 +169,7 @@ public class StringUtil
         byte[] bs = s.getBytes(encoding);
         return new String(removeBom(bs), encoding);
     }
-    
+
     /**
      * Format percentage to two decimal places, like xx.xx%.
      * If the input is not a Number, return toString(), avoid throw exception.
@@ -159,13 +195,13 @@ public class StringUtil
                 result = result + "%";
             }
         }
-        
+
         return result;
     }
-    
+
     /**
      * Generate percentage value according with the special number
-     * 
+     *
      * @param p_num
      *            The decimal number
      * @return Percentage value
@@ -173,17 +209,17 @@ public class StringUtil
     public static String formatPercent(float p_num)
     {
         float tmpF = (float) (((float) ((int) Math.floor(p_num * 100)) / 100));
-        
+
         Locale en = new Locale("en");
         DecimalFormat df = (DecimalFormat) DecimalFormat.getInstance(en);
         df.applyPattern("0.00");
-        
+
         return df.format(tmpF);
     }
 
     /**
      * Generate percentage value according with the special number and digits
-     * 
+     *
      * @param p_num
      *            The decimal number
      * @param p_digits
@@ -208,7 +244,7 @@ public class StringUtil
 
         return df.format(tmpF);
     }
-    
+
     /**
      * Compares 2 string, ignoring white space considerations.
      */
@@ -232,16 +268,16 @@ public class StringUtil
 
         return sb1.toString().equalsIgnoreCase(sb2.toString());
     }
-    
+
     /**
      * Get the sub string before the suffix string.
-     * If can not find p_suffix, then return p_input. 
-     * 
+     * If can not find p_suffix, then return p_input.
+     *
      * @param p_input
      *            input string
      * @param p_suffix
      *            special string
-     *            
+     *
      * @see StringUtilTest.testDelSuffix
      */
     public static String delSuffix(String p_input, String p_suffix)
@@ -250,7 +286,7 @@ public class StringUtil
         {
             return "";
         }
-        
+
         if (p_input.endsWith(p_suffix))
         {
             int index = p_input.lastIndexOf(p_suffix);
@@ -258,5 +294,83 @@ public class StringUtil
         }
 
         return p_input.trim();
+    }
+
+    /**
+     * Join a list of Strings with a separator.  Objects are converted with
+     * toString.  In the special case where the list is empty, the empty string
+     * is returned.
+     *
+     * Be aware that splitting on the separator may not return the original
+     * list of Strings.  This happens if the list is empty, or the separator
+     * appears in one of the elements.
+     */
+    public static String join(String separator, List<? extends Object> objs)
+    {
+        if (objs == null)
+        {
+            throw new IllegalArgumentException("objs is null");
+        }
+        if (objs.isEmpty())
+        {
+            return EMPTY_STRING;
+        }
+        Iterator<? extends Object> i = objs.iterator();
+        StringBuilder r = new StringBuilder(i.next().toString());
+        while (i.hasNext()) {
+            r.append(separator);
+            r.append(i.next().toString());
+        }
+        return r.toString();
+    }
+
+    /** @see #join(String, List) */
+    public static String join(String separator, Object... objs)
+    {
+        return join(separator, Arrays.asList(objs));
+    }
+
+    /**
+     * Check if the value is included in the array
+     * @param strArray
+     * @param value
+     * @return
+     */
+    public static boolean isIncludedInArray(String[] strArray, String value)
+    {
+        if (strArray == null || value == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < strArray.length; i++)
+        {
+            String str = strArray[i];
+            if (value.equals(str))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static Set<String> split(String p_str)
+    {
+        return split(p_str, ",");
+    }
+
+    public static Set<String> split(String p_str, String p_sep)
+    {
+        Set<String> result = new HashSet<String>();
+        String[] arr = p_str.split(p_sep);
+        for (String str : arr)
+        {
+            if (str != null && str.trim().length() > 0)
+            {
+                result.add(str);
+            }
+        }
+        return result;
     }
 }

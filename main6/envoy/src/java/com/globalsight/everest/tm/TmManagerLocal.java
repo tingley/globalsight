@@ -154,7 +154,7 @@ public final class TmManagerLocal
         }
         catch (Exception e)
         {
-            CATEGORY.error(e.toString(), e);
+            CATEGORY.error(e.getMessage(), e);
             throw new GeneralException(e.toString(), e);
         }
 
@@ -801,7 +801,7 @@ public final class TmManagerLocal
         }
         catch (Exception pe)
         {
-            CATEGORY.error(pe, pe);
+            CATEGORY.error(pe.getMessage(), pe);
             throw new GeneralException(pe.toString(), pe);
         }
 

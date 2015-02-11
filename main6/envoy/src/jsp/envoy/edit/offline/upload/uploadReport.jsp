@@ -97,8 +97,8 @@
     String lbDetails = bundle.getString("lb_details");
     String lbWorkoffline = bundle.getString("lb_work_offline");
     String lbComments = bundle.getString("lb_comments");
-    String lbDownload = bundle.getString("lb_download");
-    String lbUpload = bundle.getString("lb_upload");
+    String lbDownload = bundle.getString("lb_tab_download");
+    String lbUpload = bundle.getString("lb_tab_upload");
 
     String lbDownloadReport = bundle.getString("lb_download_report");
     String lbUploadReport = bundle.getString("lb_upload_report");

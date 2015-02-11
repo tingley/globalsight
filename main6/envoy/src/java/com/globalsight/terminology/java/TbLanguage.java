@@ -36,7 +36,7 @@ public class TbLanguage implements Serializable
     private String name;
     private String xml;
     private String local;
-    private Set terms = new HashSet();
+    private Set<TbTerm> terms = new HashSet<TbTerm>();
     
     /**
      * Return the persistent object's id.
@@ -95,11 +95,11 @@ public class TbLanguage implements Serializable
         this.local = local;
     }
     
-    public Set getTerms() {
+    public Set<TbTerm> getTerms() {
         return terms;
     }
     
-    public void setTerms(Set terms) {
+    public void setTerms(Set<TbTerm> terms) {
         this.terms = terms;
     }
 }

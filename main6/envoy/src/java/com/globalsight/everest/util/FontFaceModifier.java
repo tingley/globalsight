@@ -16,23 +16,22 @@
  */
 package com.globalsight.everest.util;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuType;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.GxmlNames;
-import com.globalsight.util.gxml.TextNode;
-
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
 import org.apache.regexp.RESyntaxException;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Iterator;
+import com.globalsight.everest.tuv.TuType;
+import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
+import com.globalsight.util.gxml.TextNode;
 
 /**
  * This class modifies font face name so CJK text is displayed
@@ -67,13 +66,13 @@ public class FontFaceModifier
      * list. "WAS" is added to each font name and storeed back into
      * Tuv object
      */
-    public static void addWasToFontFace(Tuv p_tuv)
+    public static void addWasToFontFace(Tuv p_tuv, String companyId)
     {
         // check if Tuv type is css-font-family
-        if(p_tuv.getTu().getTuType().equals(TuType.CSS_FONT_FAMILY.getName()))
+        if(p_tuv.getTu(companyId).getTuType().equals(TuType.CSS_FONT_FAMILY.getName()))
         {
             String newFonts = modifyFonts(p_tuv.getGxmlExcludeTopTags());
-            p_tuv.setGxmlExcludeTopTags(newFonts);
+            p_tuv.setGxmlExcludeTopTags(newFonts, companyId);
         }
         else
         {

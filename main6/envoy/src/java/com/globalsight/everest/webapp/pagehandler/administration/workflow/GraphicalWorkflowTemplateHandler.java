@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -265,14 +266,14 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
         leverage = leverage.substring(0, leverage.lastIndexOf(","));
 
         int leverageOrder[] = split(leverage, ',');
-        Vector leveragedLocales = new Vector();
+        Set<LeverageLocales> leveragedLocales = new HashSet<LeverageLocales>();
 
         for (int k = 0; k < leverageOrder.length; k++)
         {
             GlobalSightLocale gsl = (GlobalSightLocale) newLeverageObjects
                     .elementAt(leverageOrder[k]);
             LeverageLocales leverageLocales = new LeverageLocales(gsl);
-            leveragedLocales.addElement(leverageLocales);
+            leveragedLocales.add(leverageLocales);
         }
 
         // coming from first page for the first time (or changing all fields
@@ -289,7 +290,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                             p_request.getParameter(PROJECT_FIELD)).longValue());
 
             // get the workflow managers that have been chosen
-            List wfMgrIds = new ArrayList();
+            List<String> wfMgrIds = new ArrayList<String>();
             String wfMgrIdString = (String) p_request
                     .getParameter(CHOSEN_WORKFLOW_MANAGERS);
             StringTokenizer tokenizer = new StringTokenizer(wfMgrIdString, ",");
@@ -331,7 +332,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
             p_wfti.setCodeSet(p_request.getParameter(ENCODING_FIELD));
             p_wfti.notifyProjectManager(Boolean.valueOf(
                     p_request.getParameter(NOTIFICATION_FIELD)).booleanValue());
-            p_wfti.setLeverageLocales(leveragedLocales);
+            p_wfti.setLeveragingLocalesSet(leveragedLocales);
 
             sessionMgr.setAttribute(WF_TEMPLATE_INFO, p_wfti);
             if (p_wfti.getId() > 0)
@@ -483,7 +484,7 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
                             .getUser());
                     role[0] = user.getFirstName();
                     role[1] = user.getLastName();
-                    role[2] = user.getUserId();
+                    role[2] = user.getUserName();
                     // 3 - place holder for calendaring
                     // since the wf instance needs this and uses
                     // same WorkflowTaskDialog code
@@ -531,8 +532,8 @@ public class GraphicalWorkflowTemplateHandler extends PageHandler implements
      * Add the collection of workflow activities and the boolean that determines
      * whether a workflow can be modified.
      */
-    private void addWorkflowInfo(String p_wfId,
-            Vector p_displayInfo) throws EnvoyServletException
+    private void addWorkflowInfo(String p_wfId, Vector p_displayInfo)
+            throws EnvoyServletException
     {
         WorkflowTemplate wft = WorkflowTemplateHandlerHelper
                 .getWorkflowTemplateById(Long.parseLong(p_wfId));

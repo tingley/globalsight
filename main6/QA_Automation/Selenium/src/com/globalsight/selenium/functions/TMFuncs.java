@@ -17,9 +17,7 @@ import org.testng.Assert;
 import org.testng.Reporter;
 
 import com.globalsight.selenium.pages.TMManagement;
-import com.globalsight.selenium.pages.TerminologyElements;
-import com.globalsight.selenium.pages.Users;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 public class TMFuncs extends BasicFuncs {
@@ -47,12 +45,12 @@ public class TMFuncs extends BasicFuncs {
 					selenium.type(TMManagement.Name_TEXT_FIELD, iFieldValue);
 					iTMName = iFieldValue;
 				} else if (iFieldName.equals("domain")) {
-					selenium.type(TMManagement.Domain_TEXT_FIELD, iFieldValue);
+					selenium.type(TMManagement.DOMAIN_TEXT, iFieldValue);
 				} else if (iFieldName.equals("organization")) {
-					selenium.type(TMManagement.Organization_TEXT_FIELD,
+					selenium.type(TMManagement.ORGANIZATION_TEXT,
 							iFieldValue);
 				} else if (iFieldName.equals("description")) {
-					selenium.type(TMManagement.Description_TEXT_FIELD,
+					selenium.type(TMManagement.DESCRIPTION_TEXT,
 							iFieldValue);
 				} else if (iFieldName != null) {
 					selenium.click(TMManagement.RemoteTM_CHECKBOX);
@@ -63,18 +61,17 @@ public class TMFuncs extends BasicFuncs {
 			}
 
 		}
-		selenium.click(TMManagement.Save_BUTTON);
-		try {
+		selenium.click(TMManagement.SAVE_BUTTON);
+
+        if (selenium.isAlertPresent())
+        {
 			selenium.getAlert();
 			selenium.click(TMManagement.Cancel_BUTTON);
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		} catch (Exception e) {
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 		}
 
 		if (iTMName != null) {
 			Assert.assertEquals(this.isPresentInTable(selenium,
-					TMManagement.TMMangement_TABLE, iTMName), true);
+					TMManagement.TM_MANAGEMENT_TABLE, iTMName), true);
 		}
 		return iTMName;
 	}
@@ -87,7 +84,7 @@ public class TMFuncs extends BasicFuncs {
             String iFieldValue = ivalue[1].trim();
             
             if (iFieldName.equals("tmName")) {
-                boolean selected = selectRadioButtonFromTable(selenium, TMManagement.TMMangement_TABLE, iFieldValue);
+                boolean selected = selectRadioButtonFromTable(selenium, TMManagement.TM_MANAGEMENT_TABLE, iFieldValue);
                 if (!selected)
                 {
                     Reporter.log("Cannot find a tm to import.");
@@ -99,7 +96,7 @@ public class TMFuncs extends BasicFuncs {
             } else if (iFieldName.equals("import_file")) {
                 
                 String filePath = ConfigUtil.getConfigData("Base_Path");
-                filePath = filePath + "TM" + File.separator + iFieldValue;
+                filePath = filePath + File.separator + "TM" + File.separator + iFieldValue;
                 selenium.type(TMManagement.import_path, filePath);
             } else if (iFieldName.equals("sourceTmName")) {
                 selenium.type("sourceTmName",iFieldValue);
@@ -123,7 +120,7 @@ public class TMFuncs extends BasicFuncs {
     public void statistic(Selenium selenium, String tmName) throws Exception
     {
     	
-        boolean selected = selectRadioButtonFromTable(selenium, TMManagement.TMMangement_TABLE, tmName);
+        boolean selected = selectRadioButtonFromTable(selenium, TMManagement.TM_MANAGEMENT_TABLE, tmName);
         if (!selected)
         {
             Reporter.log("Cannot find a proper TM to do statistics.");

@@ -33,8 +33,6 @@
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
     String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
-    User user = UserHandlerHelper.getUser(userName);
-    String userId = user.getUserId();
 
     // Labels, etc
     String title= bundle.getString("lb_jobs") + " - " + bundle.getString("lb_search");
@@ -69,12 +67,16 @@
     String completionStartOptions = JobSearchConstants.EST_COMPLETION_START_OPTIONS;
     String completionEnd = JobSearchConstants.EST_COMPLETION_END;
     String completionEndOptions = JobSearchConstants.EST_COMPLETION_END_OPTIONS;
+    String exportDateStart = JobSearchConstants.EXPORT_DATE_START;
+    String exportDateStartOptions = JobSearchConstants.EXPORT_DATE_START_OPTIONS;
+    String exportDateEnd = JobSearchConstants.EXPORT_DATE_END;
+    String exportDateEndOptions = JobSearchConstants.EXPORT_DATE_END_OPTIONS;
 
     // Data
     List srcLocales = (List)request.getAttribute("srcLocales");
     List targLocales = (List)request.getAttribute("targLocales");
     List projects = (List)request.getAttribute("projects");
-    String cookieName = JobSearchConstants.JOB_SEARCH_COOKIE + userId.hashCode();
+    String cookieName = JobSearchConstants.JOB_SEARCH_COOKIE + userName.hashCode();
     Cookie cookie = (Cookie)sessionMgr.getAttribute(cookieName);
     String searchCriteria = "";
     if (cookie != null)
@@ -130,6 +132,10 @@ function validateForm()
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
     if (!isInteger(searchForm.<%=completionEnd%>.value))
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+    if (!isInteger(searchForm.<%=exportDateStart%>.value))
+        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+    if (!isInteger(searchForm.<%=exportDateEnd%>.value))
+        return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
     if (searchForm.<%=creationStart%>.value != "" &&
              getOption(searchForm.<%=creationStartOptions%>) == -1)
         return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
@@ -142,6 +148,12 @@ function validateForm()
     if (searchForm.<%=completionEnd%>.value != "" &&
              getOption(searchForm.<%=completionEndOptions%>) == -1)
         return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+    if (searchForm.<%=exportDateStart%>.value != "" &&
+            getOption(searchForm.<%=exportDateStartOptions%>) == -1)
+       return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
+   if (searchForm.<%=exportDateEnd%>.value != "" &&
+            getOption(searchForm.<%=exportDateEndOptions%>) == -1)
+       return ('<%=bundle.getString("jsmsg_job_search_bad_date2")%>');
     if (searchForm.<%=creationStart%>.value != "" &&
              searchForm.<%=creationEnd%>.value == "" &&
              getOption(searchForm.<%=creationEndOptions%>) !=
@@ -158,6 +170,14 @@ function validateForm()
     if (searchForm.<%=completionEnd%>.value != "" &&
              searchForm.<%=completionStart%>.value == "")
         return ('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+    if (searchForm.<%=exportDateStart%>.value != "" &&
+            searchForm.<%=exportDateEnd%>.value == "" &&
+            getOption(searchForm.<%=exportDateEndOptions%>) !=
+            '<%=SearchCriteriaParameters.NOW%>')
+       return ('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
+   if (searchForm.<%=exportDateEnd%>.value != "" &&
+            searchForm.<%=exportDateStart%>.value == "")
+       return ('<%=bundle.getString("jsmsg_job_search_bad_date3")%>');
     return "";
 }
 
@@ -177,6 +197,10 @@ function clearFields()
     searchForm.<%=completionStartOptions%>.options[0].selected = true;
     searchForm.<%=completionEnd%>.value = "";
     searchForm.<%=completionEndOptions%>.options[0].selected = true;
+    searchForm.<%=exportDateStart%>.value = "";
+    searchForm.<%=exportDateStartOptions%>.options[0].selected = true;
+    searchForm.<%=exportDateEnd%>.value = "";
+    searchForm.<%=exportDateEndOptions%>.options[0].selected = true;
 }
 
 function setSearchCookie()
@@ -197,7 +221,12 @@ function setSearchCookie()
               "<%=completionStart%>=" + searchForm.<%=completionStart%>.value + ":" +
               "<%=completionStartOptions%>=" + getOption(searchForm.<%=completionStartOptions%>) + ":" +
               "<%=completionEnd%>=" + searchForm.<%=completionEnd%>.value + ":" +
-              "<%=completionEndOptions%>=" + getOption(searchForm.<%=completionEndOptions%>) + ":";
+              "<%=completionEndOptions%>=" + getOption(searchForm.<%=completionEndOptions%>) + ":" +
+              "<%=exportDateStart%>=" + searchForm.<%=exportDateStart%>.value + ":" +
+              "<%=exportDateStartOptions%>=" + getOption(searchForm.<%=exportDateStartOptions%>) + ":" +
+              "<%=exportDateEnd%>=" + searchForm.<%=exportDateEnd%>.value + ":" +
+              "<%=exportDateEndOptions%>=" + getOption(searchForm.<%=exportDateEndOptions%>) + ":";
+              
     var today = new Date();
     var expires = new Date(today.getTime() + (365 * 86400000));
     document.cookie = "<%=cookieName%>=" + buf + ";EXPIRES=" + expires.toGMTString() + ";PATH=" + escape("/");
@@ -237,6 +266,10 @@ function setOption(field, value)
         if (field.options[i].value == value)
         {
             field.selectedIndex = i;
+			if (field.name == "<%=statusOptions%>" && value != "<%=Job.EXPORTED%>") {
+				document.getElementById("exportSearchLabel").style.display = "none";
+				document.getElementById("exportSearch").style.display = "none";
+			}
             return;
         }
     }
@@ -247,6 +280,17 @@ function checkNow(field, text)
 {
     if (field.options[1].selected)
         text.value = "";
+}
+
+function changeStatus() {
+    var obj = document.getElementById("statusOptions");
+	if (obj.options[obj.selectedIndex].value == "<%=Job.EXPORTED%>") {
+		document.getElementById("exportSearchLabel").style.display = "";
+    	document.getElementById("exportSearch").style.display = "";
+    } else {
+		document.getElementById("exportSearchLabel").style.display = "none";
+    	document.getElementById("exportSearch").style.display = "none";
+	}
 }
 </script>
 </head>
@@ -310,7 +354,7 @@ function checkNow(field, text)
             <%=bundle.getString("lb_status")%><span class="asterisk">*</span>:
             </td>
             <td class="standardText">
-            <select name="<%=statusOptions%>">
+            <select name="<%=statusOptions%>" id="statusOptions" onchange="changeStatus()">
             <option value='<%=Job.PENDING%>'><%= bundle.getString("lb_pending") %></option>
             <option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
             <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
@@ -467,6 +511,36 @@ if (targLocales != null)
 </select>
 </td>
 </tr>
+<div id="test">
+<tr id="exportSearchLabel">
+<td class="standardText" colspan=2>
+<%=bundle.getString("lb_export_date_range")%>:
+</td>
+</tr>
+<tr id="exportSearch">
+<td class="standardText" style="padding-left:70px" colspan=2>
+<%=bundle.getString("lb_starts")%>:
+<input type="text" name="<%=exportDateStart %>" size="3" maxlength="9">
+<select name="<%=exportDateStartOptions %>">
+<option value='-1'></option>
+<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+</select>
+<%=bundle.getString("lb_ends")%>:
+<input type="text" name="<%=exportDateEnd %>" size="3" maxlength="9">
+<select name="<%=exportDateEndOptions %>" onChange="checkNow(this, searchForm.<%=exportDateEnd %>)">
+<option value='-1'></option>
+<option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+</select>
+</td>
+</tr>
+</div>
 <tr><td>&nbsp;</td></tr>
 <tr>
 <td>
@@ -532,7 +606,18 @@ if (searchCriteria.length > 0)
 
     // completion date end option
     setField("<%=completionEndOptions%>", searchForm.<%=completionEndOptions%>, searchCriteria, true);
+    
+    // export date start 
+    setField("<%=exportDateStart%>", searchForm.<%=exportDateStart%>, searchCriteria, false);
 
+    // export date start option
+    setField("<%=exportDateStartOptions%>", searchForm.<%=exportDateStartOptions%>, searchCriteria, true);
+
+    // export date end 
+    setField("<%=exportDateEnd%>", searchForm.<%=exportDateEnd%>, searchCriteria, false);
+
+    // export date end option
+    setField("<%=exportDateEndOptions%>", searchForm.<%=exportDateEndOptions%>, searchCriteria, true);
 }
 else
 {

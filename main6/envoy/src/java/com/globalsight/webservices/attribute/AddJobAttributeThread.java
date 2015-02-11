@@ -106,7 +106,7 @@ public class AddJobAttributeThread extends Thread
                     }
                     catch (InterruptedException e1)
                     {
-                        s_logger.error(e1);
+                        s_logger.error(e1.getMessage(), e1);
                     }
 
                     i++;
@@ -154,7 +154,7 @@ public class AddJobAttributeThread extends Thread
             }
             catch (Exception e)
             {
-                s_logger.error(e);
+                s_logger.error(e.getMessage(), e);
             }
             finally
             {

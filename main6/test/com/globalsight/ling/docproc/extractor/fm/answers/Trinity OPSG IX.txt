@@ -1,0 +1,451 @@
+(Sheet [x1] of [x2])
+eProduct Designer Version 2
+™
+©
+°
+—
+Operator’s Guide
+71500126802IVD
+–
+TQ
+µ
+TQ
+¼
+½
+¾
+×
+±
+TQ
+B
+Tandem Quad (TQ) Detector
+Marvell Template Revision F
+Quattro Premier
+Waters Micromass Quattro Premier Mass Spectrometer
+Micromass Quattro Premier Mass Spectrometer
+Table of Contents
+page[x3]-
+Chapter
+Appendix
+on page[x4]-
+A
+acquisition speed[x5] [x6]1-2
+ACQUITY TQD UPLC/MS system[x7] [x8]1-4
+ACQUITY UPLC
+Console[x9] [x10]1-6
+system components[x11] [x12]1-4
+air filter
+cleaning
+behind source probe[x13] [x14]4-81
+inside lower bezel[x15] [x16]4-79
+replacing
+behind source probe[x17] [x18]4-83
+inside lower bezel[x19] [x20]4-80
+analog signal connection[x21] [x22]B-28
+APCI[x23] [x24]1-8
+APPI[x25] [x26]1-8
+assembling
+cone gas assembly[x27] [x28]4-27
+probe adjuster[x29] [x30]4-76
+source enclosure[x31] [x32]4-76
+source ion block assembly[x33] [x34]4-42
+B
+biohazard warning[x35] [x36]A-4
+burst warning[x37] [x38]A-3
+C
+cables, network[x39] [x40]B-25
+calibrating[x41] [x42]2-5
+calibration, guidelines[x43] [x44]viii
+caution symbol[x45] [x46]A-5
+checking, roughing pump oil level[x47] [x48]4-3[x49], [x50]4-18[x51], [x52]4-86
+chemical hazard warning[x53] [x54]A-5
+cleaning
+air filter
+behind source probe[x55] [x56]4-81
+inside lower bezel[x57] [x58]4-79
+ESI probe tip[x59] [x60]4-3[x61], [x62]4-54
+extraction cone[x63] [x64]4-30
+gas cone[x65] [x66]4-20[x67], [x68]4-24
+hexapole assembly[x69] [x70]4-47[x71], [x72]4-49
+instrument case[x73] [x74]4-3[x75], [x76]4-11
+ion block[x77] [x78]4-30
+isolation valve[x79] [x80]4-30
+sample cone[x81] [x82]4-20[x83], [x84]4-24
+source components[x85] [x86]4-3[x87], [x88]4-20
+source hexapole assembly[x89] [x90]4-49
+clearances, roughing pump[x91] [x92]B-4[x93], [x94]B-13
+closing source isolation valve[x95] [x96]4-8
+collision cell
+gas supply, connecting[x97] [x98]B-20
+T-Wave[x99] [x100]1-9
+combined position, of fluidics system diverter valve[x101] [x102]2-11
+comments[x103] [x104]iii
+compliant solvents[x105] [x106]C-1
+cone gas assembly
+assembling[x107] [x108]4-27
+disassembling[x109] [x110]4-23
+handling guidelines[x111] [x112]4-27
+connecting
+collision cell gas supply[x113] [x114]B-20
+electricity source[x115] [x116]B-31
+Ethernet[x117] [x118]B-26
+exhaust trap bottle[x119] [x120]B-7[x121], [x122]B-16
+liquid waste line[x123] [x124]B-23
+nitrogen exhaust[x125] [x126]B-21
+nitrogen supply[x127] [x128]B-18
+NW25 tee[x129] [x130]B-5[x131], [x132]B-14
+relay box[x133] [x134]B-9
+roughing pump[x135] [x136]B-3[x137], [x138]B-10
+signal connections[x139] [x140]B-29
+vacuum[x141] [x142]B-2
+workstation[x143] [x144]B-25
+Connections Insight, troubleshooting with[x145] [x146]4-4
+console, Waters Instrument[x147] [x148]1-6
+constant neutral loss mode[x149] [x150]1-13
+construction materials[x151] [x152]C-1
+contamination, preventing[x153] [x154]C-2
+corona pin
+installing[x155] [x156]3-7
+mounting contact blanking plug
+installing[x157] [x158]3-10
+removing[x159] [x160]3-6
+removing[x161] [x162]3-8
+covers, for signal connectors[x163] [x164]B-28
+customer comments[x165] [x166]iii
+D
+demister element, replacing[x167] [x168]4-4[x169], [x170]4-87
+detector
+calibrating[x171] [x172]2-5
+compliant solvents[x173] [x174]C-1
+external wiring[x175] [x176]B-2
+flow rates[x177] [x178]2-6
+I/O signal connectors[x179] [x180]B-26
+materials of construction[x181] [x182]C-1
+operate LED[x183] [x184]2-6
+power LED[x185] [x186]2-6
+preparing for working on the source[x187] [x188]4-7
+rear panel[x189] [x190]B-2
+rebooting[x191] [x192]2-12
+signal connectors[x193] [x194]B-26
+specifications[x195] [x196]1-2
+starting[x197] [x198]2-2
+tuning[x199] [x200]2-5
+vacuum connections[x201] [x202]B-2
+verifying state of[x203] [x204]2-5
+disassembling
+cone gas assembly[x205] [x206]4-23
+ion block assembly[x207] [x208]4-32
+probe adjuster[x209] [x210]4-71
+source enclosure[x211] [x212]4-71
+diverter valve positions[x213] [x214]2-10
+door glass, tightening guidelines[x215] [x216]4-75
+drain tube positioning[x217] [x218]B-24
+drip tray, installing[x219] [x220]2-7
+E
+EC authorized representative[x221] [x222]x
+electrical symbols[x223] [x224]A-11
+electricity source, connecting[x225] [x226]B-31
+electrospray ionization[x227] [x228]1-7
+emergency shutdown[x229] [x230]2-14
+emptying
+exhaust trap bottle[x231] [x232]4-3[x233], [x234]4-11
+liquid trap bottle[x235] [x236]4-3[x237], [x238]4-13
+equipment guidelines[x239] [x240]viii[x241], [x242]A-5
+error messages, viewing[x243] [x244]2-5
+ESCi[x245] [x246]1-7
+ESI
+optimizing probe for ESCi[x247] [x248]3-8
+ESI probe
+capillary, replacing[x249] [x250]4-3[x251], [x252]4-55
+installing[x253] [x254]3-2
+removing[x255] [x256]3-10
+tip
+cleaning[x257] [x258]4-3[x259], [x260]4-54
+replacing[x261] [x262]4-54
+Ethernet, connecting[x263] [x264]B-26
+event signal connection[x265] [x266]B-28
+exhaust system
+checking for leaks[x267] [x268]4-12[x269], [x270]B-22
+requirements[x271] [x272]B-21
+exhaust systems, separation of[x273] [x274]B-7[x275], [x276]B-21
+exhaust trap bottle[x277] [x278]B-22
+connecting[x279] [x280]B-7[x281], [x282]B-16
+emptying[x283] [x284]4-3[x285], [x286]4-11
+external connections[x287] [x288]B-1
+extraction cone
+cleaning[x289] [x290]4-30
+handling guidelines[x291] [x292]4-39
+extraction tool, cone gas assembly[x293] [x294]4-23
+F
+fitting, heater cartridge assembly[x295] [x296]4-43
+flammable solvents[x297] [x298]v[x299], [x300]A-3
+flow path diagrams[x301] [x302]2-10
+flow rates[x303] [x304]2-6
+fluidics system
+diverter valve positions
+combined[x305] [x306]2-11
+home[x307] [x308]2-10
+infusion[x309] [x310]2-11
+LC[x311] [x312]2-10
+waste[x313] [x314]2-12
+G
+gas ballasting, roughing pump[x315] [x316]4-3[x317], [x318]4-15
+gas cone, cleaning[x319] [x320]4-20[x321], [x322]4-24
+guidelines
+calibration[x323] [x324]viii
+demister element nut tightening[x325] [x326]4-90
+door glass tightening[x327] [x328]4-75
+probe adjuster screw tightening[x329] [x330]4-76
+quality control[x331] [x332]ix
+thumbscrew tightening[x333] [x334]4-76
+H
+handling
+extraction cone[x335] [x336]4-39
+hexapole assembly[x337] [x338]4-48[x339], [x340]4-52
+waste liquid[x341] [x342]4-12
+handling symbols[x343] [x344]A-12
+hazards
+flammable solvents[x345] [x346]v
+high temperature[x347] [x348]vi
+high voltage[x349] [x350]vii
+solvent leakage[x351] [x352]iv
+heater cartridge assembly
+fitting[x353] [x354]4-43
+replacing[x355] [x356]4-63
+hexapole assembly
+cleaning[x357] [x358]4-47[x359], [x360]4-49
+handling[x361] [x362]4-48[x363], [x364]4-52
+high temperature hazard[x365] [x366]vi
+high voltage hazard[x367] [x368]vii
+home position, of fluidics system diverter valve[x369] [x370]2-10
+I
+I/O signal connectors[x371] [x372]B-26
+infusion position, of fluidics system diverter valve[x373] [x374]2-11
+inject start signal connection[x375] [x376]B-28
+inlet, overview[x377] [x378]1-14
+installing
+corona pin[x379] [x380]3-7
+corona pin mounting contact blanking plug[x381] [x382]3-10
+drip tray, solvent manifold[x383] [x384]2-7
+ESI probe[x385] [x386]3-2
+low-volume vials[x387] [x388]2-9
+reservoir bottles[x389] [x390]2-8
+solvent manifold drip tray[x391] [x392]2-7
+instrument
+case, cleaning[x393] [x394]4-3[x395], [x396]4-11
+LAN card[x397] [x398]B-26
+leaving ready for operation[x399] [x400]2-14
+integral reservoirs[x401] [x402]1-4[x403], [x404]1-17
+IntelliStart
+configuring[x405] [x406]2-5
+operating[x407] [x408]1-18
+overview[x409] [x410]1-4[x411], [x412]1-17
+intended use[x413] [x414]viii
+ion block
+cleaning[x415] [x416]4-30
+disassembling[x417] [x418]4-32
+grub screw[x419] [x420]4-44
+heater cartridge assembly, replacing[x421] [x422]4-63
+removing[x423] [x424]4-30
+ion modes
+daughter[x425] [x426]1-11
+parent[x427] [x428]1-12
+precursor[x429] [x430]1-12
+product[x431] [x432]1-11
+ion optics[x433] [x434]1-9
+ionization modes[x435] [x436]3-2
+APCI[x437] [x438]1-8
+APPI[x439] [x440]1-8
+ESI[x441] [x442]1-7
+IP addresses[x443] [x444]2-2
+isolating source from instrument[x445] [x446]4-8
+isolation valve, cleaning[x447] [x448]4-30
+L
+LAN card[x449] [x450]B-26
+LC, position of fluidics system diverter valve[x451] [x452]2-10
+Leak sensors[x453] [x454]1-14
+leaks, checking for[x455] [x456]4-12[x457], [x458]4-60[x459], [x460]B-22
+LED
+monitoring[x461] [x462]2-6
+operate[x463] [x464]2-6
+power[x465] [x466]2-3[x467], [x468]2-6
+status[x469] [x470]2-3
+liquid trap bottle, emptying[x471] [x472]4-3[x473], [x474]4-13
+liquid waste line, connecting[x475] [x476]B-23
+lower bezel air filter
+cleaning[x477] [x478]4-79
+replacing[x479] [x480]4-80
+low-volume vials, installing[x481] [x482]2-9
+M
+maintenance
+safety[x483] [x484]4-6
+schedule[x485] [x486]4-3
+mass spectrometer
+leaving ready for operation[x487] [x488]2-14
+mass spectrometer shock hazard[x489] [x490]A-4
+MassLynx software[x491] [x492]1-5
+materials of construction[x493] [x494]C-1
+mobile phases, solvents used in preparation of[x495] [x496]C-3
+monitoring, system instrument LEDs[x497] [x498]2-6
+multi-mode ESCi source[x499] [x500]1-2
+multiple reaction monitoring mode[x501] [x502]1-12
+N
+network cables[x503] [x504]B-25
+nitrogen
+exhaust, connecting[x505] [x506]B-21
+supply
+connecting[x507] [x508]B-18
+pressure requirements[x509] [x510]v[x511], [x512]2-2
+NW25 tee, connecting[x513] [x514]B-5[x515], [x516]B-14
+O
+oil, roughing pump
+adding[x517] [x518]4-19
+changing[x519] [x520]4-4
+checking level[x521] [x522]4-3[x523], [x524]4-18[x525], [x526]4-86
+replacing[x527] [x528]4-83
+opening source isolation valve[x529] [x530]4-9
+operate LED[x531] [x532]2-6
+operating source isolation valve[x533] [x534]4-8
+O-ring removal kit[x535] [x536]4-10
+O-rings, removing[x537] [x538]4-10
+P
+PEEK terminal block, removing[x539] [x540]4-35[x541], [x542]4-64
+photomultiplier detection system[x543] [x544]1-9
+power LED[x545] [x546]2-3[x547], [x548]2-6
+power supply, connecting to[x549] [x550]B-25
+powering-on[x551] [x552]2-2
+precursor (parent) ion mode[x553] [x554]1-12
+pressure test, performing[x555] [x556]4-68[x557], [x558]4-78
+preventing contamination[x559] [x560]C-2
+probe adjuster
+assembling[x561] [x562]4-76
+disassembling[x563] [x564]4-71
+product (daughter) ion mode[x565] [x566]1-11
+pump, gas ballasting[x567] [x568]4-3
+Q
+quality control guidelines[x569] [x570]ix
+R
+rear panel[x571] [x572]B-2
+rebooting detector[x573] [x574]2-12
+relay box, connecting[x575] [x576]B-9
+removing
+corona pin[x577] [x578]3-8
+corona pin mounting contact blanking plug[x579] [x580]3-6
+ESI probe[x581] [x582]3-10
+ion block assembly[x583] [x584]4-30
+O-rings[x585] [x586]4-10
+PEEK terminal block[x587] [x588]4-35[x589], [x590]4-64
+seals[x591] [x592]4-10
+replacement parts[x593] [x594]4-4
+replacing
+air filter
+behind source probe[x595] [x596]4-83
+inside lower bezel[x597] [x598]4-80
+demister element[x599] [x600]4-4[x601], [x602]4-87
+ESI probe capillary[x603] [x604]4-3[x605], [x606]4-55
+ESI probe tip[x607] [x608]4-54
+ion block heater cartridge assembly[x609] [x610]4-63
+source assembly seals[x611] [x612]4-4[x613], [x614]4-68
+requirements
+exhaust system[x615] [x616]B-21
+nitrogen supply pressure[x617] [x618]v[x619], [x620]2-2
+reservoir bottles, installing[x621] [x622]2-8
+reservoirs, integral[x623] [x624]1-4[x625], [x626]1-17
+reset button[x627] [x628]2-13
+roughing pump[x629] [x630]1-15
+clearances[x631] [x632]B-4[x633], [x634]B-13
+connecting[x635] [x636]B-3[x637], [x638]B-10
+gas ballasting[x639] [x640]4-3[x641], [x642]4-15
+oil
+adding[x643] [x644]4-19
+checking level[x645] [x646]4-3[x647], [x648]4-18[x649], [x650]4-86
+replacing[x651] [x652]4-83
+replacing demister element[x653] [x654]4-4[x655], [x656]4-87
+setting up[x657] [x658]B-4[x659], [x660]B-13
+site requirements[x661] [x662]B-4[x663], [x664]B-13
+S
+safety advisories[x665] [x666]A-1
+safety procedures, maintenance[x667] [x668]4-6
+sample cone, cleaning[x669] [x670]4-20[x671], [x672]4-24
+sample inlet, overview[x673] [x674]1-14
+seals, removing[x675] [x676]4-10
+shutdown
+emergency[x677] [x678]2-14
+signal connections, connecting[x679] [x680]B-29
+site requirements, roughing pump[x681] [x682]B-4[x683], [x684]B-13
+solvent leakage hazard[x685] [x686]iv
+solvent manifold drip tray, installing[x687] [x688]2-7
+solvent vapor leakage, avoiding[x689] [x690]4-68
+solvents
+compliant[x691] [x692]C-1
+exposure of detector components to[x693] [x694]C-2
+use in mobile phases[x695] [x696]C-3
+source
+cleaning[x697] [x698]4-3[x699], [x700]4-20
+enclosure
+assembling[x701] [x702]4-76
+disassembling[x703] [x704]4-71
+seals, replacing[x705] [x706]4-68
+hexapole assembly
+cleaning[x707] [x708]4-49
+ion block assembly, assembling[x709] [x710]4-42
+isolation valve
+closing[x711] [x712]4-8
+opening[x713] [x714]4-9
+operating[x715] [x716]4-8
+preparing for work on[x717] [x718]4-7
+pressure test[x719] [x720]4-78
+replacing assembly seals[x721] [x722]4-4
+types[x723] [x724]1-2
+source probe air filter
+cleaning[x725] [x726]4-81
+replacing[x727] [x728]4-83
+spare parts[x729] [x730]4-4
+specifications[x731] [x732]1-2
+speed, acquisition[x733] [x734]1-2
+starting, detector[x735] [x736]2-2
+status LED[x737] [x738]2-3
+stop flow signal connection[x739] [x740]B-28
+switch signal connection[x741] [x742]B-28
+symbols
+caution[x743] [x744]A-5
+electrical[x745] [x746]A-11
+handling[x747] [x748]A-12
+warning[x749] [x750]A-2
+T
+thumbscrews, tightening[x751] [x752]4-76
+tightening
+demister element nut[x753] [x754]4-90
+thumbscrews[x755] [x756]4-76
+TQ Detector
+overview[x757] [x758]1-2
+trademarks[x759] [x760]ii
+trap bottle
+connecting[x761] [x762]B-22
+emptying[x763] [x764]4-11
+troubleshooting[x765] [x766]4-4
+tuning[x767] [x768]2-5
+turbomolecular pump[x769] [x770]1-15
+T-Wave collision cell[x771] [x772]1-9
+V
+vacuum
+connections[x773] [x774]B-2
+system[x775] [x776]1-15
+valve
+diverter[x777] [x778]2-10
+source isolation[x779] [x780]4-8
+W
+warning symbols[x781] [x782]A-2[x783], [x784]A-5
+waste
+bottle, emptying[x785] [x786]4-13
+line, connecting[x787] [x788]B-23
+liquid, handling[x789] [x790]4-12
+waste position, of fluidics system diverter valve[x791] [x792]2-12
+Waters Instrument, console[x793] [x794]1-6
+wiring, external[x795] [x796]B-2
+workstation, connecting[x797] [x798]B-25
+Z
+ZSpray source[x799] [x800]1-2
+Index-
+Index-
+Index
+Index-

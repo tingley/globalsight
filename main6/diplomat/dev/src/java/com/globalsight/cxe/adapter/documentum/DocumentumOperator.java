@@ -674,7 +674,7 @@ public class DocumentumOperator implements DocumentumConfiguration {
             attrValue = fileObj.getRepeatingString(attrName, 0);
 
         } catch (DfException dfEx) {
-            s_logger.error(dfEx);
+            s_logger.error(dfEx.getMessage(), dfEx);
         }
 
         return attrValue;
@@ -712,7 +712,7 @@ public class DocumentumOperator implements DocumentumConfiguration {
             //Use this method, no need to care whether the attribute is repeating or not.
             fileObj.setRepeatingString(attrName, valueIndex, attrValue);            
         } catch (DfException dfEx) {
-            s_logger.error(dfEx);
+            s_logger.error(dfEx.getMessage(), dfEx);
         }
     }
     
@@ -756,7 +756,7 @@ public class DocumentumOperator implements DocumentumConfiguration {
                 fileObj.save();
             }
         } catch (DfException dfEx) {
-            s_logger.error(dfEx);
+            s_logger.error(dfEx.getMessage(), dfEx);
         }
     }
     

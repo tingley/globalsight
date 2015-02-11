@@ -1,0 +1,5 @@
+# FOR GBS-2264: Disable Google MT v1 API support
+update TM_PROFILE set MT_ENGINE = 'MS_Translator', MT_OVERRIDE_MATCHES = 'N', 
+MT_AUTOCOMMIT_TO_TM='N', IS_MT_SENSITIVE_LEVERAGING='N', MT_PENALTY=1, 
+MT_SHOW_IN_EDITOR='N'
+where MT_ENGINE = 'Google';

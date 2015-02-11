@@ -28,6 +28,10 @@
     stateList.add(Job.DISPATCHED);
     stateList.add(Job.LOCALIZED);
     stateList.add(Job.EXPORTED);
+    stateList.add(Job.READY_TO_BE_DISPATCHED);
+    stateList.add(Job.EXPORT_FAIL);
+    stateList.add(Job.ARCHIVED);
+
     // get jobs by a state list
     Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
    	List jobList = null;
@@ -39,7 +43,7 @@
    	ResourceBundle bundle = PageHandler.getBundle(session);
 %>
 <html>
-<!-- This JSP is: /envoy/administration/reports/LisaQATranslationsEditReportWebForm.jsp-->
+<!-- This JSP is: envoy\administration\reports\ImplementedCommentsCheckReportWebForm.jsp-->
 <head>
 <title><%=bundle.getString("implemented_comments_check_report_web_form")%></title>
 <script language="javascript">
@@ -107,7 +111,7 @@ bgcolor="LIGHTGREY">
 <%=bundle.getString("optionally_select_a_job")%></SPAN>
 </TD></TR></TABLE>
 
-<form name="ImplementedChkForm" method="post" action="/globalsight/envoy/administration/reports/LisaQALanguageSignOffReport.jsp?isLSOExt=true">
+<form name="ImplementedChkForm" method="post" action="/globalsight/envoy/administration/reports/ImplementedCommentsCheckReport.jsp">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
 <tr>

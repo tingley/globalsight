@@ -16,6 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.tmprofile;
 
+import com.globalsight.cxe.entity.customAttribute.TMPAttribute;
+import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
@@ -149,6 +151,12 @@ public class CreateTMProfileHandler extends PageHandler implements
             }
         }
         sessionMgr.setAttribute("tmsOfUser", tmList);
+        
+        List<TMPAttribute> tmpas = new ArrayList<TMPAttribute>();
+        List<String> allAtt = TMPAttributeManager.getAvailableAttributenames();
+        
+        p_request.setAttribute(TMP_AVAILABLE_ATTS, TMPAttributeManager.toOneStr(allAtt));
+        p_request.setAttribute(TMP_TMP_ATTS, TMPAttributeManager.toOne(tmpas));
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);

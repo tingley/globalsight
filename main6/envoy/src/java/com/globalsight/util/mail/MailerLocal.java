@@ -46,12 +46,12 @@ import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflow.WorkflowMailerConstants;
 import com.globalsight.util.RegexUtil;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
+import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 
 /**
 * This class is the concrete implementation of Mailer interface and is responsible for 
 * sending emails (which it delegates to MailSender)
-*
 */
 
 public class MailerLocal implements Mailer
@@ -63,8 +63,7 @@ public class MailerLocal implements Mailer
     private UserManagerWLRemote m_userManager = null;
 
     private static Logger s_logger =
-        Logger.getLogger(
-            MailerLocal.class.getName());
+        Logger.getLogger(MailerLocal.class.getName());
 
     // determines whether the system-wide notification is enabled
     private boolean m_systemNotificationEnabled = 
@@ -136,8 +135,8 @@ public class MailerLocal implements Mailer
             return;
         }
         
-        ResourceBundle bundle =ResourceBundle.getBundle(
-            DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());
         p_messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
         String subject = MessageFormat.format(
@@ -189,6 +188,39 @@ public class MailerLocal implements Mailer
             //attachment is setted to null
             sendMail(from, email, ccEmail, bccEmail, subject, message, null);
         }
+    }
+    
+    public void sendMail(EmailInformation p_sendFromEmailInfo,
+            EmailInformation p_recipientEmailInfo, String p_subjectKey,
+            String p_messageKey, String[] p_messageArguments,
+            String[] p_attachments, long p_companyId)
+            throws MailerException, RemoteException
+    {
+        if (!m_systemNotificationEnabled
+                || !isNotificationEnabled(p_subjectKey,
+                        p_recipientEmailInfo.getUserId()))
+        {
+            return;
+        }
+
+        // Operates message arguments, e.g. URL.
+        p_messageArguments = handleMessageArgments(p_messageArguments);
+        
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_recipientEmailInfo.getEmailLocale());        
+        // get the subject and message
+        String subject = MessageFormat.format(bundle.getString(p_subjectKey),
+                p_messageArguments);
+        String message = MessageFormat.format(bundle.getString(p_messageKey),
+                p_messageArguments);
+        
+        // Email address
+        String fromEmail = MailerHelper.getSendFrom(String.valueOf(p_companyId), p_sendFromEmailInfo);
+        String toEmail = p_recipientEmailInfo.getEmailAddress();
+        String ccEmail = p_recipientEmailInfo.getCCEmailAddress();
+        String bccEmail = p_recipientEmailInfo.getBCCEmailAddress();
+        
+        sendMail(fromEmail, toEmail, ccEmail, bccEmail, subject, message, p_attachments);
     }
 
     /**
@@ -304,8 +336,8 @@ public class MailerLocal implements Mailer
             return;
         }
 
-        ResourceBundle bundle = ResourceBundle.getBundle(
-            DEFAULT_RESOURCE_NAME, Locale.getDefault());
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(DEFAULT_RESOURCE_NAME, Locale.getDefault());
         String[] messageArguments = handleMessageArgments(p_messageArguments);
         // get the subject and message
         String subject = MessageFormat.format(
@@ -368,12 +400,13 @@ public class MailerLocal implements Mailer
                                                  String p_userId)
     {
         boolean isNotificationEnabled = true;
-        try {
+        try 
+        {
             //first check the user's permissions
             PermissionSet perms = Permission.getPermissionManager().getPermissionSetForUser(p_userId);
             isNotificationEnabled = MailerConstants.hasPermissionForThisCategoryOfNotification(
                 perms, p_subjectKey);
-            if (isNotificationEnabled==false)
+            if (isNotificationEnabled == false)
             {
                 s_logger.warn("User " + p_userId + " does not have permission to receive notifications for " + p_subjectKey);
                 return isNotificationEnabled; //we know at this point there is no permission for this notification
@@ -390,15 +423,13 @@ public class MailerLocal implements Mailer
         {
             UserParameter categoryParam = null;
             UserParameter up = ServerProxy.getUserParameterManager().
-                getUserParameter(p_userId, UserParamNames
-                                 .NOTIFICATION_ENABLED);
+                getUserParameter(p_userId, UserParamNames.NOTIFICATION_ENABLED);
 
-            String category = MailerConstants.
-                getNotificationParamName(p_subjectKey);
+            String category = MailerConstants.getNotificationParamName(p_subjectKey);
             if (category != null)
             {
                 categoryParam = ServerProxy.getUserParameterManager().
-                getUserParameter(p_userId, category);
+                    getUserParameter(p_userId, category);
             }            
 
             isNotificationEnabled = 
@@ -410,9 +441,6 @@ public class MailerLocal implements Mailer
             s_logger.error("Failed to get notification preference for user: "+
                            p_userId, e);
         }
-
-
-
 
         return isNotificationEnabled;
     }
@@ -433,8 +461,8 @@ public class MailerLocal implements Mailer
     	{
     		p_messageArguments = buildMessageArguments(p_messageArguments);
     	}
-        ResourceBundle bundle = ResourceBundle.getBundle(
-            DEFAULT_RESOURCE_NAME,p_userLocale);
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(DEFAULT_RESOURCE_NAME, p_userLocale);
         String from = null;
         try
         {

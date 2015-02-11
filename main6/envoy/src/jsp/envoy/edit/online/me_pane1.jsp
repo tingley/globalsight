@@ -44,19 +44,23 @@ switch (iViewMode)
 %>
 <HTML>
 <HEAD>
+<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <SCRIPT>
+dojo.require("dijit.Dialog");
+
 var mode = "<%=viewMode%>";
-var isVisible = false; //is tooltip visible
+var isVisible = false; //is progress bar visible
 
 function showProgressBar()
 {
   try
   {
-    isVisible = content.tooltip.isVisible();
-    if(!isVisible)
-    {
-      content.showProgressBar();
-    }
+	   var div = content.dojo.byId('src_prograssbar');
+	   isVisible = div.style.visibility == "visible";
+	   if (!isVisible)
+       {
+		   content.showProgressBar();
+       }
   }
   catch(e)
   {
@@ -126,6 +130,22 @@ function showPreviewPage(pageName)
     if(!isVisible)
     {
        content.document.location = "<%=previewPage.getPageURL()%>" + "&action=previewSrc&file=" + encodeURIComponent(pageName)
+    }
+  }catch(e)
+  {
+  }
+}
+
+function showPreviewPage2(pageName, type, pageId)
+{
+  try
+  {
+    if(!isVisible)
+    {
+       content.document.location = "<%=previewPage.getPageURL()%>" 
+       + "&action=previewSrc&file=" + encodeURIComponent(pageName) 
+       + "&type=" + type
+       + "&pageId=" + pageId
     }
   }catch(e)
   {

@@ -21,15 +21,10 @@ import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.dom4j.Attribute;
-import org.dom4j.Document;
-import org.dom4j.Element;
 
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
@@ -49,7 +44,9 @@ import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.common.XmlWriter;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
-import com.globalsight.util.XmlParser;
+import com.globalsight.ling.docproc.extractor.xliff.WSConstants;
+import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
+import com.globalsight.ling.docproc.worldserver.WsSkeletonDispose;
 
 /**
  * <p>
@@ -97,13 +94,14 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private boolean m_isFromOfficeContent = false;
     private Exception m_error = null;
     private XmlEntities m_xmlEntityConverter = null;
-    private TmxTagGenerator m_tagGenerator = null;
+    // private TmxTagGenerator m_tagGenerator = null;
     private Properties m_subProperties = null;
     private EncodingChecker m_encodingChecker = null;
     private CxeMessage cxeMessage = null;
     private boolean m_convertHtmlEntityForHtml;
     private boolean m_convertHtmlEntityForXml;
     private long m_filterId;
+    private boolean isXmlFilterConfigured = false;
     // For entity encoding issue
     private boolean m_isCDATA = false;
 
@@ -128,6 +126,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
      * Intialize merger and pass in our L10NContent reference which holds the
      * newly generated localized page.
      */
+    @SuppressWarnings("unchecked")
     public void init(String p_diplomat, L10nContent p_l10nContent)
             throws DiplomatMergerException
     {
@@ -136,7 +135,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         m_diplomatParser = new DiplomatBasicParser(this);
         m_stateStack = new Stack();
         m_tmxStateStack = new Stack();
-        m_tagGenerator = new TmxTagGenerator();
+        // m_tagGenerator = new TmxTagGenerator();
 
         m_extractorRegistry = ExtractorRegistry.getObject();
 
@@ -228,16 +227,17 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
             m_isCDATA = false;
         }
-        else
+        else if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml)
+                || !isXmlFilterConfigured)
         {
-            // targetSeg = targetSeg.replaceAll("&apos;", "\'");
-            // targetSeg = targetSeg.replaceAll("&quot;", "\"");
-            // targetSeg = targetSeg.replaceAll("&gt;", ">");
+            targetSeg = targetSeg.replaceAll("&apos;", "\'");
+            targetSeg = targetSeg.replaceAll("&quot;", "\"");
         }
 
         return targetSeg;
     }
 
+    @SuppressWarnings("unchecked")
     private String decoding(String s)
     {
         HashMap<String, Character> map = new HashMap<String, Character>();
@@ -253,6 +253,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return s;
     }
 
+    @SuppressWarnings("unchecked")
     private String encoding(String s)
     {
         HashMap<Character, String> map = new HashMap<Character, String>();
@@ -319,16 +320,8 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             targetSeg = targetSeg.replaceAll("&apos;", "\'");
         }
 
-        if (m_isCDATA && sourceSeg.indexOf("]]>") >= 0)
-        {
-            m_isCDATA = false;
-        }
-
-        // Mark the CDATA element for "entityEncode(String sourceSeg)"
-        if (sourceSeg.indexOf("<![CDATA[") >= 0)
-        {
-            m_isCDATA = true;
-        }
+        //Judge to set value for "m_isCDATA".
+        isInCDATA(targetSeg);
 
         return targetSeg;
     }
@@ -336,6 +329,20 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private String entityEncodeForSkeleton(String sourceSeg)
     {
         return entityEncodeForSkeleton(sourceSeg, false);
+    }
+    
+    private void isInCDATA(String documentText) {
+        int beginIndex = documentText.lastIndexOf("<![CDATA[");
+        int endIndex = documentText.lastIndexOf("]]>");
+
+        if (m_isCDATA && endIndex >= 0 && beginIndex < endIndex) {
+            m_isCDATA = false;
+        }
+
+        // Mark the CDATA element for "entityEncode(String sourceSeg)"
+        if (beginIndex >= 0 && beginIndex > endIndex) {
+            m_isCDATA = true;
+        }
     }
 
     /**
@@ -470,20 +477,24 @@ public class DiplomatMerger implements DiplomatMergerImpl,
      */
     public void handleEndTag(String p_name, String p_originalTag)
     {
-        int state = ((Integer) m_tmxStateStack.pop()).intValue();
-        switch (state)
+        if (!m_tmxStateStack.isEmpty())
         {
-            case TmxTagGenerator.SUB:
-                m_subProperties = null;
-                break;
-            default:
-                break;
+            int state = ((Integer) m_tmxStateStack.pop()).intValue();
+            switch (state)
+            {
+                case TmxTagGenerator.SUB:
+                    m_subProperties = null;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
     /**
      * Required by DiplomatBasicHandler. Throw away all Diplomat start tags.
      */
+    @SuppressWarnings("unchecked")
     public void handleStartTag(String p_name, Properties p_attributes,
             String p_originalString)
     {
@@ -520,6 +531,15 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         else if (p_name.equals(DiplomatNames.Element.UT))
         {
             m_tmxStateStack.push(s_UT);
+        }
+        else if ("removeTu".equals(p_name))
+        {
+            StringBuffer s = m_l10nContent.m_l10nContent;
+            if (s.charAt(s.length() - 1) == '>')
+            {
+                s = s.replace(s.length() - 1, s.length(), " removed='true'>");
+                m_l10nContent.m_l10nContent = s;
+            }
         }
         else
         // something we didn't expect
@@ -587,8 +607,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 // &lt;span&gt; after being decoded to <span>,
                 // need additional encode back to &lt;span&gt; to ensure
                 // the tag <span> is kept after converter's conversion.
-                tmp = encodeForOfficeConversion(tmp);
+                tmp = encode(tmp);
             }
+
             if (isContent() && !format.equals("xlf")
                     && !FORMAT_PO.equals(mainFormat))
             {
@@ -617,6 +638,17 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 }
             }
 
+            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format))
+            {
+                if ((isXmlFilterConfigured && !m_convertHtmlEntityForXml)
+                        || !isXmlFilterConfigured)
+                {
+                    tmp = tmp.replaceAll("&apos;", "\'");
+                    tmp = tmp.replaceAll("&quot;", "\"");
+                }
+            }
+
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
             {
                 if (isContent())
@@ -635,6 +667,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     tmp = entityDecodeForXliff(tmp);
                 }
             }
+            else if (ExtractorRegistry.FORMAT_OFFICE_XML.equalsIgnoreCase(format))
+            {
+                if (!isContent())
+                {
+                    tmp = repair(tmp);
+                }
+            }
 
             // if this segment is parsed twice(original parser and HTML parser),
             // encode again to transform them all to entity.
@@ -643,11 +682,10 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             if (this.isUseSecondaryFilter
                     && this.convertHtmlEntryFromSecondFilter)
             {
-                XmlEntities xe = new XmlEntities();
-                char[] defaultXmlEncodeChar =
+                char[] specXmlEncodeChar =
                 { '<', '>', '&', '"' };
-                xe.setUseDefaultXmlEncoderChar(false);
-                tmp = xe.encodeString(tmp, defaultXmlEncodeChar);
+                tmp = XmlFilterHelper.encodeSpecifiedEntities(tmp,
+                        specXmlEncodeChar);
             }
             m_l10nContent.addContent(tmp);
         }
@@ -656,6 +694,25 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             m_error = e;
         }
     }
+    
+    //For GBS-2521.
+	private String repair(String s)
+	{
+		Pattern p = Pattern.compile("(<w:instrText[^>]*?>)(.*?)(</w:instrText>)");
+		Matcher m = p.matcher(s);
+		
+		while (m.find())
+		{
+			String content = m.group(2);
+			
+			content = decode(content);
+			content = encode(content);
+			
+			s = s.replace(m.group(), m.group(1) + content + m.group(3));
+		}
+		
+		return s;
+	}
 
     private boolean isKeepGsa()
     {
@@ -665,6 +722,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     /**
      * Cycle through each Output node and handle as appropriate.
      */
+    @SuppressWarnings("unchecked")
     public void merge() throws DiplomatMergerException
     {
         DocumentElement de = null;
@@ -773,21 +831,24 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                         tmp = entityEncodeForSkeleton(tmp);
                     }
 
+                    SkeletonDispose sd;
+
                     if (isTuvLocalized
-                            && tmp.indexOf("<iws:segment-metadata") > 0)
+                            && tmp.indexOf("<" + WSConstants.IWS_SEGMENT_DATA) > 0)
                     {
-                        tmp = dealSkeleton(tmp, localizedBy);
+                        sd = new WsSkeletonDispose();
+                        tmp = sd.dealSkeleton(tmp, localizedBy);
                     }
 
                     // if (srcDataType.equals("excel-html")
                     // && !tmp.contains("mso-spacerun:yes"))
                     // tmp = fixXmlForExcel(tmp);
-                    
+
                     if ("passolo".equals(srcDataType))
                     {
                         tmp = entityEncodeForPassolo(tmp);
                     }
-                    
+
                     m_l10nContent.addContent(tmp);
 
                     m_stateStack.pop();
@@ -832,11 +893,11 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
         }
     }
-    
+
     private String entityEncodeForPassolo(String skeleton)
     {
         XmlEntities xe = new XmlEntities();
-        
+
         Pattern p = Pattern.compile("(<source[^>]*>)([\\s\\S]*?)(</source>)");
         Matcher m = p.matcher(skeleton);
         while (m.find())
@@ -845,12 +906,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             String s1 = m.group(1);
             String s2 = m.group(2);
             String s3 = m.group(3);
-            
+
             String s2temp = xe.encodeStringBasic(s2);
-            
+
             skeleton = skeleton.replace(all, s1 + s2temp + s3);
         }
-        
+
         p = Pattern.compile("(<target[^>]*>)([\\s\\S]*?)(</target>)");
         m = p.matcher(skeleton);
         while (m.find())
@@ -859,12 +920,12 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             String s1 = m.group(1);
             String s2 = m.group(2);
             String s3 = m.group(3);
-            
+
             String s2temp = xe.encodeStringBasic(s2);
-            
+
             skeleton = skeleton.replace(all, s1 + s2temp + s3);
         }
-        
+
         return skeleton;
     }
 
@@ -886,7 +947,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 // XXXXSKELETON-GS-OFFICE-CONTENT-START<TAG>SKELETON-GS-OFFICE-CONTENT-ENDXXXX
                 tag = skeleton.substring(startIndex, endIndex + end.length());
-                tag = encodeForOfficeConversion(tag);
+                tag = encode(tag);
                 tag = tag.replace(start, "").replace(end, "");
                 skeleton = skeleton.substring(0, startIndex) + tag
                         + skeleton.substring(endIndex + end.length());
@@ -895,7 +956,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 // XXXXSKELETON-GS-OFFICE-CONTENT-START<TAG
                 tag = skeleton.substring(startIndex);
-                tag = encodeForOfficeConversion(tag);
+                tag = encode(tag);
                 tag = tag.replace(start, "");
                 skeleton = skeleton.substring(0, startIndex) + tag;
             }
@@ -903,212 +964,13 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             {
                 // TAG>SKELETON-GS-OFFICE-CONTENT-ENDXXXX
                 tag = skeleton.substring(0, endIndex + end.length());
-                tag = encodeForOfficeConversion(tag);
+                tag = encode(tag);
                 tag = tag.replace(end, "");
                 skeleton = tag + skeleton.substring(endIndex + end.length());
             }
         }
 
         return skeleton;
-    }
-
-    /**
-     * Encodes only '<' and '>' for office conversion.
-     */
-    private String encodeForOfficeConversion(String p_xml)
-    {
-        XmlEntities entityConverter = new XmlEntities();
-        char[] charsToConvert =
-        { '<', '>' };
-        entityConverter.setUseDefaultXmlEncoderChar(false);
-
-        return entityConverter.encodeString(p_xml, charsToConvert);
-    }
-
-    /*
-     * Deal with the skeleton of the trados xliff file job. 1. If the tuv
-     * modified by MT, need add or modify the "translation_type" value to be
-     * "machine_translation_mt", if is modified by user, the attribute value
-     * should be "manual_translation". 2. If the tuv modified by user, should
-     * set "translation_status" attribute value to be "finished".
-     * 
-     * 3. remove attribute "match-quality".
-     * 
-     * 4. remove attribute "target_content" and "source_content".
-     */
-    private String dealSkeleton(String tmp, String localizedBy)
-    {
-        boolean localizedByUser = false;
-        boolean localizedByMT = false;
-        boolean localizedByLocalTM = false;
-
-        if (localizedBy != null && localizedBy.equals(PageTemplate.byUser))
-        {
-            localizedByUser = true;
-        }
-        else if (localizedBy != null && localizedBy.equals(PageTemplate.byMT))
-        {
-            localizedByMT = true;
-        }
-        else if (localizedBy != null
-                && localizedBy.equals(PageTemplate.byLocalTM))
-        {
-            localizedByLocalTM = true;
-        }
-
-        int begin = tmp.indexOf("<iws:segment-metadata");
-        int end = tmp.indexOf("</iws:segment-metadata")
-                + "</iws:segment-metadata>".length();
-
-        String iwsStr = tmp.substring(begin, end);
-        iwsStr = "<segmentdata "
-                + "xmlns:iws=\"http://www.idiominc.com/ws/asset\">" + iwsStr
-                + "</segmentdata>";
-        Document dom = getDom(iwsStr);
-        Element root = dom.getRootElement();
-        List iwsStatusList = root.selectNodes("//iws:status");
-
-        for (int x = 0; x < iwsStatusList.size(); x++)
-        {
-            Element status = (Element) iwsStatusList.get(x);
-
-            if (localizedByUser || localizedByLocalTM || localizedByMT)
-            {
-                /*
-                 * if (status.attribute("match-quality") != null)
-                 * status.remove(status.attribute("match-quality"));
-                 * 
-                 * if (status.attribute("source_content") != null)
-                 * status.remove(status.attribute("source_content"));
-                 * 
-                 * if (status.attribute("target_content") != null)
-                 * status.remove(status.attribute("target_content"));
-                 */
-                List<Attribute> attrList = new ArrayList();
-                attrList.addAll(status.attributes());
-
-                for (int i = 0; i < attrList.size(); i++)
-                {
-                    String name = attrList.get(i).getName();
-                    if (!name.equals("translation_status")
-                            && !name.equals("translation_type")
-                            && !name.equals("source_content"))
-                    {
-                        status.remove(attrList.get(i));
-                    }
-                }
-            }
-
-            if (status.attribute("translation_status") != null)
-            {
-                if (localizedByUser)
-                {
-                    status.attribute("translation_status").setValue("finished");
-                }
-                else if (localizedByLocalTM)
-                {
-                    status.attribute("translation_status").setValue("pending");
-                }
-            }
-            else
-            {
-                if (localizedByUser)
-                {
-                    status.addAttribute("translation_status", "finished");
-                }
-                else if (localizedByLocalTM)
-                {
-                    status.addAttribute("translation_status", "pending");
-                }
-            }
-
-            if (status.attribute("translation_type") != null)
-            {
-                if (localizedByMT)
-                {
-                    status.attribute("translation_type").setValue(
-                            "machine_translation_mt");
-                }
-                else if (localizedByUser || localizedByLocalTM)
-                {
-                    status.attribute("translation_type").setValue(
-                            "manual_translation");
-                }
-            }
-            else
-            {
-                if (localizedBy != null)
-                {
-                    if (localizedByMT)
-                    {
-                        status.addAttribute("translation_type",
-                                "machine_translation_mt");
-                    }
-                    else if (localizedByUser || localizedByLocalTM)
-                    {
-                        status.addAttribute("translation_type",
-                                "manual_translation");
-                    }
-                }
-
-            }
-        }
-
-        iwsStr = dom.selectSingleNode("//iws:segment-metadata").asXML();
-        String str = "xmlns:iws=\"http://www.idiominc.com/ws/asset\"";
-        iwsStr = iwsStr.replace(str, "");
-        tmp = tmp.substring(0, begin) + iwsStr + tmp.substring(end);
-
-        return tmp;
-    }
-
-    /*
-     * To convert '<', '>' to '&lt;' and '&gt;' for GBS-1118, Added by Vincent
-     * Yan
-     * 
-     * @date 2010-07-13
-     */
-    private String fixXmlForExcel(String p_str)
-    {
-        StringBuffer sb = new StringBuffer();
-        String regex = "<td[\\s\\S]*?>{1}([\\s\\S]*?)</td>";
-        try
-        {
-            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(p_str);
-            int indexB = 0;
-            while (matcher.find())
-            {
-                String tmp = matcher.group(1);
-                int start = matcher.start(1);
-                int end = matcher.end(1);
-                sb.append(p_str.substring(indexB, start));
-                for (int i = 0; i < tmp.length(); i++)
-                {
-                    switch (tmp.charAt(i))
-                    {
-                        case '<':
-                            sb.append("&lt;");
-                            break;
-                        case '>':
-                            sb.append("&gt;");
-                            break;
-                        default:
-                            sb.append(tmp.charAt(i));
-                            break;
-                    }
-                }
-                indexB = end;
-            }
-            sb.append(p_str.substring(indexB));
-        }
-        catch (Exception e)
-        {
-            throw new DiplomatMergerException(
-                    ExtractorExceptionConstants.DIPLOMAT_MERGER_FATAL_ERROR,
-                    m_error);
-        }
-        return sb.toString();
     }
 
     private void applyFilterConfiguration()
@@ -1141,6 +1003,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                 {
                     m_convertHtmlEntityForXml = xmlFilter.isConvertHtmlEntity();
                     getValueOfconvertHtmlEntity = true;
+                    isXmlFilterConfigured = true;
                 }
             }
 
@@ -1202,6 +1065,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         return m_xmlEntityConverter.decodeStringBasic(p_xml);
     }
 
+    @SuppressWarnings("unused")
     private String encode(String p_xml)
     {
         return m_xmlEntityConverter.encodeStringBasic(p_xml);
@@ -1324,29 +1188,6 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     public boolean getConvertHtmlEntryFromSecondFilter()
     {
         return this.convertHtmlEntryFromSecondFilter;
-    }
-
-    /**
-     * Converts an XML string to a DOM document.
-     */
-    private Document getDom(String p_xml)
-    {
-        XmlParser parser = null;
-
-        try
-        {
-            parser = XmlParser.hire();
-            return parser.parseXml(p_xml);
-        }
-        catch (Exception ex)
-        {
-            throw new RuntimeException("invalid GXML `" + p_xml + "': "
-                    + ex.getMessage());
-        }
-        finally
-        {
-            XmlParser.fire(parser);
-        }
     }
 
     public CxeMessage getCxeMessage()

@@ -3,7 +3,8 @@
         com.globalsight.everest.webapp.pagehandler.tasks.TaskSearchHandlerHelper,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.workflow.WorkflowConstants,
-        com.globalsight.everest.taskmanager.Task"
+        com.globalsight.everest.taskmanager.Task,
+        com.globalsight.util.edit.EditUtil"
  %>
 <%
    String tasksAvailableUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
@@ -17,7 +18,7 @@
    String tasksRejectedUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
            "=" + Task.STATE_REJECTED + "&listType=stateOnly&init=0";
    String tasksAllStatusUrl = myActivitiesUrl + "&" + WebAppConstants.TASK_STATE +
-           "=" + Task.STATE_ALL + "&listType=stateOnly&init=0";	
+           "=" + Task.STATE_ALL + "&listType=stateOnly&init=0";
 	
     // Get most recently used tasks 
     String mruTasksStr = (String)session.getAttribute(JobSearchConstants.MRU_TASKS);
@@ -38,6 +39,28 @@ var myActivitiesMenu = new WebFXMenu;
 
 // search activity
 myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_search_activities")%>", "javascript:goToUrl('<%=tasksSearchUrl%>');", ""));
+
+<%
+//Offline Upload, fix for GBS-2191
+if(userPerms.getPermissionFor(Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY))
+{
+%>
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_offline_upload")%>", "javascript:goToUrl('<%=simpleOfflineUploadUrl%>');", ""));
+<%
+}
+if(userPerms.getPermissionFor(Permission.ACTIVITIES_TM_SEARCH))
+{
+%>
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("lb_tm_search2")%>", "javascript:goToUrl('<%=tmSearchUrl%>');", ""));
+<%
+}
+if(userPerms.getPermissionFor(Permission.ACTIVITIES_TB_SEARCH))
+{
+%>
+myActivitiesMenu.add(new WebFXMenuItem("<%=mainMenuBundle.getString("permission.terminology.search")%>", "javascript:goToUrl('<%=tbSearchUrl%>');", ""));
+<%
+}
+%>
 
 // last search
 <%
@@ -107,6 +130,8 @@ try
             String taskstate = st.nextToken();
             String label = jobname + " (" + alocale + ")";
             String aurl = new String("/globalsight/ControlServlet?linkName=detail&pageName=TK1&taskAction=getTask&taskId=" + mrutask + "&state=" + taskstate + "&jobname="+jobname + "&cookie=" + str);
+            aurl = EditUtil.toJavascript(aurl);
+            aurl = aurl.replace("\\", "\\\\");
 %>
         myActivitiesMenu.add(new WebFXMenuItem("<%=label%>", "javascript:goToUrl('<%=aurl%>');", ""));
 <%

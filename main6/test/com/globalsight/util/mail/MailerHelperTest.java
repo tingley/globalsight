@@ -18,7 +18,8 @@ public class MailerHelperTest
     
     public static String gsText;
     public static String expectedText;
-    public static String expectedHTML;
+    public static String expectedHTMLHeadRegex;
+    public static String expectedHTMLBody;
     
     private static boolean isDebug = false;
     
@@ -46,15 +47,15 @@ public class MailerHelperTest
                 + "\r\n"
                 + "Please go to http://10.10.216.127:8080/globalsight to access GlobalSight.\r\n"
                 + "\r\n";
-        expectedHTML = "<html><head>"
+        expectedHTMLHeadRegex = "<html><head>"
                 + "<meta http-equiv=\"Content-Type\" "
                 + "content=\"text/html; charset=UTF-8\">"
-                + "<style type=\"text/css\">"
-                + "body {font-family: Arial, Helvetica, sans-serif; "
-                + "font-size: 10pt; line-height: 15pt;}"
-                + ".classBold{font-weight:bold; font-size: 10.5pt;}"
-                + "</style>"
-                + "</head><body>"
+                + "<style type=\"text/css\">.*"
+                + "body \\{font-family: Arial, Helvetica, sans-serif;.*"
+                + "font-size: 10pt; line-height: 15pt;}.*"
+                + ".classBold\\{font-weight:bold; font-size: 10.5pt;}.*"
+                + "</style></head>.*";
+        expectedHTMLBody = "<body>"
                 + "The following GlobalSight Activity has been accepted:"
                 + "<br/>"
                 + "Job: <span class=\"classBold\">6_409160662</span><br/>"
@@ -71,8 +72,11 @@ public class MailerHelperTest
     public void testGetHTMLContext()
     {
         String html = m_instance.getHTMLContext(gsText);
-        printMsg(expectedHTML, html);
-        Assert.assertEquals(expectedHTML, html);
+        printMsg(expectedHTMLHeadRegex, html);
+        Assert.assertTrue("testGetHTMLContext Error on Head", html.matches(expectedHTMLHeadRegex));
+        String body = html.substring(html.indexOf("<body>"));
+        printMsg(expectedHTMLBody, body);
+        Assert.assertTrue("testGetHTMLContext Error on Body", expectedHTMLBody.equalsIgnoreCase(body));
     }
     
     @Test
@@ -127,6 +131,7 @@ public class MailerHelperTest
             return;
         }
 
+        System.out.println("***[" + Thread.currentThread().getStackTrace()[2].getMethodName() + "]***");
         System.out.println("Expected: " + expected);
         System.out.println("Actural : " + actual);
         System.out.println();

@@ -17,29 +17,26 @@
 
 package com.globalsight.everest.tuv;
 
-import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.persistence.PersistentObject;
-
 import java.io.Serializable;
 
-/**
- * Represents the association of a workflow Task with a Tuv at
- * the time the task completed.  It is keyed by the current TuvId.
- * <p>
- * At the completion of a task, a copy of each Tuv is made with
- * new ids.  These are added to the TUV tables and linked by TaskTuv.
- */
-public class TaskTuv
-    extends PersistentObject
-    implements Serializable
-{
-  
-	private static final long serialVersionUID = 1L;
+import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.taskmanager.Task;
 
+/**
+ * Represents the association of a workflow Task with a Tuv at the time the task
+ * completed. It is keyed by the current TuvId.
+ * <p>
+ * At the completion of a task, a copy of each Tuv is made with new ids. These
+ * are added to the TUV tables and linked by TaskTuv.
+ */
+public class TaskTuv extends PersistentObject implements Serializable
+{
+
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Constants used for TopLink's query.
-     * The constant value has to be exactly
+     * Constants used for TopLink's query. The constant value has to be exactly
      * the same as the variable defined in the mapping.
      */
     public static final String ID = PersistentObject.M_ID;
@@ -66,10 +63,10 @@ public class TaskTuv
     {
     }
 
-
     /**
-     * Return the Task associated with the final version of the Tuv
-     * for that task.
+     * Return the Task associated with the final version of the Tuv for that
+     * task.
+     * 
      * @return the Task.
      */
     public Task getTask()
@@ -79,23 +76,12 @@ public class TaskTuv
 
     /**
      * Return the final version of the Tuv for the task.
+     * 
      * @return the final Tuv for the task.
      */
-    public Tuv getTuv()
+    public Tuv getTuv(String companyId)
     {
-        return m_previousTuv;
-    }
-
-
-    /**
-     * Return the current Tuv associated with some task in it's
-     * workflow history.
-     * @return the current Tuv associated with some task in it's
-     * workflow history.
-     */
-    public Tuv getCurrentTuv()
-    {
-        return m_currentTuv;
+        return getPreviousTuv(companyId);
     }
 
     public void setTaskId(long p_taskId)
@@ -130,21 +116,33 @@ public class TaskTuv
 
     public void setPreviousTuv(Tuv p_previousTuv)
     {
+        m_previousTuvId = p_previousTuv.getId();
         m_previousTuv = p_previousTuv;
-        if(m_previousTuv != null)
+        if (m_previousTuv != null)
         {
-        	m_previousTuvId = m_previousTuv.getId();
+            m_previousTuvId = m_previousTuv.getId();
         }
-        
+
     }
 
     public long getPreviousTuvId()
     {
-        return m_previousTuvId;        
+        return m_previousTuvId;
     }
 
-    public Tuv getPreviousTuv()
+    public Tuv getPreviousTuv(String companyId)
     {
+        if (m_previousTuv == null && m_previousTuvId > 0)
+        {
+            try
+            {
+                m_previousTuv = SegmentTuvUtil.getTuvById(m_previousTuvId,
+                        companyId);
+            }
+            catch (Exception e)
+            {
+            }
+        }
         return m_previousTuv;
     }
 
@@ -159,27 +157,25 @@ public class TaskTuv
     }
 
     /*
-     * This method is overwritten for TOPLink.
-     * TOPLink doesn't query all collections of objects
-     * within an object.  So if a TaskTuv is serialized -
-     * the mapped objects may not be available (because
-     * they haven't been queried yet).  Overwriting the
-     * method forces the query to happen so when it is
-     * serialized all pieces of the object are serialized
-     * and availble to the client.
+     * This method is overwritten for TOPLink. TOPLink doesn't query all
+     * collections of objects within an object. So if a TaskTuv is serialized -
+     * the mapped objects may not be available (because they haven't been
+     * queried yet). Overwriting the method forces the query to happen so when
+     * it is serialized all pieces of the object are serialized and availble to
+     * the client.
      */
     protected void writeObject(java.io.ObjectOutputStream out)
-        throws java.io.IOException
+            throws java.io.IOException
     {
         // touch all the mapped objects
-        if (m_currentTuv != null)
-        {
-            m_currentTuv.getId();
-        }
-        if (m_previousTuv != null)
-        {
-            m_previousTuv.getId();
-        }
+        // if (m_currentTuv != null)
+        // {
+        // m_currentTuv.getId();
+        // }
+        // if (m_previousTuv != null)
+        // {
+        // m_previousTuv.getId();
+        // }
         if (m_task != null)
         {
             m_task.getId();
@@ -189,17 +185,15 @@ public class TaskTuv
         out.defaultWriteObject();
     }
 
-
     /**
      * Return a string representation of the object.
+     * 
      * @return a string representation of the object.
      */
     public String toString()
     {
-        return super.toString() +
-            " m_currentTuv=" + m_currentTuv +
-            " m_previousTuv=" + m_previousTuv +
-            " m_task=" + m_task;
+        return super.toString() + " m_currentTuv=" + m_currentTuv
+                + " m_previousTuv=" + m_previousTuv + " m_task=" + m_task;
     }
 
     //
@@ -207,7 +201,7 @@ public class TaskTuv
     //
 
     public TaskTuv(Tuv p_currentTuv, Tuv p_previousTuv, int p_version,
-        Task p_task)
+            Task p_task)
     {
         setCurrentTuv(p_currentTuv);
         setPreviousTuv(p_previousTuv);
@@ -222,24 +216,24 @@ public class TaskTuv
         return m_version;
     }
 
-    // Use by Hibernate
-	public void setCurrentTuv(Tuv tuv)
-	{
-		m_currentTuv = tuv;
-		if(m_currentTuv != null)
-		{
-			m_currentTuvId = m_currentTuv.getId();
-		}
-		
-	}
+    public void setCurrentTuv(Tuv tuv)
+    {
+        m_currentTuvId = tuv.getId();
+        m_currentTuv = tuv;
+        if (m_currentTuv != null)
+        {
+            m_currentTuvId = m_currentTuv.getId();
+        }
 
-	public void setTask(Task m_task)
-	{
-		this.m_task = m_task;
-		if(m_task != null)
-		{
-			m_taskId = m_task.getId();
-		}
-		
-	}
+    }
+
+    public void setTask(Task m_task)
+    {
+        this.m_task = m_task;
+        if (m_task != null)
+        {
+            m_taskId = m_task.getId();
+        }
+
+    }
 }

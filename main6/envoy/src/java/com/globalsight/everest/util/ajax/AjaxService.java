@@ -34,11 +34,10 @@ import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.log4j.Logger;
-
 import org.apache.commons.fileupload.DiskFileUpload;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUpload;
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.w3c.dom.Element;
@@ -48,6 +47,7 @@ import org.w3c.dom.NodeList;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilter;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterManager;
 import com.globalsight.cxe.entity.filterconfiguration.BaseFilterParser;
+import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.entity.filterconfiguration.Filter;
 import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
@@ -88,8 +88,7 @@ import com.globalsight.webservices.client.WebServiceClientHelper;
 
 public class AjaxService extends HttpServlet
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(AjaxService.class);
+    private static final Logger CATEGORY = Logger.getLogger(AjaxService.class);
     private static final long serialVersionUID = 1L;
     private static XmlEntities m_xmlEntities = new XmlEntities();
     private HttpServletRequest request;
@@ -266,6 +265,8 @@ public class AjaxService extends HttpServlet
         String filterDesc = request.getParameter("filterDesc");
         boolean altTranslate = Boolean.parseBoolean(request
                 .getParameter("altTranslate"));
+        boolean tabNamesTranslate = Boolean.parseBoolean(request
+                .getParameter("tabNamesTranslate"));
 
         long contentPostFilterId = -2;
         try
@@ -280,8 +281,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("contentPostFilterTableName");
 
         long filterId = FilterHelper.saveMSOfficeExcelFilter(filterName,
-                filterDesc, companyId, altTranslate, contentPostFilterId,
-                contentPostFilterTableName);
+                filterDesc, companyId, altTranslate, tabNamesTranslate,
+                contentPostFilterId, contentPostFilterTableName);
         saveBaseFilterMapping(filterId, FilterConstants.MSOFFICEEXCEL_TABLENAME);
 
         writer.write(filterId + "");
@@ -293,6 +294,8 @@ public class AjaxService extends HttpServlet
         String filterDesc = request.getParameter("filterDesc");
         boolean altTranslate = Boolean.parseBoolean(request
                 .getParameter("altTranslate"));
+        boolean tabNamesTranslate = Boolean.parseBoolean(request
+                .getParameter("tabNamesTranslate"));
 
         long contentPostFilterId = -2;
         try
@@ -307,8 +310,8 @@ public class AjaxService extends HttpServlet
                 .getParameter("contentPostFilterTableName");
 
         long filterId = FilterHelper.updateMSOfficeExcelFilter(filterName,
-                filterDesc, companyId, altTranslate, contentPostFilterId,
-                contentPostFilterTableName);
+                filterDesc, companyId, altTranslate, tabNamesTranslate,
+                contentPostFilterId, contentPostFilterTableName);
         if (filterId > 0)
         {
             saveBaseFilterMapping(filterId,
@@ -356,6 +359,8 @@ public class AjaxService extends HttpServlet
         String filterDesc = request.getParameter("filterDesc");
         boolean altTranslate = Boolean.parseBoolean(request
                 .getParameter("altTranslate"));
+        boolean notesTranslate = Boolean.parseBoolean(request
+                .getParameter("notesTranslate"));
 
         long contentPostFilterId = -2;
         try
@@ -374,6 +379,7 @@ public class AjaxService extends HttpServlet
         filter.setContentPostFilterId(contentPostFilterId);
         filter.setContentPostFilterTableName(contentPostFilterTableName);
         filter.setAltTranslate(altTranslate);
+        filter.setNotesTranslate(notesTranslate);
     }
 
     public void savePOFilter()
@@ -538,9 +544,11 @@ public class AjaxService extends HttpServlet
                 .getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
-        
-        String selectInternalTextStyles = request.getParameter("selectedInternalTextStyles");
-        String allInternalTextStyles = request.getParameter("allInternalTextStyles");
+
+        String selectInternalTextStyles = request
+                .getParameter("selectedInternalTextStyles");
+        String allInternalTextStyles = request
+                .getParameter("allInternalTextStyles");
         filter.setInTextStyles(selectInternalTextStyles, allInternalTextStyles);
 
         long contentPostFilterId = -2;
@@ -640,6 +648,8 @@ public class AjaxService extends HttpServlet
         filter.setFilterName(filterName);
         loadMSOffice2010FilterParameter(filter);
         HibernateUtil.saveOrUpdate(filter);
+        saveBaseFilterMapping(filter.getId(),
+                FilterConstants.OFFICE2010_TABLENAME);
 
         writer.write(Long.toString(filter.getId()));
     }
@@ -655,6 +665,42 @@ public class AjaxService extends HttpServlet
                 .getParameter("masterTranslate"));
         filter.setMasterTranslate(masterTranslate);
 
+        boolean notesTranslate = Boolean.parseBoolean(request
+                .getParameter("notesTranslate"));
+        filter.setNotesTranslate(notesTranslate);
+
+        boolean pptlayoutTranslate = Boolean.parseBoolean(request
+                .getParameter("pptlayoutTranslate"));
+        filter.setPptlayoutTranslate(pptlayoutTranslate);
+
+        boolean notemasterTranslate = Boolean.parseBoolean(request
+                .getParameter("notemasterTranslate"));
+        filter.setNotemasterTranslate(notemasterTranslate);
+
+        boolean handoutmasterTranslate = Boolean.parseBoolean(request
+                .getParameter("handoutmasterTranslate"));
+        filter.setHandoutmasterTranslate(handoutmasterTranslate);
+
+        boolean excelTabNamesTranslate = Boolean.parseBoolean(request
+                .getParameter("excelTabNamesTranslate"));
+        filter.setExcelTabNamesTranslate(excelTabNamesTranslate);
+
+        boolean hiddenTextTranslate = Boolean.parseBoolean(request
+                .getParameter("hiddenTextTranslate"));
+        filter.setHiddenTextTranslate(hiddenTextTranslate);
+
+        boolean toolTipsTranslate = Boolean.parseBoolean(request
+                .getParameter("toolTipsTranslate"));
+        filter.setToolTipsTranslate(toolTipsTranslate);
+        
+        boolean tableOfContentTranslate = Boolean.parseBoolean(request
+                .getParameter("tableOfContentTranslate"));
+        filter.setTableOfContentTranslate(tableOfContentTranslate);
+
+        boolean urlTranslate = Boolean.parseBoolean(request
+                .getParameter("urlTranslate"));
+        filter.setUrlTranslate(urlTranslate);
+
         String selectParaStyles = request
                 .getParameter("unextractableWordParagraphStyles");
         String allParaStyles = request.getParameter("allParagraphStyles");
@@ -664,9 +710,34 @@ public class AjaxService extends HttpServlet
                 .getParameter("unextractableWordCharacterStyles");
         String allCharStyles = request.getParameter("allCharacterStyles");
         filter.setCharStyles(selectCharStyles, allCharStyles);
+        
+        String selectExcelCellStyles = request
+                .getParameter("unextractableExcelCellStyles");
+        String allExcelCellStyles = request.getParameter("allExcelCellStyles");
+        filter.setExcelCellStyles(selectExcelCellStyles, allExcelCellStyles);
+
+        String selectInternalTextStyles = request
+                .getParameter("selectedInternalTextStyles");
+        String allInternalTextStyles = request
+                .getParameter("allInternalTextStyles");
+        filter.setInTextStyles(selectInternalTextStyles, allInternalTextStyles);
 
         long xmlFilterId = tryParse(request.getParameter("xmlFilterId"), -2);
         filter.setXmlFilterId(xmlFilterId);
+
+        long contentPostFilterId = -2;
+        try
+        {
+            contentPostFilterId = Long.parseLong(request
+                    .getParameter("contentPostFilterId"));
+        }
+        catch (Exception ex)
+        {
+        }
+        String contentPostFilterTableName = request
+                .getParameter("contentPostFilterTableName");
+        filter.setContentPostFilterId(contentPostFilterId);
+        filter.setContentPostFilterTableName(contentPostFilterTableName);
     }
 
     public void updateMSOffice2010Filter()
@@ -685,6 +756,8 @@ public class AjaxService extends HttpServlet
         {
             loadMSOffice2010FilterParameter(filter);
             HibernateUtil.update(filter);
+            saveBaseFilterMapping(filter.getId(),
+                    FilterConstants.OFFICE2010_TABLENAME);
         }
     }
 
@@ -701,7 +774,8 @@ public class AjaxService extends HttpServlet
     }
 
     /**
-     * This method is not use and updated. Reuse this method to follow checking in method {@link #deleteSpecialFilters()}
+     * This method is not use and updated. Reuse this method to follow checking
+     * in method {@link #deleteSpecialFilters()}
      */
     @Deprecated
     public void deleteFilter()
@@ -858,7 +932,7 @@ public class AjaxService extends HttpServlet
         int phTrimMode = XmlFilterConfigParser.PH_TRIM_DONOT;
         int nonasciiAs = XmlFilterConfigParser.NON_ASCII_AS_CHARACTER;
         int wsHandleMode = XmlFilterConfigParser.WHITESPACE_HANDLE_COLLAPSE;
-        int emptyTagFormat = XmlFilterConfigParser.EMPTY_TAG_FORMAT_CLOSE;
+        int emptyTagFormat = XmlFilterConfigParser.EMPTY_TAG_FORMAT_PRESERVE;
         String elementPostFilter = request.getParameter("elementPostFilter");
         String elementPostFilterId = request
                 .getParameter("elementPostFilterId");
@@ -877,6 +951,8 @@ public class AjaxService extends HttpServlet
         String entities = request.getParameter("entities");
         String processIns = request.getParameter("processIns");
         String internalTag = request.getParameter("internalTag");
+        String srcCmtXmlComment = request.getParameter("srcCmtXmlComment");
+        String srcCmtXmlTag = request.getParameter("srcCmtXmlTag");
         JSONArray jsonArrayPreserveWsTags = new JSONArray();
         JSONArray jsonArrayEmbTags = new JSONArray();
         JSONArray jsonArrayTransAttrTags = new JSONArray();
@@ -885,6 +961,8 @@ public class AjaxService extends HttpServlet
         JSONArray jsonArrayEntities = new JSONArray();
         JSONArray jsonArrayProcessIns = new JSONArray();
         JSONArray jsonArrayInternalTag = new JSONArray();
+        JSONArray jsonArraySrcCmtXmlComment = new JSONArray();
+        JSONArray jsonArraySrcCmtXmlTag = new JSONArray();
         try
         {
             secondFilterId = Long.parseLong(request
@@ -906,6 +984,8 @@ public class AjaxService extends HttpServlet
             jsonArrayEntities = new JSONArray(entities);
             jsonArrayProcessIns = new JSONArray(processIns);
             jsonArrayInternalTag = new JSONArray(internalTag);
+            jsonArraySrcCmtXmlComment = new JSONArray(srcCmtXmlComment);
+            jsonArraySrcCmtXmlTag = new JSONArray(srcCmtXmlTag);
         }
         catch (Exception e)
         {
@@ -925,7 +1005,8 @@ public class AjaxService extends HttpServlet
                     jsonArrayPreserveWsTags, jsonArrayEmbTags,
                     jsonArrayTransAttrTags, jsonArrayContentInclTags,
                     jsonArrayCdataPostfilterTags, jsonArrayEntities,
-                    jsonArrayProcessIns, jsonArrayInternalTag);
+                    jsonArrayProcessIns, jsonArrayInternalTag,
+                    jsonArraySrcCmtXmlComment, jsonArraySrcCmtXmlTag);
         }
         catch (Exception e)
         {
@@ -993,7 +1074,7 @@ public class AjaxService extends HttpServlet
         {
             baseFilterId = Integer.parseInt(request
                     .getParameter("baseFilterId"));
-            
+
             if (baseFilterId > 0)
             {
                 BaseFilterManager.saveBaseFilterMapping(baseFilterId, filterId,
@@ -1001,7 +1082,8 @@ public class AjaxService extends HttpServlet
             }
             else
             {
-                BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
+                BaseFilterManager.deleteBaseFilterMapping(filterId,
+                        filterTableName);
             }
         }
         catch (Exception ex)
@@ -1148,6 +1230,50 @@ public class AjaxService extends HttpServlet
         Filter jspFilter = new JSPFilter(filterId, filterName, filterDesc,
                 companyId, isAdditionalHeadAdded, isEscapeEntity);
         FilterHelper.updateFilter(jspFilter);
+    }
+
+    public void saveFMFilter()
+    {
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        // boolean exposeFootNote = Boolean.parseBoolean(request
+        // .getParameter("isExposeFootNote"));
+        boolean exposeLeftMasterPage = Boolean.parseBoolean(request
+                .getParameter("isExposeLeftMasterPage"));
+        boolean exposeRightMasterPage = Boolean.parseBoolean(request
+                .getParameter("isExposeRightMasterPage"));
+        boolean exposeOtherMasterPage = Boolean.parseBoolean(request
+                .getParameter("isExposeOtherMasterPage"));
+        boolean isTOCTranslate = Boolean.parseBoolean(request
+                .getParameter("isTOCTranslate"));
+        FMFilter mfFilter = new FMFilter(filterName, filterDesc, companyId, true,
+                exposeLeftMasterPage, exposeRightMasterPage,
+                exposeOtherMasterPage);
+        mfFilter.setTableOfContentTranslate(isTOCTranslate);
+        long filterId = FilterHelper.saveFilter(mfFilter);
+        writer.write(filterId + "");
+    }
+
+    public void updateFMFilter()
+    {
+        long filterId = Long.parseLong(request.getParameter("filterId"));
+        String filterName = request.getParameter("filterName");
+        String filterDesc = request.getParameter("filterDesc");
+        // boolean exposeFootNote = Boolean.parseBoolean(request
+        // .getParameter("isExposeFootNote"));
+        boolean exposeLeftMasterPage = Boolean.parseBoolean(request
+                .getParameter("isExposeLeftMasterPage"));
+        boolean exposeRightMasterPage = Boolean.parseBoolean(request
+                .getParameter("isExposeRightMasterPage"));
+        boolean exposeOtherMasterPage = Boolean.parseBoolean(request
+                .getParameter("isExposeOtherMasterPage"));
+        boolean isTOCTranslate = Boolean.parseBoolean(request
+                .getParameter("isTOCTranslate"));
+        FMFilter mfFilter = new FMFilter(filterId, filterName, filterDesc,
+                companyId, true, exposeLeftMasterPage, exposeRightMasterPage,
+                exposeOtherMasterPage);
+        mfFilter.setTableOfContentTranslate(isTOCTranslate);
+        FilterHelper.updateFilter(mfFilter);
     }
 
     public void uploadFile()

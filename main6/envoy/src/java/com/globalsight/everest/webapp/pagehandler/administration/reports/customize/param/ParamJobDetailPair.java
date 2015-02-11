@@ -27,27 +27,26 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.CurrencyThreadLocal;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 
-public class ParamJobDetailPair extends ParamObjectPair 
+public class ParamJobDetailPair extends ParamObjectPair
 {
-    public ParamJobDetailPair(Param p_param) 
+    public ParamJobDetailPair(Param p_param)
     {
         super(p_param);
     }
-    
-    public List getResult(Job p_job, 
-                          Workflow p_workflow, 
-                          DateFormat p_format, 
-                          ProjectWorkflowData workflowData)
+
+    public List getResult(Job p_job, Workflow p_workflow, DateFormat p_format,
+            ProjectWorkflowData workflowData)
     {
         List result = new ArrayList();
-        
+
         this.countWorkCost(workflowData, p_workflow);
-        
+
         L10nProfile l10nProfile = p_job.getL10nProfile();
         Project project = l10nProfile.getProject();
-        
+
         Param[] children = this.getParam().getChildParams();
         if (children[0].getValue())
         {
@@ -56,7 +55,7 @@ public class ParamJobDetailPair extends ParamObjectPair
         if (children[1].getValue())
         {
             String description = project.getDescription();
-            result.add((description == null) ? "N/A" : description); 
+            result.add((description == null) ? "N/A" : description);
         }
         if (children[2].getValue())
         {
@@ -76,7 +75,7 @@ public class ParamJobDetailPair extends ParamObjectPair
         }
         if (children[6].getValue())
         {
-            result.add(project.getProjectManagerId());
+            result.add(UserUtil.getUserNameById(project.getProjectManagerId()));
         }
         if (children[7].getValue())
         {
@@ -94,21 +93,21 @@ public class ParamJobDetailPair extends ParamObjectPair
         {
             result.add(workflowData.getEstimatedBillingCharges());
         }
-        
+
         if (children[11].getValue())
         {
             result.add(l10nProfile.getName());
         }
-        
+
         return result;
     }
-    
+
     public List getTotal(ProjectWorkflowData workflowData)
     {
         List result = new ArrayList();
-        
+
         String noneTotal = "N/A";
-        
+
         Param[] children = this.getParam().getChildParams();
         if (children[0].getValue())
         {
@@ -116,7 +115,7 @@ public class ParamJobDetailPair extends ParamObjectPair
         }
         if (children[1].getValue())
         {
-            result.add(noneTotal); 
+            result.add(noneTotal);
         }
         if (children[2].getValue())
         {
@@ -154,41 +153,37 @@ public class ParamJobDetailPair extends ParamObjectPair
         {
             result.add(workflowData.getEstimatedBillingChargesAmount());
         }
-        
+
         if (children[11].getValue())
         {
             result.add(noneTotal);
         }
-        
+
         return result;
     }
-    
-    private void countWorkCost(ProjectWorkflowData p_workflowData, 
-                               Workflow p_workflow)
+
+    private void countWorkCost(ProjectWorkflowData p_workflowData,
+            Workflow p_workflow)
     {
         try
         {
             CostingEngine costEngine = ServerProxy.getCostingEngine();
-            
-            p_workflowData.setEstimatedCost(
-                p_workflowData.toBigDecimal(
-                    costEngine.calculateCost(p_workflow,
-                            CurrencyThreadLocal.getCurrency(), 
-                                             true, 
-                                             Cost.EXPENSE)
-                              .getEstimatedCost()
-                              .getAmount()));
 
-            p_workflowData.setEstimatedBillingCharges(
-                p_workflowData.toBigDecimal(
-                    costEngine.calculateCost(p_workflow,
-                            CurrencyThreadLocal.getCurrency(), 
-                                             true, 
-                                             Cost.REVENUE)
-                              .getEstimatedCost()
-                              .getAmount()));
+            p_workflowData.setEstimatedCost(p_workflowData
+                    .toBigDecimal(costEngine
+                            .calculateCost(p_workflow,
+                                    CurrencyThreadLocal.getCurrency(), true,
+                                    Cost.EXPENSE).getEstimatedCost()
+                            .getAmount()));
+
+            p_workflowData.setEstimatedBillingCharges(p_workflowData
+                    .toBigDecimal(costEngine
+                            .calculateCost(p_workflow,
+                                    CurrencyThreadLocal.getCurrency(), true,
+                                    Cost.REVENUE).getEstimatedCost()
+                            .getAmount()));
         }
-        catch (Exception e) 
+        catch (Exception e)
         {
             throw new RuntimeException(e);
         }

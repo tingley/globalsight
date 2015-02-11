@@ -79,7 +79,7 @@ public class PageHandlerFactory
             }
             catch (Exception e) 
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
                 throw new EnvoyServletException(e);
 	    }
         } 

@@ -274,10 +274,8 @@ function doLoad()
 <%=bundle.getString("lb_term_input_model_field_constraints_at") %> <span id="idLevel"></span> &nbsp;<%=bundle.getString("lb_term_input_model_field_level") %></SPAN>
 <BR><BR>
 <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
-  <THEAD>
-    <COL WIDTH="25%">
-    <COL WIDTH="75%">
-  </THEAD>
+  <COL WIDTH="25%">
+  <COL WIDTH="75%">
   <TBODY>
   <TR>
     <TD>

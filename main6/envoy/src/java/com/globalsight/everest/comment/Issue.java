@@ -17,8 +17,6 @@
 package com.globalsight.everest.comment;
 
 
-import com.globalsight.everest.comment.Comment;
-
 import java.util.List;
 
 /**
@@ -39,6 +37,7 @@ public interface Issue extends Comment
     final static String STATUS_QUERY = "query";
     final static String STATUS_OPEN = "open";
     final static String STATUS_CLOSED = "closed";
+    final static String STATUS_REJECTED = "rejected";
     
     // category
     final static String CATEGORY_TYPE01 = "Type01";

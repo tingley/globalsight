@@ -19,7 +19,7 @@ package com.globalsight.cxe.adapter.msoffice;
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.BaseAdapter;
 import com.globalsight.cxe.adapter.CxeProcessor;
-import com.globalsight.cxe.adapter.IConverterHelper;
+import com.globalsight.cxe.adapter.IConverterHelper2;
 import com.globalsight.cxe.adapter.msoffice.MsOfficeAdapterException;
 import com.globalsight.cxe.adapter.msoffice.MicrosoftWordHelper;
 import com.globalsight.cxe.message.CxeMessage;
@@ -180,16 +180,9 @@ public class MsOfficeAdapter extends BaseAdapter
         {
             Properties props = m_msOfficeConfig.loadProperties();
 
-            IConverterHelper helper = initHelper(p_cxeMessage, props);
+            IConverterHelper2 helper = initHelper(p_cxeMessage, props);
 
-            CxeMessage msgs[] = helper.performConversion();
-
-            AdapterResult results[] = new AdapterResult[msgs.length];
-            for (int i = 0; i < msgs.length; i++)
-            {
-                results[i] = new AdapterResult(msgs[i]);
-            }
-
+            AdapterResult results[] = helper.performConversion();
             return results;
         }
         catch (MsOfficeAdapterException msoe)
@@ -205,13 +198,13 @@ public class MsOfficeAdapter extends BaseAdapter
         }
     }
 
-    private IConverterHelper initHelper(CxeMessage p_cxeMessage, Properties props) throws SAXException, IOException
+    private IConverterHelper2 initHelper(CxeMessage p_cxeMessage, Properties props) throws SAXException, IOException
     {
         EventFlowXmlParser parser = new EventFlowXmlParser();
         parser.parse(p_cxeMessage.getEventFlowXml());
         String sourceFormat = parser.getSourceFormatType();
 
-        IConverterHelper helper = null;
+        IConverterHelper2 helper = null;
         if (IFormatNames.FORMAT_OFFICE_XML.equals(sourceFormat))
         {
             helper = new OfficeXmlHelper(p_cxeMessage, getLogger(), props);
@@ -239,7 +232,7 @@ public class MsOfficeAdapter extends BaseAdapter
         {
             Properties props = m_msOfficeConfig.loadProperties();
 
-            IConverterHelper helper = initHelper(p_cxeMessage, props);
+            IConverterHelper2 helper = initHelper(p_cxeMessage, props);
 
             CxeMessage msg = helper.performConversionBack();
 

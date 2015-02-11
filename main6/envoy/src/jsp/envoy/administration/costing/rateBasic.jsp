@@ -19,7 +19,8 @@
                   java.util.Vector,
                   java.util.ArrayList,
                   java.util.Locale,
-                  java.util.ResourceBundle"
+                  java.util.ResourceBundle,
+                  java.text.NumberFormat"
           session="true"
 %>
 <jsp:useBean id="cancel" class="com.globalsight.everest.webapp.javabean.NavigationBean" scope="request"/>
@@ -33,6 +34,11 @@
     // Labels, etc
     String lbcancel = bundle.getString("lb_cancel");
     String lbsave = bundle.getString("lb_save");
+    
+    //for bug GBS-2574,by fan
+    NumberFormat numberFormat = NumberFormat.getInstance();
+    numberFormat.setGroupingUsed(false);
+    numberFormat.setMaximumFractionDigits(5);
 
     boolean edit = false;
     String saveURL = save.getPageURL();
@@ -686,7 +692,7 @@ function calculateRate() {
             <%=bundle.getString("lb_rate")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <input type="text" name="fixed" value="<%=fixed%>"> <%=bundle.getString("lb_rate_unit_1")%>
+            <input type="text" name="fixed" value="<%=numberFormat.format(fixed)%>"> <%=bundle.getString("lb_rate_unit_1")%>
           </td>
         </tr>
         <tr id="hourlySection" style="display:none">
@@ -694,7 +700,7 @@ function calculateRate() {
             <%=bundle.getString("lb_rate")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <input type="text" name="hourly" value="<%=hourly%>"> <%=bundle.getString("lb_rate_unit_2")%>
+            <input type="text" name="hourly" value="<%=numberFormat.format(hourly)%>"> <%=bundle.getString("lb_rate_unit_2")%>
           </td>
         </tr>
         <tr id="pageSection" style="display:none">
@@ -702,7 +708,7 @@ function calculateRate() {
             <%=bundle.getString("lb_rate")%><span class="asterisk">*</span>:
           </td>
           <td>
-            <input type="text" name="page" value="<%=pageRate%>"> <%=bundle.getString("lb_rate_unit_3")%>
+            <input type="text" name="page" value="<%=numberFormat.format(pageRate)%>"> <%=bundle.getString("lb_rate_unit_3")%>
           </td>
         </tr>
         <tr id="wcSection">
@@ -716,7 +722,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_in_context")%><span class="asterisk">*</span>:
                 </td>
                 <td width=25%>
-                  <input type="text" name="inContextExact" id="inContextExact" size=5 value="<%=inContextExact%>">
+                  <input type="text" name="inContextExact" id="inContextExact" size=5 value="<%=numberFormat.format(inContextExact)%>">
                 </td>
               </tr>
               <tr>
@@ -724,7 +730,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_repetition_word_cnt")%><span class="asterisk">*</span>:
                 </td>
                 <td>
-                  <input type="text" name="repetition" id="repetition" size=5 value="<%=repetition%>">
+                  <input type="text" name="repetition" id="repetition" size=5 value="<%=numberFormat.format(repetition)%>">
                 </td>
               </tr>
               <tr>
@@ -732,7 +738,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_100")%><span class="asterisk">*</span>:
                 </td>
                 <td width=25%>
-                  <input type="text" name="exact" id="exact" size=5 value="<%=exact%>">
+                  <input type="text" name="exact" id="exact" size=5 value="<%=numberFormat.format(exact)%>">
                 </td>
               </tr>
               <tr>
@@ -740,7 +746,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_95")%>:
                 </td>
                 <td>
-                  <input type="text" name="band1" id="band1" size=5 value="<%=band1%>">
+                  <input type="text" name="band1" id="band1" size=5 value="<%=numberFormat.format(band1)%>">
                 </td>
               </tr>
               <tr>
@@ -748,7 +754,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_85")%>:
                 </td>
                 <td>
-                  <input type="text" name="band2" id="band2" size=5 value="<%=band2%>">
+                  <input type="text" name="band2" id="band2" size=5 value="<%=numberFormat.format(band2)%>">
                 </td>
               </tr>
               <tr>
@@ -756,7 +762,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_75")%>:
                 </td>
                 <td>
-                  <input type="text" name="band3" id="band3" size=5 value="<%=band3%>">
+                  <input type="text" name="band3" id="band3" size=5 value="<%=numberFormat.format(band3)%>">
                 </td>
               </tr>
               <tr>
@@ -764,7 +770,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_50")%>:
                 </td>
                 <td>
-                  <input type="text" name="band4" id="band4" size=5 value="<%=band4%>">
+                  <input type="text" name="band4" id="band4" size=5 value="<%=numberFormat.format(band4)%>">
                 </td>
               </tr>
               <tr>
@@ -772,7 +778,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_no_match")%><span class="asterisk">*</span>:
                 </td>
                 <td>
-                  <input type="text" name="nomatch" id="nomatch" size=5 value="<%=nomatch%>">
+                  <input type="text" name="nomatch" id="nomatch" size=5 value="<%=numberFormat.format(nomatch)%>">
                 </td>
               </tr>
               <tr style="display:none">
@@ -794,14 +800,14 @@ function calculateRate() {
             <td>
               <table>
               <tr>
-                <td width=25% class="standardText" nowrap>
+                <td class="standardText" style="white-space:nowrap;width:25%;">
                   <%=bundle.getString("lb_in_context")%><span class="asterisk">*</span>:
                 </td>
-                <td width=25%>
-                  <input type="text" name="inContextExactPer" id="inContextExactPer" size=5 value="<%=inContextExactPer==0.0?"0":inContextExactPer%>" onfocus="this.select()">&nbsp;%
+                <td style="white-space:nowrap;width:25%;">
+                  <input type="text" name="inContextExactPer" id="inContextExactPer" size=5 value="<%=inContextExactPer==0.0?"0":numberFormat.format(inContextExactPer)%>" onfocus="this.select()">&nbsp;%&nbsp;&nbsp;
                 </td>
                 <td width=25%>
-                  <input type="text" name="inContextExactC" id="inContextExactC" size=8 value="<%=inContextExact%>">
+                  <input type="text" name="inContextExactC" id="inContextExactC" size=8 value="<%=numberFormat.format(inContextExact)%>">
                 </td>
               </tr>
               <tr>
@@ -809,10 +815,10 @@ function calculateRate() {
                   <%=bundle.getString("lb_repetition_word_cnt")%><span class="asterisk">*</span>:
                 </td>
                 <td>
-                  <input type="text" name="repetitionPer" id="repetitionPer" size=5 value="<%=repetitionPer==0.0?"0":repetitionPer%>" onfocus="this.select()">&nbsp;%
+                  <input type="text" name="repetitionPer" id="repetitionPer" size=5 value="<%=repetitionPer==0.0?"0":numberFormat.format(repetitionPer)%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="repetitionC" id="repetitionC" size=8 value="<%=repetition%>">
+                  <input type="text" name="repetitionC" id="repetitionC" size=8 value="<%=numberFormat.format(repetition)%>">
                 </td>
               </tr>
               <tr>
@@ -820,10 +826,10 @@ function calculateRate() {
                   <%=bundle.getString("lb_100")%><span class="asterisk">*</span>:
                 </td>
                 <td width=25%>
-                  <input type="text" name="exactPer" id="exactPer" size=5 value="<%=exactPer==0.0?"0":exactPer%>" onfocus="this.select()">&nbsp;%
+                  <input type="text" name="exactPer" id="exactPer" size=5 value="<%=exactPer==0.0?"0":numberFormat.format(exactPer)%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td width=25%>
-                  <input type="text" name="exactC" id="exactC" size=8 value="<%=exact%>">
+                  <input type="text" name="exactC" id="exactC" size=8 value="<%=numberFormat.format(exact)%>">
                 </td>
               </tr>
               <tr>
@@ -831,10 +837,10 @@ function calculateRate() {
                   <%=bundle.getString("lb_95")%>:
                 </td>
                 <td>
-                  <input type="text" name="band1Per" id="band1Per" size=5 value="<%=band1Per==0.0?"0":band1Per%>" onfocus="this.select()">&nbsp;%
+                  <input type="text" name="band1Per" id="band1Per" size=5 value="<%=band1Per==0.0?"0":numberFormat.format(band1Per)%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band1C" id="band1C" size=8 value="<%=band1%>">
+                  <input type="text" name="band1C" id="band1C" size=8 value="<%=numberFormat.format(band1)%>">
                 </td>
               </tr>
               <tr>
@@ -842,10 +848,10 @@ function calculateRate() {
                   <%=bundle.getString("lb_85")%>:
                 </td>
                 <td>
-                  <input type="text" name="band2Per" id="band2Per" size=5 value="<%=band2Per==0.0?"0":band2Per%>" onfocus="this.select()">&nbsp;%
+                  <input type="text" name="band2Per" id="band2Per" size=5 value="<%=band2Per==0.0?"0":numberFormat.format(band2Per)%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band2C" id="band2C" size=8 value="<%=band2%>">
+                  <input type="text" name="band2C" id="band2C" size=8 value="<%=numberFormat.format(band2)%>">
                 </td>
               </tr>
               <tr>
@@ -853,10 +859,10 @@ function calculateRate() {
                   <%=bundle.getString("lb_75")%>:
                 </td>
                 <td>
-                  <input type="text" name="band3Per" id="band3Per" size=5 value="<%=band3Per==0.0?"0":band3Per%>" onfocus="this.select()">&nbsp;%
+                  <input type="text" name="band3Per" id="band3Per" size=5 value="<%=band3Per==0.0?"0":numberFormat.format(band3Per)%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band3C" id="band3C" size=8 value="<%=band3%>">
+                  <input type="text" name="band3C" id="band3C" size=8 value="<%=numberFormat.format(band3)%>">
                 </td>
               </tr>
               <tr>
@@ -864,10 +870,10 @@ function calculateRate() {
                   <%=bundle.getString("lb_50")%>:
                 </td>
                 <td>
-                  <input type="text" name="band4Per" id="band4Per" size=5 value="<%=band4Per==0.0?"0":band4Per%>" onfocus="this.select()">&nbsp;%
+                  <input type="text" name="band4Per" id="band4Per" size=5 value="<%=band4Per==0.0?"0":numberFormat.format(band4Per)%>" onfocus="this.select()">&nbsp;%
                 </td>
                 <td>
-                  <input type="text" name="band4C" id="band4C" size=8 value="<%=band4%>">
+                  <input type="text" name="band4C" id="band4C" size=8 value="<%=numberFormat.format(band4)%>">
                 </td>
               </tr>
               <tr>
@@ -875,7 +881,7 @@ function calculateRate() {
                   <%=bundle.getString("lb_rate_base")%><span class="asterisk">*</span>:
                 </td>
                 <td>
-                  <input type="text" name="baserate" id="baserate" size=5 value="<%=nomatch==0.0?"0":nomatch%>" onfocus="this.select()">
+                  <input type="text" name="baserate" id="baserate" size=5 value="<%=nomatch==0.0?"0":numberFormat.format(nomatch)%>" onfocus="this.select()">
                 </td>
                 <td>
                   <input type="button" name="calculate" id="calculate" value="<%=bundle.getString("lb_rate_calculate")%>" onclick="calculateRate()">
@@ -919,3 +925,5 @@ function calculateRate() {
 <input type="hidden" name="<%=tokenName%>" value="<%=request.getAttribute(tokenName)%>" />
 
 </form>
+</body>
+</html>

@@ -100,10 +100,6 @@ class WorkflowTemplateControlFlowHelper
         {
             destinationPage = "save";
         }
-        else if (m_request.getParameter(ACTION).equals(SEARCH_ACTION)) 
-        {
-            destinationPage = "search";
-        }
         else if (m_request.getParameter(ACTION).equals(IMPORT_ACTION)) 
         {
             destinationPage = "_import";
@@ -112,9 +108,9 @@ class WorkflowTemplateControlFlowHelper
         {
             destinationPage = "self";
         }
-        else if (m_request.getParameter(ACTION).equals(ADV_SEARCH_ACTION)) 
+        else if (m_request.getParameter(ACTION).equals(FILTER_SEARCH)) 
         {
-            destinationPage = "advsearch";
+            destinationPage = "self";
         }
         else if (m_request.getParameter(ACTION).equals(REMOVE_ACTION))
         {  

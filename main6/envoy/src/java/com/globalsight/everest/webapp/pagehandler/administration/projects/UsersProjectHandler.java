@@ -208,71 +208,25 @@ public class UsersProjectHandler extends PageHandler
         super.invokePageHandler(pageDescriptor, request, response, context);
     }
 
-    private void setData(Project project, HttpServletRequest request,
-                         SessionManager sessionMgr)
+    private void setData(Project p_project, HttpServletRequest p_request,
+                         SessionManager p_sessionMgr)
         throws EnvoyServletException
     {
         // If just doing a sort, don't set fields
-        String linkName = (String)request.getParameter("linkName");
+        String linkName = (String)p_request.getParameter("linkName");
         if ("self".equals(linkName)) return;
+        
+        ProjectHandlerHelper.setData(p_project, p_request, false);
 
-        project.setName((String)request.getParameter("nameField"));
-        project.setDescription((String)request.getParameter("descField"));
-        project.setTermbaseName((String)request.getParameter("tbField"));
-        project.setCompanyId(CompanyThreadLocal.getInstance().getValue());
-        String pmName = (String)sessionMgr.getAttribute("pmId");
-        String qpName = (String)request.getParameter("qpField");
-        String pmCostStr = (String)request.getParameter("pmcost");
-        
-        int poRequired = Project.NO_PO_REQUIRED;
-        
-        if(request.getParameter("poRequired") != null) {
-            poRequired= Project.PO_REQUIRED;
-        }
-        
-        project.setPoRequired(poRequired);
-        
+        p_project.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        String pmName = (String)p_sessionMgr.getAttribute("pmId");                
         if (pmName == null)  
         {
-            pmName = (String)request.getParameter("pmField");
+            pmName = (String)p_request.getParameter("pmField");
         }
         if (pmName != null)
         {
-            project.setProjectManager(ProjectHandlerHelper.getUser(pmName));
-        }
-        if ("-1".equals(qpName)) 
-        {
-            project.setQuotePerson(null);
-        } 
-        else if ("0".equals(qpName))
-        {
-            project.setQuotePerson("0");
-        }
-        else 
-        {
-            project.setQuotePerson(ProjectHandlerHelper.getUser(qpName));
-        }
-        float pmCost = 0.00f;
-        try {
-            pmCost = Float.parseFloat(pmCostStr) / 100;
-        }
-        catch (Exception e)
-        {
-        }
-        project.setPMCost(pmCost);
-        
-        String attributeSetId = request.getParameter("attributeSet");
-        
-        AttributeSet attSet = null;
-        if (attributeSetId != null)
-        {
-            long attSetId = Long.valueOf(attributeSetId);
-            if (attSetId > 0)
-            {
-                attSet = HibernateUtil.get(AttributeSet.class, attSetId);
-            }
-            
-            project.setAttributeSet(attSet);
+            p_project.setProjectManager(ProjectHandlerHelper.getUser(pmName));
         }
     }
 }

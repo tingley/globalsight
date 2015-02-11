@@ -1,0 +1,5 @@
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\GlobalSight.Common\GlobalSight.Common\bin\Debug\GlobalSight.Common.dll
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\GlobalSight.Common\GlobalSight.Common\bin\Debug\GlobalSight.Common.pdb
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\GlobalSight.Common\GlobalSight.Common\obj\Debug\ResolveAssemblyReference.cache
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\GlobalSight.Common\GlobalSight.Common\obj\Debug\GlobalSight.Common.dll
+E:\GlobalSight\Workspace_cvshead\GlobalSightSource\main6\diplomat\dev\src\c-sharp\WindowsPEConverter\GlobalSight.Common\GlobalSight.Common\obj\Debug\GlobalSight.Common.pdb

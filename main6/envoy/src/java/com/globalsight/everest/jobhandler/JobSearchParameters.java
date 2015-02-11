@@ -51,6 +51,11 @@ public class JobSearchParameters extends SearchCriteriaParameters
     public static final int CREATION_START_DATE = 18;
     public static final int CREATION_END_DATE = 19;
     
+    public static final int EXPORT_DATE_START = 20;
+    public static final int EXPORT_DATE_START_OPTIONS = 21;
+    public static final int EXPORT_DATE_END = 22;
+    public static final int EXPORT_DATE_END_OPTIONS = 23;
+    
     /**
      *  Default constructor.
      */
@@ -249,6 +254,23 @@ public class JobSearchParameters extends SearchCriteriaParameters
     public void setUser(User p_user) 
     {
         addElement(USER, p_user);
+    }
+    
+    public void setExportDateStart(Integer p_start)
+    {
+        addElement(EXPORT_DATE_START, p_start);
+    }
+    
+    public void setExportDateStartOptions(String p_option) {
+        addElement(EXPORT_DATE_START_OPTIONS, p_option);
+    }
+    
+    public void setExportDateEnd(Integer p_end) {
+        addElement(EXPORT_DATE_END, p_end);
+    }
+    
+    public void setExportDateEndOptions(String p_option) {
+        addElement(EXPORT_DATE_END_OPTIONS, p_option);
     }
 }
 

@@ -38,24 +38,23 @@ import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageManager;
+import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PageTemplate;
-import com.globalsight.everest.page.PagePersistenceAccessor;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.TemplatePart;
 import com.globalsight.everest.page.pageimport.ExtractedFileImportPersistenceHandler;
 import com.globalsight.everest.page.pageimport.TemplateGenerator;
 import com.globalsight.everest.persistence.PersistenceService;
-import com.globalsight.everest.persistence.page.PageQueryNames;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.request.Request;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImplVo;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvJdbcQuery;
 import com.globalsight.everest.tuv.TuvImplVo;
+import com.globalsight.everest.tuv.TuvJdbcQuery;
 import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.Text;
@@ -219,12 +218,12 @@ class ExtractedFileUpdater
     ArrayList updateSourcePageGxml()
     {
         Logger.writeDebugFile("updateGxml-" + m_state.getSourcePage().getId()
-                + "-" + UTC.valueOfNoSeparators(new Date()) + ".xml", m_state
-                .getGxml());
+                + "-" + UTC.valueOfNoSeparators(new Date()) + ".xml",
+                m_state.getGxml());
 
         // validate the gxml and update the UpdateState object
-        ExtractedFileValidation validator = new ExtractedFileValidation(m_state
-                .getSourcePage(), m_state.getGxml());
+        ExtractedFileValidation validator = new ExtractedFileValidation(
+                m_state.getSourcePage(), m_state.getGxml());
         m_state = validator.validateGxml();
 
         if (!m_state.getValidated())
@@ -390,11 +389,8 @@ class ExtractedFileUpdater
 
             try
             {
-                CATEGORY
-                        .info("Deleting additional data for TUVs of source page "
-                                + getSourcePage().getId()
-                                + ": "
-                                + deletedTuvIds);
+                CATEGORY.info("Deleting additional data for TUVs of source page "
+                        + getSourcePage().getId() + ": " + deletedTuvIds);
 
                 HashMap map = new HashMap();
                 CompanyWrapper.saveCurrentCompanyIdInMap(map, CATEGORY);
@@ -433,16 +429,15 @@ class ExtractedFileUpdater
             }
             catch (Exception ex)
             {
-                CATEGORY
-                        .error(
-                                "Source page "
-                                        + getSourcePage().getExternalPageId()
-                                        + " (ID "
-                                        + getSourcePage().getId()
-                                        + ") was updated successfully "
-                                        + "but the page state could not be reset. "
-                                        + "GlobalSight should be restarted to correct the page state.",
-                                ex);
+                CATEGORY.error(
+                        "Source page "
+                                + getSourcePage().getExternalPageId()
+                                + " (ID "
+                                + getSourcePage().getId()
+                                + ") was updated successfully "
+                                + "but the page state could not be reset. "
+                                + "GlobalSight should be restarted to correct the page state.",
+                        ex);
 
                 // The page data is committed, only the page
                 // state is wrong. Need to send special failure email.
@@ -481,8 +476,7 @@ class ExtractedFileUpdater
         // PIDs from the export template.
         if (containsZeroPid(originalTus))
         {
-            CATEGORY
-                    .warn("Migrating PID=0 in pre-5.2 page data to valid PIDs.");
+            CATEGORY.warn("Migrating PID=0 in pre-5.2 page data to valid PIDs.");
             computePidFromTemplate(originalTus);
         }
 
@@ -663,8 +657,8 @@ class ExtractedFileUpdater
         Map oldTemplates = getPageTemplates();
 
         // Build the new template parts.
-        ArrayList templates = generateTemplates(getSourcePage(), m_state
-                .getGxmlRoot(), allNewTus, oldTemplates);
+        ArrayList templates = generateTemplates(getSourcePage(),
+                m_state.getGxmlRoot(), allNewTus, oldTemplates);
 
         assignTemplatePartIds(templates);
 
@@ -695,6 +689,11 @@ class ExtractedFileUpdater
             {
                 PersistenceCommand cmd = (PersistenceCommand) commands
                         .remove(0);
+                if (cmd instanceof DeleteTuPersistenceCommand)
+                {
+                    ((DeleteTuPersistenceCommand) cmd).setCompanyId(m_state
+                            .getSourcePage().getCompanyId());
+                }
                 cmd.persistObjects(conn);
             }
 
@@ -844,23 +843,24 @@ class ExtractedFileUpdater
 
             switch (elem.getType())
             {
-            case GxmlElement.LOCALIZABLE:
-                tu = createLocalizableSegment(elem, p_sourceLocale, p_blockId);
-                p_tuList.add(tu);
-                break;
+                case GxmlElement.LOCALIZABLE:
+                    tu = createLocalizableSegment(elem, p_sourceLocale,
+                            p_blockId);
+                    p_tuList.add(tu);
+                    break;
 
-            case GxmlElement.TRANSLATABLE:
-                ArrayList tus = createTranslatableSegments(elem,
-                        p_sourceLocale, p_blockId);
-                p_tuList.addAll(tus);
-                break;
+                case GxmlElement.TRANSLATABLE:
+                    ArrayList tus = createTranslatableSegments(elem,
+                            p_sourceLocale, p_blockId);
+                    p_tuList.addAll(tus);
+                    break;
 
-            case GxmlElement.GS:
-                p_tuList = createTus_1(elem, p_sourceLocale, p_blockId,
-                        p_tuList);
-                break;
-            default:
-                break;
+                case GxmlElement.GS:
+                    p_tuList = createTus_1(elem, p_sourceLocale, p_blockId,
+                            p_tuList);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -1013,7 +1013,8 @@ class ExtractedFileUpdater
 
             /*
              * if (CATEGORY.isDebugEnabled()) { System.err.println("text (" +
-             * datatype + "): " + text + "\n--->" + EditUtil.toJavascript(text) + "<----"); }
+             * datatype + "): " + text + "\n--->" + EditUtil.toJavascript(text)
+             * + "<----"); }
              */
 
             // Paragraph-extract the segment.
@@ -1069,9 +1070,7 @@ class ExtractedFileUpdater
 
             TuvImplVo tuv = new TuvImplVo();
             tuv.setGlobalSightLocale(p_sourceLocale);
-            tuv
-                    .setWordCount(segWordCount != null ? segWordCount
-                            .intValue() : 0);
+            tuv.setWordCount(segWordCount != null ? segWordCount.intValue() : 0);
             tuv.setOrder(i + 1);
             tuv.setGxml(gxml);
             tu.addTuv(tuv);
@@ -1197,8 +1196,8 @@ class ExtractedFileUpdater
             TuImplVo tu = (TuImplVo) unmodifiedTus.get(i);
             TuvImplVo tuv = (TuvImplVo) tu.getTuv(localeId);
 
-            TuImplVo origTu = getOriginalTuByPidOrder(tu.getPid(), tuv
-                    .getOrder());
+            TuImplVo origTu = getOriginalTuByPidOrder(tu.getPid(),
+                    tuv.getOrder());
 
             unmodifiedTus.set(i, origTu);
         }
@@ -1229,9 +1228,7 @@ class ExtractedFileUpdater
             if (tu.getPid() > 0 && !modifiedTus.contains(tu))
             {
                 TuvImplVo tuv = (TuvImplVo) tu.getTuv(localeId);
-                result
-                        .add(getOriginalTuByPidOrder(tu.getPid(), tuv
-                                .getOrder()));
+                result.add(getOriginalTuByPidOrder(tu.getPid(), tuv.getOrder()));
             }
             else
             {
@@ -1329,98 +1326,101 @@ class ExtractedFileUpdater
 
             switch (elem.getType())
             {
-            case GxmlElement.LOCALIZABLE:
-            {
-                int index = p_index.inc();
-                TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
-
-                elem.setAttribute(GxmlNames.LOCALIZABLE_BLOCKID, String
-                        .valueOf(tu.getPid()));
-
-                // honor Diplomat.properties (wordcount_localizables)
-                // and count localizables as 0 if so requested.
-                elem.setAttribute(GxmlNames.LOCALIZABLE_WORDCOUNT, "1");
-
-                if (CATEGORY.isDebugEnabled())
+                case GxmlElement.LOCALIZABLE:
                 {
-                    System.err.println("GXML loc " + i + ": " + elem.toLines());
+                    int index = p_index.inc();
+                    TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
+
+                    elem.setAttribute(GxmlNames.LOCALIZABLE_BLOCKID,
+                            String.valueOf(tu.getPid()));
+
+                    // honor Diplomat.properties (wordcount_localizables)
+                    // and count localizables as 0 if so requested.
+                    elem.setAttribute(GxmlNames.LOCALIZABLE_WORDCOUNT, "1");
+
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        System.err.println("GXML loc " + i + ": "
+                                + elem.toLines());
+                    }
                 }
-            }
-                break;
+                    break;
 
-            case GxmlElement.SEGMENT:
-            {
-                int index = p_index.inc();
-                TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
-
-                Long localeId = getSourceLocaleId();
-                int wordcount = tu.getTuv(localeId).getWordCount();
-
-                elem.setAttribute(GxmlNames.SEGMENT_SEGMENTID, String
-                        .valueOf(segmentId++));
-
-                elem.setAttribute(GxmlNames.SEGMENT_WORDCOUNT, String
-                        .valueOf(wordcount));
-
-                if (CATEGORY.isDebugEnabled())
+                case GxmlElement.SEGMENT:
                 {
-                    System.err.println("GXML seg " + i + ": " + elem.toLines());
+                    int index = p_index.inc();
+                    TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
+
+                    Long localeId = getSourceLocaleId();
+                    int wordcount = tu.getTuv(localeId).getWordCount();
+
+                    elem.setAttribute(GxmlNames.SEGMENT_SEGMENTID,
+                            String.valueOf(segmentId++));
+
+                    elem.setAttribute(GxmlNames.SEGMENT_WORDCOUNT,
+                            String.valueOf(wordcount));
+
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        System.err.println("GXML seg " + i + ": "
+                                + elem.toLines());
+                    }
                 }
-            }
-                break;
+                    break;
 
-            case GxmlElement.TRANSLATABLE:
-            {
-                int index = p_index.getValue();
-                TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
-
-                long pid = tu.getPid();
-                int wordcount = getParagraphWordCount(p_allNewTus, p_index);
-
-                elem.setAttribute(GxmlNames.TRANSLATABLE_BLOCKID, String
-                        .valueOf(pid));
-
-                elem.setAttribute(GxmlNames.TRANSLATABLE_WORDCOUNT, String
-                        .valueOf(wordcount));
-
-                if (CATEGORY.isDebugEnabled())
+                case GxmlElement.TRANSLATABLE:
                 {
-                    System.err.println("GXML trans " + i + ": "
-                            + elem.toLines());
+                    int index = p_index.getValue();
+                    TuImplVo tu = (TuImplVo) p_allNewTus.get(index);
+
+                    long pid = tu.getPid();
+                    int wordcount = getParagraphWordCount(p_allNewTus, p_index);
+
+                    elem.setAttribute(GxmlNames.TRANSLATABLE_BLOCKID,
+                            String.valueOf(pid));
+
+                    elem.setAttribute(GxmlNames.TRANSLATABLE_WORDCOUNT,
+                            String.valueOf(wordcount));
+
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        System.err.println("GXML trans " + i + ": "
+                                + elem.toLines());
+                    }
+
+                    // Recurse into the segments.
+                    patchGxmlElements_1(elem, p_allNewTus, p_index);
                 }
+                    break;
 
-                // Recurse into the segments.
-                patchGxmlElements_1(elem, p_allNewTus, p_index);
-            }
-                break;
-
-            case GxmlElement.GS:
-            {
-                if (CATEGORY.isDebugEnabled())
+                case GxmlElement.GS:
                 {
-                    System.err.println("GXML GS " + i + ": " + elem.toLines());
-                }
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        System.err.println("GXML GS " + i + ": "
+                                + elem.toLines());
+                    }
 
-                // Recurse into the deletable region.
-                patchGxmlElements_1(elem, p_allNewTus, p_index);
-            }
-                break;
-
-            case GxmlElement.SKELETON:
-                if (CATEGORY.isDebugEnabled())
-                {
-                    System.err
-                            .println("GXML skel " + i + ": " + elem.toLines());
+                    // Recurse into the deletable region.
+                    patchGxmlElements_1(elem, p_allNewTus, p_index);
                 }
-                break;
+                    break;
 
-            default:
-                if (CATEGORY.isDebugEnabled())
-                {
-                    System.err.println("GXML element " + i + ": "
-                            + elem.toLines());
-                }
-                break;
+                case GxmlElement.SKELETON:
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        System.err.println("GXML skel " + i + ": "
+                                + elem.toLines());
+                    }
+                    break;
+
+                default:
+                    if (CATEGORY.isDebugEnabled())
+                    {
+                        System.err.println("GXML element " + i + ": "
+                                + elem.toLines());
+                    }
+                    break;
             }
         }
     }
@@ -1699,8 +1699,8 @@ class ExtractedFileUpdater
         Long localeId = getSourceLocaleId();
 
         TuvImplVo newTuv = (TuvImplVo) p_tu.getTuv(localeId);
-        TuImplVo oldTu = getOriginalTuByPidOrder(p_tu.getPid(), newTuv
-                .getOrder());
+        TuImplVo oldTu = getOriginalTuByPidOrder(p_tu.getPid(),
+                newTuv.getOrder());
         TuvImplVo oldTuv = (TuvImplVo) oldTu.getTuv(localeId);
 
         /*
@@ -1840,8 +1840,7 @@ class ExtractedFileUpdater
         result.add(template);
 
         template = tg.generateStandard(p_gxml, p_tus);
-        template
-                .setId(getTemplateId(p_oldTemplates, PageTemplate.TYPE_STANDARD));
+        template.setId(getTemplateId(p_oldTemplates, PageTemplate.TYPE_STANDARD));
         result.add(template);
 
         template = tg.generateExport(p_gxml, p_tus);
@@ -2099,7 +2098,8 @@ class ExtractedFileUpdater
             String skeleton = part.getSkeleton();
             if ((skeleton.length() == 0 || (skeleton.length() == 1 && skeleton
                     .equals("\n")))
-                    && !tu.isLocalizable() && !prevTu.isLocalizable())
+                    && !tu.isLocalizable()
+                    && !prevTu.isLocalizable())
             {
                 // subsequent seg in same para, set to pid of first seg
                 tu.setPid(pid - 1);
@@ -2245,7 +2245,7 @@ class ExtractedFileUpdater
         {
             Connection conn = getPersistenceService().getConnectionForImport();
             conn.setAutoCommit(false);
-            
+
             try
             {
                 TuvJdbcQuery query = new TuvJdbcQuery(conn);
@@ -2269,7 +2269,7 @@ class ExtractedFileUpdater
                 }
                 catch (Throwable ignore)
                 {
-                    CATEGORY.error(ignore);
+                    CATEGORY.error(ignore.getMessage(), ignore);
                 }
             }
 
@@ -2282,8 +2282,8 @@ class ExtractedFileUpdater
     private ArrayList getExportTemplateParts() throws Exception
     {
         return new ArrayList(m_pageManager.getTemplatePartsForSourcePage(
-                m_state.getSourcePage().getIdAsLong(), PageTemplate
-                        .getTypeAsString(PageTemplate.TYPE_EXPORT)));
+                m_state.getSourcePage().getIdAsLong(),
+                PageTemplate.getTypeAsString(PageTemplate.TYPE_EXPORT)));
     }
 
     //
@@ -2341,6 +2341,8 @@ class ExtractedFileUpdater
                 nonClobTemplateParts, clobTemplateParts, p_modifiedTus,
                 nonClobTuvs, clobTuvs, nonClobLocTuvs, clobLocTuvs, p_allTus,
                 allTuvs);
+        ((UpdateGxmlPersistenceCommand) cmd).setCompanyId(m_state
+                .getSourcePage().getCompanyId());
         m_state.addPersistenceCommand(cmd);
     }
 }

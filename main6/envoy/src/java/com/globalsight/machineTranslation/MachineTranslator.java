@@ -33,6 +33,7 @@ public interface MachineTranslator
     public static final String ENGINE_PROMT = "promt";
     public static final String ENGINE_MSTRANSLATOR = "ms_translator";
     public static final String ENGINE_ASIA_ONLINE = "asia_online";
+    public static final String ENGINE_SAFABA = "safaba";
     
 //    public static final String PROMT_INFO = "promtParamMap";
     public static final String PROMT_PTSURL = "ptsUrl";
@@ -48,6 +49,8 @@ public interface MachineTranslator
     public static final String MSMT_CATEGORY = "msMtCategory";
     public static final String MSMT_CONTENT_TYPE = "text/plain";
     public static final String MSMT_URLFLAG = "msMtUrlFlag";
+    public static final String MSMT_CLIENTID = "msMtClientID";
+    public static final String MSMT_CLIENT_SECRET = "msMtClientSecret";
     
     public static final String AO_URL = "aoMtUrl";
     public static final String AO_PORT = "aoMtPort";
@@ -60,7 +63,8 @@ public interface MachineTranslator
     public static final String CONTAIN_TAGS = "containTags";
 
     public static final String[] gsSupportedMTEngines =
-    { ENGINE_GOOGLE, ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE };
+    { ENGINE_GOOGLE, ENGINE_MSTRANSLATOR, ENGINE_PROMT, ENGINE_ASIA_ONLINE,
+            ENGINE_SAFABA };
 
     /**
      * Returns the MT engine name (SysTran,Babelfish,etc.)

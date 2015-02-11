@@ -332,30 +332,28 @@ public class WordCountProcessor implements ReportsProcessor
         int inContextWordCount = 0;// in context word match
         boolean isUseDefaultContextMatch = PageHandler
                 .isDefaultContextMatch(tg);
-        int lb_context_tm = tg.getWordCount().getContextMatchWordCount();
+        int contextMatchWC = tg.getWordCount().getContextMatchWordCount();
         if (isInContextMatch)
         {
-            segmentTmWordCount = tg.getWordCount().getSegmentTmWordCount();// 100%
-                                                                            // match
-            inContextWordCount = tg.getWordCount().getInContextWordCount();// in
-                                                                            // context
-                                                                            // word
-                                                                            // match
-            lb_context_tm = 0;
+            // 100% match
+            segmentTmWordCount = tg.getWordCount().getSegmentTmWordCount();
+            // in context word match
+            inContextWordCount = tg.getWordCount().getInContextWordCount();
+            contextMatchWC = 0;
         }
         else
         {
             if (isUseDefaultContextMatch)
             {
                 segmentTmWordCount = tg.getWordCount()
-                        .getNoUseExactMatchWordCount()
-                        - lb_context_tm;
+                        .getTotalExactMatchWordCount() - contextMatchWC;
             }
             else
             {
-                segmentTmWordCount = tg.getWordCount()
-                        .getNoUseExactMatchWordCount();// 100% match
-                lb_context_tm = 0;
+                // 100% match
+                segmentTmWordCount = 
+                        tg.getWordCount().getTotalExactMatchWordCount();
+                contextMatchWC = 0;
             }
         }
         int hiFuzzyWordCount = tg.getWordCount().getHiFuzzyWordCount();// 95%
@@ -380,7 +378,7 @@ public class WordCountProcessor implements ReportsProcessor
         }
         if (isDefaultContextMatch)
         {
-            totalWords += lb_context_tm;
+            totalWords += contextMatchWC;
         }
 
         int pc_segmentTmWordCount = (int) ((segmentTmWordCount * 100.0) / totalWords); // 100%
@@ -409,7 +407,7 @@ public class WordCountProcessor implements ReportsProcessor
         int pc_lb_context_tm = 0;
         if (isDefaultContextMatch)
         {
-            pc_lb_context_tm = (int) ((lb_context_tm * 100.0) / totalWords);// no
+            pc_lb_context_tm = (int) ((contextMatchWC * 100.0) / totalWords);// no
                                                                             // match
                                                                             // percentage
         }
@@ -438,7 +436,7 @@ public class WordCountProcessor implements ReportsProcessor
             if (isDefaultContextMatch)
             {
                 p_sheet.addCell(new Label(ExcelColRow.E, p_row.value, ""
-                        + lb_context_tm));
+                        + contextMatchWC));
             }
             else
             {

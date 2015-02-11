@@ -74,7 +74,31 @@ public interface Mailer
                   String p_companyIdStr)
         throws MailerException, RemoteException;
 
-    
+    /**
+     * Sends Email with attachment.
+     * 
+     * @param p_sendFromEmailInfo
+     *            Email Sender
+     * @param p_recipientEmailInfo
+     *            Email Recipient
+     * @param p_subjectKey
+     *            Email Subject key
+     * @param p_messageKey
+     *            Email Body key
+     * @param p_messageArguments
+     *            Email Subject and Body arguments
+     * @param p_attachments
+     *            Email Attachment
+     * @param p_companyIdStr
+     *            Company ID string
+     * @throws MailerException
+     * @throws RemoteException
+     */
+    public void sendMail(EmailInformation p_sendFromEmailInfo,
+            EmailInformation p_recipientEmailInfo, String p_subjectKey,
+            String p_messageKey, String[] p_messageArguments,
+            String[] p_attachments, long p_companyId)
+            throws MailerException, RemoteException;
     /**
      * Send an email to a recipient from the system admin.  Since only
      * the recipient's email address is known, the server locale would

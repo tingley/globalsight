@@ -17,43 +17,40 @@
 
 package com.globalsight.persistence.pageexport;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.persistence.PersistenceCommand;
-import com.globalsight.everest.persistence.PersistenceException;
-
-import com.globalsight.everest.tuv.TuvImpl;
-import com.globalsight.everest.tuv.TuImpl;
-import com.globalsight.everest.tuv.TuvState;
-
-
 import java.sql.Connection;
-import java.sql.Timestamp;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
+import java.sql.Timestamp;
 import java.util.Collection;
-import java.util.List;
 import java.util.Iterator;
-import java.util.HashMap;
 
+import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
+import com.globalsight.everest.tuv.TuvImpl;
+import com.globalsight.persistence.PersistenceCommand;
 
-public class UpdateTuvStatePersistenceCommand
-    extends PersistenceCommand
+public class UpdateTuvStatePersistenceCommand extends PersistenceCommand
 {
-    private static final String m_updateStateTuv =
-        "update translation_unit_variant set state = ? , timestamp = ? " +
-        "where id = ? ";
-    private static final String m_updateStateAndCrcTuv =
-        "update translation_unit_variant set state = ? , timestamp = ? , " +
-        " exact_match_key = ? where id = ? ";
+    private static final String m_updateStateTuv = "update "
+            + TuvQueryConstants.TUV_TABLE_PLACEHOLDER
+            + " set state = ? , timestamp = ? " + " where id = ? ";
 
+    private static final String m_updateStateAndCrcTuv = "update "
+            + TuvQueryConstants.TUV_TABLE_PLACEHOLDER
+            + " set state = ? , timestamp = ? , exact_match_key = ? "
+            + " where id = ? ";
+
+    private Long m_companyId = 0L;
     private PreparedStatement m_psUpdateStateTuv = null;
     private PreparedStatement m_psUpdateStateAndCrcTuv = null;
 
     private Collection m_tuvsForState = null;
     private Collection m_tuvsForStateAndCrc = null;
+
+    public void setCompanyId(Long p_companyId)
+    {
+        m_companyId = p_companyId;
+    }
 
     public void setTuvsForStateUpdate(Collection p_tuvs)
     {
@@ -66,7 +63,7 @@ public class UpdateTuvStatePersistenceCommand
     }
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -92,36 +89,46 @@ public class UpdateTuvStatePersistenceCommand
                     m_psUpdateStateTuv = null;
                 }
 
-                if(m_psUpdateStateAndCrcTuv != null)
+                if (m_psUpdateStateAndCrcTuv != null)
                 {
                     m_psUpdateStateAndCrcTuv.close();
                     m_psUpdateStateAndCrcTuv = null;
                 }
             }
             catch (Throwable ignore)
-            { /* ignore */ }
+            { /* ignore */
+            }
         }
 
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
+        // default
+        String tuvTableName = "translation_unit_variant";
+        if (m_companyId > 0)
+        {
+            tuvTableName = SegmentTuTuvCacheManager
+                    .getTuvTableName(m_companyId);
+        }
+
         if (m_tuvsForState != null)
         {
-            m_psUpdateStateTuv = p_connection.prepareStatement(
-                m_updateStateTuv);
+            String sql1 = m_updateStateTuv.replace(
+                    TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName);
+            m_psUpdateStateTuv = p_connection.prepareStatement(sql1);
         }
 
         if (m_tuvsForStateAndCrc != null)
         {
-            m_psUpdateStateAndCrcTuv = p_connection.prepareStatement(
-                m_updateStateAndCrcTuv);
+            String sql2 = m_updateStateAndCrcTuv.replace(
+                    TuvQueryConstants.TUV_TABLE_PLACEHOLDER, tuvTableName);
+            m_psUpdateStateAndCrcTuv = p_connection.prepareStatement(sql2);
         }
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -130,7 +137,7 @@ public class UpdateTuvStatePersistenceCommand
             Iterator it = m_tuvsForState.iterator();
             while (it.hasNext())
             {
-                TuvImpl tuv = (TuvImpl)it.next();
+                TuvImpl tuv = (TuvImpl) it.next();
 
                 m_psUpdateStateTuv.setString(1, tuv.getState().getName());
                 m_psUpdateStateTuv.setTimestamp(2, now);
@@ -145,7 +152,7 @@ public class UpdateTuvStatePersistenceCommand
             Iterator it = m_tuvsForStateAndCrc.iterator();
             while (it.hasNext())
             {
-                TuvImpl tuv = (TuvImpl)it.next();
+                TuvImpl tuv = (TuvImpl) it.next();
 
                 m_psUpdateStateAndCrcTuv.setString(1, tuv.getState().getName());
                 m_psUpdateStateAndCrcTuv.setTimestamp(2, now);
@@ -157,8 +164,7 @@ public class UpdateTuvStatePersistenceCommand
         }
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         if (m_psUpdateStateTuv != null)
         {

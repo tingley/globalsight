@@ -535,7 +535,7 @@ public class TMImportPanel extends JPanel
                 }
                 catch (Exception e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                     AmbOptionPane.showMessageDialog("Unzip " + p_file
                             + " error!", "Warning", JOptionPane.ERROR_MESSAGE);
                 }

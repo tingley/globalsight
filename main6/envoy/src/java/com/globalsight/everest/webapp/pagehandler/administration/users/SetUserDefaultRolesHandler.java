@@ -166,7 +166,7 @@ public class SetUserDefaultRolesHandler extends PageHandler
 					wrapper.addDefaultRole(role);
 			}
 		} catch (Exception e) {
-			c_logger.error(e);
+			c_logger.error(e.getMessage(), e);
 		}
     }
 }

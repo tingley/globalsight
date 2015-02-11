@@ -46,15 +46,17 @@ import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.util.edit.SegmentUtil2;
 
 /**
- * <p>This class counts words in the segments of a Diplomat XML input
- * or a standalone string (translatable snippet).
- *
- * <p>Input is accepted from both an <code>Output</code> object or an
- * xml string, which is automatically converted to an internal
- * <code>Output</code> object.
- *
- * <p>Results of the counting are returned as <code>Output</code>
- * object or string representation.
+ * <p>
+ * This class counts words in the segments of a Diplomat XML input or a
+ * standalone string (translatable snippet).
+ * 
+ * <p>
+ * Input is accepted from both an <code>Output</code> object or an xml string,
+ * which is automatically converted to an internal <code>Output</code> object.
+ * 
+ * <p>
+ * Results of the counting are returned as <code>Output</code> object or string
+ * representation.
  */
 public class DiplomatWordCounter
 {
@@ -67,76 +69,87 @@ public class DiplomatWordCounter
     private int m_totalWordCount = 0;
 
     /**
-     * Indicates as how many words a localizable should be counted (0 or 1).
-     * See Diplomat.properties for system-wide defaults.
+     * Indicates as how many words a localizable should be counted (0 or 1). See
+     * Diplomat.properties for system-wide defaults.
      */
     private int m_localizableCount = 1;
 
     /**
-     * <p>Indicates if tokens starting with digits should be counted
-     * as words.</p>
-     *
-     * <p>Default is false. For Trados compatibility, set to true.</p>
-     *
-     * <p>See Wordcounter.properties for system-wide defaults.</p>
+     * <p>
+     * Indicates if tokens starting with digits should be counted as words.
+     * </p>
+     * 
+     * <p>
+     * Default is false. For Trados compatibility, set to true.
+     * </p>
+     * 
+     * <p>
+     * See Wordcounter.properties for system-wide defaults.
+     * </p>
      */
     private boolean m_countNumerics = false;
 
     /**
-     * <p>Indicates if tokens containing dashes should be counted as
-     * multiple words.</p>
-     *
-     * <p>Default is false. For Trados compatibility, set to true.</p>
-     *
-     * <p>See Wordcounter.properties for system-wide defaults.</p>
+     * <p>
+     * Indicates if tokens containing dashes should be counted as multiple
+     * words.
+     * </p>
+     * 
+     * <p>
+     * Default is false. For Trados compatibility, set to true.
+     * </p>
+     * 
+     * <p>
+     * See Wordcounter.properties for system-wide defaults.
+     * </p>
      */
     private boolean m_countDashedTokens = false;
 
     private String[] m_placeHolderRegexArray = null;
-    
 
-    static private final String WORD_COUNTER_PROPERTY_FILE = "properties/Wordcounter.properties";
-    static private HashMap s_company_wordcounter_properties_map = new HashMap(); 
+    static private final String WORD_COUNTER_PROPERTY_FILE = "/properties/Wordcounter.properties";
+    static private HashMap s_company_wordcounter_properties_map = new HashMap();
 
     /**
-     *  Load the wordcounter.properties and store the attributes to hashmap for current company. 
-     *  One company only load the property file once.
-     *  
+     * Load the wordcounter.properties and store the attributes to hashmap for
+     * current company. One company only load the property file once.
+     * 
      */
     private void loadWordcounterProperties()
     {
         DynamicPropertiesSystemConfiguration dpsc = (DynamicPropertiesSystemConfiguration) SystemConfiguration
-                                .getInstance(WORD_COUNTER_PROPERTY_FILE);
+                .getInstance(WORD_COUNTER_PROPERTY_FILE);
         Properties props = dpsc.getProperties();
-        
-        HashMap companyProMap = new HashMap(); 
+
+        HashMap companyProMap = new HashMap();
         String companyId = CompanyWrapper.getCurrentCompanyId();
-         String value = props.getProperty("wordcounter_count_numerics");
-         Boolean countNumerics = Boolean.FALSE;
-         if (value.equalsIgnoreCase("true"))
-         {
-             countNumerics = Boolean.TRUE;
-         }
-         value = props.getProperty("wordcounter_count_dashed_tokens");
-         Boolean countDashedTokens = Boolean.FALSE;
-         if (value.equalsIgnoreCase("true"))
-         {
-             countDashedTokens = Boolean.TRUE;
-         }
-         // Get word count place holder from properties file
-//         value = props.getProperty("wordcounter_count_placeholders");
-         value = dpsc.getPlaceHolders();
-         String[] placeHolderRegexArray = setPlaceHolderRegexArray(value);
-         companyProMap.put("wordcounter_count_numerics", countNumerics);
-         companyProMap.put("wordcounter_count_dashed_tokens", countDashedTokens);
-         companyProMap.put("wordcounter_count_placeholders", placeHolderRegexArray);
-         s_company_wordcounter_properties_map.put(companyId, companyProMap);
+        String value = props.getProperty("wordcounter_count_numerics");
+        Boolean countNumerics = Boolean.FALSE;
+        if (value.equalsIgnoreCase("true"))
+        {
+            countNumerics = Boolean.TRUE;
+        }
+        value = props.getProperty("wordcounter_count_dashed_tokens");
+        Boolean countDashedTokens = Boolean.FALSE;
+        if (value.equalsIgnoreCase("true"))
+        {
+            countDashedTokens = Boolean.TRUE;
+        }
+        // Get word count place holder from properties file
+        // value = props.getProperty("wordcounter_count_placeholders");
+        value = dpsc.getPlaceHolders();
+        String[] placeHolderRegexArray = setPlaceHolderRegexArray(value);
+        companyProMap.put("wordcounter_count_numerics", countNumerics);
+        companyProMap.put("wordcounter_count_dashed_tokens", countDashedTokens);
+        companyProMap.put("wordcounter_count_placeholders",
+                placeHolderRegexArray);
+        s_company_wordcounter_properties_map.put(companyId, companyProMap);
     }
-    
+
     //
     // Constructor
     //
-    
+
     // For debug purpose
     public DiplomatWordCounter(HashMap map)
     {
@@ -149,15 +162,20 @@ public class DiplomatWordCounter
         m_parser = createXmlParser();
 
         String companyId = CompanyWrapper.getCurrentCompanyId();
-        HashMap companyProperties = (HashMap)s_company_wordcounter_properties_map.get(companyId);
-        while(companyProperties == null)
+        HashMap companyProperties = (HashMap) s_company_wordcounter_properties_map
+                .get(companyId);
+        while (companyProperties == null)
         {
             loadWordcounterProperties();
-            companyProperties = (HashMap)s_company_wordcounter_properties_map.get(companyId);
+            companyProperties = (HashMap) s_company_wordcounter_properties_map
+                    .get(companyId);
         }
-        m_countNumerics = ((Boolean)companyProperties.get("wordcounter_count_numerics")).booleanValue();
-        m_countDashedTokens = ((Boolean)companyProperties.get("wordcounter_count_numerics")).booleanValue();
-        m_placeHolderRegexArray = (String[])companyProperties.get("wordcounter_count_placeholders");
+        m_countNumerics = ((Boolean) companyProperties
+                .get("wordcounter_count_numerics")).booleanValue();
+        m_countDashedTokens = ((Boolean) companyProperties
+                .get("wordcounter_count_dashed_tokens")).booleanValue();
+        m_placeHolderRegexArray = (String[]) companyProperties
+                .get("wordcounter_count_placeholders");
     }
 
     public void setLocalizableWordcount(int p_arg)
@@ -174,7 +192,7 @@ public class DiplomatWordCounter
     {
         m_countDashedTokens = p_arg;
     }
-    
+
     /**
      * Recount the word count of the input document element
      * 
@@ -191,7 +209,7 @@ public class DiplomatWordCounter
             m_locale = getLocale();
             m_si = GlobalsightRuleBasedBreakIterator.getWordInstance(m_locale);
         }
-        
+
         switch (p_de.type())
         {
             case DocumentElement.TRANSLATABLE:
@@ -227,15 +245,16 @@ public class DiplomatWordCounter
     }
 
     /**
-     * <p>Takes Diplomat XML inside an <code>Output</code> object and
-     * counts the words in all segments.
-     *
-     * <p>The result can be retrieved as <code>Output</code> object
-     * (<code>getOutput()</code>), or as string
-     * (<code>getDiplomatXml()</code>).
+     * <p>
+     * Takes Diplomat XML inside an <code>Output</code> object and counts the
+     * words in all segments.
+     * 
+     * <p>
+     * The result can be retrieved as <code>Output</code> object (
+     * <code>getOutput()</code>), or as string (<code>getDiplomatXml()</code>).
      */
     public void countDiplomatDocument(Output p_diplomat)
-        throws DiplomatWordCounterException
+            throws DiplomatWordCounterException
     {
         m_totalWordCount = 0;
 
@@ -248,15 +267,16 @@ public class DiplomatWordCounter
 
         m_output.setTotalWordCount(m_totalWordCount);
     }
-    
+
     /**
-     * Input DiplomatXml and return new DiplomatXml string with word
-     * counts.
+     * Input DiplomatXml and return new DiplomatXml string with word counts.
+     * 
      * @return java.lang.String
-     * @param p_diplomat java.lang.String
+     * @param p_diplomat
+     *            java.lang.String
      */
     public String countDiplomatDocument(String p_diplomat)
-        throws DiplomatWordCounterException
+            throws DiplomatWordCounterException
     {
         m_totalWordCount = 0;
 
@@ -274,8 +294,7 @@ public class DiplomatWordCounter
     }
 
     /**
-     * Return the segmented Diplomat XML as <code>Output</code>
-     * object.
+     * Return the segmented Diplomat XML as <code>Output</code> object.
      */
     public Output getOutput()
     {
@@ -295,11 +314,10 @@ public class DiplomatWordCounter
     //
 
     /**
-     * Parses a Diplomat XML string into an internal
-     * <code>Output</code> object.
+     * Parses a Diplomat XML string into an internal <code>Output</code> object.
      */
     private void convertToOutput(String p_diplomat)
-        throws DiplomatWordCounterException
+            throws DiplomatWordCounterException
     {
         m_diplomatReader = new DiplomatReader(p_diplomat);
 
@@ -311,66 +329,66 @@ public class DiplomatWordCounter
         {
             System.err.println(e);
 
-            throw new DiplomatWordCounterException (
-                ExtractorExceptionConstants.WORD_COUNTER_ERROR, e);
+            throw new DiplomatWordCounterException(
+                    ExtractorExceptionConstants.WORD_COUNTER_ERROR, e);
         }
     }
 
     /**
-     * <p>Traverses the list of tags in the internal <code>Output</code>
-     * object.  Possible tags in the list are &lt;skeleton&gt;,
-     * &lt;translatable&gt; and &lt;localizable&gt;.
-     *
-     * <p>Here lies the problem to attach the wordcount attribute to
-     * the segment nodes, they only appear in textual form in this
-     * structure.
+     * <p>
+     * Traverses the list of tags in the internal <code>Output</code> object.
+     * Possible tags in the list are &lt;skeleton&gt;, &lt;translatable&gt; and
+     * &lt;localizable&gt;.
+     * 
+     * <p>
+     * Here lies the problem to attach the wordcount attribute to the segment
+     * nodes, they only appear in textual form in this structure.
      */
-    private void traverseOutput()
-        throws DiplomatWordCounterException
+    private void traverseOutput() throws DiplomatWordCounterException
     {
         DocumentElement de = null;
 
-        for (Iterator it = m_output.documentElementIterator(); it.hasNext(); )
+        for (Iterator it = m_output.documentElementIterator(); it.hasNext();)
         {
             de = (DocumentElement) it.next();
 
             switch (de.type())
             {
-            case DocumentElement.TRANSLATABLE:
-                TranslatableElement element = (TranslatableElement)de;
+                case DocumentElement.TRANSLATABLE:
+                    TranslatableElement element = (TranslatableElement) de;
 
-                int translatableWordCount = 0;
+                    int translatableWordCount = 0;
 
-                ArrayList segments = element.getSegments();
-                for (int i = 0, max = segments.size(); i < max; i++)
-                {
-                    SegmentNode segment = (SegmentNode)segments.get(i);
+                    ArrayList segments = element.getSegments();
+                    for (int i = 0, max = segments.size(); i < max; i++)
+                    {
+                        SegmentNode segment = (SegmentNode) segments.get(i);
 
-                    int segmentWordCount = countSegment(segment);
-                    // For WS XLF,if it has word count info in original
-                    // source file, use it to replace that of GS.
-                    segmentWordCount = 
-                        getWordCountForXLFElement(element, segmentWordCount);
+                        int segmentWordCount = countSegment(segment);
+                        // For WS XLF,if it has word count info in original
+                        // source file, use it to replace that of GS.
+                        segmentWordCount = getWordCountForXLFElement(element,
+                                segmentWordCount);
 
-                    segment.setWordCount(segmentWordCount);
-                    translatableWordCount += segmentWordCount;
-                }
+                        segment.setWordCount(segmentWordCount);
+                        translatableWordCount += segmentWordCount;
+                    }
 
-                element.setWordcount(translatableWordCount);
-                m_totalWordCount += translatableWordCount;
-                break;
+                    element.setWordcount(translatableWordCount);
+                    m_totalWordCount += translatableWordCount;
+                    break;
 
-            case DocumentElement.LOCALIZABLE:
-                LocalizableElement locElement = (LocalizableElement)de;
+                case DocumentElement.LOCALIZABLE:
+                    LocalizableElement locElement = (LocalizableElement) de;
 
-                // Localizables count as 1 token or 0, depending on
-                // the configuration (Diplomat.properties).
-                locElement.setWordcount(m_localizableCount);
-                m_totalWordCount += m_localizableCount;
-                break;
+                    // Localizables count as 1 token or 0, depending on
+                    // the configuration (Diplomat.properties).
+                    locElement.setWordcount(m_localizableCount);
+                    m_totalWordCount += m_localizableCount;
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
     }
@@ -378,15 +396,13 @@ public class DiplomatWordCounter
     /**
      * Get the word count for WS XLF file.
      * 
-     * 1. If not XLF file, return GlobalSight word count.
-     * 2. If is XLF file, current section is "source", and it has a 
-     * "ws_word_count" attribute(this should be a WS XLF file), use this instead
-     * of GlobalSight word count; 
-     * 3. If is XLF file, current section is "source", but it has no 
-     * "ws_word_count" attribute, use GlobalSight word count regardless if it 
-     * is WS file;
-     * 4. If is XLF file, but current section is NOT "source"(possible be 
-     * "target","altSource" or "altTarget"),return 0;
+     * 1. If not XLF file, return GlobalSight word count. 2. If is XLF file,
+     * current section is "source", and it has a "ws_word_count" attribute(this
+     * should be a WS XLF file), use this instead of GlobalSight word count; 3.
+     * If is XLF file, current section is "source", but it has no
+     * "ws_word_count" attribute, use GlobalSight word count regardless if it is
+     * WS file; 4. If is XLF file, but current section is NOT "source"(possible
+     * be "target","altSource" or "altTarget"),return 0;
      * 
      */
     private int getWordCountForXLFElement(TranslatableElement p_element,
@@ -400,7 +416,7 @@ public class DiplomatWordCounter
             Map xlfPart = p_element.getXliffPart();
             String xlfPartAtt = (String) xlfPart.get(Extractor.XLIFF_PART);
 
-            // If it has "ws_word_count",this should be a WS XLF file; 
+            // If it has "ws_word_count",this should be a WS XLF file;
             // And if this is "source" section, should keep the word
             // count info from original source XLF file.
             if (Extractor.XLIFF_PART_SOURCE.equalsIgnoreCase(xlfPartAtt))
@@ -412,7 +428,9 @@ public class DiplomatWordCounter
                     {
                         result = Integer.parseInt(s);
                     }
-                    catch (NumberFormatException e) {}
+                    catch (NumberFormatException e)
+                    {
+                    }
                 }
             }
             else
@@ -428,7 +446,7 @@ public class DiplomatWordCounter
      * Counts words in a segment node and the individual subflows.
      */
     private int countSegment(SegmentNode p_segment)
-        throws DiplomatWordCounterException
+            throws DiplomatWordCounterException
     {
         int segmentWordCount = 0;
 
@@ -440,7 +458,7 @@ public class DiplomatWordCounter
             {
                 segment = removeInternalTagsForWordCounter(segment);
             }
-            
+
             Document doc = parse("<AllYourBaseAreBelongToUs>" + segment
                     + "</AllYourBaseAreBelongToUs>");
             Element root = doc.getRootElement();
@@ -453,7 +471,8 @@ public class DiplomatWordCounter
             Element oriroot = oridoc.getRootElement();
             int oriCount = countWords(root);
             boolean hasSub = countSubs(oriroot);
-            boolean noPh = oriSegment != null && oriSegment.indexOf("<ph") == -1;
+            boolean noPh = oriSegment != null
+                    && oriSegment.indexOf("<ph") == -1;
 
             if (noPh || hasSub)
             {
@@ -462,8 +481,8 @@ public class DiplomatWordCounter
         }
         catch (Exception e)
         {
-            throw new DiplomatWordCounterException (
-                ExtractorExceptionConstants.DIPLOMAT_XML_PARSE_ERROR, e);
+            throw new DiplomatWordCounterException(
+                    ExtractorExceptionConstants.DIPLOMAT_XML_PARSE_ERROR, e);
         }
 
         return segmentWordCount;
@@ -471,13 +490,15 @@ public class DiplomatWordCounter
 
     /**
      * Replace internal text and internal tags with whitespace for word counter
+     * 
      * @param segment
      * @return
      */
     private String removeInternalTagsForWordCounter(String segment)
     {
         List<String> internalTexts = new ArrayList<String>();
-        String temp = InternalTextHelper.protectInternalTexts(segment, internalTexts);
+        String temp = InternalTextHelper.protectInternalTexts(segment,
+                internalTexts);
 
         if (internalTexts.size() > 0)
         {
@@ -485,10 +506,11 @@ public class DiplomatWordCounter
             {
                 internalTexts.set(i, " ");
             }
-            
-            segment = InternalTextHelper.restoreInternalTexts(temp, internalTexts);
+
+            segment = InternalTextHelper.restoreInternalTexts(temp,
+                    internalTexts);
         }
-        
+
         return segment;
     }
 
@@ -524,17 +546,18 @@ public class DiplomatWordCounter
 
                 // Sub-flow word counts contribute to overall word count.
                 m_totalWordCount += words;
-                sub.addAttribute(DiplomatNames.Attribute.WORDCOUNT, String
-                        .valueOf(words));
+                sub.addAttribute(DiplomatNames.Attribute.WORDCOUNT,
+                        String.valueOf(words));
             }
             else
             {
-                //Currently, this only affect the JavaScrpt embedded in the HTML
-                //Attribute.
+                // Currently, this only affect the JavaScrpt embedded in the
+                // HTML
+                // Attribute.
                 sub.addAttribute(DiplomatNames.Attribute.WORDCOUNT, "0");
             }
         }
-        
+
         return elems.size() > 0;
     }
 
@@ -543,11 +566,11 @@ public class DiplomatWordCounter
         // Depth-first traversal: add embedded <sub> to the list first.
         for (int i = 0, max = p_element.nodeCount(); i < max; i++)
         {
-            Node child = (Node)p_element.node(i);
-            
+            Node child = (Node) p_element.node(i);
+
             if (child instanceof Element)
             {
-                findSubElements(p_result, (Element)child);
+                findSubElements(p_result, (Element) child);
             }
         }
 
@@ -560,19 +583,19 @@ public class DiplomatWordCounter
     private boolean isSkipElement(Element element)
     {
         Attribute attribute = element.attribute("isSkip");
-        if(attribute != null)
+        if (attribute != null)
         {
             return "true".equals(attribute.getValue());
         }
         return false;
     }
- 
+
     private int countWords(Element root)
     {
         String text = getTextWithWhite(root);
-        int n = countAllWords (text);
-        
-        List sentences = SegmentUtil2.getNotTranslateWords(root.asXML());       
+        int n = countAllWords(text);
+
+        List sentences = SegmentUtil2.getNotTranslateWords(root.asXML());
         for (int i = 0; i < sentences.size(); i++)
         {
             String sentence = (String) sentences.get(i);
@@ -583,33 +606,34 @@ public class DiplomatWordCounter
             int m = countAllWords(sentence);
             n -= m;
         }
-        
+
         return n;
     }
-    
+
     private Stack<String> changeArrayToStack(String[] array)
     {
         Stack<String> stack = new Stack<String>();
-        if(array == null || array.length == 0)
+        if (array == null || array.length == 0)
         {
             return stack;
         }
-        for(int i = 0; i < array.length; i++)
+        for (int i = 0; i < array.length; i++)
         {
             stack.push(array[i]);
         }
         return stack;
     }
-    
+
     private String[] stackToArray(Stack<String> stack)
     {
-        if(stack == null || stack.size() == 0)
+        if (stack == null || stack.size() == 0)
         {
-            return new String[]{};
+            return new String[]
+            {};
         }
         String[] ss = new String[stack.size()];
         int i = 0;
-        while(! stack.isEmpty())
+        while (!stack.isEmpty())
         {
             String s = stack.pop();
             ss[i] = s;
@@ -617,39 +641,43 @@ public class DiplomatWordCounter
         }
         return ss;
     }
-    
-    private String[] spitTextByREArray(String text, String[] m_placeHolderRegexArray)
+
+    private String[] spitTextByREArray(String text,
+            String[] m_placeHolderRegexArray)
     {
-        if(m_placeHolderRegexArray == null || m_placeHolderRegexArray.length ==0)
+        if (m_placeHolderRegexArray == null
+                || m_placeHolderRegexArray.length == 0)
         {
-            return new String[]{text};
+            return new String[]
+            { text };
         }
         Stack<String> REStack = changeArrayToStack(m_placeHolderRegexArray);
         Stack<String> processed = new Stack<String>();
         Stack<String> stored = new Stack<String>();
         processed.push(text);
-        while( ! REStack.isEmpty())
+        while (!REStack.isEmpty())
         {
             String re = REStack.pop();
-            while( ! processed.isEmpty())
+            while (!processed.isEmpty())
             {
                 String processingText = processed.pop();
                 String[] splitedText = processingText.split(re);
-                for(int i = 0; i < splitedText.length; i++)
+                for (int i = 0; i < splitedText.length; i++)
                 {
-                    if(splitedText[i].length() > 0)
+                    if (splitedText[i].length() > 0)
                     {
                         stored.push(splitedText[i]);
                     }
                 }
             }
-            while(! stored.isEmpty())
+            while (!stored.isEmpty())
             {
                 processed.push(stored.pop());
             }
         }
         return stackToArray(processed);
     }
+
     /**
      * The routine that actually counts the words in a string.
      */
@@ -659,13 +687,13 @@ public class DiplomatWordCounter
 
         // do Locale sensitive word count breaking
         String[] text = spitTextByREArray(p_text, m_placeHolderRegexArray);
-        for(int index = 0; index < text.length; index++)
+        for (int index = 0; index < text.length; index++)
         {
             p_text = text[index];
             m_si.setText(p_text);
             int iStart = m_si.first();
-            for (int iEnd = m_si.next(); iEnd != GlobalsightBreakIterator.DONE;
-                 iStart = iEnd, iEnd = m_si.next())
+            for (int iEnd = m_si.next(); iEnd != GlobalsightBreakIterator.DONE; iStart = iEnd, iEnd = m_si
+                    .next())
             {
                 char ch = p_text.charAt(iStart);
 
@@ -697,31 +725,32 @@ public class DiplomatWordCounter
 
                     words++;
                 }
-                else if(m_placeHolderRegexArray != null)
-                {       
+                else if (m_placeHolderRegexArray != null)
+                {
                     // Filt the word count place holder, do not count the word.
-                    // The wordcounter place holder be configurated in wordcounter.properties
+                    // The wordcounter place holder be configurated in
+                    // wordcounter.properties
                     String matchStr = "";
                     Pattern pattern = null;
-                    for(int i = 0; i < m_placeHolderRegexArray.length; i++)
+                    for (int i = 0; i < m_placeHolderRegexArray.length; i++)
                     {
                         matchStr = m_placeHolderRegexArray[i];
-                        if(matchStr == null || matchStr.length() == 0)
+                        if (matchStr == null || matchStr.length() == 0)
                         {
                             continue;
                         }
                         pattern = Pattern.compile(matchStr);
                         String matcherText = p_text.substring(iStart);
                         Matcher matcher = pattern.matcher(matcherText);
-                        if(matcher.find() && matcher.start() == 0)
-                        { 
+                        if (matcher.find() && matcher.start() == 0)
+                        {
                             p_text = matcherText.substring(matcher.end());
                             m_si.setText(p_text);
                             iEnd = m_si.first();
                             iStart = iEnd;
                             break;
                         }
-                    }     
+                    }
                 }
             }
         }
@@ -730,11 +759,11 @@ public class DiplomatWordCounter
     }
 
     /**
-     * For Trados compatibility, this counts multiple words in tokens
-     * if the words are separated by dashes ("-"), as in "over-rated".
-     *
-     * No further check to the sub-tokens are made. If this method is
-     * called, it counts "DDR2-533MHz" and "123-456" as 2 words.
+     * For Trados compatibility, this counts multiple words in tokens if the
+     * words are separated by dashes ("-"), as in "over-rated".
+     * 
+     * No further check to the sub-tokens are made. If this method is called, it
+     * counts "DDR2-533MHz" and "123-456" as 2 words.
      */
     private int countDashedTokens(String p_token)
     {
@@ -785,15 +814,14 @@ public class DiplomatWordCounter
         return result;
     }
 
-    private Document parse(String p_xml)
-        throws DocumentException
+    private Document parse(String p_xml) throws DocumentException
     {
         return m_parser.read(new StringReader(p_xml));
     }
 
     /**
-     * Returns the XML representation like Element.asXML() but without
-     * the top-level tag.
+     * Returns the XML representation like Element.asXML() but without the
+     * top-level tag.
      */
     static public String getInnerXml(Element p_node)
     {
@@ -803,7 +831,7 @@ public class DiplomatWordCounter
 
         for (int i = 0, max = content.size(); i < max; i++)
         {
-            Node node = (Node)content.get(i);
+            Node node = (Node) content.get(i);
 
             // Work around a specific behaviour of DOM4J text nodes:
             // The text node asXML() returns the plain Unicode string,
@@ -821,25 +849,27 @@ public class DiplomatWordCounter
 
         return result.toString();
     }
+
     static public String getTranslateInnerXml(Element p_node)
     {
         StringBuilder result = new StringBuilder();
         List content = p_node.content();
-        for(int i = 0; i < content.size(); i++)
+        for (int i = 0; i < content.size(); i++)
         {
             Node node = (Node) content.get(i);
-            if(node.getNodeType() == Node.TEXT_NODE)
+            if (node.getNodeType() == Node.TEXT_NODE)
             {
                 result.append(encodeXmlEntities(node.getText()));
-            } 
+            }
         }
         return result.toString();
     }
+
     /**
-     * Returns the string value of an element with tags representing
-     * whitespace replaced by either whitespace or nbsps.
+     * Returns the string value of an element with tags representing whitespace
+     * replaced by either whitespace or nbsps.
      */
-    static public String getTextWithWhite(Element p_node, boolean...bs )
+    static public String getTextWithWhite(Element p_node, boolean... bs)
     {
         StringBuffer result = new StringBuffer();
 
@@ -847,7 +877,7 @@ public class DiplomatWordCounter
 
         for (int i = 0, max = content.size(); i < max; i++)
         {
-            Node node = (Node)content.get(i);
+            Node node = (Node) content.get(i);
 
             if (node.getNodeType() == Node.TEXT_NODE && bs.length == 0)
             {
@@ -864,40 +894,51 @@ public class DiplomatWordCounter
             }
             else if (node.getNodeType() == Node.ELEMENT_NODE)
             {
-                Element elem = (Element)node;
+                Element elem = (Element) node;
                 String type = elem.attributeValue("type");
                 int childNodes = elem.content().size();
                 // For word counting, always treat TMX whitespace tags
                 // as white.
-                if (Text.isTmxWhitespaceNode(type) ||
-                    Text.isTmxMsoWhitespaceNode(type))
+                if (Text.isTmxWhitespaceNode(type)
+                        || Text.isTmxMsoWhitespaceNode(type))
                 {
                     result.append(" ");
                 }
                 else
                 {
-                    if(childNodes > 0)
+                    if (childNodes > 0)
                     {
                         boolean isExtract = false;
-                        for(int j = 0; j < childNodes; j++){
-                            if(((Node)elem.content().get(j)).getNodeType() == Node.ELEMENT_NODE)
+                        for (int j = 0; j < childNodes; j++)
+                        {
+                            if (((Node) elem.content().get(j)).getNodeType() == Node.ELEMENT_NODE)
                             {
-                                String s = ((Element)elem.content().get(j)).attributeValue("isTranslate");
-                                String innerTextNodeIndex = ((Element)elem.content().get(j)).attributeValue("innerTextNodeIndex");
-                                if(s != null && Boolean.parseBoolean(s))
+                                String s = ((Element) elem.content().get(j))
+                                        .attributeValue("isTranslate");
+                                String innerTextNodeIndex = ((Element) elem
+                                        .content().get(j))
+                                        .attributeValue("innerTextNodeIndex");
+                                if (s != null && Boolean.parseBoolean(s))
                                 {
                                     isExtract = true;
-//                                  getTextWithWhite((Element)elem.content().get(j), true);
-//                                  ((Element)elem.content().get(j)).
-//                                  result.append(getTranslateInnerXml((Element) elem.content().get(j)));
-                                }else{
+                                    // getTextWithWhite((Element)elem.content().get(j),
+                                    // true);
+                                    // ((Element)elem.content().get(j)).
+                                    // result.append(getTranslateInnerXml((Element)
+                                    // elem.content().get(j)));
+                                }
+                                else
+                                {
                                     isExtract = false;
                                 }
-                                
+
                             }
-                            else if(((Node)elem.content().get(j)).getNodeType() == Node.TEXT_NODE && isExtract)
+                            else if (((Node) elem.content().get(j))
+                                    .getNodeType() == Node.TEXT_NODE
+                                    && isExtract)
                             {
-                                result.append(((Node)elem.content().get(j)).getText());
+                                result.append(((Node) elem.content().get(j))
+                                        .getText());
                             }
                         }
                     }
@@ -918,24 +959,25 @@ public class DiplomatWordCounter
         {
             return false;
         }
-        
-        Node prenode = (Node)content.get(i - 1);
-        Node nextnode = (Node)content.get(i + 1);
-        
-        if (prenode.getNodeType() != Node.ELEMENT_NODE 
+
+        Node prenode = (Node) content.get(i - 1);
+        Node nextnode = (Node) content.get(i + 1);
+
+        if (prenode.getNodeType() != Node.ELEMENT_NODE
                 || nextnode.getNodeType() != Node.ELEMENT_NODE)
         {
             return false;
         }
-        
+
         Element preElem = (Element) prenode;
         Element nextElem = (Element) nextnode;
-        
+
         String preelemName = preElem.getName();
         String nextelemName = nextElem.getName();
         String isInternal = preElem.attributeValue("internal");
-        
-        if ("bpt".equalsIgnoreCase(preelemName) && "ept".equalsIgnoreCase(nextelemName)
+
+        if ("bpt".equalsIgnoreCase(preelemName)
+                && "ept".equalsIgnoreCase(nextelemName)
                 && "yes".equalsIgnoreCase(isInternal))
         {
             return true;
@@ -968,71 +1010,85 @@ public class DiplomatWordCounter
 
             switch (c)
             {
-            case '<':  res.append("&lt;");   break;
-            case '>':  res.append("&gt;");   break;
-            case '&':  res.append("&amp;");  break;
-            default:   res.append(c);        break;
+                case '<':
+                    res.append("&lt;");
+                    break;
+                case '>':
+                    res.append("&gt;");
+                    break;
+                case '&':
+                    res.append("&amp;");
+                    break;
+                default:
+                    res.append(c);
+                    break;
             }
         }
 
         return res.toString();
     }
-    
+
     /**
-     *  Convert the wordcounter placeholder Expression to regex String.
-     * @param p_oriStr 
+     * Convert the wordcounter placeholder Expression to regex String.
+     * 
+     * @param p_oriStr
      * @return Converted regex expression string
      */
     private static String convetToRegexStr(String p_oriStr)
     {
         StringBuffer newRegexStr = new StringBuffer();
         HashMap regexStrMap = new HashMap();
-        regexStrMap.put("[", "\\['");      // [ --> \[
-        regexStrMap.put("]", "\\]'");      // ] --> \]
-        regexStrMap.put("\\", "\\\\");     // \ --> \\
-        regexStrMap.put("^", "\\^");       // ^ --> \^
-        regexStrMap.put("$", "\\$");           // $ --> \$
-        regexStrMap.put(".", "\\.");           // . --> \.
-        regexStrMap.put("|", "\\|");           // | --> \|
-        regexStrMap.put("?", "\\?");           // ? --> \?
-        regexStrMap.put("*", "\\*");           // * --> \?
-        regexStrMap.put("+", "\\+");           // + --> \+
-        regexStrMap.put("(", "\\(");           // ( --> \(
-        regexStrMap.put(")", "\\)");           // ) --> \)
-        regexStrMap.put("\"", "\\\"");         // \ --> \\
-        regexStrMap.put("{", "\\{");           // { --> \{
-        regexStrMap.put("}", "\\}");           // } --> \}
-        regexStrMap.put("{*", "\\{[^\\{]*");   // {* --> \{[^{]*
-        regexStrMap.put("(*", "\\([^\\(]*");   // (* --> \([^(]*
-        regexStrMap.put("[*", "\\[[^\\[]*");   // [* --> \[[^\[]*
-        regexStrMap.put("*", ".*?");           // * --> .*?
-        
+        regexStrMap.put("[", "\\['"); // [ --> \[
+        regexStrMap.put("]", "\\]'"); // ] --> \]
+        regexStrMap.put("\\", "\\\\"); // \ --> \\
+        regexStrMap.put("^", "\\^"); // ^ --> \^
+        regexStrMap.put("$", "\\$"); // $ --> \$
+        regexStrMap.put(".", "\\."); // . --> \.
+        regexStrMap.put("|", "\\|"); // | --> \|
+        regexStrMap.put("?", "\\?"); // ? --> \?
+        regexStrMap.put("*", "\\*"); // * --> \?
+        regexStrMap.put("+", "\\+"); // + --> \+
+        regexStrMap.put("(", "\\("); // ( --> \(
+        regexStrMap.put(")", "\\)"); // ) --> \)
+        regexStrMap.put("\"", "\\\""); // \ --> \\
+        regexStrMap.put("{", "\\{"); // { --> \{
+        regexStrMap.put("}", "\\}"); // } --> \}
+        regexStrMap.put("{*", "\\{[^\\{]*"); // {* --> \{[^{]*
+        regexStrMap.put("(*", "\\([^\\(]*"); // (* --> \([^(]*
+        regexStrMap.put("[*", "\\[[^\\[]*"); // [* --> \[[^\[]*
+        regexStrMap.put("*", ".*?"); // * --> .*?
+
         int oriStrLength = p_oriStr.length();
-        for(int i = 0; i < oriStrLength; i++)
+        for (int i = 0; i < oriStrLength; i++)
         {
             char ch = p_oriStr.charAt(i);
             String key = String.valueOf(ch);
             String value = null;
-            String lastChar = p_oriStr.substring(oriStrLength-1, oriStrLength);
-            if(key.equals("{") && "}".equals(lastChar) && "{*".equals(p_oriStr.substring(i,i+2)))
+            String lastChar = p_oriStr
+                    .substring(oriStrLength - 1, oriStrLength);
+            if (key.equals("{") && "}".equals(lastChar)
+                    && "{*".equals(p_oriStr.substring(i, i + 2)))
             {
                 // key is "{*"
-                key = p_oriStr.substring(i,i+2);
+                key = p_oriStr.substring(i, i + 2);
                 i++;
-            }else if(key.equals("(") && ")".equals(lastChar) && "(*".equals(p_oriStr.substring(i,i+2)))
+            }
+            else if (key.equals("(") && ")".equals(lastChar)
+                    && "(*".equals(p_oriStr.substring(i, i + 2)))
             {
                 // key is "(*"
-                key = p_oriStr.substring(i,i+2);
+                key = p_oriStr.substring(i, i + 2);
                 i++;
             }
-            else if(key.equals("[") && "]".equals(lastChar) && "[*".equals(p_oriStr.substring(i,i+2)))
+            else if (key.equals("[") && "]".equals(lastChar)
+                    && "[*".equals(p_oriStr.substring(i, i + 2)))
             {
                 // key is "[*"
-                key = p_oriStr.substring(i,i+2);
+                key = p_oriStr.substring(i, i + 2);
                 i++;
             }
-            value = (String)regexStrMap.get(key);
-            if(value == null)
+            value = (String) regexStrMap.get(key);
+            if (value == null)
             {
                 value = key;
             }
@@ -1043,32 +1099,33 @@ public class DiplomatWordCounter
 
     /**
      * 
-     *  Generate a placeholder regex array based on the placeholder string from property file
+     * Generate a placeholder regex array based on the placeholder string from
+     * property file
      * 
      * @param p_placeHolderStr
      * @return
      */
     private static String[] setPlaceHolderRegexArray(String p_placeHolderStr)
     {
-        
-        String []placeHoldArray = null;
-        String []placeHolderRegexArray = null;
-        if(p_placeHolderStr != null && !"".equals(p_placeHolderStr))
+
+        String[] placeHoldArray = null;
+        String[] placeHolderRegexArray = null;
+        if (p_placeHolderStr != null && !"".equals(p_placeHolderStr))
         {
-            placeHoldArray = p_placeHolderStr.split("\n");        
+            placeHoldArray = p_placeHolderStr.split("\n");
             String placeHolderStr = "";
             String placeHolderRegexStr = "";
             placeHolderRegexArray = new String[placeHoldArray.length];
-            for(int i = 0; i < placeHoldArray.length; i++)
+            for (int i = 0; i < placeHoldArray.length; i++)
             {
                 placeHolderStr = placeHoldArray[i];
-                if(placeHolderStr != null && placeHolderStr.length() > 0)
+                if (placeHolderStr != null && placeHolderStr.length() > 0)
                 {
-//                  placeHolderRegexStr = convetToRegexStr(placeHolderStr);
-//                  placeHolderRegexArray[i] = placeHolderRegexStr;
+                    // placeHolderRegexStr = convetToRegexStr(placeHolderStr);
+                    // placeHolderRegexArray[i] = placeHolderRegexStr;
                     placeHolderRegexArray[i] = placeHolderStr;
                 }
-                
+
             }
         }
         return placeHolderRegexArray;

@@ -1,18 +1,18 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 
 package com.globalsight.everest.webapp.pagehandler.tm.management;
@@ -24,12 +24,15 @@ import java.math.BigInteger;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -38,17 +41,23 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.globalsight.cxe.entity.customAttribute.TMAttribute;
+import com.globalsight.cxe.entity.customAttribute.TMAttributeManager;
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.gsedition.GSEdition;
 import com.globalsight.everest.gsedition.GSEditionManagerLocal;
 import com.globalsight.everest.integration.ling.LingServerProxy;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.ProjectHandlerException;
 import com.globalsight.everest.projecthandler.ProjectTM;
@@ -62,8 +71,12 @@ import com.globalsight.everest.util.comparator.ProjectTMComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.util.FormUtil;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.progress.ProcessStatus;
@@ -76,41 +89,35 @@ import com.globalsight.webservices.client.WebServiceClientHelper;
  */
 public class TmMainHandler extends PageHandler implements WebAppConstants
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(TmMainHandler.class);
+    private static final Logger logger = Logger.getLogger(TmMainHandler.class);
 
-    //
     // Static Members
-    //
-    static private ProjectHandler s_manager = null;
-    static private int NUM_PER_PAGE = 10;
+    static private ProjectHandler projectHandler = null;
+    static private int NUM_PER_PAGE = 20;
 
-    //
     // Constructor
-    //
     public TmMainHandler()
     {
         super();
 
-        if (s_manager == null)
+        if (projectHandler == null)
         {
             try
             {
-                s_manager = ServerProxy.getProjectHandler();
+                projectHandler = ServerProxy.getProjectHandler();
             }
             catch (Exception ignore)
             {
+                logger.error("Error found in generating ProjectHandler.", ignore);
             }
         }
     }
 
-    //
     // Interface Methods: PageHandler
-    //
 
     /**
      * Invoke this PageHandler.
-     * 
+     *
      * @param p_pageDescriptor
      *            the page desciptor
      * @param p_request
@@ -129,123 +136,84 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         SessionManager sessionMgr = (SessionManager) session
                 .getAttribute(SESSION_MANAGER);
 
-        ProcessStatus status = (ProcessStatus) sessionMgr
-                .getAttribute(TM_TM_STATUS);
-
-        if (status != null)
-        {
-            SearchReplaceManager manager = (SearchReplaceManager) sessionMgr
-                    .getAttribute(TM_CONCORDANCE_MANAGER);
-            if (manager != null)
-                manager.detachListener((IProcessStatusListener) status);
-
-            sessionMgr.removeElement(TM_TM_STATUS);
-            sessionMgr.removeElement(TM_CONCORDANCE_MANAGER);
-            sessionMgr.removeElement(TM_CONCORDANCE_SEARCH_RESULTS);
-        }
+        handleProcessStatus(sessionMgr);
 
         Locale uiLocale = (Locale) session.getAttribute(UILOCALE);
 
         String userId = getUser(session).getUserId();
-        boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
+        boolean isAdmin = UserUtil.isInPermissionGroup(userId,
+                Permission.GROUP_ADMINISTRATOR);
         boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
-        
+
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
         Company curremtCompany = CompanyWrapper
                 .getCompanyById(currentCompanyId);
         boolean enableTMAccessControl = curremtCompany
                 .getEnableTMAccessControl();
-        
 
-        String action = (String) p_request.getParameter(TM_ACTION);
-        String tmId = (String) p_request.getParameter(RADIO_TM_ID);
-        String name = null;
+        sessionMgr.setAttribute("isAdmin", isAdmin);
+        sessionMgr.setAttribute("enableTMAccessControl", enableTMAccessControl);
+
+        String action = (String) p_request.getParameter(ACTION_STRING);
+        String filterSearch = handleFilters(p_request, sessionMgr, action);
+        setNumberOfPerPage(p_request);
+
+        String[] tmIds = p_request.getParameterValues(RADIO_TM_ID);
+        String tmId = "";
+        if (tmIds != null && tmIds.length == 1)
+            tmId = tmIds[0];
+
+        String tmName = null;
+        List<ProjectTM> tms = new ArrayList<ProjectTM>();
 
         try
         {
-            if (tmId != null && tmId.length() > 0)
+            List<TMAttribute> tmas = null;
+            List<String> allAtt = null;
+            if (!StringUtil.isEmpty(tmId))
             {
-                /*
-                 * name = s_manager.getTmName(Long.parseLong(tmid));
-                 */
-                ProjectTM tm = s_manager.getProjectTMById(Long.parseLong(tmId),
-                        false);
-                name = tm.getName();
+                ProjectTM tm = projectHandler.getProjectTMById(
+                        Long.parseLong(tmId), false);
+                tmName = tm.getName();
 
                 sessionMgr.setAttribute(TM_TM_ID, tmId);
-                sessionMgr.setAttribute(TM_TM_NAME, name);
+                sessionMgr.setAttribute(TM_TM_NAME, tmName);
+
+                tmas = tm.getAllTMAttributes();
+                allAtt = TMAttributeManager.getAvailableAttributenames(tm);
             }
-
-            if (action == null)
+            else
             {
-                // show main screen with list of TMs
-                /*
-                 * String names = s_manager.getDescriptions(uiLocale); String
-                 * names = getDescriptions(s_manager.getAllProjectTMs(),
-                 * uiLocale, session); sessionMgr.setAttribute(TM_NAMELIST,
-                 * names);
-                 */
-                sessionMgr.setAttribute("isAdmin", isAdmin);
-                sessionMgr.setAttribute("enableTMAccessControl", enableTMAccessControl);
-                List tms = getTMs(userId);
-                setTableNavigation(p_request, session, tms,
-                        new ProjectTMComparator(uiLocale), NUM_PER_PAGE,
-                        TM_LIST, TM_KEY);
-
+                tmas = new ArrayList<TMAttribute>();
+                allAtt = TMAttributeManager.getAvailableAttributenames();
             }
-            else if (action.equals(TM_ACTION_CANCEL_VALIDATION))
-            {
-                TmProcessStatus tmStatus = (TmProcessStatus) sessionMgr
-                        .getAttribute(TM_UPLOAD_STATUS);
-                if (tmStatus != null)
-                {
-                    tmStatus.setCanceled(true);
-                }
+            p_request.setAttribute(TM_AVAILABLE_ATTS, TMAttributeManager.toOneStr(allAtt));
+            p_request.setAttribute(TM_TM_ATTS, TMAttributeManager.toOne(tmas));
 
-                sessionMgr.setAttribute(TM_UPLOAD_STATUS, null);
-                sessionMgr.setAttribute("isAdmin", isAdmin);
-                sessionMgr.setAttribute("enableTMAccessControl", enableTMAccessControl);
-                List tms = getTMs(userId);
-                setTableNavigation(p_request, session, tms,
-                        new ProjectTMComparator(uiLocale), NUM_PER_PAGE,
-                        TM_LIST, TM_KEY);
+            //Handle actions
+            if (action == null) {
+                Tm3ConvertProcess tm3ConvertProcess = Tm3ConvertProcess.getInstance();
+                String tm3Status = tm3ConvertProcess.getStatus();
+                if ("".equals(tm3Status) || "Cancelled".equals(tm3Status))
+                    tm3ConvertProcess.setStatus("null");
+            } else if (action.equals(TM_ACTION_CANCEL_VALIDATION))
+            {
+                cancelValidation(sessionMgr);
             }
             else if (action.equals(TM_ACTION_NEW))
             {
-                // show screen to create new TM: pass an empty (or, default)
-                // definition.
-                String definition = "<tm>"
-                        + "<name></name><domain></domain><organization></organization><description></description>"
-                        + "<isRemoteTm>false</isRemoteTm><gsEditionId></gsEditionId>"
-                        + "<remoteTmProfileId></remoteTmProfileId><remoteTmProfileName></remoteTmProfileName>"
-                        + "</tm>";
-                sessionMgr.setAttribute(TM_DEFINITION, definition);
-                List tms = (List) s_manager.getAllProjectTMs();
-                setTMNames(p_request, tms);
-
-                FormUtil.addSubmitToken(p_request,
-                        FormUtil.Forms.NEW_TRANSLATION_MEMORY);
-
-                GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
-                Collection allGSEdition = gsEditionManager.getAllGSEdition();
-                sessionMgr.setAttribute("allGSEdition", allGSEdition);
+                //Generate an empty TM defination
+                createTM(p_request, sessionMgr);
             }
             else if (action.equals(TM_ACTION_MODIFY))
             {
-                if (tmId == null
-                        || p_request.getMethod().equalsIgnoreCase(
-                                REQUEST_METHOD_GET))
-                {
-                    p_response
-                            .sendRedirect("/globalsight/ControlServlet?activityName=tm");
-                    return;
-                }
-                ProjectTM projectTm = s_manager.getProjectTMById(Long
-                        .parseLong(tmId), false);
+                tmId = p_request.getParameter("TMId");
+                ProjectTM projectTm = projectHandler.getProjectTMById(
+                        Long.parseLong(tmId), false);
                 sessionMgr.setAttribute("modifyProjectTM", projectTm);
 
                 // load existing definition and display for modification
-                String definition = getDescription(projectTm, false);
+                String definition = getDefination(projectTm, false);
                 sessionMgr.setAttribute(TM_DEFINITION, definition);
 
                 GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
@@ -262,23 +230,18 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
             }
             else if (action.equals(TM_ACTION_CLONE))
             {
-                if (tmId == null
-                        || p_request.getMethod().equalsIgnoreCase(
-                                REQUEST_METHOD_GET))
-                {
-                    p_response
-                            .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+                if (isFromHttpGetWithoutTmId(p_request, p_response, tmId))
                     return;
-                }
-                ProjectTM projectTm = s_manager.getProjectTMById(Long
-                        .parseLong(tmId), false);
+
+                ProjectTM projectTm = projectHandler.getProjectTMById(
+                        Long.parseLong(tmId), false);
                 sessionMgr.setAttribute("modifyProjectTM", projectTm);
                 // load existing definition and display for cloning
-                String definition = getDescription(projectTm, true);
+                String definition = getDefination(projectTm, true);
                 sessionMgr.setAttribute(TM_DEFINITION, definition);
 
-                List tms = getTMs(userId);
-                setTMNames(p_request, tms);
+                tms = (List) projectHandler.getAllProjectTMs();
+                sessionMgr.setAttribute(TM_EXIST_NAMES, getExistTMNames(tms));
                 FormUtil.addSubmitToken(p_request,
                         FormUtil.Forms.NEW_TRANSLATION_MEMORY);
 
@@ -300,17 +263,10 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                         .getParameter(TM_TM_DESCRIPTION));
                 String isRemoteTm = EditUtil.utf8ToUnicode((String) p_request
                         .getParameter(TM_TM_REMOTE_TM));
+                String tmAttributes = (String) p_request.getParameter("tmAttributes");
 
                 try
                 {
-                    /*
-                     * if (id != null && id.length() > 0) { // update existing
-                     * TM s_manager.updateTm(Long.parseLong(id), newname,
-                     * domain, organization, description); } else { // create
-                     * new s_manager.createTm( newname, domain, organization,
-                     * description); }
-                     */
-
                     ProjectTM tm = new ProjectTM();
 
                     tm.setName(newname);
@@ -319,9 +275,8 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     tm.setDescription(description);
                     tm.setCreationUser(userId);
                     tm.setCreationDate(new Date());
-                    tm
-                            .setCompanyId(CompanyThreadLocal.getInstance()
-                                    .getValue());
+                    tm.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+                    TMAttributeManager.setTMAttributes(tm, tmAttributes);
                     if (isRemoteTm != null && "on".equals(isRemoteTm))
                     {
                         tm.setIsRemoteTm(true);
@@ -357,7 +312,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                     {
                         // update existing TM
                         tm.setId(Long.parseLong(id));
-                        s_manager.modifyProjectTM(tm);
+                        projectHandler.modifyProjectTM(tm);
                     }
                     else
                     {
@@ -365,7 +320,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                                 FormUtil.Forms.NEW_TRANSLATION_MEMORY))
                         {
                             // create new
-                            s_manager.createProjectTM(tm);
+                            projectHandler.createProjectTM(tm);
                             if (!isAdmin && !isSuperAdmin)
                             {
                                 long tId = tm.getId();
@@ -377,108 +332,86 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                                     FormUtil.Forms.NEW_TRANSLATION_MEMORY);
                         }
                     }
-                }
-                finally
-                {
-                    /*
-                     * String names = s_manager.getDescriptions(uiLocale);
-                     * String names =
-                     * getDescriptions(s_manager.getAllProjectTMs(), uiLocale,
-                     * session);
-                     * 
-                     * sessionMgr.setAttribute(TM_NAMELIST, names);
-                     */
-                    List tms = getTMs(userId);
-                    sessionMgr.setAttribute("isAdmin", isAdmin);
-                    sessionMgr.setAttribute("enableTMAccessControl", enableTMAccessControl);
-                    setTableNavigation(p_request, session, tms,
-                            new ProjectTMComparator(uiLocale), NUM_PER_PAGE,
-                            TM_LIST, TM_KEY);
+                } catch (Exception e) {
+                    logger.error("Error found in saving project TM.", e);
                 }
             }
             else if (action.equals(TM_ACTION_DELETE))
             {
-                if (tmId == null
-                        || p_request.getMethod().equalsIgnoreCase(
-                                REQUEST_METHOD_GET))
-                {
-                    p_response
-                            .sendRedirect("/globalsight/ControlServlet?activityName=tm");
-                    return;
-                }
                 try
                 {
-                    /*
-                     * s_manager.deleteTm(name);
-                     */
-                    // throw new
-                    // Exception("YOU SHALL NOT DELETE A TM. GOD FORBIDS IT");
-                    Tm tm = s_manager.getProjectTMById(Long.valueOf(tmId),
-                            false);
-                    String definition = LingServerProxy.getTmCoreManager()
-                            .getTmStatistics(tm, uiLocale, false).asXML();
-                    sessionMgr.setAttribute(TM_DEFINITION, definition);
-                    p_request.setAttribute(TM_TM_ID, tmId);
-                }
-                finally
-                {
-                    /*
-                     * String names = s_manager.getDescriptions(uiLocale);
-                     * String names =
-                     * getDescriptions(s_manager.getAllProjectTMs(), uiLocale,
-                     * session);
-                     * 
-                     * sessionMgr.setAttribute(TM_NAMELIST, names);
-                     */
-                    List tms = getTMs(userId);
-                    sessionMgr.setAttribute("isAdmin", isAdmin);
-                    sessionMgr.setAttribute("enableTMAccessControl", enableTMAccessControl);
-                    setTableNavigation(p_request, session, tms,
-                            new ProjectTMComparator(uiLocale), NUM_PER_PAGE,
-                            TM_LIST, TM_KEY);
+                    HashSet<GlobalSightLocale> TMLocales = new HashSet<GlobalSightLocale>();
+                    ProjectTM tm = null;
+                    Set<GlobalSightLocale> locales = null;
+                    String tmIdString = "";
+                    if (tmIds != null)
+                    {
+                        for (int i = 0; i < tmIds.length; i++)
+                        {
+                            tmId = tmIds[i];
+                            tm = projectHandler.getProjectTMById(
+                                    Long.valueOf(tmId), false);
+                            tms.add(tm);
+                            locales = LingServerProxy.getTmCoreManager()
+                                    .getTmLocales(tm);
+                            TMLocales.addAll(locales);
+                            tmIdString += tmId + ",";
+                        }
+                    }
+                    else
+                    {
+                        ArrayList<ProjectTM> allTms = new ArrayList<ProjectTM>(
+                                projectHandler.getAllProjectTMs(isSuperAdmin));
+                        for (int i = 0; i < allTms.size(); i++)
+                        {
+                            tm = allTms.get(i);
+                            if (tm.getLastTUId() > -1
+                                    || WebAppConstants.TM_STATUS_CONVERTING
+                                            .equals(tm.getStatus()))
+                                continue;
+                            tmId = String.valueOf(tm.getId());
+                            tms.add(tm);
+                            locales = LingServerProxy.getTmCoreManager()
+                                    .getTmLocales(tm);
+                            TMLocales.addAll(locales);
+                            tmIdString += tmId + ",";
+                        }
+                    }
+                    if (!tmIdString.equals(""))
+                        tmIdString = tmIdString.substring(0,
+                                tmIdString.length() - 1);
+
+                    // sessionMgr.setAttribute(TM_DEFINITION, definition);
+                    sessionMgr.setAttribute("tmLocales", TMLocales);
+                    sessionMgr.setAttribute(TM_TM_ID, tmIdString);
+                    sessionMgr.setAttribute("projectTms", tms);
+                } catch (Exception e) {
+                    logger.error("Error found in deleting project TM.", e);
                 }
             }
             else if (action.equals(TM_ACTION_IMPORT))
             {
-                if (tmId == null
-                        || p_request.getMethod().equalsIgnoreCase(
-                                REQUEST_METHOD_GET))
-                {
-                    p_response
-                            .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+                if (isFromHttpGetWithoutTmId(p_request, p_response, tmId))
                     return;
-                }
-                // load existing definition and display for modification
-                /*
-                 * String definition = s_manager.getDefinition(name, false);
-                 */
-                String definition = getDescription(s_manager.getProjectTMById(
-                        Long.parseLong(tmId), false), false);
+                String definition = getDefination(
+                        projectHandler.getProjectTMById(Long.parseLong(tmId),
+                                false), false);
 
                 sessionMgr.setAttribute(TM_DEFINITION, definition);
             }
             else if (action.equals(TM_ACTION_EXPORT))
             {
-                if (tmId == null
-                        || p_request.getMethod().equalsIgnoreCase(
-                                REQUEST_METHOD_GET))
-                {
-                    p_response
-                            .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+                if (isFromHttpGetWithoutTmId(p_request, p_response, tmId))
                     return;
-                }
-                // load existing definition and display for modification
-                /*
-                 * String definition = s_manager.getDefinition(name, false);
-                 */
-                String definition = getDescription(s_manager.getProjectTMById(
-                        Long.parseLong(tmId), false), false);
+                String definition = getDefination(
+                        projectHandler.getProjectTMById(Long.parseLong(tmId),
+                                false), false);
 
                 sessionMgr.setAttribute(TM_DEFINITION, definition);
             }
             else if (action.equals(TM_ACTION_STATISTICS))
             {
-                Tm tm = s_manager.getProjectTMById(Long.parseLong(tmId), false);
+                Tm tm = projectHandler.getProjectTMById(Long.parseLong(tmId), false);
                 String stats = LingServerProxy.getTmCoreManager()
                         .getTmStatistics(tm, uiLocale, false).asXML();
 
@@ -494,92 +427,287 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
                 ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
                 projectTMTBUsers.updateUsers(tmId, "TM", selectedField);
+            }
+            else if (action.equals(TM_ACTION_CONVERT))
+            {
+                // Convert selected TM from TM2 to TM3
+                if (isFromHttpGetWithoutTmId(p_request, p_response, tmId))
+                    return;
 
-                List tms = getTMs(userId);
-                sessionMgr.setAttribute("isAdmin", isAdmin);
-                sessionMgr.setAttribute("enableTMAccessControl", enableTMAccessControl);
-                setTableNavigation(p_request, session, tms,
-                        new ProjectTMComparator(uiLocale), NUM_PER_PAGE,
-                        TM_LIST, TM_KEY);
+                sessionMgr.setAttribute(TM_TM_NAME, tmName);
+                sessionMgr.setAttribute(TM_TM_ID, tmId);
+
+                Tm3ConvertProcess convertProcess = Tm3ConvertProcess
+                        .getInstance();
+                long tm2Id = Long.parseLong(tmId);
+                try
+                {
+                    Session hsession = TmUtil.getStableSession();
+
+                    ProjectTM oldTm = (ProjectTM) hsession.get(ProjectTM.class,
+                            tm2Id);
+                    if (oldTm != null)
+                    {
+                        long companyId = Long.valueOf(oldTm.getCompanyId());
+
+                        Tm3ConvertHelper tm3Convert = new Tm3ConvertHelper(
+                                hsession, companyId, oldTm);
+
+                        convertProcess.setConvertHelper(tm3Convert);
+                        convertProcess.setTm2Id(oldTm.getId());
+                        convertProcess.setTm2Name(oldTm.getName());
+                        if (oldTm.getLastTUId() == -1) {
+                            convertProcess.setTm3Id(-1);
+                            convertProcess.setStatus(WebAppConstants.TM_STATUS_DEFAULT);
+                        }
+
+                        session.setAttribute("tm3Convert", tm3Convert);
+                        tm3Convert.convert();
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error found in tm conversion.", e);
+                }
+
+                long tmpId = convertProcess.getTm3Id();
+                ProjectTM tmpTm = null;
+                while (true)
+                {
+                    tmpTm = ServerProxy.getProjectHandler().getProjectTMById(
+                            tmpId, false);
+                    if (tmpTm != null)
+                        break;
+                    tmpId = convertProcess.getTm3Id();
+                }
+            }
+            else if (action.equals(TM_ACTION_CONVERT_CANCEL))
+            {
+                try
+                {
+                    logger.info("Run into cancel operation.");
+                    Tm3ConvertHelper tm3ConvertHelper = (Tm3ConvertHelper) session
+                            .getAttribute("tm3Convert");
+                    logger.info("TM3ConvertHelper object is " + tm3ConvertHelper);
+                    if (tm3ConvertHelper != null)
+                        tm3ConvertHelper.cancel();
+
+                    Tm3ConvertProcess convertProcess = Tm3ConvertProcess.getInstance();
+                    while (!WebAppConstants.TM_STATUS_CONVERTED_CANCELLED.equals(convertProcess.getStatus())) {
+                        convertProcess = Tm3ConvertProcess.getInstance();
+                    }
+                    convertProcess.setConvertedRate(5);
+                    logger.info("Finished to handle cancel operation.");
+                }
+                catch (Exception e)
+                {
+                    logger.error("Error in canceling conversion"
+                            + e.getMessage());
+                }
             }
         }
         catch (Throwable ex)
         {
-            CATEGORY.error(action, ex);
-
-            // JSP needs to clear this.
+            logger.error("Error found in " + action, ex);
             sessionMgr.setAttribute(TM_ERROR, ex.toString());
         }
+
+        tms = getTMs(userId, filterSearch);
+        setTableNavigation(p_request, session, tms, new ProjectTMComparator(
+                uiLocale), NUM_PER_PAGE, TM_LIST, TM_KEY);
+
+        ArrayList<ProjectTM> proceedTms = new ArrayList<ProjectTM>(tms);
+        String tm3Tms = "", convertingTms = "", remoteTms = "";
+        String tmpTmId = "";
+        for (ProjectTM tm : proceedTms) {
+            tmpTmId = String.valueOf(tm.getId());
+            if (tm.getTm3Id() != null)
+                tm3Tms += tmpTmId + ",";
+            if (tm.getLastTUId() > 0 || WebAppConstants.TM_STATUS_CONVERTING.equals(tm.getStatus()))
+                convertingTms += tmpTmId + ",";
+            if (tm.getIsRemoteTm())
+                remoteTms = tmpTmId + ",";
+        }
+        sessionMgr.setAttribute("tm3Tms", tm3Tms);
+        sessionMgr.setAttribute("convertingTms", convertingTms);
+        sessionMgr.setAttribute("remoteTms", remoteTms);
 
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
     }
 
-    private String getDescription(ProjectTM p_tm, boolean p_clone)
+    private void createTM(HttpServletRequest p_request,
+            SessionManager sessionMgr) throws RemoteException
     {
-        StringBuffer result = new StringBuffer();
+        List<ProjectTM> tms;
+        String definition = getDefination(null, false);
+        sessionMgr.setAttribute(TM_DEFINITION, definition);
 
-        if (!p_clone)
+        tms = new ArrayList<ProjectTM>(projectHandler.getAllProjectTMs());
+        sessionMgr.setAttribute(TM_EXIST_NAMES, getExistTMNames(tms));
+
+        FormUtil.addSubmitToken(p_request,
+                FormUtil.Forms.NEW_TRANSLATION_MEMORY);
+
+        GSEditionManagerLocal gsEditionManager = new GSEditionManagerLocal();
+        Collection allGSEdition = gsEditionManager.getAllGSEdition();
+        sessionMgr.setAttribute(GS_EDITION_ALL, allGSEdition);
+    }
+
+    private void cancelValidation(SessionManager sessionMgr)
+    {
+        TmProcessStatus tmStatus = (TmProcessStatus) sessionMgr
+                .getAttribute(TM_UPLOAD_STATUS);
+        if (tmStatus != null)
+            tmStatus.setCanceled(true);
+
+        sessionMgr.setAttribute(TM_UPLOAD_STATUS, null);
+    }
+
+    private void handleProcessStatus(SessionManager sessionMgr)
+    {
+        ProcessStatus status = (ProcessStatus) sessionMgr
+                .getAttribute(TM_TM_STATUS);
+
+        if (status != null)
         {
-            result.append("<tm id='");
-            result.append(p_tm.getId());
-            result.append("'>");
+            SearchReplaceManager manager = (SearchReplaceManager) sessionMgr
+                    .getAttribute(TM_CONCORDANCE_MANAGER);
+            if (manager != null)
+                manager.detachListener((IProcessStatusListener) status);
+
+            sessionMgr.removeElement(TM_TM_STATUS);
+            sessionMgr.removeElement(TM_CONCORDANCE_MANAGER);
+            sessionMgr.removeElement(TM_CONCORDANCE_SEARCH_RESULTS);
+        }
+    }
+
+    private String handleFilters(HttpServletRequest p_request,
+            SessionManager sessionMgr, String action)
+    {
+        String name = (String) p_request.getParameter("tmNameFilter");
+        String company = (String) p_request.getParameter("tmCompanyFilter");
+
+        if (!FILTER_SEARCH.equals(action) || p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET)) {
+            name = (String) sessionMgr.getAttribute("tmNameFilter");
+            company = (String) sessionMgr.getAttribute("tmCompanyFilter");
+        }
+        sessionMgr.setAttribute("tmNameFilter", name == null ? "" : name);
+        sessionMgr.setAttribute("tmCompanyFilter", company == null ? "" : company);
+
+        String condition = "";
+        if (StringUtil.isNotEmpty(name)) {
+            name = fixQueryString(name);
+            condition = "pt.name like '%" + name + "%'";
+        }
+        if (StringUtil.isNotEmpty(company)) {
+            company = fixQueryString(company);
+            if (!StringUtil.isEmpty(condition))
+                condition += " and ";
+            condition += "pt.companyId in (select c.id from Company c where c.name like '%" + company + "%')";
+        }
+        if (FILTER_SEARCH.equals(action)) {
+            //Go to page #1 if current action is filter searching.
+            sessionMgr.setAttribute(TM_KEY + TableConstants.LAST_PAGE_NUM, Integer.valueOf(1));
+        }
+
+        return condition;
+    }
+
+    private String fixQueryString(String s) {
+        return s.replace("_", "\\_");
+    }
+
+    private boolean isFromHttpGetWithoutTmId(HttpServletRequest p_request,
+            HttpServletResponse p_response, String tmId) throws IOException
+    {
+        if (StringUtil.isEmpty(tmId)
+                || p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
+        {
+            p_response
+                    .sendRedirect("/globalsight/ControlServlet?activityName=tm");
+            return true;
         }
         else
-        {
-            result.append("<tm>");
+            return false;
+    }
+
+    private String getDefination(ProjectTM p_tm, boolean p_clone)
+    {
+        StringBuffer result = new StringBuffer(200);
+
+        if (p_tm == null) {
+            result.append("<tm><name></name><domain></domain><organization></organization>")
+                  .append("<description></description><isRemoteTm>false</isRemoteTm>")
+                  .append("<gsEditionId></gsEditionId><remoteTmProfileId></remoteTmProfileId>")
+                  .append("<remoteTmProfileName></remoteTmProfileName></tm>");
+        } else {
+            if (!p_clone)
+            {
+                result.append("<tm id='");
+                result.append(p_tm.getId());
+                result.append("'>");
+            }
+            else
+            {
+                result.append("<tm>");
+            }
+            result.append("<name>");
+            if (!p_clone)
+            {
+                result.append(EditUtil.encodeXmlEntities(p_tm.getName()));
+            }
+            result.append("</name>");
+            result.append("<domain>");
+            result.append(EditUtil.encodeXmlEntities(p_tm.getDomain()));
+            result.append("</domain>");
+            result.append("<organization>");
+            result.append(EditUtil.encodeXmlEntities(p_tm.getOrganization()));
+            result.append("</organization>");
+            result.append("<description>");
+
+            // for bug GBS-2547,by fan
+            String desc1 = EditUtil.encodeXmlEntities(p_tm.getDescription())
+                    .replaceAll("\r\n", "&lt;br/&gt;"); //for windows
+            String desc2 = desc1.replaceAll("\n", "&lt;br/&gt;"); //for unix
+            result.append(desc2);
+
+            result.append("</description>");
+            result.append("<isRemoteTm>");
+            result.append(EditUtil.encodeXmlEntities(p_tm.getIsRemoteTm() == true ? "true" : "false"));
+            result.append("</isRemoteTm>");
+            result.append("<gsEditionId>");
+            result.append(EditUtil
+                    .encodeXmlEntities(p_tm.getGsEditionId() == -1 ? "" : String
+                            .valueOf(p_tm.getGsEditionId())));
+            result.append("</gsEditionId>");
+            result.append("<remoteTmProfileId>");
+            result
+                    .append(EditUtil
+                            .encodeXmlEntities(p_tm.getRemoteTmProfileId() == -1 ? "" : String
+                                    .valueOf(p_tm.getRemoteTmProfileId())));
+            result.append("</remoteTmProfileId>");
+            result.append("<remoteTmProfileName>");
+            result
+                    .append(EditUtil.encodeXmlEntities(p_tm
+                            .getRemoteTmProfileName() == null ? "" : p_tm
+                            .getRemoteTmProfileName()));
+            result.append("</remoteTmProfileName>");
+            result.append("</tm>");
         }
-        result.append("<name>");
-        if (!p_clone)
-        {
-            result.append(EditUtil.encodeXmlEntities(p_tm.getName()));
-        }
-        result.append("</name>");
-        result.append("<domain>");
-        result.append(EditUtil.encodeXmlEntities(p_tm.getDomain()));
-        result.append("</domain>");
-        result.append("<organization>");
-        result.append(EditUtil.encodeXmlEntities(p_tm.getOrganization()));
-        result.append("</organization>");
-        result.append("<description>");
-        result.append(EditUtil.encodeXmlEntities(p_tm.getDescription()));
-        result.append("</description>");
-        result.append("<isRemoteTm>");
-        result
-                .append(EditUtil
-                        .encodeXmlEntities(p_tm.getIsRemoteTm() == true ? "true" : "false"));
-        result.append("</isRemoteTm>");
-        result.append("<gsEditionId>");
-        result.append(EditUtil
-                .encodeXmlEntities(p_tm.getGsEditionId() == -1 ? "" : String
-                        .valueOf(p_tm.getGsEditionId())));
-        result.append("</gsEditionId>");
-        result.append("<remoteTmProfileId>");
-        result
-                .append(EditUtil
-                        .encodeXmlEntities(p_tm.getRemoteTmProfileId() == -1 ? "" : String
-                                .valueOf(p_tm.getRemoteTmProfileId())));
-        result.append("</remoteTmProfileId>");
-        result.append("<remoteTmProfileName>");
-        result
-                .append(EditUtil.encodeXmlEntities(p_tm
-                        .getRemoteTmProfileName() == null ? "" : p_tm
-                        .getRemoteTmProfileName()));
-        result.append("</remoteTmProfileName>");
-        result.append("</tm>");
 
         return result.toString();
     }
 
     /**
      * Get TMs for user
-     * 
+     *
      * @param userId
      * @return
      * @throws ProjectHandlerException
      * @throws RemoteException
      */
-    private List getTMs(String userId) throws ProjectHandlerException,
+    private List getTMs(String userId, String cond) throws ProjectHandlerException,
             RemoteException
     {
         String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
@@ -589,80 +717,133 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         boolean enableTMAccessControl = curremtCompany
                 .getEnableTMAccessControl();
         List tms = new ArrayList();
-        if (enableTMAccessControl)
+        boolean isSuperPM = UserUtil.isSuperPM(userId);
+        boolean isAdmin = UserUtil.isInPermissionGroup(userId, "Administrator");
+        boolean isSuperLP = UserUtil.isSuperLP(userId);
+
+        ProjectHandler projectHandler;
+        Collection allTMs = null;
+        try
         {
-            boolean isAdmin = UserUtil.isInPermissionGroup(userId,
-                    "Administrator");
-            boolean isSuperAdmin = UserUtil.isSuperAdmin(userId);
-            boolean isSuperPM = UserUtil.isSuperPM(userId);
-            // for admin or superadmin, should get all the TM
-            if (isAdmin || isSuperAdmin)
+            projectHandler = ServerProxy.getProjectHandler();
+            allTMs = projectHandler.getAllProjectTMs(cond);
+        }
+        catch (Exception e)
+        {
+            logger.error("Error found in TmMainHandler.getTMs().", e);
+        }
+
+        if ("1".equals(currentCompanyId))
+        {
+            List<String> companies = new ArrayList<String>();
+            if (isSuperLP)
             {
-                tms = (List) s_manager.getAllProjectTMs();
+                // Get all the companies the super translator worked for
+                List projectList = null;
+                try
+                {
+                    projectList = ServerProxy.getProjectHandler()
+                            .getProjectsByUser(userId);
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+                for (Iterator it = projectList.iterator(); it.hasNext();)
+                {
+                    Project pj = (Project) it.next();
+                    String companyId = pj.getCompanyId();
+                    if (!companies.contains(companyId))
+                    {
+                        companies.add(companyId);
+                    }
+                }
+                for (Iterator it = allTMs.iterator(); it.hasNext();)
+                {
+                    ProjectTM tm = (ProjectTM) it.next();
+                    String companyId = tm.getCompanyId();
+                    if (companies.contains(companyId))
+                    {
+                        tms.add(tm);
+                    }
+                }
+
             }
-            // for superPM, should get the TMs he can access in the company
-            else if (isSuperPM)
+            else
             {
-                String companyId = CompanyThreadLocal.getInstance().getValue();
-                ProjectTMTBUsers ptmUsers = new ProjectTMTBUsers();
-                List tmIds = ptmUsers.getTList(userId, "TM");
-                Iterator it = tmIds.iterator();
+                // Super admin
+                tms.addAll(allTMs);
+            }
+        }
+        else
+        {
+            if (enableTMAccessControl && !isAdmin)
+            {
+
+                ProjectTMTBUsers projectTMTBUsers = new ProjectTMTBUsers();
+                List tmIdList = projectTMTBUsers.getTList(userId, "TM");
+                Iterator it = tmIdList.iterator();
                 while (it.hasNext())
                 {
-                    ProjectTM projectTM;
-                    projectTM = s_manager.getProjectTMById(((BigInteger) it
-                            .next()).longValue(), false);
-                    if (projectTM.getCompanyId().equals(companyId))
+                    ProjectTM tm = null;
+                    try
                     {
-                        tms.add(projectTM);
+                        tm = ServerProxy.getProjectHandler().getProjectTMById(
+                                ((BigInteger) it.next()).longValue(), false);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new EnvoyServletException(e);
+                    }
+                    if (isSuperPM)
+                    {
+                        if (tm.getCompanyId().equals(currentCompanyId))
+                        {
+                            tms.add(tm);
+                        }
+                    }
+                    else
+                    {
+                        tms.add(tm);
                     }
                 }
             }
             else
             {
-                ProjectTMTBUsers ptmUsers = new ProjectTMTBUsers();
-                List tmIds = ptmUsers.getTList(userId, "TM");
-                Iterator it = tmIds.iterator();
-                while (it.hasNext())
-                {
-                    ProjectTM projectTM;
-                    projectTM = s_manager.getProjectTMById(((BigInteger) it
-                            .next()).longValue(), false);
-                    tms.add(projectTM);
-                }
+                tms.addAll(allTMs);
             }
         }
-        else
-        {
-            tms = (List) s_manager.getAllProjectTMs();
-        }
+
+        Collections.sort(tms, new ProjectTMComparator(Locale.getDefault()));
         return tms;
     }
 
     /**
      * Set exist TM names into request.
-     * 
+     *
      * @param request
      * @throws ProjectHandlerException
      * @throws RemoteException
      */
-    private void setTMNames(HttpServletRequest request, List tms)
+    private String getExistTMNames(List<ProjectTM> tms)
             throws ProjectHandlerException, RemoteException
     {
-        List<String> tmNames = new ArrayList<String>();
-        Iterator iterator = tms.iterator();
-        while (iterator.hasNext())
-        {
-            tmNames.add(((ProjectTM) iterator.next()).getName());
+        StringBuilder existTMNames = new StringBuilder();
+        if (tms != null) {
+            Iterator<ProjectTM> iterator = tms.iterator();
+            while (iterator.hasNext())
+            {
+                existTMNames.append(iterator.next().getName() + ",");
+            }
         }
 
-        request.setAttribute(TM_EXIST_NAMES, tmNames);
+        return existTMNames.toString();
     }
 
     /**
      * Get file profile Id-Names map from remote server specified by
      * gsEditionId.
-     * 
+     *
      * @param p_gsEditionId
      * @return
      */
@@ -685,7 +866,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
 
             String strAllTmProfiles = ambassador
                     .getAllTMProfiles(realAccessToken);
-            CATEGORY.debug("allTmProfiles :: " + strAllTmProfiles);
+            logger.debug("allTmProfiles :: " + strAllTmProfiles);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -718,7 +899,7 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
                             {
                                 nodeValue = subNodeList.item(0).getNodeValue();
                             }
-                            CATEGORY.debug("nodeName :: " + nodeName
+                            logger.debug("nodeName :: " + nodeName
                                     + "; nodeValue :: " + nodeValue);
 
                             if ("id".equals(nodeName.toLowerCase()))
@@ -737,12 +918,26 @@ public class TmMainHandler extends PageHandler implements WebAppConstants
         }
         catch (Exception ex)
         {
-            CATEGORY
-                    .error("Fail to get file profile Id-Names by gsEditionId : "
-                            + p_gsEditionId);
+            logger.error("Fail to get file profile Id-Names by gsEditionId : "
+                    + p_gsEditionId);
         }
 
         return results;
+    }
+
+    private void setNumberOfPerPage(HttpServletRequest req) {
+        String pageSize = (String) req.getParameter("numOfPageSize");
+
+        if (!StringUtil.isEmpty(pageSize)) {
+            try
+            {
+                NUM_PER_PAGE = Integer.parseInt(pageSize);
+            }
+            catch (Exception e)
+            {
+                NUM_PER_PAGE = Integer.MAX_VALUE;
+            }
+        }
     }
 
 }

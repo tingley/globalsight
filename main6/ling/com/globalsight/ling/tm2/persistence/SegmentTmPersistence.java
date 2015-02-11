@@ -19,21 +19,15 @@ package com.globalsight.ling.tm2.persistence;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 
-import org.apache.commons.lang.StringUtils;
-
-import com.globalsight.everest.corpus.CorpusContext;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -63,6 +57,7 @@ public class SegmentTmPersistence
     private Connection m_connection;
 
     static public final String SEGMENT_TM_TU_T = "project_tm_tu_t";
+    static public final String SEGMENT_TM_TU_T_PROP = "project_tm_tu_t_prop";
     static public final String SEGMENT_TM_TUV_T = "project_tm_tuv_t";
     static public final String CORPUS_MAP = "corpus_map";
 
@@ -90,7 +85,7 @@ public class SegmentTmPersistence
     private static final String UPDATE_SET_TU_ID = " SET tu_id = ? WHERE id = ?";
     private static final String UPDATE_SET_MODIFY_DATE = " SET modify_date = CURRENT_TIMESTAMP, modify_user = ? WHERE id = ?";
     private static final String UPDATE_SET_SEGMENT_STRING = " SET segment_string = ?, segment_clob = null, "
-            + "exact_match_key = ?, modify_date = CURRENT_TIMESTAMP, modify_user = ? WHERE id = ?";
+            + "exact_match_key = ?, modify_date = CURRENT_TIMESTAMP, modify_user = ?, sid = ? WHERE id = ?";
 
     private static final String SELECT_TUVS_BY_TU_ID = "SELECT id, locale_id, segment_string, segment_clob FROM ";
     private static final String SELECT_TUVS_BY_TU_ID_WHERE = " WHERE tu_id = ?";
@@ -121,11 +116,23 @@ public class SegmentTmPersistence
             Collection p_segments, boolean p_isTranslatable,
             LeverageOptions p_leverageOptions, List<Tm> p_tms) throws Exception
     {
+        // fix for GBS-2448, user could search target locale in TM Search Page,
+        // if not from TM Search Page, keep old logic(by isMultiLingLeveraging
+        // of FileProfile)
+        boolean lookupTarget;
+        if (p_leverageOptions.isFromTMSearchPage())
+        {
+            lookupTarget = true;
+        }
+        else
+        {
+            lookupTarget = p_leverageOptions.isMultiLingLeveraging();
+        }
+
         SegmentTmExactLeveragerStoredProcCaller caller = new SegmentTmExactLeveragerStoredProcCaller(
-                m_connection, p_tms,
-                p_sourceLocale, p_leverageOptions.getLeveragingLocales()
-                        .getAllLeveragingLocales(), p_leverageOptions
-                        .isMultiLingLeveraging(), p_segments, p_isTranslatable);
+                m_connection, p_tms, p_sourceLocale, p_leverageOptions
+                        .getLeveragingLocales().getAllLeveragingLocales(),
+                lookupTarget, p_segments, p_isTranslatable);
 
         SegmentIdMap segmentIdMap = TmUtil.buildSegmentIdMap(p_segments);
         return new LeverageIterator(caller.getNextResult(), segmentIdMap,
@@ -158,6 +165,8 @@ public class SegmentTmPersistence
         tableList.add(tuvTable + TUV_ALIAS_1);
         tableList.add(tuvTable + TUV_ALIAS_2);
         
+        tableList.add("corpus_map");
+
         DbUtil.lockTables(m_connection, tableList);
     }
     
@@ -176,6 +185,8 @@ public class SegmentTmPersistence
         tableList.add(SEGMENT_TM_TU_L + TU_L_ALIAS);
         tableList.add(SEGMENT_TM_TUV_T + TUV_T_ALIAS);
         tableList.add(SEGMENT_TM_TUV_L + TUV_L_ALIAS);
+        
+        tableList.add(SEGMENT_TM_TU_T_PROP);
         
         tableList.add(CORPUS_MAP);
         DbUtil.lockTables(m_connection, tableList);
@@ -673,7 +684,8 @@ public class SegmentTmPersistence
                 ps.setString(1, tuv.getSegment());
                 ps.setLong(2, tuv.getExactMatchKey());
                 ps.setString(3, tuv.getModifyUser());
-                ps.setLong(4, tuv.getId());
+                ps.setString(4, tuv.getSid());
+                ps.setLong(5, tuv.getId());
                 ps.addBatch();
 
                 if (count > DbUtil.BATCH_INSERT_UNIT)

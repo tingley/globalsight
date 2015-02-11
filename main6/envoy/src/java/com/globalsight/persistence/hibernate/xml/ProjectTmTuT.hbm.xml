@@ -31,6 +31,13 @@
             <one-to-many
                 class="com.globalsight.everest.projecthandler.ProjectTmTuvT" />
         </set>
+        
+        <set name="props" inverse="true" cascade="all"
+            order-by="id asc">
+            <key column="TU_ID" />
+            <one-to-many
+                class="com.globalsight.everest.projecthandler.ProjectTmTuTProp" />
+        </set>
 
     </class>
 </hibernate-mapping>

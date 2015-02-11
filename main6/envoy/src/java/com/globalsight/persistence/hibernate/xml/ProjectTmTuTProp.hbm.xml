@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.everest.projecthandler.ProjectTmTuTProp"
+		table="PROJECT_TM_TU_T_PROP">
+		<id name="id" column="ID" type="long">
+			<generator class="assigned" />
+		</id>
+
+		<property name="propType" column="PROP_TYPE" type="string"
+			unique="false" />
+		<property name="propValue" column="PROP_VALUE" type="string"
+			unique="false" />
+
+		<many-to-one name="tu" column="TU_ID"
+			class="com.globalsight.everest.projecthandler.ProjectTmTuT" not-null="false"
+			lazy="false" />
+	</class>
+</hibernate-mapping>

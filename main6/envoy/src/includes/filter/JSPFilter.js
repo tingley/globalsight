@@ -10,23 +10,38 @@ JSPFilter.prototype.setFilter = function (filter)
 
 JSPFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId)
 {
-	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
-	str.append("</label>");
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' id='jspFilterName' value='" + this.filter.filterName + "' disabled></input>");
-	str.append("<br/>");
-	str.append("<label class='specialFilter_dialog_label'>");
+	str.append("</label></td>");
+	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='jspFilterName' value='" + this.filter.filterName + "' disabled></input>");
+	str.append("<br/></td></tr>");
+	str.append("<tr><td><label style='width:40' class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
-	str.append("</label>");
-	str.append("<textarea rows='4' cols='17' id='jspDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
-	str.append("<br/>");
+	str.append("</label></td>");
+	str.append("<td><textarea rows='4' cols='17' style='width:150' id='jspDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
+	str.append("<br/></td></tr></table>");
+	
 	var isCheckHeadAdded = (this.filter.isAdditionalHeadAdded) ? "checked":"";
 	var isCheckEscape = (this.filter.isEscapeEntity) ? "checked":"";
+	
+	str.append("<table border=0 width='240px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='70%'>" + jsAddAdditionalHead + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='addAdditionalHead' type='checkbox' name='addAdditionalHead' value='"+this.filter.isAdditionalHeadAdded+"' "+isCheckHeadAdded+"/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsAddAdditionalHead + "</label>");
-	str.append("<br/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='70%'>" + jsEnableEntityEscape + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='isEscapeEntity' type='checkbox' name='isEscapeEntity' value='"+this.filter.enableEscapeEntity+"' "+isCheckEscape+"/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsEnableEntityEscape + "</label>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("</table>");
+	
 	var dialogObj = document.getElementById('jspFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
 	this.showDialog();
@@ -40,7 +55,7 @@ JSPFilter.prototype.edit = function(filterId, color, specialFilters, topFilterId
 
 JSPFilter.prototype.generateDiv = function (topFilterId, color)
 {
-	var str = new StringBuffer("<table><tr><td><label style='width:40' class='specialFilter_dialog_label'>");
+	var str = new StringBuffer("<table><tr><td><label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label></td>");
 	str.append("<td><input type='text' style='width:150' maxlength='"+maxFilterNameLength+"' id='jspFilterName' value='JSP Filter'></input>");
@@ -48,13 +63,27 @@ JSPFilter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<tr><td><label style='width:40' class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
 	str.append("</label></td>");
-	str.append("<td><textarea rows='4' style='width:150' id='jspDesc' name='desc'></textarea>");
+	str.append("<td><textarea rows='4' cols='17' style='width:150' id='jspDesc' name='desc'></textarea>");
 	str.append("<br/></td></tr></table>");
+	
+	str.append("<table border=0 width='240px'>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='70%'>" + jsAddAdditionalHead + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='addAdditionalHead' type='checkbox' name='addAdditionalHead' value='true'/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsAddAdditionalHead + "</label>");
-	str.append("<br/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='70%'>" + jsEnableEntityEscape + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='isEscapeEntity' type='checkbox' name='isEscapeEntity' value='true'/>");
-	str.append("<label class='specialFilter_dialog_label'>" + jsEnableEntityEscape + "</label>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("</table>");
+	
 	var dialogObj = document.getElementById('jspFilterPopupContent');
 	dialogObj.innerHTML = str.toString();
 	this.showDialog();

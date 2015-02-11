@@ -106,13 +106,6 @@ public class TtxClean
         }
     }
 
-    public static String getStackTraceString(Throwable p_throwable)
-    {
-        CharArrayWriter outBuffer = new CharArrayWriter();
-        p_throwable.printStackTrace(new java.io.PrintWriter(outBuffer));
-        return outBuffer.toString();
-    }
-
     // *************************************************
 
     public String getBaseName(String p_name)

@@ -53,19 +53,19 @@ public class WorkflowTemplateInfo
 
     // persistence variables
 
-    private String             m_description = null;
-    private Project            m_project = null;
-    private GlobalSightLocale  m_sourceLocale = null;
-    private GlobalSightLocale  m_targetLocale = null;
-    private long               m_templateId = -1;
-    private String             m_encoding = null;
-    private boolean            m_notifyPm = true;
-    private L10nProfile        m_l10nProfile= null;
-    private Vector             m_leveragingLocales;
-    private List<String>       m_wfManagerIds = new ArrayList<String>();
+    private String               m_description = null;
+    private Project              m_project = null;
+    private GlobalSightLocale    m_sourceLocale = null;
+    private GlobalSightLocale    m_targetLocale = null;
+    private long                 m_templateId = -1;
+    private String               m_encoding = null;
+    private boolean              m_notifyPm = true;
+    private L10nProfile          m_l10nProfile= null;
+    private Set<LeverageLocales> m_leveragingLocales;
+    private List<String>         m_wfManagerIds = new ArrayList<String>();
 
-    private String             m_workflowType = TYPE_TRANSLATION;
-    private String 			   m_companyId = null;
+    private String               m_workflowType = TYPE_TRANSLATION;
+    private String 			     m_companyId = null;
 
 
     // non-persistence variables
@@ -88,10 +88,9 @@ public class WorkflowTemplateInfo
     }
 
     public WorkflowTemplateInfo(String p_name, String p_description,
-                                Project p_project, boolean p_notifyPm,
-                                List p_wfManagerIds, GlobalSightLocale p_sourceLocale,
-        GlobalSightLocale p_targetLocale, String p_encoding,
-        Vector p_leveragingLocales)
+            Project p_project, boolean p_notifyPm, List<String> p_wfManagerIds,
+            GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale,
+            String p_encoding, Set<LeverageLocales> p_leveragingLocales)
     {
         setName(p_name);
         m_description = p_description;
@@ -197,26 +196,16 @@ public class WorkflowTemplateInfo
      * @return Vector of GlobalSightLocale. If leveraging locales are
      * not set, null is returned.
      */
-    public Vector getLeveragingLocales()
+    public Set<GlobalSightLocale> getLeveragingLocales()
     {
-        Vector globalSightLocales = null;
+        Set<GlobalSightLocale> globalSightLocales = new HashSet<GlobalSightLocale>();
 
-        if (m_leveragingLocales.size() > 0)
+        for (Iterator it = m_leveragingLocales.iterator(); it.hasNext();)
         {
-            globalSightLocales = new Vector(m_leveragingLocales.size());
-
-            for (Iterator it = m_leveragingLocales.iterator(); it.hasNext(); )
-            {
-                globalSightLocales.add(((LeverageLocales)it.next()).getLocale());
-            }
+            globalSightLocales.add(((LeverageLocales)it.next()).getLocale());
         }
 
         return globalSightLocales;
-    }
-
-    public Vector getLeverageLocales()
-    {
-        return m_leveragingLocales;
     }
 
     /**
@@ -256,31 +245,15 @@ public class WorkflowTemplateInfo
         m_notifyPm = p_notifyPm;
     }
 
-    /**
-     * Set the leverage locales
-     * @return void
-     */
-    public void setLeverageLocales(Vector p_leveragingLocales)
-    {
-        m_leveragingLocales = new Vector();
-        m_leveragingLocales.addAll(p_leveragingLocales);
-
-        for (Iterator it = m_leveragingLocales.iterator(); it.hasNext(); )
-        {
-            LeverageLocales leverageLocale = (LeverageLocales)it.next();
-            leverageLocale.setBackPointer(this);
-        }
-    }
-    
-    // For hibernate to use
+    @SuppressWarnings("unchecked")
     public void setLeveragingLocalesSet(Set p_leveragingLocales)
     {
-    	setLeverageLocales(new Vector(p_leveragingLocales));
+        this.m_leveragingLocales = p_leveragingLocales;
     }
-    // For hibernate to use
-    public Set getLeveragingLocalesSet()
+
+    public Set<LeverageLocales> getLeveragingLocalesSet()
     {
-        return new HashSet(m_leveragingLocales);
+        return this.m_leveragingLocales;
     }
 
     /**
@@ -327,8 +300,7 @@ public class WorkflowTemplateInfo
     {
         // since the default for a non-selected option is blank,
         // we should check here.
-        if (p_wfManagerIds == null ||
-            p_wfManagerIds.size() == 0)
+        if (p_wfManagerIds == null || p_wfManagerIds.size() == 0)
         {
             // make an empty list - do not leave as NULL
             m_wfManagerIds = new ArrayList<String>();

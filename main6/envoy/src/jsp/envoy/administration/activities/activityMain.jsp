@@ -9,7 +9,7 @@
       com.globalsight.everest.servlet.util.SessionManager,
       com.globalsight.everest.webapp.pagehandler.administration.activity.ActivityConstants, 
       com.globalsight.everest.util.comparator.ActivityComparator, 
-      com.globalsight.everest.servlet.util.ServerProxy,
+      com.globalsight.everest.company.CompanyWrapper,
       java.util.ArrayList,
       java.util.ResourceBundle"
     session="true"
@@ -146,7 +146,7 @@ function enableButtons()
       </amb:column>
       <% if (isSuperAdmin) { %>
       <amb:column label="lb_company_name" sortBy="<%=ActivityComparator.ASC_COMPANY%>" width="120">
-          <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(activity.getCompanyId())).getCompanyName()%>
+          <%=CompanyWrapper.getCompanyNameById(activity.getCompanyId())%>
       </amb:column>
       <% } %>
       </amb:table>

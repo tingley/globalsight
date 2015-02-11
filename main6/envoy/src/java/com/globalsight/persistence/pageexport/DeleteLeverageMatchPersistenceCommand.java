@@ -17,42 +17,30 @@
 
 package com.globalsight.persistence.pageexport;
 
-import org.apache.log4j.Logger;
-
-
-import com.globalsight.persistence.PersistenceCommand;
-
-import com.globalsight.everest.persistence.PersistenceException;
-
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 
-import java.util.Iterator;
-import java.util.List;
+import com.globalsight.everest.persistence.PersistenceException;
+import com.globalsight.persistence.PersistenceCommand;
 
-
-public class DeleteLeverageMatchPersistenceCommand
-    extends PersistenceCommand
+public class DeleteLeverageMatchPersistenceCommand extends PersistenceCommand
 {
-    static public final String s_deleteLeverageMatches =
-        "delete from leverage_match where " +
-        "source_page_id = ? and target_locale_id = ?";
+    static public final String s_deleteLeverageMatches = "delete from leverage_match where "
+            + "source_page_id = ? and target_locale_id = ?";
 
     private long m_sourcePageId;
     private long m_targetLocaleId;
     private PreparedStatement m_ps;
 
     public DeleteLeverageMatchPersistenceCommand(long p_sourcePageId,
-        long p_targetLocaleId)
+            long p_targetLocaleId)
     {
         m_sourcePageId = p_sourcePageId;
         m_targetLocaleId = p_targetLocaleId;
     }
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -71,20 +59,18 @@ public class DeleteLeverageMatchPersistenceCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
         m_ps = p_connection.prepareStatement(s_deleteLeverageMatches);
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
         m_ps.setLong(1, m_sourcePageId);
         m_ps.setLong(2, m_targetLocaleId);
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         m_ps.execute();
     }

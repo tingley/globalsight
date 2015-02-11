@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
@@ -144,7 +145,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                 WorkflowManagerLocal.removeReservedTimes(tasks);
             }
 
-            HibernateUtil.commit(tx);
+            //HibernateUtil.commit(tx);
             // for gbs-1302, cancel interim activities
             TaskInterimPersistenceAccessor.cancelInterimActivities(taskList);
             log.info("Workflow " + wf.getId() + " was cancelled");
@@ -163,7 +164,7 @@ public class WorkflowCancelMDB extends GenericQueueMDB
                 HibernateUtil.saveOrUpdate(wf);
             }
 
-            log.error(we);
+            log.error(we.getMessage(), we);
             String[] args = new String[1];
             if (workflowId != null)
             {
@@ -187,12 +188,10 @@ public class WorkflowCancelMDB extends GenericQueueMDB
      * Change the state of each secondary target file.
      */
     private void updateSecondaryTargetFileState(
-            List<SecondaryTargetFile> p_stfs, String p_state) throws Exception
+            Set<SecondaryTargetFile> p_stfs, String p_state) throws Exception
     {
-        int size = p_stfs == null ? 0 : p_stfs.size();
-        for (int i = 0; i < size; i++)
+        for (SecondaryTargetFile stf : p_stfs)
         {
-            SecondaryTargetFile stf = p_stfs.get(i);
             stf.setState(p_state);
             HibernateUtil.update(stf);
         }

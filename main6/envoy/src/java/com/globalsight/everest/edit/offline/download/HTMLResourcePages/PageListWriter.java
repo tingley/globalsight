@@ -45,10 +45,12 @@ public class PageListWriter
 
     private String m_SegmentIdListLink = null;
     private String m_pageId = null;
+    private long m_jobId = -1;
+    private boolean m_useJobs = false;
     private StringBuffer m_entries = null;
     private ResourceBundle m_resource = null;
     private String m_uiLocale = "en_US";
-    private OfflinePageData m_offlinePageData = null;
+    private String m_pageName = null;
 
     /**
      * Constructor.
@@ -83,8 +85,15 @@ public class PageListWriter
     private String[] makeParamList()
     {
         String[] params = new String[PARAM_COUNT];
-        params[1] = RESOURCE_DIR + "/" + m_pageId + "/" + SEG_ID_LIST_FILE;
-        params[2] = m_offlinePageData.getPageName() + "&nbsp;(" + m_pageId + ")";
+        if (!m_useJobs)
+        {
+            params[1] = RESOURCE_DIR + "/" + m_pageId + "/" + SEG_ID_LIST_FILE;
+        }
+        else
+        {
+            params[1] = "../" + m_pageId + "/" + SEG_ID_LIST_FILE;
+        }
+        params[2] = m_pageName + "&nbsp;(" + m_pageId + ")";
         return params;
     }
 
@@ -98,14 +107,30 @@ public class PageListWriter
 
         return page;
     }
+    
+    public void useJobs(boolean usejobs)
+    {
+        m_useJobs = usejobs;
+    }
+    
+    public boolean isAddable(long jobid)
+    {
+        return (m_jobId == -1 || m_jobId == jobid);
+    }
+    
+    public long getJobId()
+    {
+        return m_jobId;
+    }
 
     public void processOfflinePageData(OfflinePageData p_page)
         throws AmbassadorDwUpException
     {
         m_resource = loadProperties(getClass().getName(), getLocale(m_uiLocale));
 
-        m_offlinePageData = p_page;
+        m_pageName = p_page.getPageName();
         m_pageId = p_page.getPageId();
+        m_jobId = p_page.getJobId();
 
         if (!areParamsValid())
         {
@@ -118,12 +143,9 @@ public class PageListWriter
             m_resource.getString(PAGE_LIST_ENTRY), makeParamList()));
 
         // add preview page URL
-        if (m_offlinePageData.isCanUseUrl())
+        if (p_page.isCanUseUrl())
         {
-            String previewUrl =
-                m_offlinePageData.getUrlPrefix() +
-                m_offlinePageData.getPageName();
-
+            String previewUrl = p_page.getUrlPrefix() + p_page.getPageName();
             m_entries.append(formatString(
                 m_resource.getString(PREVIEW_PAGE), previewUrl));
         }

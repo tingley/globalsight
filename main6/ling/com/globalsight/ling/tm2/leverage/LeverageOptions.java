@@ -53,6 +53,8 @@ public class LeverageOptions
     private List<ProjectTM> m_projectTms;
     private List<ProjectTM> m_remoteTms;
 
+    private boolean fromTMSearchPage = false;
+
     // constructor
     public LeverageOptions(TranslationMemoryProfile p_tmProfile,
         LeveragingLocales p_leveragingLocales)
@@ -314,6 +316,11 @@ public class LeverageOptions
     	return m_tmProfile.getId();
     }
     
+    public TranslationMemoryProfile getTmProfile()
+    {
+        return m_tmProfile;
+    }
+    
     public boolean isRefTm()
     {
         return m_tmProfile.getSelectRefTm();
@@ -406,5 +413,15 @@ public class LeverageOptions
         }
 
         return results;
+    }
+
+    public boolean isFromTMSearchPage()
+    {
+        return fromTMSearchPage;
+    }
+
+    public void setFromTMSearchPage(boolean fromTMSearchPage)
+    {
+        this.fromTMSearchPage = fromTMSearchPage;
     }
 }

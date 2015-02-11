@@ -27,11 +27,12 @@ public class RemovedTag extends PersistentObject
     private String prefixString;
     private String suffixString;
     private TuImpl tu;
-    
+    private long tuId;
+
     private List<String> orgStrings = new ArrayList<String>();
     private List<String> newStrings = new ArrayList<String>();
     private int tagNum = 0;
-    
+
     private static String PRESERVE = " xml:space=&quot;preserve&quot;";
     private static String RSIDRPR_REGEX = " w:rsidRPr=&quot;[^&]*&quot;";
     private static String RSIDR_REGEX = " w:rsidR=&quot;[^&]*&quot;";
@@ -56,14 +57,25 @@ public class RemovedTag extends PersistentObject
         this.suffixString = suffixString;
     }
 
-    public TuImpl getTu()
+    public long getTuId()
     {
-        return tu;
+        return this.tuId;
     }
 
-    public void setTu(TuImpl tu)
+    public void setTuId(long tuId)
     {
-        this.tu = tu;
+        this.tuId = tuId;
+    }
+
+    // Utility methods
+    public void setTu(TuImpl p_tu)
+    {
+        tuId = p_tu.getTuId();
+        tu = p_tu;
+        if (tu != null)
+        {
+            tuId = tu.getId();
+        }
     }
 
     @Override
@@ -93,21 +105,21 @@ public class RemovedTag extends PersistentObject
         {
             if (other.prefixString != null)
                 return false;
-        } 
+        }
         else if (!prefixString.equals(other.prefixString))
             return false;
         if (suffixString == null)
         {
             if (other.suffixString != null)
                 return false;
-        } 
+        }
         else if (!suffixString.equals(other.suffixString))
             return false;
         if (tu == null)
         {
             if (other.tu != null)
                 return false;
-        } 
+        }
         else if (!tu.equals(other.tu))
             return false;
         return true;
@@ -137,17 +149,17 @@ public class RemovedTag extends PersistentObject
     {
         return newStrings;
     }
-    
+
     public void addOrgString(String s)
     {
         this.orgStrings.add(s);
     }
-    
+
     public void addNewString(String s)
     {
         this.newStrings.add(s);
     }
-    
+
     public void mergeString(RemovedTag tag)
     {
         this.orgStrings.addAll(tag.getOrgStrings());
@@ -169,13 +181,13 @@ public class RemovedTag extends PersistentObject
             {
                 return true;
             }
-            
+
             preS = preS.replace(PRESERVE, "");
             preS2 = preS2.replace(PRESERVE, "");
-            
+
             preS = preS.replaceAll(RSIDRPR_REGEX, "");
             preS2 = preS2.replaceAll(RSIDRPR_REGEX, "");
-            
+
             preS = preS.replaceAll(RSIDR_REGEX, "");
             preS2 = preS2.replaceAll(RSIDR_REGEX, "");
             if (preS.equals(preS2))

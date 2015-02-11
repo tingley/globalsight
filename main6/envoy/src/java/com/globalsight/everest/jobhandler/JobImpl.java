@@ -16,6 +16,7 @@
  */
 package com.globalsight.everest.jobhandler;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -51,7 +52,6 @@ import com.globalsight.everest.page.UpdatedSourcePage;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.request.Request;
-import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.request.WorkflowRequest;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskImpl;
@@ -72,8 +72,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 {
     private static final long serialVersionUID = 5395578307790122441L;
 
-    static private final Logger c_logger = Logger
-            .getLogger(JobImpl.class);
+    static private final Logger c_logger = Logger.getLogger(JobImpl.class);
 
     // query key used to build a TOPLink query
     static public final String STATE = "m_state";
@@ -95,17 +94,17 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String m_state;
     private String m_orgState;
     private String m_jobName;
-    private int m_priority;
+    private int m_priority = 3;
     private int m_leverageMatchThreshold = 0;
     private GlobalSightLocale m_sourceLocale;
-    private boolean m_isWordCountReached;
+    private boolean m_isWordCountReached = false;
     private String m_dispatchType;
     private Date m_createDate = null;
     private String m_dataSourceName;
     private L10nProfile m_l10nProfile = null;
-    private Collection m_requestList = new HashSet();
+    private Collection<Request> m_requestList = new ArrayList<Request>();
     private Collection m_workflowRequestList = new ArrayList();
-    private Collection<Workflow> m_wfInstances = new ArrayList<Workflow>();
+    private Set<Workflow> m_wfInstances = new HashSet<Workflow>();
     private Collection m_sourcePages = new ArrayList();
     private List m_jobComments = new ArrayList();
     // holds the overriden word count.
@@ -117,7 +116,9 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private String uuid;
     private static Integer UUID_PREFIX = 0;
 
-    private int m_pageCount = 0;
+    private int m_pageCount = 1;
+    // from GBS-2137
+    private long m_l10nProfileId = -1;
 
     private String m_createUserId = null;
 
@@ -130,6 +131,9 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     private AttributeSet attributeSet;
 
     private Map<AttributeClone, JobAttribute> attriguteMap;
+    
+    private Date startDate = null;
+    private Date completedDate = null;
 
     public JobImpl()
     {
@@ -207,7 +211,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         m_pageCount = m_requestList.size();
     }
 
-    public Collection getRequestList()
+    public Collection<Request> getRequestList()
     {
         return m_requestList;
     }
@@ -219,29 +223,17 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
     public void setWorkflowInstances(List p_wfInstances)
     {
-        m_wfInstances = p_wfInstances;
+        m_wfInstances = new HashSet<Workflow>(p_wfInstances);
     }
 
     public Set getWorkflowInstanceSet()
     {
-        Set workflows = null;
-        if (m_wfInstances != null)
-        {
-            workflows = new HashSet(m_wfInstances);
-        }
-        return workflows;
+        return m_wfInstances;
     }
 
     public void setWorkflowInstanceSet(Set p_wfInstances)
     {
-        if (p_wfInstances == null)
-        {
-            m_wfInstances = new ArrayList();
-        }
-        else
-        {
-            m_wfInstances = new ArrayList(p_wfInstances);
-        }
+        m_wfInstances = p_wfInstances;
     }
 
     public String getJobName()
@@ -277,7 +269,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         // if in the correct state to calculate due date
         if (!getState().equals(PENDING) && !getState().equals(BATCHRESERVED) &&
         // // For sla report issue
-                // !getState().equals(READY_TO_BE_DISPATCHED) &&
+        // !getState().equals(READY_TO_BE_DISPATCHED) &&
                 !getState().equals(IMPORTFAILED))
         {
             for (Iterator it = m_wfInstances.iterator(); it.hasNext();)
@@ -399,14 +391,23 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         return m_dispatchType;
     }
 
+    public void setL10nProfileId(Long p_l10nProfileId)
+    {
+        m_l10nProfileId = p_l10nProfileId;
+    }
+
     public long getL10nProfileId()
     {
+        if (m_l10nProfileId != -1)
+        {
+            return m_l10nProfileId;
+        }
         L10nProfile lp = getL10nProfile();
         if (lp != null)
         {
             return lp.getId();
         }
-        
+
         return -1;
     }
 
@@ -416,20 +417,28 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             try
             {
-                m_l10nProfile = ServerProxy.getJobHandler()
-                        .getL10nProfileByJobId(getId());
+                if (m_l10nProfileId != -1)
+                {
+                    m_l10nProfile = ServerProxy.getProjectHandler()
+                            .getL10nProfile(m_l10nProfileId);
+                }
+                else
+                {
+                    m_l10nProfile = ServerProxy.getJobHandler()
+                            .getL10nProfileByJobId(getId());
+                }
             }
             catch (Exception e)
             {
-                c_logger
-                        .error("The l10nProfile could not be obtained for job with id, state:"
-                                + getId() + ",  " + getState() + " ::  " + e);
+                c_logger.error("The l10nProfile could not be obtained for job with id, state:"
+                        + getId() + ",  " + getState() + " ::  " + e);
             }
         }
-        
+
         if (m_l10nProfile == null)
         {
-            List<UpdatedSourcePage> pages = UpdateSourcePageManager.getAllUpdatedSourcePage(this);
+            List<UpdatedSourcePage> pages = UpdateSourcePageManager
+                    .getAllUpdatedSourcePage(this);
             for (UpdatedSourcePage page : pages)
             {
                 m_l10nProfile = page.getL10nProfile();
@@ -548,6 +557,8 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         }
 
         m_state = p_state;
+
+        setTimestamp(new Timestamp(System.currentTimeMillis()));
     }
 
     public String getState()
@@ -596,11 +607,62 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
             defaultName = "DTP In Progress";
             propertyKey = "lb_dtpinprogress";
         }
+        else if (m_state.equals(Job.EXPORTING))
+        {
+            defaultName = "Exporting";
+            propertyKey = "lb_state_exporting";
+        }
         else if ((m_state.equals(Job.EXPORTED))
                 || (m_state.equals(Job.EXPORT_FAIL)))
         {
             defaultName = "Exported";
             propertyKey = "lb_exported";
+        }
+        else if (m_state.equals(Job.UPLOADING))
+        {
+            defaultName = "Uploading";
+            propertyKey = "lb_state_uploading";
+        }
+        else if (m_state.equals(Job.IN_QUEUE))
+        {
+            defaultName = "In Queue";
+            propertyKey = "lb_state_inqueue";
+        }
+        else if (m_state.equals(Job.EXTRACTING))
+        {
+            defaultName = "Extracting";
+            propertyKey = "lb_state_extracting";
+        }
+        else if (m_state.equals(Job.LEVERAGING))
+        {
+            defaultName = "Leveraging";
+            propertyKey = "lb_state_leveraging";
+        }
+        else if (m_state.equals(Job.PROCESSING))
+        {
+            long fileCount = 0;
+            Collection<Request> requests = getRequestList();
+            Set<Long> pageNumbers = new HashSet<Long>(requests.size());
+            for (Request r : requests)
+            {
+                if (fileCount == 0)
+                {
+                    fileCount = r.getBatchInfo().getPageCount();
+                }
+                long pageNumber = r.getBatchInfo().getPageNumber();
+                if (!pageNumbers.contains(pageNumber))
+                {
+                    pageNumbers.add(pageNumber);
+                }
+            }
+            int fileNumber = pageNumbers.size();
+            defaultName = "Processing (" + fileNumber + " of " + fileCount
+                    + ")";
+        }
+        else if (m_state.equals(Job.SKIPPING))
+        {
+            defaultName = "Skipping";
+            propertyKey = "lb_state_skipping";
         }
         else
         {
@@ -645,6 +707,10 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                     long dataSourceId = sp.getRequest().getDataSourceId();
                     String currentResult = getCurrentDataSourceName(
                             dataSourceType, dataSourceId);
+
+                    if (currentResult.endsWith("_RFP"))
+                        currentResult = currentResult.substring(0,
+                                currentResult.lastIndexOf("_RFP"));
 
                     if (lastDataSourceName == null)
                     {
@@ -721,7 +787,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             result = getDBProfilePersistenceManager().getDatabaseProfile(
                     p_dataSourceId).getName();
-        } 
+        }
         else
         {
             result = HibernateUtil.get(FileProfileImpl.class, p_dataSourceId,
@@ -987,7 +1053,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
             }
             catch (Exception e)
             {
-                c_logger.error(e);
+                c_logger.error(e.getMessage(), e);
             }
         }
         return m_createUser;
@@ -1048,7 +1114,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         m_l10nProfile = profile;
     }
 
-    public void setRequestList(Collection list)
+    public void setRequestList(Collection<Request> list)
     {
         m_requestList = list;
     }
@@ -1092,7 +1158,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
     public void setWfInstances(Collection instances)
     {
-        m_wfInstances = instances;
+        m_wfInstances = new HashSet<Workflow>(instances);
     }
 
     public void setSourcePages(Collection pages)
@@ -1122,23 +1188,26 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         }
         return null;
     }
-    
+
     @Override
     public ArrayList getAllFileProfiles()
     {
         ArrayList prifiles = new ArrayList();
         try
         {
-            m_sourcePages = ServerProxy.getJobHandler().getSourcePageByJobId(getId());
-            
+            m_sourcePages = ServerProxy.getJobHandler().getSourcePageByJobId(
+                    getId());
+
             if (m_sourcePages.size() > 0)
             {
                 Iterator it = m_sourcePages.iterator();
-                
-                while(it.hasNext()) {
-                    long dataSourceId = ((SourcePage)it.next()).getRequest().getDataSourceId();
-                    FileProfile fp = 
-                        getFileProfilePersistenceManager().readFileProfile(dataSourceId);
+
+                while (it.hasNext())
+                {
+                    long dataSourceId = ((SourcePage) it.next()).getRequest()
+                            .getDataSourceId();
+                    FileProfile fp = getFileProfilePersistenceManager()
+                            .readFileProfile(dataSourceId);
                     prifiles.add(fp);
                 }
             }
@@ -1147,7 +1216,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             e.printStackTrace();
         }
-        
+
         return prifiles;
     }
 
@@ -1181,7 +1250,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
 
         return atts;
     }
-    
+
     public List<AttributeClone> getAllAttributeAsList()
     {
         List<AttributeClone> atts = new ArrayList<AttributeClone>();
@@ -1204,7 +1273,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         {
             atts.addAll(jobAtts);
         }
-        
+
         return atts;
     }
 
@@ -1257,7 +1326,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
         if (attriguteMap == null)
         {
             attriguteMap = new HashMap<AttributeClone, JobAttribute>();
-            
+
             Set<JobAttribute> jobAttributes = getAttributes();
             if (jobAttributes != null)
             {
@@ -1300,21 +1369,22 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
             // do nothing, wait util attribute are set.
             int i = 0;
         }
-        
+
         String hql = "from JobAttribute j where j.job.id = :jobId";
         Map map = new HashMap();
         map.put("jobId", getIdAsLong());
-        
-        List<JobAttribute> atts = (List<JobAttribute>)HibernateUtil.search(hql, map);
+
+        List<JobAttribute> atts = (List<JobAttribute>) HibernateUtil.search(
+                hql, map);
         if (atts == null)
             return true;
-        
+
         CostCenterAction action = new CostCenterAction();
-        for (JobAttribute att :  atts)
+        for (JobAttribute att : atts)
         {
             action.run(att);
         }
-        
+
         if (!action.isSeted())
         {
             c_logger.info("The job can not be dispatched until cost center attribute is set.");
@@ -1332,22 +1402,25 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
     {
         m_orgState = state;
     }
-    
+
     public String canAddSourceFiles()
     {
-        List<UpdatedSourcePage> uPages = UpdateSourcePageManager.getAllUpdatedSourcePage(this);
+        List<UpdatedSourcePage> uPages = UpdateSourcePageManager
+                .getAllUpdatedSourcePage(this);
         if (uPages.size() > 0)
         {
             return "msg_cannot_add_delete_file2";
         }
-        
-        List<AddingSourcePage> aPages = AddingSourcePageManager.getAllAddingSourcePage(this);
+
+        List<AddingSourcePage> aPages = AddingSourcePageManager
+                .getAllAddingSourcePage(this);
         if (aPages.size() > 0)
         {
             return "msg_cannot_add_delete_file2";
         }
-        
-        if (Job.READY_TO_BE_DISPATCHED.equals(getState()) || Job.DISPATCHED.equals(getState()))
+
+        if (Job.READY_TO_BE_DISPATCHED.equals(getState())
+                || Job.DISPATCHED.equals(getState()))
         {
             Collection<Workflow> ws = this.getWorkflows();
             for (Workflow w : ws)
@@ -1356,7 +1429,7 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                 {
                     continue;
                 }
-                
+
                 Hashtable<Long, TaskImpl> tasks = w.getTasks();
                 for (TaskImpl task : tasks.values())
                 {
@@ -1366,33 +1439,27 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                     }
                 }
             }
-            
+
             return null;
         }
-        
+
         return "msg_cannot_add_delete_file";
     }
-    
+
     public long getProjectId()
     {
-        Set<RequestImpl> requests = getRequestSet();
-        for (RequestImpl r : requests)
-        {
-            return r.getL10nProfile().getProject().getId();
-        }
-        
-        List<UpdatedSourcePage> pages = UpdateSourcePageManager.getAllUpdatedSourcePage(this);
-        for (UpdatedSourcePage page : pages)
-        {
-            return page.getProjectId();
-        }
-        
-        return -1;
+        return getL10nProfile().getProjectId();
     }
-    
+
+    public Project getProject()
+    {
+        return getL10nProfile().getProject();
+    }
+
     /**
      * The job is create from web service or not.
-     * @return true if the job is create from web service 
+     * 
+     * @return true if the job is create from web service
      */
     public boolean isFromWebService()
     {
@@ -1413,10 +1480,10 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     public boolean hasPassoloFiles()
     {
         Collection<SourcePage> sps = this.getSourcePages();
@@ -1426,5 +1493,25 @@ public class JobImpl extends PersistentObject implements Job, WorkObject
                 return true;
         }
         return false;
+    }
+
+    public Date getCompletedDate()
+    {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date completedDate)
+    {
+        this.completedDate = completedDate;
+    }
+
+    public Date getStartDate()
+    {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate)
+    {
+        this.startDate = startDate;
     }
 }

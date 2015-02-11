@@ -146,7 +146,7 @@ public class TextUI implements UI
                     }
                     catch (IOException e1)
                     {
-                        log.error(e1);
+                        log.error(e1.getMessage(), e1);
                     }
                 }
 
@@ -186,7 +186,7 @@ public class TextUI implements UI
         }
         catch (IOException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -208,14 +208,13 @@ public class TextUI implements UI
             }
             catch (IOException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 StackTraceElement[] trace = e.getStackTrace();
                 for (StackTraceElement msg : trace)
                 {
                     log.error("\tat " + msg);
                 }
 
-                e.printStackTrace();
                 pressEntryKey();
                 System.exit(0);
             }
@@ -294,7 +293,7 @@ public class TextUI implements UI
         }
         catch (IOException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         System.exit(0);
     }
@@ -311,7 +310,7 @@ public class TextUI implements UI
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -335,7 +334,7 @@ public class TextUI implements UI
         }
         catch (IOException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 

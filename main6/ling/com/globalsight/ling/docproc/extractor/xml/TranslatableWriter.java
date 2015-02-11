@@ -36,7 +36,8 @@ class TranslatableWriter extends OutputWriter
 
         try
         {
-            isOfficeXml = ExtractorRegistry.FORMAT_OFFICE_XML.equals(this.output.getDataFormat());
+            isOfficeXml = ExtractorRegistry.FORMAT_OFFICE_XML
+                    .equals(this.output.getDataFormat());
         }
         catch (Exception e)
         {
@@ -50,8 +51,9 @@ class TranslatableWriter extends OutputWriter
         {
             String toAdd = outputBuffer.toString();
 
-            if (Text.isBlank(toAdd) || 
-                    (getXmlFilterHelper() != null && getXmlFilterHelper().isBlankOrExblank(toAdd)))
+            if (Text.isBlank(toAdd)
+                    || (getXmlFilterHelper() != null && getXmlFilterHelper()
+                            .isBlankOrExblank(toAdd)))
             {
                 output.addSkeleton(toAdd);
             }
@@ -65,64 +67,51 @@ class TranslatableWriter extends OutputWriter
             }
             else
             {
-                output.addTranslatableTmx(toAdd, getSid(), isPreserveWhiteSpace(), output.getDataFormat());
+                output.addTranslatableTmx(toAdd, getSid(),
+                        isPreserveWhiteSpace(), output.getDataFormat());
             }
         }
     }
-    
+
     private String removeTags(String content)
     {
         StringBuffer sb = new StringBuffer(content);
         int st = sb.indexOf("<");
         int ed = sb.indexOf(">", st);
-        
-        while(st > -1 && ed > st)
+
+        while (st > -1 && ed > st)
         {
+            String tag = sb.toString().substring(st, ed + 1);
+            if (tag.contains(OfficeXmlContentPostFilter.IS_FROM_OFFICE_CONTENT))
+            {
+                sb.insert(
+                        ed + 1,
+                        OfficeXmlContentPostFilter.SKELETON_OFFICE_CONTENT_START);
+                sb.delete(st, ed + 1);
+                st = sb.indexOf("<");
+                ed = sb.indexOf(">", st);
+                sb.insert(st,
+                        OfficeXmlContentPostFilter.SKELETON_OFFICE_CONTENT_END);
+                st += OfficeXmlContentPostFilter.SKELETON_OFFICE_CONTENT_END
+                        .length();
+                ed += OfficeXmlContentPostFilter.SKELETON_OFFICE_CONTENT_END
+                        .length();
+
+                continue;
+            }
             sb.delete(st, ed + 1);
-            
+
             st = sb.indexOf("<");
             ed = sb.indexOf(">", st);
         }
-        
+
         return sb.toString();
     }
 
     public void append(String content)
     {
         boolean handled = false;
-        
-//        try
-//        {
-//            // check if ph consilidation
-//            if (isOfficeXml)
-//            {
-//                boolean endWithPh = outputBuffer.toString().endsWith("</ph>");
-//                if (endWithPh && content.startsWith("<ph "))
-//                {
-//                    isPhConsolidate = true;
-//                }
-//                
-//                if (isPhConsolidate)
-//                {
-//                    if (content.indexOf("<sub") < -1)
-//                    {
-//                        String notag = removeTags(content);
-//                        outputBuffer.insert(outputBuffer.length() - 5, notag);
-//                        handled = true;
-//                    }
-//                }
-//                
-//                if (endWithPh && content.endsWith("</ph>"))
-//                {
-//                    isPhConsolidate = false;
-//                }
-//            }
-//        }
-//        catch (Exception e)
-//        {
-//            // ignore
-//        }
-        
+
         if (!handled)
         {
             outputBuffer.append(content);

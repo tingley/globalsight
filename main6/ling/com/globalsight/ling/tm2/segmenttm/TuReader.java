@@ -16,28 +16,21 @@
  */
 package com.globalsight.ling.tm2.segmenttm;
 
-import com.globalsight.everest.tm.exporter.ExportUtil;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.hibernate.Session;
+
+import com.globalsight.diplomat.util.database.DbAccessor;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
+import com.globalsight.everest.tm.exporter.ExportUtil;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-
-// should be in common util package
-import com.globalsight.terminology.util.SqlUtil;
-
-import com.globalsight.diplomat.util.database.DbAccessor;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.SQLException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.hibernate.Session;
 
 /**
  * Allows reading of SegmentTmTus from a TM. The caller should
@@ -63,8 +56,10 @@ public class TuReader
     private Connection m_conn = null;
     private Statement m_stmtTus = null;
     private Statement m_stmtTuvs = null;
+    private Statement m_stmtTuProps = null;
     private ResultSet m_rsetTus = null;
     private ResultSet m_rsetTuvs = null;
+    private ResultSet m_rsetTuProps = null;
     //
     // Constructor
     //
@@ -112,6 +107,8 @@ public class TuReader
             ResultSet.CONCUR_READ_ONLY);
         m_stmtTuvs = m_conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
             ResultSet.CONCUR_READ_ONLY);
+        m_stmtTuProps = m_conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY);
 
         String tuids = printIds(p_tuIds, p_min, p_max);
 
@@ -139,6 +136,11 @@ public class TuReader
             locales 
             /* and tm_id = ? */
             );
+        
+        m_rsetTuProps = m_stmtTuProps
+                .executeQuery("SELECT id, tu_id, prop_type, prop_value "
+                        + "FROM project_tm_tu_t_prop " + "WHERE tu_id IN ("
+                        + tuids + ") ");
     }
 
     /**
@@ -198,12 +200,24 @@ public class TuReader
 
                     result.addTuv(tuv);
                 }
-                else
+            }
+            m_rsetTuvs.absolute(1);
+
+            while (m_rsetTuProps.next())
+            {
+                long tu_id = m_rsetTuProps.getLong(2);
+
+                if (tu_id == result.getId())
                 {
-                    m_rsetTuvs.previous();
-                    break;
+                    ProjectTmTuTProp prop = new ProjectTmTuTProp();
+                    prop.setId(m_rsetTuProps.getLong(1));
+                    prop.setPropType(m_rsetTuProps.getString(3));
+                    prop.setPropValue(m_rsetTuProps.getString(4));
+                    result.addProp(prop);
                 }
             }
+            m_rsetTuProps.absolute(1);
+
         }
 
         return result;

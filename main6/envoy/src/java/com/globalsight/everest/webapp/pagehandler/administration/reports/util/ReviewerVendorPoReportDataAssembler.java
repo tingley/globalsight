@@ -333,7 +333,7 @@ public class ReviewerVendorPoReportDataAssembler
 
                 data.segmentTmWordCount += (isInContextMatch) 
                     ? w.getSegmentTmWordCount() : (isDefaultContextMatch) 
-                        ? w.getNoUseExactMatchWordCount() - w.getContextMatchWordCount() : w.getNoUseExactMatchWordCount();
+                        ? w.getTotalExactMatchWordCount() - w.getContextMatchWordCount() : w.getTotalExactMatchWordCount();
                 data.inContextMatchWordCount += (isInContextMatch) ? w.getInContextMatchWordCount() : w.getNoUseInContextMatchWordCount();
                 data.contextMatchWordCount += (isDefaultContextMatch) ? w.getContextMatchWordCount() : 0;
                 data.dellExactMatchWordCount = data.segmentTmWordCount;

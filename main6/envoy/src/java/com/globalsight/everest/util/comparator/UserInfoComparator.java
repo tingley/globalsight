@@ -14,44 +14,43 @@
  *  limitations under the License.
  *  
  */
-package com.globalsight.everest.util.comparator;    
+package com.globalsight.everest.util.comparator;
 
 import java.util.Locale;
 
 import com.globalsight.everest.usermgr.UserInfo;
 
 /**
-* This class can be used to compare UserInfo objects
-*/
+ * This class can be used to compare UserInfo objects
+ */
 public class UserInfoComparator extends StringComparator
 {
-    //types of User comparison
+    // types of User comparison
     public static final int USERID = 1;
     public static final int FIRSTNAME = 2;
     public static final int LASTNAME = 3;
     public static final int FULL_NAME = 4;
 
+    /**
+     * Creates a UserInfoComparator with the given locale.
+     */
+    public UserInfoComparator(Locale p_locale)
+    {
+        super(p_locale);
+    }
 
-	/**
-	 * Creates a UserInfoComparator with the given locale.
-	 */
-	public UserInfoComparator(Locale p_locale)
-	{
-	    super(p_locale);
-	}
-	/**
-	* Creates a UserInfoComparator with the given type and locale.
-	* If the type is not a valid type, then the default comparison
-	* is done by displayName
-	*/
-	public UserInfoComparator(int p_type, Locale p_locale)
-	{
-	    super(p_type, p_locale);
-	}
+    /**
+     * Creates a UserInfoComparator with the given type and locale. If the type
+     * is not a valid type, then the default comparison is done by displayName
+     */
+    public UserInfoComparator(int p_type, Locale p_locale)
+    {
+        super(p_type, p_locale);
+    }
 
-	/**
-	* Performs a comparison of two UserInfo objects.
-	*/
+    /**
+     * Performs a comparison of two UserInfo objects.
+     */
     public int compare(java.lang.Object p_A, java.lang.Object p_B)
     {
         UserInfo a = (UserInfo) p_A;
@@ -64,8 +63,8 @@ public class UserInfoComparator extends StringComparator
         switch (m_type)
         {
             case USERID:
-                aValue = a.getUserId();
-                bValue = b.getUserId();
+                aValue = a.getUserName();
+                bValue = b.getUserName();
                 rv = this.compareStrings(aValue, bValue);
                 break;
             case FIRSTNAME:
@@ -84,8 +83,8 @@ public class UserInfoComparator extends StringComparator
                 rv = this.compareStrings(aValue, bValue);
                 break;
             default:
-                aValue = a.getUserId();
-                bValue = b.getUserId();
+                aValue = a.getUserName();
+                bValue = b.getUserName();
                 rv = this.compareStrings(aValue, bValue);
                 break;
         }

@@ -80,6 +80,7 @@ String priSrcCheckBoxes = OfflineConstants.PRI_SOURCE_CHECKBOXES;
 //   format selector
 String formatValueRtfListView = OfflineConstants.FORMAT_RTF;
 String formatValueRtfListViewTrados = OfflineConstants.FORMAT_RTF_TRADOS;
+String formatValueRtfListViewTradosOptimized = OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED;
 String formatValueTextListView = OfflineConstants.FORMAT_TEXT;
 String formatValueRtfParaView = OfflineConstants.FORMAT_RTF_PARA_VIEW;
 
@@ -127,6 +128,7 @@ String encodingValueDefault = OfflineConstants.ENCODING_DEFAULT;
 String formatStartHere = bundle.getString("lb_start_here");
 String formatRtfListView = bundle.getString("lb_rtf_listview");
 String formatRtfListViewTrados = bundle.getString("lb_rtf_trados");
+String formatRtfListViewTradosOptimized = bundle.getString("lb_rtf_trados_optimized");
 String formatTextListView = bundle.getString("lb_text");
 String formatRtfParaView = bundle.getString("lb_rtf_paraview_1");
 
@@ -306,7 +308,7 @@ function setDisplayExactMatchSelector(formSent)
 function operateConsolidateTerm()
 {
     var selector = document.getElementById("termTypeSelector");
-    document.getElementById("consolidateTermCheckBox").disabled=selector.selectedIndex == 0;
+    document.getElementById("consolidateTermCheckBox").disabled = (selector.value == 'termNone');
 }
 function setEditorSelector(formSent)
 {
@@ -326,7 +328,8 @@ function setEditorSelector(formSent)
         editorSelect.options[4] = new Option(editorOptNames[5],editorOptValues[5]);
         editorSelect.selectedIndex = 1;
     }
-    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>")
+    else if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
     {
         editorSelect.options[0] = new Option(editorOptNames[0],editorOptValues[0]);
         editorSelect.options[1] = new Option(editorOptNames[1],editorOptValues[1]);
@@ -368,6 +371,7 @@ function setEditorSelector(formSent)
     setPlaceHolderSelector(formSent);
     setPopulates(formatSelect);
     setConsolidate(formatSelect);
+    setRepetitions(formatSelect);
     return true;
 }
 
@@ -534,7 +538,8 @@ function setPopulates(formatSelect)
 {
 	var populatefuzzy = document.getElementById("populatefuzzy");
 	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>")
+    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
     {
     	populatefuzzy.style.display = "";
     }
@@ -547,13 +552,30 @@ function setPopulates(formatSelect)
 function setConsolidate(formatSelect) {
 	var consolidate = document.getElementById("needConsolidateBox");
 	
-    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>")
+    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
     {
     	consolidate.style.display = "";
     }
     else
     {
     	consolidate.style.display = "none";
+    }
+}
+
+function setRepetitions(formatSelect) {
+	var includeRepetitionsObj = document.getElementById("includeRepetitionsBox");
+	
+    if (formatSelect.options[formatSelect.selectedIndex].value == "<%= formatXlfName12 %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTrados %>"
+    		|| formatSelect.options[formatSelect.selectedIndex].value == "<%= formatValueRtfListViewTradosOptimized %>")
+    {
+    	includeRepetitionsObj.style.display = "";
+    }
+    else
+    {
+    	includeRepetitionsObj.style.display = "none";
     }
 }
 
@@ -652,7 +674,9 @@ function setPlaceHolderSelector(formSent)
 	    this.populatefuzzy = "<%=(optionsHash == null) ? request.getAttribute("populatefuzzy") :
 			optionsHash.get("populatefuzzy")%>"; 
 		this.needConsolidate = "<%=(optionsHash == null) ? request.getAttribute("needConsolidate") :
-		optionsHash.get("needConsolidate")%>";
+			optionsHash.get("needConsolidate")%>";
+		this.includeRepetitions = "<%=(optionsHash == null) ? request.getAttribute("includeRepetitions") :
+			optionsHash.get("includeRepetitions")%>";
     }
 
 /*
@@ -804,6 +828,14 @@ function setClientDwnldOptions(formSent)
 			document.getElementById("needConsolidate").checked = false;
 		}
 	}
+	
+	if (dwnldOpt.includeRepetitions)
+	{
+		if(dwnldOpt.includeRepetitions == 'false' || dwnldOpt.includeRepetitions == 'no')
+		{
+			document.getElementById("includeRepetitions").checked = false;
+		}
+	}
 }
 
 function saveUserOptions(formSent)
@@ -906,11 +938,12 @@ function operateConsolidate()
                 <SELECT onChange="setEditorSelector(this.form);" NAME="<%= formatSelector %>" CLASS="standardText" >
                   <!-- <OPTION VALUE="-"><%= formatStartHere %></OPTION> -->
                   <OPTION VALUE="<%= formatValueRtfListViewTrados %>"><%= formatRtfListViewTrados %></OPTION>
+                  <OPTION VALUE="<%= formatValueRtfListViewTradosOptimized %>"><%= formatRtfListViewTradosOptimized %></OPTION>
                   <OPTION VALUE="<%= formatValueTextListView %>"><%= formatTextListView %></OPTION>
                    <% if(EditHelper.isParagraphEditorInstalled())
                   {
                   %>
-                  <OPTION VALUE="<%= formatValueRtfParaView %>" ><%= formatRtfParaView %></OPTION>
+                  <!-- <OPTION VALUE="<%= formatValueRtfParaView %>" ><%= formatRtfParaView %></OPTION> -->
                   <%
                   }
                   %>
@@ -1024,6 +1057,14 @@ function operateConsolidate()
                 <TD>
                     <SPAN CLASS="standardText">
                       <input type="checkbox" id="needConsolidate" name="needConsolidate" value="true" checked="checked">
+                    </SPAN>
+                </TD>
+            </TR>
+            <TR id="includeRepetitionsBox">
+            	<TD><SPAN CLASS="standardText"><%=bundle.getString("lb_download_repetition") %></SPAN></TD>
+                <TD>
+                    <SPAN CLASS="standardText">
+                      <input type="checkbox" id="includeRepetitions" name="includeRepetitions" value="true" checked="checked">
                     </SPAN>
                 </TD>
             </TR>

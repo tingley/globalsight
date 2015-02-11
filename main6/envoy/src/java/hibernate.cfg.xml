@@ -21,6 +21,7 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CommunicationInfo.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Company.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/Category.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/FMFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusContext.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusDoc.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/CorpusDocGroup.hbm.xml" />
@@ -54,7 +55,6 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/L10nProfileVersion.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/LeverageGroupImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/LeverageLocales.hbm.xml" />
-		<mapping resource="com/globalsight/persistence/hibernate/xml/LeverageMatch.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/LeverageProjectTM.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/LocaleCodeSet.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/LocalePair.hbm.xml" />
@@ -81,8 +81,12 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplateFormat.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TemplatePart.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TranslationMemoryProfile.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/TMProfileMtInfo.hbm.xml" />
+		<!-- 
+		<mapping resource="com/globalsight/persistence/hibernate/xml/LeverageMatch.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TuImpl.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/TuvImpl.hbm.xml" />
+		 -->
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserCalendarWorkingDay.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserCalendarWorkingHour.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/UserFieldSecurity.hbm.xml" />
@@ -163,5 +167,8 @@
 		<mapping resource="com/globalsight/persistence/hibernate/xml/InputModel.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/BaseFilter.hbm.xml" />
 		<mapping resource="com/globalsight/persistence/hibernate/xml/BaseFilterMapping.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/TMAttribute.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/TMPAttribute.hbm.xml" />
+		<mapping resource="com/globalsight/persistence/hibernate/xml/ProjectTmTuTProp.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>

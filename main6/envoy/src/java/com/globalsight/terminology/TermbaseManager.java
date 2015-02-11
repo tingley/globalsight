@@ -103,7 +103,9 @@ public class TermbaseManager implements TermbaseExceptionMessages
                         + "'", e);
             }
 
-            CATEGORY.info("Started termbase `" + tbase.getName() + "'");
+            if (CATEGORY.isDebugEnabled()) {
+                CATEGORY.info("Started termbase `" + tbase.getName() + "'");                
+            }
             CompanyThreadLocal.getInstance().setIdValue(null);
         }
     }

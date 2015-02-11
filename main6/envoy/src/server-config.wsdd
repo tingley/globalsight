@@ -55,7 +55,13 @@
   <parameter name="allowedMethods" value="*"/>
   <parameter name="className" value="com.globalsight.webservices.vendormanagement.VendorManagement"/>
   <parameter name="scope" value="application"/>
-  <namespace>http://www.globalsight.com/webservices/</namespace>    
+  <namespace>http://www.globalsight.com/webservices/</namespace>
+ </service>
+ <service name="AmbassadorWebService2" provider="java:RPC">
+  <parameter name="allowedMethods" value="*"/>
+  <parameter name="className" value="com.globalsight.webservices.Ambassador2"/>
+  <parameter name="scope" value="application"/>
+  <namespace>http://www.globalsight.com/webservices/</namespace>
  </service>
  <transport name="http">
   <requestFlow>

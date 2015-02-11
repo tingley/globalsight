@@ -1,11 +1,11 @@
 package com.globalsight.selenium.pages;
 
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 public class OnlineReviewStatusReportWebForm
 {
     public static final String REPORT_LINK = "link="
-            + ConfigUtil.getConfigData("COMPANY_NAME") + " Online Review Status";
+            + ConfigUtil.getConfigData("company") + " Online Review Status";
     public static final String POPUP_WINDOW_NAME = "OnlineRevStatusundefined1";
 
     public static final String PROJECTS_SELECTOR = "projectId";

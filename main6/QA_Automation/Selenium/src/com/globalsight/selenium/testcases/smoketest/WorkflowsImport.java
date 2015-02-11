@@ -1,23 +1,11 @@
 package com.globalsight.selenium.testcases.smoketest;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.WorkflowsFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.pages.Workflows;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
-import com.thoughtworks.selenium.Selenium;
+
 /*
  * TestCaseName: WorkflowsImport.java
  * Author:Jester
@@ -27,59 +15,24 @@ import com.thoughtworks.selenium.Selenium;
  * Date       Comments       Updater
  * 2011-6-28  First Version  Jester
  */
-public class WorkflowsImport extends BaseTestCase{
-	/*
-	 * Common variables initialization.
-	 */
-	private Selenium selenium;
-	private WorkflowsFuncs iWorkflowsFuncs = new WorkflowsFuncs();
-	String verifyname = ConfigUtil.getDataInCase(getClass().getName(), "VerifyName");
-	
-  @Test
-  public void importWorkflow() throws Exception {
-	  
-	  selenium.click(MainFrame.Setup_MENU);
-	  selenium.click(MainFrame.Workflows_SUBMENU);
-	  selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	  iWorkflowsFuncs.importWorkFlow(selenium, ConfigUtil.getPath(getClassName(), "FILEPATH"), ConfigUtil.getDataInCase(getClassName(), "IMPORTPROFILE"),verifyname);
-	 
-  }
-    
-  @BeforeMethod
-  public void beforeMethod() {
-	  CommonFuncs.loginSystemWithAdmin(selenium);
-  }
+public class WorkflowsImport extends BaseTestCase
+{
+    /*
+     * Common variables initialization.
+     */
+    private WorkflowsFuncs workflowsFuncs = new WorkflowsFuncs();
 
-  @AfterMethod
-  public void afterMethod() {
-	  CommonFuncs.logoutSystem(selenium);
-  }
+    @Test
+    public void importWorkflow() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.WORKFLOWS_SUBMENU);
 
-  @BeforeClass
-  public void beforeClass() {
-  }
+        String filePath = ConfigUtil.getConfigData("Base_Path")
+                + getProperty("workflow.import.file");
 
-  @AfterClass
-  public void afterClass() {
-  }
-
-  @BeforeTest
-  public void beforeTest() {
-	  selenium=CommonFuncs.initSelenium();
-  }
-
-  @AfterTest
-  public void afterTest() {
-	  CommonFuncs.endSelenium(selenium);
-	  
-  }
-
-  @BeforeSuite
-  public void beforeSuite() {
-  }
-
-  @AfterSuite
-  public void afterSuite() {
-  }
-
+        workflowsFuncs.importWorkFlow(selenium, filePath,
+                getProperty("workflow.import"),
+                getProperty("workflow.import.verify"));
+    }
 }

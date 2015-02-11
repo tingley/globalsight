@@ -38,6 +38,7 @@ import com.globalsight.everest.costing.CurrencyFormat;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.JobTableModel;
@@ -90,11 +91,11 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
     /**
      * The entry of the handler. This method will dispatch the
      * HttpServletRequest to different page based on the value of
-     * <code>Constants.REPORT_ACT</code>.
-     * <code>Constants.REPORT_ACT_PREP</code> means this is request for
-     * prepare the parameter data, then system will show the parameter page.
-     * <code>Constants.REPORT_ACT_CREATE</code> means create the real report
-     * based on the user input data, then system will show the report page.
+     * <code>Constants.REPORT_ACT</code>. <code>Constants.REPORT_ACT_PREP</code>
+     * means this is request for prepare the parameter data, then system will
+     * show the parameter page. <code>Constants.REPORT_ACT_CREATE</code> means
+     * create the real report based on the user input data, then system will
+     * show the report page.
      */
     public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
             ServletContext p_context) throws Exception
@@ -109,21 +110,24 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
         if (Constants.REPORT_ACT_PREP.equalsIgnoreCase(act))
         {
             addMoreReportParameters(req);
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_PREP), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_PREP), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_CREATE.equalsIgnoreCase(act))
         {
             createReport(req);
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_TURNPAGE.equalsIgnoreCase(act))
         {
             String pageId = req.getParameter(Constants.REPORT_SHOWPAGE_PAGEID);
             bindData(req, pageId); // bind the data to one report page
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
     }
 
@@ -147,20 +151,20 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
     protected void addWorkflowStatusParameter(HttpServletRequest req)
     {
         wfStatesHashMap = new LinkedHashMap();
-        wfStatesHashMap.put(PENDING, ReportsPackage.getMessage(m_bundle,
-                PENDING));
+        wfStatesHashMap.put(PENDING,
+                ReportsPackage.getMessage(m_bundle, PENDING));
         wfStatesHashMap.put(READY, ReportsPackage.getMessage(m_bundle, READY));
-        wfStatesHashMap.put(DISPATCHED, ReportsPackage.getMessage(m_bundle,
-                DISPATCHED));
-        wfStatesHashMap.put(LOCALIZED, ReportsPackage.getMessage(m_bundle,
-                LOCALIZED));
-        wfStatesHashMap.put(EXPORTED, ReportsPackage.getMessage(m_bundle,
-                EXPORTED));
-        wfStatesHashMap.put(ARCHIVED, ReportsPackage.getMessage(m_bundle,
-                ARCHIVED));
+        wfStatesHashMap.put(DISPATCHED,
+                ReportsPackage.getMessage(m_bundle, DISPATCHED));
+        wfStatesHashMap.put(LOCALIZED,
+                ReportsPackage.getMessage(m_bundle, LOCALIZED));
+        wfStatesHashMap.put(EXPORTED,
+                ReportsPackage.getMessage(m_bundle, EXPORTED));
+        wfStatesHashMap.put(ARCHIVED,
+                ReportsPackage.getMessage(m_bundle, ARCHIVED));
         req.setAttribute(Constants.WFSTATUS_ARRAY, wfStatesHashMap);
-        req.setAttribute(Constants.WFSTATUS_LABEL, ReportsPackage.getMessage(
-                m_bundle, Constants.WFSTATUS));
+        req.setAttribute(Constants.WFSTATUS_LABEL,
+                ReportsPackage.getMessage(m_bundle, Constants.WFSTATUS));
     }
 
     /**
@@ -210,8 +214,8 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
 
             req.setAttribute(Constants.PROJECT_MGR_ARRAY, projectManagers);
             req.setAttribute(Constants.PROJECT_MGR_DEFVALUE, defvalue);
-            req.setAttribute(Constants.PROJECT_MGR_LABEL, ReportsPackage
-                    .getMessage(m_bundle, Constants.PROJECT_MGR));
+            req.setAttribute(Constants.PROJECT_MGR_LABEL,
+                    ReportsPackage.getMessage(m_bundle, Constants.PROJECT_MGR));
         }
         finally
         {
@@ -280,20 +284,22 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
         if (projectManager.equals(ReportsPackage.getMessage(m_bundle,
                 Constants.CRITERIA_ALLPMS)))
         {
-            jobs = new ArrayList<Job>(ServerProxy.getJobHandler().getJobsByState(
-                    wfstate));
+            jobs = new ArrayList<Job>(ServerProxy.getJobHandler()
+                    .getJobsByState(wfstate));
         }
         else
         {
             jobs = new ArrayList<Job>(ServerProxy.getJobHandler()
-                    .getJobsByManagerIdAndState(projectManager, wfstate));
+                    .getJobsByManagerIdAndState(
+                            UserUtil.getUserIdByName(projectManager), wfstate));
         }
 
         super.setUseInContext(jobs);
 
         // put all the job and workflow data into tables
         JobTableModel jtm = new JobTableModel(jobs, theUiLocale, m_currency);
-        ArrayList<ArrayList<Workflow>> jobWorkflows = getAllWorkflowsForAllJobs((LinkedList<Long>) jtm.getJobIds());
+        ArrayList<ArrayList<Workflow>> jobWorkflows = getAllWorkflowsForAllJobs((LinkedList<Long>) jtm
+                .getJobIds());
         // now tell how many jobs there are
         reportDataWrap.setTotalJobNum(new Integer(jtm.getRowCount()));
         HashMap<Long, WorkflowTableModel> workflowTableModels = makeWorkflowTableModels(
@@ -312,7 +318,7 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
             Long jobId = (Long) jtm.getValueAt(r, JobTableModel.ID);
             Job job = ServerProxy.getJobHandler().getJobById(jobId);
             WorkflowTableModel wtm = workflowTableModels.get(jobId);
-            
+
             ArrayList jobForm = new ArrayList();
             addJobForm(jtm, r, jobForm);
             // only show jobs with workflows
@@ -323,9 +329,9 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 // and only show cost if jobcosting is on.
                 // int numCols = 6;
                 int numCols = 10;
-                if(super.isUseInContext() && super.isUseDefaultContext())
+                if (super.isUseInContext() && super.isUseDefaultContext())
                 {
-                    numCols ++;
+                    numCols++;
                 }
                 boolean hasDispatchInfo = wfstate.equals(DISPATCHED);
                 boolean hasCostInfo = isJobCostingOn();
@@ -348,7 +354,7 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 {
                     subcols[l++] = WorkflowTableModel.IN_CONTEXT_WC;
                 }
-                if(PageHandler.isDefaultContextMatch(job))
+                if (PageHandler.isDefaultContextMatch(job))
                 {
                     subcols[l++] = WorkflowTableModel.CONTEXT_WC;
                 }
@@ -387,7 +393,7 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                 {
                     pageHeight -= REPORTHEADHEIGHT; // report header is 130px
                 }
-    
+
                 // jobform and workflowmodule height
                 int jobFormHeight = wtm.getRowCount() * EVERYROWHEIGHT
                         + FIXJOBHEIGHT;
@@ -400,11 +406,14 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
                     pageHashMap = new LinkedHashMap();
                     pageId = pageId + 1;
                 }
-    
+
                 pageHashMap.put(jobId, jobForm);
                 pageHeight -= jobFormHeight;
-            } else {
-                reportDataWrap.setTotalJobNum(reportDataWrap.getTotalJobNum() - 1);
+            }
+            else
+            {
+                reportDataWrap
+                        .setTotalJobNum(reportDataWrap.getTotalJobNum() - 1);
             }
             jobForm = new ArrayList();
         }
@@ -456,10 +465,10 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
     /**
      * Adds a form at the top with the selected PM and workflow state <br>
      * 
-     * @param projectManager --
-     *            the selected PM
-     * @param wfstate --
-     *            the selected WF state
+     * @param projectManager
+     *            -- the selected PM
+     * @param wfstate
+     *            -- the selected WF state
      */
     private void addCriteriaFormAtTop(String projectManager, String wfstate)
     {
@@ -486,12 +495,12 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
     /**
      * Adds a form to the report containing the job information <br>
      * 
-     * @param p_jtm --
-     *            the JobTableModel
-     * @param r --
-     *            the current row
-     * @param jobForm --
-     *            the current jobForm
+     * @param p_jtm
+     *            -- the JobTableModel
+     * @param r
+     *            -- the current row
+     * @param jobForm
+     *            -- the current jobForm
      */
     private void addJobForm(JobTableModel p_jtm, int r, ArrayList jobForm)
     {
@@ -536,10 +545,11 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
     /**
      * Returns an array list containing each job's workflows <br>
      * 
-     * @param p_jobs --
-     *            ArrayList of jobids
+     * @param p_jobs
+     *            -- ArrayList of jobids
      */
-    private ArrayList<ArrayList<Workflow>> getAllWorkflowsForAllJobs(LinkedList<Long> p_jobs)
+    private ArrayList<ArrayList<Workflow>> getAllWorkflowsForAllJobs(
+            LinkedList<Long> p_jobs)
     {
         // contains an array list for each job
         ArrayList<ArrayList<Workflow>> jobWorkflows = new ArrayList<ArrayList<Workflow>>();
@@ -549,8 +559,9 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
             ArrayList<Workflow> workflows = null; // the workflows for this job
             try
             {
-                workflows = new ArrayList<Workflow>(ServerProxy.getJobReportingManager()
-                        .getWorkflowsByJobId(jobId.longValue()));
+                workflows = new ArrayList<Workflow>(ServerProxy
+                        .getJobReportingManager().getWorkflowsByJobId(
+                                jobId.longValue()));
             }
             catch (Exception e)
             {
@@ -568,14 +579,15 @@ public class WorkflowStatusReportHandler extends BasicReportHandler
      * Returns an HashMap containing workflowtablemodels for each job <br>
      * 
      * @param p_jtm
-     * @param p_jobWorkflows --
-     *            an arraylist of arraylists for each job containing the
+     * @param p_jobWorkflows
+     *            -- an arraylist of arraylists for each job containing the
      *            workflows
      * @param p_wfstate
      * @return HashMap of WorkflowTableModels
      */
-    private HashMap<Long, WorkflowTableModel> makeWorkflowTableModels(JobTableModel p_jtm,
-            ArrayList<ArrayList<Workflow>> p_jobWorkflows, String p_wfstate)
+    private HashMap<Long, WorkflowTableModel> makeWorkflowTableModels(
+            JobTableModel p_jtm, ArrayList<ArrayList<Workflow>> p_jobWorkflows,
+            String p_wfstate)
     {
         HashMap<Long, WorkflowTableModel> wtms = new HashMap<Long, WorkflowTableModel>();
         for (int i = 0; i < p_jobWorkflows.size(); i++)

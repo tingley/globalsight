@@ -66,10 +66,10 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyPageExportedEvent(Collection p_targetTuvs)
+    public void notifyPageExportedEvent(Collection p_targetTuvs, Long p_companyId)
             throws TuvException, RemoteException
     {
-        updateStateOfTuvs(p_targetTuvs, TuvState.COMPLETE);
+        updateStateOfTuvs(p_targetTuvs, TuvState.COMPLETE, p_companyId);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -100,7 +100,7 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @exception TuvException
      * @exception RemoteException
      */
-    public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs)
+    public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs, Long p_companyId)
             throws TuvException, RemoteException
     {
         // change the Tuv state LOCALIZED,
@@ -111,7 +111,7 @@ public class TuvEventObserverLocal implements TuvEventObserver
         fromStates.add(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED);
         fromStates.add(TuvState.EXACT_MATCH_LOCALIZED);
 
-        updateStateOfTuvs(p_targetTuvs, fromStates, TuvState.COMPLETE);
+        updateStateOfTuvs(p_targetTuvs, fromStates, TuvState.COMPLETE, p_companyId);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -140,10 +140,10 @@ public class TuvEventObserverLocal implements TuvEventObserver
      * @throws TuvException
      *             when an error occurs.
      */
-    public void notifyJobExportedEvent(Collection p_sourceTuvs)
+    public void notifyJobExportedEvent(Collection p_sourceTuvs, Long p_companyId)
             throws TuvException, RemoteException
     {
-        updateStateOfTuvs(p_sourceTuvs, TuvState.COMPLETE);
+        updateStateOfTuvs(p_sourceTuvs, TuvState.COMPLETE, p_companyId);
 
         if (CATEGORY.isDebugEnabled())
         {
@@ -313,29 +313,39 @@ public class TuvEventObserverLocal implements TuvEventObserver
     //
 
     // update the state of the Tuvs
-    static void updateStateOfTuvs(Collection p_tuvs, TuvState p_state)
+    static void updateStateOfTuvs(Collection p_tuvs, TuvState p_state, Long p_companyId)
             throws TuvException
     {
-        updateStateOfTuvs(p_tuvs, (Collection) null, p_state);
+        updateStateOfTuvs(p_tuvs, (Collection) null, p_state, p_companyId);
     }
 
     // update the state of the Tuvs if the state matches the from state
     static void updateStateOfTuvs(Collection p_tuvs, TuvState p_fromState,
-            TuvState p_toState) throws TuvException
+            TuvState p_toState, Long p_companyId) throws TuvException
     {
-        Collection fromStates = new ArrayList();
+        Collection<TuvState> fromStates = new ArrayList<TuvState>();
         fromStates.add(p_fromState);
 
-        updateStateOfTuvs(p_tuvs, fromStates, p_toState);
+        updateStateOfTuvs(p_tuvs, fromStates, p_toState, p_companyId);
     }
 
-    // update the state of the Tuvs if the state matches the list of
-    // from states
+    /**
+     * Update the state of the Tuvs if the state matches the list of from states.
+     * 
+     * As Tuvs are using separated tables per company since 8.2.3,the Tuvs to 
+     * be updated are limited to same company.
+     * 
+     * @param p_tuvs
+     * @param p_fromStates
+     * @param p_toState
+     * @param p_companyId
+     * @throws TuvException
+     */
     static void updateStateOfTuvs(Collection p_tuvs, Collection p_fromStates,
-            TuvState p_toState) throws TuvException
+            TuvState p_toState, Long p_companyId) throws TuvException
     {
-        Collection stateUpdateTuvs = new ArrayList();
-        Collection stateAndCrcUpdateTuvs = new ArrayList();
+        Collection<TuvImpl> stateUpdateTuvs = new ArrayList<TuvImpl>();
+        Collection<TuvImpl> stateAndCrcUpdateTuvs = new ArrayList<TuvImpl>();
 
         Connection connection = null;
 
@@ -395,7 +405,8 @@ public class TuvEventObserverLocal implements TuvEventObserver
             {
                 utspc.setTuvsForStateAndCrcUpdate(stateAndCrcUpdateTuvs);
             }
-
+            // The companyId is required.
+            utspc.setCompanyId(p_companyId);
             utspc.persistObjects(connection);
             connection.commit();
         }

@@ -566,6 +566,12 @@ public abstract class TM3Tests {
     public void testFixedFingerprintTuvs() throws Exception {
         testFixedFingerprintTuvs(EN_US, FR_FR);
     }
+
+    @Test
+    public void testDataByLocaleOrdering() throws Exception {
+        testDataByLocaleOrdering(
+                manager.getTm(currentSession, FACTORY, currentTestId), EN_US, FR_FR, DE_DE);
+    }
     
     // 
     // Test implementations
@@ -2830,6 +2836,94 @@ public abstract class TM3Tests {
             throw e;
         }
     }
+
+    /**
+     * Make sure that we don't skip TUVs or return them in the wrong order
+     * when using getDataByLocale().  (GBS-2328).
+     */
+     public void testDataByLocaleOrdering(TM3Tm<TestData> tm, 
+            GlobalSightLocale srcLocale, GlobalSightLocale tgtLocale1, 
+            GlobalSightLocale tgtLocale2) throws Exception {
+
+        Transaction tx = null;
+        try {
+            tx = currentSession.beginTransaction();
+            // Create three segments in such a way that the TUVs for 
+            // French are out of order relative to the TUs.
+            TestData srcData1 = 
+                new TestData("This is source 1");
+            TestData srcData2 = 
+                new TestData("This is source 2");
+            TestData srcData3 = 
+                new TestData("This is source 3");
+            TestData tgtData1 = new TestData("This is target 1");
+            TestData tgtData2 = new TestData("This is target 2");
+            TestData tgtData3 = new TestData("This is target 3");
+
+            TM3Saver<TestData> saver = tm.createSaver();
+            // TU 1, en -> fr tuv
+            TM3Tu<TestData> tu1 = 
+                saver.tu(srcData1, srcLocale, currentTestEvent)
+                 .target(tgtData1, tgtLocale1, currentTestEvent)
+                 .save(TM3SaveMode.MERGE)
+                 .get(0);
+            currentSession.flush();
+            // TU 2, en -> de tuv
+            saver = tm.createSaver();
+            TM3Tu<TestData> tu2 = 
+                saver.tu(srcData2, srcLocale, currentTestEvent)
+                 .target(tgtData2, tgtLocale2, currentTestEvent)
+                 .save(TM3SaveMode.MERGE)
+                 .get(0);
+            currentSession.flush();
+            // TU 3, en -> fr tuv
+            saver = tm.createSaver();
+            TM3Tu<TestData> tu3 = 
+                saver.tu(srcData3, srcLocale, currentTestEvent)
+                 .target(tgtData3, tgtLocale1, currentTestEvent)
+                 .save(TM3SaveMode.MERGE)
+                 .get(0);
+            currentSession.flush();
+            // now go back to tu 2 and add an en -> fr tuv
+            saver.tu(srcData2, srcLocale, currentTestEvent)
+                 .target(tgtData2, tgtLocale1, currentTestEvent)
+                 .save(TM3SaveMode.MERGE);
+
+            currentSession.flush();
+            tx.commit();
+            tx = currentSession.beginTransaction();
+
+            // now when we ask for all fr data, we should get tuvs from 
+            // tus 1, 2, and 3 in that order.
+            TM3Handle<TestData> handle = 
+                        tm.getDataByLocale(tgtLocale1, null, null);
+            assertEquals("unexpected tu count", 3, handle.getCount());
+            ((LocaleDataHandle)handle).setIncrement(1);
+            Iterator<TM3Tu<TestData>> it = handle.iterator();
+            TM3Tu<TestData> tu = it.next();
+            assertNotNull(tu);
+            assertEquals(tu1.getId(), tu.getId());
+            assertEquals(srcData1, tu.getSourceTuv().getContent());
+            assertTrue(it.hasNext());
+            tu = it.next();
+            assertNotNull(tu);
+            assertEquals(tu2.getId(), tu.getId());
+            assertEquals(srcData2, tu.getSourceTuv().getContent());
+            assertTrue(it.hasNext());
+            tu = it.next();
+            assertNotNull(tu);
+            assertEquals(tu3.getId(), tu.getId());
+            assertEquals(srcData3, tu.getSourceTuv().getContent());
+            assertFalse("Too many TU returned", it.hasNext());
+            tx.commit();
+            cleanupTestDb(manager);
+        }
+        catch (Exception e) {
+            tx.rollback();
+            throw e;
+        }
+    }
+    
 
     // when it's safe to assume at most one tuv per locale
     private static <T extends TM3Data> TM3Tuv<T> getLocaleTuv(TM3Tu<T> tu, TM3Locale locale) {

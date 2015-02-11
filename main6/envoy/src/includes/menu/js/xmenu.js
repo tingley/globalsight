@@ -113,6 +113,12 @@ var webFXMenuHandler = {
 		else
 			//this.hideTimeout = window.setTimeout(function () { webFXMenuHandler._out(jsItem) ; }, webfxMenuHideTime);
 			this.hideTimeout = window.setTimeout("webFXMenuHandler._out(webFXMenuHandler.all['" + jsItem.id + "'])", webfxMenuHideTime);
+
+		var shimmer = document.getElementById('shimmerx');
+        if(shimmer)
+        {
+            document.body.removeChild(shimmer);
+        }
 	},
 	blurMenu		:	function (oMenuItem) {
 	document.getElementById("navigation").style.zIndex = 21;
@@ -278,8 +284,11 @@ WebFXMenu.prototype.hide = function () {
 
 	this.hideAllSubs();
 	var divElement = document.getElementById(this.id);
-	divElement.style.visibility = "hidden";
-	this.shown = false;
+	if (divElement.className!='webfx-menu-bar')//add condition for chrome
+	{
+		divElement.style.visibility = "hidden";
+		this.shown = false;
+	}
 };
 
 WebFXMenu.prototype.hideAllSubs = function () {

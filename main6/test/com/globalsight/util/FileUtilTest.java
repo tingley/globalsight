@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
-
 import org.junit.*;
 
 public class FileUtilTest {
@@ -101,9 +100,18 @@ public class FileUtilTest {
         FileUtil.deleteTempFile(tmpFile);
 
         // Not easy to test the atomic part
-        tmpFile = File.createTempFile("GSTestReadWrite", null);
+        tmpFile = new File(System.getProperty("java.io.tmpdir") + File.separator + "GSTestReadWrite.tmp");
         FileUtil.writeFileAtomically(tmpFile, "hello world", "US-ASCII");
         assertEquals("hello world", FileUtil.readFile(tmpFile, "US-ASCII"));
         FileUtil.deleteTempFile(tmpFile);
+    }
+    
+    @Test
+    public void testIsWindowsReturnMethod() throws Exception {
+        String filename = "";
+        filename = getTestFile("testdata/test_w.resx").getAbsolutePath();
+        assertTrue(FileUtil.isWindowsReturnMethod(filename));
+        filename = getTestFile("testdata/test_u.resx").getAbsolutePath();
+        assertFalse(FileUtil.isWindowsReturnMethod(filename));
     }
 }

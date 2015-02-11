@@ -426,7 +426,7 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             tx.commit();
         }
         catch(Exception e) {
-        	s_logger.error(e);
+        	s_logger.error(e.getMessage(), e);
         }
     }
 

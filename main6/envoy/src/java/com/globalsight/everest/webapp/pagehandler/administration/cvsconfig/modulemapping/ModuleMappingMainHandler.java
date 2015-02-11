@@ -214,7 +214,7 @@ public class ModuleMappingMainHandler extends PageHandler {
 				manager.addModuleMapping(mms);
 			sessionMgr.setAttribute("cvsmsg", existMMs);
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
 	}
     
@@ -352,7 +352,7 @@ public class ModuleMappingMainHandler extends PageHandler {
 				CVSUtil.exeCVSCmd(cmd, baseTargetPath);
 			}
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
 	}
 }

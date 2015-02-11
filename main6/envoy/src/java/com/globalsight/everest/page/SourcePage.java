@@ -38,6 +38,7 @@ import com.globalsight.everest.request.Request;
 import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflowmanager.Workflow;
+import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
@@ -119,7 +120,7 @@ public class SourcePage extends Page
             return false;
         }
     }
-    
+
     public static KnownFormatType getFormatTypeByFpId(long fpId)
             throws FileProfileEntityException, RemoteException,
             GeneralException, NamingException
@@ -199,20 +200,20 @@ public class SourcePage extends Page
     /**
      * Constructed through PageManager.
      * 
-     * @param p_externalPageId -
-     *            The external id of the page.
-     * @param p_globalSightLocale -
-     *            The locale of the page.
-     * @param p_originalEncoding -
-     *            The original encoding of the page.
-     * @param p_dataSourceType -
-     *            The datasource type of the page (i.e. file system, db, cms).
-     * @param p_dataType -
-     *            The data type of the page (i.e. HTML, CSS, and etc.).
-     * @param p_wordCount -
-     *            The word count of the page.
-     * @param p_containGsTags -
-     *            A boolean specifying if the page contains any GS tags
+     * @param p_externalPageId
+     *            - The external id of the page.
+     * @param p_globalSightLocale
+     *            - The locale of the page.
+     * @param p_originalEncoding
+     *            - The original encoding of the page.
+     * @param p_dataSourceType
+     *            - The datasource type of the page (i.e. file system, db, cms).
+     * @param p_dataType
+     *            - The data type of the page (i.e. HTML, CSS, and etc.).
+     * @param p_wordCount
+     *            - The word count of the page.
+     * @param p_containGsTags
+     *            - A boolean specifying if the page contains any GS tags
      *            (add/delete)
      */
     SourcePage(String p_externalPageId, GlobalSightLocale p_globalSightLocale,
@@ -234,6 +235,7 @@ public class SourcePage extends Page
         m_wordCount = new Integer(p_wordCount);
         BOMType = p_BOMType;
     }
+
     //
     // Abstract Methods Implementation
     //
@@ -457,15 +459,15 @@ public class SourcePage extends Page
     {
         switch (p_type)
         {
-        case PrimaryFile.UNEXTRACTED_FILE:
-            m_unextractedFile = new UnextractedFile();
-            m_unextractedFile.setLastModifiedDate(new Date());
-            break;
-        case PrimaryFile.EXTRACTED_FILE:
-            // fall through to default
-        default: // assume extracted file
-            m_extractedFile = new ExtractedSourceFile();
-            break;
+            case PrimaryFile.UNEXTRACTED_FILE:
+                m_unextractedFile = new UnextractedFile();
+                m_unextractedFile.setLastModifiedDate(new Date());
+                break;
+            case PrimaryFile.EXTRACTED_FILE:
+                // fall through to default
+            default: // assume extracted file
+                m_extractedFile = new ExtractedSourceFile();
+                break;
         }
     }
 
@@ -481,9 +483,31 @@ public class SourcePage extends Page
 
     public File getFile()
     {
-        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(this.getCompanyId())
-                + File.separator + filtSpecialFile(getExternalPageId());
+        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(this
+                .getCompanyId())
+                + File.separator
+                + filtSpecialFile(getExternalPageId());
         File file = new File(filePath);
+
+        if (!file.exists())
+        {
+            XmlEntities entity = new XmlEntities();
+            File dir = file.getParentFile();
+            if (dir.isDirectory())
+            {
+                File[] files = dir.listFiles();
+                for (File f : files)
+                {
+                    if (file.getName().equals(
+                            entity.decodeStringBasic(f.getName())))
+                    {
+                        file = f;
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!file.exists())
         {
             if (PassoloUtil.isPassoloFile(this))
@@ -496,7 +520,7 @@ public class SourcePage extends Page
                         + href
                         + File.separator + name;
                 file = new File(filePath);
-                
+
                 if (!file.exists())
                 {
                     file = null;
@@ -507,10 +531,10 @@ public class SourcePage extends Page
                 file = null;
             }
         }
-        
+
         return file;
     }
-    
+
     public File getFileByPageCompanyId()
     {
         String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(m_companyId)
@@ -520,10 +544,10 @@ public class SourcePage extends Page
         {
             file = null;
         }
-        
+
         return file;
     }
-    
+
     /**
      * Convert "(Adobe file information) indd\myInddFile.indd" into
      * "indd\myInddFile.indd" or "(header) word\myWordFile.doc" into
@@ -536,13 +560,14 @@ public class SourcePage extends Page
     public static String filtSpecialFile(String p_fileName)
     {
         String result = null;
-        
+
         String externalPageIdSuffix = null;
         if (p_fileName != null && p_fileName.trim().length() > 0)
         {
             int dotIndex = p_fileName.lastIndexOf('.');
-            if (dotIndex > -1) {
-                externalPageIdSuffix = p_fileName.substring(dotIndex);      
+            if (dotIndex > -1)
+            {
+                externalPageIdSuffix = p_fileName.substring(dotIndex);
             }
         }
 
@@ -572,24 +597,37 @@ public class SourcePage extends Page
     {
         return targetPages;
     }
+    
+    public TargetPage getTargetPageByLocaleId(long p_targetLocaleId)
+    {
+        TargetPage targetPage = null;
+        for (TargetPage tp : targetPages){
+            if (tp.getLocaleId() == p_targetLocaleId){
+                targetPage = tp;
+                break;
+            }
+        }
+        
+        return targetPage;
+    }
 
     public void setTargetPages(Set<TargetPage> targetPages)
     {
         this.targetPages = targetPages;
     }
-    
+
     private DatabaseProfilePersistenceManager getDBProfilePersistenceManager()
             throws Exception
     {
         return ServerProxy.getDatabaseProfilePersistenceManager();
     }
-    
+
     private FileProfilePersistenceManager getFileProfilePersistenceManager()
             throws Exception
     {
         return ServerProxy.getFileProfilePersistenceManager();
     }
-    
+
     public String getDataSource()
     {
         String dataSourceType = getDataSourceType();
@@ -615,7 +653,7 @@ public class SourcePage extends Page
         }
         return currentRetString;
     }
-    
+
     public String getPassoloFileName()
     {
         String href = getExtractedFile().getExternalBaseHref();
@@ -624,14 +662,14 @@ public class SourcePage extends Page
         int index = temp.indexOf("/");
         return temp.substring(0, index);
     }
-    
+
     public String getPassoloFilePath()
     {
         String name = getPassoloFileName();
         String href = getExtractedFile().getExternalBaseHref();
         return href + File.separator + name;
     }
-    
+
     public boolean hasRemoved()
     {
         if (PassoloUtil.isPassoloFile(this))
@@ -650,7 +688,7 @@ public class SourcePage extends Page
                 }
 
             }
-            
+
             return true;
         }
 
@@ -673,7 +711,7 @@ public class SourcePage extends Page
     {
         return BOMType;
     }
-    
+
     public boolean isPassoloPage()
     {
         return PassoloUtil.isPassoloFile(this);

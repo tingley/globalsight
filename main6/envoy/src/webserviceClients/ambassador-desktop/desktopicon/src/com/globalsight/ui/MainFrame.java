@@ -65,6 +65,7 @@ import com.globalsight.entity.User;
 import com.globalsight.exception.NotSupportHttpsException;
 import com.globalsight.util.ConfigureHelper;
 import com.globalsight.util.Constants;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.SwingHelper;
 import com.globalsight.util.UsefulTools;
 import com.globalsight.util2.CacheUtil;
@@ -85,7 +86,8 @@ public class MainFrame extends JFrame
     // Configure, View, Jobs, About, Exit
     private JMenu jm_configure, jm_view, jm_jobs, jm_help, jm_exit;
 
-    private JMenuItem jmi_configure_user, jmi_view_user, jmi_proxy, jmi_Preferences;
+    private JMenuItem jmi_configure_user, jmi_view_user, jmi_proxy,
+            jmi_Preferences;
 
     private JMenuItem jmi21, jmi22, jmi23, jmi24, jmi25, jmi26, jmi27, jmi28,
             jmi29;
@@ -126,7 +128,7 @@ public class MainFrame extends JFrame
     private Popup popupPanel = null;
 
     private DownloadAction downloadAction = new DownloadAction();
-    
+
     private QueryAction queryAction = new QueryAction();
 
     public MainFrame()
@@ -135,7 +137,7 @@ public class MainFrame extends JFrame
         setProxy();
         init();
     }
-    
+
     // ///////////////////////////////////////////////////////////////
     // constructor
     // ///////////////////////////////////////////////////////////////
@@ -217,7 +219,7 @@ public class MainFrame extends JFrame
         catch (Exception e)
         {
             status = Constants.ERROR_READUSER;
-            log.error(status + e);
+            log.error(status, e);
             AmbOptionPane.showMessageDialog(status, "Warning",
                     JOptionPane.ERROR_MESSAGE);
         }
@@ -246,12 +248,16 @@ public class MainFrame extends JFrame
                 LoginAction loginAction = new LoginAction();
                 CacheUtil.getInstance().setCurrentUser(null);
                 CacheUtil.getInstance().setLoginingUser(p_user);
-                String result = loginAction.execute(new String[] {});
+                String result = loginAction.execute(new String[]
+                {});
                 boolean disConnectToCVS = false;
                 try
                 {
-                    String allPermsOfCurrUser = queryAction.execute(new String[] { QueryAction.q_getAllPermissionsByUser });
-                    if ( allPermsOfCurrUser.indexOf(Constants.CONNECT_TO_CVS_PERM) != -1 )
+                    String allPermsOfCurrUser = queryAction
+                            .execute(new String[]
+                            { QueryAction.q_getAllPermissionsByUser });
+                    if (allPermsOfCurrUser
+                            .indexOf(Constants.CONNECT_TO_CVS_PERM) != -1)
                     {
                         disConnectToCVS = true;
                     }
@@ -262,11 +268,12 @@ public class MainFrame extends JFrame
                 }
                 jmi32.setVisible(disConnectToCVS);
                 jmi44.setVisible(disConnectToCVS);
-                if ( disConnectToCVS == false ) {
+                if (disConnectToCVS == false)
+                {
                     int index = getIndex(Constants.CONNECT_TO_CVS);
-                    if ( index != -1 )
+                    if (index != -1)
                     {
-                        closeTabbedPanel.remove(index);                     
+                        closeTabbedPanel.remove(index);
                     }
                 }
 
@@ -275,19 +282,19 @@ public class MainFrame extends JFrame
                     CacheUtil.getInstance().setCurrentUser(p_user);
                     log.info(p_user + " login.");
                     int availableVersion = checkVersion();
-                    if(availableVersion==0)
+                    if (availableVersion == 0)
                     {
                         msg = Constants.MSG_SUCCESS_LOGON + " - " + p_user;
                         style = Constants.SUCCESS;
                         islogin = true;
                     }
-                    else if(availableVersion==1)
+                    else if (availableVersion == 1)
                     {
                         msg = Constants.MSG_ERROR_CONNECTION_SERVER_VERSION_HIGH;
                         style = Constants.FAILURE;
                         islogin = false;
                     }
-                    else if(availableVersion==-1)
+                    else if (availableVersion == -1)
                     {
                         msg = Constants.MSG_ERROR_CONNECTION_SERVER_VERSION_LOW;
                         style = Constants.FAILURE;
@@ -297,8 +304,9 @@ public class MainFrame extends JFrame
                 else if (Action.restartDI.equals(result))
                 {
                     msg = Constants.INSTALLCERT_RESTART;
-                    AmbOptionPane.showMessageDialog(Constants.INSTALLCERT_RESTART,
-                            "Warning", JOptionPane.WARNING_MESSAGE);
+                    AmbOptionPane.showMessageDialog(
+                            Constants.INSTALLCERT_RESTART, "Warning",
+                            JOptionPane.WARNING_MESSAGE);
                 }
                 else
                 {
@@ -311,8 +319,7 @@ public class MainFrame extends JFrame
             }
             catch (NotSupportHttpsException e)
             {
-                msg = Constants.MSG_ERROR_TIMEDOUT + " - "
-                + p_user.getHost();
+                msg = Constants.MSG_ERROR_TIMEDOUT + " - " + p_user.getHost();
             }
             catch (Exception e)
             {
@@ -341,7 +348,8 @@ public class MainFrame extends JFrame
                 {
                     msg = Constants.MSG_ERROR_REMOTE + " - " + p_user.getHost();
                 }
-                else if (errorMsgLower.indexOf("java.lang.numberformatexception") != -1)
+                else if (errorMsgLower
+                        .indexOf("java.lang.numberformatexception") != -1)
                 {
                     msg = Constants.MSG_ERROR_HOST_OR_PORT;
                 }
@@ -430,40 +438,39 @@ public class MainFrame extends JFrame
         try
         {
             GetVersionAction getV = new GetVersionAction();
-            String version = getV.execute(new String[] {});
+            String version = getV.execute(new String[]
+            {});
             int index = version.indexOf(",");
-            String minimalVersion = version.substring(1, index);
-            String currentVersion = version.substring(index + 1, version
-                    .length() - 1);
-            double thisVersion = Double
-                    .parseDouble(Constants.APP_VERSION_DOUBLE.substring(0,3));
-            double miniVersion = Double.parseDouble(minimalVersion);
-            double curVersion = Double.parseDouble(currentVersion);
+            String minimalSupportedDIVersion = version.substring(1, index);
+            String currentGSVersion = version.substring(index + 1,
+                    version.length() - 1);
+            String currentDIVersion = Constants.APP_VERSION_STRING;
 
-            if (thisVersion < miniVersion)
+            if (StringUtil.compareStringNum(currentDIVersion,
+                    minimalSupportedDIVersion) < 0)
             {
                 AmbOptionPane
                         .showMessageDialog(
-                                "This version is out of date. \n Please update your desktop icon.",
-                                "Version Check",
-                                JOptionPane.WARNING_MESSAGE);
+                                "Your desktop icon is out of date. \n Please upgrade according to the correct version.",
+                                "Version Check", JOptionPane.WARNING_MESSAGE);
                 UsefulTools.openFile(Constants.TRANSWARE_URL);
                 availableVersion = -1;
             }
-            else if (thisVersion < curVersion)
+            else if (StringUtil.compareStringNum(currentDIVersion,
+                    currentGSVersion) < 0)
             {
-                //do nothing
-//              AmbOptionPane.showMessageDialog(
-//                      "There ia a new version supported. Please update.",
-//                      "Version Check");
+                // do nothing
+                // AmbOptionPane.showMessageDialog(
+                // "There ia a new version supported. Please update.",
+                // "Version Check");
             }
-            else if (thisVersion > curVersion)
+            else if (StringUtil.compareStringNum(currentDIVersion,
+                    currentGSVersion) > 0)
             {
                 AmbOptionPane
                         .showMessageDialog(
-                                "The server does not support this latest version. \n Please log on to another server or exit.",
-                                "Version Check",
-                                JOptionPane.WARNING_MESSAGE);
+                                "The server you connected has been out of date for the desktop icon you are using. \n Please logon to a newer server which is synchronized with your desktop icon version.",
+                                "Version Check", JOptionPane.WARNING_MESSAGE);
                 UsefulTools.openFile(Constants.TRANSWARE_URL);
                 availableVersion = 1;
             }
@@ -500,7 +507,8 @@ public class MainFrame extends JFrame
             else
             {
                 int i = getIndex(Constants.CREATE_JOB_TITLE);
-                if ( i == -1 ) {
+                if (i == -1)
+                {
                     i = 0;
                 }
                 createJobPanel = (CreateJobPanel) closeTabbedPanel
@@ -523,7 +531,8 @@ public class MainFrame extends JFrame
         setIconImage(SwingHelper.getAmbassadorIconImage());
         setResizable(false);
 
-        // init the tabbed pane, like Create Job, configure ServerURL and Account
+        // init the tabbed pane, like Create Job, configure ServerURL and
+        // Account
         initTabbedPane();
         // init status bar
         initStatusBar();
@@ -540,7 +549,8 @@ public class MainFrame extends JFrame
         south.add(msgCenterBar, BorderLayout.EAST);
         getContentPane().add(south, BorderLayout.SOUTH);
         // add file transfer handler
-        ((JPanel) getContentPane()).setTransferHandler(FileTransferHandler.install());
+        ((JPanel) getContentPane()).setTransferHandler(FileTransferHandler
+                .install());
         // add actions
         initActions();
 
@@ -588,7 +598,8 @@ public class MainFrame extends JFrame
             if (user != null)
             {
                 if (user.isAutoDownload())
-                    downloadAction.execute(new String[] {});
+                    downloadAction.execute(new String[]
+                    {});
                 else
                     stopDownloadThread();
             }
@@ -666,8 +677,8 @@ public class MainFrame extends JFrame
 
         // init the menu item
         jmi_configure_user = new JMenuItem("User Options");
-        jmi_view_user      = new JMenuItem("View User");
-        jmi_Preferences    = new JMenuItem("Preferences");
+        jmi_view_user = new JMenuItem("View User");
+        jmi_Preferences = new JMenuItem("Preferences");
         jmi21 = new JMenuItem("Jobs In Progress (IE)");
         jmi22 = new JMenuItem("Jobs Pending  (IE)");
         jmi23 = new JMenuItem("Reports  (IE)");
@@ -688,12 +699,12 @@ public class MainFrame extends JFrame
         jmi44 = new JMenuItem("CVS Help");
 
         jmi51 = new JMenuItem("Exit");
-        jmi51.setAccelerator(KeyStroke.getKeyStroke('e'));      
+        jmi51.setAccelerator(KeyStroke.getKeyStroke('e'));
 
         // add memuItem to menu
         jm_configure.add(jmi_configure_user);
         jm_configure.add(jmi_view_user);
-                
+
         jmi_proxy = new JMenuItem("Proxy");
         jmi_proxy.setAccelerator(KeyStroke.getKeyStroke('p'));
         jm_configure.add(jmi_proxy);
@@ -719,16 +730,18 @@ public class MainFrame extends JFrame
 
         jm_jobs.add(jmi31);
         jm_jobs.add(jmi32);
-        //set this menu invisible before logon() api is invoked and return the accesstoken
+        // set this menu invisible before logon() api is invoked and return the
+        // accesstoken
         jmi32.setVisible(false);
-        
+
         jm_help.add(jmi41);
         jm_help.add(jmi44);
-        //set this menu invisible before login() api is invoked and return the accesstoken
+        // set this menu invisible before login() api is invoked and return the
+        // accesstoken
         jmi44.setVisible(false);
         jm_help.add(jmi42);
         jm_help.add(jmi43);
-        
+
         jm_exit.add(jmi51);
     }
 
@@ -855,11 +868,13 @@ public class MainFrame extends JFrame
                     public void mouseClicked(MouseEvent e)
                     {
                         popupPanel.hide();
-                        if (noticeThread != null) noticeThread.stopMe();
+                        if (noticeThread != null)
+                            noticeThread.stopMe();
                         jobsNewList.clear();
                     }
                 });
-                if (popupPanel != null) popupPanel.hide();
+                if (popupPanel != null)
+                    popupPanel.hide();
                 popupPanel = PopupFactory.getSharedInstance().getPopup(m, jsp,
                         m.getX() + m.getWidth() - w,
                         m.getY() + m.getHeight() - h - 20);
@@ -931,7 +946,8 @@ public class MainFrame extends JFrame
                 else
                 {
                     closeTabbedPanel
-                            .setSelectedIndex(getIndex(Constants.USER_CONFIGURE_TITLE)==-1?0:getIndex(Constants.USER_CONFIGURE_TITLE));
+                            .setSelectedIndex(getIndex(Constants.USER_CONFIGURE_TITLE) == -1 ? 0
+                                    : getIndex(Constants.USER_CONFIGURE_TITLE));
                 }
             }
         });
@@ -955,13 +971,13 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 ExecAction openBrowserAction = new ExecAction();
                 try
                 {
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_INPROGRESS_IE },
-                            new String[] { Constants.RUBY_LIB_WATIR });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_INPROGRESS_IE }, new String[]
+                    { Constants.RUBY_LIB_WATIR });
                 }
                 catch (Exception e1)
                 {
@@ -976,13 +992,13 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 ExecAction openBrowserAction = new ExecAction();
                 try
                 {
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_PENDING_IE },
-                            new String[] { Constants.RUBY_LIB_WATIR });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_PENDING_IE }, new String[]
+                    { Constants.RUBY_LIB_WATIR });
                 }
                 catch (Exception e1)
                 {
@@ -997,13 +1013,13 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 ExecAction openBrowserAction = new ExecAction();
                 try
                 {
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_REPORT_IE },
-                            new String[] { Constants.RUBY_LIB_WATIR });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_REPORT_IE }, new String[]
+                    { Constants.RUBY_LIB_WATIR });
                 }
                 catch (Exception e1)
                 {
@@ -1020,15 +1036,15 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 ExecAction openBrowserAction = new ExecAction();
                 try
                 {
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_GOTOURL_SF });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_GOTOURL_SF });
                     Thread.sleep(1000 * 3);
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_INPROGRESS_SF });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_INPROGRESS_SF });
                 }
                 catch (Exception e1)
                 {
@@ -1043,15 +1059,15 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 ExecAction openBrowserAction = new ExecAction();
                 try
                 {
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_GOTOURL_SF });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_GOTOURL_SF });
                     Thread.sleep(1000 * 3);
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_PENDING_SF });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_PENDING_SF });
                 }
                 catch (Exception e1)
                 {
@@ -1066,15 +1082,15 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 ExecAction openBrowserAction = new ExecAction();
                 try
                 {
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_GOTOURL_SF });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_GOTOURL_SF });
                     Thread.sleep(1000 * 3);
-                    openBrowserAction.execute(new String[] { ruby,
-                            Constants.RUBY_REPORT_SF });
+                    openBrowserAction.execute(new String[]
+                    { ruby, Constants.RUBY_REPORT_SF });
                 }
                 catch (Exception e1)
                 {
@@ -1090,7 +1106,7 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 try
                 {
                     openJobFireFox("jobsInProgress");
@@ -1108,7 +1124,7 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 try
                 {
                     openJobFireFox("jobsPending");
@@ -1126,7 +1142,7 @@ public class MainFrame extends JFrame
             {
                 if (!hasLogon())
                     return;
-                
+
                 try
                 {
                     openPageFireFox("reports", false);
@@ -1147,7 +1163,7 @@ public class MainFrame extends JFrame
                 showCreateJobPane();
             }
         });
-        
+
         // Connect to CVS
         jmi32.addActionListener(new ActionListener()
         {
@@ -1162,7 +1178,9 @@ public class MainFrame extends JFrame
                 }
                 else
                 {
-                    closeTabbedPanel.setSelectedIndex(getIndex(Constants.CONNECT_TO_CVS)==-1?0:getIndex(Constants.CONNECT_TO_CVS));
+                    closeTabbedPanel
+                            .setSelectedIndex(getIndex(Constants.CONNECT_TO_CVS) == -1 ? 0
+                                    : getIndex(Constants.CONNECT_TO_CVS));
                 }
             }
         });
@@ -1172,17 +1190,10 @@ public class MainFrame extends JFrame
         {
             public void actionPerformed(ActionEvent e)
             {
-                try
-                {
-                    UsefulTools.openFile(Constants.HELP_FILE);
-                }
-                catch (Exception e1)
-                {
-                    log.warn("Can't open the help file with " + e1);
-                }
+                UsefulTools.openBrowser(Constants.SITE_DI_WIKI);
             }
         });
-        
+
         // cvs help
         jmi44.addActionListener(new ActionListener()
         {
@@ -1198,7 +1209,7 @@ public class MainFrame extends JFrame
                 }
             }
         });
-        
+
         // about
         jmi42.addActionListener(new ActionListener()
         {
@@ -1229,7 +1240,7 @@ public class MainFrame extends JFrame
                 exit();
             }
         });
-        
+
         jmi_proxy.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
@@ -1278,30 +1289,31 @@ public class MainFrame extends JFrame
         else
         {
             closeTabbedPanel
-                    .setSelectedIndex(getIndex(Constants.CREATE_JOB_TITLE)==-1?0:getIndex(Constants.CREATE_JOB_TITLE));
+                    .setSelectedIndex(getIndex(Constants.CREATE_JOB_TITLE) == -1 ? 0
+                            : getIndex(Constants.CREATE_JOB_TITLE));
         }
     }
-    
+
     private boolean hasLogon()
     {
         User user = LoginAction.USER;
         if (user == null)
-        {            
+        {
             AmbOptionPane.showMessageDialog("Please login first", "Info");
             return false;
         }
-        
+
         return true;
     }
-    
-    private void openJobFireFox(String state) 
+
+    private void openJobFireFox(String state)
     {
         openPageFireFox(state, true);
     }
-    
+
     private void openPageFireFox(String activity, boolean isJob)
     {
-     // A "base url", used by selenium to resolve relative URLs
+        // A "base url", used by selenium to resolve relative URLs
         User user = LoginAction.USER;
 
         WebDriver driver = new FirefoxDriver();
@@ -1317,7 +1329,7 @@ public class MainFrame extends JFrame
         selenium.type("name=nameField", user.getName());
         selenium.type("name=passwordField", user.getPassword());
         selenium.click("name=login0");
-        
+
         String url = "/globalsight/ControlServlet?activityName=" + activity;
         if (isJob)
         {
@@ -1325,7 +1337,7 @@ public class MainFrame extends JFrame
         }
         selenium.open(url);
     }
- 
+
     private void writeLocation()
     {
         Point p = getLocation();
@@ -1353,7 +1365,7 @@ public class MainFrame extends JFrame
                 return i;
             }
         }
-        
+
         return -1;
     }
 
@@ -1401,7 +1413,7 @@ public class MainFrame extends JFrame
 
         return files;
     }
-    
+
     class NoticeThread extends Thread
     {
         private boolean m_run = true;
@@ -1414,9 +1426,11 @@ public class MainFrame extends JFrame
             {
                 try
                 {
-                    if (m_run) msgCenterBar.setBorder(blue);
+                    if (m_run)
+                        msgCenterBar.setBorder(blue);
                     Thread.sleep(1000);
-                    if (m_run) msgCenterBar.setBorder(green);
+                    if (m_run)
+                        msgCenterBar.setBorder(green);
                     Thread.sleep(1000);
                 }
                 catch (InterruptedException e)
@@ -1434,7 +1448,7 @@ public class MainFrame extends JFrame
             noticeThread = null;
         }
     }
-    
+
     /**
      * Sets proxy according to proxy.properties.
      */
@@ -1447,27 +1461,28 @@ public class MainFrame extends JFrame
         {
             return;
         }
-        
+
         try
         {
-            FileInputStream fis  = new FileInputStream(file);
+            FileInputStream fis = new FileInputStream(file);
             Properties properties = new Properties();
             properties.load(fis);
             fis.close();
-            boolean useProxy = "true".equals(properties.getProperty("USE_PROXY").trim());
+            boolean useProxy = "true".equals(properties
+                    .getProperty("USE_PROXY").trim());
             if (useProxy)
             {
                 String proxyHost = properties.getProperty("HOST");
-                String proxyPort = properties.getProperty("PORT");      
+                String proxyPort = properties.getProperty("PORT");
                 AxisProperties.setProperty("http.proxyHost", proxyHost);
                 AxisProperties.setProperty("http.proxyPort", proxyPort);
-            }   
+            }
         }
         catch (Exception e)
         {
-            log.error(e.toString());
+            log.error(e.toString(), e);
             e.printStackTrace();
         }
     }
-    
+
 }

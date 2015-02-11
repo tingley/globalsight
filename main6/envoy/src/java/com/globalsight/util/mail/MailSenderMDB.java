@@ -77,7 +77,7 @@ public class MailSenderMDB extends GenericQueueMDB
 			MailSender.getInstance().sendMail(from, to, cc, bcc, subject, text,
 					attachments);
         } catch (Exception e) {
-            s_logger.error(e.getLocalizedMessage());
+            s_logger.error(e.getLocalizedMessage(), e);
         }
         finally
         {

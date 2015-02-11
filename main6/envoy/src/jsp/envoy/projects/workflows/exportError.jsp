@@ -24,12 +24,14 @@ String lb_reexport = bundle.getString("action_reexport");
 <TITLE><%=title%></TITLE>
 <SCRIPT SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
 <SCRIPT>
 var needWarning = false;
 var objectName = "";
+var guideNode = "";
 var helpFile = "<%=bundle.getString("help_export_errors")%>";
 
 function submitForm()
@@ -42,6 +44,14 @@ function submitForm()
    {
       document.JobForm.submit();      
    }
+}
+
+function check_all(){
+	if($("#checkAll").is(":checked")){
+		$(":checkbox").attr("checked","true");
+	} else {
+		$(":checkbox").removeAttr("checked");
+	}
 }
 
 </SCRIPT>
@@ -106,19 +116,17 @@ function submitForm()
 
 <FORM NAME="JobForm" ACTION="<%=exportedURL%>" METHOD="POST">
 <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0">
-  <TBODY>
     <COL>               <!-- checkbox -->
     <COL WIDTH="200">   <!-- pages -->
     <COL>               <!-- status -->
     <COL WIDTH="300">   <!-- message -->
     <TR CLASS="tableHeadingBasic">
-      <TD></TD>
+      <TD><input type="checkbox" id="checkAll" onclick="check_all()"/></TD>
       <TD><%=bundle.getString("lb_page")%></TD>
       <TD><%=bundle.getString("lb_status")%></TD>
       <TD><%=bundle.getString("lb_message")%></TD>
     </TR>
     <%=request.getAttribute(JobManagementHandler.JOB_CONTENT_SCRIPTLET)%>
-  </TBODY>
 </TABLE>
 <P>
 <INPUT TYPE="BUTTON" NAME="<%=lb_previous%>" VALUE="<%=lb_previous%>" 

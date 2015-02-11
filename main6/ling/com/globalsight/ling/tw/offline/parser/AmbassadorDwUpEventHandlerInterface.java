@@ -91,4 +91,7 @@ public interface AmbassadorDwUpEventHandlerInterface
     public void handleUnmatchedMatchWordCount(String s);
     
     public void handleEditAll(String s);
+    
+    public void handleJobID(String s);
+    public void handleJobName(String s);
 }

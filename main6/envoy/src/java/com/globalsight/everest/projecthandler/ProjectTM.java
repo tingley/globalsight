@@ -16,8 +16,13 @@
  */
 package com.globalsight.everest.projecthandler;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
+import com.globalsight.cxe.entity.customAttribute.TMAttribute;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentTmInfo;
@@ -41,6 +46,20 @@ public class ProjectTM
     private long m_remoteTmProfileId = -1;
     private String m_remoteTmProfileName = null;
     private Long m_tm3Id;
+    private int m_convertRate = 0;
+    private long m_lastTUId = -1;
+    private long m_convertedTM3Id = -1;
+    private String m_status = "";
+
+    public String getStatus()
+    {
+        return m_status;
+    }
+
+    public void setStatus(String m_status)
+    {
+        this.m_status = m_status;
+    }
 
     public ProjectTM()
     {
@@ -181,5 +200,75 @@ public class ProjectTM
     public void setTm3Id(Long tm3Id) {
         this.m_tm3Id = tm3Id;
     }
+    
+    private Set<TMAttribute> attributes;
+    
+    public List<TMAttribute> getAllTMAttributes()
+    {
+        List<TMAttribute> atts = new ArrayList<TMAttribute>();
+        Set<TMAttribute> tmAtts = getAttributes();
+        if (tmAtts != null)
+        {
+            atts.addAll(tmAtts);
+        }
 
+        return atts;
+    }
+    
+    public List<String> getAllTMAttributenames()
+    {
+        List<String> atts = new ArrayList<String>();
+        Set<TMAttribute> tmAtts = getAttributes();
+        if (tmAtts != null)
+        {
+            Iterator<TMAttribute> it = tmAtts.iterator();
+            while(it.hasNext())
+            {
+                TMAttribute tma = it.next();
+                atts.add(tma.getAttributename());
+            }
+        }
+
+        return atts;
+    }
+    
+    public Set<TMAttribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes(Set<TMAttribute> attributes)
+    {
+        this.attributes = attributes;
+    }
+
+    public int getConvertRate()
+    {
+        return m_convertRate;
+    }
+
+    public void setConvertRate(int m_convertRate)
+    {
+        this.m_convertRate = m_convertRate;
+    }
+
+    public long getLastTUId()
+    {
+        return m_lastTUId;
+    }
+
+    public void setLastTUId(long m_lastTUId)
+    {
+        this.m_lastTUId = m_lastTUId;
+    }
+
+    public long getConvertedTM3Id()
+    {
+        return m_convertedTM3Id;
+    }
+
+    public void setConvertedTM3Id(long m_convertedTM3Id)
+    {
+        this.m_convertedTM3Id = m_convertedTM3Id;
+    }
 }

@@ -199,6 +199,8 @@ public interface TM3Tm<T extends TM3Data> {
      */
     public TM3Attribute getAttributeByName(String name);
     
+    public boolean doesAttributeExist(String name);
+    
     /**
      * Get a list of all TU attributes that have been defined for this TM.
      * @return set of TM attributes

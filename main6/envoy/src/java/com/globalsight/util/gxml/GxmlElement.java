@@ -20,7 +20,6 @@ package com.globalsight.util.gxml;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -44,9 +43,10 @@ import com.globalsight.util.exception.BooleanConvertingException;
 public class GxmlElement
     implements Serializable
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            GxmlElement.class.getName());
+    private static final long serialVersionUID = -7065428615407672282L;
+
+    private static final Logger CATEGORY = Logger.getLogger(GxmlElement.class
+            .getName());
 
     // Element types
     public static final int NONE = -1;
@@ -85,6 +85,8 @@ public class GxmlElement
         new int[]{GxmlElement.TEXT_NODE};
     public static final int[] USPECIFIED_TYPE =
         new int[]{GxmlElement.UNSPECIFIED};
+    
+    public static final String XLF = "xlf";
 
     // member variables
 
@@ -671,14 +673,92 @@ public class GxmlElement
     
     public String toGxml(String dataType) 
     {
-    	if (dataType != null && "javascript".equalsIgnoreCase(dataType)){
-    		return toGxml("", false, true);
-    	}
-    	else if("xlf".equalsIgnoreCase(dataType)) {
-    	    return toGxml("", false, false, true);
-    	} else {
-    		return toGxml("", false, false);
-    	}
+        if (dataType != null && "javascript".equalsIgnoreCase(dataType))
+        {
+            return toGxml("", false, true);
+        }
+        else if(XLF.equalsIgnoreCase(dataType)) 
+        {
+            return toGxml("", false, false, true);
+        }
+        else 
+        {
+            return toGxml("", false, false);
+        }
+    }
+    
+    protected String toGxml(String p_startTagDelimiter,
+            boolean p_excludeTopTags, boolean p_handleNRT) 
+    {
+        return toGxml(p_startTagDelimiter, p_excludeTopTags, p_handleNRT, false);
+    }
+    
+    /**
+     * Reverse this element to XML content, including converting all
+     * its child elements.
+     * @param p_startTagDelimiter placed before start-tag
+     * @return  the element as a Gxml String
+     */
+    protected String toGxml(String p_startTagDelimiter,
+        boolean p_excludeTopTags, boolean p_handleNRT, boolean isXlf)
+    {
+        StringBuffer result = null;
+
+        if (p_excludeTopTags)
+        {
+            result = new StringBuffer((m_childElements != null ?
+                m_childElements.size() * STRING_BUFFER_LENGTH : 0));
+        }
+        else
+        {
+            result = new StringBuffer(
+                GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH +
+                (m_childElements != null ?
+                    m_childElements.size() * STRING_BUFFER_LENGTH : 0) +
+                GxmlSaxHelper.END_TAG_STRING_BUFFER_LENGTH);
+        }
+
+        result.append(p_startTagDelimiter);
+
+        if (!p_excludeTopTags)
+        {
+            result.append(getStartTag(isXlf));
+        }
+
+        // print childElements if there are any
+        if (m_childElements != null)
+        {
+            for (int i = 0; i < m_childElements.size(); i++)
+            {
+                GxmlElement child = (GxmlElement) m_childElements.get(i);
+/*
+                if (isXlf && child instanceof TextNode)
+                {
+                    String str = child.getTextNodeValue();
+                    str = str.replaceAll("&amp;", "&amp;amp;");
+                    str = str.replaceAll("&quot;", "&amp;quot;");
+                    str = str.replaceAll("&apos;", "&amp;apos;");
+                    str = str.replaceAll("&#xd;", "&amp;#xd;");
+                    str = str.replaceAll("&#x9;", "&amp;#x9;");
+                    str = str.replaceAll("&#xa;", "&amp;#xa;");
+                    //str = str.replaceAll("<", "&lt;");
+                    //str = str.replaceAll(">", "&gt;");
+                    result.append(str);
+                }
+                else
+                {
+*/                    result.append(child.toGxml(p_startTagDelimiter, false,
+                            p_handleNRT, isXlf));
+                //}
+            }
+        }
+
+        if (!p_excludeTopTags)
+        {
+            result.append(getEndTag());
+        }
+
+        return result.toString();
     }
 
     /**
@@ -790,6 +870,27 @@ public class GxmlElement
         return (GxmlElement)orderByNearestDescendant(possibleReturns)
             .get(p_position);
     }
+    
+    /**
+    * Returns the N-th descendant that has non specified attribute.  
+    * It could be this element.  All elements must
+    * belong to the same tree structure of elements.
+    */
+    public GxmlElement getNthDescendantByAttributeNone(String p_attributeName, int p_type,
+            int p_position)
+    {
+        List possibleReturns = getAllDescendantByAttributeNone(p_attributeName, p_type);
+
+        p_position = p_position - 1;
+        if (p_position < 0 || p_position >= possibleReturns.size())
+        {
+            return null;
+        }
+
+        // order the descendants by nearness to this element. return
+        // first one
+        return (GxmlElement) orderByNearestDescendant(possibleReturns).get(p_position);
+    }
 
 
     /**
@@ -845,6 +946,50 @@ public class GxmlElement
                 List elements = ((GxmlElement)child).
                     getAllDescendantByAttributeValue(p_attributeName,
                         p_attributeValue, p_type);
+
+                allElements.addAll(elements);
+            }
+        }
+
+        return allElements;
+    }
+    
+    /**
+     * Returns all elements that has non specified attribute.
+     */
+    public List getAllDescendantByAttributeNone(String p_attributeName, int p_type)
+    {
+        List allElements = new ArrayList();
+
+        // test self
+        GxmlElement gxmlElement = this;
+        if (gxmlElement.getType() == p_type)
+        {
+            String attributeValue = gxmlElement.getAttribute(p_attributeName);
+
+            if (attributeValue == null)
+            {
+                allElements.add(gxmlElement);
+            }
+        }
+
+        // test all children
+        List children = gxmlElement.getChildElements();
+        if (children != null && !children.isEmpty())
+        {
+            Iterator it = children.iterator();
+
+            // get all descendants that have the attribute value
+            while (it.hasNext())
+            {
+                Object child = it.next();
+                if (child == null)
+                {
+                    continue;
+                }
+
+                List elements = ((GxmlElement) child).getAllDescendantByAttributeNone(
+                        p_attributeName, p_type);
 
                 allElements.addAll(elements);
             }
@@ -1151,81 +1296,6 @@ public class GxmlElement
         }
     }
     
-    protected String toGxml(String p_startTagDelimiter,
-        boolean p_excludeTopTags, boolean p_handleNRT) {
-        
-        return toGxml(p_startTagDelimiter, p_excludeTopTags, p_handleNRT, false);
-    }
-
-
-    /**
-     * Reverse this element to XML content, including converting all
-     * its child elements.
-     * @param p_startTagDelimiter placed before start-tag
-     * @return  the element as a Gxml String
-     */
-    protected String toGxml(String p_startTagDelimiter,
-        boolean p_excludeTopTags, boolean p_handleNRT, boolean isXlf)
-    {
-        StringBuffer result = null;
-
-        if (p_excludeTopTags)
-        {
-            result = new StringBuffer((m_childElements != null ?
-                m_childElements.size() * STRING_BUFFER_LENGTH : 0));
-        }
-        else
-        {
-            result = new StringBuffer(
-                GxmlSaxHelper.START_TAG_STRING_BUFFER_LENGTH +
-                (m_childElements != null ?
-                    m_childElements.size() * STRING_BUFFER_LENGTH : 0) +
-                GxmlSaxHelper.END_TAG_STRING_BUFFER_LENGTH);
-        }
-
-        result.append(p_startTagDelimiter);
-
-        if (!p_excludeTopTags)
-        {
-            result.append(getStartTag(isXlf));
-        }
-
-        // print childElements if there are any
-        if (m_childElements != null)
-        {
-            for (int i = 0; i < m_childElements.size(); i++)
-            {
-                GxmlElement child = (GxmlElement) m_childElements.get(i);
-/*
-                if (isXlf && child instanceof TextNode)
-                {
-                    String str = child.getTextNodeValue();
-                    str = str.replaceAll("&amp;", "&amp;amp;");
-                    str = str.replaceAll("&quot;", "&amp;quot;");
-                    str = str.replaceAll("&apos;", "&amp;apos;");
-                    str = str.replaceAll("&#xd;", "&amp;#xd;");
-                    str = str.replaceAll("&#x9;", "&amp;#x9;");
-                    str = str.replaceAll("&#xa;", "&amp;#xa;");
-                    //str = str.replaceAll("<", "&lt;");
-                    //str = str.replaceAll(">", "&gt;");
-                    result.append(str);
-                }
-                else
-                {
-*/                    result.append(child.toGxml(p_startTagDelimiter, false,
-                            p_handleNRT, isXlf));
-                //}
-            }
-        }
-
-        if (!p_excludeTopTags)
-        {
-            result.append(getEndTag());
-        }
-
-        return result.toString();
-    }
-
     public boolean equals(Object p_object)
     {
         if (this == p_object)

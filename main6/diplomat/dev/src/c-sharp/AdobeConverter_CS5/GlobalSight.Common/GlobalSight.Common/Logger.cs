@@ -13,6 +13,7 @@ namespace GlobalSight.Common
 		private static Logger s_logger = null;
 		private static bool s_isInitialized = false;
 		private static String s_lock = "lock";
+        private bool enableDebug = false;
 		
 		/// <summary>
 		/// Private constructor used to create a Logger object.
@@ -83,7 +84,7 @@ namespace GlobalSight.Common
 		/// <param name="p_ex">the exception</param>
 		public static void LogError(string p_msg, Exception p_ex)
 		{
-			StringBuilder sb = new StringBuilder("ERROR; ");
+			StringBuilder sb = new StringBuilder(" [ERROR] ");
 			sb.Append(p_msg).Append(": ").Append(p_ex.Message.ToString());
 			sb.Append("\r\n");
 			sb.Append(p_ex.StackTrace.ToString());
@@ -98,7 +99,7 @@ namespace GlobalSight.Common
 		/// <param name="p_msg">the message</param>
 		public static void LogError(string p_msg)
 		{
-			StringBuilder sb = new StringBuilder("ERROR; ");
+			StringBuilder sb = new StringBuilder(" [ERROR] ");
 			sb.Append(p_msg);
 			LogWithoutException(sb.ToString());
 		}
@@ -116,5 +117,25 @@ namespace GlobalSight.Common
 			sb.Append(p_msg);
 			this.WriteLine(sb.ToString());
 		}
+
+        public void Debug(string p_msg)
+        {
+            if (enableDebug)
+            {
+                Log(" [DEBUG] " + p_msg);
+            }
+        }
+
+        public bool EnableDebug
+        {
+            set
+            {
+                enableDebug = value;
+            }
+            get
+            {
+                return enableDebug;
+            }
+        }
 	}
 }

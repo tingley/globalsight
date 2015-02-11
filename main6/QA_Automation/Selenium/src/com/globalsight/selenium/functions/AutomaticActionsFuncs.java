@@ -13,105 +13,85 @@ import com.thoughtworks.selenium.Selenium;
  * 
  */
 
-public class AutomaticActionsFuncs extends BasicFuncs {
-	/**
-	 * Create a new automatic actions.
-	 */
-	public void newAutomaticAction(Selenium selenium, String iActionProfiles)
-			throws Exception {
-		selenium.click(AutomaticActions.New_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+public class AutomaticActionsFuncs extends BasicFuncs
+{
+    /**
+     * Create a new automatic actions.
+     */
+    public void create(Selenium selenium, String name, String email,
+            String descripton) throws Exception
+    {
+        selenium.click(AutomaticActions.NEW_BUTTON);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
-		
-		String[] iActionProfile = iActionProfiles.split(",");
-		String iActionName = null;
+        selenium.type(AutomaticActions.NAME_TEXT, name);
+        selenium.type(AutomaticActions.EMAIL_TEXT, email);
+        selenium.type(AutomaticActions.DESCRIPTION_TEXT, descripton);
 
-		for (String iActions : iActionProfile) {
-			try {
-				String[] ivalue = iActions.split("=");
-				String iFieldName = ivalue[0].trim();
-				String iFieldValue = ivalue[1].trim();
+        selenium.click(AutomaticActions.SAVE_BUTTON);
+        if (selenium.isAlertPresent()) {
+            selenium.getAlert();
+            selenium.click(AutomaticActions.CANCEL_BUTTON);
+            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        }
+        
+        if (name != null)
+        {
+            Assert.assertEquals(this.isPresentInTable(selenium,
+                    AutomaticActions.AUTOMATIC_ACTIONS_TABLE, name), true);
+        }
+    }
 
-				if (iFieldName.equals("name")) {
-					selenium.type(AutomaticActions.Name_TEXT_FIELD, iFieldValue);
-					iActionName = iFieldValue;
-				} else if (iFieldName.equals("emailaddress")) {
-					selenium.type(AutomaticActions.EamilAddress_TEXT_FIELD,
-							iFieldValue);
-				} else if (iFieldName.equals("description")) {
-					selenium.type(AutomaticActions.Description_TEXT_FIELD,
-							iFieldValue);
-				}
-			} catch (Exception e) {
-				Reporter.log(e.getMessage());
-			}
-		}
+    public void remove(Selenium selenium, String name) throws Exception
+    {
 
-		selenium.click(AutomaticActions.Save_BUTTON);
-		try {
-			selenium.getAlert();
-			selenium.click(AutomaticActions.Cancel_BUTTON);
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		} catch (Exception e) {
-			selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		}
+        boolean result = selectRadioButtonFromTable(selenium,
+                AutomaticActions.AUTOMATIC_ACTIONS_TABLE, name);
+        if (!result)
+        {
+            Reporter.log("Cannot find the proper AutomaticAction to remove!");
+            return;
+        }
+        else
+        {
+            selenium.click(AutomaticActions.REMOVE_BUTTON);
+            if (selenium.isConfirmationPresent())
+            {
+                selenium.getConfirmation();
+            }
+            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
-		if (iActionName != null) {
-			Assert.assertEquals(this.isPresentInTable(selenium,
-					AutomaticActions.AutomaticActions_TABLE, iActionName), true);
-		}
-	}
-	public void removeAutomaticAction(Selenium selenium, String iActionName)
-			throws Exception {
+        }
+        Assert.assertEquals(this.isPresentInTable(selenium,
+                AutomaticActions.AUTOMATIC_ACTIONS_TABLE, name), false);
+    }
 
-		boolean result = selectRadioButtonFromTable(selenium,
-					AutomaticActions.AutomaticActions_TABLE, iActionName);
-			if(!result){
-			    Reporter.log("Cannot find the proper AutomaticAction to remove!");
-			    return;
-			}
-			else
-			{
-				selenium.click(AutomaticActions.Remove_BUTTON);
-				if (selenium.isConfirmationPresent()) {
-					selenium.getConfirmation();
-				}
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-				
-			}
-			Assert.assertEquals(this.isPresentInTable(selenium,
-                    AutomaticActions.AutomaticActions_TABLE, iActionName), false);
-		}
-	
+    public void modify(Selenium selenium, String name, String newName)
+            throws Exception
+    {
 
-	public void editAutomaticAction(Selenium selenium, String iActionName, String iNewName)
-			throws Exception {
+        boolean result = selectRadioButtonFromTable(selenium,
+                AutomaticActions.AUTOMATIC_ACTIONS_TABLE, name);
+        if (!result)
+        {
+            Reporter.log("Cannot find proper AutomaticAction to edit!");
+            return;
+        }
+        else
+        {
+            selenium.click(AutomaticActions.EDIT_BUTTON);
+            selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
 
-		boolean result = selectRadioButtonFromTable(selenium,
-					AutomaticActions.AutomaticActions_TABLE, iActionName);
-			if (!result) 
-			{Reporter.log("Cannot find proper AutomaticAction to edit!");
-			 return;
-			}
-			else
-			{			
-				selenium.click(AutomaticActions.Edit_BUTTON);
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-				
-			    selenium.type(AutomaticActions.Name_TEXT_FIELD, iNewName);
-						
-				selenium.type(AutomaticActions.EamilAddress_TEXT_FIELD,	"@");
-				selenium.type(AutomaticActions.Description_TEXT_FIELD, "t");
-			}
-				selenium.click(AutomaticActions.Save_BUTTON);
-				selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-				if (selenium.isConfirmationPresent())
-				{
-					selenium.getConfirmation();
-				}
-		  Assert.assertEquals(this.isPresentInTable(selenium,
-	                    AutomaticActions.AutomaticActions_TABLE, iNewName), true);
-	 } 
-		
-	}
+            selenium.type(AutomaticActions.NAME_TEXT, newName);
+        }
+        selenium.click(AutomaticActions.SAVE_BUTTON);
+        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        if (selenium.isConfirmationPresent())
+        {
+            selenium.getConfirmation();
+        }
+        Assert.assertEquals(this.isPresentInTable(selenium,
+                AutomaticActions.AUTOMATIC_ACTIONS_TABLE, newName), true);
+    }
 
+}

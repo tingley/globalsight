@@ -35,6 +35,9 @@ import com.globalsight.cxe.entity.filterconfiguration.HtmlInternalTag;
 import com.globalsight.cxe.entity.filterconfiguration.InternalText;
 import com.globalsight.cxe.entity.filterconfiguration.InternalTextHelper;
 import com.globalsight.cxe.entity.filterconfiguration.MSOfficeDocFilter;
+import com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter;
+import com.globalsight.everest.util.system.SystemConfigParamNames;
+import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.RegEx;
@@ -252,6 +255,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
 
     private boolean m_isUntranslatableEndTag = false;
 
+    private boolean m_pptNotes = false;
     private boolean m_needSpecialTagRemoveForPPT = false;
 
     //
@@ -524,7 +528,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -596,7 +600,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
                 catch (ExtractorException e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                     m_bHasError = true;
                     m_strErrorMsg = e.toString();
                 }
@@ -618,7 +622,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     // Indicates an error in a regular expression and
                     // could be ignored if AbstractExtractor spit out a
                     // debug time message...
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                     m_bHasError = true;
                     m_strErrorMsg = e.toString();
                 }
@@ -697,7 +701,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                     catch (ExtractorException e)
                     {
-                        logger.error(e);
+                        logger.error(e.getMessage(), e);
                         m_bHasError = true;
                         m_strErrorMsg = e.toString();
                     }
@@ -742,7 +746,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                     catch (ExtractorException e)
                     {
-                        logger.error(e);
+                        logger.error(e.getMessage(), e);
                         m_bHasError = true;
                         m_strErrorMsg = e.toString();
                     }
@@ -799,7 +803,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -840,8 +844,40 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             if (isInsideSkippableContext())
             {
                 addTagToSkeleton(t, false);
-
                 return;
+            }
+
+            // for GBS-1793, exclude ppt notes from extraction
+            if (isPowerPointExtractor())
+            {
+                boolean isNotesTag = isNotesTagInMaster(t);
+                m_pptNotes = m_pptNotes || isNotesTag;
+                MSOfficePPTFilter filter = (MSOfficePPTFilter) m_extractor
+                        .getMainFilter();
+                boolean shouldExtractNotes = (filter != null && filter
+                        .isNotesTranslate());
+                if (isNotesTag && !shouldExtractNotes)
+                {
+                    setSkippableContext(t);
+                    m_output.addSkeleton(t.toString());
+                    return;
+                }
+                if (m_pptNotes && isUnextractableContentFromNotes(t))
+                {
+                    setSkippableContext(t);
+                    m_output.addSkeleton(t.toString());
+                    return;
+                }
+                String isMasterTranslate = SystemConfiguration.getInstance()
+                        .getStringParameter(
+                                SystemConfigParamNames.PPT_MASTER_TRANSLATE);
+                if (!m_pptNotes && !Boolean.parseBoolean(isMasterTranslate)
+                        && isContentFromMaster(t))
+                {
+                    setSkippableContext(t);
+                    m_output.addSkeleton(t.toString());
+                    return;
+                }
             }
 
             // If TOC needn't translate, just put them into skeleton and no
@@ -1055,7 +1091,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1090,7 +1126,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1125,6 +1161,10 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             {
                 // setSkippableContext(null);
                 m_skippableContext.pop();
+                if (m_pptNotes)
+                {
+                    m_pptNotes = false;
+                }
             }
 
             return;
@@ -1277,7 +1317,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1320,7 +1360,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1385,7 +1425,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1410,7 +1450,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1440,7 +1480,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 }
                 catch (RegExException e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                     m_bHasError = true;
                     m_strErrorMsg = e.getMessage();
                 }
@@ -1462,7 +1502,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     }
                     catch (RegExException e)
                     {
-                        logger.error(e);
+                        logger.error(e.getMessage(), e);
                         m_bHasError = true;
                         m_strErrorMsg = e.getMessage();
                     }
@@ -1489,7 +1529,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                             }
                             catch (RegExException e)
                             {
-                                logger.error(e);
+                                logger.error(e.getMessage(), e);
                                 m_bHasError = true;
                                 m_strErrorMsg = e.getMessage();
                             }
@@ -1511,7 +1551,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                 }
                                 catch (RegExException e)
                                 {
-                                    logger.error(e);
+                                    logger.error(e.getMessage(), e);
                                     m_bHasError = true;
                                     m_strErrorMsg = e.getMessage();
                                 }
@@ -1533,7 +1573,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                                     }
                                     catch (RegExException e)
                                     {
-                                        logger.error(e);
+                                        logger.error(e.getMessage(), e);
                                         m_bHasError = true;
                                         m_strErrorMsg = e.getMessage();
                                     }
@@ -1572,7 +1612,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1595,7 +1635,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1648,7 +1688,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1671,7 +1711,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1761,7 +1801,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1784,7 +1824,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1817,7 +1857,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1840,7 +1880,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1872,7 +1912,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1895,7 +1935,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
@@ -1931,12 +1971,20 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
         }
         catch (ExtractorException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             m_bHasError = true;
             m_strErrorMsg = e.toString();
         }
     }
 
+    public void handleSpecialChar(HtmlObjects.Text t) {
+//        String text = t.text;
+//        if (">".equals(text))
+//            t.text = "&gt;";
+        
+        handleText(t);
+    }
+    
     /**
      * Handle text (#PCDATA).
      */
@@ -3283,8 +3331,8 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
      * section.
      * </p>
      */
-    protected void flushTextToSkeleton(HtmlObjects.HtmlElement o, HtmlObjects.HtmlElement last)
-            throws ExtractorException
+    protected void flushTextToSkeleton(HtmlObjects.HtmlElement o,
+            HtmlObjects.HtmlElement last) throws ExtractorException
     {
         if (o instanceof HtmlObjects.Tag)
         {
@@ -3318,21 +3366,22 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                 // add for export merge
                 m_output.addSkeleton(OfficeContentPostFilterHelper.SKELETON_OFFICE_CONTENT_START);
             }
-            
+
             // restore lastCR &#13; for ppt files
-            if (isPowerPointExtractor() && o instanceof HtmlObjects.Text && last != null
-                    && last instanceof HtmlObjects.Tag)
+            if (isPowerPointExtractor() && o instanceof HtmlObjects.Text
+                    && last != null && last instanceof HtmlObjects.Tag)
             {
-                HtmlObjects.Tag t = (HtmlObjects.Tag)last;
+                HtmlObjects.Tag t = (HtmlObjects.Tag) last;
                 ExtendedAttributeList atts = t.attributes;
-                String styleValue = (atts == null) ? "" : atts.getValue("style");
-                if (styleValue.contains("lastCR") && tt != null && tt.length() == 1
-                        && tt.charAt(0) == 13)
+                String styleValue = (atts == null) ? "" : atts
+                        .getValue("style");
+                if (styleValue.contains("lastCR") && tt != null
+                        && tt.length() == 1 && tt.charAt(0) == 13)
                 {
                     tt = "&#13;";
                 }
             }
-            
+
             m_output.addSkeleton(tt);
             if (o.isFromOfficeContent)
             {
@@ -3794,7 +3843,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
                     // mso-ascii-font-family:Arial;mso-hansi-font-family:Arial;
                     // mso-char-type: symbol;mso-symbol-font-family:Symbol'>
                     // <span style='mso-char-type:symbol;
-                    // mso-symbol-font-family:Symbol'>Ó</span></span>
+                    // mso-symbol-font-family:Symbol'>鑴�/span></span>
                     else if (isMsoSymbolRun(t))
                     {
                         StringBuffer buf = new StringBuffer();
@@ -4704,7 +4753,7 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
             if (strValue.length() == 0
                     || (m_xspLanguage != EC_UNKNOWNSCRIPT
                             && strValue.startsWith("<%") && strValue
-                            .endsWith("%>")))
+                                .endsWith("%>")))
             {
                 m_output.addSkeleton(" " + attrib.toString());
                 continue;
@@ -6243,6 +6292,47 @@ class ExtractionHandler implements IHtmlHandler, IHTMLConstants,
     public void setHtmlInternalTags(List<HtmlInternalTag> htmlInternalTags)
     {
         this.htmlInternalTags = htmlInternalTags;
+    }
+
+    /**
+     * Checkes if the TAG contains a note content from a master.
+     */
+    private boolean isNotesTagInMaster(HtmlObjects.Tag t)
+    {
+        if (t.tag.equalsIgnoreCase("p:notes")
+                && t.attributes.isDefined("layout"))
+        {
+            return "\"notes\"".equals(t.attributes.getValue("layout"));
+        }
+
+        return false;
+    }
+
+    /**
+     * Checkes if the DIV from notes does not need to be extracted.
+     */
+    private boolean isUnextractableContentFromNotes(HtmlObjects.Tag t)
+    {
+        if (t.tag.equalsIgnoreCase("div") && t.attributes.isDefined("class"))
+        {
+            return "O".equals(t.attributes.getValue("class"));
+        }
+
+        return false;
+    }
+
+    /**
+     * Checkes if the DIV is content from master.
+     */
+    private boolean isContentFromMaster(HtmlObjects.Tag t)
+    {
+        if (t.tag.equalsIgnoreCase("div") && t.attributes.isDefined("class"))
+        {
+            String clazz = t.attributes.getValue("class");
+            return clazz.startsWith("N") || clazz.startsWith("O");
+        }
+
+        return false;
     }
 
     /**

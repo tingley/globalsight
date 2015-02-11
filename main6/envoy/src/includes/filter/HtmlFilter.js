@@ -18,7 +18,7 @@ function HtmlFilter()
 	this.defaultUnPairedTags = "br,hr,img,input,rt,wbr";
 	this.defaultSwitchTagMaps = "script:javascript,style:css-styles,xml:xml";
 	this.defaultWhitePreservingTags = "listing,pre";
-	this.defaultTranslatableAttributes = "abbr,accesskey,alt,char,label,prompt,standby,summary,title";
+	this.defaultTranslatableAttributes = "abbr,accesskey,char,label,prompt,standby,summary,title";
 	this.defaultInternalTag = "";
 	
 	this.selectTagsMap = new Object();
@@ -830,6 +830,17 @@ HtmlFilter.prototype.showAllTagsToDelete = function(tagsToDelete, moreInfoObj)
 	}
 }
 
+//for gbs-2599
+HtmlFilter.prototype.selectAll_HtmlFilter = function()
+{
+	var selectAll = document.getElementById("selectAll_HtmlFilter")
+	if(selectAll.checked) {
+		this.checkAllTagsToDelete();
+	} else {
+		this.clearAllTagsToDelete();
+	}
+}
+
 HtmlFilter.prototype.generateDeleteTagTableContent = function()
 {
 /**
@@ -852,6 +863,7 @@ HtmlFilter.prototype.generateDeleteTagTableContent = function()
 	str.append("<Label class='tagName_td'>" + jsTagType + "</Label>");
 	str.append("</td>");
 	str.append("<td width='400px'>");
+	str.append("<input type='checkbox' checked='true' id='selectAll_HtmlFilter' onclick='htmlFilter.selectAll_HtmlFilter()'/>");//for gbs-2599
 	str.append("<Label class='tagName_td'>" + jsTagsToDeleted + "</Label>");
 	str.append("</td>");
 	str.append("<td width='22px'>");
@@ -920,6 +932,7 @@ HtmlFilter.prototype.generateDeleteTagTableContent = function()
 		}
 	} 
 	str.append("</table></center>");
+	/* for gbs-2599
 	str.append("<a href='#' class='specialfilter_a' onclick='htmlFilter.checkAllTagsToDelete()'>");
 	str.append(jsCheckAll);
 	str.append("</a>");
@@ -927,6 +940,7 @@ HtmlFilter.prototype.generateDeleteTagTableContent = function()
     str.append("<a href='#' class='specialfilter_a' onclick='htmlFilter.clearAllTagsToDelete()'>");
     str.append(jsClearAll);
     str.append("</a>");
+	*/
 	if(sum <= 0)
 	{
 		alert(noTagsToChoose);

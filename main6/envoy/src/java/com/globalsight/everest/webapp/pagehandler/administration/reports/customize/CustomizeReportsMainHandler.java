@@ -204,11 +204,13 @@ public class CustomizeReportsMainHandler extends PageHandler
         {
             // just do a query for all in progress jobs, localized, and exported
             // Add ready and archived jobs for GBS-1971
+            // Add export_fail jobs for GBS-2132
             stateList.add(Job.READY_TO_BE_DISPATCHED);
             stateList.add(Job.DISPATCHED);
             stateList.add(Job.LOCALIZED);
             stateList.add(Job.EXPORTED);
             stateList.add(Job.ARCHIVED);
+            stateList.add(Job.EXPORT_FAIL);
         }
         sp.setJobState(stateList);
         
@@ -316,6 +318,7 @@ public class CustomizeReportsMainHandler extends PageHandler
         statusList.add(Job.EXPORTED);
         statusList.add(Job.READY_TO_BE_DISPATCHED);
         statusList.add(Job.ARCHIVED);
+        statusList.add(Job.EXPORT_FAIL);
         
         //Gets job list
         List<Job> jobList = null;

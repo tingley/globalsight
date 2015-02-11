@@ -1,38 +1,35 @@
 /**
- *  Copyright 2009 Welocalize, Inc. 
- *  
+ *  Copyright 2009 Welocalize, Inc.
+ *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
- *  
- *  You may obtain a copy of the License at 
+ *
+ *  You may obtain a copy of the License at
  *  http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *  
+ *
  */
 package com.globalsight.everest.webapp;
 
 /**
- * This interface contains all of the webapp package related
- * constants.
+ * This interface contains all of the webapp package related constants.
  */
 public interface WebAppConstants
 {
     // URLs for accessing files
     // These must map the URLs defined in the web.xml
-    public static final String STF_FILES_URL_MAPPING =
-        "/globalsight/GlobalSight/SecondaryTargetFiles/";
-    public static final String UNEXTRACTED_FILES_URL_MAPPING =
-        "/globalsight/GlobalSight/UnextractedFiles/";
+    public static final String STF_FILES_URL_MAPPING = "/globalsight/GlobalSight/SecondaryTargetFiles/";
+    public static final String UNEXTRACTED_FILES_URL_MAPPING = "/globalsight/GlobalSight/UnextractedFiles/";
 
-    //FOR MULTICOMPANY
+    // FOR MULTICOMPANY
     public static final String SELECTED_COMPANY_NAME_FOR_SUPER_PM = "selectedCompanyNameForSuperPM";
-    
-    //ACCESS RIGHT
+
+    // ACCESS RIGHT
     public static final String PERMISSIONS = "permissions";
     public static final String ACCESS_GROUP_ALL = "all";
     public static final String ACCESS_GROUP_NONE = "none";
@@ -41,7 +38,7 @@ public interface WebAppConstants
     public static final String CHECKED = "CHECKED";
     public static final String SELECTED = "SELECTED";
 
-    //constant values
+    // constant values
     public static final String PROTOCOL_HTTP = "http";
     public static final String PROTOCOL_HTTPS = "https";
 
@@ -49,15 +46,15 @@ public interface WebAppConstants
     // Links defined in page descriptions in the EnvoyConfig.xml
     //
 
-    //A
+    // A
     public static final String ACTIVITY_PASS = "pass";
     public static final String ACTIVITY_DUPLICATE = "duplicate";
-    //D
+    // D
     public static final String DUMMY_LINK = "dummyLink";
     public static final String DUMMY_NAVIGATION_BEAN_NAME = "dummyNavigationBean";
-    //E
+    // E
     public static final String EXPENSES = "expenses";
-    //L
+    // L
     public static final String LOGIN_PASS = "pass";
     public static final String LOGIN_FAIL = "fail";
     public static final String SIMPLE_LOGIN_FAIL = "simpleLoginFail";
@@ -67,24 +64,25 @@ public interface WebAppConstants
     public static final String LOGIN_PROTOCOL = "loginProtocol";
     public static final String LOGIN_PORT = "loginPort";
     public static final String LOGIN_SERVER = "loginServer";
-    
+
     public static final String IS_SUPER_ADMIN = "Current_User_Is_SuperAdmin";
 
-    //Super PM Login
+    // Super PM Login
     public static final String COMPANY_NAME = "companyName";
     public static final String COMPANY_NAMES = "companyNames";
     public static final String COMP_PAGE_NAME = "COMP";
     public static final String LOG4_PAGE_NAME = "LOG4";
     public static final String SUPER_ADMINISTRATOR_NAME = "SuperAdministrator";
     public static final String SUPER_PM_NAME = "SuperProjectManager";
-    
-    //P
+
+    public static final String COMPANY_ID = "companyID";
+    // P
     public static final String PASS_LINK = "pass";
-    //R
+    // R
     public static final String REVENUE = "revenue";
-    //L10n
+    // L10n
     public static final String LOCPROFILE_SKIP_JQ = "skipJobQueue";
-    //U
+    // U
     public static final String USER_PARAMS = "userParams";
     public static final String USER_PARAMS_ERROR = "userParamsError";
 
@@ -94,7 +92,6 @@ public interface WebAppConstants
 
     public static final String COLUMN_NUM = "columnNum";
 
-
     //
     // general constants to be used in pages across the whole system
     // specifies common parameters
@@ -102,12 +99,12 @@ public interface WebAppConstants
 
     public static final String CANCEL = "Cancel";
 
-    public static final String NEXT   = "next";
+    public static final String NEXT = "next";
     public static final String PREVIOUS = "previous";
     public static final String IMPORT = "import";
     public static final String CLEAR_ALL = "clearAll";
     public static final String DONE = "done";
-    
+
     public static final String TASK = "workObject";
     public static final String WORK_OBJECT = "workObject";
     public static final String TASK_ACTION = "taskAction";
@@ -116,18 +113,21 @@ public interface WebAppConstants
     public static final String TASK_ACTION_BATCH_COMPLETE_ACTIVITY = "completeActivity";
     public static final String TASK_ACTION_BATCH_COMPLETE_WORKFLOW = "completeWorkflow";
     public static final String TAST_ACTION_DOWNLOADALL = "downloadALLOfflineFiles";
+    public static final String TAST_ACTION_DOWNLOADALL_COMBINED = "downloadALLOfflineFilesCombined";
     public static final String TASK_ACTION_ACCEPT_AND_DOWNLOAD = "acceptTaskAndDownload";
     public static final String TASK_ACTION_CREATE_STF = "createStf";
     public static final String TASK_ACTION_FINISH = "finishTask";
     public static final String TASK_ACTION_REJECT = "rejectTask";
     public static final String TASK_ACTION_SAVECOMMENT = "saveComment";
+    public static final String TASK_ACTION_GETTASKSTATUS = "getTaskStatus";
+    public static final String TASK_ACTION_SELECTED_TASKSSTATUS = "selectedTasksStatus";
     public static final String TASK_ACTION_MODIFY_ACCOUNT = "modifyAccount";
     public static final String TASK_ACTION_RETRIEVE = "getTask";
     public static final String TASK_ACTION_SAVEDETAILS = "saveDetails";
     public static final String TASK_ACTION_TRANSLATED_TEXT_RETRIEVE = "retrieveTranslatedText";
     public static final String RECREATE_EDITION_JOB = "recreateEditionJob";
     public static final String UPDATE_LEVERAGE = "updateLeverage";
-    
+
     public static final String TASK_COMMENT = "taskComment";
     public static final String TASK_DETAILPAGE_ID = "detailPageId";
     public static final String DTP_DOWNLOAD = "dtpDownload";
@@ -137,7 +137,7 @@ public interface WebAppConstants
     public static final String TASK_LIST_START = "taskListStart";
     public static final String TASK_STATE = "state";
     public static final String TASK_TYPE = "taskType";
-    public static final String TASK_FILE_NAME = "taskFileName"; 
+    public static final String TASK_FILE_NAME = "taskFileName";
 
     // Offline - Download related parameters
     public static final String DOWNLOAD_ACTION = "downloadAction";
@@ -154,6 +154,7 @@ public interface WebAppConstants
     public static final String UPLOAD_ACTION = "uploadAction";
     public static final String UPLOAD_ACTION_BACK = "uploadBack";
     public static final String UPLOAD_ACTION_CANCEL = "uploadCancel";
+    public static final String UPLOAD_ACTION_CANCE_PROGRESS = "uploadProgressCancel";
     public static final String UPLOAD_ACTION_REFRESH = "uploadRefresh";
     public static final String UPLOAD_ACTION_DONE = "uploadDone";
     public static final String UPLOAD_ACTION_PROGRESS = "uploadProgress";
@@ -161,14 +162,17 @@ public interface WebAppConstants
     public static final String REPORT_TYPE = "reportType";
     public static final String LANGUAGE_SIGN_OFF = "languageSignOff";
     public static final String TRANSLATION_EDIT = "translationEdit";
-    
+
     public static final String UPLOAD_ACTION_UPLOAD_REPORT = "uploadReport";
     public static final String DOWNLOAD_ACTION_START_DOWNLOAD_TER = "downloadTER";
     public static final String DOWNLOAD_ACTION_START_DOWNLOAD_LSO = "downloadLSO";
-    
+
     public static final String UPLOAD_MANAGER = "uploadManager";
     public static final String UPLOAD_PARAMS = "uploadParams";
     public static final String UPLOAD_STATUS = "uploadStatus";
+    public static final String UPLOAD_ORIGIN = "origin";
+    public static final String UPLOAD_FROMSIMPLEUPLOAD = "fromSimpleUpload";
+    public static final String UPLOAD_FROMTASKUPLOAD = "fromTaskUpload";
 
     public static final String EXPORT_LOCATION_ACTION = "exportAction";
     public static final String EXPORT_LOCATION_ACTION_REMOVE = "remove";
@@ -194,22 +198,19 @@ public interface WebAppConstants
     public static final String UID = "UID_";
 
     public static final String APPLET = "applet";
-    public static final String APPLET_DIRECTORY_SESSION_NAME_RANDOM =
-        "rand";
+    public static final String APPLET_DIRECTORY_SESSION_NAME_RANDOM = "rand";
     public static final String LOGIN_NAME_FIELD = "nameField";
     static public final String PASSWORD_NAME_FIELD = "passwordField";
     public static final String LOGIN_EMAIL_FIELD = "emailField";
     public static final String INITIAL_SCREEN = "initial";
 
-
-
     //
     // For error handling
     //
 
-    public static final String ERROR_BEAN_NAME ="error";
-    public static final String ERROR_PAGE ="/envoy/common/error.jsp";
-    public static final String ACTIVITY_ERROR_PAGE ="/envoy/common/activityError.jsp";
+    public static final String ERROR_BEAN_NAME = "error";
+    public static final String ERROR_PAGE = "/envoy/common/error.jsp";
+    public static final String ACTIVITY_ERROR_PAGE = "/envoy/common/activityError.jsp";
 
     //
     // Fields carried by SessionManager or Request
@@ -225,16 +226,18 @@ public interface WebAppConstants
     public static final String SOURCE_PAGE = "sourcePage";
     public static final String SSL_FAIL = "sslFail";
     public static final String JOB_ID = "jobId";
+    // TaskBO Map(HashMap<Long, TaskBO>) in Session
+    public static final String SESSION_MAP_TASKBO = "sessionMapTaskBOS";
 
     /**
-     * An identifier for a combination of job and workflow name which
-     * is used as a key for a session attribute.
+     * An identifier for a combination of job and workflow name which is used as
+     * a key for a session attribute.
      */
     public static final String JOB_AND_WORKFLOW_NAME = "jobAndWorkflowName";
 
     /* Used by User module */
     public static final String USER = "userObject";
-    public static final String USER_NAME = "username";
+    public static final String USER_NAME = "userId";
     public static final String USER_PASSWORD = "password";
     public static final String USER_PASSWORD_CONFIRM = "passwordConfirm";
     public static final String USER_LAST_NAME = "lastName";
@@ -259,14 +262,13 @@ public interface WebAppConstants
     public static final String USER_ACTION_SET_SOURCE = "setSource";
     public static final String USER_ACTION_CANCEL_FROM_ACTIVITIES = "cancelActivities";
     public static final String USER_ACTION_PREVIOUS = "previous";
+    public static final String USER_ACTION_REMOVE_ROLES = "removeUserRoles";
 
     public static final String CREATE_USER_WRAPPER = "createUserWrapper";
     public static final String MODIFY_USER_WRAPPER = "modifyUserWrapper";
 
-    public static final String ADDED_NOTIFICATION_OPTIONS =
-        "addedNotificationOptions";
-    public static final String AVAILABLE_NOTIFICATION_OPTIONS =
-        "availableNotificationOptions";
+    public static final String ADDED_NOTIFICATION_OPTIONS = "addedNotificationOptions";
+    public static final String AVAILABLE_NOTIFICATION_OPTIONS = "availableNotificationOptions";
 
     public static final String CMS_USER_INFO = "cmsUserInfoObject";
     public static final String CMS_USER_NAME = "cmsUsername";
@@ -276,14 +278,17 @@ public interface WebAppConstants
     public static final String LOCALIZATION_PARTICIPANT = "LocalizationParticipant";
 
     public static final String USER_IDS = "userIds";
-    public static final String SELECTED_COMPANY_ID ="selectedCompanyID";
+    public static final String USER_NAMES = "userNames";
+    public static final String SELECTED_COMPANY_ID = "selectedCompanyID";
+    public static final String USER_ACTION_IMPORT = "importUser";
+    public static final String USER_ACTION_EXPORT = "exportUser";
 
     /**
-     * An identifier for a project id that's used as a key for a
-     * session manager attribute
+     * An identifier for a project id that's used as a key for a session manager
+     * attribute
      */
     public static final String PROJECT_ID = "projectId";
-    
+
     public static final String PROJECT_ERROR = "PROJECT_ERROR";
 
     /**
@@ -313,14 +318,13 @@ public interface WebAppConstants
     public static final String IS_ASSIGNEE = "isAssignee";
 
     /**
-     * An identifier for the refresh link used as a key for a session
-     * attribute.
+     * An identifier for the refresh link used as a key for a session attribute.
      */
     public static final String IS_REFRESH = "isRefresh";
 
     /**
-     * An identifiers for myActivities default sort - used as a keys
-     * for a session attributes.
+     * An identifiers for myActivities default sort - used as a keys for a
+     * session attributes.
      */
     public static final String MYACT_COL_SORT_ID = "myActColSortId";
     public static final String MYACT_SORT_ASC = "myActSortAscending";
@@ -330,8 +334,8 @@ public interface WebAppConstants
     //
 
     /**
-     * Session attribute name for {@link
-     * com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState}
+     * Session attribute name for
+     * {@link com.globalsight.everest.webapp.pagehandler.administration.glossaries.GlossaryState}
      * object.
      */
     public static final String GLOSSARYSTATE = "GLOSSARYSTATE";
@@ -341,8 +345,8 @@ public interface WebAppConstants
     //
 
     /**
-     * Session attribute name for {@link
-     * com.globalsight.everest.webapp.pagehandler.administration.comment.CommentState}
+     * Session attribute name for
+     * {@link com.globalsight.everest.webapp.pagehandler.administration.comment.CommentState}
      * object.
      */
     public static final String COMMENT_REFERENCE_CANCEL = "cancel";
@@ -367,45 +371,45 @@ public interface WebAppConstants
     //
 
     /**
-     * Session attribute name for {@link
-     * com.globalsight.everest.webapp.pagehandler.edit.online.EditorState
+     * Session attribute name for
+     * {@link com.globalsight.everest.webapp.pagehandler.edit.online.EditorState
      * EditorState} object.
      */
     public static final String EDITORSTATE = "EDITORSTATE";
 
     /**
-     * Session attribute name for {@link
-     * com.globalsight.everest.edit.online.SegmentView SegmentView}
+     * Session attribute name for
+     * {@link com.globalsight.everest.edit.online.SegmentView SegmentView}
      * object.
      */
     public static final String SEGMENTVIEW = "SEGMENTVIEW";
-    
+
     /**
      * Cache segment view data into session for page.
      * key:tuID_tuvID_subID;value:SegmentView object. See
      * {@link com.globalsight.everest.edit.online.SegmentView SegmentView}.
      */
     public static final String SEGMENT_VIEW_MAP = "segmentViewMap";
-    
+
     /**
      * Cache segment list into ArrayList in sequence. Everyone is in
      * "tuID_tuvID_subID" style. See
      * {@link com.globalsight.everest.edit.online.SegmentView SegmentView}.
      */
     public static final String PAGE_TU_TUV_SUBID_SET = "pageTuTuvSubIDSet";
-    
+
     /**
-     * Session attribute name for {@link
-     * com.globalsight.everest.edit.online.CommentView CommentView}
+     * Session attribute name for
+     * {@link com.globalsight.everest.edit.online.CommentView CommentView}
      * object.
      */
     public static final String COMMENTVIEW = "COMMENTVIEW";
 
     /**
-     * Session attribute name for {@link
-     * com.globalsight.everest.edit.online.PageInfo PageInfo} object.
+     * Session attribute name for
+     * {@link com.globalsight.everest.edit.online.PageInfo PageInfo} object.
      */
-    public static final String PAGEINFO    = "PAGEINFO";
+    public static final String PAGEINFO = "PAGEINFO";
 
     /**
      * Request attribute name for Paragraph Editor.
@@ -417,9 +421,9 @@ public interface WebAppConstants
     // Fields read from System Configuration, initilized at runtime
     //
 
-    ///public static final String HOST = RuntimeInitializer.HOST;
-    public static final int HTTP_PORT  = WebAppConstantsHelper.HTTP_PORT;
-//    public static final int HTTPS_PORT = WebAppConstantsHelper.HTTPS_PORT;
+    // /public static final String HOST = RuntimeInitializer.HOST;
+    public static final int HTTP_PORT = WebAppConstantsHelper.HTTP_PORT;
+    // public static final int HTTPS_PORT = WebAppConstantsHelper.HTTPS_PORT;
 
     //
     // Terminology fields
@@ -428,7 +432,7 @@ public interface WebAppConstants
     public static final String TERMBASE_NAME = "TERMBASE_NAME";
     public static final String TERMBASE_SOURCE = "SOURCE";
     public static final String TERMBASE_TARGET = "TARGET";
-    public static final String TERMBASE_QUERY  = "QUERY";
+    public static final String TERMBASE_QUERY = "QUERY";
     public static final String TERMBASE_TERMBASEID = "TERMBASEID";
     public static final String TERMBASE_CONCEPTID = "CONCEPTID";
     public static final String TERMBASE_TERMID = "TERMID";
@@ -444,12 +448,9 @@ public interface WebAppConstants
     public static final String TERMBASE_REINDEX_STATUS = "reindex_status";
     public static final String TERMBASE_USERDATA = "TERMBASE_USERDATA";
     public static final String TERMBASE_INPUTMODEL = "TERMBASE_INPUTMODEL";
-    public static final String TERMBASE_SEARCHCONDITION =
-        "TERMBASE_SEARCHCONDITION";
-    public static final String TERMBASE_SEARCHRESULTS =
-        "TERMBASE_SEARCHRESULTS";
-    public static final String TERMBASE_SEARCHREPLACER =
-        "TERMBASE_SEARCHREPLACER";
+    public static final String TERMBASE_SEARCHCONDITION = "TERMBASE_SEARCHCONDITION";
+    public static final String TERMBASE_SEARCHRESULTS = "TERMBASE_SEARCHRESULTS";
+    public static final String TERMBASE_SEARCHREPLACER = "TERMBASE_SEARCHREPLACER";
     public static final String TERMBASE_SEARCH = "search";
     public static final String TERMBASE_REPLACE = "replace";
     public static final String TERMBASE_LEVEL = "level";
@@ -476,7 +477,7 @@ public interface WebAppConstants
     public static final String TERMBASE_ACTION_CANCEL = "cancel";
     public static final String TERMBASE_ACTION_USERS = "users";
     public static final String TERMBASE_ACTION_SAVEUSERS = "saveUsers";
-    public static final String TERMBASE_ACTION_CANCEL_IMPORT= "cancelImport";
+    public static final String TERMBASE_ACTION_CANCEL_IMPORT = "cancelImport";
     public static final String TERMBASE_ACTION_CANCEL_IMPORT_TEST = "cancelImportTest";
     public static final String TERMBASE_ACTION_CANCEL_EXPORT = "cancelExport";
     public static final String TERMBASE_ACTION_CANCEL_SEARCH = "cancelSearch";
@@ -486,10 +487,8 @@ public interface WebAppConstants
     public static final String TERMBASE_ACTION_UPLOAD_IMPORT_EXCEL_FILE = "uploadimportexcel";
     public static final String TERMBASE_ACTION_ANALYZE_FILE = "analyze";
     public static final String TERMBASE_ACTION_ANALYZE_TERMBASE = "analyze";
-    public static final String TERMBASE_ACTION_SET_IMPORT_OPTIONS =
-        "setImportOptions";
-    public static final String TERMBASE_ACTION_SET_EXPORT_OPTIONS =
-        "setExportOptions";
+    public static final String TERMBASE_ACTION_SET_IMPORT_OPTIONS = "setImportOptions";
+    public static final String TERMBASE_ACTION_SET_EXPORT_OPTIONS = "setExportOptions";
     public static final String TERMBASE_ACTION_TEST_IMPORT = "testImport";
     public static final String TERMBASE_ACTION_START_IMPORT = "startImport";
     public static final String TERMBASE_ACTION_START_EXPORT = "startExport";
@@ -503,18 +502,16 @@ public interface WebAppConstants
     public static final String TERMBASE_ACTION_SHOWPREVIOUS = "showprevious";
     public static final String TERMBASE_ACTION_SHOWNEXT = "shownext";
 
-    //York added on 2009-03-19
-    public static final String TERMBASE_ACTION_PRE_SEARCH_TERM = "preSearchTerm";
-    public static final String TERMBASE_ACTION_SEARCH_TERM = "searchTerm";
+    public static final String TERMBASE_ACTION_TERM_SEARCH = "termSearch";
+    public static final String TERMBASE_ACTION_TERM_SEARCH_ORDERING = "ordering";
+    public static final String TERMBASE_ACTION_TERM_SEARCH_PAGING = "paging";
 
-    public static final String TERMBASE_ACTION_LOAD_OBJECT   = "loadObject";
+    public static final String TERMBASE_ACTION_LOAD_OBJECT = "loadObject";
     public static final String TERMBASE_ACTION_CREATE_OBJECT = "createObject";
     public static final String TERMBASE_ACTION_MODIFY_OBJECT = "modifyObject";
     public static final String TERMBASE_ACTION_REMOVE_OBJECT = "removeObject";
-    public static final String TERMBASE_ACTION_MAKE_DEFAULT_OBJECT =
-        "defaultObject";
-    public static final String TERMBASE_ACTION_UNSET_DEFAULT_OBJECT =
-        "unsetDefaultObject";
+    public static final String TERMBASE_ACTION_MAKE_DEFAULT_OBJECT = "defaultObject";
+    public static final String TERMBASE_ACTION_UNSET_DEFAULT_OBJECT = "unsetDefaultObject";
     public static final String TERMBASE_ACTION_SHOW_PROGRESS = "showProgress";
 
     public static final String TERMBASE_TB_ID = "id";
@@ -538,38 +535,25 @@ public interface WebAppConstants
     //
     public static final String SNIPPET_LIBRARY = "snippetlibrary";
 
-    public static final String SNIPPET_ACTION_GETGENERICSNIPPET =
-        "getgenericsnippet";
+    public static final String SNIPPET_ACTION_GETGENERICSNIPPET = "getgenericsnippet";
     public static final String SNIPPET_ACTION_GETSNIPPET = "getsnippet";
     public static final String SNIPPET_ACTION_GETSNIPPETS = "getsnippets";
     public static final String SNIPPET_ACTION_GETPAGE = "getpage";
 
-    public static final String SNIPPET_ACTION_CREATESNIPPET =
-        "createsnippet";
-    public static final String SNIPPET_ACTION_CREATESNIPPETGETSNIPPET =
-        "createsnippetgetsnippet";
-    public static final String SNIPPET_ACTION_MODIFYSNIPPET =
-        "modifysnippet";
-    public static final String SNIPPET_ACTION_MODIFYSNIPPETGETSNIPPET =
-        "modifysnippetgetsnippet";
-    public static final String SNIPPET_ACTION_REMOVESNIPPET =
-        "removesnippet";
+    public static final String SNIPPET_ACTION_CREATESNIPPET = "createsnippet";
+    public static final String SNIPPET_ACTION_CREATESNIPPETGETSNIPPET = "createsnippetgetsnippet";
+    public static final String SNIPPET_ACTION_MODIFYSNIPPET = "modifysnippet";
+    public static final String SNIPPET_ACTION_MODIFYSNIPPETGETSNIPPET = "modifysnippetgetsnippet";
+    public static final String SNIPPET_ACTION_REMOVESNIPPET = "removesnippet";
 
-    public static final String SNIPPET_ACTION_ADDSNIPPETGETPAGE =
-        "addsnippetgetpage";
-    public static final String SNIPPET_ACTION_MODIFYSNIPPETGETPAGE =
-        "modifysnippetgetpage";
-    public static final String SNIPPET_ACTION_REMOVESNIPPETGETPAGE =
-        "removesnippetgetpage";
-    public static final String SNIPPET_ACTION_DELETECONTENTGETPAGE =
-        "deletecontentgetpage";
-    public static final String SNIPPET_ACTION_UNDELETECONTENTGETPAGE =
-        "undeletecontentgetpage";
+    public static final String SNIPPET_ACTION_ADDSNIPPETGETPAGE = "addsnippetgetpage";
+    public static final String SNIPPET_ACTION_MODIFYSNIPPETGETPAGE = "modifysnippetgetpage";
+    public static final String SNIPPET_ACTION_REMOVESNIPPETGETPAGE = "removesnippetgetpage";
+    public static final String SNIPPET_ACTION_DELETECONTENTGETPAGE = "deletecontentgetpage";
+    public static final String SNIPPET_ACTION_UNDELETECONTENTGETPAGE = "undeletecontentgetpage";
 
-    public static final String SNIPPET_ACTION_GETGENERICNAMES  =
-        "getgenericnames";
-    public static final String SNIPPET_ACTION_GETSNIPPETSBYLOCALE  =
-        "getsnippetsbylocale";
+    public static final String SNIPPET_ACTION_GETGENERICNAMES = "getgenericnames";
+    public static final String SNIPPET_ACTION_GETSNIPPETSBYLOCALE = "getsnippetsbylocale";
 
     //
     // TM Management Constants
@@ -580,47 +564,28 @@ public interface WebAppConstants
     public static final String TM_SEARCH_STATE_HIGHLIGHT = "Highlight";
     public static final String TM_SEARCH_STATE_NEXT = "Next";
     public static final String TM_SEARCH_STATE_PREV = "Previous";
-    public static final String TM_SEARCHRESULTS =
-        "TM_SEARCHRESULTS";
-    public static final String TM_SEARCHREPLACER =
-        "TM_SEARCHREPLACER";
+    public static final String TM_SEARCHRESULTS = "TM_SEARCHRESULTS";
+    public static final String TM_SEARCHREPLACER = "TM_SEARCHREPLACER";
     public static final String TM_SEARCH = "search";
     public static final String TM_REPLACE = "replace";
 
-    public static final String TM_SOURCE_FIND_TEXT =
-        "SourceFindText";
-    public static final String TM_SOURCE_FIND_MATCH_CASE =
-        "SourceFindMatchCase";
-    public static final String TM_SOURCE_SEARCH_LOCALES =
-        "TmSourceSearchLocales";
-    public static final String TM_SOURCE_SEARCH_LOCALE_SELECTOR =
-        "TmSourceSearchLocaleSelector";
-    public static final String TM_SOURCE_SEARCH_LOCALE =
-        "TmSourceSearchLocale";
-    public static final String TM_TARGET_FIND_TEXT =
-        "TargetFindText";
-    public static final String TM_TARGET_FIND_MATCH_CASE =
-        "TargetFindMatchCase";
-    public static final String TM_TARGET_REPLACE_TEXT =
-        "TargetReplaceText";
-    public static final String TM_TARGET_SEARCH_LOCALES =
-        "TmTargetSearchLocales";
-    public static final String TM_TARGET_SEARCH_LOCALE_SELECTOR =
-        "TmTargetSearchLocaleSelector";
-    public static final String TM_TARGET_SEARCH_LOCALE =
-        "TmTargetSearchLocale";
-    public static final String TM_REPLACE_SEGMENT_CHKBOX =
-        "TmReplaceSegmentCheckbox";
-    public static final String TM_CONCORDANCE_MANAGER =
-        "TmConcordanceManager";
-    public static final String TM_CONCORDANCE_SEARCH_RESULTS_HTML =
-        "TmConcordanceSearchResultsHtml";
-    public static final String TM_CONCORDANCE_SEARCH_RESULTS =
-        "TmConcordanceSearchResults";
-    public static final String TM_CONCORDANCE_REPLACE_RESULTS_HTML =
-        "TmConcordanceReplaceResultsHtml";
-    public static final String TM_CONCORDANCE_REPLACE_RESULTS =
-        "TmConcordanceReplaceResults";
+    public static final String TM_SOURCE_FIND_TEXT = "SourceFindText";
+    public static final String TM_SOURCE_FIND_MATCH_CASE = "SourceFindMatchCase";
+    public static final String TM_SOURCE_SEARCH_LOCALES = "TmSourceSearchLocales";
+    public static final String TM_SOURCE_SEARCH_LOCALE_SELECTOR = "TmSourceSearchLocaleSelector";
+    public static final String TM_SOURCE_SEARCH_LOCALE = "TmSourceSearchLocale";
+    public static final String TM_TARGET_FIND_TEXT = "TargetFindText";
+    public static final String TM_TARGET_FIND_MATCH_CASE = "TargetFindMatchCase";
+    public static final String TM_TARGET_REPLACE_TEXT = "TargetReplaceText";
+    public static final String TM_TARGET_SEARCH_LOCALES = "TmTargetSearchLocales";
+    public static final String TM_TARGET_SEARCH_LOCALE_SELECTOR = "TmTargetSearchLocaleSelector";
+    public static final String TM_TARGET_SEARCH_LOCALE = "TmTargetSearchLocale";
+    public static final String TM_REPLACE_SEGMENT_CHKBOX = "TmReplaceSegmentCheckbox";
+    public static final String TM_CONCORDANCE_MANAGER = "TmConcordanceManager";
+    public static final String TM_CONCORDANCE_SEARCH_RESULTS_HTML = "TmConcordanceSearchResultsHtml";
+    public static final String TM_CONCORDANCE_SEARCH_RESULTS = "TmConcordanceSearchResults";
+    public static final String TM_CONCORDANCE_REPLACE_RESULTS_HTML = "TmConcordanceReplaceResultsHtml";
+    public static final String TM_CONCORDANCE_REPLACE_RESULTS = "TmConcordanceReplaceResults";
 
     // More TM Management Constants
     public static final String TM = "TM";
@@ -639,6 +604,7 @@ public interface WebAppConstants
     public static final String TM_ACTION_MODIFY = "modify";
     public static final String TM_ACTION_CLONE = "clone";
     public static final String TM_ACTION_DELETE = "delete";
+    public static final String TM_ACTION_DELETE_LANGUAGE = "deleteTMLanguage";
     public static final String TM_ACTION_IMPORT = "import";
     public static final String TM_ACTION_EXPORT = "export";
     public static final String TM_ACTION_USERS = "users";
@@ -662,10 +628,8 @@ public interface WebAppConstants
     public static final String TM_ACTION_IMPORT_FILE = "importFile";
     public static final String TM_ACTION_ANALYZE_FILE = "analyze";
     public static final String TM_ACTION_ANALYZE_TM = "analyzetm";
-    public static final String TM_ACTION_SET_IMPORT_OPTIONS =
-        "setImportOptions";
-    public static final String TM_ACTION_SET_EXPORT_OPTIONS =
-        "setExportOptions";
+    public static final String TM_ACTION_SET_IMPORT_OPTIONS = "setImportOptions";
+    public static final String TM_ACTION_SET_EXPORT_OPTIONS = "setExportOptions";
     public static final String TM_ACTION_START_EXPORT = "startExport";
     public static final String TM_ACTION_STATISTICS = "statistics";
     public static final String TM_ACTION_MAINTENANCE = "maintenance";
@@ -677,6 +641,15 @@ public interface WebAppConstants
     public static final String TM_IMPORT_STATUS = "status";
     public static final String TM_REINDEXER = "reindexer";
     public static final String TM_REMOVER = "tmRemover";
+    public static final String TM_ACTION_TM_SEARCH = "tmSearchPage";
+    public static final String TM_ACTION_SEARCH = "tmSearch";
+    public static final String TM_ACTION_REFRESH_PAGE = "refreshPage";
+    public static final String TM_ACTION_DELETE_ENTRIES = "deleteEntries";
+    public static final String TM_ACTION_ADD_ENTRY = "addEntry";
+    public static final String TM_ACTION_EDIT_ENTRY = "editEntry";
+    public static final String TM_ACTION_SAVE_ENTRY = "saveEntry";
+    public static final String TM_ACTION_APPLY_REPLACE = "applyReplace";
+    public static final String TM_ACTION_SEARCH_LEVERAGE_FROM = "leverageFrom";
 
     public static final String TM_TM_ID = "id";
     public static final String TM_TM_NAME = "name";
@@ -694,6 +667,10 @@ public interface WebAppConstants
     public static final String TM_EXIST_NAMES = "existNames";
     public static final String TM_TM3_ID = "tm3id";
     public static final String TM_TYPE = "tmType";
+    public static final String TM_AVAILABLE_ATTS = "tmAvailableAtts";
+    public static final String TM_TM_ATTS = "tmTMAtts";
+    public static final String TMP_AVAILABLE_ATTS = "tmpAvailableAtts";
+    public static final String TMP_TMP_ATTS = "tmpTMPAtts";
 
     public static final String TM_LIST = "tms";
     public static final String TM_KEY = "tm";
@@ -725,20 +702,20 @@ public interface WebAppConstants
     public static final String GAP_CURRENTFOLDERTRG = "gapcurrentfoldertrg";
 
     public static final String GAP_ACTION = "gapaction";
-    public static final String GAP_ACTION_NEWPACKAGE  = "newpackage";
-    public static final String GAP_ACTION_SELECTFILES  = "selectfiles";
-    public static final String GAP_ACTION_ALIGNOPTIONS  = "alignoptions";
-    public static final String GAP_ACTION_CREATEPACKAGE  = "createpackage";
-    public static final String GAP_ACTION_REMOVEPACKAGE  = "removepackage";
+    public static final String GAP_ACTION_NEWPACKAGE = "newpackage";
+    public static final String GAP_ACTION_SELECTFILES = "selectfiles";
+    public static final String GAP_ACTION_ALIGNOPTIONS = "alignoptions";
+    public static final String GAP_ACTION_CREATEPACKAGE = "createpackage";
+    public static final String GAP_ACTION_REMOVEPACKAGE = "removepackage";
 
-    public static final String GAP_ACTION_DOWNLOADPACKAGE  = "downloadpackage";
-    public static final String GAP_ACTION_SHOWERRORS  = "showerrors";
+    public static final String GAP_ACTION_DOWNLOADPACKAGE = "downloadpackage";
+    public static final String GAP_ACTION_SHOWERRORS = "showerrors";
 
-    public static final String GAP_ACTION_UPLOADPACKAGE  = "uploadpackage";
+    public static final String GAP_ACTION_UPLOADPACKAGE = "uploadpackage";
 
     public static final String GAP_ERROR = "GAP_ERROR";
 
-    // Scheduler Constants 
+    // Scheduler Constants
 
     public static final String CRON_ERROR = "cronError";
 
@@ -768,10 +745,9 @@ public interface WebAppConstants
 
     public static final String CRON_BACKPOINTER = "cronBackPtr";
 
-    //virtual directories
+    // virtual directories
     /**
-     * The toplevel dir before any virtual directories in the file
-     * storage area.
+     * The toplevel dir before any virtual directories in the file storage area.
      */
     public static final String VIRTUALDIR_TOPLEVEL = "GlobalSight";
 
@@ -784,14 +760,14 @@ public interface WebAppConstants
      * The virtual dir or alias that points to CXE docs.
      */
     public static final String VIRTUALDIR_CXEDOCS = "/cxedocs/";
-    
+
     public static final String VIRTUALDIR_CXEDOCS2 = "/cxedocs2/";
-    
+
     /**
      * The virtual dir or alias that pionts to fileStorage comment reference.
      */
-	static public final String COMMENT_REFERENCE = "CommentReference";
-	static public final String COMMENT_REFERENCE2 = "CommentReference2";
+    static public final String COMMENT_REFERENCE = "CommentReference";
+    static public final String COMMENT_REFERENCE2 = "CommentReference2";
 
     /**
      * The virtual dir for support files.
@@ -799,13 +775,13 @@ public interface WebAppConstants
     public static final String VIRTUALDIR_SUPPORTFILES = "/SupportFiles/";
 
     /**
-    * This identifies a session variable that holds whether the last activity
-    * the user clicked on (task details) was review only
-    */
+     * This identifies a session variable that holds whether the last activity
+     * the user clicked on (task details) was review only
+     */
     public static final String IS_LAST_ACTIVITY_REVIEW_ONLY = "isLastActivityReviewOnly";
-    
+
     public static final String ORIGINAL_SORUCE_FILE = "OriginalSourceFile";
-    
+
     /**
      * Constants used in customize reports page.
      */
@@ -817,41 +793,66 @@ public interface WebAppConstants
     public static final String CUSTOMIZE_REPORTS_JOB_LIST = "jobList";
     public static final String CUSTOMIZE_REPORTS_TARGETLOCALE_LIST = "targetLocaleList";
     public static final String CUSTOMIZE_REPORTS_PROJECT_LIST = "projectList";
-    //These two key used as key in paramMap
+    // These two key used as key in paramMap
     public static final String JOB_RANGE_PARAM = "jobRangeParam";
     public static final String JOB_INFO_PARAM = "jobInfoParam";
     public static final String TARGET_LOCALE_PARAM = "targetLocaleParam";
     public static final String WORKFLOW_STATUS_PARAM = "workflowStatusParam";
     public static final String LABEL_BUNDLE_PARAM = "labelBundleParam";
     public static final String DATE_FORMAT_PARAM = "dateFormatParam";
-    
+
     // For "Lisa QA report" issue
     public static String TARGET_LANGUAGE = "targetLang";
     public static String DATE_FORMAT = "dateFormat";
-    
+
     // For "Logon to task detail page from email"
     public static String LOGIN_FROM = "loginFrom";
     public static String LOGIN_FROM_EMAIL = "fromEmail";
-    
+
     public static String LOGIN_FORWARD_URL = "forwardUrl";
-    
+
     // For activity page navigation
     public static String IS_FROM_ACTIVITY = "isfromactivity";
     // Flag to cache the segment data for the first 3 editable segments. If from
     // activity details page, this will be initialized to "yes";
     // When cache data is executed, this will be removed from session.
     public static String NEED_CACHE_SEGMENT_DATA = "cacheSegmentViewData";
-    
+
     public static String DOWLOAD_DELAY_TIME_TABLE = "downloadDelayTimeTable";
     public static String TASK_COMPLETE_DELAY_TIME_TABLE = "taskCompleteDelayTimeTable";
-    
+
     public static String IS_USE_IN_CONTEXT = "isUseInContext";
     public static String LEVERAGE_EXACT_ONLY = "exactMatchOnly";
     public static String IS_IN_CONTEXT_MATCH = "isInContextMatch";
     public static String IS_DEFAULT_CONTEXT_MATCH = "isDefaultContextMatch";
-    
+
     public static final String REQUEST_METHOD_GET = "get";
     public static final String RADIO_BUTTON = "radioBtn";
     public static final String RADIO_TM_ID = "TMId";
     public static final String DASHBOARD_ACTIVITY = "activityDashboard";
-}   
+
+    public static final String PROPAGATE_ACTION = "propagateAction";
+    public static final String PROPAGATE_ACTION_FIND = "findRepeatedSegments";
+    public static final String PROPAGATE_ACTION_UNMARK = "unmarkRepeatedSegments";
+    public static final String PTAGS_ACTION_FIND = "findPTagsSegments";
+    public static final String PTAGS_ACTION_UNMARK = "unmarkPTagsSegments";
+
+    public static final String TM_STATUS_DEFAULT = "";
+    public static final String TM_STATUS_CONVERTING = "Converting";
+    public static final String TM_STATUS_CONVERTED_SUCCESS = "Converted";
+    public static final String TM_STATUS_CONVERTED_FAIL = "Failed";
+    public static final String TM_STATUS_CONVERTED_CANCELLED = "Cancelled";
+    public static final String TM_STATUS_CONVERTED_STOPPED = "Conversion Stopped";
+
+    public static final String GS_EDITION_ALL = "allGSEdition";
+
+    /*
+     * Common actions in web UI
+     */
+    public static final String ACTION_STRING = "action";
+    public static final String FILTER_SEARCH = "filterSearch";
+    public static final String ACTION_NEW = "new";
+    public static final String ACTION_EDIT = "edit";
+    public static final String ACTION_REMOVE = "remove";
+    public static final String ACTION_CANCEL = "cancel";
+}

@@ -419,6 +419,17 @@ MSOfficeDocFilter.prototype.deleteTag = function()
 	}
 }
 
+//for gbs-2599
+MSOfficeDocFilter.prototype.selectAll_MSOfficeDocFilter = function()
+{
+	var selectAll = document.getElementById("selectAll_MSOfficeDocFilter")
+	if(selectAll.checked) {
+		this.checkAllTagsToDelete();
+	} else {
+		this.clearAllTagsToDelete();
+	}
+}
+
 MSOfficeDocFilter.prototype.generateDeleteTagTableContent = function()
 {
 	var str = new StringBuffer("<center><table cellpadding=0 cellspacing=0 border=0 width='540px' class='standardText'>");
@@ -427,6 +438,7 @@ MSOfficeDocFilter.prototype.generateDeleteTagTableContent = function()
 	str.append("<Label class='tagName_td'>" + jsStyleType + "</Label>");
 	str.append("</td>");
 	str.append("<td width='400px'>");
+	str.append("<input type='checkbox' checked='true' id='selectAll_MSOfficeDocFilter' onclick='officeDocFilter.selectAll_MSOfficeDocFilter()'/>");//for gbs-2599
 	str.append("<Label class='tagName_td'>" + jsStylesToDeleted + "</Label>");
 	str.append("</td>");
 	str.append("<td width='22px'>");
@@ -486,6 +498,7 @@ MSOfficeDocFilter.prototype.generateDeleteTagTableContent = function()
 		}
 	} 
 	str.append("</table></center>");
+	/*for gbs-2599
 	str.append("<a href='#' class='specialfilter_a' onclick='officeDocFilter.checkAllTagsToDelete()'>");
 	str.append(jsCheckAll);
 	str.append("</a>");
@@ -493,6 +506,7 @@ MSOfficeDocFilter.prototype.generateDeleteTagTableContent = function()
     str.append("<a href='#' class='specialfilter_a' onclick='officeDocFilter.clearAllTagsToDelete()'>");
     str.append(jsClearAll);
     str.append("</a>");
+	*/
 	if(sum <= 0)
 	{
 		alert(noTagsToChoose);

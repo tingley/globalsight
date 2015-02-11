@@ -120,6 +120,16 @@ function checkIp()
 {
     validateIp(false);
 }
+
+//for GBS-2599
+function handleSelectAll() {
+    if (remoteIpForm.selectAll.checked) {
+    	checkAllWithName('remoteIpForm', 'selectedIp'); setButtonState();
+    }
+    else {
+    	clearAll('remoteIpForm'); setButtonState();
+    }
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0" onload="loadGuides()">
@@ -136,7 +146,7 @@ function checkIp()
     </tr>
     <tr>
         <td><amb:table bean="remoteIps" id="remoteIp" key="<%=RemoteIpConstant.REMOTE_IP_KEY%>" dataClass="com.globalsight.everest.webapp.pagehandler.administration.config.remoteip.RemoteIp" pageUrl="self" emptyTableMsg="msg_no_remote_Ip">
-            <amb:column label="">
+            <amb:column label="checkbox">
                 <input type="checkbox" name="selectedIp" value="<%=remoteIp.getId()%>" onclick="setButtonState();">
             </amb:column>
             <amb:column label="lb_remote_ip" sortBy="<%=RemoteIpComparator.IP%>" width="150px">
@@ -150,8 +160,6 @@ function checkIp()
                 %>
             </amb:column>
         </amb:table>
-
-        <DIV ID="CheckAllLayer" style="float: left; margin-left: 10px;"><A CLASS="standardHREF" HREF="javascript:checkAllWithName('remoteIpForm', 'selectedIp'); setButtonState()"><%=bundle.getString("lb_check_all")%></A> | <A CLASS="standardHREF" HREF="javascript:clearAll('remoteIpForm'); setButtonState();"><%=bundle.getString("lb_clear_all")%></A></DIV>
 
         <div style="float: right;"><INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_remove")%>" name="remBtn" disabled onclick="submitForm('Remove');"> <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_edit")%>..." name="editBtn" disabled onclick="submitForm('Edit');"> <INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_new")%>..." onclick="submitForm('New');"></div>
         </td>

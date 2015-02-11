@@ -264,7 +264,7 @@ public class FileUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -274,7 +274,7 @@ public class FileUtil
             }
             catch (IOException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
         

@@ -125,4 +125,28 @@ public class ProjectInfo implements java.io.Serializable
     { 
         return getName();
     }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (int) (m_projectId ^ (m_projectId >>> 32));
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProjectInfo other = (ProjectInfo) obj;
+        if (m_projectId != other.m_projectId)
+            return false;
+        return true;
+    }
 }

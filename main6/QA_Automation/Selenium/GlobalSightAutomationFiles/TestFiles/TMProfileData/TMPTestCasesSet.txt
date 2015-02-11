@@ -1,0 +1,127 @@
+ID	SRX Rule Set 	        Storage TM	        Save unlocalized segments to TM	        Save unlocalized segments to Page TM	        Exclude Item Types	        Leverage Localizables	"Leverage Default Matches
+Leverage Exact Matches only
+Leverage Incontext Matches
+"	Leverage Approved translations from selected Reference TM(s) 	Leverage In-progress translations from the Job 	and from Jobs that write to the Storage TM 	and from Jobs that write to selected Reference TM(s) 	Reference TM(s) 	Type-sensitive Leveraging	Penalty1	Case-sensitive Leveraging	Penalty2	Whitespace-sensitive Leveraging	Penalty3	Code-sensitive Leveraging	Penalty4	Reference TM	Penalty5	Reference TM Combo	Multilingual Leveraging	Auto Repair Placeholders	Multiple Exact Matches	Penalty6	Leverage Match Threshold	Number of Matches	Display TM Matches by	Choose Latest Match 	Type-sensitive Leveraging	Penalty7	No Multiple Exact Matches	Penalty8
+Case 1	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 2	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMS1,TMR1,TMR2	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 3	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMS1,TMR1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 4	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 5	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMR1,TMR2	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 6	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMR1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 7	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1	o	1	o	1	o	1	o	1	x	1	TMS1,TMR1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 8	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1	o	1	o	1	o	1	o	1	x	1	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 9	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1,TMR1	o	1	o	1	o	1	o	1	x	1	TMR1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 10	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 11	Default	TMS1	x	o		o	xxo	o	o	x	x	TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMR1,TMR2	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 12	Default	TMS1	x	o		o	xxo	o	o	x	x	TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMR1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 13	Default	TMS1	x	o		o	xxo	o	o	x	x	TMR1,TMR2	o	1	o	1	o	1	o	1	x	1	TMR2	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 14	Default	TMS1	x	o		o	xxo	o	o	x	x	TMR1	o	1	o	1	o	1	o	1	x	1	TMR1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 15	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		o	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 16	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 17	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	x	1	x	1	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 18	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	x	1	x	1	o	1	o	1	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 19	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	2	o	5	o	8	o	10	x	3	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 20	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	2	o	5	o	8	o	10	x	3	TMS1	x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 21	Default	TMS21	x	o		o	xxo	o	o	x	x	TMS21	o	1	o	1	o	1	o	1	o	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 22	Default	TMS22	x	x		o	xxo	o	o	x	x	TMS22	o	1	o	1	o	1	o	1	o	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 23	Default	TMS23	o	o		o	xxo	o	o	x	x	TMS23	o	1	o	1	o	1	o	1	o	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 24	Default	TMS24	o	x		o	xxo	o	o	x	x	TMS24	o	1	o	1	o	1	o	1	o	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 25	Default	TMS1	x	o		o	xxo	x	x	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 26	Default	TMS1	x	o		o	xxo	x	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 27	Default	TMS1	x	o		o	xxo	x	o	x	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 28	Default	TMS1	x	o		o	xxo	x	o	o	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 29	Default	TMS1	x	o		o	xxo	x	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 30	Default	TMS1	x	o		o	xxo	o	x	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 31	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 32	Default	TMS1	x	o		o	xxo	o	o	x	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 33	Default	TMS1	x	o		o	xxo	o	o	o	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 34	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 35	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	100	5	ox	x	o	1	o	1
+Case 36	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	97	5	ox	x	o	1	o	1
+Case 37	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	95	5	ox	x	o	1	o	1
+Case 38	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	90	5	ox	x	o	1	o	1
+Case 39	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	85	5	ox	x	o	1	o	1
+Case 40	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	80	5	ox	x	o	1	o	1
+Case 41	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 42	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	70	5	ox	x	o	1	o	1
+Case 43	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	65	5	ox	x	o	1	o	1
+Case 44	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	60	5	ox	x	o	1	o	1
+Case 45	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	55	5	ox	x	o	1	o	1
+Case 46	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	50	5	ox	x	o	1	o	1
+Case 47	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	45	5	ox	x	o	1	o	1
+Case 48	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	40	5	ox	x	o	1	o	1
+Case 49	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	35	5	ox	x	o	1	o	1
+Case 50	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	30	5	ox	x	o	1	o	1
+Case 51	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	25	5	ox	x	o	1	o	1
+Case 52	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	20	5	ox	x	o	1	o	1
+Case 53	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	15	5	ox	x	o	1	o	1
+Case 54	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	10	5	ox	x	o	1	o	1
+Case 55	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	50	5	ox	x	o	1	o	1
+Case 56	Default	TMS1	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	0	5	ox	x	o	1	o	1
+Case 57	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	75	5	ox	x	o	5	o	5
+Case 58	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	100	5	ox	x	o	5	o	5
+Case 59	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	97	5	ox	x	o	5	o	5
+Case 60	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	95	5	ox	x	o	5	o	5
+Case 61	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	90	5	ox	x	o	5	o	5
+Case 62	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	85	5	ox	x	o	5	o	5
+Case 63	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	80	5	ox	x	o	5	o	5
+Case 64	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	75	5	ox	x	o	5	o	5
+Case 65	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	70	5	ox	x	o	5	o	5
+Case 66	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	65	5	ox	x	o	5	o	5
+Case 67	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	60	5	ox	x	o	5	o	5
+Case 68	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	55	5	ox	x	o	5	o	5
+Case 69	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	50	5	ox	x	o	5	o	5
+Case 70	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	45	5	ox	x	o	5	o	5
+Case 71	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	40	5	ox	x	o	5	o	5
+Case 72	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	35	5	ox	x	o	5	o	5
+Case 73	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	30	5	ox	x	o	5	o	5
+Case 74	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	25	5	ox	x	o	5	o	5
+Case 75	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	20	5	ox	x	o	5	o	5
+Case 76	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	15	5	ox	x	o	5	o	5
+Case 77	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	10	5	ox	x	o	5	o	5
+Case 78	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	50	5	ox	x	o	5	o	5
+Case 79	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	0	5	ox	x	o	5	o	5
+Case 80	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	75	5	ox	x	o	5	o	5
+Case 81	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	100	5	ox	x	o	5	o	5
+Case 82	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	97	5	ox	x	o	5	o	5
+Case 83	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	95	5	ox	x	o	5	o	5
+Case 84	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	90	5	ox	x	o	5	o	5
+Case 85	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	85	5	ox	x	o	5	o	5
+Case 86	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	80	5	ox	x	o	5	o	5
+Case 87	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	75	5	ox	x	o	5	o	5
+Case 88	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	70	5	ox	x	o	5	o	5
+Case 89	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	65	5	ox	x	o	5	o	5
+Case 90	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	60	5	ox	x	o	5	o	5
+Case 91	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	55	5	ox	x	o	5	o	5
+Case 92	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	50	5	ox	x	o	5	o	5
+Case 93	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	45	5	ox	x	o	5	o	5
+Case 94	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	40	5	ox	x	o	5	o	5
+Case 95	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	35	5	ox	x	o	5	o	5
+Case 96	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	30	5	ox	x	o	5	o	5
+Case 97	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	25	5	ox	x	o	5	o	5
+Case 98	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	20	5	ox	x	o	5	o	5
+Case 99	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	15	5	ox	x	o	5	o	5
+Case 100	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	10	5	ox	x	o	5	o	5
+Case 101	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	50	5	ox	x	o	5	o	5
+Case 102	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	5	o	5	o	5	o	5	x	5	TMS1	x	o	oxx	5	0	5	ox	x	o	5	o	5
+Case 103	Default	TMS2	x	o		o	xxo	o	o	x	x	TMS1	x	1	x	1	x	1	x	1	x	1	TMS1	o	x	xox	1	70	3	ox	x	x	1	x	1
+Case 104	Default	TMS3	x	o		o	xxo	o	o	x	x	TMS1	o	2	o	2	o	2	o	2	o	2		o	o	xxo	2	50	3	ox	o	o	1	o	1
+Case 105	Default	TMS4	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	o	1		o	o	oxx	1	40	3	ox	o	x	1	x	1
+Case 106	Default	TMS5	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	3	xo	o	o	2	o	2
+Case 107	Default	TMS6	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	3	xo	o	o	1	o	1
+Case 108	Default	TMS7	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 109	Default	TMS8	x	o		o	xxo	o	o	x	x	TMS1,TMS1,TMS2	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	5	xo	o	o	1	o	1
+Case 110	Default	TMS9	x	o		o	xxo	o	o	x	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 111	Default	TMS10	x	o		o	xxo	o	o	o	x	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 112	Default	TMS11	x	o		o	xxo	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 113	Default	TMS12	x	o		o	xxo	x	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 114	Default	TMS13	x	o		o	xxo	o	x	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 115	Default	TMS14	x	o		o	xox	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 116	Default	TMS15	x	o		o	oxx	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 117	Default	TMS16	o	x		o	oxx	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 118	Default	TMS17	o	o		o	oxx	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 119	Default	TMS18	x	x		o	oxx	o	o	o	o	TMS1	o	1	o	1	o	1	o	1	o	1	TMS1	o	o	oxx	1	75	6	xo	o	o	1	o	1
+Case 120	Default	TMS1	o	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 121	Default	TMS1	o	x		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 122	Default	TMS1	x	o		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1
+Case 123	Default	TMS1	x	x		o	xxo	o	o	x	x	TMS1	o	1	o	1	o	1	o	1	x	1		x	o	oxx	1	75	5	ox	x	o	1	o	1

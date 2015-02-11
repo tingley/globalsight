@@ -21,7 +21,9 @@ import com.globalsight.everest.foundation.Timestamp;
 
 // JDK
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jbpm.graph.def.Node;
 
@@ -79,6 +81,9 @@ public class TaskEmailInfo
     private String m_accepterName = null;
     
     private String m_companyId = null;
+    
+    // The ignored recipient of email.
+    private Set<String> ignoredReceipt;
 
 	//
     // PUBLIC CONSTRUCTORS
@@ -306,7 +311,7 @@ public class TaskEmailInfo
     {
         return m_workflowManagerIds;
     }
-
+    
     /**
      * Determines whether an email notification should be sent to PM.
      * @return True if email should be sent to PM.  Otherwise, returns false.
@@ -510,5 +515,27 @@ public class TaskEmailInfo
     public void setCompanyId(String m_companyId)
     {
         this.m_companyId = m_companyId;
-    }	
+    }
+
+    public Set<String> getIgnoredReceipt()
+    {
+        return ignoredReceipt;
+    }
+
+    public void setIgnoredReceipt(Set<String> p_ignoredReceipt)
+    {
+        ignoredReceipt = p_ignoredReceipt;
+    }
+    
+    public void setIgnoredReceipt(String p_ignoredReceipt)
+    {
+        if(ignoredReceipt == null)
+        {
+            ignoredReceipt = new HashSet<String>();
+        }
+        
+        ignoredReceipt.add(p_ignoredReceipt);
+    }
+    
+    
 }       

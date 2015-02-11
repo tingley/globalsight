@@ -27,7 +27,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
@@ -57,7 +56,6 @@ import com.globalsight.everest.webapp.pagehandler.administration.glossaries.Glos
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
-import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.ling.tw.PseudoConstants;
 
 /**
@@ -169,15 +167,17 @@ public class SendDownloadFileHelper implements WebAppConstants
                     // Client-Peer: 192.18.97.36:80
                     // Content-Disposition: attachment;
                     // filename=servlet-2_3-pfd2-docs.zip
-//                  downloadFileName = URLEncoder.encode(downloadFileName, "UTF-8");
+                    // downloadFileName = URLEncoder.encode(downloadFileName,
+                    // "UTF-8");
                     p_response.setContentType("application/zip");
                     p_response.setHeader("Content-Disposition",
-                            "attachment; filename=\"" + downloadFileName + "\";");
+                            "attachment; filename=\"" + downloadFileName
+                                    + "\";");
                     if (p_request.isSecure())
                     {
                         PageHandler.setHeaderForHTTPSDownload(p_response);
                     }
-                    
+
                     p_response.setContentLength((int) tmpFile.length());
 
                     // Send the data to the client
@@ -212,11 +212,10 @@ public class SendDownloadFileHelper implements WebAppConstants
                     // If download was aborted, the progress bar's status
                     // message should
                     // should contain an updated error message (via speak()).
-                    CATEGORY
-                            .debug("Download was aborted. No package was produced for "
-                                    + downloadFileName
-                                    + " to "
-                                    + p_request.getRemoteHost());
+                    CATEGORY.debug("Download was aborted. No package was produced for "
+                            + downloadFileName
+                            + " to "
+                            + p_request.getRemoteHost());
                 }
             }
 
@@ -266,20 +265,29 @@ public class SendDownloadFileHelper implements WebAppConstants
 
         // get task from session
         Task task = getTask(p_request);
-
+        try
+        {
+            task = ServerProxy.getTaskManager().getTask(task.getId());
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
         // workflow id
         long workflowId = task.getWorkflow().getId();
 
         // job name
         String jobName = getJobName(task);
-        
-        //activity type
+
+        // activity type
         Activity act = new Activity();
-        
-        try {
-            act = ServerProxy.getJobHandler().getActivity(
-                task.getTaskName());
-        }catch(Exception e) {
+
+        try
+        {
+            act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
+        }
+        catch (Exception e)
+        {
         }
 
         // create page id and name list
@@ -329,16 +337,16 @@ public class SendDownloadFileHelper implements WebAppConstants
         String displayExactMatch = p_request
                 .getParameter(OfflineConstants.DISPLAY_EXACT_MATCH);
 
-        DownloadParams params = new DownloadParams(jobName, null, "", Long
-                .toString(workflowId), Long.toString(task.getId()), pageIdList,
-                pageNameList, canUseUrlList, primarySourceFiles, stfList,
-                editorId, platformId, encoding, ptagFormat, uiLocale, task
-                        .getSourceLocale(), task.getTargetLocale(), true,
+        DownloadParams params = new DownloadParams(jobName, null, "",
+                Long.toString(workflowId), Long.toString(task.getId()),
+                pageIdList, pageNameList, canUseUrlList, primarySourceFiles,
+                stfList, editorId, platformId, encoding, ptagFormat, uiLocale,
+                task.getSourceLocale(), task.getTargetLocale(), true,
                 fileFormat, excludeTypes, downloadEditAll, supportFileList,
                 resInsMode, user);
-        
+
         params.setActivityType(act.getDisplayName());
-        params.setJob( task.getWorkflow().getJob());
+        params.setJob(task.getWorkflow().getJob());
         params.setTermFormat(p_request
                 .getParameter(OfflineConstants.TERM_SELECTOR));
         params.setConsolidateTermFiles(p_request
@@ -353,15 +361,21 @@ public class SendDownloadFileHelper implements WebAppConstants
                 .getParameter(OfflineConstants.CONSOLIDATE_TMX) != null);
         params.setNeedConsolidate(p_request
                 .getParameter(OfflineConstants.NEED_CONSOLIDATE) != null);
+        params.setIncludeRepetitions(p_request
+                .getParameter(OfflineConstants.INCLUDE_REPETITIONS) != null);
         boolean changeCreationId = false;
-        try {
+        try
+        {
             String strchangeCreationId = p_request
                     .getParameter(OfflineConstants.CHANGE_CREATION_ID_FOR_MT_SEGMENTS);
             if (strchangeCreationId != null && strchangeCreationId.equals("on"))
             {
                 changeCreationId = true;
             }
-        } catch (Exception ex) {}
+        }
+        catch (Exception ex)
+        {
+        }
         params.setChangeCreationIdForMTSegments(changeCreationId);
 
         try
@@ -388,14 +402,14 @@ public class SendDownloadFileHelper implements WebAppConstants
         {
             EnvoyServletException e = new EnvoyServletException("TaskNotFound",
                     null, null);
-            CATEGORY.error(e);
+            CATEGORY.error(e.getMessage(), e);
             throw e;
         }
 
         return task;
     }
 
-    public void getAllPageIdList(Task task, List pageIdList, List pageNameList)
+    public void getAllPageIdList(Task task, List<Long> pageIdList, List<String> pageNameList)
     {
         List pages = task.getSourcePages();
 
@@ -428,16 +442,19 @@ public class SendDownloadFileHelper implements WebAppConstants
             // Note: download is driven by the source page ids and the
             // target locale.
             List pages = task.getSourcePages();
-            Collections.sort(pages, new Comparator() {
-				@Override
-				public int compare(Object o1, Object o2) {
-					SourcePage sp1, sp2;
-					sp1 = (SourcePage)o1;
-					sp2 = (SourcePage)o2;
-					int result = sp1.getId() == sp2.getId() ? 0 : (sp1.getId() > sp2.getId() ? 1 : -1);
-					return result;
-				}
-			});
+            Collections.sort(pages, new Comparator()
+            {
+                @Override
+                public int compare(Object o1, Object o2)
+                {
+                    SourcePage sp1, sp2;
+                    sp1 = (SourcePage) o1;
+                    sp2 = (SourcePage) o2;
+                    int result = sp1.getId() == sp2.getId() ? 0
+                            : (sp1.getId() > sp2.getId() ? 1 : -1);
+                    return result;
+                }
+            });
 
             for (Iterator it = pages.iterator(); it.hasNext();)
             {
@@ -451,9 +468,10 @@ public class SendDownloadFileHelper implements WebAppConstants
         {
             idList = p_request
                     .getParameterValues(OfflineConstants.PAGE_CHECKBOXES);
-            
-            if (idList != null) {
-            	Arrays.sort(idList);
+
+            if (idList != null)
+            {
+                Arrays.sort(idList);
             }
 
             Long pageId = null;
@@ -484,8 +502,8 @@ public class SendDownloadFileHelper implements WebAppConstants
     public List<Long> getAllPSFList(Task task) throws EnvoyServletException
     {
         List<Long> sourceForDownload = new ArrayList<Long>();
-        Iterator<TargetPage> it = task.getWorkflow().getTargetPages(
-                PrimaryFile.UNEXTRACTED_FILE).iterator();
+        Iterator<TargetPage> it = task.getWorkflow()
+                .getTargetPages(PrimaryFile.UNEXTRACTED_FILE).iterator();
         while (it.hasNext())
         {
             TargetPage aPTF = it.next();
@@ -510,8 +528,8 @@ public class SendDownloadFileHelper implements WebAppConstants
             // we do not record file selections per/job in cookies,
             // the default for auto-download is to include all STFs
             Task task = getTask(p_request);
-            Iterator it = task.getWorkflow().getTargetPages(
-                    PrimaryFile.UNEXTRACTED_FILE).iterator();
+            Iterator it = task.getWorkflow()
+                    .getTargetPages(PrimaryFile.UNEXTRACTED_FILE).iterator();
             while (it.hasNext())
             {
                 TargetPage aPTF = (TargetPage) it.next();
@@ -729,6 +747,11 @@ public class SendDownloadFileHelper implements WebAppConstants
         {
             result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF;
         }
+        else if (fileFormat
+                .equals(OfflineConstants.FORMAT_RTF_TRADOS_OPTIMIZED))
+        {
+            result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED;
+        }
         else if (fileFormat.equals(OfflineConstants.FORMAT_TEXT))
         {
             result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TXT;
@@ -737,9 +760,9 @@ public class SendDownloadFileHelper implements WebAppConstants
         {
             result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF;
         }
-        else if (fileFormat.equals(OfflineConstants.FORMAT_TTX_NAME))
+        else if (fileFormat.equals(OfflineConstants.FORMAT_TTX_VALUE))
         {
-        	result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX;
+            result = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TTX;
         }
         else
         {

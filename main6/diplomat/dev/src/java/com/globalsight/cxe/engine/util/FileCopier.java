@@ -77,7 +77,7 @@ public class FileCopier {
             }
         } catch (IOException e) {
             //TODO we should use a common Exception here
-            throw new RuntimeException("file copy error");
+            throw new RuntimeException("file copy error : " + e.getMessage(), e);
         } finally {
             try {
                 if (input != null)
@@ -118,7 +118,7 @@ public class FileCopier {
             }
         } catch (IOException e) {
             //TODO we should use a common Exception here
-            throw new RuntimeException("file copy error");
+            throw new RuntimeException("file copy error : " + e.getMessage(), e);
         } finally {
             try {
                 if (input != null)

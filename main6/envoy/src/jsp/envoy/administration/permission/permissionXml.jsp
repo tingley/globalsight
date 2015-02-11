@@ -41,6 +41,7 @@
      <permission id="<%=Permission.COMPANY_REMOVE%>"/>
      <permission id="<%=Permission.COMPANY_EDIT%>"/>     
      <permission id="<%=Permission.COMPANY_NEW%>"/>
+     <permission id="<%=Permission.COMPANY_MIGRATE%>"/>
   </permission>
 <% } %>
   <permission id="<%=Permission.ATTRIBUTE_VIEW%>">
@@ -127,6 +128,8 @@
      <permission id="<%=Permission.USERS_NEW%>"/>
      <permission id="<%=Permission.USERS_PROJECT_MEMBERSHIP%>"/>
      <permission id="<%=Permission.CHANGE_OWN_PASSWORD%>"/>
+     <permission id="<%=Permission.USERS_IMPORT%>"/>
+     <permission id="<%=Permission.USERS_EXPORT%>"/>
   </permission>
   <permission id="<%=Permission.TM_VIEW%>">
      <permission id="<%=Permission.TM_BROWSER%>"/>     
@@ -139,9 +142,13 @@
      <permission id="<%=Permission.TM_DELETE%>"/>
      <permission id="<%=Permission.TM_EDIT%>"/>
      <permission id="<%=Permission.TM_NEW%>"/>
-     <permission id="<%=Permission.SERVICE_TM_SEARCH_ENTRY%>"/>
-     <permission id="<%=Permission.SERVICE_TM_CREATE_ENTRY%>"/>
-     <permission id="<%=Permission.SERVICE_TM_EDIT_ENTRY%>"/>
+     <permission id="<%=Permission.TM_SEARCH%>">
+       <permission id="<%=Permission.TM_ADD_ENTRY%>"/>
+       <permission id="<%=Permission.TM_EDIT_ENTRY%>"/>
+       <permission id="<%=Permission.TM_DELETE_ENTRY%>"/>
+       <permission id="<%=Permission.TM_SEARCH_ADVANCED%>"/>
+     </permission>
+     <permission id="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>"/>
   </permission>
   <permission id="<%=Permission.TMP_VIEW%>">
      <permission id="<%=Permission.TMP_EDIT%>"/>     
@@ -162,6 +169,7 @@
      <permission id="<%=Permission.TERMINOLOGY_EXPORT%>"/>     
      <permission id="<%=Permission.TERMINOLOGY_MAINTENANCE%>"/>     
      <permission id="<%=Permission.TERMINOLOGY_INPUT_MODELS%>"/>
+     <permission id="<%=Permission.TERMINOLOGY_SEARCH%>"/>
      <permission id="<%=Permission.SERVICE_TB_CREATE_ENTRY%>"/>
      <permission id="<%=Permission.SERVICE_TB_SEARCH_ENTRY%>"/>
      <permission id="<%=Permission.SERVICE_TB_EDIT_ENTRY%>"/>
@@ -253,7 +261,9 @@
   <% } %>
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_WFMGMT%>"/>  
   <permission id="<%=Permission.ACCOUNT_NOTIFICATION_GENERAL%>"/>  
-  <permission id="<%=Permission.ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES%>"/>  
+  <permission id="<%=Permission.ACCOUNT_DOWNLOAD_ALL_OFFLINE_FILES%>"/>
+  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_NOMATCHES%>"/>
+  <permission id="<%=Permission.ACCOUNT_NOTIFICATION_REPETITIONS%>"/>  
 </category>
 <category id="lb_data_sources">
   <permission id="<%=Permission.FILE_PROFILES_VIEW%>">
@@ -336,11 +346,13 @@
   </permission>
 <% } %>  
 <% if (b_customerAccessGroup) { %>
- <permission id="<%=Permission.CUSTOMER_UPLOAD%>"/>     
+ <permission id="<%=Permission.CUSTOMER_UPLOAD%>"/>
+ <permission id="<%=Permission.CUSTOMER_UPLOAD_VIA_WEBSERVICE%>"/>
   <% } %>
  <permission id="<%=Permission.CONNECT_TO_CVS%>"/>
  <permission id="<%=Permission.CVS_OPERATE%>"/>
  <permission id="<%=Permission.RSS_READER%>"/>
+ <permission id="<%=Permission.CREATE_JOB%>"/>
 </category>
 <category id="lb_job_scope">
   <permission id="<%=Permission.JOB_SCOPE_ALL%>"/>
@@ -353,7 +365,8 @@
       <% } %>
       <permission id="<%=Permission.JOBS_CHANGE_WFM%>"/>
       <permission id="<%=Permission.JOBS_DISCARD%>"/>
-      <permission id="<%=Permission.UPDATE_WORD_COUNTS%>"/>
+      <permission id="<%=Permission.JOB_UPDATE_LEVERAGE%>"/>
+      <permission id="<%=Permission.JOB_UPDATE_WORD_COUNTS%>"/>
       <permission id="<%=Permission.JOBS_DISPATCH%>"/>
       <% if (b_addDelete) { %>
       <permission id="<%=Permission.JOBS_EXPORT_SOURCE%>"/>
@@ -433,10 +446,11 @@
   <permission id="<%=Permission.ACTIVITIES_VIEW%>">
       <permission id="<%=Permission.ACTIVITIES_ACCEPT%>"/>
       <permission id="<%=Permission.ACTIVITIES_ACCEPT_ALL%>"/>
-      <permission id="<%=Permission.UPDATE_LEVERAGE%>"/>
+      <permission id="<%=Permission.ACTIVITIES_UPDATE_LEVERAGE%>"/>
       <permission id="<%=Permission.ACTIVITIES_BATCH_COMPLETE_ACTIVITY%>"/>
       <permission id="<%=Permission.ACTIVITIES_BATCH_COMPLETE_WORKFLOW%>"/>
       <permission id="<%=Permission.ACTIVITIES_DOWNLOAD_ALL%>"/>
+      <permission id="<%="activities.download.combined"%>"/>
       <permission id="<%=Permission.ACTIVITIES_REJECT_BEFORE_ACCEPTING%>"/>
       <permission id="<%=Permission.ACTIVITIES_REJECT_AFTER_ACCEPTING%>"/>
       <permission id="<%=Permission.ACTIVITIES_EXPORT%>"/>
@@ -464,7 +478,10 @@
       <permission id="<%=Permission.ACTIVITIES_DETAIL_STATISTICS%>"/>
       <permission id="<%=Permission.ACTIVITIES_SUMMARY_STATISTICS%>"/>      
       <permission id="<%=Permission.ACTIVITIES_SECONDARYTARGETFILE%>"/>
+      <permission id="<%=Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY%>"/>
   </permission>
+  <permission id="<%=Permission.ACTIVITIES_TM_SEARCH%>"/>
+  <permission id="<%=Permission.ACTIVITIES_TB_SEARCH%>"/>
   <permission id="<%=Permission.SOURCE_PAGE_EDIT%>"/>
   <permission id="<%=Permission.COMMENT_ACCESS_RESTRICTED%>"/>
 </category>
@@ -498,6 +515,7 @@
     </permission>
     <permission id="<%=Permission.REPORTS_DELL_VENDOR_PO%>"/>
     <permission id="<%=Permission.REPORTS_DELL_REVIEWER_VENDOR_PO%>"/>
+    <permission id="<%=Permission.REPORTS_SUMMARY%>"/>
   </category>
   <permission id="<%=Permission.REPORTS_SLA%>"/>
   <permission id="<%=Permission.REPORTS_TRANSLATION_PROGRESS%>"/>

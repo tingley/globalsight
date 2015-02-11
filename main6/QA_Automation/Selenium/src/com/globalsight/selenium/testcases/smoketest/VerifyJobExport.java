@@ -3,22 +3,14 @@ package com.globalsight.selenium.testcases.smoketest;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
 import com.globalsight.selenium.functions.BasicFuncs;
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.JobDetails;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.pages.MyJobs;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
 import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreateJobs;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreatedJob;
 
 /*
  * TestCaseName: VerifyJobExport.java
@@ -30,51 +22,42 @@ import com.thoughtworks.selenium.Selenium;
  * 2011-6-30  First Version  Jester
  */
 
-public class VerifyJobExport extends BaseTestCase{
-	/*
-	 * Common Variables.
-	 */
-	private Selenium selenium;
-	BasicFuncs iBasicFuncs = new BasicFuncs();
-	CreateJobs c = new CreateJobs();
-  @Test
-  public void verifyJobExport() throws Exception {
-		selenium.click(MainFrame.MyJobs_MENU);
-		selenium.click(MainFrame.InProgress_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+public class VerifyJobExport extends BaseTestCase
+{
+    /*
+     * Common Variables.
+     */
+    BasicFuncs basicFuncs = new BasicFuncs();
+    CreateJobs createJobs = new CreateJobs();
 
-		selenium.click("link="+ConfigUtil.getDataInCase(c.getClassName(), "jobName1"));
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    @Test
+    public void verifyJobExport() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.MY_JOBS_MENU,
+                MainFrame.MY_JOBS_INPROGRESS_SUBMENU);
 
-		iBasicFuncs.selectRadioButtonFromTable(selenium,
-				JobDetails.Workflows_TABLE,
-				ConfigUtil.getDataInCase(getClassName(), "WORKFLOW"));
-		
-		selenium.click(JobDetails.Export_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		
-		selenium.click(JobDetails.Export_BUTTON_EXPORT);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	  
-  }
-  @BeforeMethod
-  public void beforeMethod() {
-	  CommonFuncs.loginSystemWithPM(selenium);
-  }
+        String jobName = ConfigUtil.getDataInCase(createJobs.getClassName(),
+                "jobName1");
+        jobName = CreatedJob.getCreatedJobName(jobName);
+        clickAndWait(selenium, "link=" + jobName);
 
-  @AfterMethod
-  public void afterMethod() {
-	  CommonFuncs.logoutSystem(selenium);
-  }
+        basicFuncs.selectRadioButtonFromTable(selenium,
+                JobDetails.WORKFLOWS_TABLE, getDataInCase("workflow"));
 
-  @BeforeTest
-  public void beforeTest() {
-	  selenium=CommonFuncs.initSelenium();
-  }
+        clickAndWait(selenium, JobDetails.EXPORT_BUTTON);
 
-  @AfterTest
-  public void afterTest() {
-	  CommonFuncs.endSelenium(selenium);
-  }
+        clickAndWait(selenium, JobDetails.EXPORT_BUTTON);
+    }
 
+    @BeforeMethod
+    public void beforeMethod()
+    {
+        CommonFuncs.loginSystemWithPM(selenium);
+    }
+
+    @AfterMethod
+    public void afterMethod()
+    {
+        CommonFuncs.logoutSystem(selenium);
+    }
 }

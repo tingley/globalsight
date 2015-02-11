@@ -186,13 +186,11 @@ function getLocId(buttonClicked)
 <!-- Layer for scrolling table -->
 <DIV class="list">
     <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="600" STYLE="table-layout: fixed;">
-        <TBODY>
             <COL WIDTH=20>  <!-- Radio button -->
             <COL WIDTH=100> <!-- Name -->
             <COL WIDTH=200> <!-- Export Location -->
             <COL WIDTH=200> <!-- Description -->
             <COL WIDTH=80>  <!-- Default -->
-        </TBODY>
             <TR CLASS="tableHeadingBasic">
                 <TD HEIGHT="20">&nbsp;</TD>
                 <TD HEIGHT="20"><A CLASS="sortHREFWhite" HREF="<%=baseURL + "&" + ExportLocationPageHandler.SORT_PARAM + "=" + ExportLocationComparator.NAME%>">

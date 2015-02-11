@@ -1,0 +1,214 @@
+.maintable {
+	width:100%;
+	border-color:black;
+	border-left-style:solid;
+}
+.titletext {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:10pt;
+	text-align:left;
+}
+.footertext {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px;
+	text-align:left;
+	padding-left:10px;
+}
+.text {
+	width:100%;
+	height:23px;
+	border:solid 1px #0C1476;
+	font-family: Arial;
+	bottom:0px;
+	font-size:10pt;
+	padding-left:4px;
+}
+.textarea {
+	width:100%;
+	height:48px;
+	border:solid #0C1476 1px;
+	padding-left:4;
+	padding-right:4;
+	padding-top:1;
+	padding-bottom:1;
+	font-family: Arial;
+	font-size:10pt;
+	resize:none;
+}
+.filearea {
+	width:86%;
+	height:23px;
+	border:solid 1px #0C1476;
+	font-family: Arial;
+	bottom:0px;
+	font-size:10pt;
+}
+.select {
+	width:134px;
+	border:solid #0C1476 1px;
+	padding-left:4;
+	padding-right:4;
+	padding-top:1;
+	padding-bottom:1;
+	font: 10pt Verdana, Geneva, sans-serif;
+}
+.locale {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	padding-top:5px;
+	padding-bottom:5px;
+}
+.fileQueue {
+	height:267px;
+	position:absolute;
+	top:109px;
+	overflow:scroll;
+	overflow-x:hidden;
+	border-top:1px groove #CCCCCC;
+	border-bottom:1px groove #CCCCCC;
+}
+.attachment_div {
+	float:left;
+	position:absolute;
+	height:25px;
+	line-height:25px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overFlow:ellipsis;
+}
+.uploadifyQueueItem {
+	background-color: #F5F5F5;
+	border: 2px solid #E5E5E5;
+	font: 11px Verdana, Geneva, sans-serif;
+	margin-top: 2px;
+	width: 100%;
+	height:25px;
+	z-index:12;
+}
+.uploadifyError {
+	background-color: #FDE5DD !important;
+	border: 1px solid #FBCBBC !important;
+}
+.uploadifyProgress {
+	background-color: #E5E5E5;
+	width: 100%;
+	cursor:pointer;
+	height:25px;
+}
+.uploadifyProgress .fileInfo {
+	position:absolute;
+	z-index:13;
+	width:290px;
+	height:25px;
+	line-height: 25px;
+	white-space:nowrap;
+	overflow:hidden;
+	text-overFlow:ellipsis;
+}
+.uploadifyProgress .detail {
+	position:absolute;
+	z-index:13;
+	width:35px;
+	height:25px;
+	left:47%;
+	font:9px Verdana, Geneva, sans-serif;
+	line-height:25px;
+}
+.tip_cj {
+	line-height: 25px;
+	position:relative;
+	background-color:white;
+	z-index:200;
+	font: 11px Verdana, Geneva, sans-serif;
+	word-wrap:break-word;
+	word-break:break-all;
+}
+.uploadifyProgress .status {
+	position:absolute;
+	z-index:13;
+	width:53px;
+	height:25px;
+	line-height: 25px;
+	text-align:center;
+	left:40%;
+}
+.uploadifyProgress .filesize {
+	position:absolute;
+	width:53px;
+	z-index:13;
+	height:25px;
+	line-height: 25px;
+	left:53%;
+	padding-left:5px;
+}
+.uploadifyProgress .icon {
+	position:absolute;
+	z-index:13;
+	width:25px;
+	height:25px;
+	line-height: 25px;
+	left:65%;
+}
+.uploadifyProgress .profile {
+	position:absolute;
+	z-index:13;
+	width:100px;
+	height:25px;
+	left:72%;
+}
+.uploadifyProgress .cancel {
+	position:absolute;
+	z-index:13;
+	height:25px;
+	left:96%;
+}
+.uploadifyProgress .uploadifyProgressBar {
+	height: 25px;
+	width: 0px;
+	z-index:11;
+	filter:alpha(opacity=50);
+	opacity: .5;
+	-moz-opacity:0.5;
+	background-color: #0099FF;
+}
+
+.uploadifyProgress .uploadifyProgressBarDone {
+	height: 25px;
+	width: 0px;
+	z-index:11;
+	filter:alpha(opacity=50);
+	opacity: .5;
+	-moz-opacity:0.5;
+	background-color: gray;
+}
+
+.standardBtn_mouseout {
+	border: #738eb5 1px solid;
+	padding-top: 2px; 
+	padding-right: 2px; 
+	padding-left: 2px; 
+	padding-bottom: 4px; 
+	font-size: 12px; 
+	filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffffff, EndColorStr=#738eb5);
+	background: -moz-linear-gradient(top, #ffffff, #738eb5);
+	background: -webkit-linear-gradient(top, #ffffff, #738eb5);
+	cursor: pointer; 
+	height:25px;
+}
+
+.standardBtn_mouseover {
+	border: #f16222 1px solid;
+	padding-top: 2px; 
+	padding-right: 2px; 
+	padding-left: 2px; 
+	padding-bottom: 4px; 
+	font-size: 12px; 
+	filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffffff, EndColorStr=#f16222);
+	background: -moz-linear-gradient(top, #ffffff, #f16222);
+	background: -webkit-linear-gradient(top, #ffffff, #f16222);
+	cursor: pointer; 
+	height:25px;
+	-webkit-box-shadow:1px 1px 3px #292929;
+	-moz-box-shadow:1px 1px 3px #292929;
+	box-shadow:1px 1px 3px #292929;
+}

@@ -9,7 +9,7 @@
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.permission.Permission,
          com.globalsight.everest.servlet.util.SessionManager,
-         com.globalsight.everest.servlet.util.ServerProxy,
+         com.globalsight.everest.company.CompanyWrapper,
          java.util.ArrayList, java.util.Locale, java.util.ResourceBundle" 
          session="true" %>
 
@@ -121,7 +121,7 @@ function submitForm(button)
                 <% if (isSuperAdmin) { %>
                 <amb:column label="lb_company_name" width="120"
                      sortBy="<%=CurrencyComparator.ASC_COMPANY%>">
-                    <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(currency.getCompanyId())).getCompanyName()%>
+                    <%=CompanyWrapper.getCompanyNameById(currency.getCompanyId())%>
                 </amb:column>
                 <% } %>
               </amb:table>

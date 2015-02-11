@@ -24,6 +24,7 @@ import com.globalsight.everest.edit.offline.download.DownloadParams;
 import com.globalsight.everest.edit.offline.OfflineEditManager;
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.util.system.SystemStartupException;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.util.progress.IProcessStatusListener;
 
@@ -36,7 +37,7 @@ import java.io.File;
  */
 public final class OfflineEditManagerWLImpl
     extends RemoteServer
-    implements OfflineEditManagerWLRemote
+    implements OfflineEditManagerWLRemote, Cancelable
 {
     private OfflineEditManager m_localInstance = null;
 
@@ -154,5 +155,15 @@ public final class OfflineEditManagerWLImpl
 	public void runProcessDownloadRequest(DownloadParams downloadParams)
 			throws OfflineEditorManagerException, RemoteException {
 		m_localInstance.runProcessDownloadRequest(downloadParams);
+	}
+
+	@Override
+	public void cancel() 
+	{
+		if (m_localInstance instanceof Cancelable) 
+		{
+			Cancelable cancel = (Cancelable) m_localInstance;
+			cancel.cancel();
+		}
 	}
 }

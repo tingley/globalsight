@@ -16,32 +16,17 @@
  */
 package com.globalsight.everest.foundation;
 
-/*
- * Copyright (c) 2000 GlobalSight Corporation. All rights reserved.
- *
- * THIS DOCUMENT CONTAINS TRADE SECRET DATA WHICH IS THE PROPERTY OF 
- * GLOBALSIGHT CORPORATION. THIS DOCUMENT IS SUBMITTED TO RECIPIENT
- * IN CONFIDENCE. INFORMATION CONTAINED HEREIN MAY NOT BE USED, COPIED
- * OR DISCLOSED IN WHOLE OR IN PART EXCEPT AS PERMITTED BY WRITTEN
- * AGREEMENT SIGNED BY AN OFFICER OF GLOBALSIGHT CORPORATION.
- *
- * THIS MATERIAL IS ALSO COPYRIGHTED AS AN UNPUBLISHED WORK UNDER
- * SECTIONS 104 AND 408 OF TITLE 17 OF THE UNITED STATES CODE.
- * UNAUTHORIZED USE, COPYING OR OTHER REPRODUCTION IS PROHIBITED
- * BY LAW.
- */
-
 // Core Java classes
 import java.sql.Timestamp;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.util.GlobalSightLocale;
+
 /**
  * This class provides factory methods to create a localization profile. 
  * 
  */
-
 public class L10nProfileFactory
 {
     /**
@@ -64,7 +49,7 @@ public class L10nProfileFactory
         {
             basicProfile.setProject(p_l10nProfile.getProject());
         }
-        basicProfile.setTMChoice(p_l10nProfile.getTMChoice());
+        basicProfile.setTmChoice(p_l10nProfile.getTmChoice());
         basicProfile.setDescription(p_l10nProfile.getDescription());
         basicProfile.setCompanyId(CompanyThreadLocal.getInstance().getValue());
         basicProfile.setSourceLocale(p_l10nProfile.getSourceLocale());
@@ -82,8 +67,9 @@ public class L10nProfileFactory
         }
         return basicProfile;
     }
-    public static BasicL10nProfile makeDuplicateL10nProfile(L10nProfile p_l10nProfile,
-                                                            GlobalSightLocale p_gsl)
+    
+    public static BasicL10nProfile makeDuplicateL10nProfile(
+            L10nProfile p_l10nProfile, GlobalSightLocale p_gsl)
     {
         BasicL10nProfile duplicateProfile = new BasicL10nProfile();
         duplicateProfile.setName(p_l10nProfile.getName());
@@ -97,7 +83,7 @@ public class L10nProfileFactory
         duplicateProfile.setDescription(p_l10nProfile.getDescription());
         duplicateProfile.setCompanyId(CompanyThreadLocal.getInstance().getValue());
         duplicateProfile.setSourceLocale(p_gsl);
-        duplicateProfile.setTMChoice(p_l10nProfile.getTMChoice());
+        duplicateProfile.setTmChoice(p_l10nProfile.getTmChoice());
         duplicateProfile.setDispatchCriteria(p_l10nProfile.getDispatchCriteria());
         duplicateProfile.setExactMatchEditing(p_l10nProfile.isExactMatchEditing());
         duplicateProfile.setRunScriptAtJobCreation(p_l10nProfile.runScriptAtJobCreation());

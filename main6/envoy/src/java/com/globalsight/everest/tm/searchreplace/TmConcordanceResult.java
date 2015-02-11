@@ -22,24 +22,19 @@ import com.globalsight.ling.tm2.TuQueryResult;
 import com.globalsight.util.GlobalSightLocale;
 
 import java.io.Serializable;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class TmConcordanceResult
-    implements Serializable
+public class TmConcordanceResult implements Serializable
 {
     private GlobalSightLocale m_sourceLocale;
     private ArrayList<GlobalSightLocale> m_targetLocales;
     private ArrayList<Long> m_allLocaleIds = new ArrayList<Long>();
     private Map<Long, String> tmIdName = null;
     private TuQueryResult m_result;
-    //
-    // Constructor
-    //
 
     public TmConcordanceResult(GlobalSightLocale p_sourceLocale,
         ArrayList p_targetLocales, TuQueryResult p_result)
@@ -82,18 +77,18 @@ public class TmConcordanceResult
     /**
      * Returns a list of SegmentTmTus.  
      */
-    public List<SegmentTmTu> getTus(Connection conn)
+    public List<SegmentTmTu> getTus()
     {
-        return m_result.getPageResults(conn);
+        return m_result.getPageResults();
     }
     
     /**
      * Returns a list of SegmentTmTus, sorted using the provided
      * comparator.
      */
-    public List<SegmentTmTu> getTus(Connection conn, Comparator<SegmentTmTu> comparator)
+    public List<SegmentTmTu> getTus(Comparator<SegmentTmTu> comparator)
     {
-        List<SegmentTmTu> l = getTus(conn);
+        List<SegmentTmTu> l = getTus();
         Collections.sort(l, comparator);
         return l;
     }

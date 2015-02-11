@@ -61,7 +61,8 @@ wrapper.console.format=PM
 wrapper.console.loglevel=INFO
 
 # Log file to use for wrapper output logging.
-wrapper.logfile=%%GS_HOME%%/logs/JBoss_GlobalSight.log
+wrapper.logfile=%%GS_HOME%%/logs/JBoss_GlobalSight.log.YYYYMMDD
+wrapper.logfile.rollmode=DATE
 
 # Format of output for the log file.  (See docs for formats)
 wrapper.logfile.format=LPTM

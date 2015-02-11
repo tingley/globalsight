@@ -34,6 +34,9 @@ public interface CompanyConstants {
     public static final String DEPENDENCIES = "dependencies";
     public static final String EDIT = "edit";
     public static final String REMOVE = "remove";
+    public static final String CONVERT = "convert";
+    public static final String GET_MIGRATE_PROCESSING = "getMigrateProcessing";
+    public static final String SEARCH = "search";
 
     // fields
     public static final String NAME = "nameField";
@@ -46,5 +49,8 @@ public interface CompanyConstants {
     public static final String ENABLE_SSO_LOGON = "enableSsoLogonField";
     public static final String SSO_IDP_URL = "ssoIdpUrlField";
     public static final String TM3_VERSION = "tm3version";
+    public static final String ENABLE_SEPARATED_TABLES = "enableSeparatedTables";
     
+    public static final String FILTER_NAME = "companyNameFilter";
+    public static final String FILTER_DESCRIPTION = "companyDescriptionFilter";
 }

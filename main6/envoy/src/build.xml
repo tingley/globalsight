@@ -4,11 +4,15 @@
 	<property name="cap.javaSrcBase" value="${cap.srcBase}/java" />
 	<property name="cap.serverclassesDest" value="${serverclassesDest}" />
 	<property name="cap.graphicalWfJar" value="${appletLib}/graphicalWf.jar" />
+	<property name="cap.createJobJar" value="${appletLib}/createJob.jar" />
+	<property name="cap.webServiceClientJar" value="${appletLib}/webServiceClient.jar" />
 	<property name="cap.customerJar" value="${appletLib}/customer.jar" />
 	<property name="cap.dbProfileJar" value="${appletLib}/dbProfile.jar" />
+	<property name="cap.createJobClasses" value="com/globalsight/everest" />
 	<property name="cap.UiWorkflowClasses" value="com/globalsight/everest" />
 	<property name="cap.UiWorkflowMisc" value="com/globalsight/util" />
 	<property name="cap.UiWorkflowLing" value="com/globalsight/ling" />
+	<property name="cap.webServiceClientClasses" value="com/globalsight/webservices/client2" />
 
 	<target name="prepare">
 		<copy tofile="${cap.serverclassesDest}/com/globalsight/resources/messages/LocaleResource.properties" file="${cap.javaSrcBase}/com/globalsight/resources/messages/LocaleResource_en_US.properties" />
@@ -96,6 +100,7 @@
 				<include name="dojo/**/*" />
 				<include name="dojox/**/*" />
 				<include name="dijit/**/*" />
+				<include name="jquery/**/*" />
 				<include name="images/**/*" />
 				<include name="reports/**/*" />
 			</fileset>
@@ -195,6 +200,24 @@
 		</jar>
 		<signjar keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" lazy="true" jar="${cap.customerJar}" />
 	</target>
+	
+	<target name="createJobJar">
+		<echo message="***** Building Create Job jar file *****" />
+		<mkdir dir="${appletLib}" />
+		<jar update="true" duplicate="preserve" filesonly="true" jarfile="${cap.createJobJar}">
+			<fileset dir="${cap.serverclassesDest}" includes="${cap.createJobClasses}/webapp/applet/createjob/*.class"/>
+		</jar>
+		<signjar keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" lazy="true" jar="${cap.createJobJar}" />
+	</target>
+
+	<target name="webServiceClientJar">
+		<echo message="***** Building Webservice Client jar file *****" />
+		<mkdir dir="${appletLib}" />
+		<jar update="true" duplicate="preserve" filesonly="true" jarfile="${cap.webServiceClientJar}">
+			<fileset dir="${cap.serverclassesDest}" includes="${cap.webServiceClientClasses}/*.class"/>
+		</jar>
+		<signjar keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" lazy="true" jar="${cap.webServiceClientJar}" />
+	</target>
 
 	<target name="dbProfileJar">
 		<echo message="***** Building DB Column Profile jar file *****" />
@@ -216,15 +239,19 @@
 			<fileset dir="${commonJarLib}">
 				<include name="ant.jar" />
 				<include name="commons-httpclient-3.0-rc2.jar" />
+				<include name="commons-codec-1.3.jar" />
 			</fileset>
-            <fileset dir="../j2eeVendor/jboss/jboss_server/lib">
+                        <fileset dir="../j2eeVendor/jboss/jboss_server/lib">
 			            <include name="commons-logging.jar" />
 			</fileset>
-		    <fileset dir="${commonJarLib}">
-						<include name="commons-codec-1.3.jar" />
+			<fileset dir="${apacheAxisJarLib}">
+				<include name="axis.jar" />
+				<include name="commons-discovery.jar" />
+				<include name="jaxrpc.jar" />
+				<include name="wsdl4j.jar" />
 			</fileset>
 		</signjar>
 	</target>
 
-	<target name="build_all" depends="prepare, graphicalWfJar, customerJar, dbProfileJar, sign_jars" />
+	<target name="build_all" depends="prepare, graphicalWfJar, customerJar, dbProfileJar, sign_jars, createJobJar, webServiceClientJar" />
 </project>

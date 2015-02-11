@@ -279,7 +279,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
       <param-value>ServletExecuteQueue</param-value>
     </init-param>
   </servlet>
-
+  
 	<!-- begin Reports Configuration -->
 	  <servlet>
 	    <servlet-name>TranswareReports</servlet-name>
@@ -320,7 +320,6 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
       <param-value>Welocalize GlobalSight Reports</param-value>
     </init-param>
   </servlet>
-  
   
   <servlet-mapping>
     <servlet-name>ReportsAdmin</servlet-name>

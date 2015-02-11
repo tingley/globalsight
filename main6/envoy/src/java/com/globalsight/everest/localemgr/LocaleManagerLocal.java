@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.localemgr;
 
-// toplink
 import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -30,7 +29,6 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -60,7 +58,8 @@ import com.globalsight.util.GlobalSightLocale;
  * <p>
  * Manages all the locales available for the application and for the users to
  * translate from/to
- * </p>.
+ * </p>
+ * .
  */
 public class LocaleManagerLocal implements LocaleManager
 {
@@ -86,10 +85,10 @@ public class LocaleManagerLocal implements LocaleManager
     public GlobalSightLocale addLocale(GlobalSightLocale p_locale)
             throws LocaleManagerException, RemoteException
     {
-    	String language = p_locale.getLanguage();
-    	String country = p_locale.getCountry();
-    	addLanguage(language);
-    	addCountry(country);
+        String language = p_locale.getLanguage();
+        String country = p_locale.getCountry();
+        addLanguage(language);
+        addCountry(country);
         Session session = null;
         Transaction transaction = null;
 
@@ -125,7 +124,8 @@ public class LocaleManagerLocal implements LocaleManager
             }
 
             CATEGORY.error("Failed to add locale " + p_locale.toString(), e);
-            String args[] = { p_locale.toString() };
+            String args[] =
+            { p_locale.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_ADD_LOCALE, args, e);
         }
@@ -141,32 +141,34 @@ public class LocaleManagerLocal implements LocaleManager
 
     /**
      * Add a country to database if it doesn't exist.
-     * @param country the country name to be added.
+     * 
+     * @param country
+     *            the country name to be added.
      */
     private void addCountry(String country)
-	{
+    {
         Connection c = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
 
         try
         {
-			c = ConnectionPool.getConnection();
-			ps = c
-					.prepareStatement("select * from country where ISO_COUNTRY_CODE = ?");
-			ps.setString(1, country);
-			rs = ps.executeQuery();
-			if (!rs.next())
-			{
-				ps = c.prepareStatement("insert into country values (?)");
-				ps.setString(1, country);
-				ps.executeUpdate();
-			}
+            c = ConnectionPool.getConnection();
+            ps = c.prepareStatement("select * from country where ISO_COUNTRY_CODE = ?");
+            ps.setString(1, country);
+            rs = ps.executeQuery();
+            if (!rs.next())
+            {
+                ps = c.prepareStatement("insert into country values (?)");
+                ps.setString(1, country);
+                ps.executeUpdate();
+            }
 
         }
         catch (Exception ex)
         {
-            throw new LocaleManagerException("Failed to add country " + country, null, ex);
+            throw new LocaleManagerException(
+                    "Failed to add country " + country, null, ex);
         }
         finally
         {
@@ -175,14 +177,15 @@ public class LocaleManagerLocal implements LocaleManager
             ConnectionPool.silentReturnConnection(c);
         }
 
-	}
+    }
 
-	/**
-	 * Add a language to database if it doesn't exist.
-	 * @param language
-	 */
-	private void addLanguage(String language)
-	{
+    /**
+     * Add a language to database if it doesn't exist.
+     * 
+     * @param language
+     */
+    private void addLanguage(String language)
+    {
         Connection c = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -192,18 +195,19 @@ public class LocaleManagerLocal implements LocaleManager
             c = ConnectionPool.getConnection();
             ps = c.prepareStatement("select * from language where ISO_LANG_CODE = ?");
             ps.setString(1, language);
-			rs = ps.executeQuery();
-			if (!rs.next())
-			{
-				ps = c.prepareStatement("insert into language values (?)");
-				ps.setString(1, language);
-				ps.executeUpdate();
-			}
+            rs = ps.executeQuery();
+            if (!rs.next())
+            {
+                ps = c.prepareStatement("insert into language values (?)");
+                ps.setString(1, language);
+                ps.executeUpdate();
+            }
 
         }
         catch (Exception ex)
         {
-            throw new LocaleManagerException("Failed to add language " + language, null, ex);
+            throw new LocaleManagerException("Failed to add language "
+                    + language, null, ex);
         }
         finally
         {
@@ -211,9 +215,9 @@ public class LocaleManagerLocal implements LocaleManager
             ConnectionPool.silentClose(ps);
             ConnectionPool.silentReturnConnection(c);
         }
-	}
+    }
 
-	/**
+    /**
      * Get all the available locales supported by the system.
      * <p>
      * 
@@ -303,7 +307,8 @@ public class LocaleManagerLocal implements LocaleManager
         catch (Exception pe)
         {
             CATEGORY.error("Failed to get Locale by Id " + p_id, pe);
-            String messageArgs[] = { String.valueOf(p_id) };
+            String messageArgs[] =
+            { String.valueOf(p_id) };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_GET_LOCALE,
                     messageArgs, pe);
@@ -360,9 +365,10 @@ public class LocaleManagerLocal implements LocaleManager
             {
                 locale = (GlobalSightLocale) locales.get(0);
             }
-            else {
+            else
+            {
                 // In the database, the special new locale (he, yi, id) can be
-                // storied as old locale (iw, ji, in). 
+                // storied as old locale (iw, ji, in).
                 map.put("language", handleSpecialLocales(language));
 
                 locales = HibernateUtil.search(hql, map);
@@ -376,7 +382,8 @@ public class LocaleManagerLocal implements LocaleManager
         {
             CATEGORY.error("Failed to get locale by string " + p_localeString,
                     pe);
-            String messageArgs[] = { p_localeString };
+            String messageArgs[] =
+            { p_localeString };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_GET_LOCALE,
                     messageArgs, pe);
@@ -386,13 +393,13 @@ public class LocaleManagerLocal implements LocaleManager
     }
 
     /**
-     * Returns a string representation of the object.
-     * Converts any old iso language codes and the
-     * new codes.  
+     * Returns a string representation of the object. Converts any old iso
+     * language codes and the new codes.
+     * 
      * @return a string representation of the object.
      */
-    private String handleSpecialLocales (String language)
-    {       
+    private String handleSpecialLocales(String language)
+    {
         if ("he".equals(language))
         {
             language = "iw";
@@ -422,7 +429,7 @@ public class LocaleManagerLocal implements LocaleManager
         {
             language = "id";
             return language;
-        } 
+        }
         return language;
     }
 
@@ -485,7 +492,8 @@ public class LocaleManagerLocal implements LocaleManager
 
             CATEGORY.error("Failed to add a locale pair" + p_source.toString()
                     + " : " + p_target.toString(), e);
-            String args[] = { p_source.toString(), p_target.toString() };
+            String args[] =
+            { p_source.toString(), p_target.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_ADD_LOCALE_PAIR, args,
                     e);
@@ -521,9 +529,10 @@ public class LocaleManagerLocal implements LocaleManager
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to remove locale pair "
-                    + p_thePair.toString(), e);
-            String args[] = { p_thePair.getSource().toString(),
+            CATEGORY.error(
+                    "Failed to remove locale pair " + p_thePair.toString(), e);
+            String args[] =
+            { p_thePair.getSource().toString(),
                     p_thePair.getTarget().toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_REMOVE_LOCALE_PAIR,
@@ -761,6 +770,94 @@ public class LocaleManagerLocal implements LocaleManager
 
         return localePair;
     }
+    
+    /**
+     * Get a locale pair object based on the given source, target string (ie.
+     * en_US, fr_FR_), and a company ID.
+     * 
+     * @return A LocalePair object (the source/target locale pair)
+     * @exception LocaleManagerException
+     *                Specifies the error, probably persistence exception
+     * @exception RemoteException
+     *                System or network related exception
+     */
+    public LocalePair getLocalePairBySourceTargetAndCompanyStrings(
+            String p_sourceLocaleString, String p_targetLocaleString,
+            long companyId) throws LocaleManagerException, RemoteException
+    {
+        if (p_sourceLocaleString == null || p_sourceLocaleString.length() <= 1
+                || p_targetLocaleString == null
+                || p_targetLocaleString.length() <= 1)
+        {
+            return null;
+        }
+        LocalePair localePair = null;
+
+        // source
+        StringTokenizer srcTokenizer = new StringTokenizer(
+                p_sourceLocaleString, SEPARATOR);
+
+        // should at least be 2 (ll_cc) or at most 3 (ll_cc_vv)
+        String language = srcTokenizer.nextToken();
+        String country = "";
+
+        if (p_sourceLocaleString.length() > 3)
+        {
+            country = srcTokenizer.nextToken();
+        }
+
+        HashMap map = new HashMap();
+        map.put("sLanguage", language);
+        map.put("sCountry", country);
+
+        // target
+        StringTokenizer trgTokenizer = new StringTokenizer(
+                p_targetLocaleString, SEPARATOR);
+        language = trgTokenizer.nextToken();
+        country = "";
+
+        if (p_targetLocaleString.length() > 3)
+        {
+            country = trgTokenizer.nextToken();
+        }
+
+        map.put("tLanguage", language);
+        map.put("tCountry", country);
+
+        try
+        {
+            StringBuffer hql = new StringBuffer();
+            hql.append("from LocalePair lp where lp.isActive = 'Y'")
+                    .append(" and lp.source.language = :sLanguage ")
+                    .append(" and lp.source.country = :sCountry ")
+                    .append(" and lp.target.language = :tLanguage ")
+                    .append(" and lp.target.country = :tCountry");
+
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+            {
+                hql.append(" and lp.companyId = :companyId");
+                map.put("companyId", companyId);
+            }
+
+            List localePairs = HibernateUtil.search(hql.toString(), map);
+            if (localePairs != null && localePairs.size() > 0)
+            {
+                localePair = (LocalePair) localePairs.get(0);
+            }
+        }
+        catch (Exception e)
+        {
+            String[] errorArgs = new String[2];
+            errorArgs[0] = p_sourceLocaleString;
+            errorArgs[1] = p_targetLocaleString;
+
+            throw new LocaleManagerException(
+                    LocaleManagerException.MSG_FAILED_TO_GET_LOCALE_PAIR_BY_SRC_TRGT_STRINGS,
+                    errorArgs, e);
+        }
+
+        return localePair;
+    }
 
     /**
      * Get a locale pair object based on the given source and target string (ie.
@@ -819,11 +916,11 @@ public class LocaleManagerLocal implements LocaleManager
         try
         {
             StringBuffer hql = new StringBuffer();
-            hql.append("from LocalePair lp where lp.isActive = 'Y'").append(
-                    " and lp.source.language = :sLanguage ").append(
-                    " and lp.source.country = :sCountry ").append(
-                    " and lp.target.language = :tLanguage ").append(
-                    " and lp.target.country = :tCountry");
+            hql.append("from LocalePair lp where lp.isActive = 'Y'")
+                    .append(" and lp.source.language = :sLanguage ")
+                    .append(" and lp.source.country = :sCountry ")
+                    .append(" and lp.target.language = :tLanguage ")
+                    .append(" and lp.target.country = :tCountry");
 
             String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
@@ -871,9 +968,9 @@ public class LocaleManagerLocal implements LocaleManager
         try
         {
             StringBuffer hql = new StringBuffer();
-            hql.append("select distinct lp.target from LocalePair lp ").append(
-                    " where lp.isActive = 'Y' and lp.source.id = :sId").append(
-                    " and lp.companyId = :companyId");
+            hql.append("select distinct lp.target from LocalePair lp ")
+                    .append(" where lp.isActive = 'Y' and lp.source.id = :sId")
+                    .append(" and lp.companyId = :companyId");
 
             HashMap map = new HashMap();
             map.put("sId", p_sourceLocale.getIdAsLong());
@@ -885,7 +982,8 @@ public class LocaleManagerLocal implements LocaleManager
         {
             CATEGORY.error("Failed to get all target locales associated with "
                     + "source locale " + p_sourceLocale.toString(), pe);
-            String args[] = { p_sourceLocale.toString() };
+            String args[] =
+            { p_sourceLocale.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_GET_TARGET_LOCALES_BY_SOURCE,
                     args, pe);
@@ -930,7 +1028,8 @@ public class LocaleManagerLocal implements LocaleManager
         {
             CATEGORY.error("Failed to get all target locales associated with "
                     + "source locale " + p_sourceLocale.toString(), pe);
-            String args[] = { p_sourceLocale.toString() };
+            String args[] =
+            { p_sourceLocale.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_GET_TARGET_LOCALES_BY_SOURCE,
                     args, pe);
@@ -950,14 +1049,15 @@ public class LocaleManagerLocal implements LocaleManager
      * @exception RemoteException
      *                System or network related exception
      */
-    public Vector getTargetLocalesByProject(GlobalSightLocale p_sourceLocale, String p_project)
-            throws LocaleManagerException, RemoteException
+    public Vector getTargetLocalesByProject(GlobalSightLocale p_sourceLocale,
+            String p_project) throws LocaleManagerException, RemoteException
     {
         try
         {
             StringBuffer hql = new StringBuffer();
-            hql.append("select distinct lp.target from LocalePair lp, WorkflowTemplateInfo wf, ProjectImpl pj ").append(
-                    " where lp.target=wf.targetLocale and wf.project=pj.id and lp.isActive ='Y' and wf.isActive='Y' and lp.source.id = :sId and pj.id= :pId");
+            hql.append(
+                    "select distinct lp.target from LocalePair lp, WorkflowTemplateInfo wf, ProjectImpl pj ")
+                    .append(" where lp.target=wf.targetLocale and wf.project=pj.id and lp.isActive ='Y' and wf.isActive='Y' and lp.source.id = :sId and pj.id= :pId");
 
             HashMap map = new HashMap();
             map.put("sId", p_sourceLocale.getIdAsLong());
@@ -976,7 +1076,8 @@ public class LocaleManagerLocal implements LocaleManager
         {
             CATEGORY.error("Failed to get all target locales associated with "
                     + "source locale " + p_sourceLocale.toString(), pe);
-            String args[] = { p_sourceLocale.toString() };
+            String args[] =
+            { p_sourceLocale.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_GET_TARGET_LOCALES_BY_SOURCE,
                     args, pe);
@@ -1077,7 +1178,8 @@ public class LocaleManagerLocal implements LocaleManager
         }
         catch (Exception ex)
         {
-            String args[] = { String.valueOf(p_localeId) };
+            String args[] =
+            { String.valueOf(p_localeId) };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_GET_CODE_SETS_BY_LOCALE,
                     args, ex);
@@ -1126,7 +1228,8 @@ public class LocaleManagerLocal implements LocaleManager
         catch (UserManagerException ume)
         {
             CATEGORY.error("Failed to add role " + role.toString(), ume);
-            String args[] = { role.toString() };
+            String args[] =
+            { role.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_ADD_ROLE, args, ume);
 
@@ -1174,7 +1277,8 @@ public class LocaleManagerLocal implements LocaleManager
                         // remove the rates (deactive) that are associated with
                         // the role
                         // and then remove the roles.
-                        // The rates are stored in database and the roles in LDAP,
+                        // The rates are stored in database and the roles in
+                        // LDAP,
                         // so the
                         // dependancy between then must be kept in the code and
                         // not in the DB.
@@ -1209,7 +1313,8 @@ public class LocaleManagerLocal implements LocaleManager
         catch (UserManagerException ume)
         {
             CATEGORY.error("Failed to remove role " + curRole.toString(), ume);
-            String args[] = { curRole.toString() };
+            String args[] =
+            { curRole.toString() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_REMOVE_ROLE, args, ume);
         }
@@ -1218,7 +1323,8 @@ public class LocaleManagerLocal implements LocaleManager
             CATEGORY.error("Failed to remove the rates for role "
                     + curRole.getName());
             // tbd
-            String msgArgs[] = { curRole.getName() };
+            String msgArgs[] =
+            { curRole.getName() };
             throw new LocaleManagerException(
                     LocaleManagerException.MSG_FAILED_TO_DELETE_RATES, msgArgs,
                     ce);

@@ -1,8 +1,8 @@
-Package: DesktopIcon
+Package: desktopicon
 Priority: extra
 Section: Office
 Installed-Size: 7764
-Maintainer: GlobalSight
+Maintainer: GlobalSight <WelocalizeAdmin@domain.com>
 Architecture: i386
 Version: %version%
 Depends: 

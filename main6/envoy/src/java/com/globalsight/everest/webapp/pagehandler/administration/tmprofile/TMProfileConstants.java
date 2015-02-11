@@ -131,6 +131,9 @@ public interface TMProfileConstants
      */
     public static final String SAVE_MT_OPTIONS_ACTION = "saveMTOptions";
     public static final String CANCEL_MT_OPTIONS_ACTION = "cancelMTOptions";
+    
+    public static final String SEARCH_ACTION = "search";
+
     //////////////////////////////////////////////////////////////////////
     //  End: Action Parameters
     //////////////////////////////////////////////////////////////////////
@@ -156,9 +159,9 @@ public interface TMProfileConstants
      * The four parameters were in envoy.properties and system_parameter table,
      * now are integrated with TM profile.
      */
-    public static final String MT_OVERRIDE_MATCHES="machineTranslation.overrideNonExactMatches";
+    public static final String MT_USE_MT="machineTranslation.useMT";
     public static final String MT_ENGINE = "machineTranslation.engine";
-    public static final String MT_AUTOCOMMIT_TO_TM = "machineTranslation.autoCommitToTM";
+//    public static final String MT_AUTOCOMMIT_TO_TM = "machineTranslation.autoCommitToTM";
     public static final String MT_SHOW_IN_EDITOR = "machineTranslation.showInEditor";
     
     public static final String MT_PTSURL = "ptsurl";
@@ -173,17 +176,30 @@ public interface TMProfileConstants
     
     public static final String MT_MS_URL = "ms_mt_url";
     public static final String MT_MS_APPID = "ms_mt_appid";
+    public static final String MT_MS_CLIENT_ID = "ms_mt_client_id";
+    public static final String MT_MS_CLIENT_SECRET = "ms_mt_client_secret";
+    public static final String MT_MS_ACCESS_TOKEN = "ms_mt_access_token";
+    public static final String MT_MS_GRANT_TYPE = "client_credentials";
+    public static final String MT_MS_SCOPE = "http://api.microsofttranslator.com";
+    public static final String MT_MS_GET_ACCESS_TOKEN_URL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
     public static final String MT_MS_CATEGORY = "ms_mt_category";
     public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
     public static final String MT_MS_URL_FLAG_INTERNAL = "0";
     public static final String MT_MS_URL_FLAG_PUBLIC = "1";
+    public static final int MT_MS_MAX_CHARACTER_NUM = 1000;
     
     public static final String MT_AO_URL = "ao_mt_url";
     public static final String MT_AO_PORT = "ao_mt_port";
     public static final String MT_AO_USERNAME = "ao_mt_username";
     public static final String MT_AO_PASSWORD = "ao_mt_password";
     public static final String MT_AO_ACCOUNT_NUMBER = "ao_mt_account_number";
-     
+    
+    public static final String MT_SAFA_HOST = "safa_mt_host";
+    public static final String MT_SAFA_PORT = "safa_mt_port";
+    public static final String MT_SAFA_COMPANY_NAME = "safa_mt_company_name";
+    public static final String MT_SAFA_PASSWORD = "safa_mt_password";
+    public static final String MT_SAFA_CLIENT = "safaba_client";
+    
     /**
      * Currently 'Google' and "Promt" engines can be used.
      */
@@ -198,4 +214,8 @@ public interface TMProfileConstants
      * For TM accessing control
      */
     public static final String TM_ENABLE_ACCESS_CONTROL = "enableTMAccessControl";
+    
+    public static final String FILTER_NAME = "tmProfileNameFilter";
+    public static final String FILTER_STORAGE_TM = "tmProfileStorageTmFilter";
+    public static final String FILTER_COMPANY_NAME = "tmProfileCompanyFilter";
 }

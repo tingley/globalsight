@@ -571,7 +571,7 @@ class DedicatedTuStorage<T extends TM3Data>  extends TuStorage<T> {
               .append("TM3_EVENTS as event ")
               .append("WHERE tuv.lastEventId = event.id ")
               .append("AND tuv.localeId = ?").addValue(locale.getId())
-              .append("AND event.time >= ? AND event.time <= ? ")
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end)
               .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
               .addValues(startId, count);
@@ -579,7 +579,7 @@ class DedicatedTuStorage<T extends TM3Data>  extends TuStorage<T> {
         else {
             sb.append("SELECT DISTINCT tuId FROM ")
               .append(getStorage().getTuvTableName())
-              .append(" WHERE localeId = ? AND tuId > ? ORDER BY id ASC LIMIT ?")
+              .append(" WHERE localeId = ? AND tuId > ? ORDER BY tuId ASC LIMIT ?")
               .addValues(locale.getId(), startId, count);
         }
         return getTu(SQLUtil.execIdsQuery(getConnection(), sb), false);

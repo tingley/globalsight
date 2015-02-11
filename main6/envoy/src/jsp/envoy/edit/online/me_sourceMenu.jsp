@@ -52,6 +52,26 @@ boolean isTeamsiteSource = false;
 Object vpdfobj = sessionMgr.getAttribute("src_view_pdf");
 boolean viewPdf = vpdfobj == null ? false : true;
 
+String msgPreviewNotInstalled = "";
+if (!hasPreview)
+{
+   String keyPreviewNotInstalled = EditUtil.warnPreviewNotInstalled(pageFormat);
+   if (keyPreviewNotInstalled.length() > 0)
+   {
+       msgPreviewNotInstalled = bundle.getString(keyPreviewNotInstalled);
+   }
+}
+
+String msgPdfPreviewNotInstalled = "";
+if (!hasPDFPreview)
+{
+   String keyPdfPreviewNotInstalled = EditUtil.warnPdfPreviewNotInstalled(state);
+   if (keyPdfPreviewNotInstalled.length() > 0)
+   {
+       msgPdfPreviewNotInstalled = bundle.getString(keyPdfPreviewNotInstalled);
+   }
+}
+
 String dataSource = pageInfo.getDataSourceType();
 String pageName = pageInfo.getPageName();
 String pageNamePath = pageName.replaceAll("\\\\","/");
@@ -169,6 +189,11 @@ function highlight(element)
     highlightedElement = element;
 }
 
+function warnPreviewNoInstalled(msg)
+{   
+    alert(msg);
+}
+
 function showList()
 {
     window.parent.showList();
@@ -193,7 +218,7 @@ function showPreview()
     catch(e)
     {
     }
-    window.parent.showPreviewPage('<%=pageNamePath%>');
+    window.parent.showPreviewPage2('<%=pageNamePath%>', '<%=state.getSourceLocale()%>', '<%=state.getSourcePageId()%>');
     <% } %>
     highlight(idPreview);
 }
@@ -255,9 +280,15 @@ function doOnload()
 <%if(hasPDFPreview){ %>
  <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
       onfocus="this.blur();"><%=lb_pdf_preview%></A> |
-<%}%>
+<% } else if (msgPdfPreviewNotInstalled.length() > 0) {%>
+     <A CLASS="HREFBoldWhite" HREF="javascript:warnPreviewNoInstalled('<%=msgPdfPreviewNotInstalled%>')"
+      onfocus="this.blur();"><%=lb_pdf_preview%></A> |
+ <% } %>
 <% if (hasPreview) { %>
       <A id="idPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()"
+      onfocus="this.blur();"><%=lb_preview%></A> |
+<% } else if (msgPreviewNotInstalled.length() > 0) {%>
+     <A CLASS="HREFBoldWhite" HREF="javascript:warnPreviewNoInstalled('<%=msgPreviewNotInstalled%>')"
       onfocus="this.blur();"><%=lb_preview%></A> |
 <% } %>
 <% if (hasDynamicPreview) { %>

@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -59,14 +61,25 @@ import com.globalsight.util.StringUtil;
  */
 public class WorkflowJbpmUtil
 {
-    private static final Logger s_logger =
-            Logger.getLogger(WorkflowJbpmUtil.class.getName());
+    private static final Logger s_logger = Logger
+            .getLogger(WorkflowJbpmUtil.class.getName());
 
     private static final int ERROR_CODE = -1;
 
-    private static final String TASK_NODE_REG = "node_\\d{1,}_";
-    
+    private static final String TASK_NODE_REG = "node_(\\d{1,})_";
+
     private static final String TASK_REG = "task_";
+
+    public static int getNodeIndex(String name)
+    {
+        Pattern p = Pattern.compile(TASK_NODE_REG);
+        Matcher m = p.matcher(name);
+        if (m.find())
+        {
+            return Integer.parseInt(m.group(1));
+        }
+        return -1;
+    }
 
     /**
      * Gets the type of the node. <br>
@@ -262,7 +275,7 @@ public class WorkflowJbpmUtil
      *            task/activity type(new/accept/complete)
      * @return ativityName(arrowName)
      */
-    public static String getActivityNameWithArrowName(Node p_node, 
+    public static String getActivityNameWithArrowName(Node p_node,
             String p_suffix, ProcessInstance p_pi, String p_type)
     {
         if (p_node == null)
@@ -273,7 +286,7 @@ public class WorkflowJbpmUtil
         String result = getTaskName(p_node.getName());
         result = StringUtil.delSuffix(result, p_suffix);
         Set<Transition> trans = p_node.getArrivingTransitions();
-        if (trans == null) 
+        if (trans == null)
         {
             return result;
         }
@@ -289,7 +302,7 @@ public class WorkflowJbpmUtil
             {
                 return result;
             }
-            
+
             String tiName = getActivityName(ti.getName());
             for (Transition tTran : trans)
             {
@@ -310,9 +323,8 @@ public class WorkflowJbpmUtil
                     {
                         node1 = ((Transition) tNode.getArrivingTransitions()
                                 .iterator().next()).getFrom();
-                    }
-                    while (!isActivityNode(node1));
-                    
+                    } while (!isActivityNode(node1));
+
                     if (tiName.equals(getTaskName(node1.getName())))
                     {
                         arrTrans = tTran;
@@ -332,7 +344,7 @@ public class WorkflowJbpmUtil
         }
         return result.trim();
     }
-    
+
     /**
      * Get the last TaskInstance.
      * 
@@ -341,16 +353,18 @@ public class WorkflowJbpmUtil
      *            task/activity type(new/accept/complete)
      * @return
      */
-    public static TaskInstance getLastTaskInstance(ProcessInstance p_pi, 
+    public static TaskInstance getLastTaskInstance(ProcessInstance p_pi,
             String p_type)
     {
-        Collection<TaskInstance> tiSet = p_pi.getTaskMgmtInstance().getTaskInstances();
+        Collection<TaskInstance> tiSet = p_pi.getTaskMgmtInstance()
+                .getTaskInstances();
         int len = tiSet.size();
-        if (len == 1 || (WorkflowConstants.TASK_TYPE_COM.equals(p_type) && len == 2))
+        if (len == 1
+                || (WorkflowConstants.TASK_TYPE_COM.equals(p_type) && len == 2))
         {
             return new TaskInstance("Start");
         }
-        
+
         List<TaskInstance> tiList = new ArrayList<TaskInstance>(tiSet);
         Collections.sort(tiList, new java.util.Comparator<TaskInstance>()
         {
@@ -375,7 +389,7 @@ public class WorkflowJbpmUtil
                 }
             }
         });
-        
+
         if (WorkflowConstants.TASK_TYPE_COM.equals(p_type) && len > 2)
         {
             return tiList.get(2);
@@ -385,7 +399,7 @@ public class WorkflowJbpmUtil
             return tiList.get(1);
         }
     }
-    
+
     /**
      * Gets the task name by the node name.
      * 
@@ -459,13 +473,19 @@ public class WorkflowJbpmUtil
      */
     public static ProcessDefinition getProcessDefinition(long p_id)
     {
-        JbpmContext context = WorkflowConfiguration.getInstance()
-                .getJbpmContext();
-        ProcessDefinition pd = context.getGraphSession().getProcessDefinition(
-                p_id);
-        context.close();
-        return pd;
+        JbpmContext context = null;
+        ProcessDefinition pd = null;
+        try
+        {
+        	context = WorkflowConfiguration.getInstance().getJbpmContext();
+            pd = context.getGraphSession().getProcessDefinition(p_id);
+        }
+        finally
+        {
+            context.close();
+        }
 
+        return pd;
     }
 
     /**
@@ -507,8 +527,7 @@ public class WorkflowJbpmUtil
         }
         catch (SecurityException e)
         {
-            s_logger
-                    .error("The Security check is on, you cannot set the assessible ");
+            s_logger.error("The Security check is on, you cannot set the assessible ");
             s_logger.error("error in security check ", e);
         }
         catch (IllegalArgumentException e)
@@ -546,8 +565,7 @@ public class WorkflowJbpmUtil
         }
         catch (SecurityException e)
         {
-            s_logger
-                    .error("The Security check is on, you cannot set the assessible ");
+            s_logger.error("The Security check is on, you cannot set the assessible ");
             s_logger.error("error in security check ", e);
         }
         catch (IllegalArgumentException e)
@@ -580,8 +598,7 @@ public class WorkflowJbpmUtil
         }
         catch (SecurityException e)
         {
-            s_logger
-                    .error("The Security check is on, you cannot set the assessible ");
+            s_logger.error("The Security check is on, you cannot set the assessible ");
             s_logger.error("error in security check ", e);
         }
         catch (NoSuchFieldException e)
@@ -679,9 +696,8 @@ public class WorkflowJbpmUtil
         }
 
         /* No id found, should never be here */
-        s_logger
-                .error("There is no node found from the processdefinition, the id of the node is "
-                        + p_id);
+        s_logger.error("There is no node found from the processdefinition, the id of the node is "
+                + p_id);
         return null;
 
     }
@@ -925,13 +941,13 @@ public class WorkflowJbpmUtil
 
         return delegation;
     }
-    
+
     public static List<Long> getRejectedTaskIds(List<TaskInstance> tasks,
             String p_userId)
     {
         JbpmContext ctx = WorkflowConfiguration.getInstance()
-        .getCurrentContext();
-        
+                .getCurrentContext();
+
         List<Long> allIds = new ArrayList<Long>();
         if (tasks == null || tasks.size() == 0)
         {
@@ -961,12 +977,12 @@ public class WorkflowJbpmUtil
         List<Long> ids = new ArrayList<Long>();
         for (Object id : query.list())
         {
-            //id is BigInteger
+            // id is BigInteger
             ids.add(Long.parseLong(id.toString()));
         }
         return ids;
     }
-    
+
     public static int getStateFromTaskInstance(TaskInstance p_ti,
             String p_userId, int p_taskState)
     {
@@ -982,7 +998,7 @@ public class WorkflowJbpmUtil
 
         return rejectTaskIds.indexOf(ti.getId()) > -1;
     }
-    
+
     /**
      * Gets the state from task instance.
      * 
@@ -1031,15 +1047,15 @@ public class WorkflowJbpmUtil
         else
         {
             /* for the non pm user */
-            boolean isRejected = isUserRejected(
-                    ctx, p_userId, p_ti, rejectTaskIds);
-            
+            boolean isRejected = isUserRejected(ctx, p_userId, p_ti,
+                    rejectTaskIds);
+
             if (isRejected)
             {
-              //fix for GBS-1470
-                boolean isRejectedForReassign = WorkflowJbpmPersistenceHandler.isUserRejectedForReassign(
-                        ctx, p_userId, p_ti);
-                
+                // fix for GBS-1470
+                boolean isRejectedForReassign = WorkflowJbpmPersistenceHandler
+                        .isUserRejectedForReassign(ctx, p_userId, p_ti);
+
                 if (!isRejectedForReassign)
                 {
                     return state;
@@ -1076,7 +1092,8 @@ public class WorkflowJbpmUtil
     public static void updateAssignees(TaskInstance p_ti, String p_userId,
             WorkflowNodeParameter p_param)
     {
-        String[] pm = { p_param.getAttribute(WorkflowConstants.FIELD_PM) };
+        String[] pm =
+        { p_param.getAttribute(WorkflowConstants.FIELD_PM) };
         String actorId = p_ti.getActorId();
         if (actorId != null && p_userId.equals(actorId))
         {
@@ -1131,7 +1148,7 @@ public class WorkflowJbpmUtil
      *            the id of the task.
      * @return assignees.
      */
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public static List<String> getAssignees(long taskId)
     {
         List<String> assignees = new ArrayList<String>();
@@ -1141,12 +1158,12 @@ public class WorkflowJbpmUtil
             TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
                     .getTaskInstance(taskId, ctx);
 
-            //Adds pm
+            // Adds pm
             if (taskInstance.getDescription() != null)
             {
                 assignees.add(taskInstance.getDescription());
             }
-            
+
             if (taskInstance.getActorId() != null)
             {
                 assignees.add(taskInstance.getActorId());
@@ -1165,8 +1182,8 @@ public class WorkflowJbpmUtil
 
         return assignees;
     }
-	
-	/**
+
+    /**
      * Gets the assignees in the task instance.
      * 
      * @param p_ti
@@ -1208,9 +1225,9 @@ public class WorkflowJbpmUtil
      * Gets the state of the <code>TaskInstance</code> by the given node. <br>
      * Only three state will be retrevied from this method :
      * <ul>
-     * <li> {@code WorkflowConstants#STATE_INITIAL} </li>
-     * <li> {@code WorkflowConstants#STATE_RUNNING} </li>
-     * <li> {@code WorkflowConstants#STATE_COMPLETED} </li>
+     * <li> {@code WorkflowConstants#STATE_INITIAL}</li>
+     * <li> {@code WorkflowConstants#STATE_RUNNING}</li>
+     * <li> {@code WorkflowConstants#STATE_COMPLETED}</li>
      * </ul>
      * 
      * @param p_processInstance

@@ -15,7 +15,6 @@
 // 
 
 using System.Collections.Generic;
-using System.ServiceProcess;
 using System.Threading;
 using System.Text;
 using System.IO;
@@ -30,6 +29,7 @@ namespace GlobalSight.InDesignConverter
     /// </summary>
     public class InDesignConverterImpl : Converter
     {
+        private static object locker = new object();
         private Logger m_log = null;
 
         // Constants
@@ -92,56 +92,59 @@ namespace GlobalSight.InDesignConverter
         /// the file was written in</param>
         public void Convert(string p_fileName, string p_language)
         {
-            try
+            lock (locker)
             {
-                ResetState();
-                m_statusFileName = p_fileName.Substring(
-                    0, p_fileName.Length - FILE_EXT_LEN) + "status";
-                DetermineConversionValues(p_fileName);
+                try
+                {
+                    ResetState();
+                    m_statusFileName = p_fileName.Substring(
+                        0, p_fileName.Length - FILE_EXT_LEN) + "status";
+                    DetermineConversionValues(p_fileName);
 
-                m_log.Log("[Indesign]: The converter will process file: " + m_originalFileName);
-                m_log.Log("m_masterTranslated: " + m_masterTranslated);
-                m_log.Log("m_translateHiddenLayer: " + m_translateHiddenLayer + "\r\n");
+                    m_log.Log("[Indesign]: The converter will process file: " + m_originalFileName);
+                    m_log.Log("m_masterTranslated: " + m_masterTranslated);
+                    m_log.Log("m_translateHiddenLayer: " + m_translateHiddenLayer);
 
-                InDesignApplication indesignApp = InDesignApplication.getInstance();
-                if (m_conversionType == ConversionType.EXPORT)
-                {
-                    indesignApp.ConvertXmlToIndd(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
-                }
-                else if (m_conversionType == ConversionType.PREVIEW)
-                {
-                    //The status name will be changed to *.pv_status from *.status
-                    //when execute the preview command(*.pv_command) file
-                    m_statusFileName = m_statusFileName.Substring(0, 
-                                m_statusFileName.LastIndexOf(".")) + ".pv_status";
-                    indesignApp.ConvertInddToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
-                }
-                else
-                {
-                    try
+                    InDesignApplication indesignApp = InDesignApplication.getInstance();
+                    if (m_conversionType == ConversionType.EXPORT)
                     {
-                        indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                        indesignApp.ConvertXmlToIndd(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
                     }
-                    catch (Exception iee)
+                    else if (m_conversionType == ConversionType.PREVIEW)
                     {
-                        m_log.Log("Exception occurred, retry conversion for file : " + m_originalFileName);
-                        indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                        //The status name will be changed to *.pv_status from *.status
+                        //when execute the preview command(*.pv_command) file
+                        m_statusFileName = m_statusFileName.Substring(0,
+                                    m_statusFileName.LastIndexOf(".")) + ".pv_status";
+                        indesignApp.ConvertInddToPDF(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
                     }
+                    else
+                    {
+                        try
+                        {
+                            indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                        }
+                        catch (Exception iee)
+                        {
+                            m_log.Log("Exception occurred, retry conversion for file : " + m_originalFileName);
+                            indesignApp.ConvertInddToXml(m_originalFileName, m_newFileName, m_masterTranslated, m_translateHiddenLayer);
+                        }
+                    }
+
+                    StatusFile.WriteSuccessStatus(m_statusFileName,
+                        m_originalFileName + " was converted successfully.");
+
+                    m_log.Log("[Indesign]: Converted successfully to: " + m_newFileName);
                 }
-
-                StatusFile.WriteSuccessStatus(m_statusFileName,
-                    m_originalFileName + " was converted successfully.");
-
-                m_log.Log("[Indesign]: Converted successfully to: " + m_newFileName);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
-                StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
-            }
-            finally
-            {
-                DeleteInputFile(p_fileName);
+                catch (Exception e)
+                {
+                    Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
+                    StatusFile.WriteErrorStatus(m_statusFileName, e, (int)1);
+                }
+                finally
+                {
+                    DeleteInputFile(p_fileName);
+                }
             }
         }
 

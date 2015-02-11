@@ -93,7 +93,7 @@ public class GxmlReaderPool extends ObjectPool
         }
         catch (GxmlException ge)
         {
-            CATEGORY.error(ge);
+            CATEGORY.error(ge.getMessage(), ge);
         }   
         return null;       
     } 

@@ -86,7 +86,7 @@ public class PropertiesInternalText
                 }
                 catch (Exception e)
                 {
-                    s_logger.error(e);
+                    s_logger.error(e.getMessage(), e);
                 }
             }
         }
@@ -130,7 +130,7 @@ public class PropertiesInternalText
         }
         catch (JSONException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         
 

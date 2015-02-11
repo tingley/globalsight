@@ -16,21 +16,20 @@
  */
 package com.globalsight.ling.inprogresstm.leverage;
 
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.BaseTmTuv;
+import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.leverage.LeveragedTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTuv;
 import com.globalsight.ling.tm2.leverage.MatchState;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
- * LeveragedInProgressTuv is a class that represents a leveraged
- * segment from in-progress Tm.
+ * LeveragedInProgressTuv is a class that represents a leveraged segment from
+ * in-progress Tm.
  */
 
-public class LeveragedInProgressTuv
-    extends SegmentTmTuv
-    implements LeveragedTuv
+public class LeveragedInProgressTuv extends SegmentTmTuv implements
+        LeveragedTuv
 {
     private MatchState m_state = null;
     private float m_score = 0.0f;
@@ -39,84 +38,84 @@ public class LeveragedInProgressTuv
     // id of translation_unit for this segment
     private long m_jobDataTuId = 0;
     private String orgSid = null;
-    
+
     /**
      * Constructor.
-     * @param p_id id
-     * @param p_segment segment string
-     * @param p_locale GlobalSightLocale
+     * 
+     * @param p_id
+     *            id
+     * @param p_segment
+     *            segment string
+     * @param p_locale
+     *            GlobalSightLocale
      */
-    public LeveragedInProgressTuv(long p_id,
-        String p_segment, GlobalSightLocale p_locale)
+    public LeveragedInProgressTuv(long p_id, String p_segment,
+            GlobalSightLocale p_locale)
     {
         super(p_id, p_segment, p_locale);
     }
 
-
     public BaseTmTuv getSourceTuv()
     {
-        GlobalSightLocale source = ((LeveragedTu)getTu()).getSourceLocale();
+        GlobalSightLocale source = ((LeveragedTu) getTu()).getSourceLocale();
         return getTu().getFirstTuv(source);
     }
-    
 
     public MatchState getMatchState()
     {
-        return m_state == null
-            ? ((LeveragedTu)getTu()).getMatchState() : m_state;
+        return m_state == null ? ((LeveragedTu) getTu()).getMatchState()
+                : m_state;
     }
-    
-    
+
     public void setMatchState(MatchState p_state)
     {
         m_state = p_state;
     }
-    
-    
+
     public float getScore()
     {
-        return m_score == 0.0 ? ((LeveragedTu)getTu()).getScore() : m_score;
+        return m_score == 0.0 ? ((LeveragedTu) getTu()).getScore() : m_score;
     }
-    
-    
+
     public void setScore(float p_score)
     {
         m_score = p_score;
     }
-    
+
     public int getOrder()
     {
         return m_order;
     }
-    
-    
+
     public void setOrder(int p_order)
     {
         m_order = p_order;
     }
 
-
     public void setJobDataTuId(long p_jobDataTuId)
     {
         m_jobDataTuId = p_jobDataTuId;
     }
-    
+
     public long getJobDataTuId()
     {
         return m_jobDataTuId;
     }
 
-
-    public String getOrgSid()
+    public String getOrgSid(String companyId)
     {
         return orgSid;
     }
-
 
     public void setOrgSid(String orgSid)
     {
         this.orgSid = orgSid;
     }
-    
+
+    @Override
+    public String getOrgSid()
+    {
+        return getOrgSid(null);
+    }
 
 }

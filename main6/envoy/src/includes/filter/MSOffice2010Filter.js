@@ -6,13 +6,21 @@ function MSOffice2010Filter()
 	
 	this.paragraphStyles = "unextractableWordParagraphStyles";
 	this.characterStyles = "unextractableWordCharacterStyles";
+	this.excelCellStyles = "unextractableExcelCellStyles";
+	this.internalTextStyles = "selectedInternalTextStyles";
 	
 	this.defaultUnextractableWordParagraphStyles = "DONOTTRANSLATE_para,tw4winExternal";
 	this.defaultUnextractableWordCharacterStyles = "DONOTTRANSLATE_char,tw4winInternal";
+	this.defaultUnextractableExcelCellStyles = "tw4winExternal";
+
+	this.defaultUnextractableWordCharacterStyles = "DONOTTRANSLATE_char,tw4winExternal";
+	this.defaultSelectedInternalTextStyles = "tw4winInternal";
 	
 	this.selectTagsMap = new Object();
 	this.selectTagsMap[this.paragraphStyles] = this.defaultUnextractableWordParagraphStyles;
 	this.selectTagsMap[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
+	this.selectTagsMap[this.excelCellStyles] = this.defaultUnextractableExcelCellStyles;
+	this.selectTagsMap[this.internalTextStyles] = this.defaultSelectedInternalTextStyles;
 	
     this.currentOption = "unextractableWordParagraphStyles";
     this.currentPage = 1;
@@ -22,6 +30,8 @@ function MSOffice2010Filter()
 	this.allSelectTagsOption = new Array();	
 	this.allSelectTagsOption[this.paragraphStyles] = this.defaultUnextractableWordParagraphStyles;
     this.allSelectTagsOption[this.characterStyles] = this.defaultUnextractableWordCharacterStyles;
+    this.allSelectTagsOption[this.excelCellStyles] = this.defaultUnextractableExcelCellStyles;
+    this.allSelectTagsOption[this.internalTextStyles] = this.defaultSelectedInternalTextStyles;
 }
 
 MSOffice2010Filter.prototype.setFilter = function (filter)
@@ -31,6 +41,9 @@ MSOffice2010Filter.prototype.setFilter = function (filter)
 	this.optionMap = new Object();
 	this.optionMap[this.paragraphStyles] = jsUnextractableWordParagraphStyles;
     this.optionMap[this.characterStyles] = jsUnextractableWordCharacterStyles;
+    this.optionMap[this.excelCellStyles] = jsUnextractableExcelCellStyles;
+    this.optionMap[this.internalTextStyles] = jsWordInternalTextCharacterStyles;
+
 }
 
 MSOffice2010Filter.prototype.showStyleSelectBox = function(isDisabled) {
@@ -41,23 +54,25 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 {
 	msoffice2010DocFilter.selectTagsMap[this.paragraphStyles] = this.filter.unextractableWordParagraphStyles;
 	msoffice2010DocFilter.selectTagsMap[this.characterStyles] = this.filter.unextractableWordCharacterStyles;
+	msoffice2010DocFilter.selectTagsMap[this.excelCellStyles] = this.filter.unextractableExcelCellStyles;
+	msoffice2010DocFilter.selectTagsMap[this.internalTextStyles] = this.filter.selectedInternalTextStyles;
 	msoffice2010DocFilter.allSelectTagsOption[this.paragraphStyles] = this.filter.allParagraphStyles;
 	msoffice2010DocFilter.allSelectTagsOption[this.characterStyles] = this.filter.allCharacterStyles;
+	msoffice2010DocFilter.allSelectTagsOption[this.excelCellStyles] = this.filter.allExcelCellStyles;
+	msoffice2010DocFilter.allSelectTagsOption[this.internalTextStyles] = this.filter.allInternalTextStyles;
 	
 	msoffice2010DocFilter.init();
 	
 	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label>");
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' id='o2010FilterName' value='" + this.filter.filterName + "' disabled>");
+	str.append("<input type='text' style='width:340px' maxlength='"+maxFilterNameLength+"' id='o2010FilterName' value='" + this.filter.filterName + "' disabled>");
 	str.append("<br/>");
 	str.append("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
 	str.append("</label>");
 	str.append("<textarea rows='3' style='width:340px' id='o2010FilterDesc' name='desc' value='"+this.filter.filterDescription+"'>"+this.filter.filterDescription+"</textarea>");
 	str.append("<br/>");
-	var isCheckHeaderTranslate = (this.filter.headerTranslate) ? "checked":"";
-	var isCheckMasterTranslate = (this.filter.masterTranslate) ? "checked":"";
 	
 	str.append("<table border=0 width='408px'>");
 	
@@ -68,19 +83,109 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("</td>");
 	str.append("</tr>");
 	
+	var isChecked = (this.filter.headerTranslate) ? "checked":"";
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransHeader + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
-	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='"+this.filter.headerTranslate+"' "+isCheckHeaderTranslate+"/>");
+	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='"+this.filter.headerTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.notesTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTNotes + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='notesTranslate' type='checkbox' name='notesTranslate' value='"+this.filter.notesTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.masterTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransMaster + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='masterTranslate' type='checkbox' name='masterTranslate' value='"+this.filter.masterTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.pptlayoutTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTLayout + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='pptlayoutTranslate' type='checkbox' name='pptlayoutTranslate' value='"+this.filter.pptlayoutTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.notemasterTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTNoteMaster + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='notemasterTranslate' type='checkbox' name='notemasterTranslate' value='"+this.filter.notemasterTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.handoutmasterTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTHandoutMaster + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='handoutmasterTranslate' type='checkbox' name='handoutmasterTranslate' value='"+this.filter.handoutmasterTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.excelTabNamesTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractExcelTabNames + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='excelTabNamesTranslate' type='checkbox' name='excelTabNamesTranslate' value='"+this.filter.excelTabNamesTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.hiddenTextTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractHiddenText + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='hiddenTextTranslate' type='checkbox' name='hiddenTextTranslate' value='"+this.filter.hiddenTextTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.toolTipsTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractAlt + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='toolTipsTranslate' type='checkbox' name='toolTipsTranslate' value='"+this.filter.toolTipsTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.urlTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractUrl + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='urlTranslate' type='checkbox' name='urlTranslate' value='"+this.filter.urlTranslate+"' "+isChecked+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	isChecked = (this.filter.tableOfContentTranslate) ? "checked":"";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractToc + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='tableOfContentTranslate' type='checkbox' name='tableOfContentTranslate' value='"+this.filter.tableOfContentTranslate+"' "+isChecked+"/>");
 	str.append("</td>");
 	str.append("</tr>");
 	
 	str.append("<tr>");
-	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransMaster + "</td>");
-	str.append("<td class='htmlFilter_right_td'>");
-	str.append("<input id='masterTranslate' type='checkbox' name='masterTranslate' value='"+this.filter.masterTranslate+"' "+isCheckMasterTranslate+"/>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
 	str.append("</td>");
-	str.append("</tr>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(this.filter));
+	str.append("</td></tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName, this.filter));
+	str.append("</td></tr>");
 	
 	str.append("</table>");
 	str.append("<br/>");
@@ -95,6 +200,8 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("<select id='O2010UnextractableRule' onchange='msoffice2010DocFilter.switchTags(this)' class='specialFilter_dialog_label'>");
 	str.append("<option value='unextractableWordParagraphStyles'>" + jsO2010UnextractableWordParagraphStyles + "</option>");
 	str.append("<option value='unextractableWordCharacterStyles'>" + jsO2010UnextractableWordCharacterStyles + "</option>");
+    str.append("<option value='unextractableExcelCellStyles'>" + jsUnextractableExcelCellStyles + "</option>");
+	str.append("<option value='selectedInternalTextStyles'>" + jsWordInternalTextCharacterStyles + "</option>");
 	str.append("</select>");
 
 	str.append("</td><td nowrap align=right>");
@@ -103,6 +210,7 @@ MSOffice2010Filter.prototype.edit = function(filterId, color, specialFilters, to
 	str.append("<input type='button' value='" + jsAdd + "' onclick='msoffice2010DocFilter.onAdd()'>");
 	str.append("<input type='button' value='" + jsDelete + "' id='O2010DeleteButton' onclick='msoffice2010DocFilter.deleteTag()'>");
 	str.append("</td></tr></table>");
+	checkAll2010Styles = false;
 	
 	//str.append("<div><br>");
 	var tags = msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.currentOption].split(",");
@@ -149,10 +257,12 @@ MSOffice2010Filter.prototype.setPageValue = function()
 
 MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 {
+	var filter = getFilterById(topFilterId);
+	
 	var str = new StringBuffer("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterName + ":");
 	str.append("</label>");
-	str.append("<input type='text' maxlength='"+maxFilterNameLength+"' id='o2010FilterName' value='MSOffice2010Filter'>");
+	str.append("<input type='text' style='width:340px' maxlength='"+maxFilterNameLength+"' id='o2010FilterName' value='MSOffice2010Filter'>");
 	str.append("<br/>");
 	str.append("<label class='specialFilter_dialog_label'>");
 	str.append(jsFilterDesc + ":");
@@ -172,7 +282,14 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td' width='60%'>" + jsO2010TransHeader + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
-	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='true' class='specialFilter_dialog_label'/>");
+	str.append("<input id='headerTranslate' type='checkbox' name='headerTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTNotes + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='notesTranslate' type='checkbox' name='notesTranslate' value='false' class='specialFilter_dialog_label'/>");
 	str.append("</td>");
 	str.append("</tr>");
 	
@@ -182,6 +299,79 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<input id='masterTranslate' type='checkbox' name='masterTranslate' value='false' class='specialFilter_dialog_label'/>");
 	str.append("</td>");
 	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTLayout + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='pptlayoutTranslate' type='checkbox' name='pptlayoutTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTNoteMaster + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='notemasterTranslate' type='checkbox' name='notemasterTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractPPTHandoutMaster + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='handoutmasterTranslate' type='checkbox' name='handoutmasterTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractExcelTabNames + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='excelTabNamesTranslate' type='checkbox' name='excelTabNamesTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractHiddenText + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='hiddenTextTranslate' type='checkbox' name='hiddenTextTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractAlt + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='toolTipsTranslate' type='checkbox' name='toolTipsTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractUrl + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='urlTranslate' type='checkbox' name='urlTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td' width='60%'>" + lbExtractToc + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='tableOfContentTranslate' type='checkbox' name='tableOfContentTranslate' value='false' class='specialFilter_dialog_label'/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsContentPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(this.generateContentPostFilter(filter));
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>");
+	str.append(jsInternalTextPostFilter);
+	str.append("</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append(generateBaseFilterList(this.filterTableName));
+	str.append("</td></tr>");
 	
 	str.append("</table>");
 	str.append("<br/>");
@@ -196,6 +386,8 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<select id='O2010UnextractableRule' onchange='msoffice2010DocFilter.switchTags(this)' class='specialFilter_dialog_label'>");
 	str.append("<option value='unextractableWordParagraphStyles'>" + jsO2010UnextractableWordParagraphStyles + "</option>");
 	str.append("<option value='unextractableWordCharacterStyles'>" + jsO2010UnextractableWordCharacterStyles + "</option>");
+	str.append("<option value='unextractableExcelCellStyles'>" + jsUnextractableExcelCellStyles + "</option>");
+	str.append("<option value='selectedInternalTextStyles'>" + jsWordInternalTextCharacterStyles + "</option>");
 	str.append("</select>");
 
 	str.append("</td><td nowrap align=right>");
@@ -207,8 +399,13 @@ MSOffice2010Filter.prototype.generateDiv = function (topFilterId, color)
 
 	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles] = "";
 	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles] = "";
+	msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelCellStyles] = "";
+	msoffice2010DocFilter.selectTagsMap[officeDocFilter.internalTextStyles] = "";
 	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.paragraphStyles] = msoffice2010DocFilter.defaultUnextractableWordParagraphStyles;
 	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.characterStyles] = msoffice2010DocFilter.defaultUnextractableWordCharacterStyles;
+	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.excelCellStyles] = msoffice2010DocFilter.defaultUnextractableExcelCellStyles;
+	msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.internalTextStyles] = msoffice2010DocFilter.defaultSelectedInternalTextStyles;
+	checkAll2010Styles = false;
 	
 	msoffice2010DocFilter.init();
 	var tags = msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.currentOption].split(",");
@@ -301,7 +498,7 @@ MSOffice2010Filter.prototype.nextPage = function(tags)
 		{
 			msoffice2010DocFilter.currentPage --;
 			msoffice2010DocFilter.setPageValue();
-		}		
+		}
 
 	}
 	else
@@ -386,7 +583,9 @@ MSOffice2010Filter.prototype.addStyle = function()
 MSOffice2010Filter.prototype.setDeleteButtonStyle = function()
 {
 	var isDisabled = msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles].length == 0
-			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles].length == 0;
+			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles].length == 0
+			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.internalTextStyles].length == 0
+			&& msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelCellStyles].length == 0;
 
 	document.getElementById("O2010DeleteButton").disabled = isDisabled;
 }
@@ -400,6 +599,17 @@ MSOffice2010Filter.prototype.deleteTag = function()
 	}
 }
 
+//for gbs-2599
+MSOffice2010Filter.prototype.selectAll_MSOffice2010Filte = function()
+{
+	var selectAll = document.getElementById("selectAll_MSOffice2010Filte")
+	if(selectAll.checked) {
+		msoffice2010DocFilter.checkAllTagsToDelete();
+	} else {
+		msoffice2010DocFilter.clearAllTagsToDelete();
+	}
+}
+
 MSOffice2010Filter.prototype.generateDeleteTagTableContent = function()
 {
 	var str = new StringBuffer("<center><table cellpadding=0 cellspacing=0 border=0 width='540px' class='standardText'>");
@@ -408,6 +618,7 @@ MSOffice2010Filter.prototype.generateDeleteTagTableContent = function()
 	str.append("<Label class='tagName_td'>" + jsStyleType + "</Label>");
 	str.append("</td>");
 	str.append("<td width='400px'>");
+	str.append("<input type='checkbox' checked='true' id='selectAll_MSOffice2010Filte' onclick='msoffice2010DocFilter.selectAll_MSOffice2010Filte()'/>");//for gbs-2599
 	str.append("<Label class='tagName_td'>" + jsStylesToDeleted + "</Label>");
 	str.append("</td>");
 	str.append("<td width='22px'>");
@@ -467,6 +678,7 @@ MSOffice2010Filter.prototype.generateDeleteTagTableContent = function()
 		}
 	} 
 	str.append("</table></center>");
+	/*for gbs-2599
 	str.append("<a href='#' class='specialfilter_a' onclick='msoffice2010DocFilter.checkAllTagsToDelete()'>");
 	str.append(jsCheckAll);
 	str.append("</a>");
@@ -474,6 +686,7 @@ MSOffice2010Filter.prototype.generateDeleteTagTableContent = function()
     str.append("<a href='#' class='specialfilter_a' onclick='msoffice2010DocFilter.clearAllTagsToDelete()'>");
     str.append(jsClearAll);
     str.append("</a>");
+	*/
 	if(sum <= 0)
 	{
 		alert(noTagsToChoose);
@@ -494,6 +707,18 @@ MSOffice2010Filter.prototype.isCheckOrClearAll = function( checkOrClear )
     }
     
     checkBoxObjs = document.getElementsByName(msoffice2010DocFilter.characterStyles);
+    for(var j = 0; j < checkBoxObjs.length; j++)
+    {
+        checkBoxObjs[j].checked = checkOrClear;
+    }
+    
+    checkBoxObjs = document.getElementsByName(msoffice2010DocFilter.internalTextStyles);
+    for(var j = 0; j < checkBoxObjs.length; j++)
+    {
+        checkBoxObjs[j].checked = checkOrClear;
+    }
+    
+    checkBoxObjs = document.getElementsByName(msoffice2010DocFilter.excelCellStyles);
     for(var j = 0; j < checkBoxObjs.length; j++)
     {
         checkBoxObjs[j].checked = checkOrClear;
@@ -537,9 +762,13 @@ MSOffice2010Filter.prototype.deleteStyles = function()
 {
 	var paragraphStylesToDelete = document.getElementsByName(msoffice2010DocFilter.paragraphStyles);
 	var characterStylesToDelete = document.getElementsByName(msoffice2010DocFilter.characterStyles);
+	var internalTextStylesToDelete = document.getElementsByName(msoffice2010DocFilter.internalTextStyles);
+	var excelCellStylesToDelete = document.getElementsByName(msoffice2010DocFilter.excelCellStyles);
 		
 	msoffice2010DocFilter.buildTagsString(paragraphStylesToDelete);
 	msoffice2010DocFilter.buildTagsString(characterStylesToDelete);
+	msoffice2010DocFilter.buildTagsString(internalTextStylesToDelete);
+	msoffice2010DocFilter.buildTagsString(excelCellStylesToDelete);
 	
 	closePopupDialog('deleteO2010StyleDialog');
 }
@@ -597,9 +826,9 @@ MSOffice2010Filter.prototype.onDelete = function()
 	var styles = "";
 	for(var i = 0; i < tags.length; i++)
 	{
-		if(document.getElementById("styles_"+i))
+		if(document.getElementById("styles2010_"+i))
 		{
-			if (document.getElementById("styles_"+i).checked)
+			if (document.getElementById("styles2010_"+i).checked)
 			{
 				selected = true;
 			}
@@ -645,7 +874,7 @@ MSOffice2010Filter.prototype.switchTags = function(tagsSelectBox)
 		msoffice2010DocFilter.generateTotalEmptyTable();
 	}
 	msoffice2010DocFilter.setPageValue();
-	checkAllTags = false;
+	checkAll2010Styles = false;
 	
 	if (document.getElementById("o2010CheckAll"))
 	{
@@ -668,15 +897,15 @@ MSOffice2010Filter.prototype.checkAll = function(tags)
 	tags = msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.currentOption];
 	tags = tags.split(",");
 	var checkBoxObj = document.getElementById("o2010CheckAll");
-	checkAllTags = checkBoxObj.checked;
+	checkAll2010Styles = checkBoxObj.checked;
 	for(var i = 0; i < tags.length; i++)
 	{
-		if(document.getElementById("styles_"+i))
+		if(document.getElementById("styles2010_"+i))
 		{
-			document.getElementById("styles_"+i).checked = checkAllTags;	
+			document.getElementById("styles2010_"+i).checked = checkAll2010Styles;	
 		}
 		
-		if(checkAllTags)
+		if(checkAll2010Styles)
 		{
 			this.addThisTag(tags[i]);
 		}
@@ -735,7 +964,7 @@ MSOffice2010Filter.prototype.generateTableByPage = function(tags, currentPageNum
 	var totalpageNum = Math.floor((tags.length + 1) / msoffice2010DocFilter.tagsEveryPage) + 1;
 
 	var str = new StringBuffer("<tr class='htmlFilter_emptyTable_tr'>");
-	var check = checkAllTags ? "checked" : "";
+	var check = checkAll2010Styles ? "checked" : "";
 	str.append("<td width='5%'><input type='checkbox' onclick=msoffice2010DocFilter.checkAll('"+tags+"') id='o2010CheckAll' "+check+">");
 	str.append("</td>");
 	str.append("<td width='80%' class='tagName_td'><a href='#' class='tagName_td' onmouseenter=mouseEnter('sort_img') onmouseout=mouseOut('sort_img') onclick='msoffice2010DocFilter.sortTable()'>" + jsValue + "</a>");
@@ -797,7 +1026,7 @@ MSOffice2010Filter.prototype.generateTableByPage = function(tags, currentPageNum
 				check = "";
 			}
 			
-			str.append("<td><input onclick='msoffice2010DocFilter.checkthis(this)' type='checkbox' name= '"+tags[i]+"' id='styles_"+i+"' "+check+"></td>");
+			str.append("<td><input onclick='msoffice2010DocFilter.checkthis(this)' type='checkbox' name= '"+tags[i]+"' id='styles2010_"+i+"' "+check+"></td>");
 			str.append("<td colspan='2' class='tagValue_td' width=100%>"+tags[i]+"</td><td></td>");
 			str.append("</tr>");
 		}
@@ -941,6 +1170,54 @@ MSOffice2010Filter.prototype.showDialog = function ()
 	showPopupDialog("msoffice2010FilterDialog");
 }
 
+MSOffice2010Filter.prototype.generateContentPostFilter = function (filter)
+{
+	var _filterConfigurations = filterConfigurations;
+	var str = new StringBuffer("<select id='office2010ContentPostFilterSelect' class='xml_filter_select'>");
+	str.append("<option value='-1'>" + jsChoose + "</option>");
+
+	if(_filterConfigurations)
+	{
+		for(var i = 0; i < _filterConfigurations.length; i++)
+		{
+			var _filter = _filterConfigurations[i];
+	        if (_filter.filterTableName == "html_filter")
+	        {
+	        	var _htmlSpecialFilters = _filter.specialFilters;
+	        	if (_htmlSpecialFilters)
+	        	{
+		        	for (var j = 0; j < _htmlSpecialFilters.length; j++)
+		        	{
+		        		var _htmlSpecialFilter = _htmlSpecialFilters[j];
+		        		var _filterTableName = _htmlSpecialFilter.filterTableName;
+		        		var _filterName = _htmlSpecialFilter.filterName;
+
+		        		var _id = _htmlSpecialFilter.id;
+		        		
+		        		var contentPostFilterId = filter.contentPostFilterId;
+		        		var contentPostFilterTableName = filter.contentPostFilterTableName;
+		        		var id = filter.id;
+		        		
+		        		var selected = ""; 
+		        		if (_id == contentPostFilterId && _filterTableName == contentPostFilterTableName)
+		        		{
+		        			selected = "selected";
+		        		}
+		        		var id_filterTableName = _id + "-" + _filterTableName;
+		        		if (_filterTableName != undefined && _filterName != undefined && _id != undefined)
+		        		{
+			        		str.append("<option value='" + id_filterTableName + "' " + selected + ">" + _filterName + "</option>");		        			
+		        		}
+		        	}
+	        	}
+	        }
+		}
+	}
+	str.append("</select>");
+	
+	return str.toString();
+}
+
 MSOffice2010Filter.prototype.getXmlFilterSelect = function (filter)
 {
 	var _filterConfigurations = filterConfigurations;
@@ -991,7 +1268,6 @@ MSOffice2010Filter.prototype.getXmlFilterSelect = function (filter)
 		}
 	}
 	str.append("</select>");
-//	alert("str :" + str);
 	
 	return str.toString();
 }
@@ -1020,9 +1296,30 @@ function saveMSOffice2010DocFilter()
 	var filterDesc = document.getElementById("o2010FilterDesc").value;
 	var headerTranslate = document.getElementById("headerTranslate").checked;
 	var masterTranslate = document.getElementById("masterTranslate").checked;
+	var notesTranslate = document.getElementById("notesTranslate").checked;
+	var pptlayoutTranslate = document.getElementById("pptlayoutTranslate").checked;
+	var notemasterTranslate = document.getElementById("notemasterTranslate").checked;
+	var handoutmasterTranslate = document.getElementById("handoutmasterTranslate").checked;
+	var excelTabNamesTranslate = document.getElementById("excelTabNamesTranslate").checked;
+	var hiddenTextTranslate = document.getElementById("hiddenTextTranslate").checked;
+	var toolTipsTranslate = document.getElementById("toolTipsTranslate").checked;
+	var urlTranslate = document.getElementById("urlTranslate").checked;
+	var tableOfContentTranslate = document.getElementById("tableOfContentTranslate").checked;
 	var xmlFilterIdAndTableName = document.getElementById("xmlFilterSelect").value;
 	var splitedXmlIdTable = splitByFirstIndex(xmlFilterIdAndTableName, "-");
 	var xmlFilterId = (splitedXmlIdTable) ? splitedXmlIdTable[0] : -2;
+	var contentPostFilterIdAndTableName = document.getElementById("office2010ContentPostFilterSelect").value;
+	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
+	var contentPostFilterId = -2;
+	var contentPostFilterTableName = "";
+	if (contentPostFilterIndex > 0)
+	{
+		contentPostFilterId = contentPostFilterIdAndTableName.substring(0,contentPostFilterIndex);
+		contentPostFilterTableName = contentPostFilterIdAndTableName.substring(contentPostFilterIndex+1);
+	}
+	var baseFilterId = document.getElementById("office2010_filter_baseFilterSelect").value;
+	
+	alertUserBaseFilter(baseFilterId);
 	
 	var obj = {
 			filterTableName:"office2010_filter",
@@ -1030,12 +1327,28 @@ function saveMSOffice2010DocFilter()
 			filterDesc:filterDesc,
 			headerTranslate:headerTranslate,
 			masterTranslate:masterTranslate,
+			notesTranslate:notesTranslate,
+			pptlayoutTranslate:pptlayoutTranslate,
+			notemasterTranslate:notemasterTranslate,
+			handoutmasterTranslate:handoutmasterTranslate,
+			excelTabNamesTranslate:excelTabNamesTranslate,
+			hiddenTextTranslate:hiddenTextTranslate,
+			toolTipsTranslate:toolTipsTranslate,
+			urlTranslate:urlTranslate,
+			tableOfContentTranslate:tableOfContentTranslate,
 			xmlFilterId:-2,
 			unextractableWordParagraphStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.paragraphStyles],
 			unextractableWordCharacterStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.characterStyles],
+			unextractableExcelCellStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.excelCellStyles],
 			allParagraphStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.paragraphStyles],
 			allCharacterStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.characterStyles],
-			companyId:companyId
+			allExcelCellStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.excelCellStyles],
+			selectedInternalTextStyles:msoffice2010DocFilter.selectTagsMap[msoffice2010DocFilter.internalTextStyles],
+			allInternalTextStyles:msoffice2010DocFilter.allSelectTagsOption[msoffice2010DocFilter.internalTextStyles],
+			companyId:companyId,
+			contentPostFilterId:contentPostFilterId,
+			contentPostFilterTableName:contentPostFilterTableName,
+			baseFilterId:baseFilterId
 			};
 	
 	if(saveMSOffice2010DocFilter.edit)
@@ -1079,12 +1392,28 @@ function updateMSOffice2010FilterCallback(data)
 		jpFilter.filterDescription = checkExistMSOffice2010FilterCallback.obj.filterDesc;
 		jpFilter.headerTranslate = checkExistMSOffice2010FilterCallback.obj.headerTranslate;
 		jpFilter.masterTranslate = checkExistMSOffice2010FilterCallback.obj.masterTranslate;
+		jpFilter.notesTranslate = checkExistMSOffice2010FilterCallback.obj.notesTranslate;
+		jpFilter.pptlayoutTranslate = checkExistMSOffice2010FilterCallback.obj.pptlayoutTranslate;
+		jpFilter.notemasterTranslate = checkExistMSOffice2010FilterCallback.obj.notemasterTranslate;
+		jpFilter.handoutmasterTranslate = checkExistMSOffice2010FilterCallback.obj.handoutmasterTranslate;
+		jpFilter.toolTipsTranslate = checkExistMSOffice2010FilterCallback.obj.toolTipsTranslate;
+		jpFilter.excelTabNamesTranslate = checkExistMSOffice2010FilterCallback.obj.excelTabNamesTranslate;
+		jpFilter.hiddenTextTranslate = checkExistMSOffice2010FilterCallback.obj.hiddenTextTranslate;
+		jpFilter.urlTranslate = checkExistMSOffice2010FilterCallback.obj.urlTranslate;
+		jpFilter.tableOfContentTranslate = checkExistMSOffice2010FilterCallback.obj.tableOfContentTranslate;
 		jpFilter.xmlFilterId = checkExistMSOffice2010FilterCallback.obj.xmlFilterId;
 		jpFilter.unextractableWordParagraphStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordParagraphStyles;
 		jpFilter.unextractableWordCharacterStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordCharacterStyles;
+		jpFilter.unextractableExcelCellStyles = checkExistMSOffice2010FilterCallback.obj.unextractableExcelCellStyles;
 		jpFilter.allParagraphStyles = checkExistMSOffice2010FilterCallback.obj.allParagraphStyles;
 		jpFilter.allCharacterStyles = checkExistMSOffice2010FilterCallback.obj.allCharacterStyles;
+		jpFilter.allExcelCellStyles = checkExistMSOffice2010FilterCallback.obj.allExcelCellStyles;
+		jpFilter.selectedInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedInternalTextStyles;
+		jpFilter.allInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allInternalTextStyles;
 		jpFilter.companyId = companyId;
+		jpFilter.contentPostFilterId = checkExistMSOffice2010FilterCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistMSOffice2010FilterCallback.obj.contentPostFilterTableName;
+		jpFilter.baseFilterId = checkExistMSOffice2010FilterCallback.obj.baseFilterId;
 
 		var specialFilters = updateSpecialFilter(saveMSOffice2010DocFilter.specialFilters, jpFilter);
 		reGenerateFilterList(topFilterId, specialFilters, color);
@@ -1106,12 +1435,27 @@ function saveMSOffice2010FilterCallback(data)
 		jpFilter.filterDescription = checkExistMSOffice2010FilterCallback.obj.filterDesc;
 		jpFilter.headerTranslate = checkExistMSOffice2010FilterCallback.obj.headerTranslate;
 		jpFilter.masterTranslate = checkExistMSOffice2010FilterCallback.obj.masterTranslate;
+		jpFilter.notesTranslate = checkExistMSOffice2010FilterCallback.obj.notesTranslate;
+		jpFilter.pptlayoutTranslate = checkExistMSOffice2010FilterCallback.obj.pptlayoutTranslate;
+		jpFilter.notemasterTranslate = checkExistMSOffice2010FilterCallback.obj.notemasterTranslate;
+		jpFilter.handoutmasterTranslate = checkExistMSOffice2010FilterCallback.obj.handoutmasterTranslate;
+		jpFilter.excelTabNamesTranslate = checkExistMSOffice2010FilterCallback.obj.excelTabNamesTranslate;
+		jpFilter.hiddenTextTranslate = checkExistMSOffice2010FilterCallback.obj.hiddenTextTranslate;
+		jpFilter.urlTranslate = checkExistMSOffice2010FilterCallback.obj.urlTranslate;
+		jpFilter.tableOfContentTranslate = checkExistMSOffice2010FilterCallback.obj.tableOfContentTranslate;
 		jpFilter.xmlFilterId = checkExistMSOffice2010FilterCallback.obj.xmlFilterId;
 		jpFilter.unextractableWordParagraphStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordParagraphStyles;
 		jpFilter.unextractableWordCharacterStyles = checkExistMSOffice2010FilterCallback.obj.unextractableWordCharacterStyles;
+		jpFilter.unextractableExcelCellStyles = checkExistMSOffice2010FilterCallback.obj.unextractableExcelCellStyles;
 		jpFilter.allParagraphStyles = checkExistMSOffice2010FilterCallback.obj.allParagraphStyles;
 		jpFilter.allCharacterStyles = checkExistMSOffice2010FilterCallback.obj.allCharacterStyles;
+		jpFilter.allExcelCellStyles = checkExistMSOffice2010FilterCallback.obj.allExcelCellStyles;
+		jpFilter.selectedInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.selectedInternalTextStyles;
+		jpFilter.allInternalTextStyles = checkExistMSOffice2010FilterCallback.obj.allInternalTextStyles;
 		jpFilter.companyId = companyId;
+		jpFilter.contentPostFilterId = checkExistMSOffice2010FilterCallback.obj.contentPostFilterId;
+		jpFilter.contentPostFilterTableName = checkExistMSOffice2010FilterCallback.obj.contentPostFilterTableName;
+		jpFilter.baseFilterId = checkExistMSOffice2010FilterCallback.obj.baseFilterId;
 		filter.specialFilters.push(jpFilter);
 	    reGenerateFilterList(topFilterId, filter.specialFilters, color);
 	}

@@ -9,7 +9,9 @@ package com.globalsight.selenium.functions;
 import org.testng.Assert;
 import org.testng.Reporter;
 
+import com.globalsight.selenium.pages.FileProfile;
 import com.globalsight.selenium.pages.FilterConfiguration;
+import com.globalsight.selenium.pages.TMProfile;
 import com.thoughtworks.selenium.Selenium;
 
 public class FilterConfigurationFuncs {
@@ -27,19 +29,19 @@ public class FilterConfigurationFuncs {
 				iFilterName = iFilter + "1";
 
 				if (iFilter.equals("html")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.HtmlFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.HTML_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The html filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the html filter.
-						selenium.click(FilterConfiguration.HtmlFilter_BUTTON);
+						selenium.click(FilterConfiguration.HTML_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_HtmlFilter_TEXT_FIELD,
+								FilterConfiguration.HTML_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Basefont_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_HtmlFilter_BUTTON);
+						selenium.click(FilterConfiguration.HTML_FILTER_BASE_FONT_CHECKBOX);
+						selenium.click(FilterConfiguration.HTML_FILTER_SAVE_BUTTON);
 
 						// Check it
 						// selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
@@ -48,19 +50,19 @@ public class FilterConfigurationFuncs {
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("indesign")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.InDesignIDMLFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.INDD_FILTER_IMG);
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The indesign filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the indesign/IDML Filter
-						selenium.click(FilterConfiguration.InDesignIDMLFilter_BUTTON);
+						selenium.click(FilterConfiguration.INDD_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_InDesignIDMLFilter_TEXT_FIELD,
+								FilterConfiguration.INDD_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_InDesignIDMLFilter_BUTTON);
+						selenium.click(FilterConfiguration.INDD_FILTER_SAVE_BUTTON);
 
 						// Check it
 						// selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
@@ -69,33 +71,33 @@ public class FilterConfigurationFuncs {
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("internaltext")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.InternalTextFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.BASE_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The internaltext filter " + iFilterName
 								+ " has already exists!");
 					} else {
-						selenium.click(FilterConfiguration.InternalTextFilter_BUTTON);
+						selenium.click(FilterConfiguration.BASE_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_Internaltext_TEXT_FIELD,
+								FilterConfiguration.BASE_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_Internaltext_BUTTON);
+						selenium.click(FilterConfiguration.BASE_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("javaproperties")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.JavaPropertiesFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The javaproperties filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the Java Properties Filter
-						selenium.click(FilterConfiguration.JavaPropertiesFilter_BUTTON);
+						selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_JavaPropertiesFilter_TEXT_FIELD,
+								FilterConfiguration.JAVA_PROPERTIES_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_JavaPropertiesFilter_BUTTON);
+						selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_SAVE_BUTTON);
 
 						// Check it
 						// selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
@@ -104,22 +106,22 @@ public class FilterConfigurationFuncs {
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("javascript")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.JavaScriptFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_IMG);
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The java script filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the java script Filter
-						selenium.click(FilterConfiguration.JavaScriptFilter_BUTTON);
+						selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_JavaScriptFilter_TEXT_FIELD,
+								FilterConfiguration.JAVASCRIPT_FILTER_NAME_TEXT,
 								iFilterName);
 						selenium.type(
-								FilterConfiguration.JSFunction_TEXT_FIELD,
+								FilterConfiguration.JAVASCRIPT_FILTER_FUNCTION_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_JavaScriptFilter_BUTTON);
+						selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_SAVE_BUTTON);
 
 						// Check it
 						// selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
@@ -128,19 +130,19 @@ public class FilterConfigurationFuncs {
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("jsp")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.JspFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.JSP_FILTER_IMG);
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The jsp filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the jsp Filter
-						selenium.click(FilterConfiguration.JspFilter_BUTTON);
+						selenium.click(FilterConfiguration.JSP_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_JspFilter_TEXT_FIELD,
+								FilterConfiguration.JSP_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_JspFilter_BUTTON);
+						selenium.click(FilterConfiguration.JSP_FILTER_SAVE_BUTTON);
 
 						// Check it
 						// selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
@@ -149,74 +151,74 @@ public class FilterConfigurationFuncs {
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("msoffice2010")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.MS2010Filter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_2010_FILTER_IMG);
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The msoffice2010 filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the ms office 2010 Filter
-						selenium.click(FilterConfiguration.MS2010Filter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_MS2010Filter_TEXT_FIELD,
+								FilterConfiguration.OFFICE_2010_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_MS2010Filter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_SAVE_BUTTON);
 
 						// Check it
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("msofficedoc")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.MSDocFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_IMG);
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The msofficedoc filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the ms office doc Filter
-						selenium.click(FilterConfiguration.MSDocFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_DOC_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_MSDocFilter_TEXT_FIELD,
+								FilterConfiguration.OFFICE_WORD_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_MSDocFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON);
 
 						// Check it
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("msofficeexcel")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.MSExcelFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The msofficeexcel filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the ms office excel Filter
-						selenium.click(FilterConfiguration.MSExcelFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_XLS_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_MSExcelFilter_TEXT_FIELD,
+								FilterConfiguration.OFFICE_EXCEL_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_MSExcelFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_SAVE_BUTTON);
 
 						// Check it
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("msofficepowerpoint")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.MSPowerPointFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The msofficepowerpoint filter "
 								+ iFilterName + " has already exists!");
 					} else {
 						// Create the ms office power point Filter
-						selenium.click(FilterConfiguration.MSPowerPointFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_PPT_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_MSPowerPointFilter_TEXT_FIELD,
+								FilterConfiguration.OFFICE_POWERPOINT_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_MSPowerPointFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_SAVE_BUTTON);
 
 						// Check it
 						Assert.assertEquals(selenium.isElementPresent("link="
@@ -224,36 +226,36 @@ public class FilterConfigurationFuncs {
 					}
 
 				} else if (iFilter.equals("openoffice")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.OpenOfficeFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.OPEN_OFFICE_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The openoffice filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the open office Filter
-						selenium.click(FilterConfiguration.OpenOfficeFilter_BUTTON);
+						selenium.click(FilterConfiguration.OPEN_OFFICE_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_OpenOfficeFilter_TEXT_FIELD,
+								FilterConfiguration.OPENOFFICE_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_OpenOfficeFilter_BUTTON);
+						selenium.click(FilterConfiguration.OPENOFFICE_FILTER_SAVE_BUTTON);
 
 						// Check it
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 					}
 				} else if (iFilter.equals("portableobject")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.PortableObjectFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.PO_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The portableobject filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the portable object Filter
-						selenium.click(FilterConfiguration.PortableObjectFilter_BUTTON);
+						selenium.click(FilterConfiguration.PO_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_PortableObjectFilter_TEXT_FIELD,
+								FilterConfiguration.PO_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_PortableObjectFilter_BUTTON);
+						selenium.click(FilterConfiguration.PO_FILTER_SAVE_BUTTON);
 
 						// Check it
 						Assert.assertEquals(selenium.isElementPresent("link="
@@ -261,18 +263,18 @@ public class FilterConfigurationFuncs {
 					}
 
 				} else if (iFilter.equals("xml")) {
-					selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-					selenium.click(FilterConfiguration.XmlFilter_IMG);
+					selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+					selenium.click(FilterConfiguration.XML_FILTER_IMG);
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						Reporter.log("The xml filter " + iFilterName
 								+ " has already exists!");
 					} else {
 						// Create the xml Filter
-						selenium.click(FilterConfiguration.XmlFilter_BUTTON);
+						selenium.click(FilterConfiguration.XML_FILTER_ADD_BUTTON);
 						selenium.type(
-								FilterConfiguration.FilterName_XmlFilter_TEXT_FIELD,
+								FilterConfiguration.XML_FILTER_NAME_TEXT,
 								iFilterName);
-						selenium.click(FilterConfiguration.Save_XmlFilter_BUTTON);
+						selenium.click(FilterConfiguration.XML_FILTER_SAVE_BUTTON);
 
 						// Check it
 
@@ -301,15 +303,15 @@ public class FilterConfigurationFuncs {
 			iFilterName = iFilter + "1";
 
 			if (iFilter.equals("html")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.HtmlFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.HTML_FILTER_IMG);
 
 				if (selenium.isElementPresent("link=" + iFieldValueTemp)) {
 					Reporter.log("The html filter " + iFieldValueTemp
 							+ " has already exists!");
 				} else {
 					// Create the html filter.
-					selenium.click(FilterConfiguration.HtmlFilter_BUTTON);
+					selenium.click(FilterConfiguration.HTML_FILTER_ADD_BUTTON);
 					for (String tempStr : array) {
 						String[] ivalue = tempStr.split("=");
 						String iFieldName = ivalue[0].trim();
@@ -317,87 +319,87 @@ public class FilterConfigurationFuncs {
 
 						if (iFieldName.equals("name")) {
 							selenium.type(
-									FilterConfiguration.FilterName_HtmlFilter_TEXT_FIELD,
+									FilterConfiguration.HTML_FILTER_NAME_TEXT,
 									iFieldValue);
 						}
 					}
 
-					selenium.click(FilterConfiguration.Basefont_CHECKBOX);
-					selenium.click(FilterConfiguration.Save_HtmlFilter_BUTTON);
+					selenium.click(FilterConfiguration.HTML_FILTER_BASE_FONT_CHECKBOX);
+					selenium.click(FilterConfiguration.HTML_FILTER_SAVE_BUTTON);
 
 				}
 			} else if (iFilter.equals("indesign")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.InDesignIDMLFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.INDD_FILTER_IMG);
 
 				if (selenium.isElementPresent("link=" + iFilterName)) {
 					Reporter.log("The indesign filter " + iFilterName
 							+ " has already exists!");
 				} else {
 					// Create the indesign/IDML Filter
-					selenium.click(FilterConfiguration.InDesignIDMLFilter_BUTTON);
+					selenium.click(FilterConfiguration.INDD_FILTER_ADD_BUTTON);
 					selenium.type(
-							FilterConfiguration.FilterName_InDesignIDMLFilter_TEXT_FIELD,
+							FilterConfiguration.INDD_FILTER_NAME_TEXT,
 							iFilterName);
-					selenium.click(FilterConfiguration.Save_InDesignIDMLFilter_BUTTON);
+					selenium.click(FilterConfiguration.INDD_FILTER_SAVE_BUTTON);
 
 				}
 			} else if (iFilter.equals("javaproperties")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.JavaPropertiesFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_IMG);
 				if (selenium.isElementPresent("link=" + iFilterName)) {
 					Reporter.log("The javaproperties filter " + iFilterName
 							+ " has already exists!");
 				} else {
 					// Create the Java Properties Filter
-					selenium.click(FilterConfiguration.JavaPropertiesFilter_BUTTON);
+					selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_ADD_BUTTON);
 					selenium.type(
-							FilterConfiguration.FilterName_JavaPropertiesFilter_TEXT_FIELD,
+							FilterConfiguration.JAVA_PROPERTIES_FILTER_NAME_TEXT,
 							iFilterName);
-					selenium.click(FilterConfiguration.Save_JavaPropertiesFilter_BUTTON);
+					selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("javascript")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.JavaScriptFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_IMG);
 
 				if (selenium.isElementPresent("link=" + iFilterName)) {
 					Reporter.log("The java script filter " + iFilterName
 							+ " has already exists!");
 				} else {
 					// Create the java script Filter
-					selenium.click(FilterConfiguration.JavaScriptFilter_BUTTON);
+					selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_ADD_BUTTON);
 					selenium.type(
-							FilterConfiguration.FilterName_JavaScriptFilter_TEXT_FIELD,
+							FilterConfiguration.JAVASCRIPT_FILTER_NAME_TEXT,
 							iFilterName);
-					selenium.type(FilterConfiguration.JSFunction_TEXT_FIELD,
+					selenium.type(FilterConfiguration.JAVASCRIPT_FILTER_FUNCTION_TEXT,
 							iFilterName);
-					selenium.click(FilterConfiguration.Save_JavaScriptFilter_BUTTON);
+					selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("jsp")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.JspFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.JSP_FILTER_IMG);
 
 				if (selenium.isElementPresent("link=" + iFilterName)) {
 					Reporter.log("The jsp filter " + iFilterName
 							+ " has already exists!");
 				} else {
 					// Create the jsp Filter
-					selenium.click(FilterConfiguration.JspFilter_BUTTON);
+					selenium.click(FilterConfiguration.JSP_FILTER_ADD_BUTTON);
 					selenium.type(
-							FilterConfiguration.FilterName_JspFilter_TEXT_FIELD,
+							FilterConfiguration.JSP_FILTER_NAME_TEXT,
 							iFilterName);
-					selenium.click(FilterConfiguration.Save_JspFilter_BUTTON);
+					selenium.click(FilterConfiguration.JSP_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("msoffice2010")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.MS2010Filter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.OFFICE_2010_FILTER_IMG);
 
 				if (selenium.isElementPresent("link=" + iFieldValueTemp)) {
 					Reporter.log("The msoffice2010 filter " + iFieldValueTemp
 							+ " has already exists!");
 				} else {
 					// Create the ms office 2010 Filter
-					selenium.click(FilterConfiguration.MS2010Filter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_2010_FILTER_ADD_BUTTON);
 
 					for (String tempStr : array) {
 						String[] ivalue = tempStr.split("=");
@@ -406,7 +408,7 @@ public class FilterConfigurationFuncs {
 
 						if (iFieldName.equals("name")) {
 							selenium.type(
-									FilterConfiguration.FilterName_MS2010Filter_TEXT_FIELD,
+									FilterConfiguration.OFFICE_2010_FILTER_NAME_TEXT,
 									iFieldValue);
 						} else if (iFieldName.equals("description")) {
 							selenium.type("o2010FilterDesc", iFieldValue);
@@ -417,18 +419,18 @@ public class FilterConfigurationFuncs {
 						}
 					}
 
-					selenium.click(FilterConfiguration.Save_MS2010Filter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_2010_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("msofficedoc")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.MSDocFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_IMG);
 
 				if (selenium.isElementPresent("link=" + iFieldValueTemp)) {
 					Reporter.log("The msofficedoc filter " + iFieldValueTemp
 							+ " has already exists!");
 				} else {
 					// Create the ms office doc Filter
-					selenium.click(FilterConfiguration.MSDocFilter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_DOC_FILTER_ADD_BUTTON);
 
 					for (String tempStr : array) {
 						String[] ivalue = tempStr.split("=");
@@ -437,7 +439,7 @@ public class FilterConfigurationFuncs {
 
 						if (iFieldName.equals("name")) {
 							selenium.type(
-									FilterConfiguration.FilterName_MSDocFilter_TEXT_FIELD,
+									FilterConfiguration.OFFICE_WORD_FILTER_NAME_TEXT,
 									iFieldValue);
 						} else if (iFieldName.equals("description")) {
 							selenium.type("docDesc", iFieldValue);
@@ -449,17 +451,17 @@ public class FilterConfigurationFuncs {
 						}
 					}
 
-					selenium.click(FilterConfiguration.Save_MSDocFilter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("msofficeexcel")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.MSExcelFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_IMG);
 				if (selenium.isElementPresent("link=" + iFieldValueTemp)) {
 					Reporter.log("The msofficeexcel filter " + iFieldValueTemp
 							+ " has already exists!");
 				} else {
 					// Create the ms office excel Filter
-					selenium.click(FilterConfiguration.MSExcelFilter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_XLS_FILTER_ADD_BUTTON);
 
 					for (String tempStr : array) {
 						String[] ivalue = tempStr.split("=");
@@ -468,7 +470,7 @@ public class FilterConfigurationFuncs {
 
 						if (iFieldName.equals("name")) {
 							selenium.type(
-									FilterConfiguration.FilterName_MSExcelFilter_TEXT_FIELD,
+									FilterConfiguration.OFFICE_EXCEL_FILTER_NAME_TEXT,
 									iFieldValue);
 						} else if (iFieldName.equals("description")) {
 							selenium.type("excelDesc", iFieldValue);
@@ -478,17 +480,17 @@ public class FilterConfigurationFuncs {
 						}
 					}
 
-					selenium.click(FilterConfiguration.Save_MSExcelFilter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("msofficepowerpoint")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.MSPowerPointFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_IMG);
 				if (selenium.isElementPresent("link=" + iFieldValueTemp)) {
 					Reporter.log("The msofficepowerpoint filter "
 							+ iFieldValueTemp + " has already exists!");
 				} else {
 					// Create the ms office power point Filter
-					selenium.click(FilterConfiguration.MSPowerPointFilter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_PPT_FILTER_ADD_BUTTON);
 
 					for (String tempStr : array) {
 						String[] ivalue = tempStr.split("=");
@@ -497,7 +499,7 @@ public class FilterConfigurationFuncs {
 
 						if (iFieldName.equals("name")) {
 							selenium.type(
-									FilterConfiguration.FilterName_MSPowerPointFilter_TEXT_FIELD,
+									FilterConfiguration.OFFICE_POWERPOINT_FILTER_NAME_TEXT,
 									iFieldValue);
 						} else if (iFieldName.equals("description")) {
 							selenium.type("pptFilterDes", iFieldValue);
@@ -507,18 +509,18 @@ public class FilterConfigurationFuncs {
 						}
 					}
 
-					selenium.click(FilterConfiguration.Save_MSPowerPointFilter_BUTTON);
+					selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_SAVE_BUTTON);
 				}
 
 			} else if (iFilter.equals("openoffice")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.OpenOfficeFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.OPEN_OFFICE_FILTER_IMG);
 				if (selenium.isElementPresent("link=" + iFieldValueTemp)) {
 					Reporter.log("The openoffice filter " + iFieldValueTemp
 							+ " has already exists!");
 				} else {
 					// Create the open office Filter
-					selenium.click(FilterConfiguration.OpenOfficeFilter_BUTTON);
+					selenium.click(FilterConfiguration.OPEN_OFFICE_FILTER_ADD_BUTTON);
 
 					for (String tempStr : array) {
 						String[] ivalue = tempStr.split("=");
@@ -527,7 +529,7 @@ public class FilterConfigurationFuncs {
 
 						if (iFieldName.equals("name")) {
 							selenium.type(
-									FilterConfiguration.FilterName_OpenOfficeFilter_TEXT_FIELD,
+									FilterConfiguration.OPENOFFICE_FILTER_NAME_TEXT,
 									iFieldValue);
 						} else if (iFieldName.equals("description")) {
 							selenium.type("ooFilterDesc", iFieldValue);
@@ -536,36 +538,36 @@ public class FilterConfigurationFuncs {
 						}
 					}
 
-					selenium.click(FilterConfiguration.Save_OpenOfficeFilter_BUTTON);
+					selenium.click(FilterConfiguration.OPENOFFICE_FILTER_SAVE_BUTTON);
 				}
 			} else if (iFilter.equals("portableobject")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.PortableObjectFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.PO_FILTER_IMG);
 				if (selenium.isElementPresent("link=" + iFilterName)) {
 					Reporter.log("The portableobject filter " + iFilterName
 							+ " has already exists!");
 				} else {
 					// Create the portable object Filter
-					selenium.click(FilterConfiguration.PortableObjectFilter_BUTTON);
+					selenium.click(FilterConfiguration.PO_FILTER_ADD_BUTTON);
 					selenium.type(
-							FilterConfiguration.FilterName_PortableObjectFilter_TEXT_FIELD,
+							FilterConfiguration.PO_FILTER_NAME_TEXT,
 							iFilterName);
-					selenium.click(FilterConfiguration.Save_PortableObjectFilter_BUTTON);
+					selenium.click(FilterConfiguration.PO_FILTER_SAVE_BUTTON);
 				}
 
 			} else if (iFilter.equals("xml")) {
-				selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-				selenium.click(FilterConfiguration.XmlFilter_IMG);
+				selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+				selenium.click(FilterConfiguration.XML_FILTER_IMG);
 				if (selenium.isElementPresent("link=" + iFilterName)) {
 					Reporter.log("The xml filter " + iFilterName
 							+ " has already exists!");
 				} else {
 					// Create the xml Filter
-					selenium.click(FilterConfiguration.XmlFilter_BUTTON);
+					selenium.click(FilterConfiguration.XML_FILTER_ADD_BUTTON);
 					selenium.type(
-							FilterConfiguration.FilterName_XmlFilter_TEXT_FIELD,
+							FilterConfiguration.XML_FILTER_NAME_TEXT,
 							iFilterName);
-					selenium.click(FilterConfiguration.Save_XmlFilter_BUTTON);
+					selenium.click(FilterConfiguration.XML_FILTER_SAVE_BUTTON);
 				}
 			}
 
@@ -582,53 +584,186 @@ public class FilterConfigurationFuncs {
 	public void htmlFilter(Selenium selenium, String iFilterName, String cpf,
 			String str) throws Exception {
 
-		selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-		selenium.click(FilterConfiguration.HtmlFilter_BUTTON);
+		selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+		selenium.click(FilterConfiguration.HTML_FILTER_ADD_BUTTON);
 
-		selenium.type(FilterConfiguration.FilterName_HtmlFilter_TEXT_FIELD,
+		selenium.type(FilterConfiguration.HTML_FILTER_NAME_TEXT,
 				iFilterName);
 		htmlPostFilterChoose(selenium, cpf);
 
 		String[] group = str.split(";");
 		for (int i = 0; i < group.length; i++) {
 			String[] array = group[i].split("\\|\\|");
-			selenium.select(FilterConfiguration.Html_Choosing_Box, array[0]);
-			selenium.uncheck(FilterConfiguration.Html_CheckAll);
-			selenium.click(FilterConfiguration.Html_CheckAll);
+			selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, array[0]);
+			selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+			selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 		}
-		selenium.click(FilterConfiguration.Html_Tags_Delete_BUTTON);
+		selenium.click(FilterConfiguration.DELETE_VALUE_BUTTON);
 
 		if (selenium.isAlertPresent()) {
 			selenium.getAlert();
 		} else
-			selenium.click(FilterConfiguration.Html_Delete_Save_BUTTON);
+			selenium.click(FilterConfiguration.HTML_FILTER_TAG_SAVE_BUTTON);
+		for (int i = 0; i < group.length; i++) 
+		{
+			String[] array = group[i].split("\\|\\|");
+			
+			if (array[0].equals("Convert HTML Entity For Export"))
+			{
+				if (array[1].equals("true"))
+				{
+					selenium.check(FilterConfiguration.HTML_FILTER_CONVERT_ENTITY_CHECKBOX);
+				} else
+				{
+					selenium.uncheck(FilterConfiguration.HTML_FILTER_CONVERT_ENTITY_CHECKBOX);
+				}
+			} else if (array[0].equals("Ignore Invalid HTML Tags"))
+			{
+				if (array[1].equals("true"))
+				{
+					selenium.check(FilterConfiguration.HTML_FILTER_IGNORE_INVALID_TAGS_CHECKBOX);
+				} else
+				{
+					selenium.uncheck(FilterConfiguration.HTML_FILTER_IGNORE_INVALID_TAGS_CHECKBOX);
+				}
+			}else if (array[0].equals("Localize Function"))
+			{
+				if (array[1].equals("true"))
+				{
+					selenium.check(FilterConfiguration.HTML_FILTER_LOCALIZE_FUNTION_TEXT);
+				} else
+				{
+					selenium.uncheck(FilterConfiguration.HTML_FILTER_LOCALIZE_FUNTION_TEXT);
+				}
+			}else if (array[0].equals("Internal Text post-filter:"))
+			{
+				if (array[1].equals("true"))
+				{
+					selenium.check(FilterConfiguration.HTML_FILTER_INTERNAL_TEXT_POST_FILTER_SELECT);
+				} else
+				{
+					selenium.uncheck(FilterConfiguration.HTML_FILTER_INTERNAL_TEXT_POST_FILTER_SELECT);
+				}
+			}else 
+			{
+				String[] tagarray = array[1].split(",");
+				selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, array[0]);
+				for (String temp : tagarray) {
+					selenium.click(FilterConfiguration.HTML_FILTER_TAG_ADD_BUTTON);
+
+					if (array[0].equals("Internal Tag")) {
+						selenium.type(
+								FilterConfiguration.HTML_FILTER_TAG_INTERNAL_NAME_TEXT,
+								temp);
+						selenium.click(FilterConfiguration.HTML_FILTER_TAG_INTERNAL_ADD_BUTTON);
+					}
+
+					else {
+						selenium.type(FilterConfiguration.HTML_FILTER_TAG_NAME_TEXT, temp);
+						selenium.click(FilterConfiguration.HTML_FILTER_TAG_ADD_SAVE_BUTTON);
+					}
+				}
+				selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+			}
+			
+			
+		}
+		selenium.click(FilterConfiguration.HTML_FILTER_SAVE_BUTTON);
+	}
+
+	public void defaultHtmlFilter2(Selenium selenium, String iFilterName, boolean convEntity, 
+			boolean ignoreInv, String l10nFunc, String cpf, String str ) throws Exception {
+		
+//		selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
+//		selenium.click(FilterConfiguration.HtmlFilter_BUTTON);
+//
+//		selenium.type(FilterConfiguration.FilterName_HtmlFilter_TEXT_FIELD,
+//				iFilterName);
+		
+		// config "Convert HTML Entity For Export"
+		if (convEntity){
+			selenium.check(FilterConfiguration.HTML_FILTER_CONVERT_ENTITY_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.HTML_FILTER_CONVERT_ENTITY_CHECKBOX);
+		
+		// config "Ignore Invalid HTML Tags"
+		if (!ignoreInv) {
+			selenium.uncheck(FilterConfiguration.HTML_FILTER_IGNORE_INVALID_TAGS_CHECKBOX);
+		}
+		else selenium.check(FilterConfiguration.HTML_FILTER_IGNORE_INVALID_TAGS_CHECKBOX);
+		// config "Localize Function"
+		selenium.type(FilterConfiguration.HTML_FILTER_LOCALIZE_FUNTION_TEXT, l10nFunc);
+		
+		// config "Internal Text Filter"
+		if (cpf.equals("X")||cpf.equals("Choose")) {
+			selenium.select(FilterConfiguration.HTML_FILTER_INTERNAL_TEXT_POST_FILTER_SELECT,
+					"label=" + "Choose");
+		} 
+		else htmlPostFilterChoose(selenium, cpf);
+		
+
+		// config tags
+		String[] group = str.split(";");
+		for (int i = 0; i < group.length; i++) {
+			String[] array = group[i].split("\\|\\|");
+			selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, array[0]);
+			selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+			selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+		}
+		
+		// Note: For default html configuration, we'll use default tags. 
+		//Please uncomment below line for the specific tag test. 
+		// selenium.click(FilterConfiguration.Html_Tags_Delete_BUTTON);
+		//
+//		if (selenium.isAlertPresent()) {
+//			selenium.getAlert();
+//		} else
+//			selenium.click(FilterConfiguration.Html_Delete_Save_BUTTON);
+		
 		for (int i = 0; i < group.length; i++) {
 			String[] array = group[i].split("\\|\\|");
 			String[] tagarray = array[1].split(",");
-			selenium.select(FilterConfiguration.Html_Choosing_Box, array[0]);
+			String[] maptag = tagarray[0].split(":");
+			selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, array[0]);
+				
 			for (String temp : tagarray) {
-				selenium.click(FilterConfiguration.Html_Add_Tag_BUTTON);
+				if (!temp.equals("X")){
+					selenium.click(FilterConfiguration.HTML_FILTER_TAG_ADD_BUTTON);
+					
+					if (array[0].equals("Internal Tag")) {
+						selenium.type(
+								FilterConfiguration.HTML_FILTER_TAG_INTERNAL_NAME_TEXT,
+								temp);
+						selenium.click(FilterConfiguration.HTML_FILTER_TAG_INTERNAL_ADD_BUTTON);
+						
+						
+					}
+					
+					else if (array[0].equals("Switch Tag Map")) {
+						selenium.type(FilterConfiguration.HTML_FILTER_TAG_MAP_KEY_TEXT, maptag[0]);
+						selenium.type(FilterConfiguration.HTML_FILTER_TAG_MAP_VALUE_TEXT, maptag[1]);
+						selenium.click(FilterConfiguration.HTML_FILTER_TAG_MAP_SAVE_BUTTON);
+					}
 
-				if (array[0].equals("Internal Tag")) {
-					selenium.type(
-							FilterConfiguration.Html_Add_InternalTag_Field,
-							temp);
-					selenium.click(FilterConfiguration.Html_Add_InternalTag_Save_BUTTON);
+					else {
+						selenium.type(FilterConfiguration.HTML_FILTER_TAG_NAME_TEXT, temp);
+						selenium.click(FilterConfiguration.HTML_FILTER_TAG_ADD_SAVE_BUTTON);
+					}
+					
+						
 				}
-
-				else {
-					selenium.type(FilterConfiguration.Html_Add_Tag_Field, temp);
-					selenium.click(FilterConfiguration.Html_Add_Tag_Save_BUTTON);
-				}
+				
 			}
-			selenium.uncheck(FilterConfiguration.Html_CheckAll);
-			selenium.click(FilterConfiguration.Html_CheckAll);
+			selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+			selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 		}
-		selenium.click(FilterConfiguration.Save_HtmlFilter_BUTTON);
+		selenium.click(FilterConfiguration.HTML_FILTER_SAVE_BUTTON);
 	}
-
+	
+			
 	public void htmlPostFilterChoose(Selenium selenium, String opt) {
-		selenium.select(FilterConfiguration.InternalText_Post_Filter, "label="
+		selenium.select(FilterConfiguration.HTML_FILTER_INTERNAL_TEXT_POST_FILTER_SELECT, "label="
 				+ opt);
 	}
 
@@ -636,23 +771,22 @@ public class FilterConfigurationFuncs {
 	 * Initiate internal text filter.
 	 */
 	public void InternalText(Selenium selenium, String str, String interName) {
-		selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-		selenium.click(FilterConfiguration.InternalTextFilter_BUTTON);
-		selenium.type(FilterConfiguration.FilterName_Internaltext_TEXT_FIELD,
-				interName);
+		selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+		selenium.click(FilterConfiguration.BASE_FILTER_ADD_BUTTON);
+		selenium.type(FilterConfiguration.BASE_FILTER_NAME_TEXT,interName);
 
 		String[] tagarray = str.split(",");
 		for (String tempStr : tagarray) {
 			String[] tag = tempStr.split("\\|\\|");
-			selenium.click(FilterConfiguration.Internaltext_ADD_BUTTON);
-			selenium.type(FilterConfiguration.Internaltext_Type_Content, tag[0]);
+			selenium.click(FilterConfiguration.BASE_FILTER_ADD_CONTENT_BUTTON);
+			selenium.type(FilterConfiguration.BASE_FILTER_CONTENT_NAME_TEXT, tag[0]);
 			if (tag[1].equals("true")) {
-				selenium.click(FilterConfiguration.Internaltext_IS_RE);
+				selenium.click(FilterConfiguration.BASE_FILTER_CONTENT_RE_CHECKBOX);
 			}
-			selenium.click(FilterConfiguration.Internaltext_Content_Save_BUTTON);
+			selenium.click(FilterConfiguration.BASE_FILTER_CONTENT_SAVE_BUTTON);
 		}
-		selenium.click(FilterConfiguration.Internaltext_CheckAll);
-		selenium.click(FilterConfiguration.Save_Internaltext_BUTTON);
+		selenium.click(FilterConfiguration.BASE_FILTER_CHECK_ALL_CHECKBOX);
+		selenium.click(FilterConfiguration.BASE_FILTER_SAVE_BUTTON);
 	}
 
 	    /*
@@ -660,27 +794,41 @@ public class FilterConfigurationFuncs {
     	 */
 	public void excelFilter(Selenium selenium, String fname, String conName,
 			String interName) {
-		selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-		selenium.click(FilterConfiguration.MSExcelFilter_BUTTON);
-		selenium.type(FilterConfiguration.FilterName_MSExcelFilter_TEXT_FIELD,
+		selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+		selenium.click(FilterConfiguration.OFFICE_XLS_FILTER_ADD_BUTTON);
+		selenium.type(FilterConfiguration.OFFICE_EXCEL_FILTER_NAME_TEXT,
 				fname);
-		selenium.select(FilterConfiguration.Content_PostFilter_Choose, "label="
+		selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_CONTENT_POST_FILTER_CHECKBOX, "label="
 				+ conName);
-		selenium.select(FilterConfiguration.InternalText_PostFilter_Choose,
+		selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_TEXT_POST_FILTER_CHECKBOX,
 				"label=" + interName);
-		selenium.click(FilterConfiguration.Save_MSExcelFilter_BUTTON);
+		selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_SAVE_BUTTON);
+		if (selenium.isAlertPresent())
+			selenium.getAlert();
+	}
+	public void powerpointFilter(Selenium selenium, String fname, String conName,
+			String interName) {
+		selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+		selenium.click(FilterConfiguration.OFFICE_PPT_FILTER_ADD_BUTTON);
+		selenium.type(FilterConfiguration.OFFICE_POWERPOINT_FILTER_NAME_TEXT,
+				fname);
+		selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_CONTENT_POST_FILTER_SELECT, "label="
+				+ conName);
+		selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TEXT_SELECT,
+				"label=" + interName);
+		selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_SAVE_BUTTON);
 		if (selenium.isAlertPresent())
 			selenium.getAlert();
 	}
 	
 	public void wordFilter(Selenium selenium, String fname){
-	    selenium.click(FilterConfiguration.CollapseAll_CHECKBOX);
-	    selenium.click(FilterConfiguration.MSDocFilter_BUTTON);
-	    selenium.type(FilterConfiguration.FilterName_MSDocFilter_TEXT_FIELD, fname);
-	    selenium.uncheck(FilterConfiguration.MS_Doc_CheckAll);
-        selenium.click(FilterConfiguration.MS_Doc_CheckAll);
-        selenium.click(FilterConfiguration.MS_Delete_BUTTON);
-        selenium.click(FilterConfiguration.MS_Delete_Save_BUTTOn);
+	    selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+	    selenium.click(FilterConfiguration.OFFICE_DOC_FILTER_ADD_BUTTON);
+	    selenium.type(FilterConfiguration.OFFICE_WORD_FILTER_NAME_TEXT, fname);
+	    selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
 //	    String[] stylearray = sty.split(";");
 //
 //	    for(int i=0; i<stylearray.length; i++){
@@ -695,198 +843,447 @@ public class FilterConfigurationFuncs {
 //            selenium.uncheck(FilterConfiguration.MS_Doc_CheckAll);
 //            selenium.click(FilterConfiguration.MS_Doc_CheckAll);
 //	    }
-	    selenium.click(FilterConfiguration.Save_MSDocFilter_BUTTON);
+	    selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON);
 	    
 	}
 
-	public void filterOperation(Selenium selenium, String contentPostFilter,
+	public void filterOperation(Selenium selenium, String interName, String interName1, String htmlFilterName, String filterName, String contentPostFilter,
 			String embeddableTags, String internalTags,
 			String translatableAttibute, String internalTextFilter,
-			String internalTextPostFilter, String internalTextPostFilterChoose) {
+			String internalTextPostFilter, String internalTextPostFilterChoose,
+			String excelOrPpt) 
+	{
 
-		selenium.click(FilterConfiguration.ExpnadAll_CHECKBOX);
+		selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
 
 		//if (contentPostFilter.equalsIgnoreCase("on")) { 
-			selenium.click("link=Excel-Filter");
+			selenium.click("link=" + htmlFilterName);
 
 			if (embeddableTags.equalsIgnoreCase("o")) {
-				selenium.select(FilterConfiguration.Html_Choosing_Box,
-						"Embeddable Tags");
-				selenium.uncheck(FilterConfiguration.Html_CheckAll);
-				selenium.click(FilterConfiguration.Html_CheckAll);
+				selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, 
+						FilterConfiguration.HTML_FILTER_TAG_EMBEDDABLE);
+				selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 			} else {
-				selenium.select(FilterConfiguration.Html_Choosing_Box,
-						"Embeddable Tags");
-				selenium.check(FilterConfiguration.Html_CheckAll);
-				selenium.click(FilterConfiguration.Html_CheckAll);
+				selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, 
+						FilterConfiguration.HTML_FILTER_TAG_EMBEDDABLE);
+				selenium.check(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 			}
 
 			if (internalTags.equalsIgnoreCase("o")) {
-				selenium.select(FilterConfiguration.Html_Choosing_Box,
-						"Internal Tag");
-				selenium.uncheck(FilterConfiguration.Html_CheckAll);
-				selenium.click(FilterConfiguration.Html_CheckAll);
+				selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT, 
+						FilterConfiguration.HTML_FILTER_TAG_INTERNAL);
+				selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 			}
 			else {
-			selenium.select(FilterConfiguration.Html_Choosing_Box,
-					"Internal Tag");
-			selenium.check(FilterConfiguration.Html_CheckAll);
-			selenium.click(FilterConfiguration.Html_CheckAll);
+			selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT,
+					FilterConfiguration.HTML_FILTER_TAG_INTERNAL);
+			selenium.check(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+			selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 			}
 			
 			if (translatableAttibute.equalsIgnoreCase("o")) {
-				selenium.select(FilterConfiguration.Html_Choosing_Box,
-						"Translatable Attribute");
-				selenium.uncheck(FilterConfiguration.Html_CheckAll);
-				selenium.click(FilterConfiguration.Html_CheckAll);
+				selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT,
+						FilterConfiguration.HTML_FILTER_TAG_TRANSLATABLE_ATTRIBUTE);
+				selenium.uncheck(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 			} else {
-				selenium.select(FilterConfiguration.Html_Choosing_Box,
-						"Translatable Attribute");
-				selenium.check(FilterConfiguration.Html_CheckAll);
-				selenium.click(FilterConfiguration.Html_CheckAll);
+				selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT,
+						FilterConfiguration.HTML_FILTER_TAG_TRANSLATABLE_ATTRIBUTE);
+				selenium.check(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.HTML_FILTER_CHECK_ALL_CHECKBOX);
 			}
             if (embeddableTags.equalsIgnoreCase("x")
                     && internalTags.equalsIgnoreCase("x")
                     && translatableAttibute.equalsIgnoreCase("x"))
             {
-                selenium.select(FilterConfiguration.Html_Choosing_Box,
-                        "label=Paired Tags");
-                selenium.check(FilterConfiguration.a_CHECKBOX);
-                selenium.check(FilterConfiguration.tag1_CHECKBOX);
+                selenium.select(FilterConfiguration.HTML_FILTER_TAG_TYPE_SELECT,
+                		FilterConfiguration.HTML_FILTER_TAG_PAIRED);
+                selenium.check(FilterConfiguration.HTML_FILTER_A_CHECKBOX);
+                selenium.check(FilterConfiguration.HTML_FILTER_TAG1_CHECKBOX);
             }
 
 			if (internalTextFilter.equalsIgnoreCase("o"))
-				htmlPostFilterChoose(selenium, "html");
+				htmlPostFilterChoose(selenium, interName);
 			else
 				htmlPostFilterChoose(selenium, "Choose");
 			
-			selenium.click(FilterConfiguration.Save_HtmlFilter_BUTTON);
+			selenium.click(FilterConfiguration.HTML_FILTER_SAVE_BUTTON);
 		//}
 
 		//if (internalTextPostFilter.equalsIgnoreCase("on")) {
 			// modify internal text filter
-			selenium.click("link=Excel");
+			selenium.click("link=" + interName1);
 			if (internalTextPostFilterChoose.equalsIgnoreCase("o")) {
-				selenium.uncheck(FilterConfiguration.Internaltext_CheckAll);// uncheck,click
-				selenium.click(FilterConfiguration.Internaltext_CheckAll);
+				selenium.uncheck(FilterConfiguration.BASE_FILTER_CHECK_ALL_CHECKBOX);// uncheck,click
+				selenium.click(FilterConfiguration.BASE_FILTER_CHECK_ALL_CHECKBOX);
 			} else {
-				selenium.check(FilterConfiguration.Internaltext_CheckAll);
-				selenium.click(FilterConfiguration.Internaltext_CheckAll);
+				selenium.check(FilterConfiguration.BASE_FILTER_CHECK_ALL_CHECKBOX);
+				selenium.click(FilterConfiguration.BASE_FILTER_CHECK_ALL_CHECKBOX);
 			}
-			selenium.click(FilterConfiguration.Save_Internaltext_BUTTON);
+			selenium.click(FilterConfiguration.BASE_FILTER_SAVE_BUTTON);
 		//}
 
-		// operate excel filter
-		selenium.click("link=My Excel - 1");
-		if (contentPostFilter.equalsIgnoreCase("on"))
-			selenium.select(FilterConfiguration.Content_PostFilter_Choose,
-					"label=Excel-Filter");
-		else
-			selenium.select(FilterConfiguration.Content_PostFilter_Choose,
-					"label=Choose");
-		if (internalTextPostFilter.equalsIgnoreCase("on"))
-			selenium.select(FilterConfiguration.InternalText_PostFilter_Choose,
-					"label=Excel");
-		else
-			selenium.select(FilterConfiguration.InternalText_PostFilter_Choose,
-					"label=Choose");
-		selenium.click(FilterConfiguration.Save_MSExcelFilter_BUTTON);
+		// operate excel ppt filter
+			if (excelOrPpt.equals("excel"))
+			{
+				selenium.click("link=" + filterName);
+				if (contentPostFilter.equalsIgnoreCase("on"))
+					selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_CONTENT_POST_FILTER_CHECKBOX,
+							"label=" + htmlFilterName);
+				else
+					selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_CONTENT_POST_FILTER_CHECKBOX,
+							"label=Choose");
+				if (internalTextPostFilter.equalsIgnoreCase("on"))
+					selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_TEXT_POST_FILTER_CHECKBOX,
+							"label=" + interName1);
+				else
+					selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_TEXT_POST_FILTER_CHECKBOX,
+							"label=Choose");
+				selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_SAVE_BUTTON);
+			}else if (excelOrPpt.equals("powerpoint"))
+			{
+				selenium.click("link=" + filterName);
+				if (contentPostFilter.equalsIgnoreCase("on"))
+					selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_CONTENT_POST_FILTER_SELECT,
+							"label=" + htmlFilterName);
+				else
+					selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_CONTENT_POST_FILTER_SELECT,
+							"label=Choose");
+				if (internalTextPostFilter.equalsIgnoreCase("on"))
+					selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TEXT_SELECT,
+							"label=" + interName1);
+				else
+					selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TEXT_SELECT,
+							"label=Choose");
+				selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_SAVE_BUTTON);
+			}
+		
 	}
 
-    public void wordFilterOperation(Selenium selenium, String headerInfo,
+    public void wordFilterOperation(Selenium selenium, String filterName, String headerInfo,
             String toolTips, String tableofContent, String contentPostFilter,
-            String internalTextPostFilter, String myheading2,
-            String myheading3, String dontTrans)
+            String internalTextPostFilter, String unextractableWordParagraphStyles, 
+            String unextractableWordCharacterStyles, String selectedInternalTextStyles)
     {
-        selenium.click(FilterConfiguration.ExpnadAll_CHECKBOX);
-        selenium.click("link=Doc 1");
+        selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
+        selenium.click("link=" + filterName);
         if (headerInfo.equalsIgnoreCase("o"))
-            selenium.check("docHeaderTranslate");
-        else selenium.uncheck("docHeaderTranslate");
+            selenium.check(FilterConfiguration.OFFICE_WORD_FILTER_HEADER_INFO_CHECKBOX);
+        else selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_HEADER_INFO_CHECKBOX);
         if (toolTips.equalsIgnoreCase("o"))
-            selenium.check("docAltTranslate");
-        else selenium.uncheck("docAltTranslate");
+            selenium.check(FilterConfiguration.OFFICE_WORD_FILTER_TOOLTIPS_CHECKBOX);
+        else selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_TOOLTIPS_CHECKBOX);
         if (tableofContent.equalsIgnoreCase("o"))
-            selenium.check("TOCTranslate");
-        else selenium.uncheck("TOCTranslate");
-        if (contentPostFilter.equalsIgnoreCase("o"))
-            selenium.select("docContentPostFilterSelect", "label=2114html");
-        else selenium.select("docContentPostFilterSelect", "label=Choose");
-        if (internalTextPostFilter.equalsIgnoreCase("o"))
-            selenium.select("ms_office_doc_filter_baseFilterSelect", "label=2114");
-        else selenium.select("ms_office_doc_filter_baseFilterSelect", "label=Choose");
-        if (myheading2.equalsIgnoreCase("o"))
-            {
-            selenium.uncheck(FilterConfiguration.MS_Doc_CheckAll);
-            selenium.click(FilterConfiguration.MS_Doc_CheckAll);
-            selenium.click(FilterConfiguration.MS_Delete_BUTTON);
-            selenium.click(FilterConfiguration.MS_Delete_Save_BUTTOn);
+            selenium.check(FilterConfiguration.OFFICE_WORD_FILTER_TOC_TRANSLATE_CHECKBOX);
+        else selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_TOC_TRANSLATE_CHECKBOX);
+        if (contentPostFilter.isEmpty())
+        	selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_CONTENT_POST_FILTER_SELECT, "Choose");
+        else selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_CONTENT_POST_FILTER_SELECT, contentPostFilter);
+        if (internalTextPostFilter.isEmpty())
+        	selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_TEXT_POST_FILTER_SELECT, "Choose");
+        else selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_TEXT_POST_FILTER_SELECT, internalTextPostFilter);
+        if (unextractableWordParagraphStyles.isEmpty())
+        {
+            selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SELECT, FilterConfiguration.OFFICE_WORD_FILTER_STYLE_PARAGRAPH);
+            selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
             
-            selenium.click(FilterConfiguration.Style_Add_BUTTON);
-            selenium.type(FilterConfiguration.Style_Add, "MyHeading2");
-            selenium.click(FilterConfiguration.Style_Save_BUTTON);
-            }
-        else {
-            selenium.uncheck(FilterConfiguration.MS_Doc_CheckAll);
-            selenium.click(FilterConfiguration.MS_Doc_CheckAll);
-            selenium.click(FilterConfiguration.MS_Delete_BUTTON);
-            selenium.click(FilterConfiguration.MS_Delete_Save_BUTTOn);
-                }
-        if (myheading3.equalsIgnoreCase("o"))
-        {
-            selenium.click(FilterConfiguration.Style_Add_BUTTON);
-            selenium.type(FilterConfiguration.Style_Add, "MyHeading3");
-            selenium.click(FilterConfiguration.Style_Save_BUTTON);
         }
-        if (dontTrans.equalsIgnoreCase("o"))
+        else 
         {
-            selenium.click(FilterConfiguration.Style_Add_BUTTON);
-            selenium.type(FilterConfiguration.Style_Add, "DoNotTrans");
-            selenium.click(FilterConfiguration.Style_Save_BUTTON);
+         	selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SELECT, FilterConfiguration.OFFICE_WORD_FILTER_STYLE_PARAGRAPH);
+            selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
+            
+           	String[] iStyles = unextractableWordParagraphStyles.split(",");
+    			for(int i=0; i<iStyles.length; i++)
+    		        {
+    					selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_ADD_BUTTON);
+    		            selenium.type(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_NAME_TEXT, iStyles[i]);
+    		            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SAVE_BUTTON);
+    		        }
+
+            
+         }
+        if (unextractableWordCharacterStyles.isEmpty())
+        {
+	        selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SELECT, FilterConfiguration.OFFICE_WORD_FILTER_STYLE_CHARACTER);
+	        selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
         }
-        selenium.uncheck(FilterConfiguration.MS_Doc_CheckAll);
-        selenium.click(FilterConfiguration.MS_Doc_CheckAll);
-        selenium.click(FilterConfiguration.Save_MSDocFilter_BUTTON); 
+	    else 
+	    {
+	     	selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SELECT, FilterConfiguration.OFFICE_WORD_FILTER_STYLE_CHARACTER);
+	        selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
+	        
+	       	String[] iStyles = unextractableWordCharacterStyles.split(",");
+				for(int i=0; i<iStyles.length; i++)
+			        {
+						selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_ADD_BUTTON);
+			            selenium.type(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_NAME_TEXT, iStyles[i]);
+			            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SAVE_BUTTON);
+			        }
+	
+	        
+         }
+        if (selectedInternalTextStyles.isEmpty())
+        {
+	        selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SELECT, FilterConfiguration.OFFICE_WORD_FILTER_STYLE_INTERNAL_TEXT);
+	        selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
+        
+        }
+	    else 
+	    {
+	     	selenium.select(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SELECT, FilterConfiguration.OFFICE_WORD_FILTER_STYLE_INTERNAL_TEXT);
+	        selenium.uncheck(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_CHECK_ALL_CHECKBOX);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_BUTTON);
+	        selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_DELETE_SAVE_BUTTOn);
+	        
+	       	String[] iStyles = selectedInternalTextStyles.split(",");
+				for(int i=0; i<iStyles.length; i++)
+			        {
+						selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_ADD_BUTTON);
+			            selenium.type(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_NAME_TEXT, iStyles[i]);
+			            selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_STYLE_SAVE_BUTTON);
+			        }
+	
+	        
+	    }
+       selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON); 
+        if (selenium.isAlertPresent()) 
+            selenium.getAlert();
+        
+   }
+    
+    public void excelFilterOperation(Selenium selenium, String filterName, 
+            String toolTips, String contentPostFilter,
+            String internalTextPostFilter)
+    {
+        selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
+        selenium.click("link=" + filterName);
+        if (toolTips.equalsIgnoreCase("o"))
+            selenium.check(FilterConfiguration.OFFICE_EXCEL_FILTER_TOOLTIPS_CHECKBOX);
+        else selenium.uncheck(FilterConfiguration.OFFICE_EXCEL_FILTER_TOOLTIPS_CHECKBOX);
+        if (contentPostFilter.isEmpty())
+        	selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_CONTENT_POST_FILTER_CHECKBOX, "Choose");
+        else selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_CONTENT_POST_FILTER_CHECKBOX, contentPostFilter);
+        if (internalTextPostFilter.isEmpty())
+        	selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_TEXT_POST_FILTER_CHECKBOX, "Choose");
+        else selenium.select(FilterConfiguration.OFFICE_EXCEL_FILTER_TEXT_POST_FILTER_CHECKBOX, internalTextPostFilter);
+
+       selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON); 
+        if (selenium.isAlertPresent()) 
+            selenium.getAlert();
+        
+   }
+    public void powerpointFilterOperation(Selenium selenium, String filterName, 
+            String toolTips, String contentPostFilter,
+            String internalTextPostFilter)
+    {
+        selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
+        selenium.click("link=" + filterName);
+        if (toolTips.equalsIgnoreCase("o"))
+            selenium.check(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TOOLTIPS_CHECKBOX);
+        else selenium.uncheck(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TOOLTIPS_CHECKBOX);
+        if (contentPostFilter.isEmpty())
+        	selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_CONTENT_POST_FILTER_SELECT, "Choose");
+        else selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_CONTENT_POST_FILTER_SELECT, contentPostFilter);
+        if (internalTextPostFilter.isEmpty())
+        	selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TEXT_SELECT, "Choose");
+        else selenium.select(FilterConfiguration.OFFICE_POWERPOINT_FILTER_TEXT_SELECT, internalTextPostFilter);
+
+       selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON); 
         if (selenium.isAlertPresent()) 
             selenium.getAlert();
         
    }
 
-	/*
-	 * remove filters.
+    
+    
+    public void newInddFilter(Selenium selenium, String iFilterName, boolean sTrnHidden, boolean sTrnMaster,
+    		boolean sFileInfo, boolean sIgForceLine, boolean sIgNonBreak) throws Exception {
+		selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+		selenium.click(FilterConfiguration.INDD_FILTER_ADD_BUTTON);
+		
+		selenium.type(FilterConfiguration.INDD_FILTER_NAME_TEXT,
+				iFilterName);
+		
+		// config "Translate Hidden Layers"
+		if (sTrnHidden){
+			selenium.check(FilterConfiguration.INDD_FILTER_TRANSLATE_HIDDEN_LAYERS_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_TRANSLATE_HIDDEN_LAYERS_CHECKBOX);
+		
+		// config Translate Master Layers
+		if (sTrnMaster){
+			selenium.check(FilterConfiguration.INDD_FILTER_TRANSLATE_MASTER_LAYERS_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_TRANSLATE_MASTER_LAYERS_CHECKBOX);
+		
+		// config Translate File Information
+		if (sFileInfo){
+			selenium.check(FilterConfiguration.INDD_FILTER_TRANSLATE_FILE_INFO_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_TRANSLATE_FILE_INFO_CHECKBOX);
+		
+		// config Ignore Forced Line Breaks
+		if (sIgForceLine){
+			selenium.check(FilterConfiguration.INDD_FILTER_IGNORE_LINE_BREAK_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_IGNORE_LINE_BREAK_CHECKBOX);
+		
+		// config Ignore Nonbreaking Space
+		if (sIgNonBreak){
+			selenium.check(FilterConfiguration.INDD_FILTER_REPLACE_NON_BREAKING_SPACE_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_REPLACE_NON_BREAKING_SPACE_CHECKBOX);
+		
+		selenium.click(FilterConfiguration.INDD_FILTER_SAVE_BUTTON);
+    }
+	
+    public void editInddFilter(Selenium selenium, String iFilterName, boolean sTrnHidden, boolean sTrnMaster,
+    		boolean sFileInfo, boolean sIgForceLine, boolean sIgNonBreak) throws Exception {
+		selenium.click(FilterConfiguration.COLLAPSE_ALL_BUTTON);
+		selenium.click(FilterConfiguration.INDD_FILTER_ADD_BUTTON);
+		selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
+        selenium.click("link="+iFilterName);
+				
+		// config "Translate Hidden Layers"
+		if (sTrnHidden){
+			selenium.check(FilterConfiguration.INDD_FILTER_TRANSLATE_HIDDEN_LAYERS_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_TRANSLATE_HIDDEN_LAYERS_CHECKBOX);
+		
+		// config Translate Master Layers
+		if (sTrnMaster){
+			selenium.check(FilterConfiguration.INDD_FILTER_TRANSLATE_MASTER_LAYERS_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_TRANSLATE_MASTER_LAYERS_CHECKBOX);
+		
+		// config Translate File Information
+		if (sFileInfo){
+			selenium.check(FilterConfiguration.INDD_FILTER_TRANSLATE_FILE_INFO_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_TRANSLATE_FILE_INFO_CHECKBOX);
+		
+		// config Ignore Forced Line Breaks
+		if (sIgForceLine){
+			selenium.check(FilterConfiguration.INDD_FILTER_IGNORE_LINE_BREAK_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_IGNORE_LINE_BREAK_CHECKBOX);
+		
+		// config Ignore Nonbreaking Space
+		if (sIgNonBreak){
+			selenium.check(FilterConfiguration.INDD_FILTER_REPLACE_NON_BREAKING_SPACE_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.INDD_FILTER_REPLACE_NON_BREAKING_SPACE_CHECKBOX);
+		
+		selenium.click(FilterConfiguration.INDD_FILTER_SAVE_BUTTON);
+    }
+
+    public void propertiesFilter(Selenium selenium, String iFilterName, boolean bSID, boolean bUnicodeEsp,
+    		boolean bPresvTrailSpace, String iSecFilter, String iIntlTextFilter) throws Exception {
+    	
+    	selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
+    	
+        selenium.click("link="+iFilterName);
+		
+		//config options
+		if (bSID)
+		{
+			selenium.check(FilterConfiguration.JAVA_PROPERTIES_FILTER_SID_SUPPORT_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.JAVA_PROPERTIES_FILTER_SID_SUPPORT_CHECKBOX);
+		
+		if (bUnicodeEsp)
+		{
+			selenium.check(FilterConfiguration.JAVA_PROPERTIES_FILTER_UNICODE_ESCAPE_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.JAVA_PROPERTIES_FILTER_UNICODE_ESCAPE_CHECKBOX);
+		
+		if (bPresvTrailSpace)
+		{
+			selenium.check(FilterConfiguration.JAVA_PROPERTIES_FILTER_PRESERVE_TRAILING_SPACE_CHECKBOX);
+		}
+		else selenium.uncheck(FilterConfiguration.JAVA_PROPERTIES_FILTER_PRESERVE_TRAILING_SPACE_CHECKBOX);
+		
+		//config secondary filter
+		selenium.select("secondaryFilterSelect", "label=" + iSecFilter);
+		
+		//config internal text filter
+		selenium.select("java_properties_filter_baseFilterSelect", "label=" + iIntlTextFilter);
+		
+		selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_SAVE_BUTTON);
+		if (selenium.isAlertPresent())
+			selenium.getAlert();
+    }
+	
+    public void javascriptFitler(Selenium selenium, String iFilterName, String JSFunctionText, boolean bEnableUnicodeEsp) throws Exception 
+    {
+    	selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
+    	
+        selenium.click("link="+iFilterName);
+        
+        selenium.type(FilterConfiguration.JAVASCRIPT_FILTER_FUNCTION_TEXT, JSFunctionText);
+        
+        if (bEnableUnicodeEsp)
+        {
+        	selenium.check(FilterConfiguration.JAVASCRIPT_FILTER_UNICODE_ESCAPE_CHECKBOX);
+        }
+        else selenium.uncheck(FilterConfiguration.JAVASCRIPT_FILTER_UNICODE_ESCAPE_CHECKBOX);
+    }
+    
+    
+    /* remove filters.
 	 */
 	public void removeFilters(Selenium selenium, String Filters) {
 		String[] iFilters = Filters.split(",");
 		boolean iRemove = false;
-		selenium.click(FilterConfiguration.ExpnadAll_CHECKBOX);
+		selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
 
 		int i = 1;
 		while (selenium
-				.isElementPresent(FilterConfiguration.FiltersConfiguration_TABLE
+				.isElementPresent(FilterConfiguration.FILTER_TABLE
 						+ "/tr[" + i + "]")) {
 
 			if (selenium
-					.isElementPresent(FilterConfiguration.FiltersConfiguration_TABLE
+					.isElementPresent(FilterConfiguration.FILTER_TABLE
 							+ "/tr[" + i + "]//a")) {
 				if (selenium
-						.isElementPresent(FilterConfiguration.FiltersConfiguration_TABLE
+						.isElementPresent(FilterConfiguration.FILTER_TABLE
 								+ "/tr[" + i + "]/td[2]/div/table/tbody/tr")) {
 
 					int j = 1;
 					while (selenium
-							.isElementPresent(FilterConfiguration.FiltersConfiguration_TABLE
+							.isElementPresent(FilterConfiguration.FILTER_TABLE
 									+ "/tr["
 									+ i
 									+ "]/td[2]/div/table/tbody/tr[" + j + "]")) {
 						for (String iFilter : iFilters) {
 							if (selenium
 									.getText(
-											FilterConfiguration.FiltersConfiguration_TABLE
+											FilterConfiguration.FILTER_TABLE
 													+ "/tr["
 													+ i
 													+ "]/td[2]/div/table/tbody/tr["
 													+ j + "]").equals(iFilter)) {
-								selenium.click(FilterConfiguration.FiltersConfiguration_TABLE
+								selenium.click(FilterConfiguration.FILTER_TABLE
 										+ "/tr["
 										+ i
 										+ "]/td[2]/div/table/tbody/tr["
@@ -904,7 +1301,7 @@ public class FilterConfigurationFuncs {
 		}
 
 		if (iRemove) {
-			selenium.click(FilterConfiguration.Remove_BUTTON);
+			selenium.click(FilterConfiguration.REMOVE_VALUE_BUTTON);
 			if (selenium.isConfirmationPresent()) {
 				selenium.getConfirmation();
 			}
@@ -928,12 +1325,12 @@ public class FilterConfigurationFuncs {
 				iFilterName = iFilter + "1";
 
 				if (iFilter.equals("html")) {
-					selenium.click(FilterConfiguration.ExpnadAll_CHECKBOX);
+					selenium.click(FilterConfiguration.EXPAND_ALL_BUTTON);
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						selenium.click("link=" + iFilterName);
-						selenium.click(FilterConfiguration.a_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_HtmlFilter_BUTTON);
+						selenium.click(FilterConfiguration.HTML_FILTER_A_CHECKBOX);
+						selenium.click(FilterConfiguration.HTML_FILTER_SAVE_BUTTON);
 					} else {
 						Reporter.log("The html filter " + iFilterName
 								+ " doesn't exist!");
@@ -943,8 +1340,8 @@ public class FilterConfigurationFuncs {
 				else if (iFilter.equals("indesign")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						selenium.click("link=" + iFilterName);
-						selenium.click(FilterConfiguration.ignoreLineBreak_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_InDesignIDMLFilter_BUTTON);
+						selenium.click(FilterConfiguration.INDD_FILTER_IGNORE_LINE_BREAK_CHECKBOX);
+						selenium.click(FilterConfiguration.INDD_FILTER_SAVE_BUTTON);
 					} else {
 						Reporter.log("The indd/idml filter " + iFilterName
 								+ " doesn't exist!");
@@ -954,10 +1351,10 @@ public class FilterConfigurationFuncs {
 				else if (iFilter.equals("javaproperties")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						selenium.click("link=" + iFilterName);
-						selenium.click(FilterConfiguration.enableSIDSupport_CHECKBOX);
-						selenium.click(FilterConfiguration.enableUnicodeEscap_CHECKBOX);
-						selenium.click(FilterConfiguration.preserveTrailingSpaces_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_JavaPropertiesFilter_BUTTON);
+						selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_SID_SUPPORT_CHECKBOX);
+						selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_UNICODE_ESCAPE_CHECKBOX);
+						selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_PRESERVE_TRAILING_SPACE_CHECKBOX);
+						selenium.click(FilterConfiguration.JAVA_PROPERTIES_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The javaproperties filter " + iFilterName
@@ -972,8 +1369,8 @@ public class FilterConfigurationFuncs {
 
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						selenium.click(("link=" + iFilterName));
-						selenium.click(FilterConfiguration.enableUnicodeEscape_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_JavaScriptFilter_BUTTON);
+						selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_UNICODE_ESCAPE_CHECKBOX);
+						selenium.click(FilterConfiguration.JAVASCRIPT_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The java script filter " + iFilterName
@@ -987,8 +1384,8 @@ public class FilterConfigurationFuncs {
 				else if (iFilter.equals("jsp")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						selenium.click(("linnk=" + iFilterName));
-						selenium.click(FilterConfiguration.addAdditionalHead_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_JspFilter_BUTTON);
+						selenium.click(FilterConfiguration.JSP_FILTER_ADD_ADDITIONAL_HEAD_CHECKBOX);
+						selenium.click(FilterConfiguration.JSP_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The jsp filter " + iFilterName
@@ -1001,13 +1398,13 @@ public class FilterConfigurationFuncs {
 
 				else if (iFilter.equals("msoffice2010")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
-						selenium.click(FilterConfiguration.headerTranslate_CHECKBOX);
-						selenium.click(FilterConfiguration.masterTranslate_CHECKBOX);
-						selenium.click(FilterConfiguration.add_MS2010Filter_BUTTON);
-						selenium.type(FilterConfiguration.addStyle_TEXT_FIELD,
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_HEADER_TRANSLATE_CHECKBOX);
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_PPT_SLIDE_MASTER_TRANSLATE_CHECKBOX);
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_STYLE_ADD_BUTTON);
+						selenium.type(FilterConfiguration.OFFICE_2010_FILTER_STYLE_NAME_TEXT,
 								"AddSyles");
-						selenium.click(FilterConfiguration.Save_AddStyle2010_BUTTON);
-						selenium.click(FilterConfiguration.Save_MS2010Filter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_STYLE_SAVE_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_2010_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The msoffice2010 filter " + iFilterName
@@ -1020,8 +1417,8 @@ public class FilterConfigurationFuncs {
 
 				else if (iFilter.equals("msofficedoc")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
-						selenium.click((FilterConfiguration.HeaderInformation_MSDocFilter_CHECKBOX));
-						selenium.click(FilterConfiguration.Save_MSDocFilter_BUTTON);
+						selenium.click((FilterConfiguration.OFFICE_WORD_FILTER_HEADER_CHECKBOX));
+						selenium.click(FilterConfiguration.OFFICE_WORD_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The msofficedoc filter " + iFilterName
@@ -1034,7 +1431,7 @@ public class FilterConfigurationFuncs {
 
 				else if (iFilter.equals("msofficeexcel")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
-						selenium.click(FilterConfiguration.Save_MSExcelFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_EXCEL_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The msofficeexcel filter " + iFilterName
@@ -1047,8 +1444,8 @@ public class FilterConfigurationFuncs {
 
 				else if (iFilter.equals("msofficepowerpoint")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
-						selenium.click(FilterConfiguration.AltPPT_CHECKBOX);
-						selenium.click(FilterConfiguration.Save_MSPowerPointFilter_BUTTON);
+						selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_EXTRACT_ALT_CHECKBOX);
+						selenium.click(FilterConfiguration.OFFICE_POWERPOINT_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The msofficepowerpoint filter "
@@ -1061,8 +1458,8 @@ public class FilterConfigurationFuncs {
 
 				else if (iFilter.equals("openoffice")) {
 					if (selenium.isElementPresent("link=" + iFilterName)) {
-						selenium.click((FilterConfiguration.headerInformationOpenOffice_CHECKBOX));
-						selenium.click(FilterConfiguration.Save_OpenOfficeFilter_BUTTON);
+						selenium.click((FilterConfiguration.OPENOFFICE_FILTER_HEADER_INFO_CHECKBOX));
+						selenium.click(FilterConfiguration.OPENOFFICE_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The openoffice filter " + iFilterName
@@ -1077,9 +1474,9 @@ public class FilterConfigurationFuncs {
 					String secondaryFilter = "HTML_Filter(Defualt)";
 					if (selenium.isElementPresent("link=" + iFilterName)) {
 						selenium.select(
-								FilterConfiguration.SecondaryFilterPO_SELECT,
+								FilterConfiguration.PO_FILTER_SECONDARY_FILTER_SELECT,
 								"label=" + secondaryFilter);
-						selenium.click(FilterConfiguration.Save_PortableObjectFilter_BUTTON);
+						selenium.click(FilterConfiguration.PO_FILTER_SAVE_BUTTON);
 						Assert.assertEquals(selenium.isElementPresent("link="
 								+ iFilterName), true);
 						Reporter.log("The portableobject filter " + iFilterName

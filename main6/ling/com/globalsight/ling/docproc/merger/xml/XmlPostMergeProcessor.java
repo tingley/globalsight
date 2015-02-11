@@ -220,7 +220,7 @@ public class XmlPostMergeProcessor
         catch (RegExException e)
         {
             // shouldn't happen
-            c_category.error(e);
+            c_category.error(e.getMessage(), e);
         }
         return processed;
     }

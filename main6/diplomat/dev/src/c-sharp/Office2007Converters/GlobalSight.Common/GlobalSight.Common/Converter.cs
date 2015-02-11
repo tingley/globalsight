@@ -24,5 +24,7 @@ namespace GlobalSight.Common
 		/// </summary>
 		/// <returns>search pattern</returns>
 		string GetFileExtensionToWatch();
+
+        string GetTestFileToWatch();
 	}
 }

@@ -87,4 +87,7 @@ insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (76, 'server.s
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (77, 'adobe.cs5.dir', '%%adobe_cs5_dir%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (78, 'passolo.installKey', '%%passolo_install_key%%', '1');
 insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (79, 'passolo.dir', '%%passolo_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (80, 'adobe.cs5.5.dir', '%%adobe_cs5.5_dir%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (81, 'winpe.installKey', '%%winpe_install_key%%', '1');
+insert into SYSTEM_PARAMETER (ID, NAME, VALUE, COMPANY_ID) VALUES (82, 'winpe.dir', '%%winpe_dir%%', '1');
 commit;

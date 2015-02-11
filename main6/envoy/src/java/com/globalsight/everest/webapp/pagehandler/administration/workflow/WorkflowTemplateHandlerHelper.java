@@ -16,13 +16,11 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.workflow;
 
-
 //GlobalSight
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -41,8 +39,6 @@ import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.foundation.ContainerRole;
 import com.globalsight.everest.foundation.LocalePair;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.gsedition.GSEditionActivity;
-import com.globalsight.everest.gsedition.GSEditionActivityManagerLocal;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
@@ -50,6 +46,7 @@ import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.usermgr.UserManagerException;
 import com.globalsight.everest.util.comparator.ActivityComparator;
 import com.globalsight.everest.util.comparator.GlobalSightLocaleComparator;
 import com.globalsight.everest.util.comparator.LocalePairComparator;
@@ -58,15 +55,11 @@ import com.globalsight.everest.util.comparator.UserComparator;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
-import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.SystemAction;
 import com.globalsight.everest.workflow.WorkflowOwners;
 import com.globalsight.everest.workflow.WorkflowTemplate;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.webservices.client.Ambassador;
-import com.globalsight.webservices.client.WebServiceClientHelper;
-
 
 public class WorkflowTemplateHandlerHelper
 {
@@ -75,18 +68,20 @@ public class WorkflowTemplateHandlerHelper
     /**
      * Get a list of all existing activities in the system.
      * <p>
-     * @exception EnvoyServletException Component related exception.
+     * 
+     * @exception EnvoyServletException
+     *                Component related exception.
      * @exception GeneralException
      */
     static Vector getAllActivities(Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            Vector activities = vectorizedCollection(
-                ServerProxy.getJobHandler().getAllActivities());
+            Vector activities = vectorizedCollection(ServerProxy
+                    .getJobHandler().getAllActivities());
             Collections.sort(activities, new ActivityComparator(
-                ActivityComparator.NAME, p_locale));
+                    ActivityComparator.NAME, p_locale));
 
             return activities;
         }
@@ -97,40 +92,48 @@ public class WorkflowTemplateHandlerHelper
     }
 
     static Vector getAllDtpActivities(Locale p_locale)
-		throws EnvoyServletException {
-    	try {
-    			Vector activities = vectorizedCollection(ServerProxy
-    					.getJobHandler().getAllDtpActivities());
-    			Collections.sort(activities, new ActivityComparator(
-    					ActivityComparator.NAME, p_locale));
+            throws EnvoyServletException
+    {
+        try
+        {
+            Vector activities = vectorizedCollection(ServerProxy
+                    .getJobHandler().getAllDtpActivities());
+            Collections.sort(activities, new ActivityComparator(
+                    ActivityComparator.NAME, p_locale));
 
-    			return activities;
-    		} catch (Exception e) {
-    			throw new EnvoyServletException(e);
-    		}
+            return activities;
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
     }
 
     static Vector getAllTransActivities(Locale p_locale)
-		throws EnvoyServletException {
-    		try {
-    				Vector activities = vectorizedCollection(ServerProxy
-    						.getJobHandler().getAllTransActivities());
-    				Collections.sort(activities, new ActivityComparator(
-    						ActivityComparator.NAME, p_locale));
+            throws EnvoyServletException
+    {
+        try
+        {
+            Vector activities = vectorizedCollection(ServerProxy
+                    .getJobHandler().getAllTransActivities());
+            Collections.sort(activities, new ActivityComparator(
+                    ActivityComparator.NAME, p_locale));
 
-    				return activities;
-    			} catch (Exception e) {
-    				throw new EnvoyServletException(e);
-    			}
+            return activities;
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
     }
-    
+
     /**
      * Get all the code sets from locale manager.
      * <p>
+     * 
      * @exception EnvoyServletException
      */
-    public static List getAllCodeSets()
-        throws  EnvoyServletException
+    public static List getAllCodeSets() throws EnvoyServletException
     {
         try
         {
@@ -143,22 +146,22 @@ public class WorkflowTemplateHandlerHelper
     }
 
     /*
-     * Get all the source locales from locale manager.
-     * <p>
+     * Get all the source locales from locale manager. <p>
+     * 
      * @exception EnvoyServletException Component related exception.
+     * 
      * @exception GeneralException
      */
     public static List getAllSourceLocales(Locale p_locale)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            ArrayList al = new ArrayList(
-                ServerProxy.getLocaleManager().getAllSourceLocales());
-            GlobalSightLocaleComparator comp =
-            new GlobalSightLocaleComparator(
-                GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
-            Collections.sort(al,comp);
+            ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
+                    .getAllSourceLocales());
+            GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
+                    GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
+            Collections.sort(al, comp);
             return al;
         }
         catch (Exception e)
@@ -168,22 +171,22 @@ public class WorkflowTemplateHandlerHelper
     }
 
     /*
-     * Get all the target locales from locale manager.
-     * <p>
+     * Get all the target locales from locale manager. <p>
+     * 
      * @exception EnvoyServletException Component related exception.
+     * 
      * @exception GeneralException
      */
     public static List getAllTargetLocales(Locale p_locale)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            ArrayList al = new ArrayList(
-                ServerProxy.getLocaleManager().getAllTargetLocales());
-            GlobalSightLocaleComparator comp =
-            new GlobalSightLocaleComparator(
-                GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
-            Collections.sort(al,comp);
+            ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
+                    .getAllTargetLocales());
+            GlobalSightLocaleComparator comp = new GlobalSightLocaleComparator(
+                    GlobalSightLocaleComparator.DISPLAYNAME, p_locale);
+            Collections.sort(al, comp);
             return al;
         }
         catch (Exception e)
@@ -196,16 +199,15 @@ public class WorkflowTemplateHandlerHelper
      * Get a list of all locale pairs.
      */
     public static List getAllLocalePairs(Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-        ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
-                                         .getSourceTargetLocalePairs());
-        LocalePairComparator comp =
-                new LocalePairComparator(p_locale);
-        Collections.sort(al,comp);
-        return al;
+            ArrayList al = new ArrayList(ServerProxy.getLocaleManager()
+                    .getSourceTargetLocalePairs());
+            LocalePairComparator comp = new LocalePairComparator(p_locale);
+            Collections.sort(al, comp);
+            return al;
         }
         catch (Exception e)
         {
@@ -217,12 +219,12 @@ public class WorkflowTemplateHandlerHelper
      * Get a list of all projects
      */
     public static List getAllProjectInfos(Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            List projects =
-                    ServerProxy.getProjectHandler().getAllProjectInfosForGUI();
+            List projects = ServerProxy.getProjectHandler()
+                    .getAllProjectInfosForGUI();
             ProjectComparator uc = new ProjectComparator(p_locale);
             Collections.sort(projects, uc);
             return projects;
@@ -233,19 +235,17 @@ public class WorkflowTemplateHandlerHelper
         }
     }
 
-
     /**
      * Get a list of projects that the specified user (i.e. PM) manages them
      */
     public static List getAllProjectInfosForUser(User user, Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            List projects =
-                    ServerProxy.getProjectHandler().
-                        getProjectInfosManagedByUser(user,
-                                     Permission.GROUP_MODULE_GLOBALSIGHT);
+            List projects = ServerProxy.getProjectHandler()
+                    .getProjectInfosManagedByUser(user,
+                            Permission.GROUP_MODULE_GLOBALSIGHT);
 
             if (projects != null && projects.size() > 1)
             {
@@ -265,13 +265,12 @@ public class WorkflowTemplateHandlerHelper
      * Get the project info of the projects this user is part of.
      */
     public static List getProjectInfosByUser(String p_userId, Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            List projects =
-                    ServerProxy.getProjectHandler().
-                        getProjectInfosByUser(p_userId);
+            List projects = ServerProxy.getProjectHandler()
+                    .getProjectInfosByUser(p_userId);
 
             // only sort if the list is not null (and has more then 1 entry)
             if (projects != null && projects.size() > 1)
@@ -292,7 +291,7 @@ public class WorkflowTemplateHandlerHelper
      * Get the project identified by the id.
      */
     static Project getProjectById(long p_projectId)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -308,20 +307,32 @@ public class WorkflowTemplateHandlerHelper
      * Get a map of all workflow managers in a given list of projects
      */
     static HashMap getAllWorkflowManagersInProject()
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            //query out all the people that can manage projects
-            Collection usernames = Permission.getPermissionManager().
-                getAllUsersWithPermission(Permission.PROJECTS_MANAGE_WORKFLOWS);
+            // query out all the people that can manage projects
+            Collection usernames = Permission.getPermissionManager()
+                    .getAllUsersWithPermission(
+                            Permission.PROJECTS_MANAGE_WORKFLOWS);
             Iterator iter = usernames.iterator();
             ArrayList users = new ArrayList();
             while (iter.hasNext())
             {
-                String userid =(String) iter.next();
-                User u = ServerProxy.getUserManager().getUser(userid);
-                users.add(u);
+                String userid = (String) iter.next();
+                User u = null;
+                try
+                {
+                    u = ServerProxy.getUserManager().getUser(userid);
+                }
+                catch (UserManagerException ume)
+                {
+                    // do nothing
+                }
+                if (u != null)
+                {
+                    users.add(u);
+                }
             }
 
             return ServerProxy.getProjectHandler().getProjectsWithUsers(users);
@@ -335,13 +346,12 @@ public class WorkflowTemplateHandlerHelper
     /**
      * Get a collection of existing active worklfow template infos.
      */
-    static List getAllWorkflowTemplateInfos()
-        throws EnvoyServletException
+    static List getAllWorkflowTemplateInfos() throws EnvoyServletException
     {
         try
         {
-            return new ArrayList(ServerProxy.getProjectHandler().
-                                 getAllWorkflowTemplateInfos());
+            return new ArrayList(ServerProxy.getProjectHandler()
+                    .getAllWorkflowTemplateInfos());
         }
         catch (Exception e)
         {
@@ -350,39 +360,42 @@ public class WorkflowTemplateHandlerHelper
     }
 
     /**
-     * Returns the container role based on the given activity
-     *  name, source locale, and target locale.
+     * Returns the container role based on the given activity name, source
+     * locale, and target locale.
      * <p>
-     * @param p_activity The results of the Activity.getActivityName() method.
-     * @param p_sourceLocale The results of the source Locale.toString().
-     * @param p_targetLocale The results of the target Locale.toString().
+     * 
+     * @param p_activity
+     *            The results of the Activity.getActivityName() method.
+     * @param p_sourceLocale
+     *            The results of the source Locale.toString().
+     * @param p_targetLocale
+     *            The results of the target Locale.toString().
      * @return The container role.
-     * @exception EnvoyServletException Component related exception.
+     * @exception EnvoyServletException
+     *                Component related exception.
      */
-    public static ContainerRole getContainerRole(
-        String p_activity, String p_sourceLocale,
-        String p_targetLocale, long p_projectId)
-        throws EnvoyServletException
+    public static ContainerRole getContainerRole(String p_activity,
+            String p_sourceLocale, String p_targetLocale, long p_projectId)
+            throws EnvoyServletException
     {
         try
         {
-            ContainerRole role = ServerProxy.getUserManager().
-                getContainerRole(p_activity, p_sourceLocale,
-                                 p_targetLocale, p_projectId);
+            ContainerRole role = ServerProxy.getUserManager().getContainerRole(
+                    p_activity, p_sourceLocale, p_targetLocale, p_projectId);
 
-            return (role != null && role.isContainerRoleValid()) ?
-                role : null;
+            return (role != null && role.isContainerRoleValid()) ? role : null;
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
     }
+
     /**
      * Get a LocalePair object based on a given id.
      */
     static LocalePair getLocalePairById(long p_lpId)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -398,14 +411,13 @@ public class WorkflowTemplateHandlerHelper
      * Get a locale pair object based on a source and target locale ids.
      */
     static LocalePair getLocalePairBySourceTargetIds(long p_sourceLocaleId,
-                                                     long p_targetLocaleId)
-        throws EnvoyServletException
+            long p_targetLocaleId) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getLocaleManager().
-                getLocalePairBySourceTargetIds(p_sourceLocaleId,
-                                               p_targetLocaleId);
+            return ServerProxy.getLocaleManager()
+                    .getLocalePairBySourceTargetIds(p_sourceLocaleId,
+                            p_targetLocaleId);
         }
         catch (Exception e)
         {
@@ -415,19 +427,19 @@ public class WorkflowTemplateHandlerHelper
 
     /**
      * Get a list of all rates for a particular source/target locale.
-     * @see CostingEngine.getRates(GlobalSightLocale, GlobalSightLocale) to
-     *      see whatthe hashtable contains.
-     * <p>
-     * @exception EnvoyServletException Component related exception.
+     * 
+     * @see CostingEngine.getRates(GlobalSightLocale, GlobalSightLocale) to see
+     *      whatthe hashtable contains.
+     *      <p>
+     * @exception EnvoyServletException
+     *                Component related exception.
      */
     static Hashtable getRatesForLocale(GlobalSightLocale p_source,
-                                       GlobalSightLocale p_target)
-        throws EnvoyServletException
+            GlobalSightLocale p_target) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getCostingEngine().getRates(p_source,
-                                                           p_target);
+            return ServerProxy.getCostingEngine().getRates(p_source, p_target);
         }
         catch (Exception e)
         {
@@ -441,18 +453,20 @@ public class WorkflowTemplateHandlerHelper
     static SessionManager getSessionManager(HttpServletRequest p_request)
     {
         HttpSession session = p_request.getSession(false);
-        return (SessionManager)session.getAttribute(
-            WebAppConstants.SESSION_MANAGER);
+        return (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
     }
 
     /**
      * Get user matched the given uid
-     * @param p_uid - The user id
+     * 
+     * @param p_uid
+     *            - The user id
      * @return a User object
-     * @exception EnvoyServletException Component related exception.
+     * @exception EnvoyServletException
+     *                Component related exception.
      */
-    public static User getUser(String p_uid)
-    throws EnvoyServletException
+    public static User getUser(String p_uid) throws EnvoyServletException
     {
         try
         {
@@ -464,26 +478,29 @@ public class WorkflowTemplateHandlerHelper
         }
     }
 
-
     /**
-     * Returns the Collection of all UserRole objects with the given activity name,
-     * source locale, and target locale.
+     * Returns the Collection of all UserRole objects with the given activity
+     * name, source locale, and target locale.
      * <p>
-     * @param p_activty The results of the Activity.getActivityName() method.
-     * @param p_sourceLocale The results of the source Locale.toString().
-     * @param p_targetLocale The results of the target Locale.toString().
+     * 
+     * @param p_activty
+     *            The results of the Activity.getActivityName() method.
+     * @param p_sourceLocale
+     *            The results of the source Locale.toString().
+     * @param p_targetLocale
+     *            The results of the target Locale.toString().
      * @return Collection of all UserRole objects.
-     * @exception EnvoyServletException Component related exception.
+     * @exception EnvoyServletException
+     *                Component related exception.
      */
     public static Collection getUserRoles(String p_activity,
-                                          String p_sourceLocale,
-                                          String p_targetLocale)
-    throws EnvoyServletException
+            String p_sourceLocale, String p_targetLocale)
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getUserManager().getUserRoles(
-                p_activity, p_sourceLocale, p_targetLocale);
+            return ServerProxy.getUserManager().getUserRoles(p_activity,
+                    p_sourceLocale, p_targetLocale);
         }
         catch (Exception e)
         {
@@ -495,12 +512,12 @@ public class WorkflowTemplateHandlerHelper
      * Get a workflow template by the given id.
      */
     public static WorkflowTemplate getWorkflowTemplateById(long p_wfTemplateId)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getWorkflowServer().
-                getWorkflowTemplateById(p_wfTemplateId);
+            return ServerProxy.getWorkflowServer().getWorkflowTemplateById(
+                    p_wfTemplateId);
         }
         catch (Exception e)
         {
@@ -509,19 +526,18 @@ public class WorkflowTemplateHandlerHelper
     }
 
     /**
-     * Given a user, start date, and duration, determine an estimated
-     * completion date.
+     * Given a user, start date, and duration, determine an estimated completion
+     * date.
      */
     public static Date getEstimatedCompletionDate(String userId,
-                        Date startDate, long duration)
-        throws EnvoyServletException
+            Date startDate, long duration) throws EnvoyServletException
     {
         try
         {
-            UserFluxCalendar cal =
-                CalendarHelper.getUserCalendarByOwner(userId);
+            UserFluxCalendar cal = CalendarHelper
+                    .getUserCalendarByOwner(userId);
             return ServerProxy.getEventScheduler().determineDate(startDate,
-                 cal, duration);
+                    cal, duration);
         }
         catch (Exception e)
         {
@@ -532,12 +548,11 @@ public class WorkflowTemplateHandlerHelper
     /**
      * Get a "Task" object by id.
      */
-    public static Task getTaskById(long taskId)
-        throws EnvoyServletException
+    public static Task getTaskById(long taskId) throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getTaskManager(). getTask(taskId);
+            return ServerProxy.getTaskManager().getTask(taskId);
         }
         catch (Exception e)
         {
@@ -546,16 +561,16 @@ public class WorkflowTemplateHandlerHelper
     }
 
     /**
-     * Get a "WorkflowTemplateInfo" object by id.  Note that this object does not
+     * Get a "WorkflowTemplateInfo" object by id. Note that this object does not
      * contain "WorkflowTemplate" (for performance purposes).
      */
     static WorkflowTemplateInfo getWorkflowTemplateInfoById(long p_wfId)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getProjectHandler().
-                getWorkflowTemplateInfoById(p_wfId);
+            return ServerProxy.getProjectHandler().getWorkflowTemplateInfoById(
+                    p_wfId);
         }
         catch (Exception e)
         {
@@ -574,7 +589,7 @@ public class WorkflowTemplateHandlerHelper
             {
                 SystemConfiguration sc = SystemConfiguration.getInstance();
                 m_areAndOrNodesVisible = new Boolean(
-                    sc.getStringParameter(sc.AND_OR_NODES));
+                        sc.getStringParameter(sc.AND_OR_NODES));
             }
             catch (Exception ge)
             {
@@ -585,7 +600,6 @@ public class WorkflowTemplateHandlerHelper
 
         return m_areAndOrNodesVisible;
     }
-
 
     /**
      * Determines whether the system-wide costing feature is enables
@@ -623,7 +637,6 @@ public class WorkflowTemplateHandlerHelper
         return revenueEnabled;
     }
 
-
     /* Convert the given string into a long value; if null, or an error */
     /* occurs, return the default value instead (always -1) */
     static long parseLong(String p_string)
@@ -633,7 +646,7 @@ public class WorkflowTemplateHandlerHelper
         {
             try
             {
-                longValue  = Long.parseLong(p_string);
+                longValue = Long.parseLong(p_string);
             }
             catch (NumberFormatException e)
             {
@@ -643,26 +656,21 @@ public class WorkflowTemplateHandlerHelper
     }
 
     static void duplicateWorkflowTemplateInfo(long p_wfId,
-                                              ArrayList p_localePairs,
-                                              String newName,
-                                              ResourceBundle p_resourceBundle)
-    throws EnvoyServletException
+            ArrayList p_localePairs, String newName, Project project,
+            ResourceBundle p_resourceBundle) throws EnvoyServletException
     {
         try
         {
             WorkflowTemplateInfo wftInfo = getWorkflowTemplateInfoById(p_wfId);
-            WorkflowTemplate workflowTemplate =
-                 getWorkflowTemplateById(wftInfo.getWorkflowTemplateId());
+            WorkflowTemplate workflowTemplate = getWorkflowTemplateById(wftInfo
+                    .getWorkflowTemplateId());
 
-            String displayRoleName =
-                 p_resourceBundle.getString("lb_all_qualified_users");
+            String displayRoleName = p_resourceBundle
+                    .getString("lb_all_qualified_users");
             ServerProxy.getProjectHandler().setResourceBundle(p_resourceBundle);
-            ServerProxy.getProjectHandler().duplicateWorkflowTemplates(
-                                                              p_wfId,
-                                                              newName,
-                                                              workflowTemplate,
-                                                              p_localePairs,
-                                                              displayRoleName);
+            ServerProxy.getProjectHandler().duplicateWorkflowTemplates(p_wfId,
+                    newName, project, workflowTemplate, p_localePairs,
+                    displayRoleName);
         }
         catch (Exception e)
         {
@@ -671,66 +679,71 @@ public class WorkflowTemplateHandlerHelper
     }
 
     static void importWorkflowTemplateInfo(Document doc,
-			ArrayList<LocalePair> p_localePairs, String newName,
-			String projectId, ResourceBundle p_resourceBundle) throws EnvoyServletException
-	{
-		try
-		{
-			String displayRoleName = p_resourceBundle
-					.getString("lb_all_qualified_users");
-			ServerProxy.getProjectHandler().setResourceBundle(p_resourceBundle);
-			ServerProxy.getProjectHandler().importWorkflowTemplates(doc,
-					newName, p_localePairs, displayRoleName, projectId);
-		}
-		catch (Exception e)
-		{
-			throw new EnvoyServletException(e);
-		}
-	}
-
-    // first save the iflow template and then the workflow template info...
-    static void saveWorkflowTemplateInfo(WorkflowTemplateInfo p_wfti,
-                                         WorkflowTemplate p_wfTemplate)
-        throws EnvoyServletException
+            ArrayList<LocalePair> p_localePairs, String newName,
+            String projectId, ResourceBundle p_resourceBundle)
+            throws EnvoyServletException
     {
         try
         {
-            String[] wfManagerIds =
-                new String[p_wfti.getWorkflowManagerIds().size()];
-            wfManagerIds =
-                (String[]) p_wfti.getWorkflowManagerIds().toArray(wfManagerIds);
+            String displayRoleName = p_resourceBundle
+                    .getString("lb_all_qualified_users");
+            ServerProxy.getProjectHandler().setResourceBundle(p_resourceBundle);
+            ServerProxy.getProjectHandler().importWorkflowTemplates(doc,
+                    newName, p_localePairs, displayRoleName, projectId);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
+    }
+
+    // first save the iflow template and then the workflow template info...
+    static void saveWorkflowTemplateInfo(WorkflowTemplateInfo p_wfti,
+            WorkflowTemplate p_wfTemplate) throws EnvoyServletException
+    {
+        try
+        {
+            String[] wfManagerIds = new String[p_wfti.getWorkflowManagerIds()
+                    .size()];
+            wfManagerIds = (String[]) p_wfti.getWorkflowManagerIds().toArray(
+                    wfManagerIds);
             if (p_wfti.getId() == -1)
             {
-                WorkflowTemplate wft =
-                    ServerProxy.getWorkflowServer().createWorkflowTemplate(
-                        p_wfTemplate, new WorkflowOwners(
-                            p_wfti.getProjectManagerId(),
-                            wfManagerIds));
+                WorkflowTemplate wft = ServerProxy.getWorkflowServer()
+                        .createWorkflowTemplate(
+                                p_wfTemplate,
+                                new WorkflowOwners(
+                                        p_wfti.getProjectManagerId(),
+                                        wfManagerIds));
 
-                // set the object with the created id (will set the id within wfti).
+                // set the object with the created id (will set the id within
+                // wfti).
                 p_wfti.setWorkflowTemplate(wft);
 
-                ServerProxy.getProjectHandler().createWorkflowTemplateInfo(p_wfti);
+                ServerProxy.getProjectHandler().createWorkflowTemplateInfo(
+                        p_wfti);
             }
             else
             {
-//                long oldTemplateId = p_wfTemplate.getId();
+                // long oldTemplateId = p_wfTemplate.getId();
                 // modify is basically creating a new template in i-Flow db
                 // due to restriction of template modification (can not really
                 // modify a template that has an associated process instance).
-                WorkflowTemplate wft =
-                    ServerProxy.getWorkflowServer().modifyWorkflowTemplate(
-                        p_wfTemplate, new WorkflowOwners(
-                            p_wfti.getProjectManagerId(),
-                            wfManagerIds));
+                WorkflowTemplate wft = ServerProxy.getWorkflowServer()
+                        .modifyWorkflowTemplate(
+                                p_wfTemplate,
+                                new WorkflowOwners(
+                                        p_wfti.getProjectManagerId(),
+                                        wfManagerIds));
 
-                // set the object with the created id (will set the id within wfti).
+                // set the object with the created id (will set the id within
+                // wfti).
                 p_wfti.setWorkflowTemplate(wft);
 
                 ServerProxy.getProjectHandler().modifyWorkflowTemplate(p_wfti);
 
                 // now try removing the old template (to cleanup template table)
-//                removeWorkflowTemplate(oldTemplateId);
+                // removeWorkflowTemplate(oldTemplateId);
             }
         }
         catch (Exception e)
@@ -739,39 +752,35 @@ public class WorkflowTemplateHandlerHelper
         }
     }
 
-
-
     /**
      * Returns a sorted list of users who have the given permission
      * 
      * @param p_permission
-     *                 @see Permission
-     * @param p_locale locale
+     * @see Permission
+     * @param p_locale
+     *            locale
      * @return ArrayList of User
      * @exception Exception
      */
     private static ArrayList getUsersByPermission(String p_permission,
-                                             Locale p_locale)
-        throws Exception
+            Locale p_locale) throws Exception
     {
-        //query out all the people that have this permission
-        Collection usernames =
-            Permission.getPermissionManager().getAllUsersWithPermission(p_permission);
+        // query out all the people that have this permission
+        Collection usernames = Permission.getPermissionManager()
+                .getAllUsersWithPermission(p_permission);
         Iterator iter = usernames.iterator();
         ArrayList users = new ArrayList();
         while (iter.hasNext())
         {
-            String userid =(String) iter.next();
+            String userid = (String) iter.next();
             User u = ServerProxy.getUserManager().getUser(userid);
             users.add(u);
         }
         UserComparator uc = new UserComparator(UserComparator.DISPLAYNAME,
-                                               p_locale);
+                p_locale);
         Collections.sort(users, uc);
         return users;
     }
-
-    
 
     // convert a collection to a vector.
     private static Vector vectorizedCollection(Collection p_collection)
@@ -780,100 +789,107 @@ public class WorkflowTemplateHandlerHelper
     }
 
     static Hashtable getDataForDialog(ResourceBundle bundle, Locale p_locale,
-			WorkflowTemplateInfo p_wfti) throws EnvoyServletException {
-		// return getDataForDialog(bundle, p_locale, p_wfti.getSourceLocale(),
-		// p_wfti.getTargetLocale());
-		boolean hasCosting = isCostingEnabled();
-		boolean hasRevenue = isRevenueEnabled();
-		boolean isCalendarInstalled = CalendarManagerLocal.isInstalled();
-		// Start Dialog data
-		Hashtable hashtable = new Hashtable();
-		hashtable.put(WorkflowTemplateConstants.LABELS, dialogLabels(bundle,
-				isCalendarInstalled));
-		hashtable.put(WorkflowTemplateConstants.BTN_LABELS,
-				dialogButtons(bundle));
-		hashtable.put(WorkflowTemplateConstants.MESSAGES, messages(bundle));
-		hashtable.put(WorkflowTemplateConstants.JOB_COSTING_ENABLED,
-				new Boolean(hasCosting));
-		hashtable.put(WorkflowTemplateConstants.JOB_REVENUE_ENABLED,
-				new Boolean(hasRevenue));
-		hashtable.put("isCalendarInstalled", new Boolean(isCalendarInstalled));
+            WorkflowTemplateInfo p_wfti) throws EnvoyServletException
+    {
+        // return getDataForDialog(bundle, p_locale, p_wfti.getSourceLocale(),
+        // p_wfti.getTargetLocale());
+        boolean hasCosting = isCostingEnabled();
+        boolean hasRevenue = isRevenueEnabled();
+        boolean isCalendarInstalled = CalendarManagerLocal.isInstalled();
+        // Start Dialog data
+        Hashtable hashtable = new Hashtable();
+        hashtable.put(WorkflowTemplateConstants.LABELS,
+                dialogLabels(bundle, isCalendarInstalled));
+        hashtable.put(WorkflowTemplateConstants.BTN_LABELS,
+                dialogButtons(bundle));
+        hashtable.put(WorkflowTemplateConstants.MESSAGES, messages(bundle));
+        hashtable.put(WorkflowTemplateConstants.JOB_COSTING_ENABLED,
+                new Boolean(hasCosting));
+        hashtable.put(WorkflowTemplateConstants.JOB_REVENUE_ENABLED,
+                new Boolean(hasRevenue));
+        hashtable.put("isCalendarInstalled", new Boolean(isCalendarInstalled));
 
-		// hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
-		// getAllActivities(p_locale));
-		if (WorkflowTemplateInfo.TYPE_DTP.equals(p_wfti.getWorkflowType())) {
-			hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
-					getAllDtpActivities(p_locale));
-		} else {
-			hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
-					getAllTransActivities(p_locale));
-		}
-		hashtable.put(WorkflowTemplateConstants.SYSTEM_ACTION,
-				systemActions(bundle));
+        // hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
+        // getAllActivities(p_locale));
+        if (WorkflowTemplateInfo.TYPE_DTP.equals(p_wfti.getWorkflowType()))
+        {
+            hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
+                    getAllDtpActivities(p_locale));
+        }
+        else
+        {
+            hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
+                    getAllTransActivities(p_locale));
+        }
+        hashtable.put(WorkflowTemplateConstants.SYSTEM_ACTION,
+                systemActions(bundle));
 
-		if (hasCosting) {
-			hashtable.put(WorkflowTemplateConstants.RATES, getRatesForLocale(
-					p_wfti.getSourceLocale(), p_wfti.getTargetLocale()));
-		}
-		
-		// for applet i18n issue fixing
-        hashtable.put(WorkflowTemplateConstants.I18N_CONTENT, getI18NContents(bundle));
-		
-		return hashtable;
-	}
+        if (hasCosting)
+        {
+            hashtable.put(
+                    WorkflowTemplateConstants.RATES,
+                    getRatesForLocale(p_wfti.getSourceLocale(),
+                            p_wfti.getTargetLocale()));
+        }
+
+        // for applet i18n issue fixing
+        hashtable.put(WorkflowTemplateConstants.I18N_CONTENT,
+                getI18NContents(bundle));
+
+        return hashtable;
+    }
 
     // get the data required for the activity dialog
-    static Hashtable getDataForDialog(ResourceBundle bundle,
-                                      Locale p_locale,
-                                      GlobalSightLocale p_srcLocale,
-                                      GlobalSightLocale p_targetLocale)
-        throws EnvoyServletException
+    static Hashtable getDataForDialog(ResourceBundle bundle, Locale p_locale,
+            GlobalSightLocale p_srcLocale, GlobalSightLocale p_targetLocale)
+            throws EnvoyServletException
     {
         boolean hasCosting = isCostingEnabled();
         boolean hasRevenue = isRevenueEnabled();
         boolean isCalendarInstalled = CalendarManagerLocal.isInstalled();
-        //Start Dialog data
+        // Start Dialog data
         Hashtable hashtable = new Hashtable();
         hashtable.put(WorkflowTemplateConstants.LABELS,
-                      dialogLabels(bundle, isCalendarInstalled));
+                dialogLabels(bundle, isCalendarInstalled));
         hashtable.put(WorkflowTemplateConstants.BTN_LABELS,
-                      dialogButtons(bundle));
-        hashtable.put(WorkflowTemplateConstants.MESSAGES,
-                      messages(bundle));
+                dialogButtons(bundle));
+        hashtable.put(WorkflowTemplateConstants.MESSAGES, messages(bundle));
         hashtable.put(WorkflowTemplateConstants.JOB_COSTING_ENABLED,
-                      new Boolean(hasCosting));
+                new Boolean(hasCosting));
         hashtable.put(WorkflowTemplateConstants.JOB_REVENUE_ENABLED,
-                      new Boolean(hasRevenue));
-        hashtable.put("isCalendarInstalled",
-                      new Boolean(isCalendarInstalled));
+                new Boolean(hasRevenue));
+        hashtable.put("isCalendarInstalled", new Boolean(isCalendarInstalled));
         hashtable.put(WorkflowTemplateConstants.ACTIVITIES,
-                      getAllActivities(p_locale));
+                getAllActivities(p_locale));
         hashtable.put(WorkflowTemplateConstants.SYSTEM_ACTION,
-                      systemActions(bundle));
+                systemActions(bundle));
 
         if (hasCosting)
         {
             hashtable.put(WorkflowTemplateConstants.RATES,
-                          getRatesForLocale(p_srcLocale, p_targetLocale));
+                    getRatesForLocale(p_srcLocale, p_targetLocale));
         }
-        
+
         // for applet i18n issue fixing
-        hashtable.put(WorkflowTemplateConstants.I18N_CONTENT, getI18NContents(bundle));
+        hashtable.put(WorkflowTemplateConstants.I18N_CONTENT,
+                getI18NContents(bundle));
         hashtable.put("templateSource", p_srcLocale);
         hashtable.put("templateTarget", p_targetLocale);
-        
+
         return hashtable;
     }
-    
+
     /**
      * Init i18n contents for applet
-     * @param p_bundle {@code ResourceBundle} base on ui locale
+     * 
+     * @param p_bundle
+     *            {@code ResourceBundle} base on ui locale
      * @return
      */
     private static Hashtable getI18NContents(ResourceBundle p_bundle)
     {
         Hashtable<String, String> m_i18nContents = new Hashtable<String, String>();
-        
+
         setI18nContent(m_i18nContents, p_bundle, "lb_action");
         setI18nContent(m_i18nContents, p_bundle, "lb_activity_node");
         setI18nContent(m_i18nContents, p_bundle, "lb_and_node");
@@ -884,7 +900,8 @@ public class WorkflowTemplateHandlerHelper
         setI18nContent(m_i18nContents, p_bundle, "lb_close");
         setI18nContent(m_i18nContents, p_bundle, "lb_cancel");
         setI18nContent(m_i18nContents, p_bundle, "lb_condition_node");
-        setI18nContent(m_i18nContents, p_bundle, "lb_conditional_node_properties");
+        setI18nContent(m_i18nContents, p_bundle,
+                "lb_conditional_node_properties");
         setI18nContent(m_i18nContents, p_bundle, "lb_description_c");
         setI18nContent(m_i18nContents, p_bundle, "lb_decisions");
         setI18nContent(m_i18nContents, p_bundle, "lb_doc_title");
@@ -919,12 +936,14 @@ public class WorkflowTemplateHandlerHelper
         setI18nContent(m_i18nContents, p_bundle, "lb_start_node_properties");
         setI18nContent(m_i18nContents, p_bundle, "lb_then");
         setI18nContent(m_i18nContents, p_bundle, "lb_title");
-        setI18nContent(m_i18nContents, p_bundle, "lb_toggles_email_notification");
+        setI18nContent(m_i18nContents, p_bundle,
+                "lb_toggles_email_notification");
         setI18nContent(m_i18nContents, p_bundle, "lb_toggles_notification");
         setI18nContent(m_i18nContents, p_bundle, "lb_up");
         setI18nContent(m_i18nContents, p_bundle, "msg_arrow_empty_name");
         setI18nContent(m_i18nContents, p_bundle, "msg_arrow_max_length");
-        setI18nContent(m_i18nContents, p_bundle, "msg_arrow_with_pending_events");
+        setI18nContent(m_i18nContents, p_bundle,
+                "msg_arrow_with_pending_events");
         setI18nContent(m_i18nContents, p_bundle, "msg_condition_to_condition");
         setI18nContent(m_i18nContents, p_bundle, "msg_data_conversion_error");
         setI18nContent(m_i18nContents, p_bundle, "msg_event_pending_warning");
@@ -941,9 +960,11 @@ public class WorkflowTemplateHandlerHelper
         setI18nContent(m_i18nContents, p_bundle, "msg_two_outgoing_arrows");
         setI18nContent(m_i18nContents, p_bundle, "msg_note_ok_gray");
         setI18nContent(m_i18nContents, p_bundle, "msg_note_auto_action");
-        setI18nContent(m_i18nContents, p_bundle, "msg_gsediton_workflow_warining");
+        setI18nContent(m_i18nContents, p_bundle,
+                "msg_gsediton_workflow_warining");
         setI18nContent(m_i18nContents, p_bundle, "msg_note_gs_action");
-        
+        setI18nContent(m_i18nContents, p_bundle, "msg_activity_edit_warning");
+
         return m_i18nContents;
     }
 
@@ -955,18 +976,18 @@ public class WorkflowTemplateHandlerHelper
 
     // get all labels required for the dialog.
     private static String[] dialogLabels(ResourceBundle p_bundle,
-                                         boolean p_isCalendarInstalled)
+            boolean p_isCalendarInstalled)
     {
         String colon = p_bundle.getString("lb_colon");
         String[] array;
-//        if(p_isCalendarInstalled)
-//        {
-            array= new String[36];
-//        }
-//        else
-//        {
-//            array= new String[32];
-//        }
+        // if(p_isCalendarInstalled)
+        // {
+        array = new String[36];
+        // }
+        // else
+        // {
+        // array= new String[32];
+        // }
         array[0] = p_bundle.getString("lb_activity_type") + "* " + colon;
         array[1] = p_bundle.getString("lb_time_complete") + "* " + colon;
         array[2] = p_bundle.getString("lb_participant") + "* " + colon;
@@ -979,58 +1000,55 @@ public class WorkflowTemplateHandlerHelper
         array[9] = p_bundle.getString("lb_days");
         array[10] = p_bundle.getString("lb_activity");
         array[11] = p_bundle.getString("msg_remove_activity_from_wf");
-        array[12] = p_bundle.getString("lb_globalsight") + colon +
-            " " + p_bundle.getString("lb_new_activity_type");
+        array[12] = p_bundle.getString("lb_globalsight") + colon + " "
+                + p_bundle.getString("lb_new_activity_type");
         array[13] = p_bundle.getString("msg_new_task");
-        array[14] = p_bundle.getString("lb_globalsight") + colon +
-            " " + p_bundle.getString("lb_edit_activity_type");
+        array[14] = p_bundle.getString("lb_globalsight") + colon + " "
+                + p_bundle.getString("lb_edit_activity_type");
         array[15] = p_bundle.getString("msg_edit_activity");
-        array[16] = p_bundle.getString("lb_time_accept") +
-            "* " + colon;
+        array[16] = p_bundle.getString("lb_time_accept") + "* " + colon;
         array[17] = p_bundle.getString("lb_abbreviation_day");
         array[18] = p_bundle.getString("lb_abbreviation_hour");
         array[19] = p_bundle.getString("lb_abbreviation_minute");
         array[20] = p_bundle.getString("lb_expense_rate") + colon;
         array[21] = p_bundle.getString("lb_rate_none");
-        array[22] = p_bundle.getString("lb_revenue_rate") +colon;
-        array[23] = p_bundle.getString("lb_estimated_amount") +colon;
-        array[24] = p_bundle.getString("lb_system_action") + "* " +
-            colon;
+        array[22] = p_bundle.getString("lb_revenue_rate") + colon;
+        array[23] = p_bundle.getString("lb_estimated_amount") + colon;
+        array[24] = p_bundle.getString("lb_system_action") + "* " + colon;
         array[25] = p_bundle.getString("lb_none");
         array[26] = p_bundle.getString("lb_cstfs");
         array[27] = p_bundle.getString("lb_before_activity");
         array[28] = p_bundle.getString("lb_use_only_selected_rate");
         array[29] = p_bundle.getString("lb_use_selected_rate_until_acceptance");
-        array[30] = p_bundle.getString("lb_internal_costing_rate_selection") + colon;
+        array[30] = p_bundle.getString("lb_internal_costing_rate_selection")
+                + colon;
         array[31] = p_bundle.getString("lb_estimated_completion_date");
         array[32] = "";
         array[33] = "";
-        
-        if(p_isCalendarInstalled)
+
+        if (p_isCalendarInstalled)
         {
             array[32] = p_bundle.getString("lb_users_completed");
             array[33] = p_bundle.getString("lb_users_earliest");
         }
-        
-        array[34] =  p_bundle.getString("lb_Overdue_PM") + "* " + colon;
-        array[35] =  p_bundle.getString("lb_Overdue_user") + "* " + colon;
-        
+
+        array[34] = p_bundle.getString("lb_Overdue_PM") + "* " + colon;
+        array[35] = p_bundle.getString("lb_Overdue_user") + "* " + colon;
+
         return array;
     }
 
     private static String[] dialogButtons(ResourceBundle p_bundle)
     {
         String[] array =
-        {
-            p_bundle.getString("applet_save"),
-            p_bundle.getString("applet_saveb"),
-            p_bundle.getString("applet_savex"),
-            p_bundle.getString("applet_cancel"),
-            p_bundle.getString("applet_cancelb"),
-            p_bundle.getString("applet_ok"),
-            p_bundle.getString("applet_okb"),
-            p_bundle.getString("applet_okx")
-        };
+        { p_bundle.getString("applet_save"),
+                p_bundle.getString("applet_saveb"),
+                p_bundle.getString("applet_savex"),
+                p_bundle.getString("applet_cancel"),
+                p_bundle.getString("applet_cancelb"),
+                p_bundle.getString("applet_ok"),
+                p_bundle.getString("applet_okb"),
+                p_bundle.getString("applet_okx") };
         return array;
     }
 
@@ -1039,12 +1057,11 @@ public class WorkflowTemplateHandlerHelper
     {
         String[] array =
         {
-            p_bundle.getString("msg_loc_profiles_time_restrictions"),
-            p_bundle.getString("msg_loc_profiles_auto_restrictions"),
-            p_bundle.getString("msg_loc_profiles_overdue_time_restrictions"),
-            p_bundle.getString("jsmsg_system_parameters_notification_days"),
-            p_bundle.getString("msg_loc_profiles_GS_restrictions")
-        };
+                p_bundle.getString("msg_loc_profiles_time_restrictions"),
+                p_bundle.getString("msg_loc_profiles_auto_restrictions"),
+                p_bundle.getString("msg_loc_profiles_overdue_time_restrictions"),
+                p_bundle.getString("jsmsg_system_parameters_notification_days"),
+                p_bundle.getString("msg_loc_profiles_GS_restrictions") };
         return array;
     }
 
@@ -1054,17 +1071,14 @@ public class WorkflowTemplateHandlerHelper
     {
         Vector values = new Vector();
 
-        values.addElement(new SystemAction(
-            SystemAction.NO_ACTION,
-            p_bundle.getString(SystemAction.NO_ACTION)));
+        values.addElement(new SystemAction(SystemAction.NO_ACTION, p_bundle
+                .getString(SystemAction.NO_ACTION)));
 
-        values.addElement(new SystemAction(
-            SystemAction.CSTF,
-            p_bundle.getString(SystemAction.CSTF)));
+        values.addElement(new SystemAction(SystemAction.CSTF, p_bundle
+                .getString(SystemAction.CSTF)));
 
-        values.addElement(new SystemAction(
-            SystemAction.RSTF,
-            p_bundle.getString(SystemAction.RSTF)));
+        values.addElement(new SystemAction(SystemAction.RSTF, p_bundle
+                .getString(SystemAction.RSTF)));
 
         return values;
     }

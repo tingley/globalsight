@@ -50,21 +50,20 @@ public interface WorkflowMailerConstants
     public static final int AUTOACTION_TASK  = 12;
 
     // message text.
-    public static final String ACCEPT_TASK_MESSAGE 	= "message_accept_task";
-    public static final String AUTOACTION_TASK_MESSAGE  = "message_autoaction_task";
-    public static final String ADVANCE_TASK_MESSAGE	= "message_advance_task";
-    public static final String CANCEL_TASK_MESSAGE 	= "message_cancel_task";
-    public static final String REASSIGN_TASK_MESSAGE	= "message_reassign_task";
-    public static final String REJECT_TASK_MESSAGE 	= "message_reject_task";
-    public static final String REROUTE_TASK_MESSAGE	= "message_reroute_task";
-    public static final String ACTIVATE_TASK_MESSAGE    = "message_activate_task";
-    public static final String ACTIVATE_REVIEW_TASK_MESSAGE    = "message_activate_review_task";
-    public static final String COMPLETED_TASK_MESSAGE   = "message_completed_task";
-    public static final String PAGE_REIMPORTED_MESSAGE  = "message_page_reimported";
-    public static final String PAGE_EXPORTED_FOR_UPDATE_MESSAGE  = "message_page_efu";
-    public static final String NO_AVAILABLE_RESOURCE_MESSAGE = 
-        "message_no_available_resource";
-    public static final String SHORT_OF_WORKFLOW_GSEDITION_MESSAGE  = "message__short_of_workflow_GSEdition";
+    public static final String ACCEPT_TASK_MESSAGE = "message_accept_task";
+    public static final String AUTOACTION_TASK_MESSAGE = "message_autoaction_task";
+    public static final String ADVANCE_TASK_MESSAGE = "message_advance_task";
+    public static final String CANCEL_TASK_MESSAGE = "message_cancel_task";
+    public static final String REASSIGN_TASK_MESSAGE = "message_reassign_task";
+    public static final String REJECT_TASK_MESSAGE = "message_reject_task";
+    public static final String REROUTE_TASK_MESSAGE = "message_reroute_task";
+    public static final String ACTIVATE_TASK_MESSAGE = "message_activate_task";
+    public static final String ACTIVATE_REVIEW_TASK_MESSAGE = "message_activate_review_task";
+    public static final String COMPLETED_TASK_MESSAGE = "message_completed_task";
+    public static final String PAGE_REIMPORTED_MESSAGE = "message_page_reimported";
+    public static final String PAGE_EXPORTED_FOR_UPDATE_MESSAGE = "message_page_efu";
+    public static final String NO_AVAILABLE_RESOURCE_MESSAGE = "message_no_available_resource";
+    public static final String SHORT_OF_WORKFLOW_GSEDITION_MESSAGE = "message__short_of_workflow_GSEdition";
     
     // mesage subject.
     public static final String ACCEPT_TASK_SUBJECT = "subject_accept_task";
@@ -74,12 +73,11 @@ public interface WorkflowMailerConstants
     public static final String REASSIGN_TASK_SUBJECT = "subject_reassign_task";
     public static final String REJECT_TASK_SUBJECT = "subject_reject_task";
     public static final String REROUTE_TASK_SUBJECT = "subject_reroute_task";
-    public static final String ACTIVATE_TASK_SUBJECT    = "subject_activate_task";
-    public static final String ACTIVATE_REVIEW_TASK_SUBJECT    = "subject_activate_review_task";
-    public static final String COMPLETED_TASK_SUBJECT    = "subject_completed_task";
+    public static final String ACTIVATE_TASK_SUBJECT = "subject_activate_task";
+    public static final String ACTIVATE_REVIEW_TASK_SUBJECT = "subject_activate_review_task";
+    public static final String COMPLETED_TASK_SUBJECT = "subject_completed_task";
     public static final String PAGE_REIMPORTED_SUBJECT = "subject_page_reimported";
     public static final String PAGE_EXPORTED_FOR_UPDATE_SUBJECT = "subject_page_efu";
-    public static final String NO_AVAILABLE_RESOURCE_SUBJECT = 
-        "subject_no_available_resource";
+    public static final String NO_AVAILABLE_RESOURCE_SUBJECT = "subject_no_available_resource";
     public static final String SHORT_OF_WORKFLOW_GSEDITION_SUBJECT = "subject_short_of_workflow_GSEdition";
 }

@@ -125,7 +125,7 @@ function submitForm()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("select_the_appropriate")%></SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/reviewerVendorPOXlsReport.jsp">
@@ -224,6 +224,8 @@ function submitForm()
 <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
 <option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
 <option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+<option value='<%=Job.EXPORT_FAIL%>'><%= bundle.getString("lb_exported_failed") %></option>
+<option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
 </select>
 </td>
 </tr>

@@ -196,9 +196,7 @@ public class AlignmentUnit
             setState(ALIGN_FAILED);
 
             // log the error
-            StringWriter writer = new StringWriter();
-            e.printStackTrace(new PrintWriter(writer));
-            c_logger.error(writer.toString());
+            c_logger.error(e.getMessage(), e);
 
             // process error
             if(e instanceof GeneralException)

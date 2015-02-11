@@ -45,7 +45,7 @@ public class TmxPseudo
         PseudoCodec codec = new PseudoCodec();
         XmlEntities xmlEncoder = new XmlEntities();
         String segment = xmlEncoder.encodeString(pseudoData
-                .getPTagTargetString());
+                .getWrappedPTagTargetString());
 
         Pseudo2TmxHandler pseudo2TmxHandler = new Pseudo2TmxHandler(pseudoData);
         PseudoParser pseudoParser = new PseudoParser(pseudo2TmxHandler);
@@ -76,13 +76,13 @@ public class TmxPseudo
     {
         if (state == ONLINE_EDIT)
             return new EmbedOnlineInternalTag();
-        
+
         if (state == OFFLINE_TM)
             return new XliffInternalTag();
-        
+
         return null;
     }
-    
+
     /**
      * Construct pseudo data from a tmx string.
      * 
@@ -101,8 +101,8 @@ public class TmxPseudo
 
         PseudoCodec codec = new PseudoCodec();
         Tmx2PseudoHandler eventHandler = new Tmx2PseudoHandler(p_PseudoData);
-        String segment = eventHandler.preProcessInternalText(codec
-                .encode(p_strTmxString), internalTag);
+        String segment = eventHandler.preProcessInternalText(
+                codec.encode(p_strTmxString), internalTag);
         DiplomatBasicParser parser = new DiplomatBasicParser(eventHandler);
 
         parser.parse(segment);

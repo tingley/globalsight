@@ -3,6 +3,8 @@ package com.globalsight.ling.docproc.extractor.xliff;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,6 +14,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
 
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatCtrlCharConverter;
@@ -27,6 +31,8 @@ import com.globalsight.ling.docproc.Segmentable;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.ling.docproc.extractor.BaseExtractorTestClass;
 import com.globalsight.ling.docproc.extractor.FileSet;
+import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
+import com.globalsight.util.ClassUtil;
 
 public class TestExtractor extends BaseExtractorTestClass
 {
@@ -114,6 +120,110 @@ public class TestExtractor extends BaseExtractorTestClass
             fail(e.getMessage());
         }
 
+    }
+    
+    @Test
+    public void testWsGetNodeInfo()
+    {
+        try
+        {
+            File wsxliff = new File(
+                    getResourcePath(TestExtractor.class, SOURCE)
+                            + File.separator + "WSXliff.xlf");
+            FileInputStream in = new FileInputStream(wsxliff);
+            InputStreamReader input = new InputStreamReader(in, "utf-8");
+            GsDOMParser parser = new GsDOMParser();
+
+            // parse and create DOM tree
+            parser.parse(new InputSource(input));
+            Node doc = parser.getDocument().getFirstChild().getFirstChild();
+
+            while (!doc.getNodeName().equals("file"))
+            {
+
+                doc = doc.getNextSibling();
+            }
+
+            doc = doc.getFirstChild();
+
+            while (!doc.getNodeName().equals("body"))
+            {
+                doc = doc.getNextSibling();
+            }
+
+            doc = doc.getFirstChild();
+
+            while (!doc.getNodeName().equals("trans-unit"))
+            {
+                doc = doc.getNextSibling();
+            }
+
+            doc = doc.getFirstChild();
+
+            while (!doc.getNodeName().equals("source"))
+            {
+                doc = doc.getNextSibling();
+            }
+
+            Node sourceNode = doc;
+            WSNodeInfo wsn = new WSNodeInfo();
+
+            HashMap<String, String> map = wsn.getNodeTierInfo(sourceNode);
+
+            if (map.get(Extractor.IWS_TM_SCORE) == null)
+            {
+                fail("\n" + Extractor.IWS_TM_SCORE + " lost!");
+            }
+            else if (!map.get(Extractor.IWS_TM_SCORE).equals("99.67"))
+            {
+                fail("\n" + Extractor.IWS_TM_SCORE
+                        + " is not the correct result!");
+            }
+
+            if (map.get(Extractor.IWS_SID) == null)
+            {
+                fail("\n" + Extractor.IWS_SID + " lost!");
+            }
+            else if (!map.get(Extractor.IWS_SID).equals("0001"))
+            {
+                fail("\n" + Extractor.IWS_SID + " is not the correct result!");
+            }
+
+            if (map.get(Extractor.IWS_WORDCOUNT) == null)
+            {
+                fail("\n" + Extractor.IWS_WORDCOUNT + " lost!");
+            }
+            else if (!map.get(Extractor.IWS_WORDCOUNT).equals("6"))
+            {
+                fail("\n" + Extractor.IWS_WORDCOUNT
+                        + " is not the correct result!");
+            }
+
+            if (map.get(Extractor.IWS_TRANSLATION_TYPE) == null)
+            {
+                fail("\n" + Extractor.IWS_TRANSLATION_TYPE + " lost!");
+            }
+            else if (!map.get(Extractor.IWS_TRANSLATION_TYPE).equals(
+                    "machine_translation"))
+            {
+                fail("\n" + Extractor.IWS_TRANSLATION_TYPE
+                        + " is not the correct result!");
+            }
+
+            if (map.get(Extractor.IWS_SOURCE_CONTENT) == null)
+            {
+                fail("\n" + Extractor.IWS_SOURCE_CONTENT + " lost!");
+            }
+            else if (!map.get(Extractor.IWS_SOURCE_CONTENT).equals("repeated"))
+            {
+                fail("\n" + Extractor.IWS_SOURCE_CONTENT
+                        + " is not the correct result!");
+            }
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+        }
     }
     
     @Override

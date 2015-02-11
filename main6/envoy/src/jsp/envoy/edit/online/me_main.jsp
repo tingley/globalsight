@@ -163,6 +163,11 @@ function SwitchTargetLocale(p_locale)
     Refresh("<%=selfURL%>&refresh=0&trgViewLocale=" + p_locale);
 }
 
+function SegmentFilter(p_segmentFilter)
+{
+    Refresh("<%=selfURL%>&refresh=0&segmentFilter=" + p_segmentFilter);
+}
+
 function SetTargetLocaleInfo(p_targetViewLocale, p_displayLocale)
 {
     g_targetViewLocale = p_targetViewLocale;
@@ -179,14 +184,14 @@ function UnhighlightSegment(p_tuId, p_tuvId, p_subId)
     content.UnhighlightSegment(p_tuId, p_tuvId, p_subId);
 }
 </SCRIPT>
-<SCRIPT FOR=window EVENT=onunload>
+<!--SCRIPT FOR=window EVENT=onunload>
 // Callback for segmentComments.jsp to refresh itself
 // when new comments may have been added.
 if (!g_refreshing)
 {
     try { window.opener.RefreshComments(); } catch (ignore) {}
 }
-</SCRIPT>
+</SCRIPT-->
 </HEAD>
 
 <% if (state.isReviewMode()) { %>

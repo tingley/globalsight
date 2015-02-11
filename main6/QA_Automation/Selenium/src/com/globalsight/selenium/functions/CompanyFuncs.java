@@ -13,7 +13,7 @@ package com.globalsight.selenium.functions;
 import org.testng.Assert;
 
 import com.globalsight.selenium.pages.Company;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 public class CompanyFuncs extends BasicFuncs
@@ -27,7 +27,7 @@ public class CompanyFuncs extends BasicFuncs
             throws Exception
     {
         clickAndWait(selenium, Company.New_BUTTON);
-        String iCompanyName = ConfigUtil.getConfigData("COMPANY_NAME");
+        String iCompanyName = ConfigUtil.getConfigData("company");
         String enableIpFilter = ConfigUtil.getDataInCase(testCaseName,
                 "enableIpFilter");
         selenium.type(Company.Name_TEXT_FIELD, iCompanyName);
@@ -50,7 +50,7 @@ public class CompanyFuncs extends BasicFuncs
             selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);           
          }
       
-        Assert.assertEquals(this.findElementsOnTables(selenium,
+        Assert.assertEquals(this.isElementPresent(selenium,
                 "//input[@name='radioBtn' and @value='" + iCompanyName + "']"),
                 true);
     }

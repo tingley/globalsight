@@ -126,4 +126,15 @@ public class PermissionManagerWLRMIImpl extends RemoteServer implements
     {
         m_localReference.unMapUsersFromPermissionGroup(p_users, p_permGroup);
     }
+    public Collection getPermissionGroupsBycondition(String condition)
+            throws PermissionException, RemoteException{
+        return m_localReference.getPermissionGroupsBycondition(condition);
+        
+    };
+    
+    public  Collection<Object[]> getAlltableNameForUser(String tableName)
+            throws PermissionException, RemoteException{
+        return m_localReference.getAlltableNameForUser(tableName);
+        
+    };
 }

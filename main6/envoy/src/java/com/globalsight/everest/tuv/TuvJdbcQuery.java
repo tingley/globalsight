@@ -27,19 +27,22 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
  * TuvJdbcQuery class is responsible for querying Tu/Tuv data from database.
  */
 
-public class TuvJdbcQuery
+public class TuvJdbcQuery extends SegmentTuTuvCacheManager implements
+        TuvQueryConstants
 {
 
 	// select column list
-	private static final String SELECT_COLUMN_LIST = "SELECT tu.id tu_id, tu.order_num tu_order_num, tu.tm_id tm_id, "
+	private static final String SELECT_COLUMN_LIST = "SELECT "
+	        + "tu.id tu_id, tu.order_num tu_order_num, tu.tm_id tm_id, "
 			+ "tu.data_type data_type, tu.tu_type tu_type, "
 			+ "tu.localize_type localize_type, "
 			+ "tu.leverage_group_id leverage_group_id, tu.pid pid, tuv.id tuv_id, "
@@ -50,7 +53,9 @@ public class TuvJdbcQuery
 			+ "tuv.merge_state merge_state, tuv.last_modified last_modified, "
 	        + "tuv.timestamp timestamp, tuv.modify_user, tuv.sid ";
 
-	private static final String CONDITION_BY_SOURCE_PAGE_AND_LOCALE = "FROM translation_unit tu, translation_unit_variant tuv, "
+	private static final String CONDITION_BY_SOURCE_PAGE_AND_LOCALE = "FROM "
+	        + TU_TABLE_PLACEHOLDER + " tu, "
+	        + TUV_TABLE_PLACEHOLDER + " tuv, "
 			+ "source_page_leverage_group splg "
 			+ "WHERE tuv.state != 'OUT_OF_DATE' AND tuv.tu_id = tu.id "
 			+ "AND tu.leverage_group_id = splg.lg_id AND splg.sp_id = ? "
@@ -75,36 +80,6 @@ public class TuvJdbcQuery
 	 *            List of target locales
 	 * @return List of Tus
 	 */
-
-	public List getTusObjsBySourcePageIdAndLocales(SourcePage p_sourcePage,
-			Collection p_targetLocales) throws Exception
-	{
-
-		GlobalSightLocaleRepository localeRepository = new GlobalSightLocaleRepository();
-		localeRepository.addLocale(p_sourcePage.getGlobalSightLocale());
-		localeRepository.addLocales(p_targetLocales);
-		String query = SELECT_COLUMN_LIST
-				+ CONDITION_BY_SOURCE_PAGE_AND_LOCALE
-				+ DbUtil
-						.createLocaleInClause(localeRepository.getAllLocales())
-				+ ORDER_BY_TU_ORDER;
-
-		ArrayList tus = (ArrayList) HibernateUtil.searchWithSql(TuImpl.class,
-				query, p_sourcePage.getIdAsLong());
-
-		return tus;
-	}
-
-	/**
-	 * Retrieve TU/TUVs by source page id and locales. TUs are sorted by
-	 * order_num
-	 * 
-	 * @param p_sourcePage
-	 *            source page
-	 * @param p_targetLocales
-	 *            List of target locales
-	 * @return List of Tus
-	 */
 	public List getTusBySourcePageIdAndLocales(SourcePage p_sourcePage,
 			Collection p_targetLocales) throws Exception
 	{
@@ -115,6 +90,11 @@ public class TuvJdbcQuery
 		String query = SELECT_COLUMN_LIST + CONDITION_BY_SOURCE_PAGE_AND_LOCALE
 				+ DbUtil.createLocaleInClause(localeRepository.getAllLocales())
 				+ ORDER_BY_TU_ORDER;
+
+		String tuTableName = getTuTableName(p_sourcePage.getCompanyId());
+		String tuvTableName = getTuvTableName(p_sourcePage.getCompanyId());
+		query = query.replace(TU_TABLE_PLACEHOLDER, tuTableName);
+		query = query.replace(TUV_TABLE_PLACEHOLDER, tuvTableName);
 
 		ArrayList tus = null;
 
@@ -131,15 +111,7 @@ public class TuvJdbcQuery
 		}
 		finally
 		{
-			if (rs != null)
-			{
-				rs.close();
-			}
-
-			if (ps != null)
-			{
-				ps.close();
-			}
+		    releaseRsPsConnection(rs, ps, null);
 		}
 
 		return tus;
@@ -231,7 +203,7 @@ public class TuvJdbcQuery
 
 	private class GlobalSightLocaleRepository
 	{
-		HashMap m_locales = new HashMap();
+        HashMap<Long, GlobalSightLocale> m_locales = new HashMap<Long, GlobalSightLocale>();
 
 		private void addLocale(GlobalSightLocale p_locale)
 		{

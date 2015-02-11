@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -50,10 +49,10 @@ import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.taskmanager.TaskPersistenceAccessor;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -65,8 +64,8 @@ import com.globalsight.util.GlobalSightLocale;
  * </p>
  * 
  * <p>
- * Files are stored under ~<file storage>/GlobalSight/CommentReference. Each
- * job is a sub-directory, there might be some files which would be visible to
+ * Files are stored under ~<file storage>/GlobalSight/CommentReference. Each job
+ * is a sub-directory, there might be some files which would be visible to
  * Admin/PM/WFManagers only. They are called "Restricted" files and are
  * therefore kept in a separate directory named "Restricted". All other files
  * can be viewd by all kinds of users in the job called as "General" flies and
@@ -94,7 +93,8 @@ public class CommentManagerLocal implements CommentManager
             throws RemoteException, CommentException
     {
 
-        String[] access = { WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
+        String[] access =
+        { WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
                 WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS };
         try
         {
@@ -114,7 +114,8 @@ public class CommentManagerLocal implements CommentManager
         }
         catch (Exception ex)
         {
-            String[] arg = { p_file.getFilename() };
+            String[] arg =
+            { p_file.getFilename() };
 
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_DELETE_FILE, arg, ex);
@@ -153,7 +154,7 @@ public class CommentManagerLocal implements CommentManager
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new CommentException(ex.getMessage());
         }
     }
@@ -190,7 +191,7 @@ public class CommentManagerLocal implements CommentManager
         }
         catch (Exception ex)
         {
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new CommentException(ex.getMessage());
         }
     }
@@ -203,26 +204,26 @@ public class CommentManagerLocal implements CommentManager
     {
         return getCommentReferences(p_commentId, p_access, false);
     }
-    
+
     /**
      * @see CommentManager.getCommentRefrences(String, String)
      */
-    public ArrayList getCommentReferences(String p_commentId, String p_access, String companyId)
-            throws RemoteException, CommentException
+    public ArrayList getCommentReferences(String p_commentId, String p_access,
+            String companyId) throws RemoteException, CommentException
     {
         return getCommentReferences(p_commentId, p_access, false, companyId);
     }
-    
+
     /**
      * @see CommentManager.getCommentReferences(String, String, boolean)
      */
     public ArrayList /* of CommentFile */getCommentReferences(
-            String p_commentId, String p_access, boolean p_saved, String companyId)
-            throws RemoteException, CommentException
+            String p_commentId, String p_access, boolean p_saved,
+            String companyId) throws RemoteException, CommentException
     {
         ArrayList result = readCommentReferenceDirectory(
-                AmbFileStoragePathUtils.getCommentReferenceDir(companyId).toString(),
-                p_commentId, p_access, p_saved);
+                AmbFileStoragePathUtils.getCommentReferenceDir(companyId)
+                        .toString(), p_commentId, p_access, p_saved);
 
         return result;
     }
@@ -264,40 +265,40 @@ public class CommentManagerLocal implements CommentManager
      * @see CommentManager.save(WorkObject, long, String, String)
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment) throws RemoteException,
+            String p_creatorUserId, String p_comment) throws RemoteException,
             CommentException
     {
-        return saveComment(p_wo, p_id, p_creatorUserName, p_comment, 
-        		Calendar.getInstance().getTime(), null, null);
+        return saveComment(p_wo, p_id, p_creatorUserId, p_comment, Calendar
+                .getInstance().getTime(), null, null);
     }
 
     /**
      * @see CommentManager.save(WorkObject, long, String, String, Date)
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment, Date p_date)
+            String p_creatorUserId, String p_comment, Date p_date)
             throws RemoteException, CommentException
     {
-        return saveComment(p_wo, p_id, p_creatorUserName, p_comment, p_date, null, null);
+        return saveComment(p_wo, p_id, p_creatorUserId, p_comment, p_date,
+                null, null);
     }
-    
+
     /**
      * @see CommentManager.save(WorkObject, long, String, String, String)
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment, 
-            String p_originalId, String p_originalWsdlUrl) 
-            throws RemoteException, CommentException
+            String p_creatorUserId, String p_comment, String p_originalId,
+            String p_originalWsdlUrl) throws RemoteException, CommentException
     {
-    	return saveComment(p_wo, p_id, p_creatorUserName, p_comment, Calendar
+        return saveComment(p_wo, p_id, p_creatorUserId, p_comment, Calendar
                 .getInstance().getTime(), p_originalId, p_originalWsdlUrl);
     }
-    
+
     /**
      * @see CommentManager.save(WorkObject, long, String, String, Date)
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment, Date p_date, 
+            String p_creatorUserId, String p_comment, Date p_date,
             String p_originalId, String p_originalWsdlUrl)
             throws RemoteException, CommentException
     {
@@ -311,8 +312,7 @@ public class CommentManagerLocal implements CommentManager
         {
             // if the task was not found - need this for HP's integration API
             // in case they send invalid task ids
-            CATEGORY
-                    .error("Failed to specify a workflow object to add the comment to.");
+            CATEGORY.error("Failed to specify a workflow object to add the comment to.");
             throw new CommentException(
                     "CommmentException.FAILED_TO_SPECIFY_WORK_OBJECT", null,
                     null);
@@ -324,14 +324,15 @@ public class CommentManagerLocal implements CommentManager
 
         try
         {
-            comment = new CommentImpl(p_date, p_creatorUserName, p_comment, p_wo);
+            comment = new CommentImpl(p_date, p_creatorUserId, p_comment, p_wo);
             comment.setOriginalId(p_originalId);
             comment.setOriginalWsdlUrl(p_originalWsdlUrl);
             session.save(comment);
 
             if (p_wo instanceof Job)
             {
-                Job job = (Job) session.get(JobImpl.class, new Long(p_wo.getId()));
+                Job job = (Job) session.get(JobImpl.class,
+                        new Long(p_wo.getId()));
                 job.addJobComment(comment);
                 session.update(job);
             }
@@ -372,7 +373,8 @@ public class CommentManagerLocal implements CommentManager
                 objectType = "Task";
             }
 
-            String[] msgArgs = { objectType, String.valueOf(p_id) };
+            String[] msgArgs =
+            { objectType, String.valueOf(p_id) };
 
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_SAVE_COMMENT, msgArgs, ex);
@@ -386,7 +388,7 @@ public class CommentManagerLocal implements CommentManager
     /**
      * @see CommentManager.updateComment(long, String, String)
      */
-    public Comment updateComment(long p_commentId, String p_modifierUserName,
+    public Comment updateComment(long p_commentId, String p_modifierUserId,
             String p_commentString) throws RemoteException, CommentException
     {
         try
@@ -408,7 +410,7 @@ public class CommentManagerLocal implements CommentManager
                         Comment jobComment = (Comment) job.getJobComments()
                                 .get(jcIndex);
                         updateComment((CommentImpl) jobComment,
-                                p_commentString, p_modifierUserName);
+                                p_commentString, p_modifierUserId);
                         JobPersistenceAccessor.updateJobState(job);
                     }
                 }
@@ -422,7 +424,7 @@ public class CommentManagerLocal implements CommentManager
                         Comment taskComment = (Comment) task.getTaskComments()
                                 .get(tcIndex);
                         updateComment((CommentImpl) taskComment,
-                                p_commentString, p_modifierUserName);
+                                p_commentString, p_modifierUserId);
                         TaskPersistenceAccessor.updateTask(task);
                     }
                 }
@@ -450,7 +452,7 @@ public class CommentManagerLocal implements CommentManager
                 p_priority, p_status, p_category, p_creatorUserId, p_comment,
                 p_logicalKey, false, false);
     }
-    
+
     /**
      * @see CommentManager.addIssue(int, long, String, String, String, String,
      *      String, String, String)
@@ -477,8 +479,8 @@ public class CommentManagerLocal implements CommentManager
         catch (Exception ex)
         {
             CATEGORY.error("Failed to add a new issue.", ex);
-            String[] args = {
-                    IssueImpl.getLevelTypeAsString(p_levelObjectType),
+            String[] args =
+            { IssueImpl.getLevelTypeAsString(p_levelObjectType),
                     String.valueOf(p_levelObjectId), p_creatorUserId };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_ADD_ISSUE, args, ex);
@@ -499,7 +501,7 @@ public class CommentManagerLocal implements CommentManager
         return replyToIssue(p_issueId, p_title, p_priority, p_status,
                 p_category, p_reportedBy, p_comment, false, false);
     }
-    
+
     /**
      * @see CommentManager.replyToIssue(long, String, String, String, String,
      *      String, String)
@@ -551,11 +553,11 @@ public class CommentManagerLocal implements CommentManager
             String p_status, String p_category, String p_reportedBy,
             String p_comment) throws RemoteException, CommentException
     {
-        
+
         return editIssue(p_issueId, p_title, p_priority, p_status, p_category,
                 p_reportedBy, p_comment, false, false);
     }
-    
+
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
             String p_status, String p_category, String p_reportedBy,
             String p_comment, boolean share, boolean overwrite)
@@ -565,6 +567,8 @@ public class CommentManagerLocal implements CommentManager
 
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
+        Connection conn = null;
+        PreparedStatement stmt = null;
 
         try
         {
@@ -588,16 +592,14 @@ public class CommentManagerLocal implements CommentManager
                 if (ih.reportedBy().equals(p_reportedBy))
                 {
                     // For the "changing comments not saved" issue, use jdbc to
-                    // update
-                    // ISSUE_HISTORY table.
-                    Connection conn = null;
+                    // update ISSUE_HISTORY table.
                     conn = SqlUtil.hireConnection();
                     conn.setAutoCommit(false);
 
                     String sqlUpdate = "update ISSUE_HISTORY set DESCRIPTION= ? ,"
                             + "REPORTED_DATE = ? "
                             + " Where REPORTED_BY = ? and REPORTED_DATE = ?";
-                    PreparedStatement stmt = conn.prepareStatement(sqlUpdate);
+                    stmt = conn.prepareStatement(sqlUpdate);
                     Date date = ih.dateReportedAsDate();
                     Date currentDate = Calendar.getInstance().getTime();
 
@@ -612,8 +614,6 @@ public class CommentManagerLocal implements CommentManager
 
                     stmt.executeUpdate();
                     conn.commit();
-                    stmt.close();
-                    SqlUtil.fireConnection(conn);
                 }
             }
 
@@ -622,12 +622,15 @@ public class CommentManagerLocal implements CommentManager
         catch (Exception ex)
         {
             CATEGORY.error("Failed to edit issue.", ex);
-            String[] args = { String.valueOf(p_issueId), p_reportedBy };
+            String[] args =
+            { String.valueOf(p_issueId), p_reportedBy };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_EDIT_ISSUE, args, ex);
         }
         finally
         {
+        	DbUtil.silentClose(stmt);
+            SqlUtil.fireConnection(conn);
             // session.close();
         }
 
@@ -669,7 +672,8 @@ public class CommentManagerLocal implements CommentManager
         {
             CATEGORY.error("Failed to get comments for the tasks in job "
                     + p_jobId, ex);
-            String args[] = { String.valueOf(p_jobId) };
+            String args[] =
+            { String.valueOf(p_jobId) };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_GET_TASK_COMMENTS, args, ex);
         }
@@ -692,7 +696,8 @@ public class CommentManagerLocal implements CommentManager
             String issueIdString = String.valueOf(p_issueId);
             CATEGORY.error("Failed to get the issue with id " + issueIdString,
                     ex);
-            String msgArgs[] = { issueIdString };
+            String msgArgs[] =
+            { issueIdString };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_GET_ISSUE, msgArgs, ex);
         }
@@ -724,18 +729,30 @@ public class CommentManagerLocal implements CommentManager
             CATEGORY.error("Failed to get issues for object type "
                     + p_levelObjectType + " with logical key " + p_logicalKey,
                     ex);
-            String msgArgs[] = { String.valueOf(p_levelObjectType),
-                    p_logicalKey };
+            String msgArgs[] =
+            { String.valueOf(p_levelObjectType), p_logicalKey };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_GET_ISSUES, msgArgs, ex);
         }
     }
 
     /**
+     * @see CommentManager.getIssueCount(int, Long, List)
+     */
+	public int getIssueCount(int p_levelObjectType, Long p_targetPageId,
+			List<String> p_statusList) throws RemoteException, CommentException
+    {
+    	List<Long> targetPageIds = new ArrayList<Long>();
+    	targetPageIds.add(p_targetPageId);
+
+    	return getIssueCount(p_levelObjectType, targetPageIds, p_statusList);
+    }
+
+	/**
      * @see CommentManager.getIssueCount(int, List, List)
      */
-    public int getIssueCount(int p_levelObjectType, List p_logicalKeys,
-            List p_statusList) throws RemoteException, CommentException
+	public int getIssueCount(int p_levelObjectType, List<Long> p_targetPageIds,
+			List<String> p_statusList) throws RemoteException, CommentException
     {
         int numOfIssues = 0;
 
@@ -743,66 +760,71 @@ public class CommentManagerLocal implements CommentManager
         {
             String sql = IssueUnnamedQueries
                     .getIssueCountByTypeStatusAndPageId(p_statusList,
-                            p_logicalKeys);
-            Map map = new HashMap();
-            map.put("objectType", IssueImpl
-                    .getLevelTypeAsString(p_levelObjectType));
+                    		p_targetPageIds);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("objectType",
+                    IssueImpl.getLevelTypeAsString(p_levelObjectType));
             numOfIssues = HibernateUtil.countWithSql(sql, map);
         }
         catch (Exception ex)
         {
-            CATEGORY.error("Failed to get the issue count for object type "
-                    + p_levelObjectType + " with logical key "
-                    + p_logicalKeys.toString(), ex);
-            String msgArgs[] = {
-                    IssueImpl.getLevelTypeAsString(p_levelObjectType),
-                    p_logicalKeys.toString(), p_statusList.toString() };
+            CATEGORY.error(
+                    "Failed to get the issue count for object type "
+                            + p_levelObjectType + " with logical key "
+                            + p_targetPageIds.toString(), ex);
+            String msgArgs[] =
+            { IssueImpl.getLevelTypeAsString(p_levelObjectType),
+            		p_targetPageIds.toString(), p_statusList.toString() };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_GET_ISSUE_COUNT, msgArgs, ex);
         }
 
         return numOfIssues;
     }
-
+	
     /**
-     * @see CommentManager.getIssueCount(int, String, List)
+     * @see CommentManager.getIssueCountPerTargetPage(int, String, List)
      */
-    public int getIssueCount(int p_levelObjectType, String p_logicalKey,
-            List p_statusList) throws RemoteException, CommentException
-    {
-        int numOfIssues = 0;
-
-        try
-        {
-            if (!p_logicalKey.endsWith("%"))
+	public HashMap<Long, Integer> getIssueCountPerTargetPage(
+			int p_levelObjectType, List<Long> p_targetPageIds,
+			List<String> p_statusList) throws RemoteException, CommentException
+	{
+		HashMap<Long, Integer> result = new HashMap<Long, Integer>();
+		try
+		{
+			String sql = IssueUnnamedQueries
+					.getIssueCountByTypeStatusPerPageId(p_statusList,
+							p_targetPageIds);
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("objectType",
+                    IssueImpl.getLevelTypeAsString(p_levelObjectType));
+            List<?> list = HibernateUtil.searchWithSql(sql, map);
+            if (list != null && list.size() > 0)
             {
-                p_logicalKey += "%";
+				for (int i = 0; i < list.size(); i++)
+            	{
+            		Object[] contents = (Object[]) list.get(i);
+            		Long tpId = Long.parseLong(contents[0].toString());
+            		Integer count = Integer.parseInt(contents[1].toString());
+            		result.put(tpId, count);
+            	}
             }
-
-            // get the result
-            String sql = IssueUnnamedQueries
-                    .getIssueCountByTypeKeyAndState(p_statusList);
-            Map map = new HashMap();
-            map.put(IssueUnnamedQueries.TYPE_ARG, IssueImpl
-                    .getLevelTypeAsString(p_levelObjectType));
-            map.put(IssueUnnamedQueries.KEY_ARG, p_logicalKey);
-
-            numOfIssues = HibernateUtil.countWithSql(sql, map);
-        }
-        catch (Exception ex)
-        {
-            CATEGORY.error("Failed to get the issue count for object type "
-                    + p_levelObjectType + " with logical key " + p_logicalKey,
-                    ex);
-            String msgArgs[] = {
-                    IssueImpl.getLevelTypeAsString(p_levelObjectType),
-                    p_logicalKey, p_statusList.toString() };
+		}
+		catch (Exception ex)
+		{
+            CATEGORY.error(
+                    "Failed to get the issue count per page for object type "
+                            + p_levelObjectType + " with logical key "
+                            + p_targetPageIds.toString(), ex);
+            String msgArgs[] =
+            { IssueImpl.getLevelTypeAsString(p_levelObjectType),
+            		p_targetPageIds.toString(), p_statusList.toString() };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_GET_ISSUE_COUNT, msgArgs, ex);
-        }
+		}
 
-        return numOfIssues;
-    }
+		return result;
+	}
 
     /**
      * @see CommentManager.deleteIssues(int, List)
@@ -824,8 +846,8 @@ public class CommentManagerLocal implements CommentManager
         try
         {
             Map map = new HashMap();
-            map.put("objectType", IssueImpl
-                    .getLevelTypeAsString(p_levelObjectType));
+            map.put("objectType",
+                    IssueImpl.getLevelTypeAsString(p_levelObjectType));
             // Get all the issues with the specified type and ids in
             // chunks of 500 (needs to be smaller than 1000 because of
             // the query used).
@@ -853,12 +875,11 @@ public class CommentManagerLocal implements CommentManager
         }
         catch (Exception ex)
         {
-            CATEGORY
-                    .error("Failed to delete issues of type "
-                            + IssueImpl.getLevelTypeAsString(p_levelObjectType)
-                            + ". See previous log message for the list of affected objects.");
-            String[] errorArgs = {
-                    IssueImpl.getLevelTypeAsString(p_levelObjectType),
+            CATEGORY.error("Failed to delete issues of type "
+                    + IssueImpl.getLevelTypeAsString(p_levelObjectType)
+                    + ". See previous log message for the list of affected objects.");
+            String[] errorArgs =
+            { IssueImpl.getLevelTypeAsString(p_levelObjectType),
                     "(see globalsight.log for the list of affected objects)" };
             throw new CommentException(
                     CommentException.MSG_FAILED_TO_DELETE_ISSUES, errorArgs, ex);
@@ -884,8 +905,8 @@ public class CommentManagerLocal implements CommentManager
             TaskCommentInfo tci = (TaskCommentInfo) ci.next();
 
             // get all restricted and general attachments
-            ArrayList attach = getCommentReferences(String.valueOf(tci
-                    .getCommentId()),
+            ArrayList attach = getCommentReferences(
+                    String.valueOf(tci.getCommentId()),
                     WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS, true);
 
             tci.setAttachments(attach);
@@ -899,9 +920,9 @@ public class CommentManagerLocal implements CommentManager
      */
     private String getFilePath(CommentFile p_file, String tmpDir)
     {
-        return new StringBuffer().append(
-                AmbFileStoragePathUtils.getCommentReferenceDirPath()).append(
-                File.separator).append(tmpDir).append(File.separator)
+        return new StringBuffer()
+                .append(AmbFileStoragePathUtils.getCommentReferenceDirPath())
+                .append(File.separator).append(tmpDir).append(File.separator)
                 .toString();
     }
 
@@ -915,8 +936,8 @@ public class CommentManagerLocal implements CommentManager
     {
         ArrayList result = new ArrayList();
 
-        String[] accessLevel = {
-                WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
+        String[] accessLevel =
+        { WebAppConstants.COMMENT_REFERENCE_GENERAL_ACCESS,
                 WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS };
         int level = 0;
         if (p_access
@@ -976,51 +997,60 @@ public class CommentManagerLocal implements CommentManager
     }
 
     private void updateComment(CommentImpl p_originalComment,
-            String p_updatedComment, String p_modifierUserName)
-            throws Exception
+            String p_updatedComment, String p_modifierUserId) throws Exception
     {
         if (p_originalComment != null)
         {
             p_originalComment.setComment(p_updatedComment);
-            p_originalComment.setModifierId(p_modifierUserName);
+            p_originalComment.setModifierId(p_modifierUserId);
             p_originalComment.setModifiedDate(Calendar.getInstance().getTime());
         }
     }
-    
-    public void saveIssuEditionRelation(IssueEditionRelation ier) 
-        throws RemoteException, GSEditionException{
+
+    public void saveIssuEditionRelation(IssueEditionRelation ier)
+            throws RemoteException, GSEditionException
+    {
         Session session = null;
         Transaction transaction = null;
-        
-        try {
+
+        try
+        {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
             session.save(ier);
             transaction.commit();
         }
-        catch (PersistenceException e) {
-            try {
+        catch (PersistenceException e)
+        {
+            try
+            {
                 transaction.rollback();
-            } catch (Exception e2) {
+            }
+            catch (Exception e2)
+            {
             }
         }
     }
-    
-    public HashMap getIssuesMapByTuv(Tuv tuv) {
+
+    public HashMap getIssuesMapByTuv(Tuv tuv)
+    {
         HashMap tempMap = new HashMap();
-        
-        try {
+
+        try
+        {
             String hql = "from IssueImpl a where a.levelObjectId = :tuvid";
             HashMap map = new HashMap();
             map.put("tuvid", tuv.getId());
             Collection issues = HibernateUtil.search(hql, map);
             Iterator ite = issues.iterator();
-            
-            if(ite.hasNext()) {
+
+            if (ite.hasNext())
+            {
                 IssueImpl issue = (IssueImpl) ite.next();
                 tempMap.put("IssueID", issue.getId());
                 tempMap.put("LevelObjectId", issue.getLevelObjectId());
-                tempMap.put("LevelObjectType", issue.getLevelObjectTypeAsString());
+                tempMap.put("LevelObjectType",
+                        issue.getLevelObjectTypeAsString());
                 tempMap.put("CreateDate", issue.getCreateDate());
                 tempMap.put("CreatorId", issue.getCreatorId());
                 tempMap.put("Title", issue.getComment());
@@ -1028,12 +1058,14 @@ public class CommentManagerLocal implements CommentManager
                 tempMap.put("Status", issue.getStatus());
                 tempMap.put("LogicalKey", issue.getLogicalKey());
                 tempMap.put("Category", issue.getCategory());
-                
+
                 Vector historyVec = new Vector();
-                
-                for(int i = 0; i < issue.getHistory().size(); i++) {
+
+                for (int i = 0; i < issue.getHistory().size(); i++)
+                {
                     HashMap hv = new HashMap();
-                    IssueHistoryImpl history = (IssueHistoryImpl)issue.getHistory().get(i);
+                    IssueHistoryImpl history = (IssueHistoryImpl) issue
+                            .getHistory().get(i);
                     hv.put("HistoryID", history.getDbId());
                     hv.put("IssueID", history.getIssue().getId());
                     hv.put("Timestamp", history.getTimestamp());
@@ -1041,15 +1073,16 @@ public class CommentManagerLocal implements CommentManager
                     hv.put("Comment", history.getComment());
                     historyVec.add(hv);
                 }
-                
+
                 tempMap.put("localeId", Long.toString(tuv.getLocaleId()));
                 tempMap.put("HistoryVec", historyVec);
             }
         }
-        catch (Exception pe) {
+        catch (Exception pe)
+        {
             pe.printStackTrace();
         }
-        
+
         return tempMap;
     }
 }

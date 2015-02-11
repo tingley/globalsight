@@ -1,4 +1,4 @@
-.asterisk 
+.asterisk
 {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9pt;
@@ -10,7 +10,7 @@
     font-size: 12pt
 }
 
-.divider 
+.divider
 {
     background: #A6B8CE;
 }
@@ -20,29 +20,29 @@
     font-size: 8pt;
 }
 
-.editorStandardText { 
+.editorStandardText {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt
 }
 
-.editorText { 
+.editorText {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
-    word-break: break-all; 
+    word-break: break-all;
     word-wrap: break-word;
 }
 
-.editorId { 
+.editorId {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
     word-break: normal;
 }
 
-.editorSegment {
+.editorSegment, .editorSegmentRepetition {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 10pt;
     color: blue;
-    word-break: break-all; 
+    word-break: break-all;
     word-wrap: break-word;
 }
 
@@ -55,7 +55,7 @@
     font-size: 10pt;
     background-color: #CCFFCC;
     color: blue;
-    word-break: break-all; 
+    word-break: break-all;
     word-wrap: break-word;
 }
 
@@ -69,7 +69,7 @@
     font-size: 10pt;
     background-color: #FFFFCC;
     color: blue;
-    word-break: break-all; 
+    word-break: break-all;
     word-wrap: break-word;
 }
 
@@ -167,6 +167,11 @@
     font-size: 10pt;
 }
 
+.standardTextNew {
+    font-family:Verdana,Arial;
+    font-size: 10pt;
+}
+
 .standardTextBold {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 9pt;
@@ -200,7 +205,7 @@
     text-decoration: none;
 }
 
-.startHere: hover 
+.startHere: hover
 {
     text-decoration: underline;
 }
@@ -257,6 +262,11 @@
     font-weight: bold;
     color: white;
     background: #708EB3;
+}
+
+.tableHeadingFilter {
+	height:10px;
+	background: gray;
 }
 
 .tableHeadingListOn {
@@ -325,7 +335,7 @@
     background: #EEEEEE;
 }
 
-.wizardCellArrowLinks 
+.wizardCellArrowLinks
 {
     font-family: arial, Helvetica, sans-serif;
     font-size: 9pt;
@@ -333,7 +343,7 @@
     color: silver;
 }
 
-.wizardCellArrowLinks:hover 
+.wizardCellArrowLinks:hover
 {
     text-decoration: underline;
     color: navy;
@@ -348,7 +358,7 @@
     height: 10px;
 }
 
-.wizardCellCloseLinks 
+.wizardCellCloseLinks
 {
     font-family: arial, Helvetica, sans-serif;
     font-size: 7pt;
@@ -356,7 +366,7 @@
     color: silver;
 }
 
-.wizardCellCloseLinks:hover 
+.wizardCellCloseLinks:hover
 {
     text-decoration: none;
     color: navy;
@@ -384,7 +394,7 @@
     width: 40px;
 }
 
-.wizardLinks 
+.wizardLinks
 {
     font-family: verdana, sans-serif;
     font-size: 7pt;
@@ -392,7 +402,7 @@
     color: gray;
 }
 
-.wizardLinks:hover 
+.wizardLinks:hover
 {
     text-decoration: underline;
     color: navy;
@@ -543,7 +553,7 @@ a.wordCountLinks {
     font-family: Verdana, sans-serif;
     font-size: 7pt;
     font-weight: normal;
-    color: white; 
+    color: white;
 }
 
 a.wordCountLinks:hover {
@@ -574,4 +584,30 @@ a.wordCountLinks:link {
     font-size: 10pt;
     word-wrap: break-word;
 }
+.tip{
+	position:absolute;
+	border:1px solid #000000;
+	display:none;
+	background:#FFFFE1;
+	font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+}
 
+.tableHeadingBasicTM {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: bold;
+    color: white;
+    background: #0C1476;
+    height:30px;
+}
+
+.tableRowEvenTM {
+	height:30px;
+    background: #FFFFFF
+}
+
+.tableRowOddTM {
+	height:30px;
+    background: #EEEEEE
+}

@@ -93,7 +93,7 @@ public class Sequence
         }
         catch (Exception e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
         }
     }
 
@@ -117,7 +117,7 @@ public class Sequence
         }
         catch (Exception e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
         }
         finally
         {

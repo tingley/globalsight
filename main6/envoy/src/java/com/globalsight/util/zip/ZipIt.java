@@ -589,7 +589,7 @@ public class ZipIt implements Serializable
      * Unpack the zip file and extract the files to a path "String zipdir"
      * 
      */
-    public static ArrayList unpackZipPackage(String p_zipFileName, String zipdir)
+    public static ArrayList<String> unpackZipPackage(String p_zipFileName, String zipdir)
             throws Exception
     {
         File zipDirFile = new File(zipdir);
@@ -597,7 +597,7 @@ public class ZipIt implements Serializable
         ZipFile zipfile = new ZipFile(p_zipFileName);
 
         Enumeration entries = zipfile.getEntries();
-        ArrayList files = new ArrayList();
+        ArrayList<String> files = new ArrayList<String>();
         while (entries.hasMoreElements())
         {
             // read zip entry

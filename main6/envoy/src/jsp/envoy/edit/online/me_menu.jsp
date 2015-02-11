@@ -8,9 +8,11 @@
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.permission.Permission,
             com.globalsight.everest.webapp.javabean.NavigationBean,
+            com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorState,
             com.globalsight.everest.webapp.pagehandler.edit.online.EditorConstants,
+            com.globalsight.everest.edit.online.UIConstants,
             com.globalsight.everest.util.system.SystemConfigParamNames,
             com.globalsight.everest.util.system.SystemConfiguration,
             com.globalsight.everest.servlet.util.SessionManager,
@@ -37,7 +39,9 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
  <jsp:useBean id="search" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
-<%@ include file="/envoy/common/installedModules.jspIncl" %>
+ <jsp:useBean id="autoPropagate" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+ <%@ include file="/envoy/common/installedModules.jspIncl" %>
 <%
 
 ResourceBundle bundle = PageHandler.getBundle(session);
@@ -57,6 +61,8 @@ String url_resources   = resources.getPageURL();
 String url_termbases   = termbases.getPageURL();
 String url_options     = options.getPageURL();
 String url_search     = search.getPageURL();
+String url_autoPropagate = autoPropagate.getPageURL() 
+	+ "&action=default" + "&targetPageId=" + state.getTargetPageId();
 
 String lb_close = bundle.getString("lb_close");
 String lb_editLocaleContent = bundle.getString("lb_edit_locale_content");
@@ -78,6 +84,8 @@ String lb_termbases = bundle.getString("lb_termbases");
 String lb_unlock = bundle.getString("lb_unlock");
 String lb_lock = bundle.getString("lb_lock");
 String lb_verticalSplit = "/globalsight/images/editorVertSplit.gif";
+String lable = "";
+String action = "";
 
 //file navigation (default unavailable)
 String lb_prevFile = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=2 VSPACE=4>";
@@ -89,13 +97,31 @@ String lb_nextPage = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=
 
 PaginateInfo pi = state.getPaginateInfo();
 
-// Determine if the unlock button is VISIBLE or not, if it can be shown at all.
+// Determine if the unlock button is VISIBLE or not.
 boolean b_showUnlockButton = true;
 if ((state.isReadOnly() && !state.canEditAll()) ||
     (layout.isSinglePage() && layout.singlePageIsSource()))
 {
     b_showUnlockButton = false;
 }
+
+// Determine if show "Show Repeated" link
+boolean b_showRepeatedLink = true;
+if (state.isReadOnly()
+        || (layout.isSinglePage() && layout.singlePageIsSource()) )
+{
+    b_showRepeatedLink = false;
+}
+// Determine if show "Auto-Propagate" link
+boolean b_showAutoPropagateLink = true;
+if (state.isReadOnly() || state.getIsReviewActivity()
+        || (layout.isSinglePage() && layout.singlePageIsSource() ) )
+{
+    b_showAutoPropagateLink = false;
+}
+
+long jobId = Long.valueOf(sessionMgr.getAttribute(WebAppConstants.JOB_ID).toString());
+String tgtIDS = sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST).toString();
 %>
 <HTML>
 <HEAD>
@@ -113,7 +139,8 @@ var w_pageinfo = null;
 var w_resources = null;
 var w_termbases = null;
 var w_progress = null;
-var w_search = null
+var w_search = null;
+var w_autoPropagate = null;
 
 var helpFile = "<%=bundle.getString("help_main_editor")%>";
 
@@ -139,6 +166,7 @@ function exit()
     try { w_termbases.close(); } catch (ignore) {}
     try { w_progress.close();    } catch (ignore) {}
     try { w_search.close();    } catch (ignore) {}
+    try { w_autoPropagate.close();    } catch (ignore) {}
 }
 
 function showRadioButtons()
@@ -605,7 +633,7 @@ function cancelEvent()
 function showOptions()
 {
     w_options = window.open("<%=url_options%>", "MEOptions",
-      "resizable=no,scrollbars=no,width=470,height=480");
+      "resizable=no,scrollbars=no,width=470,height=590");
 }
 
 function showPageInfo()
@@ -628,13 +656,15 @@ function showTermbases()
 
 function createLisaQAReport()
 {
-	ShutdownForm.action = "/globalsight/envoy/administration/reports/LisaQACommentsAnalysisReport.jsp";
+	ShutdownForm.action = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=generateReports";
+	ShutdownForm.reportType.value = "CommentsAnalysisReport";
 	ShutdownForm.submit();
 }
 
 function createCharacterCountReport()
 {
-    ShutdownForm.action = "/globalsight/envoy/administration/reports/characterCountReport.jsp";
+    ShutdownForm.action = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS&action=generateReports";
+    ShutdownForm.reportType.value = "CharacterCountReport";
     ShutdownForm.submit();
 }
 
@@ -667,7 +697,7 @@ function showProgressWindow()
   		window.myAction=this;
   		window.myArguments=true;
   		var url = "/globalsight/envoy/edit/online2/progress.jsp";
-    	w_progress = window.open(url,"","height=280px, width=400px,status=no,modal=yes"); 
+    	w_progress = window.open(url,"","height=280px, width=430px,status=no,modal=yes"); 
   }
   
 }
@@ -930,6 +960,50 @@ function searchByUserOrSid() {
   	      }
       }
   }
+
+// Find Repeated Segments/Unmark Repeated Segments
+function findRepeatedSegments(p_action)
+{
+    var str_url;
+
+    if (!canCloseTarget())
+    {
+        cancelEvent();
+        RaiseEditor();
+    }
+    else
+    {
+        str_url  = "<%=url_refresh%>" + "&<%=WebAppConstants.PROPAGATE_ACTION%>=" + p_action;
+
+        showHourglass();
+        parent.Refresh(str_url);
+    }
+}
+
+// Show/Unmark PTags
+function showPtags(p_action)
+{
+    var str_url;
+
+    if (!canCloseTarget())
+    {
+        cancelEvent();
+        RaiseEditor();
+    }
+    else
+    {
+        str_url  = "<%=url_refresh%>" + "&pTagsAction=" + p_action;
+
+        showHourglass();
+        parent.Refresh(str_url);
+    }
+}
+
+function openAutoPropagate()
+{
+    w_autoPropagate = window.open("<%=url_autoPropagate%>", "AutoPropagate",
+    	"resizable=yes,scrollbars=no,width=350,height=350");
+}
 </SCRIPT>
 </HEAD>
 <BODY id="idBody" onload="init()" onbeforeunload="exit()">
@@ -937,7 +1011,9 @@ function searchByUserOrSid() {
 <iframe id="idShutdown" name="idShutdown" src="about:blank" style="display:none"></iframe>
 <FORM name="ShutdownForm" METHOD="POST" TARGET="idShutdown"
  ACTION="/globalsight/envoy/common/shutdownPopup.jsp">
-<INPUT TYPE="hidden" NAME="a" VALUE="">
+<input type="hidden" name="<%=ReportConstants.JOB_IDS%>" value="<%=jobId%>">
+<input type="hidden" name="<%=ReportConstants.TARGETLOCALE_LIST%>" value="<%=tgtIDS%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="">
 </FORM>
 
 <DIV id="idSnippetLibrary"
@@ -1003,41 +1079,61 @@ function searchByUserOrSid() {
 	</TR>
 	<TR CLASS="tableHeadingBasic">
 	  <TD>
-	    <%
-	    // Determine if the unlock button is AVAILABLE at all, or not.
-	    if (!state.getIsReviewActivity() &&
-	       (!state.isReadOnly() && state.canEditAll()))
+	  <!-- Unlock -->
+      <%
+	    if (!state.getIsReviewActivity() && !state.isReadOnly() 
+	            && state.canEditAll() && b_showUnlockButton)
 	    {
-	      if (b_showUnlockButton)
-	      {
-	        out.print("<DIV id=unlock ");
-	        out.print("STYLE='POSITION:relative; VISIBILITY:show'>");
-	      }
-	      else
-	      {
-	        out.print("<DIV id=unlock ");
-	        out.print("STYLE='POSITION:relative; VISIBILITY:hidden'>");
-	      }
-
-	      out.print("<A HREF='#' onclick='editAll(); return false;'");
-	      out.print(" CLASS=\"HREFBoldWhite\">");
-	      if (state.isEditAll())
-	      {
-	        out.print(lb_lock);
-	      }
-	      else
-	      {
-	        out.print(lb_unlock);
-	      }
-	      out.print("</A> |&nbsp;");
-
-	      out.print("</DIV>");
+	        StringBuffer unlockSB = new StringBuffer();
+	        unlockSB.append("<A HREF='#' onclick='editAll(); return false;'");
+            unlockSB.append(" CLASS=\"HREFBoldWhite\">");
+            if (state.isEditAll()) {
+		        unlockSB.append(lb_lock);
+            } else {
+		        unlockSB.append(lb_unlock);
+		    }
+            unlockSB.append("</A> |&nbsp;");
+		    out.print(unlockSB.toString());
 	    }
-	    %>
-	  </TD>
-	  <TD>
-	     <A href="#" onclick="searchByUserOrSid(); return false;"
-	     CLASS="HREFBoldWhite" title="Search">Search</A> |
+	  %>
+	  
+	  <!-- Show/Unmark PTags -->
+      <% if (state.getNeedShowPTags()) {
+			lable = bundle.getString("lb_unmark_pTag_segments");
+            action = WebAppConstants.PTAGS_ACTION_UNMARK;
+         } else {
+            lable = bundle.getString("lb_find_pTag_segments");
+            action = WebAppConstants.PTAGS_ACTION_FIND;
+         }
+      %>
+	  <A href="#" onclick="showPtags('<%=action%>');" 
+	     CLASS="HREFBoldWhite" title="<%=lable%>"><%=lable%></A> |
+	  
+   	  <!-- Show/Unmark Repeated -->
+      <% if (b_showRepeatedLink) {
+           if (state.getNeedFindRepeatedSegments()) {
+               lable = bundle.getString("lb_unmark_repeated_segments");
+               action = WebAppConstants.PROPAGATE_ACTION_UNMARK;
+           } else {
+               lable = bundle.getString("lb_find_repeated_segments");
+               action = WebAppConstants.PROPAGATE_ACTION_FIND;
+           }
+      %>
+	  <A href="#" onclick="findRepeatedSegments('<%=action%>');" 
+	     CLASS="HREFBoldWhite" title="<%=lable %>"><%=lable %></A> |
+	  <% } %>
+	  
+	  <!-- Auto-Propagate -->
+      <% if (b_showAutoPropagateLink) { %>
+	  <A href="#" onclick="openAutoPropagate();"
+	     CLASS="HREFBoldWhite" title="<%=bundle.getString("lb_automatic_propagate")%>">
+	     <%=bundle.getString("lb_automatic_propagate")%></A> |
+	  <% } %>
+
+	  <!-- Search -->
+	  <A href="#" onclick="searchByUserOrSid(); return false;"
+	     CLASS="HREFBoldWhite" title="<%=bundle.getString("lb_search")%>"><%=bundle.getString("lb_search")%></A> |
+   	  <!--  Comments Analysis -->
 	  <amb:permission name="<%=Permission.REPORTS_COMMENTS_ANALYSIS%>">
 	  	<A href="#" onclick="createLisaQAReport(); return false;"
 	     CLASS="HREFBoldWhite" title="Create Comments Analysis Report">

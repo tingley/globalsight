@@ -16,15 +16,13 @@
  */
 package com.globalsight.ling.docproc;
 
-import com.globalsight.ling.docproc.EFInputDataConstants;
-
-import java.util.Locale;
+import java.io.File;
 import java.util.HashMap;
+import java.util.Locale;
 
 /**
- * Represents an abstract input object for URLs, byte buffers, strings
- * and holds additional data relevant for extraction like the locale
- * and the encoding.
+ * Represents an abstract input object for URLs, byte buffers, strings and holds
+ * additional data relevant for extraction like the locale and the encoding.
  */
 public class EFInputData
 {
@@ -32,6 +30,8 @@ public class EFInputData
 
     /** Input as byte array. */
     private byte[] m_Input = null;
+
+    private File m_file = null;
 
     /** Input as Unicode string. */
     private String m_strUnicodeInput = null;
@@ -45,20 +45,20 @@ public class EFInputData
     private Locale m_Locale = null;
 
     /**
-     * Input type (see {@link IFormatNames} and {@link
-     * ExtractorRegistry} for valid input types).
+     * Input type (see {@link IFormatNames} and {@link ExtractorRegistry} for
+     * valid input types).
      */
     private int m_iType = EFInputDataConstants.UNKNOWN;
 
     /** Rules associated with the input. */
     private String m_rules = null;
-    
+
     // For PPT issue
     private String m_bullets_MsOffice = null;
-    
+
     /**
      * Excel Do Not Translate configuration
-     *
+     * 
      */
     private HashMap m_excelStyle = null;
 
@@ -106,26 +106,26 @@ public class EFInputData
     {
         return m_strURL;
     }
-    
+
     /**
      * Excel Do Not Translate configuration
+     * 
      * @param p_excelStyle
      */
-    public void  setExcelStyle(HashMap p_excelStyle)
+    public void setExcelStyle(HashMap p_excelStyle)
     {
-    	m_excelStyle = p_excelStyle;
+        m_excelStyle = p_excelStyle;
     }
-    
+
     public HashMap getExcelStyle()
     {
-    	return m_excelStyle;
+        return m_excelStyle;
     }
 
     /**
-     * Sets the java codeset in which the input is given.  Use the
-     * {@link com.globalsight.ling.common.CodesetMapper
-     * CodesetMapper} class to map from IANA encoding to java
-     * encodings and back.
+     * Sets the java codeset in which the input is given. Use the
+     * {@link com.globalsight.ling.common.CodesetMapper CodesetMapper} class to
+     * map from IANA encoding to java encodings and back.
      */
     public void setCodeset(String p_strCodeset)
     {
@@ -155,6 +155,18 @@ public class EFInputData
     public void setURL(String p_strURL)
     {
         m_strURL = p_strURL;
+        setFile(p_strURL);
+    }
+
+    public void setFile(File p_file)
+    {
+        m_file = p_file;
+    }
+
+    private void setFile(String p_strURL)
+    {
+        String path = p_strURL.replace("file:", "");
+        setFile(new File(path));
     }
 
     public void setRules(String rules)
@@ -162,19 +174,26 @@ public class EFInputData
         m_rules = rules;
     }
 
+    public File getFile()
+    {
+        return m_file;
+    }
+
     public String getRules()
     {
         return m_rules;
     }
-    
+
     /**
-     * <p>For PPT issue</p>
+     * <p>
+     * For PPT issue
+     * </p>
      */
     public void setBulletsMsOffice(String p_bullets_MsOffice)
     {
         m_bullets_MsOffice = p_bullets_MsOffice;
     }
-    
+
     public String getBulletsMsOffice()
     {
         return m_bullets_MsOffice;

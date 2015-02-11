@@ -51,9 +51,9 @@ public class FilterHelper
         {
             return "";
         }
-        return s.replace("\\", "\\\\")
-                .replace("\n", "\\n").replace("\r", "\\r")
-                .replace("\"", "\\\"").replace("'", "\\\'");
+        return s.replace("\\", "\\\\").replace("\n", "\\n")
+                .replace("\r", "\\r").replace("\"", "\\\"")
+                .replace("'", "\\\'");
     }
 
     @SuppressWarnings("unchecked")
@@ -95,8 +95,9 @@ public class FilterHelper
             XmlRuleFile xmlRuleFile = (XmlRuleFile) xmlRules.next();
             sb.append("{");
             sb.append("\"xmlRuleId\":").append(xmlRuleFile.getId()).append(",");
-            sb.append("\"xmlRuleName\":").append("\"").append(
-                    FilterHelper.escape(xmlRuleFile.getName())).append("\"");
+            sb.append("\"xmlRuleName\":").append("\"")
+                    .append(FilterHelper.escape(xmlRuleFile.getName()))
+                    .append("\"");
             sb.append("}");
 
             sb.append(",");
@@ -119,8 +120,8 @@ public class FilterHelper
 
     public static long saveJavaPropertiesFilter(String filterName,
             String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
-            boolean isPreserveSpaces, long companyId, long secondFilterId, String secondFilterTableName,
-            JSONArray internalTexts)
+            boolean isPreserveSpaces, long companyId, long secondFilterId,
+            String secondFilterTableName, JSONArray internalTexts)
     {
         JavaPropertiesFilter filter = new JavaPropertiesFilter();
         filter.setCompanyId(companyId);
@@ -132,22 +133,22 @@ public class FilterHelper
         filter.setSecondFilterId(secondFilterId);
         filter.setSecondFilterTableName(secondFilterTableName);
         filter.setInternalTextJson(internalTexts);
-        
+
         HibernateUtil.saveOrUpdate(filter);
         return filter.getId();
     }
 
     public static long updateJavaPropertiesFilter(String filterName,
             String filterDesc, boolean isSupportSid, boolean isUnicodeEscape,
-            boolean isPreserveSpaces, long companyId,
-            long secondFilterId, String secondFilterTableName, JSONArray internalTexts)
+            boolean isPreserveSpaces, long companyId, long secondFilterId,
+            String secondFilterTableName, JSONArray internalTexts)
     {
         JavaPropertiesFilter filter = null;
-        String hql = "from JavaPropertiesFilter jp where jp.filterName='" + filterName + "'";
+        String hql = "from JavaPropertiesFilter jp where jp.filterName='"
+                + filterName + "'";
         if (HibernateUtil.search(hql).size() > 0)
         {
-            filter = (JavaPropertiesFilter) HibernateUtil
-                    .search(hql).get(0);
+            filter = (JavaPropertiesFilter) HibernateUtil.search(hql).get(0);
             filter.setCompanyId(companyId);
             filter.setEnableSidSupport(isSupportSid);
             filter.setEnableUnicodeEscape(isUnicodeEscape);
@@ -159,19 +160,21 @@ public class FilterHelper
             filter.setInternalTextJson(internalTexts);
             HibernateUtil.update(filter);
         }
-        
+
         return filter != null ? filter.getId() : -2;
     }
-    
+
     public static long saveMSOfficeExcelFilter(String filterName,
             String filterDesc, long companyId, boolean altTranslate,
-            long contentPostFilterId, String contentPostFilterTableName)
+            boolean tabNamesTranslate, long contentPostFilterId,
+            String contentPostFilterTableName)
     {
         MSOfficeExcelFilter filter = new MSOfficeExcelFilter();
         filter.setCompanyId(companyId);
         filter.setFilterDescription(filterDesc);
         filter.setFilterName(filterName);
         filter.setAltTranslate(altTranslate);
+        filter.setTabNamesTranslate(tabNamesTranslate);
         filter.setContentPostFilterId(contentPostFilterId);
         filter.setContentPostFilterTableName(contentPostFilterTableName);
 
@@ -179,10 +182,11 @@ public class FilterHelper
 
         return filter.getId();
     }
-    
+
     public static long updateMSOfficeExcelFilter(String filterName,
             String filterDesc, long companyId, boolean altTranslate,
-            long contentPostFilterId, String contentPostFilterTableName)
+            boolean tabNamesTranslate, long contentPostFilterId,
+            String contentPostFilterTableName)
     {
         String hql = "from MSOfficeExcelFilter me where me.filterName='"
                 + filterName + "'";
@@ -194,6 +198,7 @@ public class FilterHelper
             filter.setFilterDescription(filterDesc);
             filter.setFilterName(filterName);
             filter.setAltTranslate(altTranslate);
+            filter.setTabNamesTranslate(tabNamesTranslate);
             filter.setContentPostFilterId(contentPostFilterId);
             filter.setContentPostFilterTableName(contentPostFilterTableName);
             HibernateUtil.update(filter);
@@ -203,7 +208,8 @@ public class FilterHelper
     }
 
     public static long saveJavaScriptFilter(String filterName,
-            String filterDesc, String jsFunctionText, long companyId, boolean enableUnicodeEscape)
+            String filterDesc, String jsFunctionText, long companyId,
+            boolean enableUnicodeEscape)
     {
         JavaScriptFilter filter = new JavaScriptFilter();
         filter.setCompanyId(companyId);
@@ -216,7 +222,8 @@ public class FilterHelper
     }
 
     public static void updateJavaScriptFilter(String filterName,
-            String filterDesc, String jsFunctionText, long companyId, boolean enableUnicodeEscape)
+            String filterDesc, String jsFunctionText, long companyId,
+            boolean enableUnicodeEscape)
     {
         String hql = "from JavaScriptFilter js where js.filterName='"
                 + filterName + "'";
@@ -239,18 +246,19 @@ public class FilterHelper
         {
             return false;
         }
-        
+
         boolean isExist = false;
-        
-        try 
+
+        try
         {
-            String sql = "select id from " + filterTableName + " where id=" + filterId;
-            if (HibernateUtil.searchWithSql(sql, null).size() > 0) 
+            String sql = "select id from " + filterTableName + " where id="
+                    + filterId;
+            if (HibernateUtil.searchWithSql(sql, null).size() > 0)
             {
                 isExist = true;
             }
         }
-        catch (Exception ex) 
+        catch (Exception ex)
         {
         }
 
@@ -266,7 +274,7 @@ public class FilterHelper
         {
             return null;
         }
-        
+
         return HibernateUtil.get(filter.getClass(), filterId);
     }
 
@@ -287,10 +295,12 @@ public class FilterHelper
     {
         for (int i = 0; i < specialFilterToDeletes.size(); i++)
         {
-            String filterTableName = specialFilterToDeletes.get(i).getFilterTableName();
+            String filterTableName = specialFilterToDeletes.get(i)
+                    .getFilterTableName();
             long filterId = specialFilterToDeletes.get(i).getSpecialFilterId();
             deleteFilter(filterTableName, filterId);
-            BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
+            BaseFilterManager
+                    .deleteBaseFilterMapping(filterId, filterTableName);
         }
     }
 
@@ -338,8 +348,8 @@ public class FilterHelper
         while (it.hasNext())
         {
             KnownFormatTypeImpl formatType = it.next();
-            ArrayList<Filter> filters = getFiltersByKnownFormatId(formatType
-                    .getId(), companyId);
+            ArrayList<Filter> filters = getFiltersByKnownFormatId(
+                    formatType.getId(), companyId);
             map.put(formatType.getFormatType(), filters);
         }
         return map;
@@ -370,7 +380,7 @@ public class FilterHelper
                 + "'";
         return HibernateUtil.search(hql).size() > 0;
     }
-    
+
     private static Set<JobImpl> getAllUsedJobs(Long filterId, String tableName)
     {
         Set<JobImpl> jobs = new HashSet<JobImpl>();
@@ -414,15 +424,15 @@ public class FilterHelper
         for (int i = 0; i < list.size(); i++)
         {
             Object[] contents = (Object[]) list.get(i);
-            FilterInfos filterInfo = removeInfo.new FilterInfos(Long
-                    .parseLong(contents[0].toString()), contents[1].toString(),
-                    contents[2].toString());
+            FilterInfos filterInfo = removeInfo.new FilterInfos(
+                    Long.parseLong(contents[0].toString()),
+                    contents[1].toString(), contents[2].toString());
             filterInfos.add(filterInfo);
         }
         removeInfo.setFilterInfos(filterInfos);
         return removeInfo;
     }
-    
+
     public static void checkUsedInJob(
             ArrayList<SpecialFilterToDelete> p_specialFilterToDeletes,
             RemoveInfo p_removeInfo, Long p_companyId)
@@ -440,7 +450,7 @@ public class FilterHelper
 
         p_removeInfo.addFilterInJobs(result);
     }
-    
+
     /*
      * Check the filter whether is used by other filters.
      */
@@ -452,125 +462,153 @@ public class FilterHelper
         List<Long> htmlIDList = new ArrayList<Long>();
         List<Long> xmlIDList = new ArrayList<Long>();
         List<Long> baseIdList = new ArrayList<Long>();
-        for(SpecialFilterToDelete f : p_specialFilterToDeletes)
+        for (SpecialFilterToDelete f : p_specialFilterToDeletes)
         {
-            if(FilterConstants.HTML_TABLENAME.equals(f.getFilterTableName()))
+            if (FilterConstants.HTML_TABLENAME.equals(f.getFilterTableName()))
             {
                 htmlIDList.add(f.getSpecialFilterId());
             }
-            else if(FilterConstants.XMLRULE_TABLENAME.equals(f.getFilterTableName()))
+            else if (FilterConstants.XMLRULE_TABLENAME.equals(f
+                    .getFilterTableName()))
             {
                 xmlIDList.add(f.getSpecialFilterId());
             }
-            else if(FilterConstants.BASE_TABLENAME.equals(f.getFilterTableName()))
+            else if (FilterConstants.BASE_TABLENAME.equals(f
+                    .getFilterTableName()))
             {
                 baseIdList.add(f.getSpecialFilterId());
             }
-        }   
+        }
 
         // 2. Checks the filter list after separate.
-        checkHTMLFilterIsUsedByFiter(FilterConstants.JAVAPROPERTIES_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
-        checkHTMLFilterIsUsedByFiter(FilterConstants.MSOFFICEDOC_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
-        checkHTMLFilterIsUsedByFiter(FilterConstants.MSOFFICEEXCEL_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
-        checkHTMLFilterIsUsedByFiter(FilterConstants.MSOFFICEPPT_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
-        checkHTMLFilterIsUsedByFiter(FilterConstants.XMLRULE_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
-        checkHTMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, htmlIDList, p_removeInfo, p_companyId);
-        
-        checkXMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, xmlIDList, p_removeInfo, p_companyId);
-        
+        checkHTMLFilterIsUsedByFiter(FilterConstants.JAVAPROPERTIES_TABLENAME,
+                htmlIDList, p_removeInfo, p_companyId);
+        checkHTMLFilterIsUsedByFiter(FilterConstants.MSOFFICEDOC_TABLENAME,
+                htmlIDList, p_removeInfo, p_companyId);
+        checkHTMLFilterIsUsedByFiter(FilterConstants.MSOFFICEEXCEL_TABLENAME,
+                htmlIDList, p_removeInfo, p_companyId);
+        checkHTMLFilterIsUsedByFiter(FilterConstants.MSOFFICEPPT_TABLENAME,
+                htmlIDList, p_removeInfo, p_companyId);
+        checkHTMLFilterIsUsedByFiter(FilterConstants.XMLRULE_TABLENAME,
+                htmlIDList, p_removeInfo, p_companyId);
+        checkHTMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, htmlIDList,
+                p_removeInfo, p_companyId);
+
+        checkXMLFilterIsUsedByFiter(FilterConstants.PO_TABLENAME, xmlIDList,
+                p_removeInfo, p_companyId);
+
         checkBaseFilterIsUsedByFiter(baseIdList, p_removeInfo, p_companyId);
     }
-    
+
     public static void checkHTMLFilterIsUsedByFiter(
             String p_usedfilterTableName, List<Long> p_htmlFilteIDList,
             RemoveInfo p_removeInfo, Long p_companyId)
     {
-        if(p_htmlFilteIDList == null || p_htmlFilteIDList.size()<1) return;
-        
-        if (p_usedfilterTableName.equals(FilterConstants.XMLRULE_TABLENAME)) 
+        if (p_htmlFilteIDList == null || p_htmlFilteIDList.size() < 1)
+            return;
+
+        if (p_usedfilterTableName.equals(FilterConstants.XMLRULE_TABLENAME))
         {
             // Gets all XML filter, and then check one by one.
-            List<Filter> list = getFiltersByTableName(p_usedfilterTableName, p_companyId);
-            for(int i=0; i<list.size(); i++)
+            List<Filter> list = getFiltersByTableName(p_usedfilterTableName,
+                    p_companyId);
+            for (int i = 0; i < list.size(); i++)
             {
                 XMLRuleFilter filter = (XMLRuleFilter) list.get(i);
                 Map<String, String> nodeMap = new HashMap<String, String>();
 
                 // Checks Element pose_filter
                 nodeMap = filter.getElementPostFilter();
-                Long tableID = Long.valueOf(nodeMap.get(FilterConstants.TABLEID));
-                String tableName = (String) nodeMap.get(FilterConstants.TABLENAME);
-                if(tableID>0 && tableName!=null && tableName.length()>0 )
+                Long tableID = Long.valueOf(nodeMap
+                        .get(FilterConstants.TABLEID));
+                String tableName = (String) nodeMap
+                        .get(FilterConstants.TABLENAME);
+                if (tableID > 0 && tableName != null && tableName.length() > 0)
                 {
                     HtmlFilter htmlFilter = getHtmlFilter(Long.valueOf(tableID));
-                    if(p_htmlFilteIDList.contains(tableID) 
-                            && htmlFilter!=null && tableName.equals(htmlFilter.getFilterTableName()))
+                    if (p_htmlFilteIDList.contains(tableID)
+                            && htmlFilter != null
+                            && tableName
+                                    .equals(htmlFilter.getFilterTableName()))
                     {
                         if (!p_removeInfo.isUsedByFilters())
-                                p_removeInfo.setUsedByFilters(true);
+                            p_removeInfo.setUsedByFilters(true);
                         FilterInfos filterInfo = p_removeInfo.new FilterInfos(
-                                Long.valueOf(tableID), tableName, 
-                                String.valueOf(filter.getId()), p_usedfilterTableName);
+                                Long.valueOf(tableID), tableName,
+                                String.valueOf(filter.getId()),
+                                p_usedfilterTableName);
                         p_removeInfo.addUsedFilters(filterInfo);
                     }
                 }
-                
+
                 // Checks CDATA pose_filter
                 nodeMap = filter.getCdataPostFilter();
-                Long cdataPostFilterTableID = Long.valueOf(nodeMap.get(FilterConstants.TABLEID));
-                String cdataPostFilterTableName = (String) nodeMap.get(FilterConstants.TABLENAME);
-                if(tableID.equals(cdataPostFilterTableID) && tableName.equalsIgnoreCase(cdataPostFilterTableName))
+                Long cdataPostFilterTableID = Long.valueOf(nodeMap
+                        .get(FilterConstants.TABLEID));
+                String cdataPostFilterTableName = (String) nodeMap
+                        .get(FilterConstants.TABLENAME);
+                if (tableID.equals(cdataPostFilterTableID)
+                        && tableName.equalsIgnoreCase(cdataPostFilterTableName))
                 {
                     break;
                 }
-                if(tableID>0 && tableName!=null && tableName.length()>0 )
+                if (tableID > 0 && tableName != null && tableName.length() > 0)
                 {
                     HtmlFilter htmlFilter = getHtmlFilter(Long.valueOf(tableID));
-                    if(p_htmlFilteIDList.contains(tableID) 
-                            && htmlFilter!=null && tableName.equals(htmlFilter.getFilterTableName()))
+                    if (p_htmlFilteIDList.contains(tableID)
+                            && htmlFilter != null
+                            && tableName
+                                    .equals(htmlFilter.getFilterTableName()))
                     {
                         if (!p_removeInfo.isUsedByFilters())
-                                p_removeInfo.setUsedByFilters(true);
+                            p_removeInfo.setUsedByFilters(true);
                         FilterInfos filterInfo = p_removeInfo.new FilterInfos(
-                                Long.valueOf(cdataPostFilterTableID), cdataPostFilterTableName, 
-                                String.valueOf(filter.getId()), p_usedfilterTableName);
+                                Long.valueOf(cdataPostFilterTableID),
+                                cdataPostFilterTableName, String.valueOf(filter
+                                        .getId()), p_usedfilterTableName);
                         p_removeInfo.addUsedFilters(filterInfo);
                     }
                 }
             }
-        } 
-        else 
+        }
+        else
         {
-            for (Long hID : p_htmlFilteIDList) 
+            for (Long hID : p_htmlFilteIDList)
             {
-                String sql = "select id, filter_name from " + p_usedfilterTableName 
-                            + " where SECOND_FILTER_ID = :SFID"
-                            + " and COMPANY_ID = :CID";
-                if (p_usedfilterTableName.equals(FilterConstants.MSOFFICEDOC_TABLENAME)
-                        || p_usedfilterTableName.equals(FilterConstants.MSOFFICEEXCEL_TABLENAME)
-                        || p_usedfilterTableName.equals(FilterConstants.MSOFFICEPPT_TABLENAME))
+                String sql = "select id, filter_name from "
+                        + p_usedfilterTableName
+                        + " where SECOND_FILTER_ID = :SFID"
+                        + " and COMPANY_ID = :CID";
+                if (p_usedfilterTableName
+                        .equals(FilterConstants.MSOFFICEDOC_TABLENAME)
+                        || p_usedfilterTableName
+                                .equals(FilterConstants.MSOFFICEEXCEL_TABLENAME)
+                        || p_usedfilterTableName
+                                .equals(FilterConstants.MSOFFICEPPT_TABLENAME))
                 {
-                    sql = "select id, filter_name from " + p_usedfilterTableName
+                    sql = "select id, filter_name from "
+                            + p_usedfilterTableName
                             + " where CONTENT_POST_FILTER_ID = :SFID"
                             + " and CONTENT_POST_FILTER_TABLE_NAME = \""
-                            + FilterConstants.HTML_TABLENAME + "\" and COMPANY_ID = :CID";
+                            + FilterConstants.HTML_TABLENAME
+                            + "\" and COMPANY_ID = :CID";
                 }
-                
+
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("SFID", hID);
                 map.put("CID", p_companyId);
                 List<?> list = HibernateUtil.searchWithSql(sql, map);
                 boolean isExist = list.size() > 0;
-                if (isExist) 
+                if (isExist)
                 {
                     if (!p_removeInfo.isUsedByFilters())
                         p_removeInfo.setUsedByFilters(isExist);
                     FilterInfos filterInfo = null;
-                    for (int i = 0; i < list.size(); i++) 
+                    for (int i = 0; i < list.size(); i++)
                     {
                         Object[] contents = (Object[]) list.get(i);
                         filterInfo = p_removeInfo.new FilterInfos(hID,
-                                FilterConstants.HTML_TABLENAME, 
+                                FilterConstants.HTML_TABLENAME,
                                 contents[0].toString(), p_usedfilterTableName);
                         p_removeInfo.addUsedFilters(filterInfo);
                     }
@@ -578,13 +616,14 @@ public class FilterHelper
             }
         }
     }
-    
+
     public static void checkXMLFilterIsUsedByFiter(
             String p_usedfilterTableName, List<Long> p_filteIDList,
             RemoveInfo p_removeInfo, Long p_companyId)
     {
-        if(p_filteIDList == null || p_filteIDList.size()<1) return;
-        
+        if (p_filteIDList == null || p_filteIDList.size() < 1)
+            return;
+
         for (Long hID : p_filteIDList)
         {
             String sql = "select id, filter_name from " + p_usedfilterTableName
@@ -604,22 +643,24 @@ public class FilterHelper
                 {
                     Object[] contents = (Object[]) list.get(i);
                     filterInfo = p_removeInfo.new FilterInfos(hID,
-                            FilterConstants.XMLRULE_TABLENAME, contents[0]
-                                    .toString(), p_usedfilterTableName);
+                            FilterConstants.XMLRULE_TABLENAME,
+                            contents[0].toString(), p_usedfilterTableName);
                     p_removeInfo.addUsedFilters(filterInfo);
                 }
             }
         }
     }
-    
+
     public static void checkBaseFilterIsUsedByFiter(List<Long> p_filteIDList,
             RemoveInfo p_removeInfo, Long p_companyId)
     {
-        if(p_filteIDList == null || p_filteIDList.size()<1) return;
-        
+        if (p_filteIDList == null || p_filteIDList.size() < 1)
+            return;
+
         for (Long hID : p_filteIDList)
         {
-            List<BaseFilterMapping> mappings = BaseFilterManager.getBaseFilterMapping(hID);
+            List<BaseFilterMapping> mappings = BaseFilterManager
+                    .getBaseFilterMapping(hID);
             if (mappings != null && mappings.size() > 0)
             {
                 FilterInfos filterInfo = null;
@@ -632,13 +673,15 @@ public class FilterHelper
                     if (isFilterExist(filterTableName, filterId))
                     {
                         filterInfo = p_removeInfo.new FilterInfos(hID,
-                                FilterConstants.BASE_TABLENAME, "" + mapping.getFilterId(),
+                                FilterConstants.BASE_TABLENAME, ""
+                                        + mapping.getFilterId(),
                                 mapping.getFilterTableName());
                         usedFilters.add(filterInfo);
                     }
                     else
                     {
-                        BaseFilterManager.deleteBaseFilterMapping(filterId, filterTableName);
+                        BaseFilterManager.deleteBaseFilterMapping(filterId,
+                                filterTableName);
                     }
                 }
 
@@ -652,7 +695,7 @@ public class FilterHelper
             }
         }
     }
-    
+
     private static String buildCondition(
             ArrayList<SpecialFilterToDelete> specialFilterToDeletes,
             String tablename)
@@ -680,7 +723,7 @@ public class FilterHelper
         HibernateUtil.saveOrUpdate(filter);
         return filter.getId();
     }
-    
+
     public static void updateFilter(Filter filter)
     {
         HibernateUtil.update(filter);
@@ -690,7 +733,7 @@ public class FilterHelper
     {
         return HibernateUtil.get(HtmlFilter.class, filterId);
     }
-    
+
     public static XMLRuleFilter getXmlFilter(long filterId)
     {
         return HibernateUtil.get(XMLRuleFilter.class, filterId);
@@ -759,7 +802,7 @@ public class FilterHelper
         {
             Filter filter = filters.get(i);
             sb.append(filter.toJSON(companyId));
-            if(i != filters.size() - 1)
+            if (i != filters.size() - 1)
             {
                 sb.append(",");
             }
@@ -768,17 +811,20 @@ public class FilterHelper
         return sb.toString();
     }
 
-    public static String isFilterValid(HttpServletRequest request, String filterTableName)
+    public static String isFilterValid(HttpServletRequest request,
+            String filterTableName)
     {
         HttpSession session = request.getSession(false);
         ResourceBundle bundle = PageHandler.getBundle(session);
         String result = "true";
-        
+
         // xml_rule_filter
         if (filterTableName.equals(FilterConstants.XMLRULE_TABLENAME))
         {
-            String extendedWhitespaceChars = request.getParameter("extendedWhitespaceChars");
-            if (extendedWhitespaceChars != null && !"".equals(extendedWhitespaceChars.trim()))
+            String extendedWhitespaceChars = request
+                    .getParameter("extendedWhitespaceChars");
+            if (extendedWhitespaceChars != null
+                    && !"".equals(extendedWhitespaceChars.trim()))
             {
                 extendedWhitespaceChars = extendedWhitespaceChars.trim();
                 String[] chars = extendedWhitespaceChars.split("\\s+");
@@ -786,17 +832,20 @@ public class FilterHelper
                 {
                     if (ch.length() > 1)
                     {
-                        result = MessageFormat.format(bundle.getString("lb_filter_msg_invalid_extended_space_char"), ch);
+                        result = MessageFormat
+                                .format(bundle
+                                        .getString("lb_filter_msg_invalid_extended_space_char"),
+                                        ch);
                         break;
                     }
                 }
             }
-            
+
             return result;
         }
-        
+
         // TODO check: is filter valid
-        
+
         return "true";
     }
 

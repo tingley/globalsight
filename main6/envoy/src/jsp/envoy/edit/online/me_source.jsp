@@ -30,6 +30,7 @@ boolean b_singlePage = layout.isSinglePage();
 boolean b_autoSync = state.getOptions().getAutoSync(); 
 String str_pageHtml  = state.getSourcePageHtml(layout.getSourceViewMode());
 String str_targetLocale = state.getTargetLocale().toString();
+String str_segmentCount = String.valueOf(state.getPageInfo().getSegmentCount());
 
 String str_scrollHandler = "";
 if (!b_singlePage && b_autoSync)
@@ -57,18 +58,18 @@ pre {
 <SCRIPT src="/globalsight/envoy/terminology/viewer/error.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/snippets/snippet.js" defer></SCRIPT>
 <SCRIPT src="/globalsight/envoy/edit/online/editsnippets.js" defer></SCRIPT>
-<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/tooltip.js"></SCRIPT>
+<script type="text/javascript" SRC="/globalsight/dojo/dojo.js"></script>
 <SCRIPT>
+dojo.require("dijit.Dialog");
+
 var g_targetLocale = "<%=str_targetLocale%>";
-var tooltip = new Tooltip();
 
 function showProgressBar()
 {
   try
   {
-    tooltip.show("", 100, 300);
-    var prograssBarObj = tooltip.tooltip.children[1];
-    fakeProgressByTip(0, prograssBarObj.children[0].children[0], prograssBarObj.children[1], "<%=lb_loadingPreview%>");
+	  var div = dojo.byId('src_prograssbar');
+	  div.style.visibility = "visible";
   }
   catch(e)
   {
@@ -176,8 +177,51 @@ function update_tr(id)
 	}
 }
 
-
 </SCRIPT>
+
+<style type="text/css">
+<!--
+#src_prograssbar {
+	visibility: hidden;
+	position: absolute;
+	background-color: white;
+	width: 500px;
+	height: 50px;
+	text-align: center;
+	vertical-align: middle;
+	border: 1px solid #ddd;
+}
+-->
+</style>
+
+<script type="text/javascript">
+<!--
+	lastScrollY = 0;
+	function resetLocation(p_eid) {
+	try	{
+		var diffY;
+		if (document.documentElement && document.documentElement.scrollTop)
+			diffY = document.documentElement.scrollTop;
+		else if (document.body)
+			diffY = document.body.scrollTop
+		else {/*Netscape stuff*/
+		}
+		percent = .1 * (diffY - lastScrollY);
+		if (percent > 0)
+			percent = Math.ceil(percent);
+		else
+			percent = Math.floor(percent);
+		document.getElementById(p_eid).style.top = parseInt(document
+				.getElementById(p_eid).style.top)
+				+ percent + "px";
+		lastScrollY = lastScrollY + percent;
+	} catch(e) {
+  	}
+	}
+	window.setInterval("resetLocation(\"src_prograssbar\")", 1);
+//-->
+</script>
+
 </HEAD>
 <BODY onscroll="<%=str_scrollHandler%>" onload="doLoad()" onerror="return true">
 
@@ -185,6 +229,10 @@ function update_tr(id)
 <div id=idSnippetEditorDialog
      style="behavior: url('/globalsight/envoy/edit/snippets/SnippetEditor.htc');
             display: none;"></div>
+
+<div dojoType="dijit.Dialog" id="src_prograssbar" style="top: 300px; left: 100px;">
+	<br /> <img alt="<%=lb_loadingPreview %>" src="/globalsight/includes/loading.gif"> <%=lb_loadingPreview %> <br />
+</div>
 
 <% if (i_viewMode == EditorConstants.VIEWMODE_DETAIL) { %>
 <TABLE WIDTH="100%" CELLSPACING="0" CELLPADDING="3" BORDER="1"
@@ -195,7 +243,7 @@ function update_tr(id)
   <COL WIDTH="99%" VALIGN="TOP" CLASS="editorText">
   
   <THEAD>
-    <TR CLASS="tableHeadingGray">
+    <TR CLASS="tableHeadingGray" style="height:19pt;">
       <TD ALIGN="CENTER"><%=lb_id%></TD>
       <TD ALIGN="LEFT"><%=lb_segment%></TD>
     </TR>
@@ -207,5 +255,6 @@ function update_tr(id)
 	<%=str_pageHtml%>
 </DIV>
 <% } %>
+<input type="hidden" id="segmentCount" name="segmentCount" value="<%=str_segmentCount %>" />
 </BODY>
 </HTML>

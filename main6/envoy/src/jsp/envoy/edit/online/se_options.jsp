@@ -214,7 +214,7 @@ function init()
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_PTAGHILITE%>" value="mlah!">
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_ITERATE_SUBS%>" value="mlah!">
 <TABLE>
-  <THEAD><COL width="70%"><COL width="30%"></THEAD>
+  <COL width="70%"><COL width="30%">
   <TBODY>  
   <TR>
     <TD><SPAN class="standardText"><%=lb_autosave%></SPAN></TD>

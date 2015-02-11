@@ -152,13 +152,11 @@ public class WorkflowInstanceHelper extends WorkflowHelper
 			throws WorkflowException
 	{
 		ProcessInstance pi = null;
+		JbpmContext context = null;
 		try
 		{
-			JbpmContext context = WorkflowConfiguration.getInstance()
-					.getJbpmContext();
-
+			context = WorkflowConfiguration.getInstance().getJbpmContext();
 			pi = context.getProcessInstance(p_workflowInstanceId);
-			context.close();
 		}
 		// WFServerException, WFInternalException, ModelInternalException
 		catch (Exception se)
@@ -171,6 +169,11 @@ public class WorkflowInstanceHelper extends WorkflowHelper
 			throw new WorkflowException(
 					WorkflowException.MSG_FAILED_TO_GET_WF_INSTANCE, args, se);
 		}
+		finally
+		{
+			context.close();
+		}
+
 		return pi;
 	}
 

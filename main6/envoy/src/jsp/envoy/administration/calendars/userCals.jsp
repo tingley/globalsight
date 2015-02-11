@@ -11,13 +11,14 @@
                   com.globalsight.util.resourcebundle.ResourceBundleConstants,
                   com.globalsight.util.resourcebundle.SystemResourceBundle,
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
-                  com.globalsight.everest.servlet.util.ServerProxy,
+                  com.globalsight.everest.company.CompanyWrapper,
                   com.globalsight.everest.servlet.EnvoyServletException,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
                   com.globalsight.calendar.UserFluxCalendar,
-                  com.globalsight.everest.servlet.util.ServerProxy,
+                  com.globalsight.everest.servlet.util.ServerProxy,                  
+                  com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,  
                   java.text.MessageFormat,
                   java.util.Locale, 
                   java.util.ResourceBundle,
@@ -131,7 +132,7 @@ function enableButtons()
                     onclick="enableButtons()">
             </amb:column>
             <amb:column label="lb_user_name"  sortBy="<%=UserCalendarComparator.NAME%>">
-                <%=cal.getOwnerUserId()%>
+                <%=UserUtil.getUserNameById(cal.getOwnerUserId())%>
             </amb:column>
             <amb:column label="lb_time_zone" width="200px"
              sortBy="<%=UserCalendarComparator.TIMEZONE%>">
@@ -140,8 +141,8 @@ function enableButtons()
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=UserCalendarComparator.ASC_COMPANY%>">
                 <%
-                	  String companyId = ServerProxy.getCalendarManager().findCalendarById(cal.getParentCalendarId()).getCompanyId();
-                	  String companyName = ServerProxy.getJobHandler().getCompanyById(Long.parseLong(companyId)).getCompanyName();
+		          	  String companyId = ServerProxy.getCalendarManager().findCalendarById(cal.getParentCalendarId()).getCompanyId();
+		          	  String companyName = CompanyWrapper.getCompanyNameById(companyId);
                 	  out.print(companyName);
                 %>
             </amb:column>

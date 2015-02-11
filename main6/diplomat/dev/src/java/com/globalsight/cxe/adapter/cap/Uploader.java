@@ -444,6 +444,8 @@ public class Uploader
         m_dataSourceId = sourceElement.getAttribute("dataSourceId");
         m_pageIsCxePreviewable = sourceElement
                 .getAttribute("pageIsCxePreviewable");
+        String formatType = sourceElement.getAttribute("formatType");
+        boolean isPassolo = "passolo".equals(formatType);
 
         nl = rootElement.getElementsByTagName("displayName");
         e = (Element) nl.item(0);
@@ -552,7 +554,15 @@ public class Uploader
         }
 
         // get the target file name
-        nl = rootElement.getElementsByTagName("target");
+        if (isPassolo)
+        {
+            nl = rootElement.getElementsByTagName("source");
+        }
+        else
+        {
+            nl = rootElement.getElementsByTagName("target");
+        }
+        
         if (nl.getLength() > 0)
         {
             Element trg = (Element) nl.item(0);

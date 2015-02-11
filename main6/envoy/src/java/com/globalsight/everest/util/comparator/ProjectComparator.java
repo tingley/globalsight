@@ -31,6 +31,7 @@ public class ProjectComparator extends StringComparator
 	public static final int PROJECTMANAGER = 1;
     public static final int TERMBASE = 2;
     public static final int ASC_COMPANY = 3;
+    public static final int DESCRIPTION=4;
 
 
 	/**
@@ -74,6 +75,11 @@ public class ProjectComparator extends StringComparator
 			bValue = CompanyWrapper.getCompanyNameById(b.getCompanyId());
 			rv = this.compareStrings(aValue,bValue);
 			break;
+		case DESCRIPTION:
+            aValue = a.getDescription();
+            bValue = b.getDescription();
+            rv = this.compareStrings(aValue,bValue);
+            break;
 		default:
 			aValue = a.getName();
 			bValue = b.getName();

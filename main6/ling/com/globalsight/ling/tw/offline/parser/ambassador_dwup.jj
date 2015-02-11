@@ -18,6 +18,7 @@
 Javacc grammar file for GlobalSight Download/upload file format.
 Version 1.0 9/25/2000 Initial version
 Version 1.1 9/22/2005 Added Help and Note lines in the header.
+Version 1.2 10/25/2012 [#GBS-2823]： text version of rtf file doesn't upload
 */
 
 options
@@ -67,6 +68,7 @@ PARSER_END(AmbassadorDwUpParser)
 {
   <ID: "# "(["0"-"9"])+<NEWLINE>>
 | <SUBFLOW_ID: "# "(["0"-"9"])+":"<ALPHANUMERIC>":"(["0"-"9"])+<NEWLINE>>
+| <PAGE_NAME: "# Page Name: "(~["\r","\n"])*<NEWLINE>>
 | <SEG_FORMAT: "# Segment Format: "<ALPHANUMERIC><NEWLINE>>
 // This is a required format. The upload code requires specific fixed strings to follow.
 | <MATCH_TYPE: "# Match Type: "<ALPHANUMERIC><NEWLINE>>
@@ -119,6 +121,8 @@ void header() :
     placeholderFormat()
     sourceLocale()
     targetLocale()
+    (jobID())?
+    (jobName())?
     (pageName())?
     pageId()
     workflowId()
@@ -192,6 +196,24 @@ void targetLocale() :
 {
     "# Target Locale: " t=<ALPHANUMERIC> <NEWLINE>
     { m_handler.handleTargetLocale(t.image); }
+}
+
+void jobID() :
+{
+    Token t;
+}
+{
+    "# Job ID: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleJobID(t.image); }
+}
+
+void jobName() :
+{
+    Token t;
+}
+{
+    "# Job Name: " t=<ALPHANUMERIC> <NEWLINE>
+    { m_handler.handleJobName(t.image); }
 }
 
 void pageName() :
@@ -299,6 +321,7 @@ void id() :
     Token ms = null;
     Token tk = null;
     Token t = null;
+    Token pageName = null;
 }
 {
     t=<ID>
@@ -307,6 +330,17 @@ void id() :
         m_handler.handleId(t.image.substring(1).trim());
     }
 
+	(
+        pageName=<PAGE_NAME>
+        {
+            if (pageName != null)
+            {
+                // remove "# Page Name: " from string
+                m_handler.handlePageName(pageName.image.substring(12).trim());
+            }
+        }
+    )?
+    
     (
         sf=<SEG_FORMAT>
         {
@@ -368,6 +402,7 @@ void subflowId() :
     Token ms = null;
     Token tk = null;
     Token t = null;
+    Token pageName = null;
 }
 {
     t=<SUBFLOW_ID>
@@ -376,6 +411,17 @@ void subflowId() :
         m_handler.handleSubflowId(t.image.substring(1).trim());
     }
 
+	(
+        pageName=<PAGE_NAME>
+        {
+            if (pageName != null)
+            {
+                // remove "# Page Name: " from string
+                m_handler.handlePageName(pageName.image.substring(12).trim());
+            }
+        }
+    )?
+    
     (
         sf=<SEG_FORMAT>
         {

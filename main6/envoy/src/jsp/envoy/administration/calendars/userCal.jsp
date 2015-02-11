@@ -16,7 +16,8 @@
                   com.globalsight.calendar.FluxCalendar,
                   com.globalsight.calendar.UserFluxCalendar,
                   com.globalsight.util.GeneralException,
-                  com.globalsight.everest.webapp.pagehandler.administration.users.CreateUserWrapper,                  
+                  com.globalsight.everest.webapp.pagehandler.administration.users.CreateUserWrapper,        
+                  com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,           
                   java.text.MessageFormat,
                   java.util.ArrayList,
                   java.util.Locale,
@@ -121,11 +122,11 @@
     } 
     
     if (wrapper != null) {
-        userName = wrapper.getUserId();
+        userName = wrapper.getUserName();
     } else if (cal != null) {
-        userName = cal.getOwnerUserId();
+        userName = UserUtil.getUserNameById(cal.getOwnerUserId());
     } else {
-    	userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
+    	userName = UserUtil.getUserNameById((String)session.getAttribute(WebAppConstants.USER_NAME));
     }
 
 %>

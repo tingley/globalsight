@@ -8,14 +8,14 @@ public class Currency
 {
 
     // Currency
-    public static final String New_BUTTON = "//input[@value='New...']";
-    public static final String Edit_BUTTON = "//input[@value='Edit']";
-    public static final String Currency_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
+    public static final String NEW_BUTTON = "//input[@value='New...']";
+    public static final String EDIT_BUTTON = "//input[@value='Edit']";
+    public static final String CURRENCY_TABLE = "//div[@id='contentLayer']/form/table/tbody/tr[2]/td/table/tbody";
 
     // New Currency
-    public static final String Save_BUTTON = "Save";
+    public static final String SAVE_BUTTON = "Save";
     public static final String Cacel_BUTTON = "Cancel";
-    public static final String DisplayCurrency_SELECT = "displayCurr";
-    public static final String ConversionFactor_TEXT_FIELD = "conversion";
+    public static final String CURRENCY_SELECT = "displayCurr";
+    public static final String FACTOR_TEXT = "conversion";
 
 }

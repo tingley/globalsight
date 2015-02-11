@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.globalsight.cxe.entity.filterconfiguration.FMFilter;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.ling.docproc.AbstractExtractor;
@@ -30,6 +31,7 @@ public class ExtractorTest extends BaseExtractorTestClass
     private static final String extension = "mif";
     
     private Extractor extractor;
+    private FMFilter mainFilter = null;
     
     /**
      * true: create answer files
@@ -40,6 +42,7 @@ public class ExtractorTest extends BaseExtractorTestClass
     @Before
     public void setUp()
     {
+        mainFilter = initFmFilter();
         initExtractor();
         
         sourceRoot = getResourcePath(ExtractorTest.class, "source");
@@ -112,6 +115,7 @@ public class ExtractorTest extends BaseExtractorTestClass
         input.setURL(file.toURI().toString());
         input.setLocale(Locale.US);
         extractor.init(input, output);
+        extractor.setMainFilter(mainFilter);
         extractor.loadRules();
         extractor.extract();
         String gxml = DiplomatWriter.WriteXML(output);
@@ -139,6 +143,15 @@ public class ExtractorTest extends BaseExtractorTestClass
     {
         // TODO Auto-generated method stub
         return null;
+    }
+    
+    private FMFilter initFmFilter()
+    {
+        FMFilter ff = new FMFilter();
+        ff.setExposeLeftMasterPage(true);
+        ff.setExposeOtherMasterPage(true);
+        ff.setExposeRightMasterPage(true);
+        return ff;
     }
     
 }

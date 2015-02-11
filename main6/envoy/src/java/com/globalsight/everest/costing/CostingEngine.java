@@ -47,59 +47,59 @@ import com.globalsight.util.GlobalSightLocale;
 public interface CostingEngine extends SystemParameterChangeListener
 {
 
-	public static final String SERVICE_NAME = "CostingEngine";
+    public static final String SERVICE_NAME = "CostingEngine";
 
-	/**
+    /**
      * Integer constant representing JOB
      */
-	public static final int JOB = 1;
+    public static final int JOB = 1;
 
-	/**
+    /**
      * Integer constant representing CURRENCY
      */
-	public static final int CURRENCY = 2;
+    public static final int CURRENCY = 2;
 
-	/**
+    /**
      * Integer constant representing RECALCULATE
      */
-	public static final int RECALCULATE = 3;
+    public static final int RECALCULATE = 3;
 
-	/**
+    /**
      * Integer constant representing COST_TYPE
      */
-	public static final int COST_TYPE = 4;
+    public static final int COST_TYPE = 4;
 
-	/**
+    /**
      * Return a Vector of all the iso currency codes.
      * <p>
      * 
      * @return A vector of the currency codes supported by System4.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Vector getIsoCurrencies() throws RemoteException, CostingException;
+    Vector getIsoCurrencies() throws RemoteException, CostingException;
 
-	/**
+    /**
      * Return a Vector of all the iso currency codes that currently don't have a
      * conversion factor set up.
      * <p>
      * 
      * @return A vector of the currency codes supported by System4.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Vector getIsoCurrenciesWithoutConversion() throws RemoteException,
-			CostingException;
+    Vector getIsoCurrenciesWithoutConversion() throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Return the specified iso currency by specifying the code.
      */
-	IsoCurrency getIsoCurrency(String p_isoCode) throws RemoteException,
-			CostingException;
+    IsoCurrency getIsoCurrency(String p_isoCode) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Add or modify a currency. Adds the new currency or replaces the existing
      * one.
      * <p>
@@ -107,54 +107,54 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @param p_currency
      *            The currency to add or modify.
      * @return The currency that was just added - with the id filled in.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Currency addOrModifyCurrency(Currency p_currency) throws RemoteException,
-			CostingException;
+    Currency addOrModifyCurrency(Currency p_currency) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Retrieve all the currencies in the system.
      * <p>
      * 
      * @return All the currencies in the system. Could be an empty collection
      *         (but not null).
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Collection getCurrencies() throws RemoteException, CostingException;
+    Collection getCurrencies() throws RemoteException, CostingException;
 
-	/**
+    /**
      * Retrieve the currency with the specified iso code.
      * <p>
      * 
      * @return The currency that is associated with the iso code or NULL if
      *         there is none.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Currency getCurrency(String p_isoCode, String p_companyId)
-			throws RemoteException, CostingException;
+    Currency getCurrency(String p_isoCode, String p_companyId)
+            throws RemoteException, CostingException;
 
-	Currency getCurrency(String p_isoCodes) throws RemoteException,
-			CostingException;
+    Currency getCurrency(String p_isoCodes) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Retrieve the pivot (i.e. default) currency. All other currencies
      * conversion factors are based on this currency.
      * <p>
      * 
      * @return The default currency.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Currency getPivotCurrency() throws RemoteException, CostingException;
+    Currency getPivotCurrency() throws RemoteException, CostingException;
 
-	/**
+    /**
      * Changes the pivot (i.e. default) currency to a new currency. It also
      * recalculates all the conversion factors for all the other currencies so
      * they are reflected off the new pivot.
@@ -162,10 +162,10 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @param p_newPivotCurrency
      *            The currency that will be the new pivot.
      */
-	void changePivotCurrency(Currency p_newPivotCurrency)
-			throws RemoteException, CostingException;
+    void changePivotCurrency(Currency p_newPivotCurrency)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Adds a new rate to a certain role.
      * <p>
      * 
@@ -173,25 +173,25 @@ public interface CostingEngine extends SystemParameterChangeListener
      *            The rate to add - the rate contains the activity and locale
      *            pair it should be associated with.
      * @return Returns the rate that has been added (with id set).
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Rate addRate(Rate p_rate) throws RemoteException, CostingException;
+    Rate addRate(Rate p_rate) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Modify the rate (name, description or rates per word count)
      * <p>
      * 
      * @param p_rate
      *            The rate to modify.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	void modifyRate(Rate p_rate) throws RemoteException, CostingException;
+    void modifyRate(Rate p_rate) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Delete the rate(s) associated with the specific role. This really just
      * deactivates them so they can still be referenced for historical purposes.
      * They are NOT removed from the role itself, but just deactivated within
@@ -200,39 +200,39 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @param p_role
      *            The role that the rate(s) to be removed are referenced by.
-     * @exception CostingException -
-     *                An error occurred when removing the rate(s).
+     * @exception CostingException
+     *                - An error occurred when removing the rate(s).
      *                RemoteException - a network exception occurred.
      */
-	void deleteRatesOnRole(Role p_role) throws CostingException,
-			RemoteException;
+    void deleteRatesOnRole(Role p_role) throws CostingException,
+            RemoteException;
 
-	/**
+    /**
      * Returns all the rates in the system.
      * <p>
      * 
      * @return A collection of all the rates in the system. This could be an
      *         empty collection, but not null.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Collection getRates() throws RemoteException, CostingException;
+    Collection getRates() throws RemoteException, CostingException;
 
-	/**
+    /**
      * Retrieves the specified rate.
      * <p>
      * 
      * @param p_id
      *            The id of the rate to find.
      * @return The rate or NULL if it couldn't be found.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Rate getRate(long p_id) throws RemoteException, CostingException;
+    Rate getRate(long p_id) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Retrieves all the rates associated with the specific activity and
      * locales.
      * <p>
@@ -244,15 +244,15 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @param p_targetLocale
      *            The target locale the role is associated with.
      * @return A collection of rates.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Collection getRates(Activity p_activity, GlobalSightLocale p_sourceLocale,
-			GlobalSightLocale p_targetLocale) throws RemoteException,
-			CostingException;
+    Collection getRates(Activity p_activity, GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Returns the rates that are associated with the specific locales.
      * <p>
      * 
@@ -262,15 +262,15 @@ public interface CostingEngine extends SystemParameterChangeListener
      *            The target locale the role is associated with.
      * @return A hashtable where the key is the activity and the value is a
      *         vector of the Rates associated with that activity.
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Hashtable getRates(GlobalSightLocale p_sourceLocale,
-			GlobalSightLocale p_targetLocale) throws RemoteException,
-			CostingException;
+    Hashtable getRates(GlobalSightLocale p_sourceLocale,
+            GlobalSightLocale p_targetLocale) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Returns all the rates that are associated with roles of a specific source
      * locale.
      * <p>
@@ -279,17 +279,17 @@ public interface CostingEngine extends SystemParameterChangeListener
      *            The source locale the role the rate is associated with.
      * @return A hashtable of hashtables. The external hashtable's key is the
      *         target locale id and then a hashtable which contains as a key the
-     *         Activity and the values are the rates associated with it. Ex. 32 -
-     *         Translate --> rate1, rate2 - Review --> rate3, rate4 35 -
+     *         Activity and the values are the rates associated with it. Ex. 32
+     *         - Translate --> rate1, rate2 - Review --> rate3, rate4 35 -
      *         Translate --> rate 6 - Review --> rate 7
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Hashtable getRates(GlobalSightLocale p_sourceLocale)
-			throws RemoteException, CostingException;
+    Hashtable getRates(GlobalSightLocale p_sourceLocale)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Override and persist the cost for the object specified.
      * 
      * @param p_obj
@@ -301,14 +301,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the newly updated cost (with the override).
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost overrideCost(WorkObject p_obj, float p_overrideCost, int p_costType)
-			throws RemoteException, CostingException;
+    Cost overrideCost(WorkObject p_obj, float p_overrideCost, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Clear the override cost.
      * 
      * @param p_obj
@@ -317,14 +317,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the newly updated cost (without the override).
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost clearOverrideCost(WorkObject p_obj, int p_costType)
-			throws RemoteException, CostingException;
+    Cost clearOverrideCost(WorkObject p_obj, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Add the specified surcharge to the cost and persist.
      * 
      * @param p_costId
@@ -334,14 +334,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the newly updated cost (with the surcharge added).
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost addSurcharge(long p_costId, Surcharge p_newSurcharge, int p_costType)
-			throws RemoteException, CostingException;
+    Cost addSurcharge(long p_costId, Surcharge p_newSurcharge, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Modify the specified surcharge of the cost and persist.
      * 
      * @param p_costId
@@ -356,15 +356,15 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the newly updated cost (with the modified surcharge).
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost modifySurcharge(long p_costId, String p_oldSurchareName,
-			Surcharge p_modifiedSurcharge, int p_costType)
-			throws RemoteException, CostingException;
+    Cost modifySurcharge(long p_costId, String p_oldSurchareName,
+            Surcharge p_modifiedSurcharge, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Remove the specified surcharge and persists the change.
      * 
      * @param p_costId
@@ -374,14 +374,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the newly updated cost (with the surcharge removed).
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost removeSurcharge(long p_costId, String p_surchargeName, int p_costType)
-			throws RemoteException, CostingException;
+    Cost removeSurcharge(long p_costId, String p_surchargeName, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Add/reset the estimated amount of work in EVERY task in the job that has
      * a rate with the unit of work specified.
      * 
@@ -392,14 +392,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @param p_amount
      *            The amount of estimated work.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	void setEstimatedAmountOfWorkInJob(long p_jobId, int p_unitOfWork,
-			float p_amount) throws RemoteException, CostingException;
+    void setEstimatedAmountOfWorkInJob(long p_jobId, int p_unitOfWork,
+            float p_amount) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Retrieve the average estimated amount of work in the job. Goes through
      * all tasks with page-based rates - totals them up and averages them.
      * 
@@ -413,14 +413,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @return Returns the estimated amount. If there were no tasks in the job
      *         with that unit of work will return '-1'.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	float getEstimatedAmountOfWorkInJob(long p_jobId, int p_unitOfWork,
-			int p_costType) throws RemoteException, CostingException;
+    float getEstimatedAmountOfWorkInJob(long p_jobId, int p_unitOfWork,
+            int p_costType) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Add/reset the estimated amount of work to the task.
      * 
      * @param p_taskId
@@ -430,14 +430,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @param p_amount
      *            The amount of estimated work.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	void setEstimatedAmountOfWork(long p_taskId, int p_unitOfWork,
-			float p_amount) throws RemoteException, CostingException;
+    void setEstimatedAmountOfWork(long p_taskId, int p_unitOfWork,
+            float p_amount) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Add/reset the actual amount of work to the task. The AmountOfWork must
      * exist with an estimate set.
      * 
@@ -448,14 +448,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @param p_amount
      *            The amount of actual work.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	void setActualAmountOfWork(long p_taskId, int p_unitOfWork, float p_amount)
-			throws RemoteException, CostingException;
+    void setActualAmountOfWork(long p_taskId, int p_unitOfWork, float p_amount)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Calculates the cost of a job in the currency specified.
      * 
      * @param p_jobId
@@ -472,15 +472,15 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return void
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	void calculateCost(long p_jobId, Currency p_currency,
-			boolean p_recalculate, int p_costType) throws RemoteException,
-			CostingException;
+    void calculateCost(long p_jobId, Currency p_currency,
+            boolean p_recalculate, int p_costType) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Calculates the cost of a job in the currency specified.
      * 
      * @param p_job
@@ -497,14 +497,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the cost object for the job.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost calculateCost(Job p_job, Currency p_currency, boolean p_recalculate,
-			int p_costType) throws RemoteException, CostingException;
+    Cost calculateCost(Job p_job, Currency p_currency, boolean p_recalculate,
+            int p_costType) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Calculates the cost of a job in the pivot currency.
      * 
      * @param p_job
@@ -519,18 +519,18 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the cost object for the job.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost calculateCost(Job p_job, boolean p_recalculate, int p_costType)
-			throws RemoteException, CostingException;
+    Cost calculateCost(Job p_job, boolean p_recalculate, int p_costType)
+            throws RemoteException, CostingException;
 
-	/** Re-sets the cost of a job without recalculating workflows */
-	Cost reCostJob(Job p_job, Currency p_currency, int p_costType)
-			throws RemoteException, CostingException;
+    /** Re-sets the cost of a job without recalculating workflows */
+    Cost reCostJob(Job p_job, Currency p_currency, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Calculates the cost of a workflow in the currency specified.
      * 
      * @param p_workflow
@@ -547,15 +547,15 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the cost object for the workflow.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost calculateCost(Workflow p_workflow, Currency p_currency,
-			boolean p_recalculate, int p_costType) throws RemoteException,
-			CostingException;
+    Cost calculateCost(Workflow p_workflow, Currency p_currency,
+            boolean p_recalculate, int p_costType) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * Calculates the cost of a workflow in the pivot currency.
      * 
      * @param p_workflow
@@ -570,14 +570,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the cost object for the workflow.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost calculateCost(Workflow p_workflow, boolean p_recalculate,
-			int p_costType) throws RemoteException, CostingException;
+    Cost calculateCost(Workflow p_workflow, boolean p_recalculate,
+            int p_costType) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Calculates the cost of a task in the given currency.
      * 
      * @param p_task
@@ -594,14 +594,14 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the cost object for the task.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost calculateCost(Task p_task, Currency p_currency, boolean p_recalculate,
-			int p_costType) throws RemoteException, CostingException;
+    Cost calculateCost(Task p_task, Currency p_currency, boolean p_recalculate,
+            int p_costType) throws RemoteException, CostingException;
 
-	/**
+    /**
      * Calculates the cost of a task in the pivot currency.
      * 
      * @param p_task
@@ -616,55 +616,55 @@ public interface CostingEngine extends SystemParameterChangeListener
      * 
      * @return Returns the cost object for the task.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	Cost calculateCost(Task p_task, boolean p_recalculate, int p_costType)
-			throws RemoteException, CostingException;
+    Cost calculateCost(Task p_task, boolean p_recalculate, int p_costType)
+            throws RemoteException, CostingException;
 
-	/**
+    /**
      * Calculate cost for the Workflows having the different status.
      * 
-     * @param p_workflow -
-     *            Specify the workflow.
-     * @param p_currency -
-     *            Specify the currency for cost.
-     * @param p_recalculate -
-     *            Determine whether to calculate costing for unfinished jobs.
-     * @param p_costType -
-     *            Cost type.
-     * @param p_recalcFinishedWorkflow -
-     *            Determine whether to recalculate costing for finished jobs.
+     * @param p_workflow
+     *            - Specify the workflow.
+     * @param p_currency
+     *            - Specify the currency for cost.
+     * @param p_recalculate
+     *            - Determine whether to calculate costing for unfinished jobs.
+     * @param p_costType
+     *            - Cost type.
+     * @param p_recalcFinishedWorkflow
+     *            - Determine whether to recalculate costing for finished jobs.
      * 
      * @return Cost.
      * @throws RemoteException
      * @throws CostingException
      */
-	public Cost calculateCost(Workflow p_workflow, Currency p_currency,
-			boolean p_recalculate, int p_costType,
-			boolean p_recalcFinishedWorkflow) throws RemoteException,
-			CostingException;
+    public Cost calculateCost(Workflow p_workflow, Currency p_currency,
+            boolean p_recalculate, int p_costType,
+            boolean p_recalcFinishedWorkflow) throws RemoteException,
+            CostingException;
 
-	/**
+    /**
      * This method can be used to load any new currencies and updates the
      * conversions. This is currently just used to load the pivot currency on
      * start-up.
      * 
-     * @exception CostingException -
-     *                An error occurred in the component RemoteException - a
+     * @exception CostingException
+     *                - An error occurred in the component RemoteException - a
      *                network exception occurred
      */
-	void loadCurrencies() throws RemoteException, CostingException;
+    void loadCurrencies() throws RemoteException, CostingException;
 
-	/**
+    /**
      * FIXME This method need to be modified after the system parameters made
      * company sensitive.
      */
-	public Currency addOrModifyPivotCurrency(String p_companyId)
-			throws RemoteException, CostingException, GeneralException;
+    public Currency addOrModifyPivotCurrency(String p_companyId)
+            throws RemoteException, CostingException, GeneralException;
 
-	/**
+    /**
      * Get the factor based on the source currency and target currency.
      * 
      * @param currency
@@ -675,22 +675,22 @@ public interface CostingEngine extends SystemParameterChangeListener
      * @throws CostingException
      * @throws GeneralException
      */
-	public float getFactor(Currency currency, String targetName,
-			String companyId) throws RemoteException, CostingException,
-			GeneralException;
+    public float getFactor(Currency currency, String targetName,
+            String companyId) throws RemoteException, CostingException,
+            GeneralException;
 
-	/**
-	 * Gets the currency based on the currency name.
-	 * 
-	 * @param targetName
-	 * @param companyId
-	 * @return
-	 * @throws RemoteException
-	 * @throws CostingException
-	 * @throws GeneralException
-	 */
-	public Currency getCurrencyByName(String targetName, String companyId)
-			throws RemoteException, CostingException, GeneralException;
-	
-	public void removeRate(long p_id)throws GeneralException;
+    /**
+     * Gets the currency based on the currency name.
+     * 
+     * @param targetName
+     * @param companyId
+     * @return
+     * @throws RemoteException
+     * @throws CostingException
+     * @throws GeneralException
+     */
+    public Currency getCurrencyByName(String targetName, String companyId)
+            throws RemoteException, CostingException, GeneralException;
+
+    public void removeRate(long p_id) throws GeneralException;
 }

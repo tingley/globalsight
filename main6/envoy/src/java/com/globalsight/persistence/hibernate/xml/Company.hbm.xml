@@ -1,43 +1,43 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="com.globalsight.everest.company.Company"
-        table="COMPANY">
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
-        <property name="companyDescription" length="4000"
-            column="DESCRIPTION" type="string" not-null="false"
-            unique="false" />
-        <property name="name" length="40" column="NAME" type="string"
-            not-null="true" unique="false" />
-        <property name="sessionTime" length="10" column="SESSION_TIME" type="string"
-            not-null="false" unique="false" />
-        <property name="isActive" column="IS_ACTIVE" type="yes_no"
-            not-null="true" unique="false" />
-        <property name="enableIPFilter" column="ENABLE_IP_FILTER" type="yes_no"
-            not-null="false" unique="false" />
-        <property name="enableTMAccessControl" column="ENABLE_TM_ACCESS_CONTROL" type="yes_no"
-            not-null="false" unique="false" />
-        <property name="enableTBAccessControl" column="ENABLE_TB_ACCESS_CONTROL" type="yes_no"
-            not-null="false" unique="false" />
-        <property name="enableSSOLogin" column="ENABLE_SSO_LOGIN" type="yes_no"
-            not-null="false" unique="false" />
-        <property name="ssoIdpUrl" length="256"
-            column="SSO_IDP_URL" type="string" not-null="false"
-            unique="false" />
-        <property name="ssoLoginUrl" length="256"
-            column="SSO_LOGIN_URL" type="string" not-null="false"
-            unique="false" />
-        <property name="ssoLogoutUrl" length="256"
-            column="SSO_LOGOUT_URL" type="string" not-null="false"
-            unique="false" />
-        <property name="ssoWSEndpoint" length="256"
-            column="SSO_WS_ENDPOINT" type="string" not-null="false"
-            unique="false" />
-        <property name="tmVersionVal" column="TM_VERSION" type="int"
-            not-null="true" />
-        <property name="email" length="100" column="EMAIL" type="string"
-            not-null="false" unique="false" />
-    </class>
+	<class name="com.globalsight.everest.company.Company" table="COMPANY">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="companyDescription" length="4000" column="DESCRIPTION"
+			type="string" not-null="false" unique="false" />
+		<property name="name" length="40" column="NAME" type="string"
+			not-null="true" unique="false" />
+		<property name="sessionTime" length="10" column="SESSION_TIME"
+			type="string" not-null="false" unique="false" />
+		<property name="isActive" column="IS_ACTIVE" type="yes_no"
+			not-null="true" unique="false" />
+		<property name="enableIPFilter" column="ENABLE_IP_FILTER"
+			type="yes_no" not-null="false" unique="false" />
+		<property name="enableTMAccessControl" column="ENABLE_TM_ACCESS_CONTROL"
+			type="yes_no" not-null="false" unique="false" />
+		<property name="enableTBAccessControl" column="ENABLE_TB_ACCESS_CONTROL"
+			type="yes_no" not-null="false" unique="false" />
+		<property name="enableSSOLogin" column="ENABLE_SSO_LOGIN"
+			type="yes_no" not-null="false" unique="false" />
+		<property name="ssoIdpUrl" length="256" column="SSO_IDP_URL"
+			type="string" not-null="false" unique="false" />
+		<property name="ssoLoginUrl" length="256" column="SSO_LOGIN_URL"
+			type="string" not-null="false" unique="false" />
+		<property name="ssoLogoutUrl" length="256" column="SSO_LOGOUT_URL"
+			type="string" not-null="false" unique="false" />
+		<property name="ssoWSEndpoint" length="256" column="SSO_WS_ENDPOINT"
+			type="string" not-null="false" unique="false" />
+		<property name="tmVersionVal" column="TM_VERSION" type="int"
+			not-null="true" />
+		<property name="email" length="100" column="EMAIL" type="string"
+			not-null="false" unique="false" />
+		<property name="state" length="40" column="STATE" type="string"
+			not-null="false" />
+		<property name="separateTmTuTuvTables" column="SEPARATE_LM_TU_TUV_TABLES" 
+			type="int" not-null="false" />
+		<property name="migrateProcessing" column="MIGRATE_PROCESSING" 
+			type="int" not-null="false" />
+	</class>
 </hibernate-mapping>

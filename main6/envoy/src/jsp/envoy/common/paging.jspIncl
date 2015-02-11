@@ -1,0 +1,123 @@
+<%@ page
+    import="java.util.*,java.util.ResourceBundle"
+%>
+<SCRIPT type="text/javascript">
+/**
+ * This file is used for paging display.
+ * 
+ * Please implement loadPage(page) method outside first
+ *
+ * @param page
+ * @returns {String}
+ */
+function makePageNavigation(p_currentPage, p_totalItemNum, p_maxItemNumPerPage, p_pageNumberDisplay)
+{
+  var p_totalPage;
+  if("All"==p_maxItemNumPerPage)
+  {
+	 p_totalPage = 1;
+  }
+  else
+  {
+     p_totalPage = Math.ceil(p_totalItemNum/p_maxItemNumPerPage);
+  }
+  var lb_first = '<%=bundle.getString("lb_first")%>';
+  var lb_previous = '<%=bundle.getString("lb_previous")%>';
+  var lb_next = '<%=bundle.getString("lb_next")%>';
+  var lb_last = '<%=bundle.getString("lb_last")%>';
+  var p_first='loadPage(1)';
+  var p_last='loadPage('+p_totalPage+')';
+
+  var p_html="";
+  
+  if(p_currentPage==1)
+  {
+	  p_html='<a>'+lb_first+'</a>|';
+      p_html+='<a>'+lb_previous+'</a>|';
+  }
+  else
+  {
+	  p_html='<a href="javascript:'+p_first+';">'+lb_first+'</a>|';
+      p_html+='<a href="javascript:loadPage('+(p_currentPage-1)+');">'+lb_previous+'</a>| ';
+  }
+
+  var p_begin;
+  
+  if(p_totalPage<p_pageNumberDisplay+1)
+  {
+    p_begin=1;
+  }
+  else
+  {
+    var p_status=p_pageNumberDisplay%2;
+    var p_round = Math.floor((p_pageNumberDisplay-1)/2);
+    var p_temp1 = p_currentPage-p_round;
+    var p_temp2 = p_temp1+p_pageNumberDisplay-1;
+    if(p_temp1<1)
+    {
+      p_begin = 1;
+    }
+    else if(p_temp2>p_totalPage)
+    {
+      p_begin = p_totalPage-p_pageNumberDisplay+1;
+    }
+    else
+    {
+      p_begin = p_temp1;
+    }
+  }
+  
+  var p_temp = p_begin+p_pageNumberDisplay-1;
+  var p_end;
+  if(p_temp>p_totalPage)
+  {
+    p_end = p_totalPage;
+  }
+  else
+  {
+    p_end = p_temp;
+  }
+  
+  for(var i=p_begin;i<=p_end;i++)
+  {
+	  if(i==p_currentPage)
+	  {
+		p_html+='<a>'+i+'</a> ';
+	  }
+	  else
+	  {
+		p_html+='<a href="javascript:loadPage('+i+');">'+i+'</a> ';
+	  }
+  }
+
+  if(p_currentPage==p_totalPage)
+  {
+	 p_html+='|<a>'+lb_next+'</a>|';
+     p_html+='<a>'+lb_last+'</a>';
+  }
+  else
+  {
+	 p_html+='|<a href="javascript:loadPage('+(p_currentPage+1)+')">'+lb_next+'</a>|';
+     p_html+='<a href="javascript:'+p_last+';">'+lb_last+'</a>';
+  }
+  return p_html;
+}
+
+function makePageStatus(p_currentPage, p_maxItemNumPerPage, p_totalItemNum)
+{
+	var p_temp = p_maxItemNumPerPage;
+	if("All"==p_maxItemNumPerPage)
+	{
+		p_temp = p_totalItemNum;
+	}
+	
+	var p_recordBegin = (p_currentPage-1)*p_temp+1;
+	var p_recordEnd = p_currentPage*p_temp;
+	if(p_recordEnd>p_totalItemNum)
+	{
+		p_recordEnd = p_totalItemNum;
+	}
+	var p_pageStatus = "Displaying "+p_recordBegin+"-"+p_recordEnd+" of "+p_totalItemNum;
+	return p_pageStatus;
+}
+</SCRIPT>

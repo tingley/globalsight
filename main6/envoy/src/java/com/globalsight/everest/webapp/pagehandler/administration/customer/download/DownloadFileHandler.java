@@ -61,6 +61,8 @@ import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.zip.ZipIt;
 
 /**
@@ -209,8 +211,7 @@ public class DownloadFileHandler extends PageHandler
                     {
                         //Get target locales from workflows of selected job
                         List localesList = new ArrayList();
-                        ArrayList<Workflow> wfs = (ArrayList<Workflow>)j.getWorkflows();
-                        for (Workflow wf : wfs) {
+                        for (Workflow wf : j.getWorkflows()) {
                             localesList.add(wf.getTargetLocale().toString());
                         }
                         sessionMgr.setAttribute(DOWNLOAD_JOB_LOCALES,
@@ -296,17 +297,25 @@ public class DownloadFileHandler extends PageHandler
                         }
                         
                         // Process XLZ file
-                        if (externalPageId.toLowerCase().endsWith(".xlf")
-                                || externalPageId.toLowerCase().endsWith(
-                                        ".xliff"))
+                        String tmp = externalPageId.toLowerCase();
+                        if (XliffFileUtil.isXliffFile(tmp))
                         {
-                            String tmp = externalPageId.substring(0,
+                            tmp = StringUtil.replace(tmp, "/", File.separator);
+                            tmp = StringUtil.replace(tmp, "\\", File.separator);
+                            int tmpIndex = tmp.lastIndexOf(".sub" + File.separator);
+                            if (tmpIndex != -1) {
+                                tmp = tmp.substring(0, tmpIndex);
+                                if (XliffFileUtil.isXliffFile(tmp))
+                                    externalPageId = externalPageId.substring(0, tmpIndex);
+                            }
+                            
+                            String tmpFullname = "";
+                            tmp = externalPageId.substring(0,
                                     externalPageId.lastIndexOf(File.separator))
                                     + ".xlz";
 
                             String companyName = CompanyWrapper
                                     .getCompanyNameById(j.getCompanyId());
-                            String tmpFullname = "";
                             if ("1".equals(CompanyWrapper.getCurrentCompanyId())
                                     && !"1".equals(j.getCompanyId())) 
                             {
@@ -319,7 +328,6 @@ public class DownloadFileHandler extends PageHandler
                             {
                                 tmpFullname = getAbsolutePath(tmp);                                
                             }
-
                             File tmpFullFile = new File(tmpFullname);
                             if (tmpFullFile.exists() && tmpFullFile.isFile())
                             {
@@ -602,7 +610,15 @@ public class DownloadFileHandler extends PageHandler
                         .getAttribute(DESKTOP_FOLDER);
                 for (int i = 0; i < files.length; i++)
                 {
-                    file = URLDecoder.decode(files[i].toString(), "UTF-8");
+                    try
+                    {
+                        file = URLDecoder.decode(files[i].toString(), "UTF-8");
+                    }
+                    catch (Exception e)
+                    {
+                        file = files[i].toString();
+                    }
+                    
                     File addFile = new File(getAbsolutePath(file));
                     if (addFile.isDirectory())
                     {
@@ -654,8 +670,7 @@ public class DownloadFileHandler extends PageHandler
                 // Remove files from the import list.
                 for (int i = 0; i < files.length; i++)
                 {
-                    // file = URLDecoder.decode(files[i].toString(), "UTF-8");
-                    file = files[i].toString();
+                    file = URLDecoder.decode(files[i].toString(), "UTF-8"); 
                     fileList.remove(file);
                 }
             }

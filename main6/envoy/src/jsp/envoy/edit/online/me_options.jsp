@@ -41,6 +41,9 @@ String lb_colorNote = bundle.getString("msg_colors_apply_to_preview");
 String lb_linkColor        = bundle.getString("lb_normal_link_color");
 String lb_activeLinkColor  = bundle.getString("lb_active_link_color");
 String lb_visitedLinkColor = bundle.getString("lb_visited_link_color");
+String lb_preview100MatchColor = bundle.getString("lb_Color_100match");
+String lb_previewIceMatchColor = bundle.getString("lb_Color_ICEmatch");
+String lb_previewNonMatchColor = bundle.getString("lb_Color_Nonmatch");
 String lb_autoUnlockSegments = bundle.getString("lb_auto_unlock_segments");
 String lb_autoSyncSegments = bundle.getString("lb_auto_sync_segments"); 
 String lb_defaultLayout = bundle.getString("lb_default_layout");
@@ -59,6 +62,10 @@ String msg_invalid_max_segments_num = bundle.getString("msg_max_segment_number_e
 String linkColor        = (String)request.getAttribute(UserParamNames.HYPERLINK_COLOR);
 String activeLinkColor  = (String)request.getAttribute(UserParamNames.ACTIVE_HYPERLINK_COLOR);
 String visitedLinkColor = (String)request.getAttribute(UserParamNames.VISITED_HYPERLINK_COLOR);
+
+String preview100MatchColor = (String)request.getAttribute(UserParamNames.PREVIEW_100MATCH_COLOR);
+String previewIceMatchColor = (String)request.getAttribute(UserParamNames.PREVIEW_ICEMATCH_COLOR);
+String previewNonMatchColor = (String)request.getAttribute(UserParamNames.PREVIEW_NONMATCH_COLOR);
 
 String override = (String)request.getAttribute(UserParamNames.HYPERLINK_COLOR_OVERRIDE);
 String autoUnlock = (String)request.getAttribute(UserParamNames.EDITOR_AUTO_UNLOCK);
@@ -175,24 +182,6 @@ function checkForm()
     }
 }
 
-//judge if the max segments num is valid num (must > 0)
-function checkIsVaildNum(num)
-{
-    var submit = false;
-    try {
-    	var v_num = parseInt(num);
-    	alert("v_num after parseInt :: " + v_num);
-    	if(isNaN(v_num) || v_num < 1) {
-    		alert("<%=msg_invalid_max_segments_num%>");
-    		submit = false;
-    	} else {
-    		submit = true;
-    	}
-    } catch (e) {}
-
-    return submit;
-}
-
 function initForm()
 {
     if (!g_reviewMode)
@@ -265,6 +254,54 @@ function init()
     <TD><SPAN class="standardText"><%=lb_visitedLinkColor%></SPAN></TD>
     <TD><INPUT type="text" size="20" name="<%=UserParamNames.VISITED_HYPERLINK_COLOR%>"
       value="<%=visitedLinkColor%>"></TD>
+  </TR>
+  <TR>
+    <TD colspan="2"><SPAN class="standardText"><%=bundle.getString("lb_Preview_ColorCode")%></SPAN></TD>
+  </TR>
+  <TR>
+    <TD>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class="standardText"><%=lb_preview100MatchColor%></SPAN></TD>
+    <TD><SELECT name="<%=UserParamNames.PREVIEW_100MATCH_COLOR%>">
+    <option <%=("Black".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Black">Black</option>
+    <option <%=("White".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="White">White</option>
+    <option <%=("Red".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Red">Red</option>
+    <option <%=("Green".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Green">Green</option>
+    <option <%=("Blue".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Blue">Blue</option>
+    <option <%=("Cyan".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Cyan">Cyan</option>
+    <option <%=("Magenta".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Magenta">Magenta</option>
+    <option <%=("Yellow".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Yellow">Yellow</option>
+    <option <%=("Mauve".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Mauve">Mauve</option>
+    <option <%=("Olive".equalsIgnoreCase(preview100MatchColor)) ? "selected=\"selected\"" : "" %> value="Olive">Olive</option>
+    </SELECT></TD>
+  </TR>
+  <TR>
+    <TD>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class="standardText"><%=lb_previewIceMatchColor%></SPAN></TD>
+    <TD><SELECT name="<%=UserParamNames.PREVIEW_ICEMATCH_COLOR%>">
+    <option <%=("Black".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Black">Black</option>
+    <option <%=("White".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="White">White</option>
+    <option <%=("Red".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Red">Red</option>
+    <option <%=("Green".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Green">Green</option>
+    <option <%=("Blue".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Blue">Blue</option>
+    <option <%=("Cyan".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Cyan">Cyan</option>
+    <option <%=("Magenta".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Magenta">Magenta</option>
+    <option <%=("Yellow".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Yellow">Yellow</option>
+    <option <%=("Mauve".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Mauve">Mauve</option>
+    <option <%=("Olive".equalsIgnoreCase(previewIceMatchColor)) ? "selected=\"selected\"" : "" %> value="Olive">Olive</option>
+    </SELECT></TD>
+  </TR>
+  <TR>
+    <TD>&nbsp;&nbsp;&nbsp;&nbsp;<SPAN class="standardText"><%=lb_previewNonMatchColor%></SPAN></TD>
+    <TD><SELECT name="<%=UserParamNames.PREVIEW_NONMATCH_COLOR%>">
+    <option <%=("Black".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Black">Black</option>
+    <option <%=("White".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="White">White</option>
+    <option <%=("Red".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Red">Red</option>
+    <option <%=("Green".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Green">Green</option>
+    <option <%=("Blue".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Blue">Blue</option>
+    <option <%=("Cyan".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Cyan">Cyan</option>
+    <option <%=("Magenta".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Magenta">Magenta</option>
+    <option <%=("Yellow".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Yellow">Yellow</option>
+    <option <%=("Mauve".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Mauve">Mauve</option>
+    <option <%=("Olive".equalsIgnoreCase(previewNonMatchColor)) ? "selected=\"selected\"" : "" %> value="Olive">Olive</option>
+    </SELECT></TD>
   </TR>
 <% if (!b_reviewMode) { %>
   <TR>

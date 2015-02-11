@@ -199,8 +199,7 @@ public class Main
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -230,8 +229,7 @@ public class Main
                     {
                         System.out.println(new File(NEW_CLASS_PATH + parent
                                 + f1.getName()).getAbsolutePath());
-                        e.printStackTrace();
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                     }
                 }
             }
@@ -266,8 +264,7 @@ public class Main
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -320,8 +317,7 @@ public class Main
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -346,8 +342,7 @@ public class Main
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
@@ -384,8 +379,7 @@ public class Main
             }
             catch (Exception e)
             {
-                e.printStackTrace();
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }

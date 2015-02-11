@@ -1,22 +1,25 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-    <class name="com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter"
-        table="ms_office_ppt_filter">
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
-        <property name="companyId" column="COMPANY_ID" type="long"
-            not-null="true" unique="false" />
-        <property name="filterName" length="255" column="FILTER_NAME"
-            type="string" not-null="true" unique="false" />
-        <property name="filterDescription" length="2000" column="FILTER_DESCRIPTION"
-            type="string" not-null="false" unique="false" />
-        <property name="contentPostFilterId" column="CONTENT_POST_FILTER_ID"
-            type="long" not-null="true" unique="false" />
-        <property name="contentPostFilterTableName" length="45" column="CONTENT_POST_FILTER_TABLE_NAME" 
-        	type="string" not-null="true" />
-        <property name="altTranslate" column="IS_ALT_TRANSLATE" type="yes_no"
-            not-null="true" />
-    </class>
+	<class
+		name="com.globalsight.cxe.entity.filterconfiguration.MSOfficePPTFilter"
+		table="ms_office_ppt_filter">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+		<property name="companyId" column="COMPANY_ID" type="long"
+			not-null="true" unique="false" />
+		<property name="filterName" length="255" column="FILTER_NAME"
+			type="string" not-null="true" unique="false" />
+		<property name="filterDescription" length="2000"
+			column="FILTER_DESCRIPTION" type="string" not-null="false" unique="false" />
+		<property name="contentPostFilterId" column="CONTENT_POST_FILTER_ID"
+			type="long" not-null="true" unique="false" />
+		<property name="contentPostFilterTableName" length="45"
+			column="CONTENT_POST_FILTER_TABLE_NAME" type="string" not-null="true" />
+		<property name="altTranslate" column="IS_ALT_TRANSLATE" type="yes_no"
+			not-null="true" />
+		<property name="notesTranslate" column="IS_NOTES_TRANSLATE"
+			type="yes_no" not-null="true" />
+	</class>
 </hibernate-mapping>

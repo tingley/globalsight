@@ -136,7 +136,7 @@ public abstract class PageActionHandler extends PageHandler
                     }
                     catch (Exception e)
                     {
-                        logger.error(e);
+                        logger.error(e.getMessage(), e);
                     }
 
                     break;
@@ -186,7 +186,7 @@ public abstract class PageActionHandler extends PageHandler
         }
         catch (Exception e1)
         {
-            logger.error(e1);
+            logger.error(e1.getMessage(), e1);
             return null;
         }
 
@@ -207,7 +207,7 @@ public abstract class PageActionHandler extends PageHandler
                 }
                 catch (Exception e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                 }
             }
             else if (name.startsWith("set") && name.length() > 4
@@ -229,7 +229,7 @@ public abstract class PageActionHandler extends PageHandler
                         }
                         catch (Exception e)
                         {
-                            logger.error(e);
+                            logger.error(e.getMessage(), e);
                         }
                     }
                 }
@@ -279,11 +279,11 @@ public abstract class PageActionHandler extends PageHandler
             }
             catch (InstantiationException e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
             catch (IllegalAccessException e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
 

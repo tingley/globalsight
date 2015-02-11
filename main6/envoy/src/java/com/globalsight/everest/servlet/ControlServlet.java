@@ -20,7 +20,6 @@ package com.globalsight.everest.servlet;
 // Envoy packages
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -30,11 +29,13 @@ import java.util.Vector;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.catalina.connector.ClientAbortException;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -60,14 +61,13 @@ import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
 
-
 public class ControlServlet extends HttpServlet
 // implements SingleThreadModel
 {
-	
+
     private static final long serialVersionUID = 1L;
 
-	private static final Logger CATEGORY = Logger
+    private static final Logger CATEGORY = Logger
             .getLogger(ControlServlet.class);
 
     private static AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
@@ -78,14 +78,13 @@ public class ControlServlet extends HttpServlet
     //
     static public final String ENTRY_PAGE = "LOG1";
 
-    static public final String WELCOME_PAGE = "LOG4";    
+    static public final String WELCOME_PAGE = "LOG4";
 
     static public final String RETRIEVE_PAGE = "retrieve";
 
     // Actually should have our own page, id est, "You do not have
     // permission to perform the selected activity." LOG1 for now.
     static public final String NO_PERMISSION_PAGE = ENTRY_PAGE;
-    
 
     //
     // Global Variables
@@ -199,16 +198,41 @@ public class ControlServlet extends HttpServlet
         {
             _doGet(p_request, p_response);
         }
-        catch (SocketException se)
+        // Tomcat throws this (Tomcat-specific) exception when the client
+        // aborts the request. Previously, we caught SocketException (maybe
+        // thrown by other servers or earlier version of Tomcat?); but this
+        // would be prone to false-positives anyway.
+        catch (ClientAbortException e)
         {
-            // GSDEF8496 -- special handling for socket exceptions so the
-            // log file is not overwhelmed. This typically happens when the
-            // user aborts the request out of impatience
-            CATEGORY.error("Socket Exception2: " + se.getMessage());
+            CATEGORY.info("Client aborted request: " + e.getMessage());
         }
         catch (Exception e)
         {
             CATEGORY.error("Exception servicing request", e);
+        }
+    }
+
+    /**
+     * This should be called from a JSP error page to deal with the exception
+     * received via the standard JSP errorPage mechanism. Note that JSP error
+     * pages are (confusingly) used in two ways in GlobalSight:
+     * <ol>
+     * <li>Via the standard JSP errorPage mechanism. In this case, the exception
+     * variable is non-null and has not been logged.
+     * <li>Via ControlServlet.reportErrorPage. In this case, the ErrorBean has
+     * the exception (which has been logged), and the exception variable is
+     * null.
+     * </ol>
+     */
+    public static void handleJSPException(Throwable t)
+    {
+        if (t instanceof ClientAbortException)
+        {
+            CATEGORY.info("Client aborted request in JSP: " + t.getMessage());
+        }
+        else if (t != null)
+        {
+            CATEGORY.error("Exception servicing request in JSP", t);
         }
     }
 
@@ -223,8 +247,7 @@ public class ControlServlet extends HttpServlet
     {
         if (CATEGORY.isDebugEnabled())
         {
-            CATEGORY
-                    .debug("\r\nDumping Request Attributes and Parameter Values");
+            CATEGORY.debug("\r\nDumping Request Attributes and Parameter Values");
             System.out.println("-------------------------------");
             System.out.println("HTTP request=" + p_request.toString());
             System.out.println("HTTP request URI=" + p_request.getRequestURI());
@@ -261,7 +284,6 @@ public class ControlServlet extends HttpServlet
                     "System4 is not yet accessible. It may be starting up or shutting down.");
         }
 
-        
         dumpRequestValues(p_request);
 
         WebPageDescriptor targetPageDescriptor = null;
@@ -282,6 +304,12 @@ public class ControlServlet extends HttpServlet
             userSession = directory.getSession(rand);
         }
 
+        // Check if session is valid for APPLET.
+        if (returnImmediate(userSession, p_request, p_response))
+        {
+            return;
+        }
+
         /*
          * TomyD -- I commented out isRequestedSessionIdValid call since for an
          * applet making two separate calls to servlet with different content
@@ -292,7 +320,8 @@ public class ControlServlet extends HttpServlet
         {
             // If there is no user session, only three pages can be
             // invoked: entry and welcome, and the terminology viewer.
-            String activityName = p_request.getParameter(LinkHelper.ACTIVITY_NAME);
+            String activityName = p_request
+                    .getParameter(LinkHelper.ACTIVITY_NAME);
             String pageName = p_request.getParameter(WebAppConstants.PAGE_NAME);
 
             if (activityName != null && activityName.equals("termviewer"))
@@ -302,10 +331,10 @@ public class ControlServlet extends HttpServlet
                 targetPageDescriptor = activityDescriptor
                         .getDefaultPageDescriptor();
             }
-            else if (pageName!=null && pageName.equals(RETRIEVE_PAGE))
+            else if (pageName != null && pageName.equals(RETRIEVE_PAGE))
             {
-            	targetPageDescriptor = WebSiteDescription.instance()
-                .getPageDescriptor(RETRIEVE_PAGE);
+                targetPageDescriptor = WebSiteDescription.instance()
+                        .getPageDescriptor(RETRIEVE_PAGE);
             }
             // Determine if we came from the login page.
             else if (p_request.getParameter(WebAppConstants.LOGIN_NAME_FIELD) == null
@@ -361,8 +390,7 @@ public class ControlServlet extends HttpServlet
                     catch (Throwable t)
                     {
                         CATEGORY.error("Throwable thrown when determining "
-                                + "link to follow: " + t.getMessage() + "\r\n"
-                                + GeneralException.getStackTraceString(t));
+                                + "link to follow", t);
 
                         reportErrorPage(
                                 isApplet != null,
@@ -466,8 +494,7 @@ public class ControlServlet extends HttpServlet
                     catch (Throwable t)
                     {
                         CATEGORY.error("Throwable thrown when determining "
-                                + "link to follow: " + t.getMessage() + "\r\n"
-                                + GeneralException.getStackTraceString(t));
+                                + "link to follow", t);
 
                         reportErrorPage(
                                 isApplet != null,
@@ -571,12 +598,18 @@ public class ControlServlet extends HttpServlet
             return;
         }
 
+        String targetJSP = targetPageDescriptor.getJspURL();
+        String targetPageHandlerName = targetPageDescriptor
+                .getPageHandlerClassName();
         PageHandler targetPageHandler = null;
-        Map<Object,Object> activityArgs = new HashMap<Object,Object>();
-        activityArgs.put("pageHandler",
-                targetPageDescriptor.getPageHandlerClassName());
-        activityArgs.put("jsp",
-                targetPageDescriptor.getJspURL());
+        Map<Object, Object> activityArgs = new HashMap<Object, Object>();
+        activityArgs.put("pageHandler", targetPageHandlerName);
+        activityArgs.put("jsp", targetJSP);
+        activityArgs.put(
+                "user",
+                userSession == null ? null : userSession
+                        .getAttribute(WebAppConstants.USER_NAME));
+
         ActivityLog.Start activityStart = ActivityLog.start(
                 ControlServlet.class, "_doGet", activityArgs);
         try
@@ -589,17 +622,19 @@ public class ControlServlet extends HttpServlet
             if (isApplet == null || initial != null)
             {
 
-                if (!TaskFilter.doFilter(targetPageHandler, p_request, p_response,
-                        m_servletContext))
+                if (!TaskFilter.doFilter(targetPageHandler, p_request,
+                        p_response, m_servletContext))
                 {
                     return;
                 }
-                
-                if (userSession != null && !(targetPageHandler instanceof TaskListHandler))
+
+                if (userSession != null
+                        && !(targetPageHandler instanceof TaskListHandler))
                 {
-                    userSession.removeAttribute(TaskListHandler.TASK_SEARCH_RESULT);
+                    userSession
+                            .removeAttribute(TaskListHandler.TASK_SEARCH_RESULT);
                 }
-                
+
                 targetPageHandler.invokePageHandler(targetPageDescriptor,
                         p_request, p_response, m_servletContext);
             }
@@ -616,8 +651,8 @@ public class ControlServlet extends HttpServlet
                 boolean isDoGet = p_request.getParameter("doPost") == null;
 
                 Vector objs = targetPageHandler.invokePageHandlerForApplet(
-                        isDoGet, targetPageDescriptor, p_request,
-                        p_response, m_servletContext, userSession);
+                        isDoGet, targetPageDescriptor, p_request, p_response,
+                        m_servletContext, userSession);
 
                 Locale uiLocale = null;
                 if (userSession != null)
@@ -629,22 +664,11 @@ public class ControlServlet extends HttpServlet
                 outputToApplet(objs, uiLocale, p_response);
             }
         }
-        catch (EnvoyServletException e)
+        catch (ClientAbortException e)
         {
-            CATEGORY.error("Problem invoking targetPageHandler (isApplet="
-                    + isApplet + "): ", e);
-            reportErrorPage(isApplet != null, null, e, p_request,
-                    p_response, m_servletContext, userSession,
-                    targetPageHandler);
+            throw e; // handled higher
         }
-        catch (SocketException se)
-        {
-            // GSDEF8496 -- special handling for socket exceptions so the
-            // log file is not overwhelmed. This typically happens when the
-            // user aborts the request out of impatience
-            CATEGORY.error("Socket Exception: " + se.getMessage());
-        }
-        catch (Throwable t)
+        catch (Exception t)
         {
             String pageHandlerClassName = null;
             String pageName = null;
@@ -654,35 +678,29 @@ public class ControlServlet extends HttpServlet
                         .getPageHandlerClassName();
                 pageName = targetPageDescriptor.getPageName();
             }
+            CATEGORY.error("Exception in targetPageHandler["
+                    + pageHandlerClassName + "," + pageName + "](isApplet="
+                    + isApplet + ")(" + getRequestParameters(p_request) + ")",
+                    t);
 
-            CATEGORY.error(
-                    "Throwable thrown while invoking targetPageHandler["
-                            + pageHandlerClassName + "," + pageName
-                            + "](isApplet=" + isApplet + "): "
-                            + t.getMessage(), t);
+            EnvoyServletException e = t instanceof EnvoyServletException ? (EnvoyServletException) t
+                    : new EnvoyServletException(
+                            EnvoyServletException.EX_GENERAL, t);
 
-            // print out all the parameters
-            Enumeration e = p_request.getParameterNames();
-            String param = null;
-            while (e.hasMoreElements())
+            // If the response has already been started, there's nothing we can
+            // do about it.
+            if (!p_response.isCommitted())
             {
-                param = (String) e.nextElement();
-                CATEGORY.error("parameter: " + param + "="
-                        + p_request.getParameter(param));
+                reportErrorPage(isApplet != null, null, e, p_request,
+                        p_response, m_servletContext, userSession,
+                        targetPageHandler);
             }
-
-            reportErrorPage(isApplet != null, null,
-                    new EnvoyServletException(
-                            EnvoyServletException.EX_GENERAL,
-                            GeneralException.getStackTraceString(t)),
-                    p_request, p_response, m_servletContext, userSession,
-                    targetPageHandler);
         }
         finally
         {
             activityStart.end();
         }
-        
+
     }
 
     /**
@@ -714,8 +732,8 @@ public class ControlServlet extends HttpServlet
     private void outputToApplet(Vector p_objects, Locale p_uiLocale,
             HttpServletResponse p_response) throws IOException
     {
-        ObjectOutputStream outputToApplet = new ObjectOutputStream(p_response
-                .getOutputStream());
+        ObjectOutputStream outputToApplet = new ObjectOutputStream(
+                p_response.getOutputStream());
 
         outputToApplet.writeObject(p_objects);
         outputToApplet.writeObject(p_uiLocale);
@@ -723,8 +741,6 @@ public class ControlServlet extends HttpServlet
         outputToApplet.flush();
         outputToApplet.close();
     }
-
-  
 
     /**
      * Reports an error using a generic error page.
@@ -788,8 +804,8 @@ public class ControlServlet extends HttpServlet
         }
 
         Vector objs = new Vector();
-        ExceptionMessage em = new ExceptionMessage(message, p_exception
-                .getStackTraceString(), CATEGORY.isDebugEnabled());
+        ExceptionMessage em = new ExceptionMessage(message,
+                p_exception.getStackTraceString(), CATEGORY.isDebugEnabled());
         objs.addElement(em);
 
         Locale uiLocale = null;
@@ -836,6 +852,7 @@ public class ControlServlet extends HttpServlet
         {
             String sessionUserName = (String) p_userSession
                     .getAttribute(WebAppConstants.USER_NAME);
+            sessionUserName = UserUtil.getUserNameById(sessionUserName);
             String loginFrom = p_request
                     .getParameter(WebAppConstants.LOGIN_FROM);
             if (sessionUserName == null || sessionUserName.length() == 0)
@@ -855,5 +872,53 @@ public class ControlServlet extends HttpServlet
             }
         }
         return isLogin;
+    }
+
+    /**
+     * On UI, when click a button or link to open an applet, but the session is
+     * timed out, this will result in function failure. Need check if the
+     * session is still valid before invoking applet.
+     * 
+     * One case is, when click "Add Files" on web DI, ensure session if valid,
+     * otherwise it should turn to login UI.
+     * 
+     * Refer to function "OW(obj)" in "createJobs.jsp".
+     * 
+     */
+    private boolean returnImmediate(final HttpSession p_userSession,
+            final HttpServletRequest p_request,
+            final HttpServletResponse p_response) throws IOException
+    {
+        String activityName = p_request
+                .getParameter(LinkHelper.ACTIVITY_NAME);
+        if ("checkSessionStatus".equals(activityName))
+        {
+            String sessionStatus = "valid";
+            if (!isLoginSession(p_userSession, p_request))
+            {
+                sessionStatus = "invalid";
+            }
+
+            ServletOutputStream out = p_response.getOutputStream();
+            try
+            {
+                p_response.setContentType("text/plain");
+                out = p_response.getOutputStream();
+                String returns = "{\"sessionStatus\":\"" + sessionStatus + "\"}";
+                out.write(returns.getBytes("UTF-8"));
+                
+                return true;
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e.getMessage(), e);
+            }
+            finally
+            {
+                out.close();
+            }
+        }
+
+        return false;
     }
 }

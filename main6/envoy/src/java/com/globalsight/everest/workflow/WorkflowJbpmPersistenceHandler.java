@@ -503,8 +503,8 @@ public class WorkflowJbpmPersistenceHandler
 		SQLQuery query = session.createSQLQuery(TASK_INSTANCE_BY_ID);
 		query.addEntity(TaskInstance.class);
 		query.setLong(TASK_ID, p_taskId);
-
-		return query.list();
+		List result = query.list();
+		return result;
 	}
 
 	public static List getNonRejectedTaskInstancesByAssignee(String p_userId,

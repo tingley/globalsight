@@ -17,26 +17,21 @@
 package com.globalsight.ling.tw.online;
 
 import java.applet.Applet;
-import java.lang.Throwable;
-import java.util.Hashtable;
-import java.util.Enumeration;
 
-import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatBasicParser;
-
-import com.globalsight.ling.tw.ErrorChecker;
-import com.globalsight.ling.tw.HtmlTableWriter;
+import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.tw.HtmlEntities;
+import com.globalsight.ling.tw.HtmlTableWriter;
+import com.globalsight.ling.tw.PseudoBaseHandler;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
 import com.globalsight.ling.tw.PseudoErrorChecker;
 import com.globalsight.ling.tw.PseudoOverrideItemException;
 import com.globalsight.ling.tw.PseudoParser;
-import com.globalsight.ling.tw.PseudoBaseHandler;
 import com.globalsight.ling.tw.PseudoParserException;
+import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
 import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.XmlEntities;
-import com.globalsight.ling.tw.Tmx2HtmlPreviewHandler;
 
 /**
  * Provides access to PTag API for the editor.
@@ -74,7 +69,7 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
     private StringBuffer m_coloredPtags = null;
     private PseudoParser m_ptagParser = null;
 
-    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>";
+    private static final String PTAG_COLOR_START = "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>";
     private static final String PTAG_COLOR_END = "</SPAN>";
     private PseudoErrorChecker m_errChecker = null;
 
@@ -178,6 +173,17 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
             throw new DiplomatBasicParserException(
                     "Should call setLocale() or setInputSegment() first.");
         }
+    }
+
+    public String getNewPTagTargetString() throws DiplomatBasicParserException,
+            PseudoParserException
+    {
+        if (m_errChecker != null)
+        {
+            return m_errChecker.getNewTarget();
+        }
+
+        return "";
     }
 
     /**
@@ -341,13 +347,14 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
 
         m_withPtags.setLocale(p_locale);
     }
-    
+
     /*
      * Sets the data type (for error check)
      * 
-     * @param 
+     * @param
      */
-    public void setDataType(String p_dataType) throws PseudoOverrideItemException
+    public void setDataType(String p_dataType)
+            throws PseudoOverrideItemException
     {
         // we must init things here because we cannot throw exceptions
         // from the applets init() method.
@@ -395,7 +402,7 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         withPtags.setAddables(m_segmentFormat);
         converter.tmx2Pseudo(p_diplomat, withPtags);
 
-        return convertToColored(withPtags.getPTagSourceString());
+        return convertToColored(withPtags.getWrappedPTagSourceString());
     }
 
     /**
@@ -417,7 +424,7 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         withPtags.setAddables(m_segmentFormat);
         converter.tmx2Pseudo(p_diplomat, withPtags);
 
-        return convertToColored(withPtags.getPTagSourceString());
+        return convertToColored(withPtags.getWrappedPTagSourceString());
     }
 
     public String makeInlineVerboseColoredPtags(String p_diplomat)
@@ -437,7 +444,7 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
         withPtags.setAddables(m_segmentFormat);
         converter.tmx2Pseudo(p_diplomat, withPtags, TmxPseudo.ONLINE_EDIT);
 
-        return convertToColored(withPtags.getPTagSourceString());
+        return convertToColored(withPtags.getWrappedPTagSourceString());
     }
 
     /**
@@ -556,25 +563,64 @@ public class OnlineApplet extends Applet implements PseudoBaseHandler
             m_errChecker.setStyles(styles);
         }
     }
-    
+
     public static void main(String[] args)
     {
-    	OnlineApplet oa = new OnlineApplet();
-//    	String diplomat = "<bpt type=\"x-span\" x=\"1\" i=\"1\">&lt;span style=&apos;font-family:&quot;Arial&quot;,&quot;sans-serif&quot;&apos;&gt;</bpt>Sample Document<ept i=\"1\">&lt;/span&gt;</ept>";
-    	String diplomat = "<ph id=\"0\" xmlns=\"\">&lt;span contenteditable=\"false\"&gt;</ph>Update the following table as necessary when this document is changed:<ph id=\"1\" xmlns=\"\">&lt;/span&gt;</ph>";
-    	try {
-    		oa.init();
-    		oa.setInputSegment(diplomat, "UTF8", "xlf");
-			String str = oa.makeCompactColoredPtags(diplomat);
-			System.out.println("str : " + str);
-			String tmp = "[x0]Update the following table as necessary when this document is changed changed :[x1]";
-			String str2 = oa.getTargetDiplomat(tmp);
-			System.out.println("str2 : " + str2);
-		} catch (DiplomatBasicParserException e) {
-			e.printStackTrace();
-		} catch (PseudoOverrideItemException e) {
-			e.printStackTrace();
-		} catch (PseudoParserException e) {
+        OnlineApplet oa = new OnlineApplet();
+        String diplomat = "1 L = 10<ph type=\"superscript\" id=\"173\" x=\"1\">&apos;&gt;" 
+        		+ "&lt;Font" 
+        		+ "&lt;FTag `&apos;&gt;"
+        		+ "&lt;FPosition FSuperscript&gt;"
+        	    + "&lt;FLocked No&gt;"
+        		+ "&gt; # end of Font"
+        	    + "&lt;String `</ph>3<ph type=\"text\" id=\"176\" x=\"2\">&apos;&gt;"
+        	    + "&lt;Font"
+        	    + "&lt;FTag `&apos;&gt;"
+        	    + "&lt;FLocked No&gt;"
+        	    + "&gt; # end of Font"
+        	    + "&lt;String `</ph> mL = 10<ph type=\"superscript\" id=\"179\" x=\"3\">&apos;&gt;"
+        	    + "&lt;Font"
+        	    + "&lt;FTag `&apos;&gt;"
+        	    + "&lt;FPosition FSuperscript&gt;"
+        	    + "&lt;FLocked No&gt;"
+        	    + "&gt; # end of Font"
+        	    + "&lt;String `</ph>6<ph type=\"text\" id=\"182\" x=\"4\">&apos;&gt;"
+        	    + "&lt;Font"
+        	    + "&lt;FTag `&apos;&gt;"
+        	    + "&lt;FLocked No&gt;"
+        	    + "&gt; # end of Font"
+        	    + "&lt;String `</ph> µL";
+        String target = "1 L = 10[superscript1]3[x2] mL = 10[superscript3]6[x4] µL--Changed";
+//      String diplomat = "1g = 10<bpt isTranslate=\"true\" i=\"3\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"2\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>3<ept i=\"3\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>mg = 10<bpt isTranslate=\"true\" i=\"5\" type=\"superscript\" erasable=\"yes\" movable=\"no\" x=\"4\">&lt;w:r w:rsidRPr=&quot;00F80D16&quot;&gt;&lt;w:rPr&gt;&lt;w:rFonts w:hint=&quot;eastAsia&quot;/&gt;&lt;w:vertAlign w:val=&quot;superscript&quot;/&gt;&lt;/w:rPr&gt;&lt;w:t&gt;</bpt>6<ept i=\"5\">&lt;/w:t&gt;&lt;/w:r&gt;</ept>ug ";
+//      String target = "1g = 10[superscript2]3[/superscript2]mg = 10[superscript4]6[/superscript4]ug===";
+        
+        try
+        {
+            oa.init();
+//            oa.setInputSegment(diplomat, "UTF8", "xlf");
+            oa.setInputSegment(diplomat, "UTF8", "text");
+//            String str = oa.makeCompactColoredPtags(diplomat);
+//            System.out.println("str : " + str);
+//            String tmp = "[x0]Update the following table as necessary when this document is changed changed :[x1]";
+            String a = oa.getCompact();
+//            String str2 = oa.getTargetDiplomat(target);
+//            System.out.println("str2 : " + str2);
+            String result = oa.errorCheck(target, diplomat, 0, "UTF8", 0, "UTF8");
+            System.out.println(result);
+        }
+        catch (DiplomatBasicParserException e)
+        {
+            e.printStackTrace();
+        }
+        catch (PseudoOverrideItemException e)
+        {
+            e.printStackTrace();
+        }
+        catch (PseudoParserException e)
+        {
+            e.printStackTrace();
+        } catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }

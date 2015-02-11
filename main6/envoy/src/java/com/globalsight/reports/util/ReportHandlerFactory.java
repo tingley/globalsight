@@ -147,9 +147,7 @@ public class ReportHandlerFactory
         } 
         catch (DocumentException e) 
         { 
-        	CATEGORY.error( "Cannot read the ReportConfig.xml" + 
-                            e.getMessage() );
-            e.printStackTrace(); 
+        	CATEGORY.error( "Cannot read the ReportConfig.xml", e );
         } 
         
         return retVal;
@@ -187,7 +185,7 @@ public class ReportHandlerFactory
             {
                 CATEGORY.error( "Cannot create report handler instance: " + 
                                 theReportHandlerName );
-                CATEGORY.error( e );
+                CATEGORY.error( e.getMessage(), e );
             }
         } 
         

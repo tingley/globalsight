@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -30,6 +29,8 @@ import org.apache.regexp.RESyntaxException;
 
 import com.globalsight.cxe.adapter.adobe.AdobeHelper;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeConverter;
+import com.globalsight.cxe.adapter.idml.IdmlConverter;
+import com.globalsight.cxe.adapter.msoffice2010.MsOffice2010Converter;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.util.GlobalSightLocale;
@@ -792,8 +793,42 @@ public final class EditUtil
         {
             return OpenOfficeConverter.isOpenOfficeInstalled();
         }
+        
+        if (p_dataType.equals(IFormatNames.FORMAT_OFFICE_XML))
+        {
+            return MsOffice2010Converter.isInstalled();
+        }       
 
         return false;
+    }
+    
+    static public String warnPreviewNotInstalled(String p_dataType)
+    {
+        if (p_dataType.equals(IFormatNames.FORMAT_OFFICE_XML) && !MsOffice2010Converter.isInstalled())
+        {
+            return "lb_preivew_not_set_office2007";
+        }
+        
+        return "";
+    }
+    
+    static public String warnPdfPreviewNotInstalled(EditorState p_state)
+    {
+    	 if (p_state == null)
+         {
+             CATEGORY.warn("FIXME hasPDFPreviewMode(): p_state is null");
+             return "";
+         }
+    	 
+    	 String filename = p_state.getSourcePageName();
+    	 
+    	filename = filename.toLowerCase();
+        if (filename.endsWith("idml") && !IdmlConverter.isInstalled())
+        {
+            return "lb_preivew_not_set_cs5";
+        }
+        
+        return "";
     }
     
     static public boolean hasPDFPreviewMode(EditorState p_state)
@@ -815,6 +850,12 @@ public final class EditUtil
         if (filename.endsWith("fm") && "mif".equals(p_state.getPageFormat()))
         {
             return true;
+        }
+        
+        filename = filename.toLowerCase();
+        if (filename.endsWith("idml"))
+        {
+            return IdmlConverter.isInstalled();
         }
 
         return false;

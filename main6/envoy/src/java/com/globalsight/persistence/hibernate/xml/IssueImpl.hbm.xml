@@ -22,6 +22,9 @@
         <property name="logicalKey" length="200" column="LOGICAL_KEY"
             type="string" not-null="false" unique="false" />
 
+        <property name="targetPageId" column="TARGET_PAGE_ID"
+            type="long" not-null="false" unique="false" />
+
         <property name="title" length="200" column="TITLE" type="string"
             not-null="true" unique="false" />
 

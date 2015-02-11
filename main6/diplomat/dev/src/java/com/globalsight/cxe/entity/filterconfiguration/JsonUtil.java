@@ -151,27 +151,6 @@ public class JsonUtil
         return sb.toString();
     }
 
-    public static Object map2Json(Map<String, String> map)
-    {
-        if (map.isEmpty())
-            return "{}";
-        StringBuilder sb = new StringBuilder(map.size() << 4);
-        sb.append('{');
-        Set<String> keys = map.keySet();
-        for (String key : keys)
-        {
-            Object value = map.get(key);
-            sb.append('\"');
-            sb.append(key);
-            sb.append('\"');
-            sb.append(':');
-            sb.append(toJson(value));
-            sb.append(',');
-        }
-        sb.setCharAt(sb.length() - 1, '}');
-        return sb.toString();
-    }
-    
     public static void main(String[] args)
     {
 //        HtmlFilter filter = new HtmlFilter();

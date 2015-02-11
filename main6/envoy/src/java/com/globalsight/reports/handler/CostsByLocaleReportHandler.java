@@ -37,6 +37,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.datawrap.CostsByLocaleReportDataWrap;
 import com.globalsight.reports.util.ReportHandlerFactory;
@@ -109,8 +110,9 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
         setTableNavigation(req, theSession, NUM_ITEMS_DISPLAYED,
                 Constants.COSTS_BY_LOCALE_REPORT_CURRENT_PAGE_LIST,
                 this.reportKey, reportDataWrap);
-        dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                + Constants.REPORT_ACT_CREATE), req, res, p_context);
+        dispatcherForward(
+                ReportHandlerFactory.getTargetUrl(reportKey
+                        + Constants.REPORT_ACT_CREATE), req, res, p_context);
     }
 
     /**
@@ -159,20 +161,21 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
 
     public void readResultSet(ResultSet rs) throws Exception
     {
-    	SystemConfiguration sc = SystemConfiguration.getInstance();
+        SystemConfiguration sc = SystemConfiguration.getInstance();
         boolean s_jobRevenueIsOn = sc
                 .getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED);
-    	
+
         // get the each feild's name of the result set.
         ResultSetMetaData rsMetaData = rs.getMetaData();
         ArrayList fieldnameList = new ArrayList();
         for (int i = 0; i < rsMetaData.getColumnCount(); i++)
         {
-        	if (i == 1) {
-        		continue;
-        	}
-        	
-        	String name = rsMetaData.getColumnName(i + 1);
+            if (i == 1)
+            {
+                continue;
+            }
+
+            String name = rsMetaData.getColumnName(i + 1);
             fieldnameList.add(ReportsPackage.getMessage(m_bundle, name));
         }
         String[] columnKeys = new String[4];
@@ -191,23 +194,36 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
             ArrayList singleRowDataList = new ArrayList();
             for (int j = 0; j < rsMetaData.getColumnCount(); j++)
             {
-            	if (j == 1) {
-            		jobId = rs.getLong(2);
-            		continue;
-            	}
-            	
-            	if ("final_cost".equalsIgnoreCase((String) fieldnameList.get(j == 0 ? 0 : j - 1))) {
-            		Job p_job = ServerProxy.getJobHandler().getJobById(jobId);
-                    
-            		Cost finalCost = BasicReportHandler.calculateJobCost(p_job,
-							ServerProxy.getCostingEngine().getPivotCurrency(),
-							Cost.EXPENSE);
-            		
-            		singleRowDataList.add(String.valueOf(finalCost.getFinalCost().getAmount()));
-            		
-            	} else {
-            		singleRowDataList.add(rs.getString(j + 1));
-            	}
+                if (j == 1)
+                {
+                    jobId = rs.getLong(2);
+                    continue;
+                }
+                if (j == 2)
+                {
+                    // project manager
+                    singleRowDataList.add(UserUtil.getUserNameById(rs
+                            .getString(j + 1)));
+                    continue;
+                }
+
+                if ("final_cost".equalsIgnoreCase((String) fieldnameList
+                        .get(j == 0 ? 0 : j - 1)))
+                {
+                    Job p_job = ServerProxy.getJobHandler().getJobById(jobId);
+
+                    Cost finalCost = BasicReportHandler.calculateJobCost(p_job,
+                            ServerProxy.getCostingEngine().getPivotCurrency(),
+                            Cost.EXPENSE);
+
+                    singleRowDataList.add(String.valueOf(finalCost
+                            .getFinalCost().getAmount()));
+
+                }
+                else
+                {
+                    singleRowDataList.add(rs.getString(j + 1));
+                }
             }
             allRowsDataList.add(singleRowDataList);
         }
@@ -323,25 +339,23 @@ public class CostsByLocaleReportHandler extends BasicReportHandler
         m_select.append("SELECT");
         m_select.append(" VIEW_WORKFLOW_LEVEL.PROJECT_NAME as \"Project\",");
         m_select.append(" VIEW_WORKFLOW_LEVEL.JOB_ID as JOB_ID, ");
-        m_select
-                .append(" VIEW_WORKFLOW_LEVEL.PROJECT_MANAGER as \"Project Manager\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.PROJECT_MANAGER as \"Project Manager\",");
         m_select.append(" VIEW_WORKFLOW_LEVEL.JOB_NAME as \"Job Name\",");
-        m_select
-                .append(" VIEW_WORKFLOW_LEVEL.SOURCE_LOCALE \"Source Locale\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.TARGET_LOCALE as \"").append(
-                "Target Locale").append("\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.START_DATE as \"").append(
-                "Start Date").append("\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.ACTUAL_END as \"").append(
-                "End Date").append("\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.ESTIMATED_COST as \"").append(
-                "Estimated Cost").append("\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.ACTUAL_COST as \"").append(
-                "Actual Cost").append("\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.FINAL_COST as \"").append(
-                "Final Cost").append("\",");
-        m_select.append(" VIEW_WORKFLOW_LEVEL.OVERRIDE_COST as \"").append(
-                "Override Cost").append("\"");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.SOURCE_LOCALE \"Source Locale\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.TARGET_LOCALE as \"")
+                .append("Target Locale").append("\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.START_DATE as \"")
+                .append("Start Date").append("\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.ACTUAL_END as \"")
+                .append("End Date").append("\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.ESTIMATED_COST as \"")
+                .append("Estimated Cost").append("\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.ACTUAL_COST as \"")
+                .append("Actual Cost").append("\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.FINAL_COST as \"")
+                .append("Final Cost").append("\",");
+        m_select.append(" VIEW_WORKFLOW_LEVEL.OVERRIDE_COST as \"")
+                .append("Override Cost").append("\"");
 
     }
 

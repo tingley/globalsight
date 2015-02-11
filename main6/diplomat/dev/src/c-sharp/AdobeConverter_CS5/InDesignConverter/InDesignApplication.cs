@@ -81,6 +81,7 @@ namespace GlobalSight.InDesignConverter
         private const string ALIGNMENT_LEFT = "left";
         private const string ALIGNMENT_CENTER = "center";
         private const string ALIGNMENT_RIGHT = "right";
+        private const string PARAGRAPH_STYLE = "paragraphStyle";
 
         private const string PARAGRAPH_LEFT_INDENT = "leftindent";
         private const string PARAGRAPH_SPACE_BEFORE = "spacebefore";
@@ -98,11 +99,13 @@ namespace GlobalSight.InDesignConverter
 
         // Font issue
         private Hashtable inDesignUnknownFontTable = null;
+        private List<string> m_markedPara = null;
 
         //add parameter for master layer translate swith.
         //default:true
         private String m_versionComments = String.Empty;
         private bool m_forceSave = false;
+        private bool m_showingWindow = false;
 
         public static InDesignApplication getInstance()
         {
@@ -159,6 +162,7 @@ namespace GlobalSight.InDesignConverter
         private InDesignApplication()
         {
             m_log = Logger.GetLogger();
+            m_showingWindow = AppConfig.GetAppConfigBool("ID.ShowingWindow", false);
             // 
             CreateInDesignAppClass();
         }
@@ -322,13 +326,21 @@ namespace GlobalSight.InDesignConverter
             try
             {
                 isExceptionOccur = false;
+                m_log.Debug("Start conversion to XML");
                 OpenInDesignDoc(p_inddFileName);
+                m_log.Debug("finish OpenInDesignDoc, start ExportXMP");
                 ExportXMP(p_inddFileName);
+                m_log.Debug("finish ExportXMP, start CheckLayers");
                 CheckLayers();
+                m_log.Debug("finish CheckLayers, start UnmarkInddFile");
                 UnmarkInddFile();
+                m_log.Debug("finish UnmarkInddFile, start MarkupInddFile");
                 MarkupInddFile(p_masterTranslated, p_translateHiddenLayer);
+                m_log.Debug("finish MarkupInddFile, start RestoreLayers");
                 RestoreLayers();
+                m_log.Debug("finish RestoreLayers, start ExportToXmlFile");
                 ExportToXmlFile(p_xmlFileName);
+                m_log.Debug("finish ExportToXmlFile");
             }
             catch (Exception e)
             {
@@ -339,6 +351,25 @@ namespace GlobalSight.InDesignConverter
             finally
             {
                 SaveDocument(p_inddFileName);
+            }
+        }
+
+        public void ConvertIdmlToPDF(string p_idmlFileName, string pdfFileName)
+        {           
+            try
+            {
+                isExceptionOccur = false;
+                m_log.Debug("Start conversion to PDF");
+                OpenInDesignDoc(p_idmlFileName);
+                //convert to pdf
+                ExportToPDFFile(pdfFileName);
+                m_log.Debug("finish ExportToPDFFile");
+            }
+            catch (Exception e)
+            {
+                isExceptionOccur = true;
+                Logger.LogError("[Indesign]: InDesign Conversion Failed", e);
+                throw e;
             }
         }
 
@@ -354,19 +385,31 @@ namespace GlobalSight.InDesignConverter
             try
             {
                 isExceptionOccur = false;
+                m_log.Debug("Start conversion to PDF");
                 OpenInDesignDoc(p_inddFileName);
+                m_log.Debug("finish OpenInDesignDoc, start CheckLayers");
                 CheckLayers();
-                UnmarkInddFile();
+                m_log.Debug("finish CheckLayers, start UnmarkInddFile");
+                //UnmarkInddFile();
+                m_log.Debug("finish UnmarkInddFile, start ResetUnknownFontTable");
                 ResetUnknownFontTable();
-                MarkupInddFile(p_masterTranslated, p_translateHiddenLayer);
+                m_log.Debug("finish ResetUnknownFontTable, start MarkupInddFile");
+                //MarkupInddFile(p_masterTranslated, p_translateHiddenLayer);
+                m_log.Debug("finish MarkupInddFile, start PreImport");
                 PreImport(p_xmlFileName);
+                m_log.Debug("finish PreImport, start ImportXML");
                 m_inDesignDoc.ImportXML(p_xmlFileName);
+                m_log.Debug("finish ImportXML, start UpdateParagraphStyle");
                 UpdateParagraphStyle();
+                m_log.Debug("finish UpdateParagraphStyle, start ImportXMP");
                 ImportXMP(p_inddFileName);
+                m_log.Debug("finish ImportXMP, start RestoreLayers");
                 RestoreLayers();
+                m_log.Debug("finish RestoreLayers, start ExportToPDFFile");
 
                 //convert to pdf
                 ExportToPDFFile(pdfFileName);
+                m_log.Debug("finish ExportToPDFFile");
             }
             catch (Exception e)
             {
@@ -392,16 +435,27 @@ namespace GlobalSight.InDesignConverter
             try
             {
                 isExceptionOccur = false;
+                m_log.Debug("Start conversion to INDD");
                 OpenInDesignDoc(p_inddFileName);
+                m_log.Debug("finish OpenInDesignDoc, start CheckLayers");
                 CheckLayers();
-                UnmarkInddFile();
+                m_log.Debug("finish CheckLayers, start UnmarkInddFile");
+                //UnmarkInddFile();
+                m_log.Debug("finish UnmarkInddFile, start ResetUnknownFontTable");
                 ResetUnknownFontTable();
-                MarkupInddFile(p_masterTranslated, p_translateHiddenLayer);
+                m_log.Debug("finish ResetUnknownFontTable, start MarkupInddFile");
+                //MarkupInddFile(p_masterTranslated, p_translateHiddenLayer);
+                m_log.Debug("finish MarkupInddFile, start PreImport");
                 PreImport(p_xmlFileName);
+                m_log.Debug("finish PreImport, start ImportXML");
                 m_inDesignDoc.ImportXML(p_xmlFileName);
+                m_log.Debug("finish ImportXML, start UpdateParagraphStyle");
                 UpdateParagraphStyle();
+                m_log.Debug("finish UpdateParagraphStyle, start ImportXMP");
                 ImportXMP(p_inddFileName);
+                m_log.Debug("finish ImportXMP, start RestoreLayers");
                 RestoreLayers();
+                m_log.Debug("finish RestoreLayers");
             }
             catch (Exception e)
             {
@@ -618,14 +672,25 @@ namespace GlobalSight.InDesignConverter
             InDesign.Font font = null;
             string fontfamily = null;
             string fontstylename = null;
+            InDesign.XMLElement element = null;
 
             if (p_element.Paragraphs.Count > 0)
             {
-                paragraph = (InDesign.Paragraph)p_element.Paragraphs.FirstItem();
+                element = p_element;
+            }
+            else if (((InDesign.XMLElement) p_element.Parent).Paragraphs.Count > 0)
+            {
+                element = (InDesign.XMLElement) p_element.Parent;
+            }
 
-                Hashtable xmlAtts = ExtractAttributes(p_element);
+            if (element != null)
+            {
+                paragraph = (InDesign.Paragraph)element.Paragraphs.FirstItem();
 
-                if (HasDifferentStyle(p_element))
+                Hashtable xmlAtts = ExtractAttributes(element);
+                UpdateParaStyle(paragraph, xmlAtts);
+
+                if (HasDifferentStyle(element))
                 {
                     // This paragraph has different font styles, we should recompose
                     // each character's font.
@@ -655,20 +720,109 @@ namespace GlobalSight.InDesignConverter
 
                     UpdateCharacterFont(paragraph, adjustedKeys, adjustedIndexToStyle);
                 }
-
                 else
                 {
                     // This paragraph has the same font. Update font in paragraph level.
                     fontfamily = (string)xmlAtts[FONT_FAMILY_ATTRIBUTE];
                     fontstylename = (string)xmlAtts[FONT_STYLE_ATTRIBUTE];
-                    paragraph.PointSize = xmlAtts[FONT_SIZE_ATTRIBUTE]; ;
+                    string pointSize = (string)xmlAtts[FONT_SIZE_ATTRIBUTE];
+                    
+                    // log DEBUG information point size for GBS-2612
+                    if (pointSize == null || pointSize.Length == 0)
+                    {
+                        m_log.Debug("pointSize is null");
+                        m_log.Debug("p_element.Id : " + p_element.Id);
+                        m_log.Debug("p_element.Contents : " + p_element.Contents);
+                    }
+                    else
+                    {
+                        paragraph.PointSize = pointSize;
+                    }
+                    
                     font = GetProperFont(fontfamily, fontstylename);
-                    if (font != null)
+                    if (font == null)
+                    {
+                        string msg = String.Format("Cannot init Font with font family: {0}, style: {1}", fontfamily, fontstylename);
+                        Logger.LogError(msg);
+                    }
+                    else
                     {
                         paragraph.AppliedFont = font;
+                        UpdateTableStyle(paragraph, font);
                     }
                 }
                 UpdateParaGlobalFormat(paragraph, xmlAtts);
+            }
+        }
+
+        private void UpdateTableStyle(InDesign.Paragraph p_paragraph, InDesign.Font p_font)
+        {
+            InDesign.Table table = null;
+            InDesign.Cell cell = null;
+            InDesign.Paragraph p = null;
+            // update tables styles if paragraph has tables.
+            for (int t = 0; t < p_paragraph.Tables.Count; t++)
+            {
+                if (t == 0)
+                {
+                    table = (InDesign.Table)p_paragraph.Tables.FirstItem();
+                }
+                else
+                {
+                    table = (InDesign.Table)p_paragraph.Tables.NextItem(table);
+                }
+
+                // update cells one by one
+                for (int i = 0; i < table.Cells.Count; i++)
+                {
+                    if (i == 0)
+                    {
+                        cell = (InDesign.Cell)table.Cells.FirstItem();
+                    }
+                    else
+                    {
+                        cell = (InDesign.Cell)table.Cells.NextItem(cell);
+                    }
+
+                    InDesign.Paragraphs ps = cell.Paragraphs;
+
+                    for (int j = 0; j < ps.Count; j++)
+                    {
+                        if (j == 0)
+                        {
+                            p = (InDesign.Paragraph)ps.FirstItem();
+                        }
+                        else
+                        {
+                            p = (InDesign.Paragraph)ps.NextItem(p);
+                        }
+
+                        p.AppliedFont = p_font;
+                    }
+                }
+            }
+        }
+
+        private void UpdateParaStyle(InDesign.Paragraph p_paragraph, Hashtable xmlAtts)
+        {
+            string pstylename = (string)xmlAtts[PARAGRAPH_STYLE];
+            if (pstylename != null &&
+                !(pstylename.StartsWith("[") && pstylename.EndsWith("]")))
+            {
+                try
+                {
+                    p_paragraph.AppliedParagraphStyle = pstylename;
+                }
+                catch (Exception ex)
+                {
+                    string msg = "AppliedParagraphStyle failed, pstylename: ";
+                    msg += pstylename;
+                    msg += ". p_paragraph Contents:";
+                    msg += p_paragraph.Contents;
+
+                    m_log.Debug(msg);
+                    m_log.Debug(ex.Message);
+                }
             }
         }
 
@@ -839,6 +993,17 @@ namespace GlobalSight.InDesignConverter
                     }
                     font = GetProperFont(fontFamily, styles[0]);
                     pointSize = styles[1];
+                    bool isPointSizeNull = false;
+
+                    // log DEBUG information point size for GBS-2612
+                    if (pointSize == null || pointSize.Length == 0)
+                    {
+                        isPointSizeNull = true;
+                        m_log.Debug("pointSize is null");
+                        m_log.Debug("styleInfo : " + styleInfo);
+                        m_log.Debug("pointSize : " + pointSize);
+                    }
+                    
                     int j = i;
                     for (; j < styleEnd && j < characters.Count; j++)
                     {
@@ -847,7 +1012,12 @@ namespace GlobalSight.InDesignConverter
                         {
                             currentChar.AppliedFont = font;
                         }
-                        currentChar.PointSize = pointSize;
+                        
+                        if (!isPointSizeNull)
+                        {
+                            currentChar.PointSize = pointSize;
+                        }
+
 
                         if (j == characters.Count - 1 ||
                             j == styleEnd - 1)
@@ -1064,7 +1234,7 @@ namespace GlobalSight.InDesignConverter
 
             Thread t = new Thread(new ThreadStart(CheckOpenBlockDialog));
             t.Start();
-            m_inDesignDoc = (InDesign.Document)m_inDesignApp.Open(fileNameAsObj, false, option);
+            m_inDesignDoc = (InDesign.Document)m_inDesignApp.Open(fileNameAsObj, m_showingWindow, option);
             Thread.Sleep(3000);
             isDocumentOpened = true;
             m_openedFileNumber++;
@@ -1201,6 +1371,15 @@ namespace GlobalSight.InDesignConverter
         /// </summary>
         private void MarkupInddFile(bool p_masterTranslated, bool p_translateHiddenLayer)
         {
+            if (m_markedPara == null)
+            {
+                m_markedPara = new List<string>();
+            }
+            else
+            {
+                m_markedPara.Clear();
+            }
+
             // Get root element of the document.
             InDesign.XMLElements elements = (InDesign.XMLElements)m_inDesignDoc.XMLElements;
             InDesign.XMLElement rootElm = (InDesign.XMLElement)elements.FirstItem();
@@ -1384,6 +1563,11 @@ namespace GlobalSight.InDesignConverter
         /// </summary>
         private void MarkupInddParagraph(InDesign.XMLElement p_parentElm, InDesign.Paragraph p_paragraph)
         {
+            if (IsParagraphMarked(p_paragraph))
+            {
+                return;
+            }
+
             InDesign.Table table = null;
             InDesign.Footnote footnote = null;
 
@@ -1453,7 +1637,74 @@ namespace GlobalSight.InDesignConverter
             }
 
             p_paragraph.Markup(paraElement);
+            MakeParagraphMarked(p_paragraph);
+        }
 
+        private bool IsParagraphMarked(InDesign.Paragraph p_paragraph)
+        {
+            string key = GenerateParagraphKey(p_paragraph);
+            if (m_markedPara.Contains(key))
+            {
+                return true;
+            }
+
+            string k1 = p_paragraph.ParentStory.Id + "-";
+            foreach (string vv in m_markedPara)
+            {
+                if (vv.StartsWith(k1))
+                {
+                    string k2 = vv.Substring(k1.Length);
+                    int index2 = Convert.ToInt32(k2);
+                    
+                    if (index2 > p_paragraph.Index)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private string GenerateParagraphKey(InDesign.Paragraph p_paragraph)
+        {
+            InDesign.Story s = p_paragraph.ParentStory;
+            return s.Id + "-" + p_paragraph.Index;
+        }
+
+        private void MakeParagraphMarked(InDesign.Paragraph p_paragraph)
+        {
+            string key = GenerateParagraphKey(p_paragraph);
+
+            if (!m_markedPara.Contains(key))
+            {
+                m_markedPara.Add(key);
+            }
+        }
+
+        private bool IsParagraphEmpty(InDesign.Paragraph p_paragraph)
+        {
+            try
+            {
+                string contents = p_paragraph.Contents.ToString();
+                int tableCount = p_paragraph.Tables.Count;
+                int footnoteCount = p_paragraph.Footnotes.Count;
+
+                if (tableCount == 0
+                    && footnoteCount == 0
+                    && contents.Trim().Length == 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void DetermineLeftIndent(InDesign.XMLElement p_paraElement,
@@ -1505,6 +1756,13 @@ namespace GlobalSight.InDesignConverter
             if (alignment != null)
             {
                 p_paraElement.XMLAttributes.Add(PARAGRAPH_IDLIST_ALIGNMENT, alignment);
+            }
+
+            InDesign.ParagraphStyle pstyle = (InDesign.ParagraphStyle)p_paragraph.AppliedParagraphStyle;
+            if (pstyle != null)
+            {
+                string pstylename = pstyle.Name;
+                p_paraElement.XMLAttributes.Add(PARAGRAPH_STYLE, pstylename);
             }
         }
 
@@ -1777,7 +2035,20 @@ namespace GlobalSight.InDesignConverter
         {
             // Table in indd file will be markup automatically with "Table" and "Cell" xml notes,
             // here "Inddgstable" will not be used to markup the Table in indd file.
-            p_parentElm.XMLElements.Add(INDD_TABLE_TAG, p_table);
+            try
+            {
+                p_parentElm.XMLElements.Add(INDD_TABLE_TAG, p_table);
+            }
+            catch (Exception ex)
+            {
+                // ignore this exception
+                if (ex.Message.Contains("already tagged"))
+                {
+                    return;
+                }
+
+                throw ex;
+            }
         }
 
         /// <summary>

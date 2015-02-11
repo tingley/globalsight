@@ -28,39 +28,40 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.ling.common.XmlEntities;
 import com.sun.jndi.toolkit.url.UrlUtil;
 
 /**
- * The ImageServlet can be used to view images contained in imported
- * documents, i.e. images that are stored in the CXEDOCS directory.
+ * The ImageServlet can be used to view images contained in imported documents,
+ * i.e. images that are stored in the CXEDOCS directory.
  */
-public class ImageFileServlet2
-    extends UncacheableFileServlet
+public class ImageFileServlet2 extends UncacheableFileServlet
 {
     private static final long serialVersionUID = -555209420906242066L;
-    public Logger CATEGORY =
-        Logger.getLogger("Images");
+    public Logger CATEGORY = Logger.getLogger("Images");
 
     /**
      * Write out the image to the response's buffered stream.
-     *
-     * @param p_request -- the request
-     * @param p_response -- the response
+     * 
+     * @param p_request
+     *            -- the request
+     * @param p_response
+     *            -- the response
      * @throws ServletException
      * @throws IOException
      */
     public void service(HttpServletRequest p_request,
-        HttpServletResponse p_response)
-        throws ServletException, IOException
+            HttpServletResponse p_response) throws ServletException,
+            IOException
     {
         HttpSession userSession = p_request.getSession(false);
         // if there is no session in the browser, forward to login page.
-        if (userSession == null) 
+        if (userSession == null)
         {
             p_response.sendRedirect("/globalsight");
             return;
         }
-        
+
         String docHome = getInitParameter("docHome");
 
         // strip off the first CXEDOCS part of the url since it is not
@@ -72,19 +73,20 @@ public class ImageFileServlet2
         int index = decodedUrl.indexOf(WebAppConstants.VIRTUALDIR_CXEDOCS2);
         if (index >= 0)
         {
-            fileName = decodedUrl.substring(
-                index + WebAppConstants.VIRTUALDIR_CXEDOCS.length());
+            fileName = decodedUrl.substring(index
+                    + WebAppConstants.VIRTUALDIR_CXEDOCS.length());
         }
         else
         {
             // invalid or incorrect use of this servlet
-            CATEGORY.warn("Invalid request for " + fileName +
-                ", not under " + WebAppConstants.VIRTUALDIR_CXEDOCS);
+            CATEGORY.warn("Invalid request for " + fileName + ", not under "
+                    + WebAppConstants.VIRTUALDIR_CXEDOCS);
             p_response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
 
         File file = new File(docHome, fileName);
+        String name = file.getName();
         if (!file.exists())
         {
             String temp = fileName.toLowerCase().replace("\\", "/");
@@ -92,18 +94,38 @@ public class ImageFileServlet2
             {
                 if (temp.lastIndexOf((".lpu/")) > 0)
                 {
-                    fileName = fileName.substring(0, temp.lastIndexOf((".lpu/")) + 4);
+                    fileName = fileName.substring(0,
+                            temp.lastIndexOf((".lpu/")) + 4);
                     file = new File(docHome, fileName);
                 }
             }
         }
-        
+
+        if (!file.exists())
+        {
+            XmlEntities entity = new XmlEntities();
+            File dir = file.getParentFile();
+            if (dir.isDirectory())
+            {
+                File[] files = dir.listFiles();
+                for (File f : files)
+                {
+                    if (file.getName().equals(
+                            entity.decodeStringBasic(f.getName())))
+                    {
+                        file = f;
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!file.exists())
         {
             if (CATEGORY.isDebugEnabled())
             {
-                CATEGORY.debug("Requested image `" + fileName +
-                    "' does not exist.");
+                CATEGORY.debug("Requested image `" + fileName
+                        + "' does not exist.");
             }
             p_response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
@@ -115,25 +137,25 @@ public class ImageFileServlet2
             {
                 CATEGORY.debug("Sending image " + fileName);
             }
-            
+
             String contentType = "application/octet-stream";
             // PO File is used in Linux/Unix
-            if(fileName!=null && fileName.toLowerCase().endsWith(".po"))
+            if (fileName != null && fileName.toLowerCase().endsWith(".po"))
             {
                 contentType = "text/x-gettext-translation";
             }
-            
-            //set the content type appropriately
+
+            // set the content type appropriately
             p_response.setContentType(contentType);
             String attachment = "attachment; filename=\""
-                    + UrlUtil.encode(file.getName(), "utf-8") + "\";";
+                    + UrlUtil.encode(name, "utf-8") + "\";";
             p_response.setHeader("Content-Disposition", attachment);
-            
+
             if (p_request.isSecure())
             {
                 PageHandler.setHeaderForHTTPSDownload(p_response);
             }
-            
+
             writeOutFile(file, p_response, false);
         }
         catch (Throwable ignore)

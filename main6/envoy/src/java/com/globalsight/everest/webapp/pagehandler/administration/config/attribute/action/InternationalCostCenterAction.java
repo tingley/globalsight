@@ -25,12 +25,12 @@ import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 
 public class InternationalCostCenterAction implements AttributeAction
 {
     static private final Logger logger = Logger
-            .getLogger(HibernateUtil.class);
+            .getLogger(InternationalCostCenterAction.class);
 
     private static final String NAME = "protect_international_cost_center";
 
@@ -41,7 +41,7 @@ public class InternationalCostCenterAction implements AttributeAction
 
         if (NAME.equals(jobAttribute.getAttribute().getName()))
         {
-            List<String> value = (List<String>)jobAttribute.getValue();
+            List<String> value = (List<String>) jobAttribute.getValue();
             if (value != null && value.indexOf("yes") > -1)
             {
                 try
@@ -50,20 +50,19 @@ public class InternationalCostCenterAction implements AttributeAction
                     String companyIdStr = job.getCompanyId();
                     String[] args =
                     { job.getName(), Long.toString(job.getId()),
-                            job.getCreateUserId() };
+                            UserUtil.getUserNameById(job.getCreateUserId()) };
                     User user = job.getL10nProfile().getProject()
                             .getProjectManager();
                     if (user != null)
                     {
                         ServerProxy.getMailer().sendMailFromAdmin(user, args,
                                 "InternationalCostCenterSubject",
-                                "InternationalCostCenterBody",
-                                companyIdStr);
+                                "InternationalCostCenterBody", companyIdStr);
                     }
                 }
                 catch (Exception e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                 }
             }
 

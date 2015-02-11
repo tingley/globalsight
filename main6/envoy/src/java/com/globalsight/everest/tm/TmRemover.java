@@ -41,7 +41,9 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProcessMonitor;
 import com.globalsight.util.progress.ProgressReporter;
@@ -57,7 +59,9 @@ public class TmRemover extends MultiCompanySupportedThread implements
 
 	private Connection m_connection;
 
-	private long m_tmId;
+	//private long m_tmId;
+	
+	private ArrayList<String> tmIds = null;
 
 	private int m_percentage = 0;
 
@@ -65,7 +69,7 @@ public class TmRemover extends MultiCompanySupportedThread implements
 
 	private boolean m_error = false;
 
-	private String m_message;
+	private String m_message = "";
 
 	private InterruptMonitor m_monitor = new InterruptMonitor();
 	
@@ -81,11 +85,11 @@ public class TmRemover extends MultiCompanySupportedThread implements
 	 * @param p_companyId
 	 *            ID of the company to which the TM belogs.
 	 */
-	public TmRemover(long p_tmId) throws TmManagerException
+	public TmRemover(ArrayList<String> tmIds) throws TmManagerException
 	{
 		super();
 
-		m_tmId = p_tmId;
+		this.tmIds = tmIds;
 
 		try
 		{
@@ -99,37 +103,57 @@ public class TmRemover extends MultiCompanySupportedThread implements
 		}
 	}
 
-	/** Tm removal body */
 	public void run()
 	{
 		try
 		{
 			super.run();
 			
-	        // CompanyThreadLocal.getInstance().setIdValue(this.m_currentCompanyId);
-			String tempMsg = null;
             setPercentage(0);
-            ArrayList tmProfiles = getDependentTmProfileNames();
-
-            if (tmProfiles != null)
-            {
-                setDependencyError(tmProfiles);
-
-                // Tm has dependency. Don't delete it.
-                return;
-            }
+            ArrayList<String> dependencyTms = new ArrayList<String>();
+            ArrayList<String> nonDependencyTms = new ArrayList<String>(tmIds);
             
-            Tm tm = ServerProxy.getProjectHandler().getProjectTMById(m_tmId, true);
-            TmCoreManager manager = LingServerProxy.getTmCoreManager();
-            if (deleteLanguageFlag) {
-                GlobalSightLocale locale = ServerProxy.getLocaleManager().getLocaleById(localeID);
-                manager.removeTmData(tm, locale, this, m_monitor);
-            }
-            else {
-                manager.removeTmData(tm, this, m_monitor);
+            getDependentTmProfileNames(dependencyTms, nonDependencyTms);
+
+            if (dependencyTms.size() > 0)
+                setDependencyError(dependencyTms);
+            int size = nonDependencyTms.size();
+            long tmId = -1l;
+            if (size > 0) {
+                int round = Math.round(80/size);
+                int index = 1;
+                Tm tm = null;
+                GlobalSightLocale locale = null;
+                TmCoreManager manager = LingServerProxy.getTmCoreManager();
                 ProjectTMTBUsers ptUsers = new ProjectTMTBUsers();
-                ptUsers.deleteAllUsers(String.valueOf(m_tmId), "TM");
+
+                for (String tmpTmId : nonDependencyTms) {
+                    tmId = Long.parseLong(tmpTmId);
+                    
+                    tm = ServerProxy.getProjectHandler().getProjectTMById(tmId, true);
+                    
+                    int convertedRate = tm.getConvertRate();
+                    if (convertedRate > 0 && convertedRate < 100) {
+                        long tm2Id = tm.getConvertedTM3Id();
+                        ProjectTM oriTm = ServerProxy.getProjectHandler().getProjectTMById(tm2Id, true);
+                        oriTm.setConvertedTM3Id(-1);
+                        oriTm.setLastTUId(-1);
+                        HibernateUtil.save(oriTm);
+                    }
+
+                    if (deleteLanguageFlag) {
+                        locale = ServerProxy.getLocaleManager().getLocaleById(localeID);
+                        manager.removeTmData(tm, locale, this, m_monitor);
+                    }
+                    else {
+                        manager.removeTmData(tm, this, m_monitor);
+                        ptUsers.deleteAllUsers(String.valueOf(tmId), "TM");
+                    }
+                    
+                    setPercentage(index * round);
+                }
             }
+            setPercentage(100);
 		}
 		catch (Throwable ex)
 		{
@@ -152,8 +176,8 @@ public class TmRemover extends MultiCompanySupportedThread implements
 
 				synchronized (this)
 				{
-                    m_message = getStringFromBundle("lb_tm_remove_error_occur", "An error occured while removing Tm")
-                            + ": " + ex.getMessage();
+                    m_message = "&lt;font color='red'&gt;" + getStringFromBundle("lb_tm_remove_error_occur", "An error occured while removing Tm")
+                            + ": " + ex.getMessage() + "&lt;/font&gt;";
 					m_done = true;
 					m_error = true;
 				}
@@ -208,7 +232,7 @@ public class TmRemover extends MultiCompanySupportedThread implements
 	 */
 	public void initReplacingMessage()
 	{
-		setMessageKey("lb_tm_remove_checking_dependency", "Checking dependency...");
+		setMessageKey("", "");
 	}
 
 	/**
@@ -231,7 +255,8 @@ public class TmRemover extends MultiCompanySupportedThread implements
 	{
 		synchronized (this)
 		{
-			return m_error;
+			//return m_error;
+		    return false;
 		}
 	}
 
@@ -268,7 +293,9 @@ public class TmRemover extends MultiCompanySupportedThread implements
     @Override
     public void setMessageKey(String messageKey, String defaultMessage) {
 	    synchronized (this) {
-	        m_message = getStringFromBundle(messageKey, defaultMessage);
+            String tmp = getStringFromBundle(messageKey, defaultMessage);
+            if (!StringUtil.isEmpty(tmp))
+                m_message += tmp + "&lt;br&gt;";
 	    }
 	}
     
@@ -280,28 +307,24 @@ public class TmRemover extends MultiCompanySupportedThread implements
     public void setPercentage(int percentage) {
 	    synchronized (this) {
 	        m_percentage = percentage;
+	        if (m_percentage == 100)
+	            m_done = true;
 	    }
     }
 	
-	//
-	// Private Methods
-	//
-
-	private void setDependencyError(ArrayList p_tmProfileNames)
+	private void setDependencyError(ArrayList<String> p_tmProfileNames)
 	{
 		synchronized (this)
 		{
 		    String tmpMsg = "Tm is refered to by the following Tm Profiles. "
                 + "Please deselect this Tm from the Tm Profiles before removing it.";
-			m_message = getStringFromBundle("lb_tm_remove_tm_deselect_tmp", tmpMsg) + "\r\n\r\n";
+			m_message = "&lt;font color='red'&gt;" + getStringFromBundle("lb_tm_remove_tm_deselect_tmp", tmpMsg) + "&lt;br&gt;";
 
-			for (Iterator it = p_tmProfileNames.iterator(); it.hasNext();)
-			{
-				String profileName = (String) it.next();
-				m_message += profileName + "\r\n";
-			}
+			for (Iterator<String> it = p_tmProfileNames.iterator(); it.hasNext();)
+				m_message += "&lt;b&gt;" + it.next() + "&lt;/b&gt;&lt;br&gt;";
 
-			m_done = true;
+			m_message += "&lt;/font&gt;";
+			
 			m_error = true;
 		}
 	}
@@ -314,23 +337,27 @@ public class TmRemover extends MultiCompanySupportedThread implements
 		throw new InterruptException();
 	}
 
-	private ArrayList getDependentTmProfileNames() throws Exception
+	private void getDependentTmProfileNames(ArrayList<String> dependencyTms, ArrayList<String> nonDependencyTms) throws Exception
 	{
-		ArrayList result = new ArrayList();
-
 		Collection tmProfiles = ServerProxy.getProjectHandler()
 				.getAllTMProfiles();
 
+		String tmp = null;
+		long tmpTmId = -1l;
+		Tm tm = null;
 		for (Iterator itTmProfiles = tmProfiles.iterator(); itTmProfiles
 				.hasNext();)
 		{
 			TranslationMemoryProfile profile = (TranslationMemoryProfile) itTmProfiles
 					.next();
 
+			tmpTmId = profile.getProjectTmIdForSave();
 			// check with the Tm to save
-			if (profile.getProjectTmIdForSave() == m_tmId)
+			if (tmIds.contains(String.valueOf(tmpTmId)))
 			{
-				result.add(profile.getName());
+			    ProjectTM projectTM = ServerProxy.getProjectHandler().getProjectTMById(tmpTmId, false);
+				dependencyTms.add(projectTM.getName());
+				nonDependencyTms.remove(String.valueOf(tmpTmId));
 				continue;
 			}
 
@@ -338,16 +365,16 @@ public class TmRemover extends MultiCompanySupportedThread implements
 			Collection tms = profile.getProjectTMsToLeverageFrom();
 			for (Iterator itTms = tms.iterator(); itTms.hasNext();)
 			{
-				LeverageProjectTM tm = (LeverageProjectTM) itTms.next();
-				if (tm.getProjectTmId() == m_tmId)
+				LeverageProjectTM lptm = (LeverageProjectTM) itTms.next();
+				tmp = String.valueOf(lptm.getProjectTmId());
+				if (tmIds.contains(tmp))
 				{
-					result.add(profile.getName());
+					dependencyTms.add(profile.getName());
+					nonDependencyTms.remove(tmp);
 					break;
 				}
 			}
 		}
-
-		return result.size() > 0 ? result : null;
 	}
 
 	private class InterruptException extends Exception

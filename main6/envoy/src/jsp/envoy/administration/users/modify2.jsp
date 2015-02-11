@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.everest.webapp.WebAppConstants"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
@@ -22,6 +23,7 @@
 <jsp:useBean id="done" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="cancel" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="self" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
+<jsp:useBean id="remove" scope="request" class="com.globalsight.everest.webapp.javabean.NavigationBean"/>
 
 <% 
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -31,6 +33,8 @@
        "=" + WebAppConstants.USER_ACTION_NEW_LOCALES;
     String editUrl = modify.getPageURL()+ "&" + WebAppConstants.USER_ACTION +
        "=" + WebAppConstants.USER_ACTION_MODIFY_LOCALES;
+    String removeUrl = remove.getPageURL() + "&" + WebAppConstants.USER_ACTION +
+            "=" + WebAppConstants.USER_ACTION_REMOVE_ROLES;
     String doneUrl = done.getPageURL() + "&" + WebAppConstants.USER_ACTION +
        "=" + WebAppConstants.USER_ACTION_MODIFY_USER;
     String cancelUrl = cancel.getPageURL() + "&" + WebAppConstants.USER_ACTION + "=" + WebAppConstants.USER_ACTION_CANCEL_LOCALES;
@@ -49,6 +53,7 @@
     String editButton = bundle.getString("lb_edit");
     String cancelButton = bundle.getString("lb_cancel");
     String doneButton = bundle.getString("lb_done");
+    String removeButton = bundle.getString("lb_remove");
 
     String lbUserName = bundle.getString("lb_user_name");
     
@@ -75,7 +80,7 @@
     String access = (String)hash.get(UserSecureFields.ROLES);
     
     ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(UserConstants.MODIFY_USER_WRAPPER);
-    String userName = wrapper.getUserId();
+    String userName = wrapper.getUserName();
 %>
 <HTML>
 <!-- This JSP is envoy/administratin/users/modify2.jsp-->
@@ -154,6 +159,8 @@ function submitForm(selectedButton)
         RolesForm.sourceLocale.value = values[0];
         RolesForm.targetLocale.value = values[1];
         RolesForm.companyId.value = values[2];
+    } else if (selectedButton == "Remove") {
+    	RolesForm.action = "<%=removeUrl%>";
     }
     RolesForm.submit();
 }
@@ -330,6 +337,7 @@ function submitForm(selectedButton)
 
     <INPUT TYPE="BUTTON" VALUE="<%=cancelButton%>" onClick="submitForm('Cancel');">
 <% if (access.equals("shared")) { %>
+    <INPUT TYPE="BUTTON" VALUE="<%=removeButton%>" onClick="submitForm('Remove');">
     <INPUT TYPE="BUTTON" VALUE="<%=editButton%>..." onClick="submitForm('Edit');">
     <INPUT TYPE="BUTTON" VALUE="<%=newButton%>..." onClick="submitForm('New');">
     <INPUT TYPE="BUTTON" VALUE="<%=doneButton%>" onClick="submitForm('Done');">

@@ -25,7 +25,6 @@ import java.util.Map;
 
 import com.globalsight.everest.company.Company;
 import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class SSOUserUtil implements Serializable
@@ -49,7 +48,8 @@ public class SSOUserUtil implements Serializable
         }
     }
 
-    public static void saveUserMapping(long p_companyId, String p_userId, String p_ssoUserId)
+    public static void saveUserMapping(long p_companyId, String p_userId,
+            String p_ssoUserId)
     {
         SSOUserMapping result = null;
         SSOUserMapping ori = getUserMapping(p_companyId, p_userId);
@@ -70,7 +70,8 @@ public class SSOUserUtil implements Serializable
         HibernateUtil.saveOrUpdate(result);
     }
 
-    public static void deleteUserMapping(long p_companyId, String p_userId) throws Exception
+    public static void deleteUserMapping(long p_companyId, String p_userId)
+            throws Exception
     {
         SSOUserMapping result = null;
         SSOUserMapping ori = getUserMapping(p_companyId, p_userId);
@@ -88,14 +89,14 @@ public class SSOUserUtil implements Serializable
         String companyName = p_user.getCompanyName();
         Company c = CompanyWrapper.getCompanyByName(companyName);
         long companyId = c.getId();
-        String userName = p_user.getUserId();
 
-        result = getUserMapping(companyId, userName);
+        result = getUserMapping(companyId, p_user.getUserId());
 
         return result;
     }
 
-    public static SSOUserMapping getUserMapping(long p_companyId, String p_userId)
+    public static SSOUserMapping getUserMapping(long p_companyId,
+            String p_userId)
     {
         SSOUserMapping result = null;
 
@@ -113,10 +114,11 @@ public class SSOUserUtil implements Serializable
         return result;
     }
 
-    public static SSOUserMapping getUserMappingBySSOUser(long p_companyId, String p_ssoUserId)
+    public static SSOUserMapping getUserMappingBySSOUser(long p_companyId,
+            String p_ssoUserId)
     {
         SSOUserMapping result = null;
-        
+
         if (p_ssoUserId == null || "".equals(p_ssoUserId.trim()))
         {
             return result;
@@ -136,10 +138,11 @@ public class SSOUserUtil implements Serializable
         return result;
     }
 
-    public static List<SSOUserMapping> getUserMappingBySSOUser(String p_ssoUserId)
+    public static List<SSOUserMapping> getUserMappingBySSOUser(
+            String p_ssoUserId)
     {
         List<SSOUserMapping> result = new ArrayList<SSOUserMapping>();
-        
+
         if (p_ssoUserId == null || "".equals(p_ssoUserId.trim()))
         {
             return result;
@@ -158,10 +161,11 @@ public class SSOUserUtil implements Serializable
         return result;
     }
 
-    public static List<SSOUserMapping> getSSOUserIdRepeat(long p_companyId, String p_ssoUserId)
+    public static List<SSOUserMapping> getSSOUserIdRepeat(long p_companyId,
+            String p_ssoUserId)
     {
         List<SSOUserMapping> result = new ArrayList<SSOUserMapping>();
-        
+
         if (p_ssoUserId == null || "".equals(p_ssoUserId.trim()))
         {
             return result;
@@ -184,7 +188,7 @@ public class SSOUserUtil implements Serializable
     public static Company getCompanyByIdpUrl(String idpUrl)
     {
         Company result = null;
-        
+
         if (idpUrl == null || "".equals(idpUrl.trim()))
         {
             return result;

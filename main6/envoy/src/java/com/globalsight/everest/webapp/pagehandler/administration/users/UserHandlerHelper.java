@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -54,27 +55,34 @@ import com.globalsight.persistence.dependencychecking.UserDependencyChecker;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 
-
 public class UserHandlerHelper
 {
+    public static String PERMISSIONGROUP = "permissiongroup";
+    public static String PROJECT = "project";
+
     public static Vector getAllSourceLocalesByCompanyId(String p_companyId)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         Vector data = null;
 
-        try {
-            data = ServerProxy.getLocaleManager().getAllSourceLocalesByCompanyId(p_companyId);
-        } catch (RemoteException re) {
+        try
+        {
+            data = ServerProxy.getLocaleManager()
+                    .getAllSourceLocalesByCompanyId(p_companyId);
+        }
+        catch (RemoteException re)
+        {
             throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
-        } catch (GeneralException ge) {
+        }
+        catch (GeneralException ge)
+        {
             throw new EnvoyServletException(ge.getExceptionId(), ge);
         }
 
         return data;
     }
-    
-    public static Vector getAllSourceLocales()
-        throws EnvoyServletException
+
+    public static Vector getAllSourceLocales() throws EnvoyServletException
     {
         Vector data = null;
 
@@ -94,8 +102,7 @@ public class UserHandlerHelper
         return data;
     }
 
-    public static Vector getAllTargetLocales()
-        throws EnvoyServletException
+    public static Vector getAllTargetLocales() throws EnvoyServletException
     {
         Vector data = null;
 
@@ -116,13 +123,14 @@ public class UserHandlerHelper
     }
 
     public static GlobalSightLocale getLocaleByString(String p_localeString)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         GlobalSightLocale data = null;
 
         try
         {
-            data = ServerProxy.getLocaleManager().getLocaleByString(p_localeString);
+            data = ServerProxy.getLocaleManager().getLocaleByString(
+                    p_localeString);
         }
         catch (RemoteException re)
         {
@@ -136,24 +144,24 @@ public class UserHandlerHelper
         return data;
     }
 
-
-  /**
-   * Gets the PermissionGroups in the system. If the user doing the editing
-   * 
-   *
-   * NOTE: This used to filter out ones with "Vendor" in the name, but that was removed in 6.7
-   * 
-   * @return 
-   * @exception EnvoyServletException
-   */
-  public static String[] getGroupNames()
-        throws EnvoyServletException
+    /**
+     * Gets the PermissionGroups in the system. If the user doing the editing
+     * 
+     * 
+     * NOTE: This used to filter out ones with "Vendor" in the name, but that
+     * was removed in 6.7
+     * 
+     * @return
+     * @exception EnvoyServletException
+     */
+    public static String[] getGroupNames() throws EnvoyServletException
     {
         String[] result = null;
 
         try
         {
-            Collection permGroups = Permission.getPermissionManager().getAllPermissionGroups();
+            Collection permGroups = Permission.getPermissionManager()
+                    .getAllPermissionGroups();
             Iterator iter = permGroups.iterator();
             ArrayList groupNames = new ArrayList();
             while (iter.hasNext())
@@ -163,7 +171,7 @@ public class UserHandlerHelper
             }
             result = new String[groupNames.size()];
             iter = groupNames.iterator();
-            int i=0;
+            int i = 0;
             while (iter.hasNext())
                 result[i++] = (String) iter.next();
         }
@@ -184,19 +192,19 @@ public class UserHandlerHelper
     }
 
     /**
-     * Check if any objects have dependencies on this User.
-     * This should be called BEFORE attempting to remove a User.
+     * Check if any objects have dependencies on this User. This should be
+     * called BEFORE attempting to remove a User.
      * <p>
-     *
+     * 
      * @param p_userId
      * @param session
      * @return
-     * @exception EnvoyServletException Failed to look for
-     * dependencies for the profile.  The cause is indicated by the
-     * exception message.
+     * @exception EnvoyServletException
+     *                Failed to look for dependencies for the profile. The cause
+     *                is indicated by the exception message.
      */
-    public static String checkForDependencies(String p_userId, HttpSession session)
-        throws EnvoyServletException
+    public static String checkForDependencies(String p_userId,
+            HttpSession session) throws EnvoyServletException
     {
         try
         {
@@ -204,7 +212,8 @@ public class UserHandlerHelper
             User user = getUser(p_userId);
 
             UserDependencyChecker depChecker = new UserDependencyChecker();
-            Hashtable catDeps = depChecker.categorizeDependencies((UserImpl)user);
+            Hashtable catDeps = depChecker
+                    .categorizeDependencies((UserImpl) user);
 
             // Now convert the hashtable into a Vector of Strings
             StringBuffer deps = new StringBuffer();
@@ -213,19 +222,20 @@ public class UserHandlerHelper
                 return null;
             }
 
-            
             deps.append("<span class=\"errorMsg\">");
-            Object[] args = {bundle.getString("lb_user")};
-            deps.append(MessageFormat.format(bundle.getString("msg_dependency_users"), args));
+            Object[] args =
+            { bundle.getString("lb_user") };
+            deps.append(MessageFormat.format(
+                    bundle.getString("msg_dependency_users"), args));
 
-            for (Enumeration e = catDeps.keys(); e.hasMoreElements() ;)
+            for (Enumeration e = catDeps.keys(); e.hasMoreElements();)
             {
-                String key = (String)e.nextElement();
+                String key = (String) e.nextElement();
                 deps.append("<p>*** " + bundle.getString(key) + " ***<br>");
-                Vector values = (Vector)catDeps.get(key);
-                for (int i = 0 ; i < values.size() ; i++)
+                Vector values = (Vector) catDeps.get(key);
+                for (int i = 0; i < values.size(); i++)
                 {
-                    deps.append((String)values.get(i));
+                    deps.append((String) values.get(i));
                     deps.append("<br>");
                 }
             }
@@ -238,20 +248,21 @@ public class UserHandlerHelper
         }
     }
 
-
     /**
      * Calls UserManager to remove the specified User from LDAP.
-     *
-     * @param p_userRequestingRemove    The user requesting the remove. 
-     * @param p_user                    The User object to remove from LDAP.
+     * 
+     * @param p_userRequestingRemove
+     *            The user requesting the remove.
+     * @param p_user
+     *            The User object to remove from LDAP.
      */
-    public static void removeUser(User p_userRequestingRemove, String p_userName)
-        throws EnvoyServletException
+    public static void removeUser(User p_userRequestingRemove, String p_userId)
+            throws EnvoyServletException
     {
         try
         {
             ServerProxy.getUserManager().removeUser(p_userRequestingRemove,
-                                                    p_userName);
+                    p_userId);
         }
         catch (UserManagerException ume)
         {
@@ -267,8 +278,7 @@ public class UserHandlerHelper
         }
     }
 
-    public static User getUser(String p_userId)
-        throws EnvoyServletException
+    public static User getUser(String p_userId) throws EnvoyServletException
     {
         User data = null;
         try
@@ -292,15 +302,16 @@ public class UserHandlerHelper
 
     /**
      * Get all user names as an array of strings.
+     * 
      * @return An array of user names.
      */
-    public static String[] getAllUserNames()
-        throws EnvoyServletException
+    public static String[] getAllUserNames() throws EnvoyServletException
     {
         String[] userNames = null;
         try
         {
-            userNames = ServerProxy.getUserManager().getAllUserNames();
+            userNames = ServerProxy.getUserManager()
+                    .getUserNamesFromAllCompanies();
         }
         catch (Exception e)
         {
@@ -310,14 +321,13 @@ public class UserHandlerHelper
         return userNames;
     }
 
-    public static ModifyUserWrapper createModifyUserWrapper(User p_userRequestingMod,
-                                                            User p_user)
-        throws EnvoyServletException
+    public static ModifyUserWrapper createModifyUserWrapper(
+            User p_userRequestingMod, User p_user) throws EnvoyServletException
     {
         try
         {
-            return new ModifyUserWrapper(ServerProxy.getUserManager(), 
-                                         p_userRequestingMod, p_user);
+            return new ModifyUserWrapper(ServerProxy.getUserManager(),
+                    p_userRequestingMod, p_user);
         }
         catch (RemoteException re)
         {
@@ -333,8 +343,7 @@ public class UserHandlerHelper
         }
     }
 
-    public static String[] getUILocales()
-        throws EnvoyServletException
+    public static String[] getUILocales() throws EnvoyServletException
     {
         String[] locales = null;
 
@@ -352,9 +361,8 @@ public class UserHandlerHelper
         return locales;
     }
 
-
     public static Vector<Activity> getAllActivities(Locale p_locale)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -378,45 +386,59 @@ public class UserHandlerHelper
             throw new EnvoyServletException(GeneralException.EX_NAMING, ne);
         }
     }
-    
+
     public static Vector getAllActivities(String p_companyId, Locale p_locale)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
-        try {
+        try
+        {
             ArrayList al = new ArrayList(ServerProxy.getJobHandler()
                     .getAllActivitiesByCompanyId(p_companyId));
             ActivityComparator comp = new ActivityComparator(
                     ActivityComparator.NAME, p_locale);
             Collections.sort(al, comp);
             return new Vector(al);
-        } catch (GeneralException ge) {
+        }
+        catch (GeneralException ge)
+        {
             throw new EnvoyServletException(ge.getExceptionId(), ge);
-        } catch (RemoteException re) {
+        }
+        catch (RemoteException re)
+        {
             throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
-        } catch (NamingException ne) {
+        }
+        catch (NamingException ne)
+        {
             throw new EnvoyServletException(GeneralException.EX_NAMING, ne);
         }
     }
 
-    public static Vector getTargetLocalesByCompanyId(GlobalSightLocale p_sourceLocale, String p_companyId)
-    throws EnvoyServletException
-    {
-        try {
-            return ServerProxy.getLocaleManager().getTargetLocalesByCompanyId(
-                    p_sourceLocale, p_companyId);
-        } catch (GeneralException ge) {
-            throw new EnvoyServletException(ge.getExceptionId(), ge);
-        } catch (RemoteException re) {
-            throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
-        }
-    }
-    
-    public static Vector getTargetLocales(GlobalSightLocale p_sourceLocale)
-        throws EnvoyServletException
+    public static Vector getTargetLocalesByCompanyId(
+            GlobalSightLocale p_sourceLocale, String p_companyId)
+            throws EnvoyServletException
     {
         try
         {
-            return  ServerProxy.getLocaleManager().getTargetLocales(p_sourceLocale);
+            return ServerProxy.getLocaleManager().getTargetLocalesByCompanyId(
+                    p_sourceLocale, p_companyId);
+        }
+        catch (GeneralException ge)
+        {
+            throw new EnvoyServletException(ge.getExceptionId(), ge);
+        }
+        catch (RemoteException re)
+        {
+            throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
+        }
+    }
+
+    public static Vector getTargetLocales(GlobalSightLocale p_sourceLocale)
+            throws EnvoyServletException
+    {
+        try
+        {
+            return ServerProxy.getLocaleManager().getTargetLocales(
+                    p_sourceLocale);
         }
         catch (GeneralException ge)
         {
@@ -432,19 +454,18 @@ public class UserHandlerHelper
      * Get a reference to the object stored in the http session.
      */
     public static Object getObjectFromSession(HttpSession p_httpSession,
-        String p_key)
+            String p_key)
     {
-        SessionManager sessionMgr = (SessionManager)p_httpSession.
-            getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) p_httpSession
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         return sessionMgr.getAttribute(p_key);
     }
 
-    public static Vector getUsers()
-        throws EnvoyServletException
+    public static Vector getUsers() throws EnvoyServletException
     {
         try
         {
-            return  ServerProxy.getUserManager().getUsers();
+            return ServerProxy.getUserManager().getUsers();
         }
         catch (GeneralException ge)
         {
@@ -457,11 +478,11 @@ public class UserHandlerHelper
     }
 
     public static Vector getUsersForCurrentCompany()
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return  ServerProxy.getUserManager().getUsersForCurrentCompany();
+            return ServerProxy.getUserManager().getUsersForCurrentCompany();
         }
         catch (GeneralException ge)
         {
@@ -474,11 +495,11 @@ public class UserHandlerHelper
     }
 
     public static Collection getUserRoles(User p_user)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return  ServerProxy.getUserManager().getUserRoles(p_user);
+            return ServerProxy.getUserManager().getUserRoles(p_user);
         }
         catch (GeneralException ge)
         {
@@ -490,12 +511,11 @@ public class UserHandlerHelper
         }
     }
 
-    public static String[] getCompanyNames()
-        throws EnvoyServletException
+    public static String[] getCompanyNames() throws EnvoyServletException
     {
         try
         {
-            return  ServerProxy.getUserManager().getCompanyNames();
+            return ServerProxy.getUserManager().getCompanyNames();
         }
         catch (GeneralException ge)
         {
@@ -508,12 +528,12 @@ public class UserHandlerHelper
     }
 
     public static List getProjectsManagedByUser(User user)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return ServerProxy.getProjectHandler().
-                getProjectsManagedByUser(user, Permission.GROUP_MODULE_GLOBALSIGHT);
+            return ServerProxy.getProjectHandler().getProjectsManagedByUser(
+                    user, Permission.GROUP_MODULE_GLOBALSIGHT);
         }
         catch (GeneralException ge)
         {
@@ -530,16 +550,17 @@ public class UserHandlerHelper
     }
 
     /**
-     * Get the ProjectInfos for the user with userId.  If this is the
-     * first time the data is being fetched for the user, get it from
-     * the project handler.  Otherwise, get it from the user wrapper.
+     * Get the ProjectInfos for the user with userId. If this is the first time
+     * the data is being fetched for the user, get it from the project handler.
+     * Otherwise, get it from the user wrapper.
      */
     public static List getProjectsByUser(String userId)
-        throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
-            return (List)ServerProxy.getProjectHandler().getProjectsByUser(userId);
+            return (List) ServerProxy.getProjectHandler().getProjectsByUser(
+                    userId);
         }
         catch (GeneralException ge)
         {
@@ -555,36 +576,34 @@ public class UserHandlerHelper
         }
     }
 
-
     /*
-     * Return list of default projects.  Update added projects.
+     * Return list of default projects. Update added projects.
      */
     public static List setProjectsForEdit(ArrayList availableProjects,
-                            ArrayList addedProjects,
-                            boolean isInAllProjects,
-                            HttpServletRequest request,
-                            HttpSession session)
+            ArrayList addedProjects, boolean isInAllProjects,
+            HttpServletRequest request, HttpSession session)
     {
 
         // Default projects are the ones that are in added and not in
-        // available.  Create a default list, and remove the defaults from
+        // available. Create a default list, and remove the defaults from
         // the added list since they cannot be changed.
         //
-        // There is one exception.  If the logged in user is not the admin
+        // There is one exception. If the logged in user is not the admin
         // and "future" is set to true, then put all added users in the
         // default list.
         // isAdmin now means user has the GET_ALL_PROJECTS permission??
-        PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet perms = (PermissionSet) session
+                .getAttribute(WebAppConstants.PERMISSIONS);
         boolean isAdmin = perms.getPermissionFor(Permission.GET_ALL_PROJECTS);
         ArrayList defaultProjects = null;
         if (addedProjects != null)
         {
             defaultProjects = new ArrayList();
             if (availableProjects == null || availableProjects.size() == 0
-                || (isInAllProjects && !isAdmin))
+                    || (isInAllProjects && !isAdmin))
             {
                 // all added projects are defaults
-                defaultProjects = (ArrayList)addedProjects;
+                defaultProjects = (ArrayList) addedProjects;
                 addedProjects = null;
             }
             else
@@ -616,10 +635,24 @@ public class UserHandlerHelper
             }
         }
 
-        Collections.sort(availableProjects, new ProjectComparator(Locale
-                .getDefault()));
-        Collections.sort(addedProjects, new ProjectComparator(Locale
-                .getDefault()));
+        if (availableProjects != null && availableProjects.size() != 0)
+        {
+            Collections.sort(availableProjects,
+                    new ProjectComparator(Locale.getDefault()));
+        }
+        else
+        {
+            availableProjects = new ArrayList();
+        }
+        if (addedProjects != null)
+        {
+            Collections.sort(addedProjects,
+                    new ProjectComparator(Locale.getDefault()));
+        }
+        else
+        {
+            addedProjects = new ArrayList();
+        }
 
         request.setAttribute("availableProjects", availableProjects);
         request.setAttribute("addedProjects", addedProjects);
@@ -629,15 +662,13 @@ public class UserHandlerHelper
     /**
      * Get a list of field level securities for the specified users.
      */
-    public static List getSecurities(
-        List p_users, User p_user)
-        throws  EnvoyServletException
+    public static List getSecurities(List p_users, User p_user)
+            throws EnvoyServletException
     {
         try
         {
-            return
-              ServerProxy.getSecurityManager().getFieldSecurities(
-                  p_user, p_users, true);
+            return ServerProxy.getSecurityManager().getFieldSecurities(p_user,
+                    p_users, true);
         }
         catch (Exception e)
         {
@@ -648,63 +679,107 @@ public class UserHandlerHelper
     /**
      * Get the field level security hashtable
      */
-    public static FieldSecurity getSecurity(User userToModify, User userRequestingModify,
-                                            boolean checkProject)
-        throws  EnvoyServletException
+    public static FieldSecurity getSecurity(User userToModify,
+            User userRequestingModify, boolean checkProject)
+            throws EnvoyServletException
     {
         try
         {
-            return 
-              ServerProxy.getSecurityManager().getFieldSecurity(userRequestingModify,
-                                                                userToModify, checkProject);
+            return ServerProxy.getSecurityManager().getFieldSecurity(
+                    userRequestingModify, userToModify, checkProject);
         }
         catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
     }
+
     /**
      * Gets the PermissionGroup names for the user
      * 
-     *
-     * @return 
+     * 
+     * @return
      * @exception EnvoyServletException
      */
     public static String[] getAllPermissionGroupNamesForUser(String p_userId)
-          throws EnvoyServletException
+            throws EnvoyServletException
     {
-          String[] result = null;
+        String[] result = null;
 
-          try
-          {
-              Collection permGroups = Permission.getPermissionManager().getAllPermissionGroupsForUser(p_userId);
-              Iterator iter = permGroups.iterator();
-              ArrayList groupNames = new ArrayList();
-              while (iter.hasNext())
-              {
-                  PermissionGroup pg = (PermissionGroup) iter.next();
-                  groupNames.add(pg.getName());
-              }
-              result = new String[groupNames.size()];
-              iter = groupNames.iterator();
-              int i=0;
-              while (iter.hasNext())
-                  result[i++] = (String) iter.next();
-          }
-          catch (RemoteException re)
-          {
-              throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
-          }
-          catch (GeneralException ge)
-          {
-              throw new EnvoyServletException(ge.getExceptionId(), ge);
-          }
-          catch (Exception e)
-          {
-              throw new EnvoyServletException(e);
-          }
+        try
+        {
+            Collection permGroups = Permission.getPermissionManager()
+                    .getAllPermissionGroupsForUser(p_userId);
+            Iterator iter = permGroups.iterator();
+            ArrayList groupNames = new ArrayList();
+            while (iter.hasNext())
+            {
+                PermissionGroup pg = (PermissionGroup) iter.next();
+                groupNames.add(pg.getName());
+            }
+            result = new String[groupNames.size()];
+            iter = groupNames.iterator();
+            int i = 0;
+            while (iter.hasNext())
+                result[i++] = (String) iter.next();
+        }
+        catch (RemoteException re)
+        {
+            throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
+        }
+        catch (GeneralException ge)
+        {
+            throw new EnvoyServletException(ge.getExceptionId(), ge);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
 
-          return result;
+        return result;
     }
-}
 
+    public static HashMap<String, String> getAllPerAndProNameForUser(
+            String tableName) throws EnvoyServletException
+    {
+        HashMap<String, String> result = new HashMap<String, String>();
+
+        try
+        {
+            Collection<Object[]> listo = Permission.getPermissionManager()
+                    .getAlltableNameForUser(tableName);
+            for (Iterator<Object[]> a = listo.iterator(); a.hasNext();)
+            {
+                Object[] test = a.next();
+                String key = (String) test[0];
+                String value = result.get(key);
+                if (value != null)
+                {
+                    result.put(key, value + "<br>" + (String) test[1]);
+
+                }
+                else
+                {
+                    result.put(key, (String) test[1]);
+
+                }
+
+            }
+        }
+        catch (RemoteException re)
+        {
+            throw new EnvoyServletException(GeneralException.EX_REMOTE, re);
+        }
+        catch (GeneralException ge)
+        {
+            throw new EnvoyServletException(ge.getExceptionId(), ge);
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
+
+        return result;
+    }
+
+}

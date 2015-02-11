@@ -1,6 +1,11 @@
 package com.globalsight.ling.tm3.integration.segmenttm;
 
-import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.*;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FROM_WORLDSERVER;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.SID;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
 
 import java.util.Map;
 
@@ -71,14 +76,28 @@ class Tm3Leverager {
         projectAttr = TM3Util.getAttr(tm, UPDATED_BY_PROJECT);
         
         matchType = leverageOptions.leverageOnlyExactMatches() ?
-                TM3MatchType.EXACT : TM3MatchType.FALLBACK;
+                TM3MatchType.EXACT : TM3MatchType.ALL;
     }
     
     void leverageSegment(BaseTmTuv srcTuv, Map<TM3Attribute, Object> attrs) {
         LOGGER.debug("leverageSegment: " + srcTuv.toDebugString());
-        TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(srcTuv),
-                srcLocale, leverageOptions.getLeveragingLocales().getAllTargetLocales(), 
-                attrs, matchType, leverageOptions.isMultiLingLeveraging(), 
+
+        // fix for GBS-2448, user could search target locale in TM Search Page,
+        // if not from TM Search Page, keep old logic(by isMultiLingLeveraging
+        // of FileProfile)
+        boolean lookupTarget;
+        if (leverageOptions.isFromTMSearchPage())
+        {
+            lookupTarget = true;
+        }
+        else
+        {
+            lookupTarget = leverageOptions.isMultiLingLeveraging();
+        }
+
+        TM3LeverageResults<GSTuvData> results = tm.findMatches(new GSTuvData(
+                srcTuv), srcLocale, leverageOptions.getLeveragingLocales()
+                .getAllTargetLocales(), attrs, matchType, lookupTarget,
                 MAX_HITS, leverageOptions.getMatchThreshold());
         
         // NB in this conversion, we lose which tuv was matched, only which

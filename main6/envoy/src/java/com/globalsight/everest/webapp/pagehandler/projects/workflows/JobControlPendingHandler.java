@@ -69,33 +69,38 @@ public class JobControlPendingHandler extends JobManagementHandler
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
         // error bean.
-        m_importErrorBean = new NavigationBean(ERROR_BEAN, p_thePageDescriptor
-                .getPageName());
+        m_importErrorBean = new NavigationBean(ERROR_BEAN,
+                p_thePageDescriptor.getPageName());
 
-        p_request.setAttribute("searchType", p_request
-                .getParameter("searchType"));
+        p_request.setAttribute("searchType",
+                p_request.getParameter("searchType"));
         performAppropriateOperation(p_request);
         Vector jobStates = new Vector();
         jobStates.add(Job.PENDING);
         jobStates.add(Job.BATCHRESERVED);
         jobStates.add(Job.IMPORTFAILED);
         jobStates.add(Job.ADD_FILE);
-        
-        p_request.setAttribute(JOB_SCRIPTLET, getJobText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(), null,
-                ((NavigationBean) beanMap.get(DETAILS_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(PLANNED_COMPLETION_DATE_BEAN))
-                        .getPageURL(), getExpJobListing(p_request), jobStates,
-                false));
+
+        p_request.setAttribute(
+                JOB_SCRIPTLET,
+                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
+                        .getPageURL(), null, ((NavigationBean) beanMap
+                        .get(DETAILS_BEAN)).getPageURL(),
+                        ((NavigationBean) beanMap
+                                .get(PLANNED_COMPLETION_DATE_BEAN))
+                                .getPageURL(), getExpJobListing(p_request),
+                        jobStates, false));
         p_request.setAttribute(ERROR_URL_PARAM, m_importErrorBean.getPageURL());
         p_request.setAttribute(JOB_ID, JOB_ID);
         p_request.setAttribute(DISCARD_JOB_PARAM, DISCARD_JOB_PARAM);
         p_request.setAttribute(MAKE_READY_JOB_PARAM, MAKE_READY_JOB_PARAM);
-        p_request.setAttribute(JOB_LIST_START_PARAM, p_request
-                .getParameter(JOB_LIST_START_PARAM));
-        p_request.setAttribute(PAGING_SCRIPTLET, getPagingText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
-                jobStates));
+        p_request.setAttribute(JOB_LIST_START_PARAM,
+                p_request.getParameter(JOB_LIST_START_PARAM));
+        p_request.setAttribute(
+                PAGING_SCRIPTLET,
+                getPagingText(p_request,
+                        ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
+                        jobStates));
 
         HttpSession session = p_request.getSession(false);
         SessionManager sessionMgr = (SessionManager) session
@@ -159,9 +164,8 @@ public class JobControlPendingHandler extends JobManagementHandler
             while (tokenizer.hasMoreTokens())
             {
                 jobId = tokenizer.nextToken();
-                WorkflowHandlerHelper
-                        .makeReadyJob(WorkflowHandlerHelper
-                                .getJobById(Long.parseLong(jobId)));
+                WorkflowHandlerHelper.makeReadyJob(WorkflowHandlerHelper
+                        .getJobById(Long.parseLong(jobId)));
             }
         }
         // THIS IS FOR JOB CANCEL
@@ -198,8 +202,7 @@ public class JobControlPendingHandler extends JobManagementHandler
         // FOR UPDATING PLANNED COMPLETION DATES
         if (PLANNED_COMP_DATE.equals(p_request.getParameter("action")))
         {
-            WorkflowHandlerHelper.updatePlannedCompletionDates(
-                    p_request);
+            WorkflowHandlerHelper.updatePlannedCompletionDates(p_request);
         }
 
     }

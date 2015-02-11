@@ -8,7 +8,8 @@ var gbIE5=false;
 var gbIE55=false;
 
 var gAgent=navigator.userAgent.toLowerCase();
-var gbMac=(gAgent.indexOf("mac")!=-1);
+//to support chrome,because chrome and safari use same Rendering Engine:webkit
+var gbMac=(gAgent.indexOf("mac")!=-1 || gAgent.indexOf("chrome")!=-1);//var gbMac=(gAgent.indexOf("mac")!=-1);
 var gbSunOS=(gAgent.indexOf("sunos")!=-1);
 var gbOpera=(gAgent.indexOf("opera")!=-1);
 

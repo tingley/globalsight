@@ -19,26 +19,16 @@
 
 package com.globalsight.everest.edit.offline.upload;
 
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
+import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
+import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.download.HTMLResourcePages.DownloadWriter;
 import com.globalsight.everest.edit.offline.download.HTMLResourcePages.DownloadWriterInterface;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
-import com.globalsight.everest.edit.offline.AmbassadorDwUpExceptionConstants;
 import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
-import com.globalsight.ling.common.DiplomatBasicParserException;
-import com.globalsight.ling.tw.PseudoData;
-import com.globalsight.ling.tw.PseudoConstants;
-import com.globalsight.ling.tw.PseudoOverrideItemException;
-import com.globalsight.ling.tw.PseudoParserException;
-import com.globalsight.ling.tw.TmxPseudo;
-
-import java.util.ResourceBundle;
-import java.util.ListIterator;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.MissingResourceException;
-import java.util.Locale;
 
 public class PtagErrorPageWriter
     extends DownloadWriter
@@ -154,6 +144,30 @@ public class PtagErrorPageWriter
         params[6] = m_labels.getString(LABEL_STAGE_ID);
         params[7] = " " + m_StageId;
         page.append(formatString(m_template.getString(ERRORPAGE_HEADER), params));
+
+        // error messages
+        page.append(m_segments);
+
+        // end HTML page
+        page.append(formatString(m_template.getString(ERRORPAGE_END),
+            m_labels.getString(LABEL_PAGE_END)));
+
+        // clear the messages
+        m_segments = new StringBuffer();
+
+        return page;
+    }
+    
+    /**
+     * When task is not accepted or acceptor of this task is not right,
+     * Assembles and returns the complete HTML error page.
+     */
+    public StringBuffer buildPageForTaskError()
+    {
+        StringBuffer page = new StringBuffer();
+
+        String s = m_template.getString(ERRORPAGE_START);
+        page.append(s);
 
         // error messages
         page.append(m_segments);

@@ -26,6 +26,10 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
 import com.globalsight.ling.common.Text;
 
@@ -55,12 +59,25 @@ public class ActivityPageDataQuery
 		{
 			String inWFTClauseHolder = addWFTLocaleClause(p_targetLocales);
 			String inJobClauseHolder = addJobIds(p_jobIds);
+			
+			String tuTableName = null;
+			String tuvTableName = null;
+			Iterator jobIdIt = p_jobIds.iterator();
+			if (jobIdIt.hasNext()){
+			    String jobId = (String) jobIdIt.next();
+			    Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(jobId));
+			    tuTableName = SegmentTuTuvCacheManager.getTuTableName(job.getCompanyId());
+			    tuvTableName = SegmentTuTuvCacheManager.getTuvTableName(job.getCompanyId());
+			}
 			String inTUVClauseHolder = addTUVLocaleClause(p_targetLocales);
 
 			if (p_caseSensitiveSearch)
 			{
-				StringBuffer sb = new StringBuffer(
-						SqlHolder.SEARCH_CASE_SENSITIVE);
+                String sql1 = SqlHolder.SEARCH_CASE_SENSITIVE.replaceAll(
+                        TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
+                sql1 = sql1.replaceAll(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                        tuvTableName);
+				StringBuffer sb = new StringBuffer(sql1);
 				sb.append(inWFTClauseHolder);
 				sb.append(inJobClauseHolder);
 				sb.append(inTUVClauseHolder);
@@ -75,8 +92,11 @@ public class ActivityPageDataQuery
 			}
 			else
 			{
-				StringBuffer sb = new StringBuffer(
-						SqlHolder.SEARCH_CASE_INSENSITIVE);
+                String sql2 = SqlHolder.SEARCH_CASE_INSENSITIVE.replaceAll(
+                        TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
+                sql2 = sql2.replaceAll(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                        tuvTableName);
+				StringBuffer sb = new StringBuffer(sql2);
 				sb.append(inWFTClauseHolder);
 				sb.append(inJobClauseHolder);
 				sb.append(inTUVClauseHolder);
@@ -333,8 +353,8 @@ public class ActivityPageDataQuery
 			sb.append(" source_page sp, ");
 			sb.append(" target_page tp, ");
 			sb.append(" target_page_leverage_group tplg,  ");
-			sb.append(" translation_unit tu,  ");
-			sb.append(" translation_unit_variant tuv, ");
+			sb.append(TuvQueryConstants.TU_TABLE_PLACEHOLDER).append(" tu,  ");
+			sb.append(TuvQueryConstants.TUV_TABLE_PLACEHOLDER).append(" tuv, ");
 			sb.append(" jbpm_taskinstance jti,");
 			sb.append(" jbpm_task jtask,");
 			sb.append(" jbpm_node jnode");

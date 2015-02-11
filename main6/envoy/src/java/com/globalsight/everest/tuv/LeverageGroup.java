@@ -72,4 +72,5 @@ public interface LeverageGroup
      * @return A collection of Tus.
      */
     Collection getTus();
+    Collection getTus(boolean p_loadFromDb);
 }

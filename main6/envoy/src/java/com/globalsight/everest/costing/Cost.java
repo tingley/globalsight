@@ -17,11 +17,7 @@
 
 package com.globalsight.everest.costing;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 import com.globalsight.everest.foundation.WorkObject;
 import com.globalsight.everest.persistence.PersistentObject;
@@ -68,7 +64,7 @@ public class Cost extends PersistentObject
     // Contains all surcharges to be applied to the m_actualCost
     // The key is the name of the surcharge and the value is the Surcharge
     // object.
-    private Hashtable<String, Surcharge> m_surcharges = new Hashtable<String, Surcharge>();
+    private Set<Surcharge> m_surcharges = new HashSet<Surcharge>();
 
     // A costed object doesn't have to have a cost by word count object,
     // but if it does, this contains the granual by word count costing
@@ -77,6 +73,12 @@ public class Cost extends PersistentObject
 
     public boolean isUseInContext = false;
     public boolean isDefaultInContext = false;
+    
+    private HashMap<Long, Cost> workflowCost = 
+            new HashMap<Long, Cost>();
+
+    private HashMap<Long, Cost> taskCost = 
+            new HashMap<Long, Cost>();
 
     /**
      * Constructor.
@@ -463,40 +465,22 @@ public class Cost extends PersistentObject
      */
     public Collection<Surcharge> getSurcharges()
     {
-        return m_surcharges.values();
+        if(m_surcharges == null) {
+            return new ArrayList();
+        }
+        else {
+            return new ArrayList(m_surcharges);
+        }
     }
 
     public Set<Surcharge> getSurchargeSet()
     {
-        Set<Surcharge> surcharges = null;
-
-        if (m_surcharges != null)
-        {
-            surcharges = new HashSet<Surcharge>(m_surcharges.values());
-        }
-        return surcharges;
+        return m_surcharges;
     }
 
     public void setSurchargeSet(Set<Surcharge> surcharges)
     {
-        m_surcharges = new Hashtable<String, Surcharge>();
-        if (surcharges != null)
-        {
-            Iterator<Surcharge> iterator = surcharges.iterator();
-            while (iterator.hasNext())
-            {
-                Surcharge surcharge = (Surcharge) iterator.next();
-                addSurcharge(surcharge);
-            }
-        }
-    }
-
-    /**
-     * Return the particular surchare.
-     */
-    public Surcharge getSurcharge(String p_surchargeName)
-    {
-        return (Surcharge) m_surcharges.get(p_surchargeName);
+        m_surcharges = surcharges;
     }
 
     /**
@@ -519,11 +503,12 @@ public class Cost extends PersistentObject
                                 .getCurrency(), this.getCurrency()), this
                                 .getCurrency());
             }
-            m_surcharges.put(p_surcharge.getName(), fs);
+            
+            m_surcharges.add(fs);
         }
         else
         {
-            m_surcharges.put(p_surcharge.getName(), p_surcharge);
+            m_surcharges.add(p_surcharge);
         }
         // re-calculate the final cost since
         // the surcharge amounts may have changed
@@ -541,13 +526,20 @@ public class Cost extends PersistentObject
      */
     public void modifySurcharge(String p_surchargeOldName, Surcharge p_surcharge)
     {
-        Surcharge s = m_surcharges.remove(p_surchargeOldName);
-        s.setCost(null);
+        Iterator<Surcharge> ite = m_surcharges.iterator();
+        
+        while(ite.hasNext())
+        {
+            Surcharge surcharge = ite.next();
+            if(surcharge.getName().equals(p_surchargeOldName)) {
+                m_surcharges.remove(surcharge);
+                surcharge.setCost(null);
 
-        // now adds the surcharge. will either overlay the existing one if
-        // the names are the same OR be added as a new surcharge since the
-        // older version of it will be deleted.
-        addSurcharge(p_surcharge);
+                addSurcharge(p_surcharge);
+                
+                return;
+            }
+        }
     }
 
     /**
@@ -555,12 +547,24 @@ public class Cost extends PersistentObject
      */
     public Surcharge removeSurcharge(String p_surchargeName)
     {
-        Surcharge s = (Surcharge) m_surcharges.remove(p_surchargeName);
-        s.setCost(null);
-        // re-calculate the final cost since
-        // the surcharge amounts may have changed
-        calculateFinalCost();
-        return s;
+        Iterator<Surcharge> ite = m_surcharges.iterator();
+
+        while (ite.hasNext())
+        {
+            Surcharge surcharge = ite.next();
+            if (surcharge.getName().equals(p_surchargeName))
+            {
+                m_surcharges.remove(surcharge);
+                surcharge.setCost(null);
+                // re-calculate the final cost since
+                // the surcharge amounts may have changed
+                calculateFinalCost();
+
+                return surcharge;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -741,8 +745,6 @@ public class Cost extends PersistentObject
                 float surchargeAmount = convert(fs.getAmount().getAmount(), fs
                         .getAmount().getCurrency(), p_requestedCurrency);
                 fs.setAmount(surchargeAmount, p_requestedCurrency);
-                // replace old surcharge amount with new one
-                m_surcharges.put(s.getName(), s);
             }
         }
     }
@@ -807,5 +809,21 @@ public class Cost extends PersistentObject
     public void setFinalCost(Float cost)
     {
         m_finalCost = cost;
+    }
+    
+    public HashMap<Long, Cost> getWorkflowCost() {
+        return this.workflowCost;
+    }
+    
+    public void addworkflowCost(long wfId, Cost c) {
+        workflowCost.put(wfId, c);
+    }
+    
+    public HashMap<Long, Cost> getTaskCost() {
+        return this.taskCost;
+    }
+    
+    public void addTaskCost(long taskId, Cost c) {
+        taskCost.put(taskId, c);
     }
 }

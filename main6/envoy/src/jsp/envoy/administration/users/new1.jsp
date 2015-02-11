@@ -82,8 +82,13 @@ CreateUserWrapper wrapper = (CreateUserWrapper)sessionMgr.getAttribute(
   UserConstants.CREATE_USER_WRAPPER);
 
 String uiLocale = wrapper.getDefaultUILocale();
-String userName = wrapper.getUserId();
-String ssoUserName = wrapper.getSsoUserName();
+String userName = wrapper.getUserName();
+String ssoUserName = null;
+String ssoUserId = wrapper.getSsoUserId();
+if (ssoUserId != null)
+{
+	ssoUserName = UserUtil.getUserNameById(ssoUserId);
+}
 String password = wrapper.getPassword();
 String passwordConfirm = wrapper.getPassword();
 String firstName = wrapper.getFirstName();
@@ -107,7 +112,7 @@ if (companies != null)
   }
 }
 
-String[] userNames = UserHandlerHelper.getAllUserNames();
+String[] userNames = UserUtil.getAllUserNames();
 int size = userNames == null ? 0 : userNames.length;
 
 //if you can see all users, then you can change the company name, otherwise not

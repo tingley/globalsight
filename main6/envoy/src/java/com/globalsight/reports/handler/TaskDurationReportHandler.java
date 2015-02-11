@@ -34,6 +34,7 @@ import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.WfTaskInfo;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.everest.workflow.WorkflowTaskInstance;
@@ -101,8 +102,9 @@ public class TaskDurationReportHandler extends BasicReportHandler
         setTableNavigation(req, theSession, NUM_ITEMS_DISPLAYED,
                 Constants.TASK_DURATION_REPORT_CURRENT_PAGE_LIST,
                 this.reportKey, reportDataWrap);
-        dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                + Constants.REPORT_ACT_CREATE), req, res, p_context);
+        dispatcherForward(
+                ReportHandlerFactory.getTargetUrl(reportKey
+                        + Constants.REPORT_ACT_CREATE), req, res, p_context);
     }
 
     /**
@@ -169,9 +171,7 @@ public class TaskDurationReportHandler extends BasicReportHandler
 
             Job job = (Job) o;
 
-            ArrayList<Workflow> workflows = new ArrayList<Workflow>(job.getWorkflows());
-
-            for (Workflow workflow : workflows)
+            for (Workflow workflow : job.getWorkflows())
             {
                 Hashtable<?, ?> tasks = workflow.getTasks();
 
@@ -182,9 +182,11 @@ public class TaskDurationReportHandler extends BasicReportHandler
                     ArrayList<String> singleRowDataList = new ArrayList<String>();
                     singleRowDataList.add(job.getJobName());
                     singleRowDataList.add(job.getSourceLocale().toString());
-                    singleRowDataList.add(workflow.getTargetLocale().toString());
+                    singleRowDataList
+                            .add(workflow.getTargetLocale().toString());
                     singleRowDataList.add(task.getTaskDisplayName());
-                    singleRowDataList.add(task.getAcceptor());
+                    singleRowDataList.add(UserUtil.getUserNameById(task
+                            .getAcceptor()));
                     singleRowDataList.add(task.getDurationString());
                     allRowsDataList.add(singleRowDataList);
                 }
@@ -248,18 +250,17 @@ public class TaskDurationReportHandler extends BasicReportHandler
     {
         StringBuilder hql = new StringBuilder();
         hql.append(" select distinct j ")
-           .append(" from JobImpl j, RequestImpl r, ")
-           .append(" BasicL10nProfile l, WorkflowImpl w, TaskImpl t, ")
-           .append(" GlobalSightLocale l1, GlobalSightLocale l2 ")
-           .append(" where j.id = w.job ")
-           .append(" and j.id = r.job ")
-           .append(" and r.l10nProfile = l.id ")
-           .append(" and w.id = t.workflow ")
-           .append(" and w.targetLocale = l1.id ")
-           .append(" and l.sourceLocale = l2.id ")
-           .append(" and j.createDate between DATE_SUB(now(), ")
-           .append(" INTERVAL 31 DAY) and now() ")
-           .append(" and j.state in ('EXPORTED', 'LOCALIZED') ");
+                .append(" from JobImpl j, RequestImpl r, ")
+                .append(" BasicL10nProfile l, WorkflowImpl w, TaskImpl t, ")
+                .append(" GlobalSightLocale l1, GlobalSightLocale l2 ")
+                .append(" where j.id = w.job ").append(" and j.id = r.job ")
+                .append(" and r.l10nProfile = l.id ")
+                .append(" and w.id = t.workflow ")
+                .append(" and w.targetLocale = l1.id ")
+                .append(" and l.sourceLocale = l2.id ")
+                .append(" and j.createDate between DATE_SUB(now(), ")
+                .append(" INTERVAL 31 DAY) and now() ")
+                .append(" and j.state in ('EXPORTED', 'LOCALIZED') ");
 
         Map<String, Object> params = new HashMap<String, Object>();
 
@@ -287,7 +288,8 @@ public class TaskDurationReportHandler extends BasicReportHandler
             m_completedActivities = p_completedActivities;
         }
 
-        public int compare(WorkflowTaskInstance a_wfTask, WorkflowTaskInstance b_wfTask)
+        public int compare(WorkflowTaskInstance a_wfTask,
+                WorkflowTaskInstance b_wfTask)
         {
             Long a_taskId = new Long(a_wfTask.getTaskId());
             Long b_taskId = new Long(b_wfTask.getTaskId());

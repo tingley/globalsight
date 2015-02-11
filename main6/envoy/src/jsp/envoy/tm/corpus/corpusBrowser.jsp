@@ -167,8 +167,7 @@ if(enableTMAccessControl)
             tmNames = tmListOfUser;   
         }
     }
-}
-Collections.sort(tmNames, new StringComparator(Locale.getDefault()));    
+}   
 String tableRows = (String) request.getAttribute("tableRows");
 // get actual concordance results on the session manager
 TmConcordanceResult searchResults =
@@ -219,11 +218,16 @@ else
 
 Collection corpusDocs = (Collection) request.getAttribute("corpusDocs");
 Integer fuzzyOverride = (Integer) request.getAttribute("fuzzyOverride");
+String companyId = null;
 List pairs = WorkflowTemplateHandlerHelper.getAllLocalePairs(uiLocale);
 // remove the duplicated pairs for super admin
 Map<String, LocalePair> pairsMap = new HashMap<String, LocalePair>();
 for (int i=0;i < pairs.size(); i++) {
     LocalePair lp = (LocalePair) pairs.get(i);
+    if (companyId == null)
+    {
+    	companyId = lp.getCompanyId();
+    }
     String key = lp.getSource().getId() + "-" + lp.getTarget().getId();
     pairsMap.put(key, lp);
 }    
@@ -1418,12 +1422,12 @@ for (int i=0; i < tmProfiles.size(); i++) {
    {
        LeverageMatches levMatches = (LeverageMatches)itLeverageMatches.next();
        // walk through all target locales in the LeverageMatches
-       Iterator itLocales = levMatches.targetLocaleIterator();
+       Iterator itLocales = levMatches.targetLocaleIterator(companyId);
        while(itLocales.hasNext())
        {
            GlobalSightLocale tLocale = (GlobalSightLocale)itLocales.next();
            // walk through all matches in the locale
-           Iterator itMatch = levMatches.matchIterator(tLocale);
+           Iterator itMatch = levMatches.matchIterator(tLocale, companyId);
            while(itMatch.hasNext())
            {
                rowColor = (rownum++ % 2 == 0) ? "#FFFFFF" : "#DDDDDD";

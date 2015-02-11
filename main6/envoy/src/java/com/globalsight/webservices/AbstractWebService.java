@@ -37,8 +37,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
  */
 public abstract class AbstractWebService
 {
-    private static final Logger s_logger = Logger
-            .getLogger("WebService");
+    private static final Logger s_logger = Logger.getLogger("WebService");
 
     private static final String CIPHER = "DES/CBC/PKCS5Padding";
 
@@ -76,9 +75,8 @@ public abstract class AbstractWebService
             }
             catch (Exception e)
             {
-                s_logger
-                        .error("Unable to create an Access Token due to the following exception"
-                                + e);
+                s_logger.error("Unable to create an Access Token due to the following exception"
+                        + e);
                 String message = "Unable to create an encryption key for login";
                 message = makeErrorXml("login", message);
                 throw new WebServiceException(message);
@@ -114,7 +112,7 @@ public abstract class AbstractWebService
      * 
      * @param p_accessToken
      */
-    protected String getUsernameFromSession(String p_accessToken)
+    public static String getUsernameFromSession(String p_accessToken)
     {
         return (String) s_session.get(handleAccessToken(p_accessToken));
     }
@@ -200,7 +198,7 @@ public abstract class AbstractWebService
     {
         checkIfInstalled();
         p_accessToken = handleAccessToken(p_accessToken);
-        
+
         try
         {
             decryptToken(p_accessToken);
@@ -209,11 +207,11 @@ public abstract class AbstractWebService
         }
         catch (Exception e)
         {
-            s_logger
-                    .info("Unable to decrypt the Access Token due to exception "
-                            + e.getMessage());
+            s_logger.info("Unable to decrypt the Access Token due to exception "
+                    + e.getMessage());
             String message = "The security information passed to the web service is not consistent.";
-            message = makeResponseXml(p_webMethodName, false, message).toString();
+            message = makeResponseXml(p_webMethodName, false, message)
+                    .toString();
             throw new WebServiceException(message);
         }
         if (s_logger.isDebugEnabled())
@@ -222,8 +220,8 @@ public abstract class AbstractWebService
                     + "\" for user " + getUsernameFromSession(p_accessToken));
         }
     }
-    
-    private String handleAccessToken(String accessToken)
+
+    private static String handleAccessToken(String accessToken)
     {
         String separator = "+_+";
         int index = accessToken.indexOf(separator);
@@ -231,7 +229,7 @@ public abstract class AbstractWebService
         {
             accessToken = accessToken.substring(0, index);
         }
-        
+
         return accessToken;
     }
 
@@ -246,7 +244,8 @@ public abstract class AbstractWebService
     {
         try
         {
-            ServerProxy.getSecurityManager().authenticateUser(p_username, p_password);
+            ServerProxy.getSecurityManager().authenticateUserByName(p_username,
+                    p_password);
             return true;
         }
         catch (Throwable e)
@@ -271,17 +270,21 @@ public abstract class AbstractWebService
         return makeResponseXml(p_method, isOK, "");
     }
 
-    protected StringBuilder makeResponseXml(String p_method, boolean isOK, String p_message)
+    protected StringBuilder makeResponseXml(String p_method, boolean isOK,
+            String p_message)
     {
-        StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
-        xml.append("<status>").append((isOK ? "OK" : "Failed")).append("</status>\r\n");
-        if (!isOK) {
-        	xml.append("<error>").append(p_message).append("</error>\r\n");
+        StringBuilder xml = new StringBuilder(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\r\n");
+        xml.append("<status>").append((isOK ? "OK" : "Failed"))
+                .append("</status>\r\n");
+        if (!isOK)
+        {
+            xml.append("<error>").append(p_message).append("</error>\r\n");
         }
-        
+
         return xml;
     }
-    
+
     /**
      * Gets the user associated with the specified user name (user id).
      */
@@ -289,11 +292,11 @@ public abstract class AbstractWebService
     {
         try
         {
-            return ServerProxy.getUserManager().getUser(p_username);
+            return ServerProxy.getUserManager().getUserByName(p_username);
         }
         catch (Exception e)
         {
-            String errMessage = "Failed to get the user associated with user id "
+            String errMessage = "Failed to get the user associated with user name "
                     + p_username;
             s_logger.error(errMessage, e);
             throw new WebServiceException(errMessage);
@@ -315,8 +318,8 @@ public abstract class AbstractWebService
     protected String accessCurrentCompanyId(String p_accessToken)
             throws WebServiceException
     {
-        String userId = this.getUsernameFromSession(p_accessToken);
-        String companyName = this.getUser(userId).getCompanyName();
+        String userName = this.getUsernameFromSession(p_accessToken);
+        String companyName = this.getUser(userName).getCompanyName();
         CompanyThreadLocal.getInstance().setValue(companyName);
 
         return CompanyThreadLocal.getInstance().getValue();

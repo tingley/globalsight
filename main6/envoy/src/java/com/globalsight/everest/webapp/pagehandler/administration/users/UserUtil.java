@@ -17,6 +17,9 @@
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
 import java.rmi.RemoteException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -25,13 +28,17 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
 
 import com.globalsight.calendar.UserFluxCalendar;
 import com.globalsight.everest.company.Company;
@@ -65,17 +72,21 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
 import com.globalsight.everest.workflow.Activity;
+import com.globalsight.everest.workflow.WorkflowTask;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
+
 /**
- * Class containing static utility methods available to user
- * pagehandlers.
+ * Class containing static utility methods available to user pagehandlers.
  */
 public class UserUtil
 {
+    static private final Logger logger = Logger.getLogger(UserUtil.class);
+
     static final String COST_ATTR = "Cost";
 
     static final String NAME_TYPE_ATTR = "selectName";
@@ -88,7 +99,6 @@ public class UserUtil
     static final String ALL_COMPANY_MAP = "allCompanyMap";
     static final String UPDATE_COMPANY_MAP_FLAG = "updateCompnayMapFlag";
     static final String IS_YES = "yes";
-
 
     static final String USERNAME_ATTR = "userName";
     static final String SSOUSERNAME_ATTR = "ssoUserName";
@@ -110,15 +120,25 @@ public class UserUtil
     static final int REVENUE = 0;
     static final int EXPENSE = 1;
 
-    public UserUtil()
-    {
-    }
+    private static final String SQL_INSERT_USER_ID_USER_NAME = "insert into USER_ID_USER_NAME values(?, ?)";
+
+    private static final String SQL_QUERY_USER_ID_USER_NAME_USER_ID = "select USER_ID from USER_ID_USER_NAME where USER_NAME=?";
+
+    private static final String SQL_QUERY_USER_ID_USER_NAME_USER_NAME = "select USER_NAME from USER_ID_USER_NAME where USER_ID=?";
+
+    private static final String SQL_REMOVE_USER_ID_USER_NAME = "delete from USER_ID_USER_NAME where USER_ID=?";
+
+    private static final String SQL_UPDATE_USER_ID_USER_NAME = "update USER_ID_USER_NAME set USER_NAME=? where USER_ID=?";
+
+    private static Map<String, String> userIdNameMap = new HashMap<String, String>();
+
+    private static Map<String, String> userNameIdMap = new HashMap<String, String>();
 
     /**
      * Factory method returns a new CreateUserWrapper object.
      */
     static CreateUserWrapper createCreateUserWrapper(User p_userRequestingAdd)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         UserManager userMgr = getUserManager();
         return new CreateUserWrapper(userMgr, p_userRequestingAdd);
@@ -140,7 +160,6 @@ public class UserUtil
         return p_theRequest.getParameter(TARGET_LOCALE_ATTR);
     }
 
-
     static String[] extractTargetLocales(HttpServletRequest p_theRequest)
     {
         return p_theRequest.getParameterValues(TARGET_LOCALE_ATTR);
@@ -149,49 +168,39 @@ public class UserUtil
     /**
      * Save the request parameters from the Security page
      */
-    public static void extractSecurity(FieldSecurity fs, HttpServletRequest request)
-    throws  EnvoyServletException
+    public static void extractSecurity(FieldSecurity fs,
+            HttpServletRequest request) throws EnvoyServletException
     {
         try
         {
             fs.put(UserSecureFields.ACCESS_GROUPS,
-                   request.getParameter("accessGroups"));
-            fs.put(UserSecureFields.ADDRESS,
-                   request.getParameter("address"));
+                    request.getParameter("accessGroups"));
+            fs.put(UserSecureFields.ADDRESS, request.getParameter("address"));
             fs.put(UserSecureFields.CELL_PHONE,
-                   request.getParameter("cellPhone"));
-            fs.put(UserSecureFields.COMPANY,
-                   request.getParameter("company"));
-            fs.put(UserSecureFields.COUNTRY,
-                   request.getParameter("country"));
+                    request.getParameter("cellPhone"));
+            fs.put(UserSecureFields.COMPANY, request.getParameter("company"));
+            fs.put(UserSecureFields.COUNTRY, request.getParameter("country"));
             fs.put(UserSecureFields.EMAIL_ADDRESS,
-                   request.getParameter("email"));
+                    request.getParameter("email"));
             fs.put(UserSecureFields.CC_EMAIL_ADDRESS,
                     request.getParameter("ccEmail"));
             fs.put(UserSecureFields.BCC_EMAIL_ADDRESS,
                     request.getParameter("bccEmail"));
             fs.put(UserSecureFields.EMAIL_LANGUAGE,
-                   request.getParameter("emailLanguage"));
-            fs.put(UserSecureFields.FAX,
-                   request.getParameter("fax"));
+                    request.getParameter("emailLanguage"));
+            fs.put(UserSecureFields.FAX, request.getParameter("fax"));
             fs.put(UserSecureFields.FIRST_NAME,
-                   request.getParameter("firstName"));
+                    request.getParameter("firstName"));
             fs.put(UserSecureFields.HOME_PHONE,
-                   request.getParameter("homePhone"));
-            fs.put(UserSecureFields.LAST_NAME,
-                   request.getParameter("lastName"));
-            fs.put(UserSecureFields.PASSWORD,
-                   request.getParameter("password"));
-            fs.put(UserSecureFields.PROJECTS,
-                   request.getParameter("projects"));
-            fs.put(UserSecureFields.ROLES,
-                   request.getParameter("roles"));
-            fs.put(UserSecureFields.STATUS,
-                   request.getParameter("status"));
-            fs.put(UserSecureFields.TITLE,
-                   request.getParameter("title"));
+                    request.getParameter("homePhone"));
+            fs.put(UserSecureFields.LAST_NAME, request.getParameter("lastName"));
+            fs.put(UserSecureFields.PASSWORD, request.getParameter("password"));
+            fs.put(UserSecureFields.PROJECTS, request.getParameter("projects"));
+            fs.put(UserSecureFields.ROLES, request.getParameter("roles"));
+            fs.put(UserSecureFields.STATUS, request.getParameter("status"));
+            fs.put(UserSecureFields.TITLE, request.getParameter("title"));
             fs.put(UserSecureFields.WORK_PHONE,
-                   request.getParameter("workPhone"));
+                    request.getParameter("workPhone"));
         }
         catch (Exception e)
         {
@@ -200,21 +209,21 @@ public class UserUtil
     }
 
     /**
-     * Extracts base user data from the HttpServletRequest and stores
-     * it in the passed CreateUserWrapper.
+     * Extracts base user data from the HttpServletRequest and stores it in the
+     * passed CreateUserWrapper.
      */
     static void extractUserData(HttpServletRequest p_request,
-                                CreateUserWrapper p_wrapper)
+            CreateUserWrapper p_wrapper)
     {
         extractUserData(p_request, p_wrapper, true);
     }
 
     /**
-     * Extracts base user data from the HttpServletRequest and stores
-     * it in the passed CreateUserWrapper.
+     * Extracts base user data from the HttpServletRequest and stores it in the
+     * passed CreateUserWrapper.
      */
     static void extractUserData(HttpServletRequest p_request,
-                                CreateUserWrapper p_wrapper, boolean extractUid)
+            CreateUserWrapper p_wrapper, boolean extractUid)
     {
         if (p_request == null)
             return;
@@ -222,68 +231,58 @@ public class UserUtil
             return;
 
         // Get all the straight strings.
-        String userName = null;
-        if (extractUid == true)
-        {
-            userName = EditUtil.utf8ToUnicode(
-                                             p_request.getParameter(USERNAME_ATTR).trim());
-        }
+        String userName = p_request.getParameter(USERNAME_ATTR).trim();
         String ssoUN = p_request.getParameter(SSOUSERNAME_ATTR);
-        String ssoUserName = ssoUN == null ? null : EditUtil.utf8ToUnicode(ssoUN.trim());
-        String firstName = EditUtil.utf8ToUnicode(
-                                                 p_request.getParameter(FIRSTNAME_ATTR));
-        String lastName = EditUtil.utf8ToUnicode(
-                                                p_request.getParameter(LASTNAME_ATTR));
-        String password = EditUtil.utf8ToUnicode(
-                                                p_request.getParameter(PASSWORD_ATTR));
-        String title = EditUtil.utf8ToUnicode(
-                                             p_request.getParameter(TITLE_ATTR));
-        String companyName = EditUtil.utf8ToUnicode(
-                                                   p_request.getParameter(COMPANYNAME_ATTR));
+        String ssoUserName = ssoUN == null ? null : EditUtil
+                .utf8ToUnicode(ssoUN.trim());
+        String firstName = EditUtil.utf8ToUnicode(p_request
+                .getParameter(FIRSTNAME_ATTR));
+        String lastName = EditUtil.utf8ToUnicode(p_request
+                .getParameter(LASTNAME_ATTR));
+        String password = EditUtil.utf8ToUnicode(p_request
+                .getParameter(PASSWORD_ATTR));
+        String title = EditUtil.utf8ToUnicode(p_request
+                .getParameter(TITLE_ATTR));
+        String companyName = EditUtil.utf8ToUnicode(p_request
+                .getParameter(COMPANYNAME_ATTR));
 
         if (p_request.getParameter("company").equals("false"))
         {
-            companyName = EditUtil.utf8ToUnicode(
-                                                p_request.getParameter("companies"));
+            companyName = EditUtil.utf8ToUnicode(p_request
+                    .getParameter("companies"));
         }
 
-        //When modify user
+        // When modify user
         if (isBlank(companyName) && !isBlank(p_wrapper.getCompanyName()))
         {
             companyName = p_wrapper.getCompanyName();
         }
 
-        //When company admin user creates new users
+        // When company admin user creates new users
         if (isBlank(companyName))
         {
-            try {
-                companyName = ServerProxy.getJobHandler().getCompanyById(
-                        Long.parseLong(CompanyThreadLocal.getInstance().getValue())).getCompanyName();
-            } catch (Exception e) {
+            try
+            {
+                companyName = ServerProxy
+                        .getJobHandler()
+                        .getCompanyById(
+                                Long.parseLong(CompanyThreadLocal.getInstance()
+                                        .getValue())).getCompanyName();
+            }
+            catch (Exception e)
+            {
                 throw new RuntimeException(e);
             }
         }
 
-        //String group = p_request.getParameter(GROUP_ATTR);
+        // String group = p_request.getParameter(GROUP_ATTR);
         String uiLocale = p_request.getParameter(UILOCALE_ATTR);
 
-        // If the attributes are non-null, then set their values into
-        // the user wrapper. Otherwise, set an empty string into the wrapper.
-        if (extractUid == true)
-        {
-            if (userName != null)
-            {
-                p_wrapper.setUserId(userName);
-            }
-            else
-            {
-                p_wrapper.setUserId("");
-            }
-        }
-        
+        p_wrapper.setUserName(userName);
+
         if (ssoUserName != null)
         {
-            p_wrapper.setSsoUserName(ssoUserName);
+            p_wrapper.setSsoUserId(ssoUserName);
         }
 
         if (firstName != null)
@@ -329,7 +328,7 @@ public class UserUtil
      * the passed CreateUserWrapper.
      */
     static void extractContactInfoData(HttpServletRequest p_request,
-                                       CreateUserWrapper p_wrapper)
+            CreateUserWrapper p_wrapper)
     {
         if (p_request == null)
             return;
@@ -337,24 +336,22 @@ public class UserUtil
             return;
 
         // Get all the straight strings.
-        String address = EditUtil.utf8ToUnicode(
-                                               p_request.getParameter(ADDRESS_ATTR));
-        String email = EditUtil.utf8ToUnicode(
-                                               p_request.getParameter(EMAIL_ATTR));
-        String ccEmail = EditUtil.utf8ToUnicode(
-                                               p_request.getParameter(CC_EMAIL_ATTR));
-        String bccEmail = EditUtil.utf8ToUnicode(
-                                               p_request.getParameter(BCC_EMAIL_ATTR));
-        String homePhone = EditUtil.utf8ToUnicode(
-                                                 p_request.getParameter(HOMEPHONE_ATTR));
-        String workPhone = EditUtil.utf8ToUnicode(
-                                                 p_request.getParameter(WORKPHONE_ATTR));
-        String cellPhone = EditUtil.utf8ToUnicode(
-                                                 p_request.getParameter(CELLPHONE_ATTR));
-        String fax = EditUtil.utf8ToUnicode(
-                                           p_request.getParameter(FAX_ATTR));
+        String address = EditUtil.utf8ToUnicode(p_request
+                .getParameter(ADDRESS_ATTR));
+        String email = EditUtil.utf8ToUnicode(p_request
+                .getParameter(EMAIL_ATTR));
+        String ccEmail = EditUtil.utf8ToUnicode(p_request
+                .getParameter(CC_EMAIL_ATTR));
+        String bccEmail = EditUtil.utf8ToUnicode(p_request
+                .getParameter(BCC_EMAIL_ATTR));
+        String homePhone = EditUtil.utf8ToUnicode(p_request
+                .getParameter(HOMEPHONE_ATTR));
+        String workPhone = EditUtil.utf8ToUnicode(p_request
+                .getParameter(WORKPHONE_ATTR));
+        String cellPhone = EditUtil.utf8ToUnicode(p_request
+                .getParameter(CELLPHONE_ATTR));
+        String fax = EditUtil.utf8ToUnicode(p_request.getParameter(FAX_ATTR));
         String uiLocale = p_request.getParameter(UILOCALE_ATTR);
-
 
         if (address != null)
         {
@@ -443,16 +440,16 @@ public class UserUtil
      * the passed CreateUserWrapper.
      */
     public static void extractPermissionData(HttpServletRequest p_request)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         if (p_request == null)
             return;
 
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager)
-                                    session.getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
 
-        String toField = (String)p_request.getParameter("toField");
+        String toField = (String) p_request.getParameter("toField");
         ArrayList<PermissionGroup> userPerms = new ArrayList<PermissionGroup>();
         try
         {
@@ -475,49 +472,49 @@ public class UserUtil
     }
 
     /**
-     * Extracts calendar data from the HttpServletRequest and stores it in
-     * the passed CreateUserWrapper.
+     * Extracts calendar data from the HttpServletRequest and stores it in the
+     * passed CreateUserWrapper.
      */
     public static UserFluxCalendar extractCalendarData(
-                                                      HttpServletRequest p_request, String userId)
-    throws EnvoyServletException
+            HttpServletRequest p_request, String userId)
+            throws EnvoyServletException
     {
         return extractCalendarData(p_request, userId, false);
     }
 
     /**
-     * Extracts calendar data from the HttpServletRequest and stores it in
-     * the passed CreateUserWrapper.
+     * Extracts calendar data from the HttpServletRequest and stores it in the
+     * passed CreateUserWrapper.
      */
     public static UserFluxCalendar extractCalendarData(
-                                                      HttpServletRequest p_request, String userId, boolean fromBase)
-    throws EnvoyServletException
+            HttpServletRequest p_request, String userId, boolean fromBase)
+            throws EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager)
-                                    session.getAttribute(WebAppConstants.SESSION_MANAGER);
-        UserFluxCalendar cal = (UserFluxCalendar)
-                               sessionMgr.getAttribute(CalendarConstants.CALENDAR);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        UserFluxCalendar cal = (UserFluxCalendar) sessionMgr
+                .getAttribute(CalendarConstants.CALENDAR);
         if (cal == null)
         {
             // Create calendar.
-            String parentId = (String)
-                              p_request.getParameter(CalendarConstants.BASE_CAL_FIELD);
+            String parentId = (String) p_request
+                    .getParameter(CalendarConstants.BASE_CAL_FIELD);
             String activityBuffer = "0"; // TomyD -- just a placeholder
-            String tz =
-            (String)p_request.getParameter(CalendarConstants.TZ_FIELD);
+            String tz = (String) p_request
+                    .getParameter(CalendarConstants.TZ_FIELD);
             cal = new UserFluxCalendar(Long.parseLong(parentId), userId,
-                                       Integer.parseInt(activityBuffer), tz);
-            // Save the parent id and timezone.  Needed in case user does
-            // a cancel out of reserved times.  That removes all calendar
+                    Integer.parseInt(activityBuffer), tz);
+            // Save the parent id and timezone. Needed in case user does
+            // a cancel out of reserved times. That removes all calendar
             // updates - basically create a new cal
             sessionMgr.setAttribute(CalendarConstants.BASE_CAL_ID, parentId);
             sessionMgr.setAttribute(CalendarConstants.TIME_ZONE, tz);
         }
         if (fromBase)
         {
-            String parentId = (String)
-                              p_request.getParameter(CalendarConstants.BASE_CAL_FIELD);
+            String parentId = (String) p_request
+                    .getParameter(CalendarConstants.BASE_CAL_FIELD);
             CalendarHelper.updateUserCalFieldsFromBase(parentId, cal);
         }
         else
@@ -529,11 +526,11 @@ public class UserUtil
     }
 
     /**
-     * Extracts project data from the HttpServletRequest and stores it in
-     * the passed CreateUserWrapper.
+     * Extracts project data from the HttpServletRequest and stores it in the
+     * passed CreateUserWrapper.
      */
     static void extractProjectData(HttpServletRequest p_request,
-                                   CreateUserWrapper p_wrapper)
+            CreateUserWrapper p_wrapper)
     {
         if (p_request == null)
             return;
@@ -541,11 +538,11 @@ public class UserUtil
             return;
 
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr = (SessionManager)
-                                    session.getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         sessionMgr.setAttribute("ProjectPageVisited", "true");
 
-        String toField = (String)p_request.getParameter("toField");
+        String toField = (String) p_request.getParameter("toField");
         ArrayList<Long> projectIds = new ArrayList<Long>();
         if (toField != null && !toField.equals(""))
         {
@@ -557,8 +554,8 @@ public class UserUtil
         }
 
         p_wrapper.setProjects(projectIds);
-        PermissionSet permSet = (PermissionSet) p_request.getSession(false).
-                                getAttribute(WebAppConstants.PERMISSIONS);
+        PermissionSet permSet = (PermissionSet) p_request.getSession(false)
+                .getAttribute(WebAppConstants.PERMISSIONS);
 
         if (permSet.getPermissionFor(Permission.USERS_PROJECT_MEMBERSHIP))
         {
@@ -577,9 +574,9 @@ public class UserUtil
      * Prepare data for the Role page
      */
     static void prepareRolesPage(HttpSession session,
-                                 HttpServletRequest p_theRequest, CreateUserWrapper wrapper,
-                                 String sourceLocale, String targetLocale, boolean addAnotherFlag)
-    throws EnvoyServletException
+            HttpServletRequest p_theRequest, CreateUserWrapper wrapper,
+            String sourceLocale, String targetLocale, boolean addAnotherFlag)
+            throws EnvoyServletException
     {
         boolean isCostingEnabled = false;
         boolean isRevenueEnabled = false;
@@ -587,26 +584,27 @@ public class UserUtil
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            isCostingEnabled = sc.getBooleanParameter(
-                                                     SystemConfigParamNames.COSTING_ENABLED);
-            isRevenueEnabled = sc.getBooleanParameter(
-                                                     SystemConfigParamNames.REVENUE_ENABLED);
+            isCostingEnabled = sc
+                    .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
+            isRevenueEnabled = sc
+                    .getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED);
         }
-        catch (Exception e )
+        catch (Exception e)
         {
             // Problem getting system parameter.
         }
 
-        SessionManager sessionMgr = (SessionManager)
-                                    session.getAttribute(WebAppConstants.SESSION_MANAGER);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
         StringBuffer sourceLocaleBuf = new StringBuffer();
         StringBuffer jsBuf = new StringBuffer();
         StringBuffer paddingBuf = new StringBuffer();
         StringBuffer activityBuf = new StringBuffer();
-        StringBuffer addAnother =  new StringBuffer();
+        StringBuffer addAnother = new StringBuffer();
 
         // get the UI locale
-        Locale uiLocale = (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) session
+                .getAttribute(WebAppConstants.UILOCALE);
         ResourceBundle bundle = PageHandler.getBundle(session);
         Hashtable sourceTargetMap = wrapper.getSourceTargetMap();
         String selectedCompanyId = getSelectedCompanyId(p_theRequest, wrapper);
@@ -615,13 +613,17 @@ public class UserUtil
         StringBuffer allRoleCompanyNamesBuf = null;
 
         // update Company Map here
-        if ((sessionMgr.getAttribute(UPDATE_COMPANY_MAP_FLAG) != null) && (sessionMgr.getAttribute(UPDATE_COMPANY_MAP_FLAG).equals(IS_YES)))
+        if ((sessionMgr.getAttribute(UPDATE_COMPANY_MAP_FLAG) != null)
+                && (sessionMgr.getAttribute(UPDATE_COMPANY_MAP_FLAG)
+                        .equals(IS_YES)))
         {
             sessionMgr.removeElement(UPDATE_COMPANY_MAP_FLAG);
             HashMap companyMap = getAllCompanyMap(sessionMgr);
             companyMap.remove(selectedCompanyId);
-            if (companyMap.keySet().iterator().hasNext()) {
-                selectedCompanyId = (String)companyMap.keySet().iterator().next();
+            if (companyMap.keySet().iterator().hasNext())
+            {
+                selectedCompanyId = (String) companyMap.keySet().iterator()
+                        .next();
             }
             sessionMgr.setAttribute(ALL_COMPANY_MAP, companyMap);
             sourceLocale = null;
@@ -639,79 +641,74 @@ public class UserUtil
             targetLocale = null;
         }
 
-        UserUtil.createLocaleHTML(selectedCompanyId, sourceLocaleBuf, jsBuf, paddingBuf, bundle,
-                                  sourceTargetMap, uiLocale, addAnother, sourceLocale, targetLocale,
-                                  addAnotherFlag);
-        // have add all the roles for the company. so remove this company from the array.
+        UserUtil.createLocaleHTML(selectedCompanyId, sourceLocaleBuf, jsBuf,
+                paddingBuf, bundle, sourceTargetMap, uiLocale, addAnother,
+                sourceLocale, targetLocale, addAnotherFlag);
+        // have add all the roles for the company. so remove this company from
+        // the array.
         // and update the companyMap, allCompanyNames
         // addAnother is a flag to enable the add buttom.
         // when action setRate do update.
 
-
-
         // first add locale, set the flag to update companyMap.
-        /*if (    isSuperCompany(sessionMgr, wrapper)
-                && ("false").equals(addAnother.toString())
-                && (getAllCompanyMap(sessionMgr) != null))
-        {
-            HashMap companyMap = getAllCompanyMap(sessionMgr);
-            if (companyMap.size() > 1)
-            {
-                addAnother = new StringBuffer("true");
-                if (addAnotherFlag == false)
-                {
-                    sessionMgr.setAttribute(UPDATE_COMPANY_MAP_FLAG, IS_YES);
-                }
-            }
-            else
-            {
-                if(addAnotherFlag == false)
-                {
-                    sessionMgr.removeElement(ALL_COMPANY_MAP);
-                }
-
-            }
-        }*/
+        /*
+         * if ( isSuperCompany(sessionMgr, wrapper) &&
+         * ("false").equals(addAnother.toString()) &&
+         * (getAllCompanyMap(sessionMgr) != null)) { HashMap companyMap =
+         * getAllCompanyMap(sessionMgr); if (companyMap.size() > 1) { addAnother
+         * = new StringBuffer("true"); if (addAnotherFlag == false) {
+         * sessionMgr.setAttribute(UPDATE_COMPANY_MAP_FLAG, IS_YES); } } else {
+         * if(addAnotherFlag == false) {
+         * sessionMgr.removeElement(ALL_COMPANY_MAP); }
+         * 
+         * } }
+         */
 
         sessionMgr.setAttribute(UserConstants.ADD_ANOTHER, addAnother);
-        UserUtil.createActivitySelectionHTML(selectedCompanyId, activityBuf, uiLocale,
-                                             sourceLocale, targetLocale);
-        p_theRequest.setAttribute("allRoleCompanyNames", allRoleCompanyNamesBuf.toString());
+        UserUtil.createActivitySelectionHTML(selectedCompanyId, activityBuf,
+                uiLocale, sourceLocale, targetLocale);
+        p_theRequest.setAttribute("allRoleCompanyNames",
+                allRoleCompanyNamesBuf.toString());
         p_theRequest.setAttribute("activities", activityBuf.toString());
-        p_theRequest.setAttribute("allSourceLocales", sourceLocaleBuf.toString());
+        p_theRequest.setAttribute("allSourceLocales",
+                sourceLocaleBuf.toString());
         p_theRequest.setAttribute("jsArrays", jsBuf.toString());
         p_theRequest.setAttribute("optionPadding", paddingBuf.toString());
         p_theRequest.setAttribute(SystemConfigParamNames.COSTING_ENABLED,
-                                  new Boolean(isCostingEnabled));
+                new Boolean(isCostingEnabled));
         p_theRequest.setAttribute(SystemConfigParamNames.REVENUE_ENABLED,
-                                  new Boolean(isRevenueEnabled));
+                new Boolean(isRevenueEnabled));
     }
 
     /**
      * Generate the activity-cost map hashtable from the HttpServletRequest.
-     *
-     * @return A Hashtable containing String names of activities as
-     * keys, and Float costs as values.
+     * 
+     * @return A Hashtable containing String names of activities as keys, and
+     *         Float costs as values.
      */
-    static Hashtable<Activity, Vector<String>> generateActivityCostMap(HttpServletRequest p_theRequest)
-    throws EnvoyServletException
+    static Hashtable<Activity, Vector<String>> generateActivityCostMap(
+            HttpServletRequest p_theRequest) throws EnvoyServletException
     {
         Hashtable<Activity, Vector<String>> retVal = new Hashtable<Activity, Vector<String>>();
-        Locale uiLocale = (Locale)p_theRequest.getSession().getAttribute(
-                                                                        WebAppConstants.UILOCALE);
+        Locale uiLocale = (Locale) p_theRequest.getSession().getAttribute(
+                WebAppConstants.UILOCALE);
 
-        Vector<Activity> vActivities = UserHandlerHelper.getAllActivities(uiLocale);
+        Vector<Activity> vActivities = UserHandlerHelper
+                .getAllActivities(uiLocale);
         Enumeration<Activity> eActivities = vActivities.elements();
         while (eActivities.hasMoreElements())
         {
             Activity curActivity = (Activity) eActivities.nextElement();
             Vector<String> params = new Vector<String>();
             String activityName = curActivity.getActivityName();
-            String activityCostString = curActivity.getActivityName() + COST_ATTR;
+            String activityCostString = curActivity.getActivityName()
+                    + COST_ATTR;
 
             String costStr = p_theRequest.getParameter(activityCostString);
-            params.addElement((String)p_theRequest.getParameter(activityCostString));
-            params.addElement((String)p_theRequest.getParameter(activityName + "_expense"));
+            params.addElement((String) p_theRequest
+                    .getParameter(activityCostString));
+            params.addElement((String) p_theRequest.getParameter(activityName
+                    + "_expense"));
             if (costStr != null && (!(costStr.equalsIgnoreCase(""))))
             {
                 // If result from the cost field isn't null or the empty
@@ -724,11 +721,11 @@ public class UserUtil
     }
 
     /**
-     * Generates an HTML option String based on the LocaleWrapper passed
-     * and the UI locale it should be displayed in.
+     * Generates an HTML option String based on the LocaleWrapper passed and the
+     * UI locale it should be displayed in.
      */
     static String genLocaleOptionString(GlobalSightLocale p_localeWrapper,
-                                        Locale p_uiLocale)
+            Locale p_uiLocale)
     {
         StringBuffer buf = new StringBuffer();
         buf.append("<option value=\"");
@@ -741,19 +738,20 @@ public class UserUtil
     }
 
     /**
-     * Builds a Vector of User objects based on search parameters passed to
-     * the method. Converts the search parameters built up on the web page
-     * into LDAP-enabled methods, and passes them on to the UserManager.
-     *
-     * @param p_searchParams String-based search parameters used to construct
-     *                       the actual UserManager query.
+     * Builds a Vector of User objects based on search parameters passed to the
+     * method. Converts the search parameters built up on the web page into
+     * LDAP-enabled methods, and passes them on to the UserManager.
+     * 
+     * @param p_searchParams
+     *            String-based search parameters used to construct the actual
+     *            UserManager query.
      * @return A Vector of User objects complying with the search parameters.
-     *         Returns an empty Vector if the search parameters are null, or
-     *         if an exception is raised by the calls to UserManager.
+     *         Returns an empty Vector if the search parameters are null, or if
+     *         an exception is raised by the calls to UserManager.
      */
     @SuppressWarnings("unchecked")
     static Vector getUsersForSearchParams(UserSearchParams p_searchParams)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         Vector retVal = new Vector();
 
@@ -764,21 +762,23 @@ public class UserUtil
             try
             {
                 retVal = userMgr.getUsers(p_searchParams.getNameAttributes(),
-                                          p_searchParams.getRoleAttributes(), null);
+                        p_searchParams.getRoleAttributes(), null);
 
-                //filter out the users not in the specified perm group
+                // filter out the users not in the specified perm group
                 String permGroupName = p_searchParams.getPermissionGroupParam();
                 if (p_searchParams.getPermissionGroupParam() != null)
                 {
-                    if (permGroupName !=null && !permGroupName.equals(""))
+                    if (permGroupName != null && !permGroupName.equals(""))
                     {
-                        //only filter if they selected a real perm group
-                        ArrayList pgUsers = new ArrayList(Permission.getPermissionManager().getAllUsersForPermissionGroup(permGroupName));
+                        // only filter if they selected a real perm group
+                        ArrayList pgUsers = new ArrayList(Permission
+                                .getPermissionManager()
+                                .getAllUsersForPermissionGroup(permGroupName));
                         Iterator iter = retVal.iterator();
                         while (iter.hasNext())
                         {
                             User u = (User) iter.next();
-                            if (pgUsers.contains(u.getUserId())==false)
+                            if (pgUsers.contains(u.getUserId()) == false)
                                 iter.remove();
                         }
                     }
@@ -798,36 +798,17 @@ public class UserUtil
             retVal = UserHandlerHelper.getUsers();
         }
 
-        //now run through the users and filter out those users not in the same company
-        //as the person who requested to see the users, if the user cannot see all users
-//        PermissionSet permsOfSearcher = p_searchParams.getPermissionSetOfSearcher();
-//        String companyName = p_searchParams.getCompanyOfSearcher();
-//        if (permsOfSearcher!=null && companyName !=null &&
-//        permsOfSearcher.getPermissionFor(Permission.USERS_VIEW_SEE_ALL)==false)
-//        {
-//            Iterator iter2 = retVal.iterator();
-//            while (iter2.hasNext())
-//            {
-//                User u = (User)iter2.next();
-//                if (! companyName.equals(u.getCompanyName()))
-//                    iter2.remove();
-//            }
-//       }
-
-        //For multicompany issue, Permission.USERS_VIEW_SEE_ALL is useless for non-admin user.
-        //Iterator iter2 =
-
         return retVal;
     }
 
     /**
      * Pulls all the attributes off the HttpServletRequest for the purposes of
      * generating search parameters.
-     *
-     * @param p_theRequest The HttpServletRequest we're wanting to
-     * pull attributes off
-     * @return A valid UserSearchParams object based on the attributes
-     * found on the HttpServletRequest.
+     * 
+     * @param p_theRequest
+     *            The HttpServletRequest we're wanting to pull attributes off
+     * @return A valid UserSearchParams object based on the attributes found on
+     *         the HttpServletRequest.
      */
     static UserSearchParams generateSearchParams(HttpServletRequest p_theRequest)
     {
@@ -841,12 +822,15 @@ public class UserUtil
 
         if (p_theRequest.getParameter(MATCH_TYPE_ATTR) != null)
         {
-            selectMatchType = new Integer(p_theRequest.getParameter(MATCH_TYPE_ATTR));
+            selectMatchType = new Integer(
+                    p_theRequest.getParameter(MATCH_TYPE_ATTR));
         }
 
         String textName = p_theRequest.getParameter(NAME_TEXT_ATTR);
-        String selectSourceLocale = p_theRequest.getParameter(SOURCE_LOCALE_ATTR);
-        String selectTargetLocale = p_theRequest.getParameter(TARGET_LOCALE_ATTR);
+        String selectSourceLocale = p_theRequest
+                .getParameter(SOURCE_LOCALE_ATTR);
+        String selectTargetLocale = p_theRequest
+                .getParameter(TARGET_LOCALE_ATTR);
         String selectPermGroup = p_theRequest.getParameter(PERM_GROUP_ATTR);
 
         UserSearchParams params = new UserSearchParams();
@@ -856,14 +840,14 @@ public class UserUtil
 
         String noneStr = "none";
 
-        if (selectSourceLocale != null &&
-            !(selectSourceLocale.equalsIgnoreCase(noneStr)))
+        if (selectSourceLocale != null
+                && !(selectSourceLocale.equalsIgnoreCase(noneStr)))
         {
             params.setSourceLocaleParam(selectSourceLocale);
         }
 
-        if (selectTargetLocale != null &&
-            !(selectTargetLocale.equalsIgnoreCase(noneStr)))
+        if (selectTargetLocale != null
+                && !(selectTargetLocale.equalsIgnoreCase(noneStr)))
         {
             params.setTargetLocaleParam(selectTargetLocale);
         }
@@ -890,47 +874,44 @@ public class UserUtil
     }
 
     /**
-     * Builds up three StringBuffers with the relevant HTML and
-     * JavaScript for enabling dynamic repopulation of target locale
-     * dropdown based on selection in source locale dropdown.
-     *
-     * @param p_sourceLocaleBuffer The StringBuffer to be filled with
-     * source locale options.
-     * @param p_targetLocaleBuffer The StringBuffer to be filled with
-     * target locale JavaScript.
-     * @param p_paddingBuffer The StringBuffer to be filled with blank
-     * options to ensure proper working of the script in the JSP.
+     * Builds up three StringBuffers with the relevant HTML and JavaScript for
+     * enabling dynamic repopulation of target locale dropdown based on
+     * selection in source locale dropdown.
+     * 
+     * @param p_sourceLocaleBuffer
+     *            The StringBuffer to be filled with source locale options.
+     * @param p_targetLocaleBuffer
+     *            The StringBuffer to be filled with target locale JavaScript.
+     * @param p_paddingBuffer
+     *            The StringBuffer to be filled with blank options to ensure
+     *            proper working of the script in the JSP.
      * @param p_bundle
-     * @param p_sourceTargetMap Map that holds a source locale as a
-     * key and a vector or target locales associated with each
-     * source. (GlobalSightLocales)
-     * @param p_uiLocale The locale the UI is being displayed in for
-     * this user.
+     * @param p_sourceTargetMap
+     *            Map that holds a source locale as a key and a vector or target
+     *            locales associated with each source. (GlobalSightLocales)
+     * @param p_uiLocale
+     *            The locale the UI is being displayed in for this user.
      */
     static void createLocaleHTML(String p_companyId,
-                                 StringBuffer p_sourceLocaleBuffer,
-                                 StringBuffer p_targetLocaleBuffer,
-                                 StringBuffer p_paddingBuffer,
-                                 ResourceBundle p_bundle,
-                                 Hashtable p_sourceTargetMap,
-                                 final Locale p_uiLocale,
-                                 StringBuffer p_addAnother,
-                                 String p_sourceLocale,
-                                 String p_targetLocale,
-                                 boolean addAnotherFlag)
-    throws EnvoyServletException
+            StringBuffer p_sourceLocaleBuffer,
+            StringBuffer p_targetLocaleBuffer, StringBuffer p_paddingBuffer,
+            ResourceBundle p_bundle, Hashtable p_sourceTargetMap,
+            final Locale p_uiLocale, StringBuffer p_addAnother,
+            String p_sourceLocale, String p_targetLocale, boolean addAnotherFlag)
+            throws EnvoyServletException
     {
 
         // Get the user manager, for queries.
-        //LocaleManager localeMgr = ServerProxy.getLocaleManager();
-        //ResourceBundle bundle =
-        //    SystemResourceBundle.getInstance().getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME,
-        //                           Locale.getDefault());
+        // LocaleManager localeMgr = ServerProxy.getLocaleManager();
+        // ResourceBundle bundle =
+        // SystemResourceBundle.getInstance().getResourceBundle(ResourceBundleConstants.LOCALE_RESOURCE_NAME,
+        // Locale.getDefault());
         int curLargestTargetList = 0;
         GlobalSightLocale sourceSelected = getLocale(p_sourceLocale);
         GlobalSightLocale targetSelected = getLocale(p_targetLocale);
 
-        Vector vSourceLocales = UserHandlerHelper.getAllSourceLocalesByCompanyId(p_companyId);
+        Vector vSourceLocales = UserHandlerHelper
+                .getAllSourceLocalesByCompanyId(p_companyId);
         ArrayList<GlobalSightLocale> sourceLocales = new ArrayList<GlobalSightLocale>();
         for (int i = 0; i < vSourceLocales.size(); i++)
         {
@@ -938,8 +919,8 @@ public class UserUtil
                     .elementAt(i);
             sourceLocales.add(curLocale);
         }
-        Collections.sort(sourceLocales, new GlobalSightLocaleComparator(Locale
-                .getDefault()));
+        Collections.sort(sourceLocales,
+                new GlobalSightLocaleComparator(Locale.getDefault()));
         int sourceSize = 0;
         int targetSize = 0;
         int sourceId = 0;
@@ -950,23 +931,30 @@ public class UserUtil
             StringBuffer targetTextBuf = new StringBuffer();
             StringBuffer targetValueBuf = new StringBuffer();
 
-            Vector<GlobalSightLocale> vValidTargets = UserHandlerHelper.getTargetLocalesByCompanyId(curLocale, p_companyId);
+            Vector<GlobalSightLocale> vValidTargets = UserHandlerHelper
+                    .getTargetLocalesByCompanyId(curLocale, p_companyId);
 
-            Collections.sort(vValidTargets, new Comparator<GlobalSightLocale>() {
-                public int compare(GlobalSightLocale locale1, GlobalSightLocale locale2) {
-                        return locale1.getDisplayName(p_uiLocale).compareTo(locale2.getDisplayName(p_uiLocale));
+            Collections.sort(vValidTargets, new Comparator<GlobalSightLocale>()
+            {
+                public int compare(GlobalSightLocale locale1,
+                        GlobalSightLocale locale2)
+                {
+                    return locale1.getDisplayName(p_uiLocale).compareTo(
+                            locale2.getDisplayName(p_uiLocale));
                 }
             });
 
             // Trim out the used target locales for the current source
             // locales.
-            Vector vUsedTargets = (Vector) p_sourceTargetMap.get(curLocale.toString() + "=" +p_companyId);
+            Vector vUsedTargets = (Vector) p_sourceTargetMap.get(curLocale
+                    .toString() + "=" + p_companyId);
             if (vUsedTargets != null)
             {
-                for ( Iterator iValidTargets = vValidTargets.iterator();
-                    iValidTargets.hasNext();)
+                for (Iterator iValidTargets = vValidTargets.iterator(); iValidTargets
+                        .hasNext();)
                 {
-                    GlobalSightLocale curElement = (GlobalSightLocale) iValidTargets.next();
+                    GlobalSightLocale curElement = (GlobalSightLocale) iValidTargets
+                            .next();
                     if (vUsedTargets.contains(curElement.toString()))
                     {
                         iValidTargets.remove();
@@ -985,7 +973,8 @@ public class UserUtil
                 p_sourceLocaleBuffer.append(" value=\"");
                 p_sourceLocaleBuffer.append(curLocale.toString());
                 p_sourceLocaleBuffer.append("\">");
-                p_sourceLocaleBuffer.append(curLocale.getDisplayName(p_uiLocale));
+                p_sourceLocaleBuffer.append(curLocale
+                        .getDisplayName(p_uiLocale));
                 p_sourceLocaleBuffer.append("</option>\n");
                 targetTextBuf.append("var targetArrayText");
                 targetTextBuf.append(sourceId + 1);
@@ -997,11 +986,13 @@ public class UserUtil
                 targetValueBuf.append(" = new Array(\"-1");
                 for (int j = 0; j < vValidTargets.size(); j++)
                 {
-                    GlobalSightLocale curValidTarget = (GlobalSightLocale) vValidTargets.elementAt(j);
+                    GlobalSightLocale curValidTarget = (GlobalSightLocale) vValidTargets
+                            .elementAt(j);
 
                     targetTextBuf.append("\",");
                     targetTextBuf.append("\"");
-                    targetTextBuf.append(curValidTarget.getDisplayName(p_uiLocale));
+                    targetTextBuf.append(curValidTarget
+                            .getDisplayName(p_uiLocale));
 
                     targetValueBuf.append("\",");
                     targetValueBuf.append("\"");
@@ -1041,13 +1032,14 @@ public class UserUtil
             p_paddingBuffer.append(p_bundle.getString("lb_sel_source_first"));
             p_paddingBuffer.append("</option>");
         }
-        else{
+        else
+        {
             String targetStr = targetSelected.getDisplayName(p_uiLocale);
-            //if(targetStr != null && targetStr.trim()!=""){
-                p_paddingBuffer.append("<option value=\"" + p_targetLocale + "\"");
-                p_paddingBuffer.append(" SELECTED>");
-                p_paddingBuffer.append(targetStr);
-                p_paddingBuffer.append("</option>");
+            // if(targetStr != null && targetStr.trim()!=""){
+            p_paddingBuffer.append("<option value=\"" + p_targetLocale + "\"");
+            p_paddingBuffer.append(" SELECTED>");
+            p_paddingBuffer.append(targetStr);
+            p_paddingBuffer.append("</option>");
         }
         for (int k = 0; k < curLargestTargetList; k++)
         {
@@ -1056,11 +1048,12 @@ public class UserUtil
     }
 
     /**
-     * Generate the activity/cost HTML table for the activities currently
-     * in the system.
+     * Generate the activity/cost HTML table for the activities currently in the
+     * system.
      */
     static void createActivityCostHTML(StringBuffer p_leftActivities,
-                                       StringBuffer p_rightActivities, Locale p_locale) throws EnvoyServletException
+            StringBuffer p_rightActivities, Locale p_locale)
+            throws EnvoyServletException
     {
         Vector vActivities = UserHandlerHelper.getAllActivities(p_locale);
         Vector vLeftActivities = null;
@@ -1085,19 +1078,19 @@ public class UserUtil
         {
             // Odd number of activities, greater than 1.
             vLeftActivities = new Vector(vActivities.subList(0,
-                                                             (vActivities.size() / 2) + 1));
+                    (vActivities.size() / 2) + 1));
 
-            vRightActivities = new Vector(vActivities.subList(((vActivities.size() / 2) + 1),
-                                                              (vActivities.size() )));
+            vRightActivities = new Vector(vActivities.subList(
+                    ((vActivities.size() / 2) + 1), (vActivities.size())));
         }
         else
         {
             // Even number of activities, greater than one.
             vLeftActivities = new Vector(vActivities.subList(0,
-                                                             vActivities.size() / 2));
+                    vActivities.size() / 2));
 
-            vRightActivities = new Vector(vActivities.subList((vActivities.size() / 2),
-                                                              (vActivities.size() )));
+            vRightActivities = new Vector(vActivities.subList(
+                    (vActivities.size() / 2), (vActivities.size())));
         }
 
         genTableHTMLForActivityList(vLeftActivities, p_leftActivities);
@@ -1105,36 +1098,38 @@ public class UserUtil
     }
 
     /**
-     * Generate the activity/cost HTML table for the activities
-     * currently in the system.
+     * Generate the activity/cost HTML table for the activities currently in the
+     * system.
      */
-    public static void createActivitySelectionHTML(String p_companyId, StringBuffer p_activities,
-                                                   Locale p_locale, String p_source, String p_target)
-    throws EnvoyServletException
+    public static void createActivitySelectionHTML(String p_companyId,
+            StringBuffer p_activities, Locale p_locale, String p_source,
+            String p_target) throws EnvoyServletException
     {
-        Vector vActivities = UserHandlerHelper.getAllActivities(p_companyId, p_locale);
+        Vector vActivities = UserHandlerHelper.getAllActivities(p_companyId,
+                p_locale);
         genSelectHTMLForActivityList(vActivities, p_activities, p_locale,
-                                     p_source, p_target);
+                p_source, p_target);
     }
 
     /**
-     * Generate the activity/cost HTML table for the activities
-     * currently in the system.
+     * Generate the activity/cost HTML table for the activities currently in the
+     * system.
      */
     public static void createActivitySelectionHTML(StringBuffer p_activities,
-                                                   Locale p_locale, String p_source, String p_target)
-    throws EnvoyServletException
+            Locale p_locale, String p_source, String p_target)
+            throws EnvoyServletException
     {
         Vector vActivities = UserHandlerHelper.getAllActivities(p_locale);
         genSelectHTMLForActivityList(vActivities, p_activities, p_locale,
-                                     p_source, p_target);
+                p_source, p_target);
     }
+
     /**
      * Private helper method for generating HTML based on activity list.
      */
     private static void genSelectHTMLForActivityList(Vector p_activityList,
-                                                     StringBuffer p_buffer, Locale p_locale, String p_source, String p_target)
-    throws EnvoyServletException
+            StringBuffer p_buffer, Locale p_locale, String p_source,
+            String p_target) throws EnvoyServletException
     {
         Enumeration eActivities = p_activityList.elements();
         int count = 0;
@@ -1149,7 +1144,8 @@ public class UserUtil
             {
                 bgColor = "White";
             }
-            p_buffer.append("<TR CLASS=standardText BGCOLOR=\"" + bgColor + "\">\n");
+            p_buffer.append("<TR CLASS=standardText BGCOLOR=\"" + bgColor
+                    + "\">\n");
             p_buffer.append("<TD NOWRAP VALIGN=TOP>");
 
             p_buffer.append("<INPUT TYPE=\"CHECKBOX\" NAME=\"");
@@ -1161,7 +1157,8 @@ public class UserUtil
             {
                 p_buffer.append("</TD>\n");
                 p_buffer.append("<TD NOWRAP VALIGN=TOP>");
-                createRateSelectionHTML(expenses, p_locale, p_source, p_target, curActivity, EXPENSE, -1);
+                createRateSelectionHTML(expenses, p_locale, p_source, p_target,
+                        curActivity, EXPENSE, -1);
                 p_buffer.append(expenses);
                 p_buffer.append("</TD>\n");
                 p_buffer.append("</TR>\n");
@@ -1174,12 +1171,12 @@ public class UserUtil
      * Private helper method for generating HTML based on activity list.
      */
     private static void genTableHTMLForActivityList(Vector p_activityList,
-                                                    StringBuffer p_buffer)
+            StringBuffer p_buffer)
     {
-        ResourceBundle bundle =
-        SystemResourceBundle.getInstance().getResourceBundle(
-                                                            ResourceBundleConstants.LOCALE_RESOURCE_NAME,
-                                                            Locale.getDefault());
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(
+                        ResourceBundleConstants.LOCALE_RESOURCE_NAME,
+                        Locale.getDefault());
         Enumeration eActivities = p_activityList.elements();
         while (eActivities.hasMoreElements())
         {
@@ -1199,21 +1196,23 @@ public class UserUtil
     }
 
     /**
-     * Generate the activity/cost HTML table for the activities currently
-     * in the system, with cost data for the roles passed in as an argument.
+     * Generate the activity/cost HTML table for the activities currently in the
+     * system, with cost data for the roles passed in as an argument.
      */
     static void createActivityHTMLForRoles(StringBuffer p_activities,
-                                           Vector p_roles, Locale p_locale, String p_source, String p_target)
-    throws EnvoyServletException
+            Vector p_roles, Locale p_locale, String p_source, String p_target)
+            throws EnvoyServletException
     {
 
         Vector vActivities = UserHandlerHelper.getAllActivities(p_locale);
-        genHTMLForActivityList(vActivities, p_roles, p_activities,
-                               p_source, p_target, p_locale);
+        genHTMLForActivityList(vActivities, p_roles, p_activities, p_source,
+                p_target, p_locale);
     }
+
     /**
-     * Generate the activity/cost HTML table for the activities currently
-     * in the system, with cost data for the roles passed in as an argument.
+     * Generate the activity/cost HTML table for the activities currently in the
+     * system, with cost data for the roles passed in as an argument.
+     * 
      * @param selectedCompanyId
      * @param activityBuf
      * @param roles
@@ -1221,12 +1220,14 @@ public class UserUtil
      * @param sourceLocale
      * @param targetLocale
      */
-    public static void createActivityHTMLForRoles(String selectedCompanyId, StringBuffer p_activities,
-            Vector p_roles, Locale p_locale, String p_source, String p_target)
-    throws EnvoyServletException{
-        Vector vActivities = UserHandlerHelper.getAllActivities(selectedCompanyId,p_locale);
-        genHTMLForActivityList(vActivities, p_roles, p_activities,
-                               p_source, p_target, p_locale);
+    public static void createActivityHTMLForRoles(String selectedCompanyId,
+            StringBuffer p_activities, Vector p_roles, Locale p_locale,
+            String p_source, String p_target) throws EnvoyServletException
+    {
+        Vector vActivities = UserHandlerHelper.getAllActivities(
+                selectedCompanyId, p_locale);
+        genHTMLForActivityList(vActivities, p_roles, p_activities, p_source,
+                p_target, p_locale);
 
     }
 
@@ -1235,15 +1236,14 @@ public class UserUtil
      * roles.
      */
     private static void genHTMLForActivityList(Vector p_activityList,
-                                               Vector p_roles, StringBuffer p_buffer, String p_source,
-                                               String p_target, Locale p_locale)
-    throws EnvoyServletException
+            Vector p_roles, StringBuffer p_buffer, String p_source,
+            String p_target, Locale p_locale) throws EnvoyServletException
     {
 
-        ResourceBundle bundle =
-        SystemResourceBundle.getInstance().getResourceBundle(
-                                                            ResourceBundleConstants.LOCALE_RESOURCE_NAME,
-                                                            Locale.getDefault());
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(
+                        ResourceBundleConstants.LOCALE_RESOURCE_NAME,
+                        Locale.getDefault());
         Enumeration eActivities = p_activityList.elements();
         while (eActivities.hasMoreElements())
         {
@@ -1252,7 +1252,7 @@ public class UserUtil
             String curActivityName = curActivity.getActivityName();
             boolean isReview = curActivity.isType(Activity.TYPE_REVIEW);
 
-            if(isReview)
+            if (isReview)
             {
                 boolean isEditable = curActivity.getIsEditable();
                 isReview = isReview && !isEditable;
@@ -1263,7 +1263,7 @@ public class UserUtil
             p_buffer.append("<INPUT TYPE=\"CHECKBOX\" NAME=\"");
             p_buffer.append(curActivity.getActivityName() + COST_ATTR);
             p_buffer.append("\" VALUE=\"true\" ");
-            p_buffer.append(" isReviewOnly = \"" + isReview +"\"");
+            p_buffer.append(" isReviewOnly = \"" + isReview + "\"");
             long rateId = -1;
 
             Enumeration eRoles = p_roles.elements();
@@ -1271,13 +1271,14 @@ public class UserUtil
             {
                 Role curRole = (Role) eRoles.nextElement();
 
-                if (curActivityName.equals(curRole.getActivity().getActivityName()))
+                if (curActivityName.equals(curRole.getActivity()
+                        .getActivityName()))
                 {
                     Rate rate = null;
                     p_buffer.append("CHECKED");
-                    String sRate = ((UserRole)curRole).getRate();
-                    Vector rates = new Vector(((Role)curRole).getRates());
-                    //if(rate == null || rate.equals(""))
+                    String sRate = ((UserRole) curRole).getRate();
+                    Vector rates = new Vector(((Role) curRole).getRates());
+                    // if(rate == null || rate.equals(""))
                     if (rates == null || rates.size() < 1)
                     {
                         if ((sRate == null || sRate.equals("")))
@@ -1292,9 +1293,10 @@ public class UserUtil
                     }
                     else
                     {
-                        // Assuming that there is just one rate associated with user
+                        // Assuming that there is just one rate associated with
+                        // user
                         // get the first one
-                        rate = (Rate)rates.elementAt(0);
+                        rate = (Rate) rates.elementAt(0);
                         rateId = rate.getId();
                     }
                     break;
@@ -1308,7 +1310,7 @@ public class UserUtil
                 p_buffer.append("</TD>\n");
                 p_buffer.append("<TD NOWRAP VALIGN=TOP>");
                 createRateSelectionHTML(expenses, p_locale, p_source, p_target,
-                                        curActivity, EXPENSE, rateId);
+                        curActivity, EXPENSE, rateId);
                 p_buffer.append(expenses);
                 p_buffer.append("</TD>\n");
                 p_buffer.append("</TR>\n");
@@ -1317,12 +1319,12 @@ public class UserUtil
     }
 
     /**
-     * Generate the activity/cost HTML table for the activities currently
-     * in the system, with cost data for the roles passed in as an argument.
+     * Generate the activity/cost HTML table for the activities currently in the
+     * system, with cost data for the roles passed in as an argument.
      */
     static void createActivityCostHTMLForRoles(StringBuffer p_leftActivities,
-                                               StringBuffer p_rightActivities, Vector p_roles, Locale p_locale)
-    throws EnvoyServletException
+            StringBuffer p_rightActivities, Vector p_roles, Locale p_locale)
+            throws EnvoyServletException
     {
         Vector vActivities = UserHandlerHelper.getAllActivities(p_locale);
         Vector vLeftActivities = null;
@@ -1351,23 +1353,24 @@ public class UserUtil
         {
             // Odd number of activities, greater than 1.
             vLeftActivities = new Vector(vActivities.subList(0,
-                                                             (vActivities.size() / 2) + 1));
+                    (vActivities.size() / 2) + 1));
 
-            vRightActivities = new Vector(vActivities.subList(((vActivities.size() / 2) + 1),
-                                                              (vActivities.size() )));
+            vRightActivities = new Vector(vActivities.subList(
+                    ((vActivities.size() / 2) + 1), (vActivities.size())));
         }
         else
         {
             // Even number of activities, greater than one.
             vLeftActivities = new Vector(vActivities.subList(0,
-                                                             vActivities.size() / 2));
+                    vActivities.size() / 2));
 
-            vRightActivities = new Vector(vActivities.subList((vActivities.size() / 2),
-                                                              (vActivities.size() )));
+            vRightActivities = new Vector(vActivities.subList(
+                    (vActivities.size() / 2), (vActivities.size())));
         }
 
         genTableHTMLForActivityList(vLeftActivities, p_roles, p_leftActivities);
-        genTableHTMLForActivityList(vRightActivities, p_roles, p_rightActivities);
+        genTableHTMLForActivityList(vRightActivities, p_roles,
+                p_rightActivities);
     }
 
     /**
@@ -1375,12 +1378,12 @@ public class UserUtil
      * roles.
      */
     private static void genTableHTMLForActivityList(Vector p_activityList,
-                                                    Vector p_roles, StringBuffer p_buffer)
+            Vector p_roles, StringBuffer p_buffer)
     {
-        ResourceBundle bundle =
-        SystemResourceBundle.getInstance().getResourceBundle(
-                                                            ResourceBundleConstants.LOCALE_RESOURCE_NAME,
-                                                            Locale.getDefault());
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(
+                        ResourceBundleConstants.LOCALE_RESOURCE_NAME,
+                        Locale.getDefault());
 
         Enumeration eActivities = p_activityList.elements();
         while (eActivities.hasMoreElements())
@@ -1400,7 +1403,8 @@ public class UserUtil
             {
                 Role curRole = (Role) eRoles.nextElement();
 
-                if (curActivityName.equals(curRole.getActivity().getActivityName()))
+                if (curActivityName.equals(curRole.getActivity()
+                        .getActivityName()))
                 {
                     p_buffer.append("CHECKED");
                 }
@@ -1414,8 +1418,7 @@ public class UserUtil
         }
     }
 
-    private static UserManager getUserManager()
-    throws EnvoyServletException
+    private static UserManager getUserManager() throws EnvoyServletException
     {
         try
         {
@@ -1428,20 +1431,23 @@ public class UserUtil
     }
 
     private static String getUserCompanyId(CreateUserWrapper wrapper)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         String companyId = "-1";
-        try {
-            companyId = CompanyWrapper.getCompanyIdByName(wrapper.getCompanyName());
+        try
+        {
+            companyId = CompanyWrapper.getCompanyIdByName(wrapper
+                    .getCompanyName());
             return companyId;
         }
-        catch (PersistenceException e) {
+        catch (PersistenceException e)
+        {
             throw new EnvoyServletException(e);
         }
     }
 
-    private static boolean isSuperCompany(SessionManager sessionMgr, CreateUserWrapper wrapper)
-    throws EnvoyServletException
+    private static boolean isSuperCompany(SessionManager sessionMgr,
+            CreateUserWrapper wrapper) throws EnvoyServletException
     {
         if (sessionMgr.getAttribute(SUPER_COMPANY) != null
                 && sessionMgr.getAttribute(SUPER_COMPANY).equals(IS_YES))
@@ -1450,13 +1456,15 @@ public class UserUtil
             // for multi company issue
             // companyId == 1 means that the company is super company, that is
             // "Welocalize".
-            // so this user should be able to access all companies in GlobalSight.
+            // so this user should be able to access all companies in
+            // GlobalSight.
         }
         else if (Long.parseLong(getUserCompanyId(wrapper)) == 1)
         {
             sessionMgr.setAttribute(SUPER_COMPANY, IS_YES);
             return true;
-        }  else
+        }
+        else
         {
             return false;
         }
@@ -1465,12 +1473,12 @@ public class UserUtil
 
     /**
      * Create All Company Map, key-companyId, value-companyName,
-     *
+     * 
      * @param sessionMgr
      * @return
      */
-    private static HashMap<String, String> getAllCompanyMap(SessionManager sessionMgr)
-    throws EnvoyServletException
+    private static HashMap<String, String> getAllCompanyMap(
+            SessionManager sessionMgr) throws EnvoyServletException
     {
         try
         {
@@ -1489,7 +1497,8 @@ public class UserUtil
             }
             else
             {
-                companyMap = (HashMap<String, String>) sessionMgr.getAttribute(ALL_COMPANY_MAP);
+                companyMap = (HashMap<String, String>) sessionMgr
+                        .getAttribute(ALL_COMPANY_MAP);
             }
 
             return companyMap;
@@ -1500,10 +1509,11 @@ public class UserUtil
         }
     }
 
-    public static String getSelectedCompanyId(HttpServletRequest p_request, CreateUserWrapper wrapper)
-    throws EnvoyServletException
+    public static String getSelectedCompanyId(HttpServletRequest p_request,
+            CreateUserWrapper wrapper) throws EnvoyServletException
     {
-        String selectedCompanyId = (String)p_request.getParameter(WebAppConstants.SELECTED_COMPANY_ID);
+        String selectedCompanyId = (String) p_request
+                .getParameter(WebAppConstants.SELECTED_COMPANY_ID);
         if (selectedCompanyId == null)
         {
             selectedCompanyId = getUserCompanyId(wrapper);
@@ -1522,7 +1532,8 @@ public class UserUtil
         }
         else
         {
-            String rand = p_request.getParameter(WebAppConstants.APPLET_DIRECTORY_SESSION_NAME_RANDOM);
+            String rand = p_request
+                    .getParameter(WebAppConstants.APPLET_DIRECTORY_SESSION_NAME_RANDOM);
             AppletDirectory directory = AppletDirectory.getInstance();
             session = directory.getSession(rand);
         }
@@ -1532,7 +1543,8 @@ public class UserUtil
         {
             try
             {
-                String companyId = p_request.getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
+                String companyId = p_request
+                        .getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
                 if (companyId == null)
                     throw new NumberFormatException();
                 Integer.parseInt(companyId);
@@ -1540,19 +1552,23 @@ public class UserUtil
             }
             catch (NumberFormatException ne)
             {
-                companyName = p_request.getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
+                companyName = p_request
+                        .getParameter(CompanyWrapper.CURRENT_COMPANY_ID);
                 if (companyName == null)
                 {
-                    companyName = p_request.getParameter(UserLdapHelper.LDAP_ATTR_COMPANY);
+                    companyName = p_request
+                            .getParameter(UserLdapHelper.LDAP_ATTR_COMPANY);
                 }
             }
         }
         else
         {
-            companyName = (String) session.getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
+            companyName = (String) session
+                    .getAttribute(WebAppConstants.SELECTED_COMPANY_NAME_FOR_SUPER_PM);
             if (UserUtil.isBlank(companyName))
             {
-                companyName = (String) session.getAttribute(UserLdapHelper.LDAP_ATTR_COMPANY);
+                companyName = (String) session
+                        .getAttribute(UserLdapHelper.LDAP_ATTR_COMPANY);
             }
         }
 
@@ -1569,7 +1585,7 @@ public class UserUtil
             // get All company Maps
             HashMap companyMap = getAllCompanyMap(sessionMgr);
 
-            //Fix for GBS-1693
+            // Fix for GBS-1693
             ArrayList<Company> companies = new ArrayList<Company>();
 
             for (Iterator it = companyMap.keySet().iterator(); it.hasNext();)
@@ -1581,8 +1597,8 @@ public class UserUtil
                 company.setName(curCompanyName);
                 companies.add(company);
             }
-            Collections.sort(companies, new CompanyComparator(Locale
-                    .getDefault()));
+            Collections.sort(companies,
+                    new CompanyComparator(Locale.getDefault()));
 
             allRoleCompanyNamesBuf.append("<SELECT NAME=");
             allRoleCompanyNamesBuf.append(WebAppConstants.SELECTED_COMPANY_ID);
@@ -1617,19 +1633,22 @@ public class UserUtil
         return allRoleCompanyNamesBuf;
 
     }
-    public static String createCompanyHTMLText(String companyName){
-        return "<B>"+companyName+"</B></br>";
+
+    public static String createCompanyHTMLText(String companyName)
+    {
+        return "<B>" + companyName + "</B></br>";
     }
 
     private static void createRateSelectionHTML(StringBuffer p_buffer,
-                                                Locale uilocale, String p_sourceLocale, String p_targetLocale,
-                                                Activity p_activity, int costType, long p_rateId)
-    throws EnvoyServletException
+            Locale uilocale, String p_sourceLocale, String p_targetLocale,
+            Activity p_activity, int costType, long p_rateId)
+            throws EnvoyServletException
     {
-        ResourceBundle bundle = SystemResourceBundle.getInstance().getResourceBundle(
-                ResourceBundleConstants.LOCALE_RESOURCE_NAME, uilocale);
+        ResourceBundle bundle = SystemResourceBundle.getInstance()
+                .getResourceBundle(
+                        ResourceBundleConstants.LOCALE_RESOURCE_NAME, uilocale);
         String activityName = p_activity.getActivityName();
-        String name ="";
+        String name = "";
         name = activityName + "_expense";
         p_buffer.append("<SELECT NAME='" + name + "'>\n");
         p_buffer.append("<OPTION ");
@@ -1637,7 +1656,8 @@ public class UserUtil
         {
             p_buffer.append(" SELECTED ");
         }
-        p_buffer.append(" VALUE='-1'>" + bundle.getString("lb_no_rate") + "</OPTION>");
+        p_buffer.append(" VALUE='-1'>" + bundle.getString("lb_no_rate")
+                + "</OPTION>");
         if ((p_sourceLocale != null) && (p_targetLocale != null))
         {
             ArrayList activityRates = null;
@@ -1645,16 +1665,15 @@ public class UserUtil
             {
                 GlobalSightLocale sourceLocale = getLocale(p_sourceLocale);
                 GlobalSightLocale targetLocale = getLocale(p_targetLocale);
-                activityRates = (ArrayList) ServerProxy
-                        .getCostingEngine().getRates(p_activity, sourceLocale,
-                                targetLocale);
+                activityRates = (ArrayList) ServerProxy.getCostingEngine()
+                        .getRates(p_activity, sourceLocale, targetLocale);
                 Collections.sort(activityRates, new RateComparator(
                         RateComparator.NAME, Locale.getDefault()));
                 Iterator it = activityRates.iterator();
 
                 while (it.hasNext())
                 {
-                    Rate rate = (Rate)it.next();
+                    Rate rate = (Rate) it.next();
                     long rateId = rate.getId();
                     if (rateId == p_rateId)
                     {
@@ -1684,7 +1703,7 @@ public class UserUtil
     }
 
     public static GlobalSightLocale getLocale(String p_locale)
-    throws EnvoyServletException
+            throws EnvoyServletException
     {
         try
         {
@@ -1707,8 +1726,8 @@ public class UserUtil
         try
         {
             SystemConfiguration sc = SystemConfiguration.getInstance();
-            isCostingEnabled = sc.getBooleanParameter(
-                                                     SystemConfigParamNames.COSTING_ENABLED);
+            isCostingEnabled = sc
+                    .getBooleanParameter(SystemConfigParamNames.COSTING_ENABLED);
         }
         catch (Exception e)
         {
@@ -1717,28 +1736,32 @@ public class UserUtil
         return isCostingEnabled;
     }
 
-    public static boolean isSuperAdmin(String p_userId)
-        throws RuntimeException
+    public static boolean isSuperAdmin(String p_userId) throws RuntimeException
     {
-        try {
-            return ServerProxy.getUserManager()
-                .containsPermissionGroup(p_userId, WebAppConstants.SUPER_ADMINISTRATOR_NAME);
-        } catch (Exception e) {
+        try
+        {
+            return ServerProxy.getUserManager().containsPermissionGroup(
+                    p_userId, WebAppConstants.SUPER_ADMINISTRATOR_NAME);
+        }
+        catch (Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
 
-    public static boolean isSuperPM(String p_userId)
-    throws RuntimeException
+    public static boolean isSuperPM(String p_userId) throws RuntimeException
     {
-        try {
+        try
+        {
             return ServerProxy.getUserManager().containsPermissionGroup(
                     p_userId, WebAppConstants.SUPER_PM_NAME);
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new RuntimeException(e);
         }
     }
-    
+
     public static User getUserById(String userId) throws RuntimeException
     {
         try
@@ -1753,7 +1776,7 @@ public class UserUtil
 
     /**
      * Validate if user is super localization participant
-     *
+     * 
      * @param p_userId
      *            User ID
      * @return boolean If user is a super localization participant, then reutrn
@@ -1769,7 +1792,9 @@ public class UserUtil
             User user = getUserManager().getUser(p_userId);
             boolean isLP = getUserManager().containsPermissionGroup(p_userId,
                     WebAppConstants.LOCALIZATION_PARTICIPANT);
-            if ("Welocalize".equals(user.getCompanyName()) && isLP)
+            if (CompanyWrapper.getSuperCompanyName().equals(
+                    user.getCompanyName())
+                    && isLP)
                 return true;
             else
                 return false;
@@ -1782,7 +1807,7 @@ public class UserUtil
 
     /**
      * Validate if user is in the specified permission group
-     *
+     * 
      * @param p_userId
      *            User's ID
      * @param p_group
@@ -1810,7 +1835,7 @@ public class UserUtil
 
     /**
      * Validate if user is in specified project
-     *
+     * 
      * @param p_userId
      *            User's ID
      * @param p_projectId
@@ -1830,6 +1855,18 @@ public class UserUtil
             User user = getUserManager().getUser(p_userId);
             Project project = ServerProxy.getProjectHandler().getProjectById(
                     Long.parseLong(p_projectId));
+            String userId = user.getUserId();
+            String userCompanyId = CompanyWrapper.getCompanyIdByName(user
+                    .getCompanyName());
+
+            if (!project.getCompanyId().equals(userCompanyId))
+            {
+                // Current user is not in the company of project
+                if (!isSuperAdmin(userId) && !isSuperLP(userId)
+                        && !isSuperPM(userId))
+                    return false;
+            }
+
             Set users = new TreeSet(project.getUserIds());
             if (user.isInAllProjects() || users.contains(p_userId))
                 return true;
@@ -1851,12 +1888,346 @@ public class UserUtil
         return false;
     }
 
-    public static String getProperLocale(String locale){
+    public static String getProperLocale(String locale)
+    {
         int index = locale.indexOf("=");
-        if(index < 0){
+        if (index < 0)
+        {
             return locale;
         }
         return locale.substring(0, index);
     }
 
+    /**
+     * Deletes user id and name mapping from table USER_ID_USER_NAME.
+     */
+    public static void removeUserFromUserIdUserName(String userId)
+    {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try
+        {
+            connection = DbUtil.getConnection();
+            connection.setAutoCommit(false);
+            ps = connection.prepareStatement(SQL_REMOVE_USER_ID_USER_NAME);
+            ps.setString(1, userId);
+            ps.execute();
+            connection.commit();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when removeUserFromUserIdUserName()."
+                    + e.getMessage());
+        }
+        finally
+        {
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+    }
+
+    /**
+     * Creates a new user id and name mapping in table USER_ID_USER_NAME.
+     */
+    public static String newUserId(String userName)
+    {
+        Connection connection = null;
+        PreparedStatement querypPs = null;
+        PreparedStatement insertPs = null;
+        ResultSet rs = null;
+        String userId = userName;
+        try
+        {
+            connection = DbUtil.getConnection();
+            connection.setAutoCommit(false);
+            querypPs = connection
+                    .prepareStatement(SQL_QUERY_USER_ID_USER_NAME_USER_NAME);
+            querypPs.setString(1, userName);
+            rs = querypPs.executeQuery();
+            if (rs.next())
+            {
+                // found duplicate user id, then make a new unique user id with
+                // random number
+                userId = userName + (int) (Math.random() * 10000);
+            }
+            insertPs = connection
+                    .prepareStatement(SQL_INSERT_USER_ID_USER_NAME);
+            insertPs.setString(1, userId);
+            insertPs.setString(2, userName);
+            insertPs.execute();
+            connection.commit();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when newUserId()." + e.getMessage());
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(insertPs);
+            DbUtil.silentClose(querypPs);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        return userId;
+    }
+
+    /**
+     * Updates user name in table USER_ID_USER_NAME.
+     */
+    public static void updateUserIdUserName(String userId, String userName)
+    {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        try
+        {
+            connection = DbUtil.getConnection();
+            connection.setAutoCommit(false);
+            ps = connection.prepareStatement(SQL_UPDATE_USER_ID_USER_NAME);
+            ps.setString(1, userName);
+            ps.setString(2, userId);
+            ps.execute();
+            connection.commit();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when updateUserIdUserName().", e);
+        }
+        finally
+        {
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+        // update user id and name mapping
+        String oldName = getUserNameById(userId);
+        userNameIdMap.remove(oldName);
+        userNameIdMap.put(userName.trim().toLowerCase(), userId);
+        userIdNameMap.put(userId.trim().toLowerCase(), userName);
+
+    }
+
+    /**
+     * Gets user name by user id.
+     */
+    public static String getUserNameById(String p_userId)
+    {
+        if (p_userId == null)
+        {
+            return null;
+        }
+        String userId = p_userId.trim().toLowerCase();
+        if (!userIdNameMap.containsKey(userId))
+        {
+            String userName = getUserNameByIdFromMapping(userId);
+            if (userName == null)
+            {
+                return p_userId;
+            }
+            userIdNameMap.put(userId, userName);
+        }
+
+        return userIdNameMap.get(userId);
+    }
+
+    /**
+     * Gets user id by user name.
+     */
+    public static String getUserIdByName(String p_userName)
+    {
+        if (p_userName == null)
+        {
+            return null;
+        }
+        String userName = p_userName.trim().toLowerCase();
+        if (!userNameIdMap.containsKey(userName))
+        {
+            userNameIdMap.put(userName, getUserIdByNameFromMapping(userName));
+        }
+
+        return userNameIdMap.get(userName);
+    }
+
+    public static String getUserIdsByNames(String p_userNames)
+    {
+        if (WorkflowTask.DEFAULT_ROLE_NAME.equals(p_userNames))
+        {
+            return p_userNames;
+        }
+        StringBuilder userIds = new StringBuilder();
+        StringTokenizer st = new StringTokenizer(p_userNames, ",");
+        while (st.hasMoreElements())
+        {
+            String userName = st.nextToken();
+            userIds.append(getUserIdByName(userName));
+            userIds.append(",");
+        }
+        userIds.deleteCharAt(userIds.length() - 1);
+
+        return userIds.toString();
+    }
+
+    public static String getUserNamesByIds(String p_userIds)
+    {
+        if (WorkflowTask.DEFAULT_ROLE_NAME.equals(p_userIds))
+        {
+            return p_userIds;
+        }
+        StringBuilder userNames = new StringBuilder();
+        StringTokenizer st = new StringTokenizer(p_userIds, ",");
+        while (st.hasMoreElements())
+        {
+            String userId = st.nextToken();
+            userNames.append(getUserNameById(userId));
+            userNames.append(",");
+        }
+        userNames.deleteCharAt(userNames.length() - 1);
+
+        return userNames.toString();
+    }
+
+    public static String[] getAllUserNames()
+    {
+        try
+        {
+            return ServerProxy.getUserManager().getUserNamesFromAllCompanies();
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getAllUserNames().", e);
+        }
+
+        return null;
+    }
+
+    public static String[] convertUserNamesToUserIds(String[] p_userNames)
+    {
+        if (p_userNames == null)
+        {
+            return null;
+        }
+
+        String[] userIds = new String[p_userNames.length];
+
+        for (int i = 0; i < p_userNames.length; i++)
+        {
+            userIds[i] = getUserIdByName(p_userNames[i]);
+        }
+
+        return userIds;
+    }
+
+    public static Object[] convertUserIdsToUserNames(Object[] p_userIds)
+    {
+        if (p_userIds == null)
+        {
+            return null;
+        }
+
+        Object[] userNames = new Object[p_userIds.length];
+
+        for (int i = 0; i < p_userIds.length; i++)
+        {
+            userNames[i] = getUserNameById((String) p_userIds[i]);
+        }
+
+        return userNames;
+    }
+
+    public static String[] convertUserIdsToUserNamesInRoles(String[] p_roles)
+    {
+        String[] newRoles = new String[p_roles.length];
+        for (int i = 0; i < p_roles.length; i++)
+        {
+            String role = p_roles[i];
+            String[] items = role.split(" ");
+            if (items.length > 4)
+            {
+                // indicate this is an user role
+                StringBuilder newRole = new StringBuilder();
+                newRole.append(items[0]);
+                newRole.append(" ");
+                newRole.append(items[1]);
+                newRole.append(" ");
+                newRole.append(items[2]);
+                newRole.append(" ");
+                newRole.append(items[3]);
+                newRole.append(" ");
+                newRole.append(getUserNameById(items[4]));
+                newRoles[i] = newRole.toString();
+            }
+            else
+            {
+                newRoles[i] = role;
+            }
+        }
+        return newRoles;
+    }
+
+    /**
+     * Gets user name by user id from table USER_ID_USER_NAME.
+     */
+    private static String getUserNameByIdFromMapping(String p_userId)
+    {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            connection = DbUtil.getConnection();
+            ps = connection
+                    .prepareStatement(SQL_QUERY_USER_ID_USER_NAME_USER_NAME);
+            ps.setString(1, p_userId);
+            rs = ps.executeQuery();
+            if (rs.next())
+            {
+                return rs.getString(1);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getUserNameByIdFromMapping().", e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        return null;
+    }
+
+    /**
+     * Gets user id by user name from table USER_ID_USER_NAME.
+     */
+    private static String getUserIdByNameFromMapping(String p_userName)
+    {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            connection = DbUtil.getConnection();
+            ps = connection
+                    .prepareStatement(SQL_QUERY_USER_ID_USER_NAME_USER_ID);
+            ps.setString(1, p_userName);
+            rs = ps.executeQuery();
+            if (rs.next())
+            {
+                return rs.getString(1);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error("Error when getUserIdByNameFromMapping().", e);
+        }
+        finally
+        {
+            DbUtil.silentClose(rs);
+            DbUtil.silentClose(ps);
+            DbUtil.silentReturnConnection(connection);
+        }
+
+        return null;
+    }
 }

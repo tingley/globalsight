@@ -88,7 +88,7 @@ public class WebClientHelper
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -191,7 +191,7 @@ public class WebClientHelper
         }
         catch (SSLException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         X509Certificate[] chain = tm.chain;

@@ -30,21 +30,17 @@ public class SourcePageDescriptorModifier extends PageDescriptorModifier
     public static final String SOURCE_PAGE_BY_JOB_ID = "select sp.* "
             + "from source_page sp, request r "
             + "where sp.id = r.page_id and r.job_id = :" + JOB_ID_ARG;
-    
+
     public static final String UNEXTRACTED_SOURCE_PAGES_BY_JOB_ID_SQL = SOURCE_PAGE_BY_JOB_ID
             + " and storage_path is not null";
-    
+
     public static final String EXTRACTED_SOURCE_PAGES_BY_JOB_ID_SQL = SOURCE_PAGE_BY_JOB_ID
             + " and original_encoding is not null";
-    
-    /**
-     * Add "type != 'REQUEST_WITH_IMPORT_ERROR'" for GBS-1406 on 08/12/2010 by York.
-     */
+
     public static final String SOURCE_PAGES_STILL_IMPORTING_SQL = "select * "
             + "from source_page where (state = '" + PageState.IMPORTING
             + "' or state = '" + PageState.IMPORT_SUCCESS + "' or state = '"
             + PageState.IMPORT_FAIL + "') and id in "
             + "(select page_id from request where job_id is null "
-            + "and page_id is not null "
-            + "and type != 'REQUEST_WITH_IMPORT_ERROR')";
+            + "and page_id is not null)";
 }

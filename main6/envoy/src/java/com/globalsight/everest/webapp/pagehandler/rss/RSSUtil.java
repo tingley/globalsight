@@ -229,7 +229,7 @@ public class RSSUtil
 			
 			return filename;
 		} catch (Exception e) {
-			s_logger.error(e.toString());
+			s_logger.error(e.getMessage(), e);
 	    	return null;
 		}
     }

@@ -89,7 +89,7 @@ public class PlugUtil
             {
             	if (!ignoreError)
             	{
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     UI ui = UIFactory.getUI();
                     ui.confirmContinue("Failed to copy " + name);
             	}
@@ -105,7 +105,7 @@ public class PlugUtil
                 {
                 	if (!ignoreError)
                 	{
-                        log.error(e);
+                        log.error(e.getMessage(), e);
                         UI ui = UIFactory.getUI();
                         ui.confirmContinue("Failed to copy " + name + " for company " + company);
                 	}
@@ -135,7 +135,7 @@ public class PlugUtil
             {
             	if (!ignoreError)
             	{
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     UI ui = UIFactory.getUI();
                     ui.confirmContinue("Failed to copy " + name);
             	}

@@ -15,7 +15,6 @@
  *  
  */
 
-
 package com.globalsight.persistence.jobcreation;
 
 import java.sql.Connection;
@@ -32,24 +31,22 @@ import com.globalsight.persistence.PersistenceCommand;
 
 public class AddTargetPagesToJobCommand extends PersistenceCommand
 {
-    private String m_updateTargetPage = 
-        "update target_page set workflow_iflow_instance_id = " +
-        " (select distinct iflow_instance_id from workflow " +
-        " where job_id = ? and target_locale_id = ?) " +
-        " ,timestamp = ? where id = ? ";
+    private String m_updateTargetPage = "update target_page set workflow_iflow_instance_id = "
+            + " (select distinct iflow_instance_id from workflow "
+            + " where job_id = ? and target_locale_id = ?) "
+            + " ,timestamp = ? where id = ? ";
     private HashMap m_targetPages;
     private JobImpl m_job;
     private PreparedStatement m_ps;
 
-    public AddTargetPagesToJobCommand(HashMap p_targetPages,
-                                      JobImpl p_job)
+    public AddTargetPagesToJobCommand(HashMap p_targetPages, JobImpl p_job)
     {
         m_targetPages = p_targetPages;
-        m_job         = p_job;
+        m_job = p_job;
     }
 
-    public void persistObjects(Connection p_connection) 
-        throws PersistenceException 
+    public void persistObjects(Connection p_connection)
+            throws PersistenceException
     {
         try
         {
@@ -65,7 +62,8 @@ public class AddTargetPagesToJobCommand extends PersistenceCommand
         {
             try
             {
-                if (m_ps != null) m_ps.close();
+                if (m_ps != null)
+                    m_ps.close();
             }
             catch (Exception e)
             {
@@ -74,28 +72,29 @@ public class AddTargetPagesToJobCommand extends PersistenceCommand
         }
     }
 
-    public void createPreparedStatement(Connection p_connection) 
-        throws Exception 
+    public void createPreparedStatement(Connection p_connection)
+            throws Exception
     {
         m_ps = p_connection.prepareStatement(m_updateTargetPage);
     }
-    public void setData() throws Exception 
+
+    public void setData() throws Exception
     {
         Collection c = m_targetPages.values();
         Iterator it = c.iterator();
         while (it.hasNext())
         {
-            TargetPage tp = (TargetPage)it.next();
-            m_ps.setLong(1,m_job.getId());
-            m_ps.setLong(2,tp.getLocaleId());
+            TargetPage tp = (TargetPage) it.next();
+            m_ps.setLong(1, m_job.getId());
+            m_ps.setLong(2, tp.getLocaleId());
             m_ps.setDate(3, new Date(System.currentTimeMillis()));
             m_ps.setLong(4, tp.getId());
             m_ps.addBatch();
         }
     }
-    public void batchStatements() throws Exception 
+
+    public void batchStatements() throws Exception
     {
         m_ps.executeBatch();
     }
 }
-

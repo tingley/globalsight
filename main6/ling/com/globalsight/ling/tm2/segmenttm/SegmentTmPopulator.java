@@ -1,6 +1,10 @@
 package com.globalsight.ling.tm2.segmenttm;
 
+import static com.globalsight.ling.tm2.population.TmPopulator.LOCALIZABLE;
+import static com.globalsight.ling.tm2.population.TmPopulator.TRANSLATABLE;
+
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +15,10 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.customAttribute.TMAttributeManager;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.projecthandler.ProjectTM;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
@@ -19,7 +27,6 @@ import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.TmSegmentIndexer;
-import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.SegmentQueryResult;
 import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.ling.tm2.persistence.SegmentTmRetriever;
@@ -28,9 +35,6 @@ import com.globalsight.ling.tm2.population.SegmentsForSave;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepository;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepositoryForCorpus;
 import com.globalsight.util.GlobalSightLocale;
-
-import static com.globalsight.ling.tm2.population.TmPopulator.TRANSLATABLE;
-import static com.globalsight.ling.tm2.population.TmPopulator.LOCALIZABLE;;
 
 
 /**
@@ -69,6 +73,11 @@ public class SegmentTmPopulator {
         throws Exception
     {
         long p_saveTmId = tm.getId();
+        ProjectTM projectTM = null;
+        if (tm instanceof ProjectTM)
+        {
+            projectTM = (ProjectTM) tm;
+        }
         
         // sanity check. No data to save, no further processing
         if(p_segmentsToSave.size() == 0)
@@ -101,7 +110,7 @@ public class SegmentTmPopulator {
 
                 c_logger.debug("Got lock for segment tm");
                 // get lock on tables
-                stPersistence.lockSegmentTmTables();
+//                stPersistence.lockSegmentTmTables();
                 
                 c_logger.debug("Retrieve segment tm begin");
                 // Get segments from Segment TM
@@ -136,6 +145,96 @@ public class SegmentTmPopulator {
                 
                 tmSegmentSaver.saveToSegmentTm(segmentsForSave, p_saveTmId);
                 c_logger.debug("Save segments end");
+                
+                // remove and save new properties
+                c_logger.debug("Save tu properties begin");
+                Collection removedTus = segmentsForSave.getTusForRemove(true);
+                Collection createdTus = segmentsForSave.getTusForCreate(true);
+                Collection updateTuvs = segmentsForSave.getTuvsForUpdate(true);
+                Collection addedTuvs = segmentsForSave.getTuvsForAdd(true);
+                Collection noOpTuvs = segmentsForSave.getTuvsForNoOp();
+
+                // for job populator                
+                Map<String, String> attValues = TMAttributeManager.getTUAttributesForPopulator(projectTM, m_job);
+                
+                // for TM importing
+                for (Object obj : removedTus)
+                {
+                    SegmentTmTu tu = (SegmentTmTu) obj;
+                    ProjectTmTuTProp.removeTuProps(m_connection, tu.getId());
+                }
+                
+                for (Object obj : createdTus)
+                {
+                    SegmentsForSave.CreateTu ctu = (SegmentsForSave.CreateTu) obj;
+                    long tuId = ctu.getNewTuId();
+                    BaseTmTu baseTu = ctu.getTu();
+                    if (baseTu instanceof SegmentTmTu)
+                    {
+                        SegmentTmTu stu = (SegmentTmTu) baseTu;
+                        Collection<ProjectTmTuTProp> props = stu.getProps();
+                        for (ProjectTmTuTProp prop : props)
+                        {
+                            ProjectTmTuTProp.saveTuProp(m_connection, prop, tuId);
+                        }
+                        
+                        for (String attName : attValues.keySet())
+                        {
+                            ProjectTmTuTProp p = new ProjectTmTuTProp();
+                            p.setPropType(ProjectTmTuTProp.TYPE_ATT_PREFIX + attName);
+                            p.setPropValue(attValues.get(attName));
+                            
+                            ProjectTmTuTProp.saveTuProp(m_connection, p, tuId);
+                        }
+                    }
+                }
+                
+                List<Long> handledTus = new ArrayList<Long>();
+                for (Object obj : updateTuvs)
+                {
+                    SegmentsForSave.UpdateTuv tuv = (SegmentsForSave.UpdateTuv) obj;
+                    long tuId = tuv.getTuId();
+                    Long tuIdLong = new Long(tuId);
+
+                    if (!handledTus.contains(tuIdLong))
+                    {
+                        BaseTmTu baseTu = tuv.getTuv().getTu();
+
+                        mergeTuProperties(baseTu, handledTus, tuId, tuIdLong, attValues);
+                    }
+                }
+                
+                handledTus = new ArrayList<Long>();
+                for (Object obj : noOpTuvs)
+                {
+                    SegmentsForSave.UpdateTuv tuv = (SegmentsForSave.UpdateTuv) obj;
+                    long tuId = tuv.getTuId();
+                    Long tuIdLong = new Long(tuId);
+
+                    if (!handledTus.contains(tuIdLong))
+                    {
+                        BaseTmTu baseTu = tuv.getTuv().getTu();
+
+                        mergeTuProperties(baseTu, handledTus, tuId, tuIdLong, attValues);
+                    }
+                }
+                
+                handledTus = new ArrayList<Long>();
+                for (Object obj : addedTuvs)
+                {
+                    SegmentsForSave.AddTuv tuv = (SegmentsForSave.AddTuv) obj;
+                    long tuId = tuv.getTuIdToAdd();
+                    Long tuIdLong = new Long(tuId);
+
+                    if (!handledTus.contains(tuIdLong))
+                    {
+                        BaseTmTu baseTu = tuv.getTuv().getTu();
+
+                        mergeTuProperties(baseTu, handledTus, tuId, tuIdLong, attValues);
+                    }
+                }
+                
+                c_logger.debug("Save tu properties end");
 
                 c_logger.debug("Save index begin");
                 // index segments
@@ -163,11 +262,64 @@ public class SegmentTmPopulator {
             }
             finally
             {
-                DbUtil.unlockTables(m_connection);
+//                DbUtil.unlockTables(m_connection);
             }
         }
         
         return makeCorpusMapping(tm, segmentsForSave, jobDataToSave);
+    }
+
+    private void mergeTuProperties(BaseTmTu baseTu, List<Long> handledTus, long tuId,
+            Long tuIdLong, Map<String, String> attValue) throws SQLException
+    {
+        if (baseTu instanceof SegmentTmTu)
+        {
+            SegmentTmTu stu = (SegmentTmTu) baseTu;
+            Collection<ProjectTmTuTProp> props = stu.getProps();
+
+            for (ProjectTmTuTProp prop : props)
+            {
+                if (prop.getPropType() == null || prop.getPropValue() == null
+                        || "".equals(prop.getPropType())
+                        || "".equals(prop.getPropValue()))
+                {
+                    continue;
+                }
+
+                // Merge properties which have same name
+                if (!ProjectTmTuTProp.doesPropsExistTu(m_connection, tuId,
+                        prop.getPropType()))
+                {
+                    ProjectTmTuTProp.saveTuProp(m_connection, prop, tuId);
+                }
+                else
+                {
+                    ProjectTmTuTProp.updateTuProp(m_connection, prop, tuId);
+                }
+            }
+
+            for (String attName : attValue.keySet())
+            {
+                String propType = ProjectTmTuTProp.TYPE_ATT_PREFIX + attName;
+                String propV = attValue.get(attName);
+
+                // do not merge properties which have same name
+                if ("".equals(propV)
+                        || ProjectTmTuTProp.doesPropsExistTu(m_connection, tuId,
+                                propType))
+                {
+                    continue;
+                }
+
+                ProjectTmTuTProp p = new ProjectTmTuTProp();
+                p.setPropType(propType);
+                p.setPropValue(propV);
+
+                ProjectTmTuTProp.saveTuProp(m_connection, p, tuId);
+            }
+            
+            handledTus.add(tuIdLong);
+        }
     }
 
     private UniqueSegmentRepository getSegmentsFromSegmentTm(
@@ -230,18 +382,25 @@ public class SegmentTmPopulator {
                       BaseTmTuv tuvToExamin = (BaseTmTuv)itTuv.next();
                       if (!p_fromTmImport)
                       {
-                            if (tuvToExamin.getModifyUser() != null)
-                            {
-                                // Becasue GlobalSight auto create sourceTuv and targetTuv after
-                                // import a file. Originally we record pm as their creator, and insert
-                                // them into translation_unit_variant table.
-                                // Now we take the modify user as creator user and insert it into 
-                                // project_tm_tuv_t table as TM data.
-                                tuvToExamin.setCreationUser(tuvToExamin.getModifyUser());
-                                tuvToExamin.setCreationDate(tuvToExamin.getModifyDate());
-                                //tuvToExamin.setModifyDate(null);
-                                tuvToExamin.setModifyUser(null);
-                            }
+                        if (tuvToExamin.getModifyUser() != null)
+                        {
+                            // Becasue GlobalSight auto create sourceTuv and
+                            // targetTuv after
+                            // import a file. Originally we record pm as their
+                            // creator, and insert
+                            // them into translation_unit_variant table.
+                            // Now we take the modify user as creator user and
+                            // insert it into
+                            // project_tm_tuv_t table as TM data.
+                            tuvToExamin.setCreationUser(tuvToExamin
+                                    .getModifyUser());
+                            tuvToExamin.setCreationDate(tuvToExamin
+                                    .getModifyDate());
+                            tuvToExamin.setModifyDate(tuvToExamin
+                                    .getModifyDate());
+                            tuvToExamin.setModifyUser(tuvToExamin
+                                    .getModifyUser());
+                        }
                       }
 
                   }
@@ -572,6 +731,15 @@ public class SegmentTmPopulator {
         }
     }
     
+    private Job m_job;
 
+    public void setJob(Job job)
+    {
+        m_job = job;
+    }
 
+    public Job getJob()
+    {
+        return m_job;
+    }
 }

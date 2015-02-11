@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -47,6 +46,7 @@ import com.globalsight.everest.foundation.DispatchCriteria;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.jobhandler.jobcreation.JobCreator;
 import com.globalsight.everest.page.ExtractedSourceFile;
 import com.globalsight.everest.page.PageManager;
@@ -61,6 +61,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
@@ -73,8 +74,7 @@ import com.globalsight.util.mail.MailerConstants;
 public class RequestHandlerLocal implements RequestHandler
 {
     // for logging purposes
-    private static Logger c_logger = Logger
-            .getLogger("RequestHandlerLocal");
+    private static Logger c_logger = Logger.getLogger("RequestHandlerLocal");
 
     // used for email messages - keys into property file
     // subject and message keys for all import failures
@@ -129,42 +129,21 @@ public class RequestHandlerLocal implements RequestHandler
         RequestImpl req = null;
         try
         {
+            // 1.Create the request object
             req = prepareL10nRequest(p_requestType, p_contentFileName,
                     p_l10nRequestXml, p_eventFlowXml, p_exception);
-            HashMap parametersInMap = (HashMap) p_hashmap.get("parametersInMap");
-            
-            //GS Edition job parameters
-            String originalTaskId = (String) parametersInMap.get("taskId");
-            if (originalTaskId != null && !"".equals(originalTaskId))
-            {
-                HashMap editionJobParams = new HashMap();
-                
-                String originalEndpoint = (String) parametersInMap.get("wsdlUrl");
-                String originalUserName = (String) parametersInMap.get("userName");
-                String originalPassword = (String) parametersInMap.get("password");
-                Vector jobComments = (Vector) parametersInMap.get("jobComments");
-                HashMap segComments = (HashMap) parametersInMap.get("segComments");
-                
-                editionJobParams.put("taskId", originalTaskId);
-                editionJobParams.put("wsdlUrl", originalEndpoint);
-                editionJobParams.put("userName", originalUserName);
-                editionJobParams.put("password", originalPassword);
-                editionJobParams.put("jobComments", jobComments);
-                editionJobParams.put("segComments", segComments);
-                
-                req.setEditionJobParams(editionJobParams);            	
-            }
-
-            
+            // 2.Set job parameters for GS Edition
+            setEditionJobParams(req, p_hashmap);
+            // 3.Submit request
             submitRequest(req);
         }
         catch (RequestHandlerException rhe)
         {
-            c_logger.error("Failed to submit the request. "
-                    + p_l10nRequestXml.toString(), rhe);
+            c_logger.error(
+                    "Failed to submit the request. "
+                            + p_l10nRequestXml.toString(), rhe);
 
-            // send an email to admin: at this point nothing is
-            // persisted yet.
+            // send an email to admin: at this point nothing is persisted yet.
             String[] attachments = null;
 
             if (p_exception != null)
@@ -201,12 +180,14 @@ public class RequestHandlerLocal implements RequestHandler
                         e);
             }
 
-            sendEmailToAdmin(IMPORT_FAILED_MESSAGE, messageArgs, attachments, 
-                             req.getCompanyId());
+            sendEmailToAdmin(IMPORT_FAILED_MESSAGE, messageArgs, attachments,
+                    req.getCompanyId());
             throw rhe;
-        } catch (Exception e) {
-			c_logger.error("Can not get projecthandler to attain workflow infos");
-		}
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Can not get projecthandler to attain workflow infos");
+        }
     }
 
     /**
@@ -250,191 +231,6 @@ public class RequestHandlerLocal implements RequestHandler
     }
 
     /**
-     * @see RequestHandler.submitRequest(int,String,String,String,String)
-     */
-    public long submitRequest(int p_requestType, String p_gxml,
-            String p_l10nRequestXml, String p_eventFlowXml,
-            GeneralException p_exception) throws RequestHandlerException,
-            RemoteException
-    {
-        // create the request from the information specified
-        // and save to the database
-        RequestImpl r = prepareL10nRequest(p_requestType, p_gxml,
-                p_l10nRequestXml, p_eventFlowXml, p_exception);
-        return submitRequest(r);
-    }
-
-    /**
-     * Initiate the importing of the created, already persisted request.
-     */
-    private long submitRequest(RequestImpl p_request)
-            throws RequestHandlerException, RemoteException
-    {
-        // if this is an extracted request then check if the page
-        // already exists in an active job (an active re-import)
-        if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
-        {
-            int reimportOption = ActivePageReimporter.getReimportOption();
-            switch (reimportOption)
-            {
-            case ActivePageReimporter.REIMPORT_NEW_TARGETS:
-                importWithReimportNewTargets(p_request);
-                break;
-            case ActivePageReimporter.DELAY_REIMPORT:
-                importWithDelayReimport(p_request);
-                break;
-            case ActivePageReimporter.NO_REIMPORT:
-            default:
-                importWithNoReimport(p_request);
-                break;
-            }
-        }
-        else
-        {
-            // import all unextracted files
-            importPage(p_request);
-        }
-
-        return p_request.getId();
-    }
-
-    /**
-     * Perform the import with the "reimport new targets" option turned on.
-     */
-    private void importWithReimportNewTargets(Request p_request)
-            throws RequestHandlerException, RemoteException
-    {
-        // if local content is turned on first check to see if
-        // the source page exists already with snippets and is ACTIVE
-        // this will fail importing
-        boolean addDeleteEnabled = true;
-        try
-        {
-            addDeleteEnabled = SystemConfiguration.getInstance()
-                    .getBooleanParameter(
-                            SystemConfigParamNames.ADD_DELETE_ENABLED);
-        }
-        catch (Exception e)
-        {
-            // just assume it is set to true then for the most
-            // validation
-            c_logger
-                    .error(
-                            "Failed to get the value of is add/delete enabled from the system parameters",
-                            e);
-        }
-
-        if (addDeleteEnabled)
-        {
-            // if the previous page is active and it contains snippets
-            // fail the import
-            SourcePage p = findPreviousSourcePage(p_request);
-
-            if (m_reimporter.isActivePage(p)
-                    && ((ExtractedSourceFile) p.getPrimaryFile())
-                            .containGsTags())
-            {
-                c_logger
-                        .error("Can't import the page "
-                                + p.getExternalPageId()
-                                + " to any target locales because it is part of an active job and contains snippets.");
-                // takes in one argument - external page id
-                String[] args = { p.getExternalPageId() };
-                RequestHandlerException rhe = new RequestHandlerException(
-                        RequestHandlerException.MSG_PAGE_WITH_SNIPPETS_IN_OF_ACTIVE_JOB,
-                        args, null);
-                RequestPersistenceAccessor
-                        .setExceptionInRequest(p_request, rhe);
-            }
-        }
-
-        // look to see if there is a previous page
-        // must do for each target locale
-        ArrayList tps = findPreviousTargetPages(p_request);
-
-        if (tps != null && tps.size() > 0)
-        {
-            for (int i = 0; i < tps.size(); i++)
-            {
-                TargetPage tp = (TargetPage) tps.get(i);
-                if (m_reimporter.isActivePage(tp))
-                {
-                    p_request.addActiveTarget(tp.getGlobalSightLocale(), tp
-                            .getWorkflowInstance().getJob());
-                    c_logger.info("Importing - Found the page "
-                            + p_request.getExternalPageId()
-                            + " to still be active in the locale "
-                            + tp.getGlobalSightLocale().toString());
-                }
-            }
-            importPage(p_request);
-        }
-        else
-        {
-            importPage(p_request);
-        }
-    }
-
-    /**
-     * Perform the import with the "delay reimport" option turned on.
-     */
-    private void importWithDelayReimport(Request p_request)
-            throws RequestHandlerException, RemoteException
-    {
-        // if the previous page is part of an active job then it is
-        // a re-import of an active page.
-        SourcePage p = findPreviousSourcePage(p_request);
-
-        if (m_reimporter.isActivePage(p))
-        {
-            try
-            {
-                m_reimporter.delayImport((RequestImpl) p_request, p);
-            }
-            catch (ReimporterException re)
-            {
-                c_logger
-                        .error(
-                                "An exception was thrown when attempting to delay import.",
-                                re);
-                throw new RequestHandlerException(re);
-            }
-        }
-        else
-        {
-            importPage(p_request);
-        }
-    }
-
-    /**
-     * Perform the import with "no reimport" turned on. Which mean any source
-     * page that is already in an active job can NOT be re-imported until the
-     * previous version of it has been completly translated or cancelled.
-     */
-    private void importWithNoReimport(Request p_request)
-            throws RequestHandlerException, RemoteException
-    {
-        // if the previous page is part of an active job then it is
-        // a re-import of an active page.
-        SourcePage p = findPreviousSourcePage(p_request);
-        if (m_reimporter.isActivePage(p))
-        {
-            c_logger.error("Can't import the page " + p.getExternalPageId()
-                    + " because it is part of an active job.");
-            // takes in one argument - external page id
-            String[] args = { p.getExternalPageId() };
-            RequestHandlerException rhe = new RequestHandlerException(
-                    RequestHandlerException.MSG_PAGE_ALREADY_PART_OF_ACTIVE_JOB,
-                    args, null);
-            RequestPersistenceAccessor.setExceptionInRequest(p_request, rhe);
-        }
-
-        // import all files - if an error will recognize the error and add the
-        // request to a job as an error
-        importPage(p_request);
-    }
-
-    /**
      * @see RequestHandler.importPage(Request) method
      */
     public void importPage(Request p_request) throws RequestHandlerException,
@@ -448,14 +244,15 @@ public class RequestHandlerLocal implements RequestHandler
         {
             // During shutting down server,may return a null for "jc",so add
             // judgment to avoid throw exception.
-            if (jc != null) {
+            if (jc != null)
+            {
                 jc.addRequestToJob(p_request);
             }
         }
         catch (Exception ex)
         {
-            c_logger.error("JobCreator.addRequestToJob. "
-                    + p_request.toString(), ex);
+            c_logger.error(
+                    "JobCreator.addRequestToJob. " + p_request.toString(), ex);
 
             try
             {
@@ -463,7 +260,7 @@ public class RequestHandlerLocal implements RequestHandler
             }
             catch (Exception e)
             {
-                c_logger.error(e);
+                c_logger.error(e.getMessage(), e);
             }
         }
     }
@@ -598,208 +395,30 @@ public class RequestHandlerLocal implements RequestHandler
             RequestHandlerException
     {
         c_logger.info("Starting cleanup of incomplete imports....");
-        handleIncompletePages();
-        handleIncompleteRequests();
+        // handleIncompletePages();
+        // handleIncompleteRequests();
+        JobCreationMonitor.cleanupIncompleteJobs();
         c_logger.info("....done cleaning up incomplete imports.");
     }
 
-    /**
-     * Find the previous valid version of the page.
-     * 
-     * @param p_pageName
-     *            The unique name for the page.
-     * @param p_l10nProfile
-     *            The profile associated with this page.
-     * 
-     * @return The previous version or NULL if one doesn't exist.
-     */
-    private SourcePage findPreviousSourcePage(Request p_request)
-            throws RequestHandlerException
+    public FileProfile getFileProfile(Request p_request)
     {
-        // get the source locale from the profile
-        GlobalSightLocale sourceLocale = p_request.getL10nProfile()
-                .getSourceLocale();
-        // find the page manager and verify if the page can be imported
-        PageManager pm = getPageManager();
-        SourcePage p = null;
-
+        FileProfile fileProfile = null;
+        // get the file system profile persistence manager
+        FileProfilePersistenceManager fileProfMgr = null;
         try
         {
-            p = pm.getCurrentPageByNameAndLocale(p_request, sourceLocale);
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Exception when calling "
-                    + "PageManager.getCurrentPageByNameAndLocale", e);
-            // just passes null back doesn't throw an exception
-        }
-        return p;
-    }
-
-    /**
-     * Find the previous valid version of the target page. This is for each
-     * target locale specified in the request.
-     * 
-     * @param p_pageName
-     *            The unique name for the page.
-     * @param p_l10nProfile
-     *            The profile associated with this page.
-     * 
-     * @return The previous version or NULL if one doesn't exist.
-     */
-    private ArrayList findPreviousTargetPages(Request p_request)
-            throws RequestHandlerException
-    {
-        // find the page manager and verify if the page can be imported
-        PageManager pm = getPageManager();
-        ArrayList tps = new ArrayList(0);
-
-        try
-        {
-            tps = pm.getActiveTargetPagesByNameAndLocale(p_request);
-        }
-        catch (Exception e)
-        {
-            c_logger.error("Exception when calling "
-                    + "PageManager.getCurrentTargetPagesByNameAndLocales", e);
-            // just passes null back doesn't throw an exception
-        }
-        return tps;
-    }
-
-    /**
-     * Takes all source pages stuck in the IMPORTING state and marks the request
-     * with the appropriate error. It then uses the common importing code to
-     * update the page to be an IMPORT_FAIL and add it to the appropriate job.
-     */
-    private void handleIncompletePages() throws RequestHandlerException
-    {
-        try
-        {
-            // find all the incomplete requests and source pages
-            Collection pages = getPageManager().getSourcePagesStillImporting();
-            if (pages != null && pages.size() > 0)
-            {
-                c_logger
-                        .info("Cleaning up "
-                                + pages.size()
-                                + " page(s) that were importing when the system was shutdown.");
-                for (Iterator i = pages.iterator(); i.hasNext();)
-                {
-                    SourcePage sp = (SourcePage) i.next();
-
-                    // get the request straight from the DB - no caching
-                    // involved
-                    //
-                    // should not get the request from the source page
-                    // "sp.getRequest()"
-                    // because this will cause the request to be cached and any
-                    // updates
-                    // done to it using JDBC will go directly to the DB and the
-                    // cache and
-                    // DB will be out-of-date.
-                    Request r = RequestPersistenceAccessor.findRequestByPageId(sp.getId());
-
-                    // update the request type
-                    String[] args = { sp.getExternalPageId() };
-
-                    // set up the relationship that is only persisted from
-                    // source page to request
-                    // and not the other way - will need this for importing
-                    r.setSourcePage(sp);
-                    // update the request with an error exception of failing to import
-                    // because of the system being shutdown
-                    setExceptionInRequest(
-                            r,
-                            new RequestHandlerException(
-                                    RequestHandlerException.MSG_FAILED_TO_COMPLETE_IMPORT_DURING_SHUTDOWN,
-                                    args, null));
-                    // import the page - this method handles error requests too.
-                    // disable this invoking for GBS-1406 by York on 08/11/2010.
-//                    importPage(r);
-                }
-            }
-            else
-            {
-                c_logger.info("There aren't any pages stuck in importing.");
-            }
+            fileProfMgr = ServerProxy.getFileProfilePersistenceManager();
+            fileProfile = fileProfMgr.readFileProfile(p_request
+                    .getDataSourceId());
         }
         catch (Exception e)
         {
             throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS,
+                    RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER,
                     null, e);
         }
-    }
-
-    /**
-     * Takes all requests that don't have a source page associated with it
-     * because they were importing when the system was shut-down. Marks the
-     * request as an error and then uses the common importing code to update the
-     * page to be an IMPORT_FAIL and add it to the appropriate job.
-     */
-    private void handleIncompleteRequests() throws RequestHandlerException
-    {
-        try
-        {
-            // find all the incomplete requests
-            Collection requests = RequestPersistenceAccessor.findRequestsStillImporting();
-            if (requests != null && requests.size() > 0)
-            {
-                c_logger.info("Cleaning up " + requests.size()
-                        + " request(s) were importing "
-                        + "when they system was shutdown.");
-                for (Iterator i = requests.iterator(); i.hasNext();)
-                {
-                    Request r = (Request) i.next();
-
-                    // update the page name and data source type
-                    /** Uses DOM to parse the event flow XML */
-                    StringReader sr = new StringReader(r.getEventFlowXml());
-                    InputSource is = new InputSource(sr);
-                    DOMParser parser = new DOMParser();
-                    parser.setFeature("http://xml.org/sax/features/validation",
-                            false);
-                    parser.parse(is);
-                    Document document = parser.getDocument();
-                    Element root = document.getDocumentElement();
-                    NodeList nl = root.getElementsByTagName("displayName");
-                    Element displayNameElt = (Element) nl.item(0);
-
-                    String pageName = displayNameElt.getFirstChild()
-                            .getNodeValue();
-                    r.setExternalPageId(pageName);
-                    Element source = (Element) root.getElementsByTagName(
-                            "source").item(0);
-                    String dataSourceType = source
-                            .getAttribute("dataSourceType");
-                    r.setDataSourceType(dataSourceType);
-
-                    String[] args = { r.getExternalPageId() };
-                    // update the request with an error exception of failing to
-                    // import
-                    // because of the system being shutdown
-                    setExceptionInRequest(
-                            r,
-                            new RequestHandlerException(
-                                    RequestHandlerException.MSG_FAILED_TO_COMPLETE_IMPORT_DURING_SHUTDOWN,
-                                    args, null));
-                    
-                    // disable this invoking for GBS-1406 by York on 08/11/2010.
-//                  importPage(r);
-                }
-            }
-            else
-            {
-                c_logger.info("There aren't any requests stuck in importing.");
-            }
-        }
-        catch (Exception e)
-        {
-            throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS,
-                    null, e);
-        }
+        return fileProfile;
     }
 
     /**
@@ -807,7 +426,7 @@ public class RequestHandlerLocal implements RequestHandler
      * the L10nRequest Xml. This also stores some of the information of the
      * request that won't be part of the page.
      */
-    public RequestImpl prepareL10nRequest(int p_requestType, String p_gxml,
+    private RequestImpl prepareL10nRequest(int p_requestType, String p_gxml,
             String p_l10nRequestXml, String p_eventFlowXml,
             GeneralException p_exception) throws RequestHandlerException
     {
@@ -822,7 +441,7 @@ public class RequestHandlerLocal implements RequestHandler
         // external page id
         String externalPageId = parser
                 .findElementInXml(CxeToCapRequest.L10nRequestXml.UNIQUE_PAGE_NAME);
-        
+
         // is page previewable - convert to boolean
         String isPreviewable = parser.findAttributeInXml(
                 CxeToCapRequest.L10nRequestXml.UNIQUE_PAGE_NAME,
@@ -856,8 +475,9 @@ public class RequestHandlerLocal implements RequestHandler
         {
             dataSourceId = Long.parseLong(dataSourceIdString);
         }
-        
-        String priority = parser.findElementInXml(CxeToCapRequest.L10nRequestXml.JOB_PRIORITY);
+
+        String priority = parser
+                .findElementInXml(CxeToCapRequest.L10nRequestXml.JOB_PRIORITY);
 
         String baseHref = parser
                 .findElementInXml(CxeToCapRequest.L10nRequestXml.BASE_HREF);
@@ -957,11 +577,11 @@ public class RequestHandlerLocal implements RequestHandler
             {
                 BatchInfo bi = new BatchInfo(batchId,
                         Long.parseLong(pageCount), Long.parseLong(pageNumber),
-                        Long.parseLong(docPageCount), Long
-                                .parseLong(docPageNumber), jobPrefixName);
+                        Long.parseLong(docPageCount),
+                        Long.parseLong(docPageNumber), jobPrefixName);
                 r.setBatchInfo(bi);
             }
-            
+
             RequestPersistenceAccessor.insertRequest(r);
         }
         else if (profile.getDispatchCriteria().getCondition() == DispatchCriteria.WORD_COUNT_OR_TIMER_CONDITION)
@@ -976,14 +596,12 @@ public class RequestHandlerLocal implements RequestHandler
         if (importInitiatorId != null)
         {
             c_logger.info("Received an import request from "
-                    + importInitiatorId);
+                    + UserUtil.getUserNameById(importInitiatorId));
         }
         return r;
     }
 
-    
-
-	private void setUnimportedLocales(String p_eventFlowXml, RequestImpl r)
+    private void setUnimportedLocales(String p_eventFlowXml, RequestImpl r)
     {
         try
         {
@@ -1031,6 +649,407 @@ public class RequestHandlerLocal implements RequestHandler
         }
     }
 
+    /**
+     * Set job parameters for Editions job.
+     */
+    private void setEditionJobParams(RequestImpl p_request, HashMap p_hashMap)
+    {
+        if (p_request == null || p_hashMap == null)
+            return;
+
+        HashMap parametersInMap = (HashMap) p_hashMap.get("parametersInMap");
+        String originalTaskId = (String) parametersInMap.get("taskId");
+        if (originalTaskId != null && !"".equals(originalTaskId))
+        {
+            HashMap editionJobParams = new HashMap();
+
+            String originalEndpoint = (String) parametersInMap.get("wsdlUrl");
+            String originalUserName = (String) parametersInMap.get("userName");
+            String originalPassword = (String) parametersInMap.get("password");
+            Vector jobComments = (Vector) parametersInMap.get("jobComments");
+            HashMap segComments = (HashMap) parametersInMap.get("segComments");
+
+            editionJobParams.put("taskId", originalTaskId);
+            editionJobParams.put("wsdlUrl", originalEndpoint);
+            editionJobParams.put("userName", originalUserName);
+            editionJobParams.put("password", originalPassword);
+            editionJobParams.put("jobComments", jobComments);
+            editionJobParams.put("segComments", segComments);
+
+            p_request.setEditionJobParams(editionJobParams);
+        }
+    }
+
+    /**
+     * Initiate the importing of the created, already persisted request.
+     */
+    private long submitRequest(RequestImpl p_request)
+            throws RequestHandlerException, RemoteException
+    {
+        // if this is an extracted request then check if the page
+        // already exists in an active job (an active re-import)
+        if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
+        {
+            int reimportOption = ActivePageReimporter.getReimportOption();
+            switch (reimportOption)
+            {
+                case ActivePageReimporter.REIMPORT_NEW_TARGETS:
+                    importWithReimportNewTargets(p_request);
+                    break;
+                case ActivePageReimporter.DELAY_REIMPORT:
+                    importWithDelayReimport(p_request);
+                    break;
+                case ActivePageReimporter.NO_REIMPORT:
+                default:
+                    importWithNoReimport(p_request);
+                    break;
+            }
+        }
+        else
+        {
+            // import all un-extracted files
+            importPage(p_request);
+        }
+
+        return p_request.getId();
+    }
+
+    /**
+     * Perform the import with the "reimport new targets" option turned on.
+     */
+    private void importWithReimportNewTargets(Request p_request)
+            throws RequestHandlerException, RemoteException
+    {
+        // if local content is turned on first check to see if
+        // the source page exists already with snippets and is ACTIVE
+        // this will fail importing
+        boolean addDeleteEnabled = true;
+        try
+        {
+            addDeleteEnabled = SystemConfiguration.getInstance()
+                    .getBooleanParameter(
+                            SystemConfigParamNames.ADD_DELETE_ENABLED);
+        }
+        catch (Exception e)
+        {
+            // just assume it is set to true then for the most
+            // validation
+            c_logger.error(
+                    "Failed to get the value of is add/delete enabled from the system parameters",
+                    e);
+        }
+
+        if (addDeleteEnabled)
+        {
+            // if the previous page is active and it contains snippets
+            // fail the import
+            SourcePage p = findPreviousSourcePage(p_request);
+
+            if (m_reimporter.isActivePage(p)
+                    && ((ExtractedSourceFile) p.getPrimaryFile())
+                            .containGsTags())
+            {
+                c_logger.error("Can't import the page "
+                        + p.getExternalPageId()
+                        + " to any target locales because it is part of an active job and contains snippets.");
+                // takes in one argument - external page id
+                String[] args =
+                { p.getExternalPageId() };
+                RequestHandlerException rhe = new RequestHandlerException(
+                        RequestHandlerException.MSG_PAGE_WITH_SNIPPETS_IN_OF_ACTIVE_JOB,
+                        args, null);
+                RequestPersistenceAccessor
+                        .setExceptionInRequest(p_request, rhe);
+            }
+        }
+
+        // look to see if there is a previous page
+        // must do for each target locale
+        ArrayList tps = findPreviousTargetPages(p_request);
+
+        if (tps != null && tps.size() > 0)
+        {
+            for (int i = 0; i < tps.size(); i++)
+            {
+                TargetPage tp = (TargetPage) tps.get(i);
+                if (m_reimporter.isActivePage(tp))
+                {
+                    p_request.addActiveTarget(tp.getGlobalSightLocale(), tp
+                            .getWorkflowInstance().getJob());
+                    c_logger.info("Importing - Found the page "
+                            + p_request.getExternalPageId()
+                            + " to still be active in the locale "
+                            + tp.getGlobalSightLocale().toString());
+                }
+            }
+            importPage(p_request);
+        }
+        else
+        {
+            importPage(p_request);
+        }
+    }
+
+    /**
+     * Perform the import with the "delay re-import" option turned on.
+     */
+    private void importWithDelayReimport(Request p_request)
+            throws RequestHandlerException, RemoteException
+    {
+        // if the previous page is part of an active job then it is
+        // a re-import of an active page.
+        SourcePage p = findPreviousSourcePage(p_request);
+
+        if (m_reimporter.isActivePage(p))
+        {
+            try
+            {
+                m_reimporter.delayImport((RequestImpl) p_request, p);
+            }
+            catch (ReimporterException re)
+            {
+                c_logger.error(
+                        "An exception was thrown when attempting to delay import.",
+                        re);
+                throw new RequestHandlerException(re);
+            }
+        }
+        else
+        {
+            importPage(p_request);
+        }
+    }
+
+    /**
+     * Perform the import with "no reimport" turned on. Which mean any source
+     * page that is already in an active job can NOT be re-imported until the
+     * previous version of it has been completly translated or cancelled.
+     */
+    private void importWithNoReimport(Request p_request)
+            throws RequestHandlerException, RemoteException
+    {
+        // if the previous page is part of an active job then it is
+        // a re-import of an active page.
+        SourcePage p = findPreviousSourcePage(p_request);
+        if (m_reimporter.isActivePage(p))
+        {
+            c_logger.error("Can't import the page " + p.getExternalPageId()
+                    + " because it is part of an active job.");
+            // takes in one argument - external page id
+            String[] args =
+            { p.getExternalPageId() };
+            RequestHandlerException rhe = new RequestHandlerException(
+                    RequestHandlerException.MSG_PAGE_ALREADY_PART_OF_ACTIVE_JOB,
+                    args, null);
+            RequestPersistenceAccessor.setExceptionInRequest(p_request, rhe);
+        }
+
+        // import all files - if an error will recognize the error and add the
+        // request to a job as an error
+        importPage(p_request);
+    }
+
+    /**
+     * Find the previous valid version of the page.
+     * 
+     * @param p_pageName
+     *            The unique name for the page.
+     * @param p_l10nProfile
+     *            The profile associated with this page.
+     * 
+     * @return The previous version or NULL if one doesn't exist.
+     */
+    private SourcePage findPreviousSourcePage(Request p_request)
+            throws RequestHandlerException
+    {
+        // get the source locale from the profile
+        GlobalSightLocale sourceLocale = p_request.getL10nProfile()
+                .getSourceLocale();
+        // find the page manager and verify if the page can be imported
+        PageManager pm = getPageManager();
+        SourcePage p = null;
+
+        try
+        {
+            p = pm.getCurrentPageByNameAndLocale(p_request, sourceLocale);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Exception when calling "
+                    + "PageManager.getCurrentPageByNameAndLocale", e);
+            // just passes null back doesn't throw an exception
+        }
+        return p;
+    }
+
+    /**
+     * Find the previous valid version of the target page. This is for each
+     * target locale specified in the request.
+     * 
+     * @param p_pageName
+     *            The unique name for the page.
+     * @param p_l10nProfile
+     *            The profile associated with this page.
+     * 
+     * @return The previous version or NULL if one doesn't exist.
+     */
+    private ArrayList findPreviousTargetPages(Request p_request)
+            throws RequestHandlerException
+    {
+        // find the page manager and verify if the page can be imported
+        PageManager pm = getPageManager();
+        ArrayList tps = new ArrayList(0);
+
+        try
+        {
+            tps = pm.getActiveTargetPagesByNameAndLocale(p_request);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Exception when calling "
+                    + "PageManager.getCurrentTargetPagesByNameAndLocales", e);
+            // just passes null back doesn't throw an exception
+        }
+        return tps;
+    }
+
+    /**
+     * Takes all source pages stuck in the IMPORTING state and marks the request
+     * with the appropriate error. It then uses the common importing code to
+     * update the page to be an IMPORT_FAIL and add it to the appropriate job.
+     */
+    private void handleIncompletePages() throws RequestHandlerException
+    {
+        try
+        {
+            // find all the incomplete requests and source pages
+            Collection pages = getPageManager().getSourcePagesStillImporting();
+            if (pages != null && pages.size() > 0)
+            {
+                c_logger.info("Cleaning up "
+                        + pages.size()
+                        + " page(s) that were importing when the system was shutdown.");
+                for (Iterator i = pages.iterator(); i.hasNext();)
+                {
+                    SourcePage sp = (SourcePage) i.next();
+
+                    // get the request straight from the DB - no caching
+                    // involved
+                    //
+                    // should not get the request from the source page
+                    // "sp.getRequest()"
+                    // because this will cause the request to be cached and any
+                    // updates
+                    // done to it using JDBC will go directly to the DB and the
+                    // cache and
+                    // DB will be out-of-date.
+                    Request r = RequestPersistenceAccessor
+                            .findRequestByPageId(sp.getId());
+
+                    // update the request type
+                    String[] args =
+                    { sp.getExternalPageId() };
+
+                    // set up the relationship that is only persisted from
+                    // source page to request
+                    // and not the other way - will need this for importing
+                    r.setSourcePage(sp);
+                    // update the request with an error exception of failing to
+                    // import
+                    // because of the system being shutdown
+                    setExceptionInRequest(
+                            r,
+                            new RequestHandlerException(
+                                    RequestHandlerException.MSG_FAILED_TO_COMPLETE_IMPORT_DURING_SHUTDOWN,
+                                    args, null));
+                    // import the page - this method handles error requests too.
+                    importPage(r);
+                }
+            }
+            else
+            {
+                c_logger.info("There aren't any pages stuck in importing.");
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RequestHandlerException(
+                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS,
+                    null, e);
+        }
+    }
+
+    /**
+     * Takes all requests that don't have a source page associated with it
+     * because they were importing when the system was shut-down. Marks the
+     * request as an error and then uses the common importing code to update the
+     * page to be an IMPORT_FAIL and add it to the appropriate job.
+     */
+    private void handleIncompleteRequests() throws RequestHandlerException
+    {
+        try
+        {
+            // find all the incomplete requests
+            Collection requests = RequestPersistenceAccessor
+                    .findRequestsStillImporting();
+            if (requests != null && requests.size() > 0)
+            {
+                c_logger.info("Cleaning up " + requests.size()
+                        + " request(s) were importing "
+                        + "when they system was shutdown.");
+                for (Iterator i = requests.iterator(); i.hasNext();)
+                {
+                    Request r = (Request) i.next();
+
+                    // update the page name and data source type
+                    /** Uses DOM to parse the event flow XML */
+                    StringReader sr = new StringReader(r.getEventFlowXml());
+                    InputSource is = new InputSource(sr);
+                    DOMParser parser = new DOMParser();
+                    parser.setFeature("http://xml.org/sax/features/validation",
+                            false);
+                    parser.parse(is);
+                    Document document = parser.getDocument();
+                    Element root = document.getDocumentElement();
+                    NodeList nl = root.getElementsByTagName("displayName");
+                    Element displayNameElt = (Element) nl.item(0);
+
+                    String pageName = displayNameElt.getFirstChild()
+                            .getNodeValue();
+                    r.setExternalPageId(pageName);
+                    Element source = (Element) root.getElementsByTagName(
+                            "source").item(0);
+                    String dataSourceType = source
+                            .getAttribute("dataSourceType");
+                    r.setDataSourceType(dataSourceType);
+
+                    String[] args =
+                    { r.getExternalPageId() };
+                    // update the request with an error exception of failing to
+                    // import
+                    // because of the system being shutdown
+                    setExceptionInRequest(
+                            r,
+                            new RequestHandlerException(
+                                    RequestHandlerException.MSG_FAILED_TO_COMPLETE_IMPORT_DURING_SHUTDOWN,
+                                    args, null));
+
+                    importPage(r);
+                }
+            }
+            else
+            {
+                c_logger.info("There aren't any requests stuck in importing.");
+            }
+        }
+        catch (Exception e)
+        {
+            throw new RequestHandlerException(
+                    RequestHandlerException.MSG_FAILED_TO_CLEANUP_INCOMPLETE_IMPORTS,
+                    null, e);
+        }
+    }
+
     // Sends mail from the Admin to the PM about an Import Failure
     private void sendMailFromAdmin(Request p_r) throws Exception
     {
@@ -1073,9 +1092,8 @@ public class RequestHandlerLocal implements RequestHandler
     }
 
     // send mail to Project manager / Workflow Manager
-    private void sendEmail(String p_userId, String[] p_messageArgs, 
-            String p_companyIdStr)
-            throws Exception
+    private void sendEmail(String p_userId, String[] p_messageArgs,
+            String p_companyIdStr) throws Exception
     {
         if (!m_systemNotificationEnabled)
         {
@@ -1093,7 +1111,7 @@ public class RequestHandlerLocal implements RequestHandler
      * Send email to the administrator. If fails - log the error.
      */
     private void sendEmailToAdmin(String p_messageKey,
-            String[] p_messageArguments, String[] p_attachments, 
+            String[] p_messageArguments, String[] p_attachments,
             String p_companyIdStr)
     {
         if (!m_systemNotificationEnabled)
@@ -1219,23 +1237,5 @@ public class RequestHandlerLocal implements RequestHandler
 
         return messageArgs;
     }
-    public FileProfile getFileProfile(Request p_request)
-    {
-        FileProfile fileProfile = null;
-        // get the file system profile persistence manager
-        FileProfilePersistenceManager fileProfMgr = null;
-        try
-        {
-            fileProfMgr = ServerProxy.getFileProfilePersistenceManager();
-            fileProfile = fileProfMgr.readFileProfile(p_request
-                    .getDataSourceId());
-        }
-        catch (Exception e)
-        {
-            throw new RequestHandlerException(
-                    RequestHandlerException.MSG_FAILED_TO_FIND_FILE_PROFILE_MANAGER,
-                    null, e);
-        }
-        return fileProfile;
-    }
+
 }

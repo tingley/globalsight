@@ -89,6 +89,7 @@
     ArrayList<Filter> pptFilters = mapOfFormatTypeFilter.get("powerpoint-html");
     ArrayList<Filter> o2010Filters = mapOfFormatTypeFilter.get("office-xml");
     ArrayList<Filter> poFilters = mapOfFormatTypeFilter.get("po");
+    ArrayList<Filter> fmFilters = mapOfFormatTypeFilter.get("mif");
     
 	FileProfile fp = (FileProfile) sessionMgr.getAttribute("fileprofile");
     String formatType = (String)sessionMgr.getAttribute("formatType");
@@ -461,6 +462,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 	var pptFilters = new Array();
 	var o2010Filters = new Array();
 	var poFilters = new Array();
+	var fmFilters = new Array();
   
 	<%
 		for(int i = 0; i < jpFilters.size(); i++)
@@ -553,6 +555,20 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 			jspFilter.filterName = "<%=filter.getFilterName()%>";
 			jspFilter.filterTableName = "<%=filter.getFilterTableName()%>";
 			jspFilters.push(jspFilter);
+			<%
+		}      
+	%>
+	
+	<%
+		for(int i = 0; i < fmFilters.size(); i++)
+		{
+			Filter filter = fmFilters.get(i);
+			%>
+			var fmFilter = new Object();
+			fmFilter.id = "<%=filter.getId()%>";
+			fmFilter.filterName = "<%=filter.getFilterName()%>";
+			fmFilter.filterTableName = "<%=filter.getFilterTableName()%>";
+			fmFilters.push(fmFilter);
 			<%
 		}      
 	%>
@@ -669,6 +685,10 @@ function enforceEncodingAndTargetFileExportIfNeeded()
         {
         	generateFilters(o2010Filters);
         }
+        else if (isFM9(format))
+        {
+        	generateFilters(fmFilters);
+        }
         else
         {
             generateEmptyFilters();
@@ -729,7 +749,7 @@ function enforceEncodingAndTargetFileExportIfNeeded()
 		}
     }
     
-    if(isHtml() || format == "XML")
+    if(isHtml() || format == "XML" || format == "RESX")
     {
     	showBOMType();
     }
@@ -799,7 +819,8 @@ function thisFormatMustUseUTF8(format)
         format == "Office2010 document" ||
         format == "MIF 9" ||
         format == "FrameMaker9" ||
-        format == "Passolo 2011")
+        format == "Passolo 2011" ||
+        format == "Windows Portable Executable")
     {
         return true;
     }
@@ -838,6 +859,7 @@ function isIndesign(format)
         format == "INDD (CS3)" ||
         format == "INDD (CS4)" ||
         format == "INDD (CS5)" ||
+        format == "INDD (CS5.5)" ||
         format == "INX (CS2)" ||
         format == "INX (CS3)"  ||
         format == "InDesign Markup (IDML)" )
@@ -861,6 +883,16 @@ function isOpenOffice(format)
 function isOffice2010(format)
 {
     if (format == "Office2010 document")
+    {
+        return true;
+    }
+
+    return false;
+}
+
+function isFM9(format)
+{
+	if (format == "MIF 9" || format == "FrameMaker9")
     {
         return true;
     }
@@ -1192,7 +1224,7 @@ function isProjectUseTermbase(data) {
         </tr>
         <tr>
           <td valign="top">
-            <%=bundle.getString("lb_loc_profiles")%><span class="asterisk">*</span>:
+            <%=bundle.getString("lb_loc_profile")%><span class="asterisk">*</span>:
           </td>
           <td>
             <select id="locProfileId" name="locProfileId" onchange="setForXLZ();">

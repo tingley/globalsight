@@ -28,12 +28,14 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.ling.tm2.BaseTmTu;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.population.SegmentsForSave;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
@@ -60,10 +62,10 @@ public class TmSegmentSaver
 
     static private final String INSERT_SEGMENT_TM_TU = " (id, tm_id, format, type, source_locale_id, source_tm_name, from_world_server) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    static private final String INSERT_NON_CLOB_TUV = " (id, tu_id, segment_string, "
+    static private final String INSERT_NON_CLOB_TUV = " (id, tu_id, segment_string, segment_clob, "
             + "exact_match_key, locale_id, creation_date, modify_date, "
             + "creation_user, modify_user, updated_by_project, sid) VALUES "
-            + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            + "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
 
     static private final String UPDATE = "UPDATE ";
 
@@ -496,15 +498,21 @@ public class TmSegmentSaver
     {
         p_tuvNonClobInsert.setLong(1, p_tuvId);
         p_tuvNonClobInsert.setLong(2, p_tuId);
-        p_tuvNonClobInsert.setString(3, p_tuv.getSegment());
-        p_tuvNonClobInsert.setLong(4, p_tuv.getExactMatchKey());
-        p_tuvNonClobInsert.setLong(5, p_tuv.getLocale().getId());
-        p_tuvNonClobInsert.setTimestamp(6, getCreationDate(p_tuv, p_now));
-        p_tuvNonClobInsert.setTimestamp(7, getModifyDate(p_tuv, p_now));
-        p_tuvNonClobInsert.setString(8, p_tuv.getCreationUser());
-        p_tuvNonClobInsert.setString(9, p_tuv.getModifyUser());
-        p_tuvNonClobInsert.setString(10, p_tuv.getUpdatedProject());
-        p_tuvNonClobInsert.setString(11, p_tuv.getSid());
+        if (EditUtil.getUTF8Len(p_tuv.getSegment()) <= PersistentObject.CLOB_THRESHOLD) {
+            p_tuvNonClobInsert.setString(3, p_tuv.getSegment());
+            p_tuvNonClobInsert.setString(4, null);
+        } else { 
+            p_tuvNonClobInsert.setString(3, null);
+            p_tuvNonClobInsert.setString(4, p_tuv.getSegment());
+        }
+        p_tuvNonClobInsert.setLong(5, p_tuv.getExactMatchKey());
+        p_tuvNonClobInsert.setLong(6, p_tuv.getLocale().getId());
+        p_tuvNonClobInsert.setTimestamp(7, getCreationDate(p_tuv, p_now));
+        p_tuvNonClobInsert.setTimestamp(8, getModifyDate(p_tuv, p_now));
+        p_tuvNonClobInsert.setString(9, p_tuv.getCreationUser());
+        p_tuvNonClobInsert.setString(10, p_tuv.getModifyUser());
+        p_tuvNonClobInsert.setString(11, p_tuv.getUpdatedProject());
+        p_tuvNonClobInsert.setString(12, p_tuv.getSid());
         p_tuvNonClobInsert.addBatch();
     }
 

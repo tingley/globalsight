@@ -193,6 +193,15 @@ public class AccountOptionsHandler
             PageHandler.getUserParameter(
                 p_session, VISITED_HYPERLINK_COLOR).getValue());
         
+        p_request.setAttribute(PREVIEW_100MATCH_COLOR,
+                PageHandler.getUserParameter(p_session, PREVIEW_100MATCH_COLOR).getValue());
+
+        p_request.setAttribute(PREVIEW_ICEMATCH_COLOR,
+                PageHandler.getUserParameter(p_session, PREVIEW_ICEMATCH_COLOR).getValue());
+
+        p_request.setAttribute(PREVIEW_NONMATCH_COLOR,
+                PageHandler.getUserParameter(p_session, PREVIEW_NONMATCH_COLOR).getValue());
+        
         p_request.setAttribute(EDITOR_SHOW_CLOSEALLCOMMENT,
                 PageHandler.getUserParameter(
                     p_session, EDITOR_SHOW_CLOSEALLCOMMENT).getValue());
@@ -263,6 +272,9 @@ public class AccountOptionsHandler
             p_request.getParameter(ACTIVE_HYPERLINK_COLOR));
         optionsHash.put(VISITED_HYPERLINK_COLOR,
             p_request.getParameter(VISITED_HYPERLINK_COLOR));
+        optionsHash.put(PREVIEW_100MATCH_COLOR, p_request.getParameter(PREVIEW_100MATCH_COLOR));
+        optionsHash.put(PREVIEW_ICEMATCH_COLOR, p_request.getParameter(PREVIEW_ICEMATCH_COLOR));
+        optionsHash.put(PREVIEW_NONMATCH_COLOR, p_request.getParameter(PREVIEW_NONMATCH_COLOR));
         optionsHash.put(EDITOR_SHOW_CLOSEALLCOMMENT,
                 p_request.getParameter(EDITOR_SHOW_CLOSEALLCOMMENT));
     }

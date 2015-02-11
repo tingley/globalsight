@@ -377,7 +377,7 @@ public abstract class InstallUtil
 		} 
 		catch (IOException e) 
 		{
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 		
 		FileInputStream in = null;
@@ -388,7 +388,7 @@ public abstract class InstallUtil
 		} 
         catch (Exception e) 
 		{
-			log.error(e);
+			log.error(e.getMessage(), e);
 		} 
         finally
         {
@@ -400,7 +400,7 @@ public abstract class InstallUtil
 				} 
         		catch (IOException e) 
 				{
-					log.error(e);
+					log.error(e.getMessage(), e);
 				}
         	}
         }
@@ -519,7 +519,7 @@ public abstract class InstallUtil
         }
         catch (IOException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
             UI ui = UIFactory.getUI();
             ui.confirmContinue("Failed to generate mail-service.xml.");
             return;

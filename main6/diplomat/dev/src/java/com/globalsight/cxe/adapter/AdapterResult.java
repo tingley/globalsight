@@ -15,6 +15,10 @@
  *  
  */
 package com.globalsight.cxe.adapter;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.globalsight.cxe.message.CxeMessage;
 
 /**
@@ -22,7 +26,7 @@ import com.globalsight.cxe.message.CxeMessage;
  * handleMessage() method. Currently this is just the CxeMessage, but this might grow to include
  * items associated with a CxeMessage.
  */
-public class AdapterResult
+public class AdapterResult implements Serializable
 {
     //////////////////////////////////////
     // Public Members                   //
@@ -32,6 +36,8 @@ public class AdapterResult
      * of an adapter's operation
      */
     public CxeMessage cxeMessage = null;
+    
+    private List<CxeMessage> cxeMessages = new ArrayList<CxeMessage>();
 
     //////////////////////////////////////
     // Constructors                     //
@@ -53,6 +59,21 @@ public class AdapterResult
     public AdapterResult(CxeMessage p_cxeMessage)
     {
         cxeMessage = p_cxeMessage;
+    }
+    
+    public void addMsg(CxeMessage p_cxeMessage)
+    {
+    	cxeMessages.add(p_cxeMessage);
+    }
+    
+    public void addAllMsg(List<CxeMessage> p_cxeMessage)
+    {
+    	cxeMessages.addAll(p_cxeMessage);
+    }
+    
+    public List<CxeMessage> getMsgs()
+    {
+    	return cxeMessages;
     }
 }
 

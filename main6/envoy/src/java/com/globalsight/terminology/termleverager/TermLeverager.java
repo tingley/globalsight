@@ -33,6 +33,7 @@ import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.java.TbTerm;
+import com.globalsight.util.StringUtil;
 
 /**
  * Workhorse for TermLeverageManager that performs the actual leveraging.
@@ -206,10 +207,12 @@ public class TermLeverager
 
         // Then find the indexes to leverage from and query them.
         ArrayList langs = p_options.getSourcePageLangNames();
-
+        String lang = null;
+        String termMatchFormatString = null;
+        String segment = null;
         l_languages: for (int i = 0, maxi = langs.size(); i < maxi; i++)
         {
-            String lang = (String) langs.get(i);
+            lang = (String) langs.get(i);
 
             // Do that for each TUV, ignoring subflows since release 4.2.
             for (int j = 0, maxj = p_tuvs.size(); j < maxj; j++)
@@ -218,10 +221,33 @@ public class TermLeverager
 
                 try
                 {
-                    Hitlist hits = tb.recognizeTerms(lang, tuv
-                            .getTermMatchFormat(), 10);
-
+                    termMatchFormatString = tuv.getTermMatchFormat();
+                    Hitlist hits = tb.recognizeTerms(lang,
+                            termMatchFormatString, 10);
                     addSourceHits(p_result, tuv, hits, tbid);
+
+                    ArrayList<Long> existedHits = new ArrayList<Long>();
+                    ArrayList hitlist = hits.getHits();
+                    for (int k = 0; k < hitlist.size(); k++)
+                    {
+                        Hitlist.Hit hit = (Hitlist.Hit) hitlist.get(k);
+                        existedHits.add(hit.getTermId());
+                    }
+                    
+                    //GBS-2679, Vincent Yan
+                    //If a segment contains internal text, the internal text
+                    //don't need to leverage
+                    segment = tuv.getGxml();
+                    if (containsInternalText(segment))
+                    {
+                        hits = tb.recognizeTerms(lang,
+                                ignoreInternalText(segment, termMatchFormatString), 10);
+                        if (existedHits.size() == 0)
+                            addSourceHits(p_result, tuv, hits, tbid);
+                        else {
+                            addSourceHits(p_result, tuv, hits, tbid, existedHits);
+                        }
+                    }
                 }
                 catch (TermbaseException ex)
                 {
@@ -232,6 +258,59 @@ public class TermLeverager
                     continue l_languages;
                 }
             }
+        }
+    }
+
+    /**
+     * Verify if the segment contains internal text
+     * Internal text has tag as "<bpt internal=\"yes\" ".
+     * 
+     * @param segment Segment
+     * @return boolean If the segment contains internal text, return true
+     */
+    private boolean containsInternalText(String segment) {
+        if (StringUtil.isEmpty(segment))
+            return false;
+        return segment.indexOf("<bpt internal=\"yes\" ") > -1;
+    }
+    
+    /**
+     * Ignore Internal text in term leverage
+     * @param segment Segment
+     * @param termMatchFormatString 
+     * @return String String without any internal texts
+     */
+    private String ignoreInternalText(String segment, String termMatchFormatString)
+    {
+        int beginIndex = -1, endIndex = -1, tmpIndex = 0;
+        String internalText = "";
+        String oriTermMatchFormatString = termMatchFormatString;
+        int count = 0;
+        try
+        {
+            while ((beginIndex = segment.indexOf("<bpt internal=\"yes\"", tmpIndex)) > -1 && count < 2) {
+                endIndex = segment.indexOf("</bpt>", beginIndex);
+                tmpIndex = segment.indexOf("<ept ", beginIndex);
+                if (endIndex == -1 || endIndex > tmpIndex)
+                    endIndex = segment.indexOf(">", beginIndex) + 1;
+                else 
+                    endIndex += 6;
+                
+                if (endIndex > -1 && tmpIndex > -1) {
+                    internalText = segment.substring(endIndex, tmpIndex);
+                    termMatchFormatString = termMatchFormatString.replace(" " + internalText, "");
+                    termMatchFormatString = termMatchFormatString.replace(internalText + " ", "");
+                    termMatchFormatString = termMatchFormatString.replace(internalText, "");
+                }
+                
+                count++;
+            }
+            return termMatchFormatString;
+        }
+        catch (Exception e)
+        {
+            CATEGORY.warn("Cannot handle internal text in term leverage correctly. " + segment, e);
+            return oriTermMatchFormatString;
         }
     }
 
@@ -249,6 +328,27 @@ public class TermLeverager
 
             p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(), hit
                     .getTermId(), hit.getTerm().trim(), hit.getScore(), hit.getDescXML());
+        }
+    }
+
+    /**
+     * Helper method to record source matches in result.
+     */
+    private void addSourceHits(TermLeverageResult p_result, TuvLing p_tuv,
+            Hitlist p_hits, long p_tbid, ArrayList<Long> existedHits)
+    {
+        ArrayList hits = p_hits.getHits();
+        if (existedHits == null)
+            existedHits = new ArrayList<Long>();
+
+        for (int i = 0, max = hits.size(); i < max; i++)
+        {
+            Hitlist.Hit hit = (Hitlist.Hit) hits.get(i);
+            
+            if (!existedHits.contains(hit.getTermId())) {
+                p_result.addSourceHit(p_tuv, p_tbid, hit.getConceptId(), hit
+                        .getTermId(), hit.getTerm().trim(), hit.getScore(), hit.getDescXML());
+            }
         }
     }
 
@@ -333,7 +433,7 @@ public class TermLeverager
                     // String usage = results.getString("usage");
 
                     // Map lang_name to a termbase locale (language code only)
-                    if (p_options.getLocale(langname) != null) {
+                    if (p_options.getLocale(langname) != null && !StringUtil.isEmpty(term)) {
                         String locale = p_options.getLocale(langname).getLanguage();
 
                         p_result.addTargetTerm(tbid, cid, tid, term, locale, "");

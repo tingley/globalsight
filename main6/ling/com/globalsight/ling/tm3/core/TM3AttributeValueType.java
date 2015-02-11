@@ -24,14 +24,19 @@ public interface TM3AttributeValueType {
         }
         public void checkValue(Object value, String name)
                 throws IllegalArgumentException {
-            if (! (value instanceof String)) {
-                throw new IllegalArgumentException(
-                    "attr " + name + " value " + value + " not of type String");
-            }
-            String s = (String) value;
-            if (s.length() > maxLength) {
-                throw new IllegalArgumentException(
-                    "attr " + name + " value " + value + " longer than " + maxLength);
+            if (value != null)
+            {
+                if (!(value instanceof String))
+                {
+                    throw new IllegalArgumentException("attr " + name
+                            + " value " + value + " not of type String");
+                }
+                String s = (String) value;
+                if (s.length() > maxLength)
+                {
+                    throw new IllegalArgumentException("attr " + name
+                            + " value " + value + " longer than " + maxLength);
+                }
             }
         }
     }

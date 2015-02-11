@@ -128,11 +128,9 @@ public class ViewFilesHandler
             {
                 Job job = ServerProxy.getJobHandler().getJobById(Long.parseLong(st.nextToken()));
                 // Get the workflows and search for the workflow with this target locale
-                List workflows = (List)job.getWorkflows();
                 String status = null;
-                for (int i=0; i < workflows.size(); i++)
+                for (Workflow wf : job.getWorkflows())
                 {
-                    Workflow wf = (Workflow)workflows.get(i);
                     if (wf.getTargetLocale().toString().equals(targLocale))
                     {
                         Hashtable taskHash = wf.getTasks();

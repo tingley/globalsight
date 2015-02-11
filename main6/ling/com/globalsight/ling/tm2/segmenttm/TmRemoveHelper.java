@@ -30,25 +30,24 @@ public class TmRemoveHelper {
         static final String REMOVE_TU_T = "delete from project_tm_tu_t where tm_id = ?";
     
         static final String REMOVE_TU_L = "delete from project_tm_tu_l where tm_id = ?";
-    
-        static final String REMOVE_TUV_T = "delete from project_tm_tuv_t where exists "
-                + "(select * from project_tm_tu_t where project_tm_tu_t.id = project_tm_tuv_t.tu_id "
-                + "and project_tm_tu_t.tm_id = ?)";
-        
-        static final String REMOVE_TUV_T_BY_LANGUAGE = "delete from project_tm_tuv_t where exists "
-               + "(select * from project_tm_tu_t where project_tm_tu_t.id = project_tm_tuv_t.tu_id "
-               + " and  project_tm_tu_t.tm_id= ? "
-               + "and project_tm_tuv_t.LOCALE_ID = ?)";
-    
-        static final String REMOVE_TUV_L = "delete from project_tm_tuv_l where exists "
-                + "(select * from project_tm_tu_l where project_tm_tu_l.id = project_tm_tuv_l.tu_id "
-                + "and project_tm_tu_l.tm_id = ?)";
-        
-        static final String REMOVE_TUV_L_BY_LANGUAGE = "delete from project_tm_tuv_l where exists "
-               + "(select * from project_tm_tu_l where project_tm_tu_l.id = project_tm_tuv_l.tu_id "
-               + " and project_tm_tu_l.tm_id = ? "
-               + "and  project_tm_tuv_l.LOCALE_ID = ? )";
 
+        static final String REMOVE_TUV_T = "delete project_tm_tuv_t from project_tm_tuv_t, project_tm_tu_t "
+        		+ "where project_tm_tu_t.id = project_tm_tuv_t.tu_id "
+                + "and project_tm_tu_t.tm_id = ?";
+
+        static final String REMOVE_TUV_T_BY_LANGUAGE = "delete project_tm_tuv_t from project_tm_tuv_t, project_tm_tu_t "
+        	   + "where project_tm_tu_t.id = project_tm_tuv_t.tu_id "
+               + "and project_tm_tu_t.tm_id= ? "
+               + "and project_tm_tuv_t.locale_id = ?";
+
+        static final String REMOVE_TUV_L = "delete project_tm_tuv_l from project_tm_tuv_l, project_tm_tu_l "
+                + "where project_tm_tu_l.id = project_tm_tuv_l.tu_id "
+                + "and project_tm_tu_l.tm_id = ?";
+
+        static final String REMOVE_TUV_L_BY_LANGUAGE = "delete project_tm_tuv_l from project_tm_tuv_l, project_tm_tu_l "
+               + "where project_tm_tu_l.id = project_tm_tuv_l.tu_id "
+               + "and project_tm_tu_l.tm_id = ? "
+               + "and project_tm_tuv_l.locale_id = ? ";
     }
 
     static final String GET_CUV_IDS = "select distinct cm.cuv_id from corpus_map cm, "

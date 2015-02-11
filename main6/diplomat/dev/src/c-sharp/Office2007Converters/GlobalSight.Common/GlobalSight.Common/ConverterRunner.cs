@@ -19,6 +19,7 @@ namespace GlobalSight.Common
 		private bool m_keepWatching = true;
 		private Converter m_converter = null;
 		private DirectoryInfo m_watchDirInfo = null;
+        private Thread m_testThread = null;
 
 
 		/// <summary>
@@ -34,6 +35,8 @@ namespace GlobalSight.Common
 			m_watchDirInfo = new DirectoryInfo(m_watchDirName);
 			m_converter = p_converter;
 			m_watchThread = new Thread(new ThreadStart(Watch));
+
+            m_testThread = new Thread(new ThreadStart(WatchTest));
             m_log = p_log;
 		}
 
@@ -44,6 +47,7 @@ namespace GlobalSight.Common
 		{
 			m_keepWatching = true;
 			m_watchThread.Start();
+            m_testThread.Start();
 		}
 
 		/// <summary>
@@ -73,6 +77,22 @@ namespace GlobalSight.Common
 				Thread.Sleep(2000);
 			}
 		}
+
+        private void WatchTest()
+        {
+            while (m_keepWatching)
+            {
+                try
+                {
+                    ScanDirectoryTest();
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(m_log, "Failed to scan directory", e);
+                }
+                Thread.Sleep(1000);
+            }
+        }
 	
 		/// <summary>
 		/// Scans the watch directory for appropriate files and then invokes the converter.
@@ -94,5 +114,13 @@ namespace GlobalSight.Common
 				}
 			}
 		}
+
+        private void ScanDirectoryTest()
+        {
+            foreach (FileInfo f in m_watchDirInfo.GetFiles(m_converter.GetTestFileToWatch()))
+            { 
+                f.Delete();
+            }
+        }
 	}
 }

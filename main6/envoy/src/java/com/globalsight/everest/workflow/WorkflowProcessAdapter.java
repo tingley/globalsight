@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.Node;
 import org.jbpm.graph.def.ProcessDefinition;
@@ -43,6 +42,7 @@ import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskInfo;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.util.StringUtil;
 
 /**
@@ -56,7 +56,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
 {
     private static final Logger s_logger = Logger
             .getLogger(WorkflowProcessAdapter.class.getName());
-    
+
     // ////////////////////////////////////////////////////////////////////
     // Begin: Package Level Methods
     // ////////////////////////////////////////////////////////////////////
@@ -153,7 +153,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         addArrowToTaskInstance(nodeList, wfTaskInstances, wfInst, map);
 
         // now add the properties
-        addPropertiesToTaskInstance(wfTaskInstances, nodeList, map);
+        addPropertiesToTaskInstance(wfInst, wfTaskInstances, nodeList, map);
 
         // now get the max sequence
         wfInst.setMaxSequence(WorkflowAdapterHelper.getMaxSeq(wfTaskInstances));
@@ -322,7 +322,6 @@ public class WorkflowProcessAdapter extends WorkflowHelper
 
             ProcessDefinition processDefinition = p_pi.getProcessDefinition();
 
-            processDefinition.setName(p_workflowInstance.getName());
             setDescription(processDefinition,
                     p_workflowInstance.getDescription());
 
@@ -330,7 +329,9 @@ public class WorkflowProcessAdapter extends WorkflowHelper
             // Add all the new node instances which were added
             addRemoveNode(processDefinition, p_workflowInstance);
 
-            updateArrowProperties(processDefinition, p_workflowInstance);
+            updateArrowProperties(p_pi, processDefinition, p_workflowInstance);
+
+            updateNodeNames(p_pi, processDefinition, p_workflowInstance);
 
             // before commit, activate task for a completed workflow
             List activeNodes = activateNewTasks(lastCompletedActivitiesId, p_pi);
@@ -345,8 +346,55 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         }
     }
 
+    /**
+     * Updates the task|taskNode|taskInstance name if the activity is changed.
+     */
+    private static void updateNodeNames(ProcessInstance p_pi,
+            ProcessDefinition p_pd, WorkflowInstance p_wfi)
+    {
+        for (Object o : p_wfi.getWorkflowInstanceTasks())
+        {
+            WorkflowTaskInstance wfTask = (WorkflowTaskInstance) o;
+            String nodeName = wfTask.getNodeName();
+            Node node = WorkflowJbpmUtil.getNodeByNodeName(p_pd, nodeName);
+            if (node == null)
+            {
+                continue;
+            }
+
+            if (wfTask.getStructuralState() != WorkflowConstants.REMOVED
+                    && wfTask.getStructuralState() != WorkflowConstants.NEW)
+            {
+                if (wfTask.getType() == WorkflowConstants.ACTIVITY)
+                {
+                    String activityName = wfTask.getActivityName();
+                    // updating names only when the activity is changed
+                    if (!activityName.equals(WorkflowJbpmUtil
+                            .getActivityName(node)))
+                    {
+                        String newTaskName = WorkflowJbpmUtil
+                                .generateTaskName(activityName);
+                        Task task = ((TaskNode) node).getTask(WorkflowJbpmUtil
+                                .getTaskName(node));
+                        task.setName(newTaskName);
+                        // update task instance name if created
+                        TaskInstance ti = WorkflowJbpmUtil
+                                .getTaskInstanceByNode(p_pi, nodeName);
+                        if (ti != null)
+                        {
+                            ti.setName(newTaskName);
+                        }
+                        node.setName(WorkflowJbpmUtil.generateNodeName(
+                                activityName,
+                                WorkflowJbpmUtil.getNodeIndex(nodeName)));
+                    }
+                }
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private static void updateArrowProperties(
+    private static void updateArrowProperties(ProcessInstance p_pi,
             ProcessDefinition p_processDefinition,
             WorkflowInstance p_workflowInstance) throws Exception
     {
@@ -385,7 +433,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
                 WorkflowJbpmUtil.setConfigure(node, nodePara.restore());
 
             }
-            // This means update existing nodeinstance
+            // This means update existing node instance
             else if (p_wfTask.getStructuralState() != WorkflowConstants.REMOVED)
             {
                 if (p_wfTask.getType() == WorkflowConstants.ACTIVITY)
@@ -696,6 +744,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         WorkflowTaskInstance wti = new WorkflowTaskInstance(
                 WorkflowJbpmUtil.getActivityName(taskNode),
                 WorkflowConstants.ACTIVITY);
+        wti.setAcceptUser(p_taskInstance.getActorId());
         wti.setTaskId(taskNode.getId());
         wti.setNodeName(taskNode.getName());
         wti.setDesc(param.getAttribute(WorkflowConstants.FIELD_SEQUENCE));
@@ -730,6 +779,12 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         return wti;
     }
 
+    private static void addActivityNodeProperties(WorkflowNodeParameter param,
+            WorkflowTaskInstance wti) throws Exception
+    {
+        addActivityNodeProperties(null, param, wti);
+    }
+
     /**
      * Adds the required properties of the activity node.
      * 
@@ -740,12 +795,39 @@ public class WorkflowProcessAdapter extends WorkflowHelper
      * 
      * @throws Exception
      */
-    private static void addActivityNodeProperties(
+    private static void addActivityNodeProperties(WorkflowInstance p_wfi,
             WorkflowNodeParameter p_param, WorkflowTaskInstance p_wti)
             throws Exception
     {
         Activity activity = ServerProxy.getJobHandler().getActivity(
                 p_param.getAttribute(WorkflowConstants.FIELD_ACTIVITY));
+
+        String acceptor = null;
+        if (p_wfi != null)
+        {
+            JbpmContext ctx = null;
+            try
+            {
+                ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+                ProcessInstance processInstance = ctx.getProcessInstance(p_wfi
+                        .getId());
+                if (processInstance != null)
+                {
+                    TaskInstance taskInstance = WorkflowJbpmUtil
+                            .getTaskInstanceByNode(processInstance,
+                                    p_wti.getNodeName());
+                    if (taskInstance != null)
+                    {
+                        acceptor = taskInstance.getActorId();
+                    }
+                }
+            }
+            finally
+            {
+                ctx.close();
+            }
+        }
+
         // sequence of the node
         int sequence = WorkflowAdapterHelper.parseInt(p_wti.getDesc(), -9);
 
@@ -815,6 +897,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         p_wti.setRolePreference(rolePreference);
         p_wti.setActionType(actionType);
         p_wti.setActivity(activity);
+        p_wti.setAcceptUser(acceptor);
         p_wti.setSequence(sequence);
         p_wti.setRoleType(isUserRole);
         p_wti.setRoles(roles);
@@ -822,7 +905,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         p_wti.setCompletedTime(timeToComplete);
         p_wti.setOverdueToPM(overduePM);
         p_wti.setOverdueToUser(overdueUser);
-        p_wti.setDisplayRoleName(displayRoleName);
+        p_wti.setDisplayRoleName(UserUtil.getUserNamesByIds(displayRoleName));
     }
 
     /**
@@ -849,6 +932,12 @@ public class WorkflowProcessAdapter extends WorkflowHelper
         {
             Node node = (Node) it.next();
             WorkflowTaskInstance task = workflowTaskInstance(node, p_process);
+            TaskInstance taskInstance = WorkflowJbpmUtil.getTaskInstanceByNode(
+                    p_process, node.getName());
+            if (taskInstance != null)
+            {
+                task.setAcceptUser(taskInstance.getActorId());
+            }
             if (task != null)
             {
                 workflowTasks.add(task);
@@ -1094,14 +1183,15 @@ public class WorkflowProcessAdapter extends WorkflowHelper
      *            The {@code Node}.
      * @throws Exception
      */
-    private static void addActivityNodeProperties(Map p_map,
-            WorkflowTaskInstance p_task, Node p_node) throws Exception
+    private static void addActivityNodeProperties(WorkflowInstance p_wfi,
+            Map p_map, WorkflowTaskInstance p_task, Node p_node)
+            throws Exception
     {
         String nodeName = p_node.getName();
         /* Gets the nodeParameter */
         WorkflowNodeParameter nodeParameter = (WorkflowNodeParameter) p_map
                 .get(nodeName);
-        addActivityNodeProperties(nodeParameter, p_task);
+        addActivityNodeProperties(p_wfi, nodeParameter, p_task);
     }
 
     /*
@@ -1240,8 +1330,9 @@ public class WorkflowProcessAdapter extends WorkflowHelper
     /**
      * Adds properties to the task instances.
      */
-    private static void addPropertiesToTaskInstance(List p_wfTaskInstances,
-            List p_nodeList, Map p_map) throws Exception
+    private static void addPropertiesToTaskInstance(WorkflowInstance p_wfi,
+            List p_wfTaskInstances, List p_nodeList, Map p_map)
+            throws Exception
 
     {
         Iterator it = p_nodeList.iterator();
@@ -1254,7 +1345,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
             switch (wfTask.getType())
             {
                 case WorkflowConstants.ACTIVITY:
-                    addActivityNodeProperties(p_map, wfTask, node);
+                    addActivityNodeProperties(p_wfi, p_map, wfTask, node);
                     break;
                 case WorkflowConstants.CONDITION:
                     addConditionNodeProperties(wfTask, node, p_map);
@@ -1419,9 +1510,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
             {
                 if (wfArrow.getArrowInstanceId() == -1)
                 {
-
                     /* new added arrow */
-
                     Node targetNode = WorkflowJbpmUtil.getNodeByWfTask(
                             p_processDefinition, wfArrow.getTargetNode());
 
@@ -1622,7 +1711,8 @@ public class WorkflowProcessAdapter extends WorkflowHelper
 
         // update role name UDA
         String role_name = p_wfTask.getDisplayRoleName();
-        nodePara.setAttribute(WorkflowConstants.FIELD_ROLE_NAME, role_name);
+        nodePara.setAttribute(WorkflowConstants.FIELD_ROLE_NAME,
+                UserUtil.getUserIdsByNames(role_name));
 
         // update system action type UDA
         String actionType = p_wfTask.getActionType();
@@ -1875,6 +1965,7 @@ public class WorkflowProcessAdapter extends WorkflowHelper
 
         // add the properties
         addPropertiesToTaskInstance(wfTaskInst, workflowNodeParameter);
+
         return wfTaskInst;
     }
 
@@ -1955,12 +2046,4 @@ public class WorkflowProcessAdapter extends WorkflowHelper
 
         return wfTaskInst;
     }
-
-    public static Collection<?> getTaskInstances(long instanceId)
-    {
-        JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-        ProcessInstance instance = ctx.getProcessInstance(instanceId);
-        return instance.getTaskMgmtInstance().getTaskInstances();
-    }
-
 }

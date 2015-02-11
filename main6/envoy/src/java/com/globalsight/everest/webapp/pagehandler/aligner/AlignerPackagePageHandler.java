@@ -370,7 +370,7 @@ public class AlignerPackagePageHandler
 //            }
 //            catch (Exception e)
 //            {
-//                CATEGORY.error(e);
+//                CATEGORY.error(e.getMessage(), e);
 //                throw new RuntimeException(e.getMessage());
 //            }
 //        }

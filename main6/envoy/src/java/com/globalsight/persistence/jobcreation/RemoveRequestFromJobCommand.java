@@ -27,55 +27,47 @@ import java.util.Iterator;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.persistence.PersistenceCommand;
 
 /**
- * Given a list of requests that have failed to import, removes the
- * requests and the source page objects that are still associated with
- * them.  Since the source pages have failed to import, they don't
- * have any other data associated with them (tuv, leverage matches etc).
+ * Given a list of requests that have failed to import, removes the requests and
+ * the source page objects that are still associated with them. Since the source
+ * pages have failed to import, they don't have any other data associated with
+ * them (tuv, leverage matches etc).
  */
-public class RemoveRequestFromJobCommand
-	extends PersistenceCommand
+public class RemoveRequestFromJobCommand extends PersistenceCommand
 {
-    private static Logger c_logger =
-        Logger.getLogger(
-			RemoveRequestFromJobCommand.class.getName());
+    private static Logger c_logger = Logger
+            .getLogger(RemoveRequestFromJobCommand.class.getName());
 
-    private static final String DELETE_REQUEST_SQL =
-		"delete from request where id = ?" ;
+    private static final String DELETE_REQUEST_SQL = "delete from request where id = ?";
 
-    private static final String DELETE_SOURCE_PAGE_SQL =
-		"delete from source_page where id = ?";
+    private static final String DELETE_SOURCE_PAGE_SQL = "delete from source_page where id = ?";
 
-    private static final String UPDATE_JOB_PAGE_COUNT_SQL = 
-            "update job set page_count = page_count - ? where id = ?";
+    private static final String UPDATE_JOB_PAGE_COUNT_SQL = "update job set page_count = page_count - ? where id = ?";
 
-    private static final String FIND_SOURCE_PAGE_DEPENDENCY_SQL = 
-      "select lg_id from source_page_leverage_group where sp_id = ?";
-    
-    private static final String UPDATE_REQUEST_PAGE_COUNT = 
-        "update request set BATCH_PAGE_COUNT = BATCH_PAGE_COUNT - ? where JOB_ID = ?";
-    
+    private static final String FIND_SOURCE_PAGE_DEPENDENCY_SQL = "select lg_id from source_page_leverage_group where sp_id = ?";
+
+    private static final String UPDATE_REQUEST_PAGE_COUNT = "update request set BATCH_PAGE_COUNT = BATCH_PAGE_COUNT - ? where JOB_ID = ?";
+
     private PreparedStatement m_psRequest;
     private PreparedStatement m_psSourcepage;
     private PreparedStatement m_psUpdateJob;
     private PreparedStatement m_psCheckDependency;
     private PreparedStatement m_psUpdatePageCount;
-    
+
     // holds the list of commands to remove dependancies
     private ArrayList m_pageDependencyCommands;
     private Collection m_requests;
     private long m_jobId;
 
     // store for the dependency calls
-    private Connection m_connection;              
+    private Connection m_connection;
 
-	//
-	// CONSTRUCTOR
-	//
+    //
+    // CONSTRUCTOR
+    //
 
     public RemoveRequestFromJobCommand(long p_jobId, Collection p_requests)
     {
@@ -87,16 +79,15 @@ public class RemoveRequestFromJobCommand
         m_pageDependencyCommands = new ArrayList(m_requests.size());
     }
 
+    //
+    // INTERFACE METHODS
+    //
 
-	//
-	// INTERFACE METHODS
-	//
-
-	/**
-	 * Overwrites PersistenceObject.persistObjects and adds cleanup calls.
-	 */
+    /**
+     * Overwrites PersistenceObject.persistObjects and adds cleanup calls.
+     */
     public void persistObjects(Connection p_connection)
-		throws PersistenceException 
+            throws PersistenceException
     {
         try
         {
@@ -107,11 +98,16 @@ public class RemoveRequestFromJobCommand
         {
             try
             {
-                if (m_psSourcepage != null)  m_psSourcepage.close();
-                if (m_psRequest != null)  m_psRequest.close();
-                if (m_psUpdateJob != null) m_psUpdateJob.close();
-                if (m_psCheckDependency != null) m_psCheckDependency.close();
-                if (m_psUpdatePageCount != null) m_psUpdatePageCount.close();
+                if (m_psSourcepage != null)
+                    m_psSourcepage.close();
+                if (m_psRequest != null)
+                    m_psRequest.close();
+                if (m_psUpdateJob != null)
+                    m_psUpdateJob.close();
+                if (m_psCheckDependency != null)
+                    m_psCheckDependency.close();
+                if (m_psUpdatePageCount != null)
+                    m_psUpdatePageCount.close();
             }
             catch (Exception e)
             {
@@ -119,70 +115,69 @@ public class RemoveRequestFromJobCommand
         }
     }
 
-    public void createPreparedStatement(Connection p_connection) 
-		throws Exception 
+    public void createPreparedStatement(Connection p_connection)
+            throws Exception
     {
         m_psSourcepage = p_connection.prepareStatement(DELETE_SOURCE_PAGE_SQL);
-	    m_psRequest = p_connection.prepareStatement(DELETE_REQUEST_SQL);
-        m_psUpdateJob = p_connection.prepareStatement(UPDATE_JOB_PAGE_COUNT_SQL);
-        m_psCheckDependency = p_connection.
-                            prepareStatement(FIND_SOURCE_PAGE_DEPENDENCY_SQL);
-        m_psUpdatePageCount = p_connection.prepareStatement(UPDATE_REQUEST_PAGE_COUNT);
+        m_psRequest = p_connection.prepareStatement(DELETE_REQUEST_SQL);
+        m_psUpdateJob = p_connection
+                .prepareStatement(UPDATE_JOB_PAGE_COUNT_SQL);
+        m_psCheckDependency = p_connection
+                .prepareStatement(FIND_SOURCE_PAGE_DEPENDENCY_SQL);
+        m_psUpdatePageCount = p_connection
+                .prepareStatement(UPDATE_REQUEST_PAGE_COUNT);
     }
 
-    public void setData() 
-		throws Exception 
+    public void setData() throws Exception
     {
         RequestImpl request = null;
         int numberOfErrorRequests = m_requests.size();
-        for (Iterator it = m_requests.iterator(); it.hasNext(); )
+        for (Iterator it = m_requests.iterator(); it.hasNext();)
         {
-            request = (RequestImpl)it.next();
+            request = (RequestImpl) it.next();
 
             m_psSourcepage.setLong(1, request.getSourcePageId());
             m_psSourcepage.addBatch();
 
             m_psRequest.setLong(1, request.getId());
             m_psRequest.addBatch();
-            
-            // query for the source page and check 
+
+            // query for the source page and check
             // if it has dependencies
             // create a command to delete the dependencies and
             // add to the list
-            m_psCheckDependency.setLong(1,request.getSourcePageId());
+            m_psCheckDependency.setLong(1, request.getSourcePageId());
             ResultSet rs = m_psCheckDependency.executeQuery();
             // if there is atleast one in the resultset - there is a dependency
             if (rs.next())
             {
-                DeleteSourcePageDependenciesCommand delSPCommand = 
-                    new DeleteSourcePageDependenciesCommand(request.getSourcePageId());
+                DeleteSourcePageDependenciesCommand delSPCommand = new DeleteSourcePageDependenciesCommand(
+                        request.getSourcePageId());
                 m_pageDependencyCommands.add(delSPCommand);
             }
-         }                    
+        }
         if (request != null)
         {
             m_psUpdateJob.setInt(1, numberOfErrorRequests);
             m_psUpdateJob.setLong(2, m_jobId);
-            
+
             m_psUpdatePageCount.setInt(1, numberOfErrorRequests);
             m_psUpdatePageCount.setLong(2, m_jobId);
         }
     }
 
-    public void batchStatements() 
-		throws Exception 
+    public void batchStatements() throws Exception
     {
         // first remove all dependancies to the
-        for (int i=0 ; i < m_pageDependencyCommands.size() ; i++)
+        for (int i = 0; i < m_pageDependencyCommands.size(); i++)
         {
-            ((DeleteSourcePageDependenciesCommand)m_pageDependencyCommands.get(i)).
-                    persistObjects(m_connection);
+            ((DeleteSourcePageDependenciesCommand) m_pageDependencyCommands
+                    .get(i)).persistObjects(m_connection);
         }
 
         m_psRequest.executeBatch();
-	    m_psSourcepage.executeBatch();
+        m_psSourcepage.executeBatch();
         m_psUpdateJob.executeUpdate();
         m_psUpdatePageCount.executeUpdate();
     }
 }
-

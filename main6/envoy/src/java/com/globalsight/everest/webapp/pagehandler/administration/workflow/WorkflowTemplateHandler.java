@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.ServletContext;
@@ -29,11 +30,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.io.SAXReader;
 
 import com.globalsight.everest.comment.CommentFilesDownLoad;
 import com.globalsight.everest.foundation.LocalePair;
+import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WfTemplateSearchParameters;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -46,85 +49,81 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
+import com.globalsight.everest.webapp.tags.TableConstants;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflow.WorkflowConstants;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.StringUtil;
 
 /**
  * WorkflowTemplateHandler is the page handler responsible for displaying a list
  * of workflow templates and perform actions supported by the UI (JSP).
  */
 
-public class WorkflowTemplateHandler extends PageHandler
-    implements WorkflowTemplateConstants
+public class WorkflowTemplateHandler extends PageHandler implements
+        WorkflowTemplateConstants
 {
-    
-    //non user related state
-    private int m_numOfWfsPerPage; //number of workflow templates per page
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Constructor
-    ////////////////////////////////////////////////////////////////////
+    // non user related state
+    private int m_numOfWfsPerPage; // number of workflow templates per page
+
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Constructor
+    // //////////////////////////////////////////////////////////////////
     public WorkflowTemplateHandler()
     {
-	try 
+        try
         {
             m_numOfWfsPerPage = SystemConfiguration.getInstance()
-            .getIntParameter(SystemConfigParamNames.NUM_WFT_PER_PAGE);
-	}
-	catch (Exception e)
-	{
-	    m_numOfWfsPerPage = 10;
-	}
+                    .getIntParameter(SystemConfigParamNames.NUM_WFT_PER_PAGE);
+        }
+        catch (Exception e)
+        {
+            m_numOfWfsPerPage = 20;
+        }
     }
-    //////////////////////////////////////////////////////////////////////
-    //  End: Constructor
-    //////////////////////////////////////////////////////////////////////
 
+    // ////////////////////////////////////////////////////////////////////
+    // End: Constructor
+    // ////////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Override Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Override Methods
+    // ////////////////////////////////////////////////////////////////////
     /**
      * Invokes this PageHandler
-     *
-     * @param p_pageDescriptor the page desciptor
-     * @param p_request the original request sent from the browser
-     * @param p_response the original response object
-     * @param p_context context the Servlet context
+     * 
+     * @param p_pageDescriptor
+     *            the page desciptor
+     * @param p_request
+     *            the original request sent from the browser
+     * @param p_response
+     *            the original response object
+     * @param p_context
+     *            context the Servlet context
      */
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
-                                  HttpServletRequest p_request,
-                                  HttpServletResponse p_response,
-                                  ServletContext p_context)
-    throws ServletException, IOException,
-        EnvoyServletException
+            HttpServletRequest p_request, HttpServletResponse p_response,
+            ServletContext p_context) throws ServletException, IOException,
+            EnvoyServletException
     {
         HttpSession session = p_request.getSession(false);
-        SessionManager sessionMgr =
-                (SessionManager) session.getAttribute(SESSION_MANAGER);
-        WfTemplateSearchParameters params =
-            (WfTemplateSearchParameters)sessionMgr.getAttribute("searchParams");
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        WfTemplateSearchParameters params;
+//        preDataForDropBox(p_request, session);
+        
+        params = getSearchCriteria(p_request);
         if (isPost(p_request))
         {
             String action = p_request.getParameter(ACTION);
-
             if (CANCEL_ACTION.equals(action))
             {
-                clearSessionExceptTableInfo(session, KEY);
-                sessionMgr.setAttribute("searchParams", params);
+                sessionMgr.setAttribute(WF_TEMPLATE_INFO,null);//distinguish cancel and previous
             }
-            else if (SAVE_ACTION.equals(action))
+            if (SAVE_ACTION.equals(action))
             {
                 saveDuplicates(p_request, session);
-            }
-            else if (SEARCH_ACTION.equals(action))
-            {
-                params = getSearchCriteria(p_request, false);
-            }
-            else if (ADV_SEARCH_ACTION.equals(action))
-            {
-                params = getSearchCriteria(p_request, true);
             }
             else if (IMPORT_ACTION.equals(action))
             {
@@ -140,152 +139,209 @@ public class WorkflowTemplateHandler extends PageHandler
         selectTemplatesForDisplay(p_request, session, params);
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
-        super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+        super.invokePageHandler(p_pageDescriptor, p_request, p_response,
+                p_context);
     }
 
+//    private void preDataForDropBox(HttpServletRequest p_request,
+//            HttpSession session)
+//    {
+//        PermissionSet perms = (PermissionSet) session.getAttribute(WebAppConstants.PERMISSIONS);
+//        Locale uiLocale =  (Locale)session.getAttribute(WebAppConstants.UILOCALE);
+//
+//        // Get data needed for search page
+//        p_request.setAttribute(WorkflowTemplateConstants.SOURCE_LOCALES,
+//                 WorkflowTemplateHandlerHelper.getAllSourceLocales(uiLocale));
+//        p_request.setAttribute(WorkflowTemplateConstants.TARGET_LOCALES,
+//                 WorkflowTemplateHandlerHelper.getAllTargetLocales(uiLocale));
+//        // If not admin, get only the projects for that user (PM).
+//        List projectInfos;
+//
+//        if (perms.getPermissionFor(Permission.GET_ALL_PROJECTS))
+//        {
+//            projectInfos = 
+//                WorkflowTemplateHandlerHelper.getAllProjectInfos(uiLocale);
+//        }
+//        else
+//        {
+//            String userName = (String)session.getAttribute(
+//                                            WebAppConstants.USER_NAME);
+//            User user = UserHandlerHelper.getUser(userName);
+//            projectInfos = 
+//                WorkflowTemplateHandlerHelper.getAllProjectInfosForUser(user,
+//                                                                    uiLocale);
+//        }
+//        p_request.setAttribute(WorkflowTemplateConstants.PROJECTS, projectInfos);
+//    }
 
     private void importWorkFlow(HttpServletRequest p_request,
-			HttpSession session)
-	{
-		FileUploadHelper o_upload = new FileUploadHelper();
-		try
-		{
-			o_upload.doUpload(p_request);
-			String list = o_upload.getFieldValue("localePairs");
-			String name = o_upload.getFieldValue("nameTF");
-			String projectId = o_upload.getFieldValue("project");
-			String fileName = o_upload.getSavedFilepath();
-			SAXReader reader = new SAXReader();
-			Document doc = reader.read(new File(fileName));
-			ArrayList<LocalePair> alist = new ArrayList<LocalePair>();
-			StringTokenizer st = new StringTokenizer(list, ",");
-			while (st.hasMoreTokens())
-			{
-				String id = (String) st.nextToken();
-				alist.add(ServerProxy.getLocaleManager().getLocalePairById(
-						Long.parseLong(id)));
-			}
+            HttpSession session)
+    {
+        FileUploadHelper o_upload = new FileUploadHelper();
+        try
+        {
+            o_upload.doUpload(p_request);
+            String list = o_upload.getFieldValue("localePairs");
+            String name = o_upload.getFieldValue("nameTF");
+            String projectId = o_upload.getFieldValue("project");
+            String fileName = o_upload.getSavedFilepath();
+            SAXReader reader = new SAXReader();
+            Document doc = reader.read(new File(fileName));
+            ArrayList<LocalePair> alist = new ArrayList<LocalePair>();
+            StringTokenizer st = new StringTokenizer(list, ",");
+            while (st.hasMoreTokens())
+            {
+                String id = (String) st.nextToken();
+                alist.add(ServerProxy.getLocaleManager().getLocalePairById(
+                        Long.parseLong(id)));
+            }
 
-			WorkflowTemplateHandlerHelper.importWorkflowTemplateInfo(
-					doc, alist, name, projectId,
-					getBundle(session));
-		}
-		catch (Exception e)
-		{
-			throw new EnvoyServletException(e);
-		}
+            WorkflowTemplateHandlerHelper.importWorkflowTemplateInfo(doc,
+                    alist, name, projectId, getBundle(session));
+        }
+        catch (Exception e)
+        {
+            throw new EnvoyServletException(e);
+        }
 
-	}
-    
-	private void exportWorkFlow(HttpServletRequest p_request,
-			HttpServletResponse p_response, HttpSession session)
-	{
-		String wfTemplateId = p_request.getParameter(WF_TEMPLATE_INFO_ID);
-		WorkflowTemplateInfo template = WorkflowTemplateHandlerHelper
-				.getWorkflowTemplateInfoById(Long
-						.parseLong(wfTemplateId));
-		String templateName = template.getName();
-		String templateFileName = AmbFileStoragePathUtils
-				.getWorkflowTemplateXmlDir().getAbsolutePath()
-				+ File.separator + templateName + WorkflowConstants.SUFFIX_XML;
-		File file = new File(templateFileName);
-//		if (!file.exists()) {
-//			throw new EnvoyServletException("");
-//		}
-		CommentFilesDownLoad download = new CommentFilesDownLoad();
-		download.sendFileToClient(p_request, p_response, 
-				templateName + WorkflowConstants.SUFFIX_XML, file);
-	}
-	/**
-     * Overide getControlFlowHelper so we can do processing
-     * and redirect the user correctly.
-     *
+    }
+
+    private void exportWorkFlow(HttpServletRequest p_request,
+            HttpServletResponse p_response, HttpSession session)
+    {
+        String wfTemplateId = p_request.getParameter(WF_TEMPLATE_INFO_ID);
+        WorkflowTemplateInfo template = WorkflowTemplateHandlerHelper
+                .getWorkflowTemplateInfoById(Long.parseLong(wfTemplateId));
+        String templateName = template.getName();
+        String templateFileName = AmbFileStoragePathUtils
+                .getWorkflowTemplateXmlDir().getAbsolutePath()
+                + File.separator
+                + templateName + WorkflowConstants.SUFFIX_XML;
+        File file = new File(templateFileName);
+        // if (!file.exists()) {
+        // throw new EnvoyServletException("");
+        // }
+        CommentFilesDownLoad download = new CommentFilesDownLoad();
+        download.sendFileToClient(p_request, p_response, templateName
+                + WorkflowConstants.SUFFIX_XML, file);
+    }
+
+    /**
+     * Overide getControlFlowHelper so we can do processing and redirect the
+     * user correctly.
+     * 
      * @return the name of the link to follow
      */
-    public ControlFlowHelper getControlFlowHelper(
-        HttpServletRequest p_request, HttpServletResponse p_response)
+    public ControlFlowHelper getControlFlowHelper(HttpServletRequest p_request,
+            HttpServletResponse p_response)
     {
 
         return new WorkflowTemplateControlFlowHelper(p_request, p_response);
     }
-    //////////////////////////////////////////////////////////////////////
-    //  End: Override Methods
-    //////////////////////////////////////////////////////////////////////
 
-    
-    //////////////////////////////////////////////////////////////////////
-    //  Begin: Local Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Override Methods
+    // ////////////////////////////////////////////////////////////////////
+
+    // ////////////////////////////////////////////////////////////////////
+    // Begin: Local Methods
+    // ////////////////////////////////////////////////////////////////////
 
     /**
      * Search for workflows with certain criteria.
      */
-    private WfTemplateSearchParameters getSearchCriteria(HttpServletRequest p_request,
-                                                         boolean advSearch)
-        throws EnvoyServletException
+    private WfTemplateSearchParameters getSearchCriteria(
+            HttpServletRequest p_request)
+            throws EnvoyServletException
     {
-        HttpSession session = p_request.getSession();
-        SessionManager sessionMgr =
-            (SessionManager) session.getAttribute(SESSION_MANAGER);
+        String[] filterParam = dealWithFilterParam(p_request);
+        String name = filterParam[0];
+        String srcLocale = filterParam[1];
+        String targLocale = filterParam[2];
+        String project = filterParam[3];
+        String companyName = filterParam[4];
         WfTemplateSearchParameters params = new WfTemplateSearchParameters();
-        String buf = p_request.getParameter("nameOptions");
-        params.setWorkflowNameCondition(buf);
-        params.setWorkflowName(p_request.getParameter("nameField"));
-        if (advSearch)
-        {
-            try 
-            {
-                buf = (String)p_request.getParameter("srcLocale");
-                if (!buf.equals("-1"))
-                {
-                    params.setSourceLocale(ServerProxy.getLocaleManager().getLocaleById(
-                                            Long.parseLong(buf)));
-                }
-                buf = (String)p_request.getParameter("targLocale");
-                if (!buf.equals("-1"))
-                {
-                    params.setTargetLocale(ServerProxy.getLocaleManager().getLocaleById(
-                                            Long.parseLong(buf)));
-                }
-            }
-            catch (Exception e)
-            {
-                throw new EnvoyServletException(e);
-            }
-            if (!p_request.getParameter("project").equals(""))
-                params.setProjectId(p_request.getParameter("project"));
-        }
-        sessionMgr.setAttribute("searchParams", params);
+        params.setWorkflowName(name);
+        params.setSourceLocale(srcLocale);
+        params.setTargetLocale(targLocale);
+        params.setProject(project);
+        params.setCompanyName(companyName);
+
         return params;
+    }
+    
+    private String[] dealWithFilterParam(HttpServletRequest p_request){
+        String action = p_request.getParameter("action");
+        HttpSession session = p_request.getSession(false);
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(SESSION_MANAGER);
+        String name = p_request.getParameter("nameField");
+        String srcLocale = p_request.getParameter("srcLocale");
+        String targLocale = p_request.getParameter("targLocale");
+        String project = p_request.getParameter("project");
+        String companyName = p_request.getParameter("companyName");
+
+        if (!FILTER_SEARCH.equals(action) || p_request.getMethod().equalsIgnoreCase(WebAppConstants.REQUEST_METHOD_GET)) {
+            name = (String) sessionMgr.getAttribute("nameField");
+            srcLocale = (String) sessionMgr.getAttribute("srcLocale");
+            targLocale = (String) sessionMgr.getAttribute("targLocale");
+            project = (String) sessionMgr.getAttribute("project");
+            companyName = (String) sessionMgr.getAttribute("companyName");
+        }
+        if (FILTER_SEARCH.equals(action)) {
+            //Go to page #1 if current action is filter searching.
+            sessionMgr.setAttribute(KEY + TableConstants.LAST_PAGE_NUM, Integer.valueOf(1));
+        }
+        name = name == null ? "" : name;
+        srcLocale = srcLocale == null ? "" : srcLocale;
+        targLocale = targLocale == null ? "" : targLocale;
+        project = project == null ? "" : project;
+        companyName = companyName == null ? "" : companyName;
+        sessionMgr.setAttribute("nameField", name);
+        sessionMgr.setAttribute("srcLocale", srcLocale);
+        sessionMgr.setAttribute("targLocale", targLocale);
+        sessionMgr.setAttribute("project", project);
+        sessionMgr.setAttribute("companyName", companyName);
+        
+        String[] filterParam = {name,srcLocale,targLocale,project,companyName};
+        return filterParam;
     }
 
     private void selectTemplatesForDisplay(HttpServletRequest p_request,
-                                           HttpSession p_session,
-                                           WfTemplateSearchParameters p_params)
-        throws ServletException, IOException, EnvoyServletException
+            HttpSession p_session, WfTemplateSearchParameters p_params)
+            throws ServletException, IOException, EnvoyServletException
     {
-        List templates = null;
+        List<WorkflowTemplateInfo> templates = null;
         try
-        {        
-            if (p_params == null)
-            {
-                templates = WorkflowTemplateHandlerHelper.getAllWorkflowTemplateInfos();
-            }
-            else
-            {
-                templates = (List) ServerProxy.getProjectHandler().findWorkflowTemplates(p_params);
-            } 
-            
+        {
+            templates = (List<WorkflowTemplateInfo>) ServerProxy.getProjectHandler()
+                    .findWorkflowTemplates(p_params);
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             throw new EnvoyServletException(e);
         }
-        Locale uiLocale = (Locale)p_session.getAttribute(WebAppConstants.UILOCALE);
-	    WorkflowTemplateInfoComparator comp = new WorkflowTemplateInfoComparator(uiLocale);
-        setTableNavigation(p_request, p_session, templates, comp, 
-        					m_numOfWfsPerPage, TEMPLATES, KEY);
-                            
+        Locale uiLocale = (Locale) p_session
+                .getAttribute(WebAppConstants.UILOCALE);
+        templates = getTemplatesByLocaleFilter(templates,p_params,uiLocale);
+        setNumberPerPage(p_request);
+        WorkflowTemplateInfoComparator comp = new WorkflowTemplateInfoComparator(
+                uiLocale);
+        setTableNavigation(p_request, p_session, templates, comp,
+                m_numOfWfsPerPage, TEMPLATES, KEY);
+    }
+    
+    private List<WorkflowTemplateInfo> getTemplatesByLocaleFilter(List<WorkflowTemplateInfo> templates,WfTemplateSearchParameters p_params,Locale uiLocale){
+        List<WorkflowTemplateInfo> filteredTemplates = new ArrayList<WorkflowTemplateInfo>();
+        Map criteria = p_params.getParameters();
+        for(WorkflowTemplateInfo template : templates){
+            boolean src = StringUtils.containsIgnoreCase(template.getSourceLocale().getDisplayName(uiLocale), (String)criteria.get(WfTemplateSearchParameters.SOURCE_LOCALE));
+            boolean targ = StringUtils.containsIgnoreCase(template.getTargetLocale().getDisplayName(uiLocale), (String)criteria.get(WfTemplateSearchParameters.TARGET_LOCALE));
+            if(src && targ){
+                filteredTemplates.add(template);
+            }
+        }
+        return filteredTemplates;
     }
 
     /* Convert the given string into an integer value; if null, or an error */
@@ -297,7 +353,7 @@ public class WorkflowTemplateHandler extends PageHandler
         {
             try
             {
-                intVal  = Integer.parseInt(p_string);
+                intVal = Integer.parseInt(p_string);
             }
             catch (NumberFormatException e)
             {
@@ -306,34 +362,52 @@ public class WorkflowTemplateHandler extends PageHandler
         return intVal;
     }
 
-    private void saveDuplicates(HttpServletRequest p_request, HttpSession session)
-    throws EnvoyServletException
+    private void saveDuplicates(HttpServletRequest p_request,
+            HttpSession session) throws EnvoyServletException
     {
-        try {
-            String wftiId = (String)session.getAttribute(WF_TEMPLATE_INFO_ID);
-            String list = (String)p_request.getParameter("localePairs");
-            String name = (String)p_request.getParameter("nameTF");
+        try
+        {
+            String wftiId = (String) session.getAttribute(WF_TEMPLATE_INFO_ID);
+            String list = (String) p_request.getParameter("localePairs");
+            String name = (String) p_request.getParameter("nameTF");
+            String projectId = p_request.getParameter(PROJECT_FIELD);
+            Project project = ServerProxy.getProjectHandler().getProjectById(
+                    Long.parseLong(projectId));
             ArrayList alist = new ArrayList();
             StringTokenizer st = new StringTokenizer(list, ",");
-            while (st.hasMoreTokens()) {
+            while (st.hasMoreTokens())
+            {
                 String id = (String) st.nextToken();
-                alist.add(ServerProxy.getLocaleManager().getLocalePairById(Long.parseLong(id)));
+                alist.add(ServerProxy.getLocaleManager().getLocalePairById(
+                        Long.parseLong(id)));
             }
-        
-        
+
             WorkflowTemplateHandlerHelper.duplicateWorkflowTemplateInfo(
-                                                Long.parseLong(wftiId),
-                                                alist,
-                                                name,
-                                                getBundle(session));
-        } catch (Exception e) {
+                    Long.parseLong(wftiId), alist, name, project,
+                    getBundle(session));
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
         }
     }
+    
+    private void setNumberPerPage(HttpServletRequest req) {
+        String pageSize = (String) req.getParameter("numOfPageSize");
+        if (!StringUtil.isEmpty(pageSize)) {
+            try
+            {
+                m_numOfWfsPerPage = Integer.parseInt(pageSize);
+            }
+            catch (Exception e)
+            {
+                m_numOfWfsPerPage = Integer.MAX_VALUE;
+            }
+        }
+    }
 
-
-    //////////////////////////////////////////////////////////////////////
-    //  End: Local Methods
-    //////////////////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////////////////////
+    // End: Local Methods
+    // ////////////////////////////////////////////////////////////////////
 
 }

@@ -6,6 +6,7 @@ cp src/desktopicon.jar .
 unzip desktopicon.jar -d jar
 rm -R root/usr/share/doc/globalsight/DesktopIcon
 mkdir -p root/usr/share/doc/globalsight/DesktopIcon
+mkdir -p root/usr/share/globalsight/DesktopIcon
 cp src/*.pdf root/usr/share/doc/globalsight/DesktopIcon
 cp -r src/* root/usr/share/globalsight/DesktopIcon
 cp -r jar/com root/usr/share/globalsight/DesktopIcon

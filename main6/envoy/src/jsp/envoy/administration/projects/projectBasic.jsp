@@ -9,6 +9,7 @@
                   com.globalsight.everest.webapp.javabean.NavigationBean,
                   com.globalsight.everest.webapp.pagehandler.PageHandler,
                   com.globalsight.everest.projecthandler.Project,
+                  com.globalsight.everest.projecthandler.ProjectImpl,
                   com.globalsight.everest.projecthandler.ProjectInfo,
                   com.globalsight.util.resourcebundle.ResourceBundleConstants,
                   com.globalsight.util.resourcebundle.SystemResourceBundle,
@@ -52,7 +53,7 @@
     Vector qps = (Vector)sessionManager.getAttribute("qePersons");
     List termbases = (List)sessionManager.getAttribute("termbases");
     List projects = (List)sessionManager.getAttribute("projects");
-    Project project = (Project)sessionManager.getAttribute("project");
+    ProjectImpl project = (ProjectImpl)sessionManager.getAttribute("project");
     List<AttributeSet> allAttributeGroups = (List<AttributeSet>)sessionManager.getAttribute("allAttributeGroups");
     AttributeSet attributeSet = null;
     
@@ -78,7 +79,8 @@
     }
     
     String checkOrNot = "checked";
-
+    String reviewOnlyAAChecked = "", reviewOnlyASChecked = "";
+    String autoAcceptPMTaskChecked = "";	
     if (project != null)
     {
         projectName = project.getName();
@@ -97,12 +99,15 @@
         nf.setMaximumFractionDigits(2);
         pmcost = String.valueOf(nf.format(project.getPMCost()*100));
         
-        int poRequired = project.getPoRequired();
-        
-        if(poRequired == 0) {
+        if(project.getPoRequired() == 0) {
             checkOrNot = "";
         }
+        
+        reviewOnlyAAChecked = project.getReviewOnlyAutoAccept()? "checked" : "";
+        reviewOnlyASChecked = project.getReviewOnlyAutoSend()? "checked" : "";
+        autoAcceptPMTaskChecked = project.getAutoAcceptPMTask()? "checked" : "";
     }
+    
     String cancelURL = cancel.getPageURL() + "&action=cancel";
     String doneURL = done.getPageURL() + "&action=save";
     String usersURL = users.getPageURL();
@@ -125,22 +130,24 @@
     }
 %>
 
-<%@page import="com.globalsight.cxe.entity.customAttribute.Attribute"%><html>
+<%@page import="com.globalsight.cxe.entity.customAttribute.Attribute"%>
+<html>
+<!-- envoy\administration\projects\projectBasic.jsp -->
 <head>
     <meta http-equiv="content-type" content="text/html;charset=UTF-8">
     <title><%= title %></title>
     <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
     <script language="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></script>
+    <script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
     <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
     <%@ include file="/envoy/common/warning.jspIncl" %>
-<%@ include file="/envoy/common/warning.jspIncl" %>
-
 
 <script language="JavaScript">
 var needWarning = false;
 var objectName = "<%=bundle.getString("lb_projects")%>";
 var guideNode="projects";
 var helpFile = "<%=bundle.getString("help_projects_edit")%>";
+var reviewOnlyAAChecked = "<%=reviewOnlyAAChecked%>";
 
 function submitForm(formAction)
 {
@@ -284,14 +291,77 @@ function confirmForm()
     return true;
 }
 
+/**
+ * Disable/Enable TR element
+ * 
+ * @param trId
+ *            The id of TR item
+ * @param isDisabled
+ *            Disable/Enable flag
+ */
+function setDisableTR(trId, isDisabled) 
+{
+	var trElem = document.getElementById(trId);
+	var color;
+	if (isDisabled) 
+	{
+		color = "gray";
+	} 
+	else 
+	{
+		color = "black";
+	}
+	trElem.style.color = color;
+	
+	// Operate text elements
+	elems = trElem.getElementsByTagName("input");
+	for ( var i = 0; i < elems.length; i++) 
+	{
+		if ("checkbox" == elems[i].type) 
+		{
+			elems[i].disabled = isDisabled;
+			elems[i].style.color = color;
+		}
+	}
+}
 
+$(document).ready(function() {
+	if("checked" == reviewOnlyAAChecked)
+	{
+		setDisableTR('reviewOnlyASTRID', false);
+	}
+	else
+	{
+		setDisableTR('reviewOnlyASTRID', true);
+	}
+	
+	$("#reviewOnlyAA").click(function(){
+		if(this.checked)
+		{
+			setDisableTR('reviewOnlyASTRID', false);
+		}
+		else
+		{
+			setDisableTR('reviewOnlyASTRID', true);
+			$("#reviewOnlyAS").attr("checked",false);
+		}
+	});
+	
+	$("#autoAcceptPMTask").click(function(){
+		if(this.checked)
+		{
+			if(!confirm("<%=bundle.getString("jsmsg_project_autoSend")%>"))
+			{
+				$(this).attr("checked",false);
+			}
+		}
+	});
+});
 </script>
 
 <style type="text/css">
 @import url(/globalsight/includes/attribute.css);
 </style>
-</style>
-
 </head>
 
 <body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0" onload="loadGuides()">
@@ -326,12 +396,10 @@ function confirmForm()
     </table>
     <br>
 
-
 <form name="projectForm" method="post" action="">
 <input type="hidden" name="formAction" value="">
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
-  <tr><td>
-    </td></tr>
+  <tr><td></td></tr>
   <tr valign="top">
     <td>
       <table border="0" class="standardText" cellpadding="2">
@@ -477,7 +545,25 @@ function confirmForm()
           <td><%=bundle.getString("PO_required")%>:</td>
           <td><INPUT TYPE=checkbox id="poRequired" name="poRequired" onfocus="this.select()" <%=checkOrNot%> ></td>
         </tr>
-        <tr><td colspan="2">&nbsp;</td></tr>
+                
+        <tr>
+          <td><%=bundle.getString("lb_project_reviewOnlyAutoAccept")%>:</td>
+          <td><INPUT TYPE=checkbox id="reviewOnlyAA" name="reviewOnlyAA" <%=reviewOnlyAAChecked%> >
+          </td>
+        </tr>
+        <tr id="reviewOnlyASTRID">
+          <td colspan="2">&nbsp;&nbsp;
+          	<%=bundle.getString("lb_project_reviewOnlyAutoSend")%>:
+          	<INPUT TYPE=checkbox id="reviewOnlyAS" name="reviewOnlyAS" <%=reviewOnlyASChecked%> >
+          </td>
+        </tr>
+        <tr>
+          <td><%=bundle.getString("lb_project_AutoAcceptPMTask")%>:</td>
+          <td><INPUT TYPE=checkbox id="autoAcceptPMTask" name="autoAcceptPMTask" <%=autoAcceptPMTaskChecked%> >
+          </td>
+        </tr>
+        
+      <tr><td colspan="2">&nbsp;</td></tr>
       <tr>
         <td colspan="2">
           <input type="button" name="<%=lbcancel%>" value="<%=lbcancel%>"

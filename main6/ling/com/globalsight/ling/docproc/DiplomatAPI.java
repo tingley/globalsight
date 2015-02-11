@@ -44,6 +44,7 @@ import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
 import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.segmentationhelper.Segmentation;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.common.CodesetMapper;
@@ -53,8 +54,10 @@ import com.globalsight.ling.docproc.extractor.html.Extractor;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterChecker;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.PostMergeProcessor;
+import com.globalsight.ling.docproc.merger.fm.FMPreviewerHelper;
 import com.globalsight.ling.docproc.merger.fm.FmPostMergeProcessor;
 import com.globalsight.ling.docproc.merger.fm.FontMappingHelper;
+import com.globalsight.ling.docproc.merger.html.HtmlPreviewerHelper;
 import com.globalsight.ling.docproc.merger.jsp.JspPostMergeProcessor;
 import com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor;
 
@@ -431,6 +434,7 @@ public class DiplomatAPI implements IFormatNames
     private CxeMessage cxeMessage = null;
     private String fileProfileId;
     private long filterId = 0;
+    private boolean isPreview = false;
     
     private String filterTableName;
 
@@ -1165,6 +1169,8 @@ public class DiplomatAPI implements IFormatNames
         wc.countDiplomatDocument(m_output);
         m_output = wc.getOutput();
         
+        // call GC here to free some memory used in extracting
+        System.gc();
         String gxml = "";
 
         //by walter, the xliff target content needn't be diplomate process
@@ -1536,6 +1542,7 @@ public class DiplomatAPI implements IFormatNames
         String strClass = registry.getPostMergeClasspath(formatId);
 
         PostMergeProcessor processor = null;
+        boolean donotProcess = false;
         try
         {
             processor = (PostMergeProcessor) Class.forName(strClass)
@@ -1554,11 +1561,13 @@ public class DiplomatAPI implements IFormatNames
             }
             else if (processor instanceof XmlPostMergeProcessor)
             {
+                boolean checkIsInddXml = true;
                 if(filterId > 0 && filterTableName != null)
                 {
                     Filter filter = FilterHelper.getFilter(filterTableName, filterId);
                     if(filter instanceof XMLRuleFilter)
                     {
+                        checkIsInddXml = false;
                         try
                         {
                             XMLRuleFilter xmlFilter = (XMLRuleFilter) filter;
@@ -1580,16 +1589,37 @@ public class DiplomatAPI implements IFormatNames
                         }
                     }
                 }
-                else if (FontMappingHelper.isInddXml(p_format, p_content) && m_targetLocale != null)
+                
+                if (checkIsInddXml && FontMappingHelper.isInddXml(p_format, p_content) && m_targetLocale != null)
                 {
-                    p_content = FontMappingHelper.processInddXml(m_targetLocale.toString(), p_content);
+                    // do not change font for exporting, just for previewing PDF
+                    // p_content = FontMappingHelper.processInddXml(m_targetLocale.toString(), p_content);
                 }
             }
             else if (processor instanceof FmPostMergeProcessor)
             {
+                if (isPreview)
+                {
+                    FMPreviewerHelper previewerHelper = new FMPreviewerHelper(p_content);
+                    p_content = previewerHelper.process();
+                }
+                
                 FmPostMergeProcessor fmProcessor = (FmPostMergeProcessor) processor;
                 fmProcessor.setSourceLocale(m_locale.toString());
                 fmProcessor.setTargetLocale(m_targetLocale.toString());
+                
+                donotProcess = !isPreview;
+            }
+            
+            if (isPreview && FORMAT_OFFICE_XML.equals(p_format))
+            {
+                if (!(p_content.endsWith("</w:document>") 
+                        || p_content.endsWith("</w:ftr>") 
+                        || p_content.endsWith("</w:hdr>")))
+                {
+                    p_content = HtmlPreviewerHelper.removeGSColorTag(p_content);
+                    return p_content;
+                }
             }
         }
         catch (Exception e)
@@ -1598,7 +1628,14 @@ public class DiplomatAPI implements IFormatNames
                     "PostMergeProcessorCreationFailure", null, e);
         }
 
-        return processor.process(p_content, p_ianaEncoding);
+        if (donotProcess)
+        {
+            return null;
+        }
+        else
+        {
+            return processor.process(p_content, p_ianaEncoding);
+        }
     }
     
     private void checkWellFormedIfNeed(String p_content, String p_format)
@@ -1705,5 +1742,15 @@ public class DiplomatAPI implements IFormatNames
     public void setJsFilterRegex(String jsFilterRegex)
     {
         this.jsFilterRegex = jsFilterRegex;
+    }
+
+    public boolean isPreview()
+    {
+        return isPreview;
+    }
+
+    public void setPreview(boolean isPreview)
+    {
+        this.isPreview = isPreview;
     }
 }

@@ -192,6 +192,15 @@ public interface UserParamNames
     public static final String VISITED_HYPERLINK_COLOR = "editor_visitedLinkColor";
     public static final String VISITED_HYPERLINK_COLOR_DEFAULT = "blue";
     
+    public static final String PREVIEW_100MATCH_COLOR = "PREVIEW_100_MATCH_COLOR";
+    public static final String PREVIEW_100MATCH_COLOR_DEFAULT = "Black";
+    
+    public static final String PREVIEW_ICEMATCH_COLOR = "PREVIEW_ICE_MATCH_COLOR";
+    public static final String PREVIEW_ICEMATCH_COLOR_DEFAULT = "Black";
+    
+    public static final String PREVIEW_NONMATCH_COLOR = "PREVIEW_NON_MATCH_COLOR";
+    public static final String PREVIEW_NONMATCH_COLOR_DEFAULT = "Black";
+    
     public static final String EDITOR_SHOW_CLOSEALLCOMMENT = "editor_show_closeAllComment";
     public static final String EDITOR_SHOW_CLOSEALLCOMMENT_DEFAULT = "0";
     

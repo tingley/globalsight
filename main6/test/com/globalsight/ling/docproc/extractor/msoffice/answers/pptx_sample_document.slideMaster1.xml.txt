@@ -1,0 +1,12 @@
+<bpt i="1" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr altLang=&quot;zh-CN&quot; dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>GlobalSight<ept i="1">&lt;/a:t&gt;&lt;/a:r&gt;</ept><bpt i="2" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt> Master title style<ept i="2">&lt;/a:t&gt;&lt;/a:r&gt;</ept><ph type="a:endParaRPr">&lt;a:endParaRPr dirty=&quot;0&quot; lang=&quot;en-US&quot;/&gt;</ph>
+
+<ph type="a:pPr">&lt;a:pPr lvl=&quot;0&quot;/&gt;</ph><bpt i="3" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr altLang=&quot;zh-CN&quot; dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>GlobalSight <ept i="3">&lt;/a:t&gt;&lt;/a:r&gt;</ept><bpt i="4" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>Master text styles<ept i="4">&lt;/a:t&gt;&lt;/a:r&gt;</ept>
+
+<ph type="a:pPr">&lt;a:pPr lvl=&quot;1&quot;/&gt;</ph><bpt i="5" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>Second level<ept i="5">&lt;/a:t&gt;&lt;/a:r&gt;</ept>
+
+<ph type="a:pPr">&lt;a:pPr lvl=&quot;2&quot;/&gt;</ph><bpt i="6" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>Third level<ept i="6">&lt;/a:t&gt;&lt;/a:r&gt;</ept>
+
+<ph type="a:pPr">&lt;a:pPr lvl=&quot;3&quot;/&gt;</ph><bpt i="7" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>Fourth level<ept i="7">&lt;/a:t&gt;&lt;/a:r&gt;</ept>
+
+<ph type="a:pPr">&lt;a:pPr lvl=&quot;4&quot;/&gt;</ph><bpt i="8" type="a:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;a:r&gt;&lt;a:rPr dirty=&quot;0&quot; lang=&quot;en-US&quot; smtClean=&quot;0&quot;&gt;&lt;/a:rPr&gt;&lt;a:t&gt;</bpt>Fifth level<ept i="8">&lt;/a:t&gt;&lt;/a:r&gt;</ept><ph type="a:endParaRPr">&lt;a:endParaRPr dirty=&quot;0&quot; lang=&quot;en-US&quot;/&gt;</ph>
+

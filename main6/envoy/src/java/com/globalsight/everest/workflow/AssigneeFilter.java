@@ -70,25 +70,23 @@ public class AssigneeFilter
         return assigneeListAsString(users);
     }
 
-    
-
     /**
      * Get a list of assignees (user ids) as an array of strings. This list is
      * provided based on the node's role preference.
      * 
-     * @param p_pi -
-     *            The process instance which the node belongs to.
-     * @param p_node -
-     *            The node which needs to have the assignees set.
-     * @param p_userIds -
-     *            The user ids based on the node's role(s).
-     * @param p_baseDate -
-     *            The based date of the action (start or advance task)
-     * @param p_rolePreference -
-     *            The preference of the node's role. These are specified in
+     * @param p_pi
+     *            - The process instance which the node belongs to.
+     * @param p_node
+     *            - The node which needs to have the assignees set.
+     * @param p_userIds
+     *            - The user ids based on the node's role(s).
+     * @param p_baseDate
+     *            - The based date of the action (start or advance task)
+     * @param p_rolePreference
+     *            - The preference of the node's role. These are specified in
      *            Worklflow Constants (i.e. FASTEST_ROLE_PREFERENCE).
-     * @param p_taskInfo -
-     *            A TaskInfo object containing estimated date info of a task.
+     * @param p_taskInfo
+     *            - A TaskInfo object containing estimated date info of a task.
      */
     static String[] getAssigneeListByRolePreference(
             WorkflowTaskInstance p_node, String[] p_userIds, Date p_baseDate,
@@ -106,8 +104,6 @@ public class AssigneeFilter
             return assignees == null ? null : assignees.split(",");
         }
     }
-
-    
 
     // ////////////////////////////////////////////////////////////////////
     // Private Methods
@@ -180,8 +176,6 @@ public class AssigneeFilter
         return sb.toString();
     }
 
-    
-
     /**
      * Get a list of assigneess (user ids) separated by comma. This list is
      * provided based on the node's role preference.
@@ -206,8 +200,9 @@ public class AssigneeFilter
             else if (WorkflowConstants.AVAILABLE_ROLE_PREFERENCE
                     .equals(p_rolePreference))
             {
-                assignees = getAvailableResources(p_baseDate, p_taskInfo
-                        .getCompleteByDate(), totalDuration, p_userIds);
+                assignees = getAvailableResources(p_baseDate,
+                        p_taskInfo.getCompleteByDate(), totalDuration,
+                        p_userIds);
             }
         }
         return assignees;
@@ -221,8 +216,8 @@ public class AssigneeFilter
      * @return An array of all the user ids that match the filter (roles and
      *         project).
      */
-    public static String[] getAssigneeList(String[] p_roleNames, long p_projectId)
-            throws WorkflowException
+    public static String[] getAssigneeList(String[] p_roleNames,
+            long p_projectId) throws WorkflowException
     {
         String[] finalUserIds = null;
         try
@@ -237,21 +232,22 @@ public class AssigneeFilter
 
             if (p_roleNames == null || p_roleNames.length == 0)
             {
-                finalUserIds = um.getUserNamesByFilter(null, p);
+                finalUserIds = um.getUserIdsByFilter(null, p);
             }
             else if (p_roleNames.length == 1)
             {
-                finalUserIds = um.getUserNamesByFilter(p_roleNames[0], p);
+                finalUserIds = um.getUserIdsByFilter(p_roleNames[0], p);
             }
             else
             {
-                finalUserIds = um.getUserNamesFromRoles(p_roleNames, p);
+                finalUserIds = um.getUserIdsFromRoles(p_roleNames, p);
             }
 
         }
         catch (Exception e)
         {
-            String[] args = { Arrays.asList(p_roleNames).toString() };
+            String[] args =
+            { Arrays.asList(p_roleNames).toString() };
             throw new WorkflowException(
                     WorkflowException.MSG_FAILED_TO_GET_ASSIGNEES_FOR_ROLE,
                     args, e);

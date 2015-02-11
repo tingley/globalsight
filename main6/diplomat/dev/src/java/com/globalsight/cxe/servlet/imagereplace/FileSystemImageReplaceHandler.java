@@ -145,7 +145,7 @@ public class FileSystemImageReplaceHandler extends HttpServlet
         catch (Exception ex)
         {
             p_response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            CATEGORY.error(ex);
+            CATEGORY.error(ex.getMessage(), ex);
             throw new ServletException(ex);
         }
     }

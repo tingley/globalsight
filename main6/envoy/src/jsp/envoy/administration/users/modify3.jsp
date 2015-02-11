@@ -85,7 +85,7 @@
    
    SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
    ModifyUserWrapper wrapper = (ModifyUserWrapper) sessionMgr.getAttribute(UserConstants.MODIFY_USER_WRAPPER);
-   String userName = wrapper.getUserId();
+   String userName = wrapper.getUserName();
 %>
 <HTML>
 <!-- This JSP is envoy/administration/users/modify3.jsp-->
@@ -96,6 +96,7 @@
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = true;
 var objectName = "<%= bundle.getString("lb_user") %>";
@@ -201,10 +202,10 @@ function checkTargetLocale(theForm)
 function confirmForm(formSent)
 {
     activityChecked = false;
-    for (i=2; i < formSent.length; i++)
+    for (i=0; i < formSent.length; i++)
     {
         if ((formSent.elements[i].type == "checkbox") &&
-            (formSent.elements[i].checked == true))
+            (formSent.elements[i].checked == true) && (formSent.elements[i].name !== "selectAll"))
         {
             activityChecked = true;
             break;
@@ -317,6 +318,19 @@ function setTargets(selectedIndexSent)
         }*/
     }
 }
+
+//for GBS-2599
+$(document).ready(function(){
+	$("#selectAll").click(function(){
+		$(":checkbox[name!='selectAll']").each(function(){
+			if($("#selectAll").attr("checked")){
+				$(this).attr("checked",true);
+			}else{
+				$(this).attr("checked",false);
+			}
+		});      
+	});
+});
 </SCRIPT>
 <STYLE type="text/css">
 .list {
@@ -379,7 +393,7 @@ function setTargets(selectedIndexSent)
                <TD>
 	  			<TABLE CELLSPACING="0" CELLPADDING="4" BORDER="0" CLASS="list">
 				 	<TR CLASS=tableHeadingBasic>
-		  					<TD><%=bundle.getString("lb_activity_types")%></TD>
+		  					<TD><input type="checkbox" name="selectAll" id="selectAll"/><%=bundle.getString("lb_activity_types")%></TD>
 		  				
 		  				<% if(isJobCosting) { %>
 		  				    <TD><%=bundle.getString("lb_expense")%></TD>

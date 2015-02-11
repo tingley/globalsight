@@ -52,6 +52,8 @@ import com.globalsight.cxe.message.MessageData;
 import com.globalsight.everest.aligner.AlignerExtractor;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -60,13 +62,12 @@ import com.globalsight.util.j2ee.AppServerWrapper;
 import com.globalsight.util.j2ee.AppServerWrapperFactory;
 
 /**
- * The CxeProxy class allows clients to make import/export
- * requests to CXE without having to directly use JMS.
+ * The CxeProxy class allows clients to make import/export requests to CXE
+ * without having to directly use JMS.
  */
 public class CxeProxy
 {
-    static private final Logger s_logger =
-        Logger.getLogger("CXE");
+    static private final Logger s_logger = Logger.getLogger("CXE");
 
     // PUBLIC CONSTANTS
 
@@ -81,9 +82,8 @@ public class CxeProxy
     /** The aligner import request **/
     static public final String IMPORT_TYPE_ALIGNER = "aligner";
 
-    static public final String JMS_FACTORY =
-        "com.globalsight.jms.GlobalSightTopicConnectionFactory";
-    
+    static public final String JMS_FACTORY = "com.globalsight.jms.GlobalSightTopicConnectionFactory";
+
     static private final String s_TS_KEY_SENDMSG = "TopicSessionKeySendMessage";
 
     static private final Integer ONE = new Integer(1);
@@ -93,13 +93,13 @@ public class CxeProxy
     static private HashMap s_targetLocales = new HashMap();
     static private TopicConnectionFactory tcf = null;
     static private TopicSession s_sendMessageTopicSession = null;
-    
+
     static
     {
         try
         {
             s_context = new InitialContext();
-            tcf = (TopicConnectionFactory)s_context.lookup(JMS_FACTORY);
+            tcf = (TopicConnectionFactory) s_context.lookup(JMS_FACTORY);
             s_sendMessageTopicSession = getTopicSession(s_TS_KEY_SENDMSG);
         }
         catch (Exception ex)
@@ -107,7 +107,7 @@ public class CxeProxy
             s_logger.error("Failed to create initial context", ex);
         }
     }
-    
+
     /**
      * store target locales which were choosed when importing file
      * 
@@ -117,7 +117,8 @@ public class CxeProxy
      *            like en_US,zh_CN,zh_TW
      * 
      * @see com.globalsight.webservices.GlobalSight#publishEventToCxe()
-     * @see this#{@link #importFromFileSystem(String, String, String, String, Integer, Integer, Integer, Integer, Boolean, Boolean, String, String, Integer)}
+     * @see this#
+     *      {@link #importFromFileSystem(String, String, String, String, Integer, Integer, Integer, Integer, Boolean, Boolean, String, String, Integer)}
      */
     public static void setTargetLocales(String p_key, String p_locales)
     {
@@ -126,110 +127,187 @@ public class CxeProxy
 
     /**
      * Initiates a file system import using JMS.
-     *
-     * @param p_fileName file name relative to the docs directory
-     * @param p_jobName  job name
-     * @param p_batchId  batch Id
-     * @param p_fileProfileId file profile ID
-     * @param p_pageCount number of pages in the batch
-     * @param p_pageNum number of the current page in the batch
-     * (starting from 1)
-     * @param p_docPageCount number of pages in the document
-     * @param p_docPageNum number of the current page in the document
-     * (starting from 1)
-     * @param p_isAutoImport FALSE if this is a manual import
-     * @param p_importRequestType IMPORT_TYPE_XXX
+     * 
+     * @param p_fileName
+     *            file name relative to the docs directory
+     * @param p_jobName
+     *            job name
+     * @param p_batchId
+     *            batch Id
+     * @param p_fileProfileId
+     *            file profile ID
+     * @param p_pageCount
+     *            number of pages in the batch
+     * @param p_pageNum
+     *            number of the current page in the batch (starting from 1)
+     * @param p_docPageCount
+     *            number of pages in the document
+     * @param p_docPageNum
+     *            number of the current page in the document (starting from 1)
+     * @param p_isAutoImport
+     *            FALSE if this is a manual import
+     * @param p_importRequestType
+     *            IMPORT_TYPE_XXX
      * @param p_importInitiatorId
-     *                   The user id of the user who initiated the import for this file.
+     *            The user id of the user who initiated the import for this
+     *            file.
      * @param p_exitValueByScript
-     *                   The return value by the script on import.                  
+     *            The return value by the script on import.
      * @exception JMSException
      * @exception NamingException
      */
-    static public void importFromFileSystem(
-        String p_fileName, String p_jobName, String jobUuid,
-        String p_batchId, String p_fileProfileId,
-        Integer p_pageCount, Integer p_pageNum,
-        Integer p_docPageCount, Integer p_docPageNum,
-        Boolean p_isAutoImport, String p_importRequestType,
-        String p_importInitiatorId, Integer p_exitValueByScript)
-        throws JMSException, NamingException
+    static public void importFromFileSystem(String p_fileName,
+            String p_jobName, String jobUuid, String p_batchId,
+            String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum,
+            Boolean p_isAutoImport, String p_importRequestType,
+            String p_importInitiatorId, Integer p_exitValueByScript)
+            throws JMSException, NamingException
     {
-        importFromFileSystem(p_fileName, p_jobName, jobUuid, p_batchId, p_fileProfileId,
-            p_pageCount, p_pageNum, p_docPageCount, p_docPageNum,
-            p_isAutoImport, Boolean.FALSE, p_importRequestType,
-                             p_importInitiatorId, p_exitValueByScript);
+        importFromFileSystem(p_fileName, p_jobName, jobUuid, p_batchId,
+                p_fileProfileId, p_pageCount, p_pageNum, p_docPageCount,
+                p_docPageNum, p_isAutoImport, Boolean.FALSE,
+                p_importRequestType, p_importInitiatorId, p_exitValueByScript);
     }
 
-    static public void importFromFileSystem(
-            String p_fileName, String p_jobName, String jobUuid,
-            String p_batchId, String p_fileProfileId,
-            Integer p_pageCount, Integer p_pageNum,
+    static public void importFromFileSystem(String p_fileName,
+            String p_jobName, String jobUuid, String p_batchId,
+            String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
             Integer p_docPageCount, Integer p_docPageNum,
             Boolean p_isAutoImport, String p_importRequestType,
-            String p_importInitiatorId, Integer p_exitValueByScript, String p_priority)
-            throws JMSException, NamingException
-        {
-            importFromFileSystem(p_fileName, p_jobName, jobUuid, p_batchId, p_fileProfileId,
-                p_pageCount, p_pageNum, p_docPageCount, p_docPageNum,
-                p_isAutoImport, Boolean.FALSE, p_importRequestType,
-                                 p_importInitiatorId, p_exitValueByScript, p_priority);
-        }
+            String p_importInitiatorId, Integer p_exitValueByScript,
+            String p_priority) throws JMSException, NamingException
+    {
+        importFromFileSystem(p_fileName, p_jobName, jobUuid, p_batchId,
+                p_fileProfileId, p_pageCount, p_pageNum, p_docPageCount,
+                p_docPageNum, p_isAutoImport, Boolean.FALSE,
+                p_importRequestType, p_importInitiatorId, p_exitValueByScript,
+                p_priority);
+    }
 
-    static public void importFromFileSystem(
-            String p_fileName, String p_jobName,
-            String p_batchId, String p_fileProfileId,
-            Integer p_pageCount, Integer p_pageNum,
-            Integer p_docPageCount, Integer p_docPageNum,
-            Boolean p_isAutoImport, String p_importRequestType,
-            String p_importInitiatorId, Integer p_exitValueByScript, String p_priority,
-            String p_originalTaskId, String p_originalEndpoint, String p_originalUserName, String p_originalPassword,
-            Vector p_jobComments, HashMap p_segComments )
-            throws JMSException, NamingException
+    static public void importFromFileSystem(String p_fileName,
+            String p_jobName, String p_batchId, String p_fileProfileId,
+            Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
+            Integer p_docPageNum, Boolean p_isAutoImport,
+            String p_importRequestType, String p_importInitiatorId,
+            Integer p_exitValueByScript, String p_priority,
+            String p_originalTaskId, String p_originalEndpoint,
+            String p_originalUserName, String p_originalPassword,
+            Vector p_jobComments, HashMap p_segComments) throws JMSException,
+            NamingException
     {
         importFromFileSystem(p_fileName, p_jobName, p_batchId, p_fileProfileId,
-            p_pageCount, p_pageNum, p_docPageCount, p_docPageNum,
-            p_isAutoImport, Boolean.FALSE, p_importRequestType,
-            p_importInitiatorId, p_exitValueByScript, p_priority,
-            p_originalTaskId, p_originalEndpoint, p_originalUserName, p_originalPassword,
-            p_jobComments, p_segComments);
+                p_pageCount, p_pageNum, p_docPageCount, p_docPageNum,
+                p_isAutoImport, Boolean.FALSE, p_importRequestType,
+                p_importInitiatorId, p_exitValueByScript, p_priority,
+                p_originalTaskId, p_originalEndpoint, p_originalUserName,
+                p_originalPassword, p_jobComments, p_segComments);
     }
 
     /**
      * Initiates a file system import using JMS.
-     *
-     * @param p_fileName file name relative to the docs directory
-     * @param p_jobName  job name
-     * @param p_batchId  batch Id
-     * @param p_fileProfileId file profile ID
-     * @param p_pageCount number of pages in the batch
-     * @param p_pageNum number of the current page in the batch
-     * (starting from 1)
-     * @param p_isAutoImport FALSE if this is a manual import
-     * @param p_overrideFileProfileAsUnextracted - Determines whether
-     * the import process is invoked upon a failure for an extracted
-     * file (will override the file profile's format type).
-     * @param p_importRequestType IMPORT_TYPE_XXX
+     * <p>
+     * From GBS-2137.
+     */
+    static public void importFromFileSystem(String p_fileName, String p_jobId,
+            String p_batchId, String p_fileProfileId, Integer p_pageCount,
+            Integer p_pageNum, Integer p_docPageCount, Integer p_docPageNum,
+            Boolean p_isAutoImport, Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType, Integer p_exitValueByScript,
+            String p_priority) throws JMSException, NamingException
+    {
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
+        CxeMessage cxeMessage = new CxeMessage(type);
+        HashMap params = cxeMessage.getParameters();
+
+        Job job = JobCreationMonitor.loadJobFromDB(Long.parseLong(p_jobId));
+
+        params.put(CompanyWrapper.CURRENT_COMPANY_ID, job.getCompanyId());
+        params.put("Filename", p_fileName);
+        params.put("JobId", p_jobId);
+        params.put("BatchId", p_batchId);
+        params.put("FileProfileId", p_fileProfileId);
+        params.put("PageCount", p_pageCount);
+        params.put("PageNum", p_pageNum);
+        params.put("DocPageCount", p_docPageCount);
+        params.put("DocPageNum", p_docPageNum);
+        params.put("IsAutomaticImport", p_isAutoImport);
+        params.put("OverrideFileProfileAsUnextracted",
+                p_overrideFileProfileAsUnextracted);
+        params.put(IMPORT_TYPE, p_importRequestType);
+        params.put("ScriptOnImport", p_exitValueByScript);
+        params.put("priority", p_priority);
+
+        if (p_isAutoImport.booleanValue() == false)
+        {
+            simulateAutoImportIfNeeded(params);
+        }
+
+        // some target locales can be unchecked before import
+        String key = p_batchId + p_fileName + p_pageNum.intValue();
+        if (s_targetLocales.containsKey(key))
+        {
+            String targetLocales = (String) s_targetLocales.get(key);
+            if (!targetLocales.equals(""))
+                params.put("TargetLocales", targetLocales);
+            s_targetLocales.remove(key);
+        }
+
+        // for GBS-2137, update the new job to "IN_QUEUE" state
+        String state = job.getState();
+        if (state != null && Job.UPLOADING.equals(job.getState()))
+        {
+            JobCreationMonitor.updateJobState(job, Job.IN_QUEUE);
+        }
+
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
+        sendMessage(cxeMessage, jmsTopic);
+
+    }
+
+    /**
+     * Initiates a file system import using JMS.
+     * 
+     * @param p_fileName
+     *            file name relative to the docs directory
+     * @param p_jobName
+     *            job name
+     * @param p_batchId
+     *            batch Id
+     * @param p_fileProfileId
+     *            file profile ID
+     * @param p_pageCount
+     *            number of pages in the batch
+     * @param p_pageNum
+     *            number of the current page in the batch (starting from 1)
+     * @param p_isAutoImport
+     *            FALSE if this is a manual import
+     * @param p_overrideFileProfileAsUnextracted
+     *            - Determines whether the import process is invoked upon a
+     *            failure for an extracted file (will override the file
+     *            profile's format type).
+     * @param p_importRequestType
+     *            IMPORT_TYPE_XXX
      * @param p_importInitiatorId
-     *                   The user id of the user who initiated the import for this file.
+     *            The user id of the user who initiated the import for this
+     *            file.
      * @param p_exitValueByScript
-     *                   The return value by the script on import.                  
+     *            The return value by the script on import.
      * @exception JMSException
      * @exception NamingException
      */
-    static public void importFromFileSystem(
-        String p_fileName, String p_jobName, String uuid,
-        String p_batchId, String p_fileProfileId,
-        Integer p_pageCount, Integer p_pageNum,
-        Integer p_docPageCount, Integer p_docPageNum,
-        Boolean p_isAutoImport,
-        Boolean  p_overrideFileProfileAsUnextracted,
-        String p_importRequestType,
-        String p_importInitiatorId, Integer p_exitValueByScript)
-        throws JMSException, NamingException
+    static public void importFromFileSystem(String p_fileName,
+            String p_jobName, String uuid, String p_batchId,
+            String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum,
+            Boolean p_isAutoImport, Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType, String p_importInitiatorId,
+            Integer p_exitValueByScript) throws JMSException, NamingException
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         HashMap params = cxeMessage.getParameters();
         params.put("Filename", p_fileName);
@@ -240,30 +318,30 @@ public class CxeProxy
             jobName = "job_" + timeInSec;
         }
 
-        //To make JMS message support CompanyThreadLocal, we have to do so.
+        // To make JMS message support CompanyThreadLocal, we have to do so.
         String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
         params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
-        
+
         params.put("JobName", jobName);
         params.put("uuid", uuid);
         params.put("BatchId", p_batchId);
-        params.put("FileProfileId",p_fileProfileId);
+        params.put("FileProfileId", p_fileProfileId);
         params.put("PageCount", p_pageCount);
         params.put("PageNum", p_pageNum);
         params.put("DocPageCount", p_docPageCount);
         params.put("DocPageNum", p_docPageNum);
         params.put("IsAutomaticImport", p_isAutoImport);
         params.put("OverrideFileProfileAsUnextracted",
-            p_overrideFileProfileAsUnextracted);
+                p_overrideFileProfileAsUnextracted);
         params.put(IMPORT_TYPE, p_importRequestType);
         params.put("ImportInitiator", p_importInitiatorId);
         params.put("ScriptOnImport", p_exitValueByScript);
-        
+
         if (p_isAutoImport.booleanValue() == false)
         {
-            simulateAutoImportIfNeeded(params); 
+            simulateAutoImportIfNeeded(params);
         }
-        
+
         // make target locales selectable when import file
         String key = p_batchId + p_fileName + p_pageNum.intValue();
         if (s_targetLocales.containsKey(key))
@@ -273,150 +351,148 @@ public class CxeProxy
                 params.put("TargetLocales", targetLocales);
             s_targetLocales.remove(key);
         }
-        
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-        sendMessage(cxeMessage,jmsTopic);
+
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
+        sendMessage(cxeMessage, jmsTopic);
     }
 
-    static public void importFromFileSystem(
-            String p_fileName, String p_jobName, String uuid,
-            String p_batchId, String p_fileProfileId,
-            Integer p_pageCount, Integer p_pageNum,
+    static public void importFromFileSystem(String p_fileName,
+            String p_jobName, String uuid, String p_batchId,
+            String p_fileProfileId, Integer p_pageCount, Integer p_pageNum,
             Integer p_docPageCount, Integer p_docPageNum,
-            Boolean p_isAutoImport,
-            Boolean  p_overrideFileProfileAsUnextracted,
-            String p_importRequestType,
-            String p_importInitiatorId, Integer p_exitValueByScript, String p_priority)
-            throws JMSException, NamingException
-        {
-            CxeMessageType type = CxeMessageType.getCxeMessageType(
-                CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
-            CxeMessage cxeMessage = new CxeMessage(type);
-            HashMap params = cxeMessage.getParameters();
-            params.put("Filename", p_fileName);
-            String jobName = p_jobName;
-            if (p_jobName == null || p_jobName.length() == 0)
-            {
-                long timeInSec = System.currentTimeMillis() / 1000L;
-                jobName = "job_" + timeInSec;
-            }
-
-            //To make JMS message support CompanyThreadLocal, we have to do so.
-            String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
-            params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
-            
-            params.put("JobName", jobName);
-            params.put("uuid", uuid);
-            params.put("BatchId", p_batchId);
-            params.put("FileProfileId",p_fileProfileId);
-            params.put("PageCount", p_pageCount);
-            params.put("PageNum", p_pageNum);
-            params.put("DocPageCount", p_docPageCount);
-            params.put("DocPageNum", p_docPageNum);
-            params.put("IsAutomaticImport", p_isAutoImport);
-            params.put("OverrideFileProfileAsUnextracted",
-                p_overrideFileProfileAsUnextracted);
-            params.put(IMPORT_TYPE, p_importRequestType);
-            params.put("ImportInitiator", p_importInitiatorId);
-            params.put("ScriptOnImport", p_exitValueByScript);
-            params.put("priority", p_priority);
-            
-            if (p_isAutoImport.booleanValue() == false)
-            {
-                simulateAutoImportIfNeeded(params); 
-            }
-            
-            // make target locales selectable when import file
-            String key = p_batchId + p_fileName + p_pageNum.intValue();
-            if (s_targetLocales.containsKey(key))
-            {
-                String targetLocales = (String) s_targetLocales.get(key);
-                if (!targetLocales.equals(""))
-                    params.put("TargetLocales", targetLocales);
-                s_targetLocales.remove(key);
-            }
-            
-            String jmsTopic = EventTopicMap.JMS_PREFIX +
-                EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-            sendMessage(cxeMessage,jmsTopic);
-        }
-
-    static public void importFromFileSystem(
-            String p_fileName, String p_jobName,
-            String p_batchId, String p_fileProfileId,
-            Integer p_pageCount, Integer p_pageNum,
-            Integer p_docPageCount, Integer p_docPageNum,
-            Boolean p_isAutoImport,
-            Boolean  p_overrideFileProfileAsUnextracted,
-            String p_importRequestType,
-            String p_importInitiatorId, Integer p_exitValueByScript, String p_priority,
-            String p_originalTaskId, String p_originalEndpoint, String p_originalUserName, String p_originalPassword,
-            Vector p_jobComments, HashMap p_segComments )
+            Boolean p_isAutoImport, Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType, String p_importInitiatorId,
+            Integer p_exitValueByScript, String p_priority)
             throws JMSException, NamingException
     {
-            CxeMessageType type = CxeMessageType.getCxeMessageType(
-                CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
-            CxeMessage cxeMessage = new CxeMessage(type);
-            HashMap params = cxeMessage.getParameters();
-            params.put("Filename", p_fileName);
-            String jobName = p_jobName;
-            if (p_jobName == null || p_jobName.length() == 0)
-            {
-                long timeInSec = System.currentTimeMillis() / 1000L;
-                jobName = "job_" + timeInSec;
-            }
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
+        CxeMessage cxeMessage = new CxeMessage(type);
+        HashMap params = cxeMessage.getParameters();
+        params.put("Filename", p_fileName);
+        String jobName = p_jobName;
+        if (p_jobName == null || p_jobName.length() == 0)
+        {
+            long timeInSec = System.currentTimeMillis() / 1000L;
+            jobName = "job_" + timeInSec;
+        }
 
-            //To make JMS message support CompanyThreadLocal, we have to do so.
-            String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
-            params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
-            
-            params.put("JobName", jobName);
-            params.put("BatchId", p_batchId);
-            params.put("FileProfileId",p_fileProfileId);
-            params.put("PageCount", p_pageCount);
-            params.put("PageNum", p_pageNum);
-            params.put("DocPageCount", p_docPageCount);
-            params.put("DocPageNum", p_docPageNum);
-            params.put("IsAutomaticImport", p_isAutoImport);
-            params.put("OverrideFileProfileAsUnextracted", p_overrideFileProfileAsUnextracted);
-            params.put(IMPORT_TYPE, p_importRequestType);
-            params.put("ImportInitiator", p_importInitiatorId);
-            params.put("ScriptOnImport", p_exitValueByScript);
-            params.put("priority", p_priority);
-            params.put("taskId", p_originalTaskId);
-            params.put("wsdlUrl", p_originalEndpoint);
-            params.put("userName", p_originalUserName);
-            params.put("password", p_originalPassword);
-            params.put("jobComments", p_jobComments);
-            params.put("segComments", p_segComments);
-            
-            if (p_isAutoImport.booleanValue() == false)
-            {
-                simulateAutoImportIfNeeded(params); 
-            }
-            
-            // make target locales selectable when import file
-            String key = p_batchId + p_fileName + p_pageNum.intValue();
-            if (s_targetLocales.containsKey(key))
-            {
-                String targetLocales = (String) s_targetLocales.get(key);
-                if (!targetLocales.equals(""))
-                    params.put("TargetLocales", targetLocales);
-                s_targetLocales.remove(key);
-            }
-            
-            String jmsTopic = EventTopicMap.JMS_PREFIX +
-                EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
-            sendMessage(cxeMessage,jmsTopic);
+        // To make JMS message support CompanyThreadLocal, we have to do so.
+        String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
+        params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
+
+        params.put("JobName", jobName);
+        params.put("uuid", uuid);
+        params.put("BatchId", p_batchId);
+        params.put("FileProfileId", p_fileProfileId);
+        params.put("PageCount", p_pageCount);
+        params.put("PageNum", p_pageNum);
+        params.put("DocPageCount", p_docPageCount);
+        params.put("DocPageNum", p_docPageNum);
+        params.put("IsAutomaticImport", p_isAutoImport);
+        params.put("OverrideFileProfileAsUnextracted",
+                p_overrideFileProfileAsUnextracted);
+        params.put(IMPORT_TYPE, p_importRequestType);
+        params.put("ImportInitiator", p_importInitiatorId);
+        params.put("ScriptOnImport", p_exitValueByScript);
+        params.put("priority", p_priority);
+
+        if (p_isAutoImport.booleanValue() == false)
+        {
+            simulateAutoImportIfNeeded(params);
+        }
+
+        // make target locales selectable when import file
+        String key = p_batchId + p_fileName + p_pageNum.intValue();
+        if (s_targetLocales.containsKey(key))
+        {
+            String targetLocales = (String) s_targetLocales.get(key);
+            if (!targetLocales.equals(""))
+                params.put("TargetLocales", targetLocales);
+            s_targetLocales.remove(key);
+        }
+
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
+        sendMessage(cxeMessage, jmsTopic);
+    }
+
+    static public void importFromFileSystem(String p_fileName,
+            String p_jobName, String p_batchId, String p_fileProfileId,
+            Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
+            Integer p_docPageNum, Boolean p_isAutoImport,
+            Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType, String p_importInitiatorId,
+            Integer p_exitValueByScript, String p_priority,
+            String p_originalTaskId, String p_originalEndpoint,
+            String p_originalUserName, String p_originalPassword,
+            Vector p_jobComments, HashMap p_segComments) throws JMSException,
+            NamingException
+    {
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
+        CxeMessage cxeMessage = new CxeMessage(type);
+        HashMap params = cxeMessage.getParameters();
+        params.put("Filename", p_fileName);
+        String jobName = p_jobName;
+        if (p_jobName == null || p_jobName.length() == 0)
+        {
+            long timeInSec = System.currentTimeMillis() / 1000L;
+            jobName = "job_" + timeInSec;
+        }
+
+        // To make JMS message support CompanyThreadLocal, we have to do so.
+        String currentCompanyId = getCompanyIdByFileProfileId(p_fileProfileId);
+        params.put(CompanyWrapper.CURRENT_COMPANY_ID, currentCompanyId);
+
+        params.put("JobName", jobName);
+        params.put("BatchId", p_batchId);
+        params.put("FileProfileId", p_fileProfileId);
+        params.put("PageCount", p_pageCount);
+        params.put("PageNum", p_pageNum);
+        params.put("DocPageCount", p_docPageCount);
+        params.put("DocPageNum", p_docPageNum);
+        params.put("IsAutomaticImport", p_isAutoImport);
+        params.put("OverrideFileProfileAsUnextracted",
+                p_overrideFileProfileAsUnextracted);
+        params.put(IMPORT_TYPE, p_importRequestType);
+        params.put("ImportInitiator", p_importInitiatorId);
+        params.put("ScriptOnImport", p_exitValueByScript);
+        params.put("priority", p_priority);
+        params.put("taskId", p_originalTaskId);
+        params.put("wsdlUrl", p_originalEndpoint);
+        params.put("userName", p_originalUserName);
+        params.put("password", p_originalPassword);
+        params.put("jobComments", p_jobComments);
+        params.put("segComments", p_segComments);
+
+        if (p_isAutoImport.booleanValue() == false)
+        {
+            simulateAutoImportIfNeeded(params);
+        }
+
+        // make target locales selectable when import file
+        String key = p_batchId + p_fileName + p_pageNum.intValue();
+        if (s_targetLocales.containsKey(key))
+        {
+            String targetLocales = (String) s_targetLocales.get(key);
+            if (!targetLocales.equals(""))
+                params.put("TargetLocales", targetLocales);
+            s_targetLocales.remove(key);
+        }
+
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
+        sendMessage(cxeMessage, jmsTopic);
     }
 
     /**
-     * Modifies the parameters in the HashMap to simulate certain
-     * aspects of auto import with a batch size of 1, including 1 page
-     * per job and the jobname being the page name. If the value of
-     * the property import.manualImportSingleBatch in envoy.properties
-     * is false, then nothing happens here.
+     * Modifies the parameters in the HashMap to simulate certain aspects of
+     * auto import with a batch size of 1, including 1 page per job and the
+     * jobname being the page name. If the value of the property
+     * import.manualImportSingleBatch in envoy.properties is false, then nothing
+     * happens here.
      */
     static private void simulateAutoImportIfNeeded(HashMap p_params)
     {
@@ -441,20 +517,23 @@ public class CxeProxy
                 p_params.put("PageNum", ONE);
                 p_params.put("DocPageCount", ONE);
                 p_params.put("DocPageNum", ONE);
-                String newBatchId = baseName.hashCode() +
-                    Long.toString(System.currentTimeMillis());
+                String newBatchId = baseName.hashCode()
+                        + Long.toString(System.currentTimeMillis());
                 p_params.put("BatchId", newBatchId);
             }
         }
         catch (Exception ex)
         {
-            s_logger.error("Could not handle import.manualImportSingleBatch processing.", ex);
+            s_logger.error(
+                    "Could not handle import.manualImportSingleBatch processing.",
+                    ex);
         }
     }
 
     /**
-     * @see exportFile(String, MessageData, String, String, String, int, String, String, String
-     *      String, Integer, Integer, Integer, Integer, long, boolean, String, boolean).
+     * @see exportFile(String, MessageData, String, String, String, int, String,
+     *      String, String String, Integer, Integer, Integer, Integer, long,
+     *      boolean, String, boolean).
      */
     static public void exportFile(String p_eventFlowXml, MessageData p_gxml,
             String p_cxeRequestType, String p_targetLocale,
@@ -472,18 +551,27 @@ public class CxeProxy
                 p_docPageCount, p_docPageNum, null, 0, false, p_isUnextracted,
                 p_fileName, p_sourcePageBomType, p_isFinalExport, p_companyId);
     }
-    
+
     /**
-     * Initiates an export within CXE using JMS(Override method for documentum workflow Id).
-     *
-     * @param p_eventFlowXml string of event flow xml
-     * @param p_gxmlFileName filename of a file that contains GXML
-     * @param p_cxeRequestType CXE Request Type
-     * @param p_targetLocale target locale
-     * @param p_targetCharset target encoding
-     * @param p_bomType BOM type
-     * @param p_messageId export message ID
-     * @param p_exportLocation export location
+     * Initiates an export within CXE using JMS(Override method for documentum
+     * workflow Id).
+     * 
+     * @param p_eventFlowXml
+     *            string of event flow xml
+     * @param p_gxmlFileName
+     *            filename of a file that contains GXML
+     * @param p_cxeRequestType
+     *            CXE Request Type
+     * @param p_targetLocale
+     *            target locale
+     * @param p_targetCharset
+     *            target encoding
+     * @param p_bomType
+     *            BOM type
+     * @param p_messageId
+     *            export message ID
+     * @param p_exportLocation
+     *            export location
      * @param p_localeSubDir
      * @param p_exportBatchId
      * @param p_pageCount
@@ -492,7 +580,8 @@ public class CxeProxy
      * @param p_docPageNum
      * @param wfId
      * @param p_isUnextracted
-     * @param p_fileName The name of the file to be exported (relative path)
+     * @param p_fileName
+     *            The name of the file to be exported (relative path)
      * @exception JMSException
      * @exception NamingException
      */
@@ -526,13 +615,14 @@ public class CxeProxy
 
     /**
      * Export for dynamic preview
-     *
+     * 
      * @param p_eventFlowXml
      * @param p_gxml
      * @param p_cxeRequestType
      * @param p_targetLocale
      * @param p_targetCharset
-     * @param p_bomType BOM Type
+     * @param p_bomType
+     *            BOM Type
      * @param p_messageId
      * @param p_exportLocation
      * @param p_localeSubDir
@@ -561,7 +651,7 @@ public class CxeProxy
 
     /**
      * Initiates a teamsite import using JMS.
-     *
+     * 
      * @param p_originalFilename
      * @param p_convertedFileName
      * @param p_fileSize
@@ -574,44 +664,31 @@ public class CxeProxy
      * @param p_localizationProfile
      * @param p_jobName
      * @param p_userName
-     * @param p_importRequestType IMPORT_TYPE_XXX
+     * @param p_importRequestType
+     *            IMPORT_TYPE_XXX
      * @exception JMSException
      * @exception NamingException
      */
     static public void importFromTeamSite(String p_originalFilename,
-        String p_convertedFileName,
-        int p_fileSize,
-        String p_locale,
-        String p_charset,
-        String p_batchId,
-        int p_pageNum,
-        int p_pageCount,
-        int p_docPageNum,
-        int p_docPageCount,
-        String p_fileProfileId,
-        String p_localizationProfile,
-        String p_jobName,
-        String p_userName,
-        String p_serverName,
-        String p_storeName,
-        String p_taskId,
-        String p_overwriteSource,
-        String p_callbackImmediately,
-        String p_importRequestType)
-        throws JMSException, NamingException
+            String p_convertedFileName, int p_fileSize, String p_locale,
+            String p_charset, String p_batchId, int p_pageNum, int p_pageCount,
+            int p_docPageNum, int p_docPageCount, String p_fileProfileId,
+            String p_localizationProfile, String p_jobName, String p_userName,
+            String p_serverName, String p_storeName, String p_taskId,
+            String p_overwriteSource, String p_callbackImmediately,
+            String p_importRequestType) throws JMSException, NamingException
     {
-        importFromTeamSite(p_originalFilename, p_convertedFileName,
-            p_fileSize, p_locale, p_charset, p_batchId,
-            p_pageNum, p_pageCount, p_docPageNum, p_docPageCount,
-            p_fileProfileId, p_localizationProfile, p_jobName, p_userName,
-            p_serverName, p_storeName, p_taskId, p_overwriteSource,
-            p_callbackImmediately, Boolean.FALSE,
-            p_importRequestType);
+        importFromTeamSite(p_originalFilename, p_convertedFileName, p_fileSize,
+                p_locale, p_charset, p_batchId, p_pageNum, p_pageCount,
+                p_docPageNum, p_docPageCount, p_fileProfileId,
+                p_localizationProfile, p_jobName, p_userName, p_serverName,
+                p_storeName, p_taskId, p_overwriteSource,
+                p_callbackImmediately, Boolean.FALSE, p_importRequestType);
     }
 
     /**
      * Initiates a teamsite import using JMS.
-     *
+     * 
      * @param p_originalFilename
      * @param p_convertedFileName
      * @param p_fileSize
@@ -620,47 +697,38 @@ public class CxeProxy
      * @param p_batchId
      * @param p_pageNum
      * @param p_pageCount
-     * @param p_docPageNum this is not the p_pageNum
-     * @param p_docPageCount this is not the p_pageCount
+     * @param p_docPageNum
+     *            this is not the p_pageNum
+     * @param p_docPageCount
+     *            this is not the p_pageCount
      * @param p_fileProfileId
      * @param p_localizationProfile
      * @param p_jobName
      * @param p_userName
-     * @param p_overrideFileProfileAsUnextracted - Determines whether
-     * the import process is invoked upon a failure for an extracted
-     * file (will override the file profile's format type).
-     * @param p_importRequestType IMPORT_TYPE_XXX
+     * @param p_overrideFileProfileAsUnextracted
+     *            - Determines whether the import process is invoked upon a
+     *            failure for an extracted file (will override the file
+     *            profile's format type).
+     * @param p_importRequestType
+     *            IMPORT_TYPE_XXX
      * @exception JMSException
      * @exception NamingException
      */
     static public void importFromTeamSite(String p_originalFilename,
-        String p_convertedFileName,
-        int p_fileSize,
-        String p_locale,
-        String p_charset,
-        String p_batchId,
-        int p_pageNum,
-        int p_pageCount,
-        int p_docPageNum,
-        int p_docPageCount,
-        String p_fileProfileId,
-        String p_localizationProfile,
-        String p_jobName,
-        String p_userName,
-        String p_serverName,
-        String p_storeName,
-        String p_taskId,
-        String p_overwriteSource,
-        String p_callbackImmediately,
-        Boolean  p_overrideFileProfileAsUnextracted,
-        String p_importRequestType)
-        throws JMSException, NamingException
+            String p_convertedFileName, int p_fileSize, String p_locale,
+            String p_charset, String p_batchId, int p_pageNum, int p_pageCount,
+            int p_docPageNum, int p_docPageCount, String p_fileProfileId,
+            String p_localizationProfile, String p_jobName, String p_userName,
+            String p_serverName, String p_storeName, String p_taskId,
+            String p_overwriteSource, String p_callbackImmediately,
+            Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType) throws JMSException, NamingException
     {
         s_logger.debug("CXE import server is " + p_serverName);
         s_logger.debug("CXE import store is " + p_storeName);
 
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.TEAMSITE_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.TEAMSITE_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         HashMap params = new HashMap();
         String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
@@ -685,56 +753,45 @@ public class CxeProxy
         params.put("JobName", p_jobName);
         params.put("UserName", p_userName);
         params.put("OverrideFileProfileAsUnextracted",
-            p_overrideFileProfileAsUnextracted);
+                p_overrideFileProfileAsUnextracted);
 
         cxeMessage.setParameters(params);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
     }
 
     static public void importFromTeamSite(String p_originalFilename,
-        String p_convertedFileName,
-        int p_fileSize,
-        String p_locale,
-        String p_charset,
-        String p_batchId,
-        int p_pageNum,
-        int p_pageCount,
-        int p_docPageNum,
-        int p_docPageCount,
-        String p_fileProfileId,
-        String p_localizationProfile,
-        String p_jobName,
-        String p_userName,
-        String p_serverName,
-        String p_storeName,
-        Boolean  p_overrideFileProfileAsUnextracted,
-        String p_importRequestType)
-        throws JMSException, NamingException
+            String p_convertedFileName, int p_fileSize, String p_locale,
+            String p_charset, String p_batchId, int p_pageNum, int p_pageCount,
+            int p_docPageNum, int p_docPageCount, String p_fileProfileId,
+            String p_localizationProfile, String p_jobName, String p_userName,
+            String p_serverName, String p_storeName,
+            Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType) throws JMSException, NamingException
     {
-        importFromTeamSite(p_originalFilename, p_convertedFileName,
-            p_fileSize, p_locale, p_charset, p_batchId,
-            p_pageNum, p_pageCount, p_docPageNum, p_docPageCount,
-            p_fileProfileId, p_localizationProfile, p_jobName, p_userName,
-            p_serverName, p_storeName, "", "", "",
-            p_overrideFileProfileAsUnextracted,
-            p_importRequestType);
+        importFromTeamSite(p_originalFilename, p_convertedFileName, p_fileSize,
+                p_locale, p_charset, p_batchId, p_pageNum, p_pageCount,
+                p_docPageNum, p_docPageCount, p_fileProfileId,
+                p_localizationProfile, p_jobName, p_userName, p_serverName,
+                p_storeName, "", "", "", p_overrideFileProfileAsUnextracted,
+                p_importRequestType);
     }
-
 
     /**
      * Publishes the CxeMessage objects contained in AdapterResult[]
-     *
-     * @param p_msgs array of messages
-     * @param p_topic the desired topic to publish to
+     * 
+     * @param p_msgs
+     *            array of messages
+     * @param p_topic
+     *            the desired topic to publish to
      * @exception
      */
     static public void publishEvents(AdapterResult[] p_msgs, String p_topic)
-        throws Exception
+            throws Exception
     {
         CxeMessage cxeMessage = null;
         String jmsTopic = EventTopicMap.JMS_PREFIX + p_topic;
@@ -742,14 +799,15 @@ public class CxeProxy
         for (int i = 0; i < p_msgs.length; i++)
         {
             cxeMessage = p_msgs[i].cxeMessage;
-            CompanyWrapper.saveCurrentCompanyIdInMap(cxeMessage.getParameters(), s_logger);
+            CompanyWrapper.saveCurrentCompanyIdInMap(
+                    cxeMessage.getParameters(), s_logger);
             sender.publish(getTopicSession().createObjectMessage(cxeMessage));
         }
     }
 
     /**
      * Initiates a vignette import using JMS.
-     *
+     * 
      * @exception Exception
      */
     static public void importFromVignette(String p_jobName, String p_batchId,
@@ -767,27 +825,19 @@ public class CxeProxy
 
     /**
      * Initiates a vignette import using JMS.
-     *
+     * 
      * @exception Exception
      */
-    static public void importFromVignette(String p_jobName,
-        String p_batchId,
-        int p_pageNum,
-        int p_pageCount,
-        int p_docPageNum,
-        int p_docPageCount,
-        String p_srcMid,
-        String p_path,
-        String p_fileProfileId,
-        String p_targetProjectMid,
-        String p_returnStatus,
-        String p_versionFlag,
-        Boolean  p_overrideFileProfileAsUnextracted,
-        String p_importRequestType)
-        throws Exception
+    static public void importFromVignette(String p_jobName, String p_batchId,
+            int p_pageNum, int p_pageCount, int p_docPageNum,
+            int p_docPageCount, String p_srcMid, String p_path,
+            String p_fileProfileId, String p_targetProjectMid,
+            String p_returnStatus, String p_versionFlag,
+            Boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType) throws Exception
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.VIGNETTE_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.VIGNETTE_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         HashMap params = new HashMap();
         String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
@@ -795,8 +845,8 @@ public class CxeProxy
         params.put("ObjectId", p_srcMid);
         params.put("Path", p_path);
         params.put("FileProfileId", p_fileProfileId);
-        params.put("JobName",p_jobName);
-        params.put("BatchId",p_batchId);
+        params.put("JobName", p_jobName);
+        params.put("BatchId", p_batchId);
         params.put("PageCount", new Integer(p_pageCount));
         params.put("PageNum", new Integer(p_pageNum));
         params.put("DocPageCount", new Integer(p_docPageCount));
@@ -805,33 +855,34 @@ public class CxeProxy
         params.put("ReturnStatus", p_returnStatus);
         params.put("VersionFlag", p_versionFlag);
         params.put("OverrideFileProfileAsUnextracted",
-            p_overrideFileProfileAsUnextracted);
+                p_overrideFileProfileAsUnextracted);
         params.put(IMPORT_TYPE, p_importRequestType);
         cxeMessage.setParameters(params);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_VIGNETTE_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_VIGNETTE_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
     }
 
-
     /**
-     * Initiates an import of a knowledge object and associated
-     * Concepts from ServiceWare.
-     *
-     * @param p_koId knowledge object ID
-     * @param p_fpId file profile id
-     * @param p_jobName suggested job name
+     * Initiates an import of a knowledge object and associated Concepts from
+     * ServiceWare.
+     * 
+     * @param p_koId
+     *            knowledge object ID
+     * @param p_fpId
+     *            file profile id
+     * @param p_jobName
+     *            suggested job name
      * @exception Exception
      */
-    static public void importFromServiceWare(
-        String p_koId, String p_fpId, String p_jobName)
-        throws Exception
+    static public void importFromServiceWare(String p_koId, String p_fpId,
+            String p_jobName) throws Exception
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.SERVICEWARE_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.SERVICEWARE_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         HashMap params = new HashMap();
 
@@ -845,53 +896,47 @@ public class CxeProxy
         params.put("DocPageCount", new Integer(1));
         params.put("DocPageNum", new Integer(1));
         params.put("FileProfileId", p_fpId);
-        params.put("OverrideFileProfileAsUnextracted",
-            Boolean.FALSE);
+        params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
         cxeMessage.setParameters(params);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_SERVICEWARE_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_SERVICEWARE_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
     }
 
     /**
-     * Initiates a Mediasurface import using JMS for one MS leaf item.
-     * The caller has already figured out the batch information and
-     * should know what to pass for batchId, pageNum, and pageCount.
-     *
+     * Initiates a Mediasurface import using JMS for one MS leaf item. The
+     * caller has already figured out the batch information and should know what
+     * to pass for batchId, pageNum, and pageCount.
+     * 
      * @exception Exception
      */
-    static public void importFromMediasurface(
-        int p_mediasurfaceItemKey,
-        String p_mediasurfaceContentServerUrl,
-        String p_mediasurfaceContentServerName,
-        String p_mediasurfaceContentServerPort,
-        String p_mediasurfaceUser,
-        String p_mediasurfacePassword,
-        String p_jobName,
-        String p_batchId,
-        int p_pageNum,
-        int p_pageCount,
-        int p_docPageNum,
-        int p_docPageCount,
-        String p_fileProfileId,
-        boolean p_overrideFileProfileAsUnextracted,
-        String p_importRequestType)
-        throws Exception
+    static public void importFromMediasurface(int p_mediasurfaceItemKey,
+            String p_mediasurfaceContentServerUrl,
+            String p_mediasurfaceContentServerName,
+            String p_mediasurfaceContentServerPort, String p_mediasurfaceUser,
+            String p_mediasurfacePassword, String p_jobName, String p_batchId,
+            int p_pageNum, int p_pageCount, int p_docPageNum,
+            int p_docPageCount, String p_fileProfileId,
+            boolean p_overrideFileProfileAsUnextracted,
+            String p_importRequestType) throws Exception
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.MEDIASURFACE_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.MEDIASURFACE_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         HashMap params = new HashMap();
 
         String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
         params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
         params.put("MediasurfaceItemKey", new Integer(p_mediasurfaceItemKey));
-        params.put("MediasurfaceContentServerUrl", p_mediasurfaceContentServerUrl);
-        params.put("MediasurfaceContentServerName", p_mediasurfaceContentServerName);
-        params.put("MediasurfaceContentServerPort", p_mediasurfaceContentServerPort);
+        params.put("MediasurfaceContentServerUrl",
+                p_mediasurfaceContentServerUrl);
+        params.put("MediasurfaceContentServerName",
+                p_mediasurfaceContentServerName);
+        params.put("MediasurfaceContentServerPort",
+                p_mediasurfaceContentServerPort);
         params.put("MediasurfaceUser", p_mediasurfaceUser);
         params.put("MediasurfacePassword", p_mediasurfacePassword);
         params.put("JobName", p_jobName);
@@ -901,13 +946,13 @@ public class CxeProxy
         params.put("DocPageCount", new Integer(p_docPageCount));
         params.put("DocPageNum", new Integer(p_docPageNum));
         params.put("FileProfileId", p_fileProfileId);
-        params.put("OverrideFileProfileAsUnextracted",
-            new Boolean(p_overrideFileProfileAsUnextracted));
+        params.put("OverrideFileProfileAsUnextracted", new Boolean(
+                p_overrideFileProfileAsUnextracted));
         params.put(IMPORT_TYPE, p_importRequestType);
         cxeMessage.setParameters(params);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_MEDIASURFACE_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_MEDIASURFACE_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
@@ -915,7 +960,7 @@ public class CxeProxy
 
     /**
      * Returns true if the MS Office Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isMsOfficeAdapterInstalled()
@@ -925,7 +970,7 @@ public class CxeProxy
 
     /**
      * Returns true if the TeamSite Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isTeamSiteAdapterInstalled()
@@ -935,7 +980,7 @@ public class CxeProxy
 
     /**
      * Returns true if the Database Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isDatabaseAdapterInstalled()
@@ -945,7 +990,7 @@ public class CxeProxy
 
     /**
      * Returns true if the Pdf Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isPdfAdapterInstalled()
@@ -955,7 +1000,7 @@ public class CxeProxy
 
     /**
      * Returns true if the Pdf Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isVignetteAdapterInstalled()
@@ -965,7 +1010,7 @@ public class CxeProxy
 
     /**
      * Returns true if the ServiceWare Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isServiceWareAdapterInstalled()
@@ -975,7 +1020,7 @@ public class CxeProxy
 
     /**
      * Returns true if the Desktop Publishing (Quark/Frame) Adapter is installed
-     *
+     * 
      * @return true | false
      */
     static public boolean isQuarkFrameAdapterInstalled()
@@ -983,29 +1028,33 @@ public class CxeProxy
         return QuarkFrameAdapter.isInstalled();
     }
 
-
-    ///////////////////////
-    // Private methods  //
-    //////////////////////
-
+    // /////////////////////
+    // Private methods //
+    // ////////////////////
 
     /**
      * Gets a publisher for the given topic
-     *
-     * @param p_topicName JMS topic name
+     * 
+     * @param p_topicName
+     *            JMS topic name
      * @return JMS Publisher
      * @exception JMSException
      * @exception NamingException
      */
     static private TopicPublisher getPublisher(String p_topicName)
-        throws JMSException, NamingException
+            throws JMSException, NamingException
     {
-        // This is JBOSS specified, when jboss bind the JMS destination(Queue or Topic) in to naming context,
-        // it will automatically add the prefix "topic/queue" ahead of the JNDI name, such as: 
-        // "topic/com.globalsight.cxe.jms.ForExtractor".  
-        // So if the GlobalSight works on JBOSS, we need add the prefix manually when lookup the JMS destination.
-        AppServerWrapper s_appServerWrapper = AppServerWrapperFactory.getAppServerWrapper();
-        if (s_appServerWrapper.getJ2EEServerName().equals(AppServerWrapperFactory.JBOSS)) 
+        // This is JBOSS specified, when jboss bind the JMS destination(Queue or
+        // Topic) in to naming context,
+        // it will automatically add the prefix "topic/queue" ahead of the JNDI
+        // name, such as:
+        // "topic/com.globalsight.cxe.jms.ForExtractor".
+        // So if the GlobalSight works on JBOSS, we need add the prefix manually
+        // when lookup the JMS destination.
+        AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
+                .getAppServerWrapper();
+        if (s_appServerWrapper.getJ2EEServerName().equals(
+                AppServerWrapperFactory.JBOSS))
         {
             p_topicName = EventTopicMap.TOPIC_PREFIX_JBOSS + p_topicName;
         }
@@ -1018,29 +1067,31 @@ public class CxeProxy
     /**
      * Gets a JMS topic session on a per-thread basis. This stores the
      * TopicSessions per thread in a static HashMap.
-     *
+     * 
      * @return JMS TopicSession
      * @exception JMSException
      * @exception NamingException
      */
-    static private TopicSession getTopicSession()
-        throws JMSException, NamingException
+    static private TopicSession getTopicSession() throws JMSException,
+            NamingException
     {
         String threadName = Thread.currentThread().getName();
         return getTopicSession(threadName);
     }
-    
+
     static private TopicSession getTopicSession(String key)
-        throws JMSException, NamingException
+            throws JMSException, NamingException
     {
         TopicSession ts = (TopicSession) s_topicSessions.get(key);
 
         if (ts == null)
         {
-            TopicConnectionFactory cf = (TopicConnectionFactory) s_context.lookup(JMS_FACTORY);
+            TopicConnectionFactory cf = (TopicConnectionFactory) s_context
+                    .lookup(JMS_FACTORY);
             TopicConnection topicConnection = cf.createTopicConnection();
             topicConnection.start();
-            ts = topicConnection.createTopicSession(false, Session.CLIENT_ACKNOWLEDGE);
+            ts = topicConnection.createTopicSession(false,
+                    Session.CLIENT_ACKNOWLEDGE);
             s_topicSessions.put(key, ts);
         }
 
@@ -1049,22 +1100,29 @@ public class CxeProxy
 
     /**
      * Initiates an export within CXE using JMS
-     *
-     * @param p_eventFlowXml string of event flow xml
-     * @param p_gxmlFileName filename of a file that contains GXML
-     * @param p_cxeRequestType CXE Request Type
-     * @param p_targetLocale target locale
-     * @param p_targetCharset target encoding
-     * @param p_messageId export message ID
-     * @param p_exportLocation export location
+     * 
+     * @param p_eventFlowXml
+     *            string of event flow xml
+     * @param p_gxmlFileName
+     *            filename of a file that contains GXML
+     * @param p_cxeRequestType
+     *            CXE Request Type
+     * @param p_targetLocale
+     *            target locale
+     * @param p_targetCharset
+     *            target encoding
+     * @param p_messageId
+     *            export message ID
+     * @param p_exportLocation
+     *            export location
      * @param p_localeSubDir
      * @param p_exportBatchId
      * @param p_pageCount
      * @param p_pageNum
      * @param p_isUnextracted
      * @param p_sessionId
-     * @param p_fileName The name of the file that is being exported
-     * (relative path)
+     * @param p_fileName
+     *            The name of the file that is being exported (relative path)
      * @exception JMSException
      * @exception NamingException
      */
@@ -1156,23 +1214,174 @@ public class CxeProxy
                 + EventTopicMap.FOR_CAP_SOURCE_ADAPTER;
         sendMessage(exportMsg, jmsTopic);
     }
+    
+    /**
+     * Initiates an export within CXE using JMS(Override method for documentum
+     * workflow Id).
+     * 
+     * @param p_eventFlowXml
+     *            string of event flow xml
+     * @param p_gxmlFileName
+     *            filename of a file that contains GXML
+     * @param p_cxeRequestType
+     *            CXE Request Type
+     * @param p_targetLocale
+     *            target locale
+     * @param p_targetCharset
+     *            target encoding
+     * @param p_bomType
+     *            BOM type
+     * @param p_messageId
+     *            export message ID
+     * @param p_exportLocation
+     *            export location
+     * @param p_localeSubDir
+     * @param p_exportBatchId
+     * @param p_pageCount
+     * @param p_pageNum
+     * @param p_docPageCount
+     * @param p_docPageNum
+     * @param wfId
+     * @param p_isUnextracted
+     * @param p_fileName
+     *            The name of the file to be exported (relative path)
+     * @exception JMSException
+     * @exception NamingException
+     */
+    static public CxeMessage getExportCxeMessage(String p_eventFlowXml, MessageData p_gxml,
+            String p_cxeRequestType, String p_targetLocale,
+            String p_targetCharset, int p_bomType, String p_messageId,
+            String p_exportLocation, String p_localeSubDir,
+            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum, String newObjId,
+            long wfId, boolean isJobDone, boolean p_isUnextracted,
+            String p_fileName, int p_sourcePageBomType,
+            boolean p_isFinalExport, String p_companyId) throws JMSException,
+            NamingException, IOException
+    {
+        if (s_logger.isDebugEnabled())
+        {
+            s_logger.debug("CXE Export Request: (requestType="
+                    + p_cxeRequestType + ", " + "pageId=" + p_messageId + ", "
+                    + "page " + p_docPageNum + " of " + p_docPageCount + ", "
+                    + "targetLocale=" + p_targetLocale + ", " + "unextracted="
+                    + p_isUnextracted + ", " + "dir=" + p_localeSubDir + ")");
+        }
+
+        return getCxeMessage(p_eventFlowXml, p_gxml, p_cxeRequestType, p_targetLocale,
+                p_targetCharset, p_bomType, p_messageId, p_exportLocation,
+                p_localeSubDir, p_exportBatchId, p_pageCount, p_pageNum,
+                p_docPageCount, p_docPageNum, newObjId, wfId, isJobDone,
+                p_isUnextracted, null, p_fileName, p_sourcePageBomType,
+                p_isFinalExport, p_companyId);
+    }
+    
+    static private CxeMessage getCxeMessage(String p_eventFlowXml, MessageData p_gxml,
+            String p_cxeRequestType, String p_targetLocale,
+            String p_targetCharset, int p_bomType, String p_messageId,
+            String p_exportLocation, String p_localeSubDir,
+            String p_exportBatchId, Integer p_pageCount, Integer p_pageNum,
+            Integer p_docPageCount, Integer p_docPageNum, String newObjId,
+            long wfId, boolean isJobDone, boolean p_isUnextracted,
+            String p_sessionId, String p_fileName, int p_sourcePageBomType,
+            boolean p_isFinalExport, String p_companyId) throws JMSException,
+            NamingException, IOException
+    {
+        CxeMessageType type;
+        if (p_isUnextracted)
+        {
+            type = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
+        }
+        else
+        {
+            type = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.GXML_LOCALIZED_EVENT);
+        }
+
+        // Handle STF created files as unextracted as well if it's not
+        // the STF creation, but a regular STF export.
+        if (ExportConstants.EXPORT_STF.equals(p_cxeRequestType))
+        {
+            type = CxeMessageType
+                    .getCxeMessageType(CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT);
+        }
+
+        CxeMessage exportMsg = new CxeMessage(type);
+        HashMap params = new HashMap();
+
+        if (p_targetCharset != null && p_targetCharset.endsWith("_di"))
+        {
+            p_targetCharset = p_targetCharset.replace("_di", "");
+        }
+
+        else if ("Unicode Escape".equalsIgnoreCase(p_targetCharset))
+        {
+            p_targetCharset = "UTF-8";
+            params.put("UnicodeEscape", "true");
+        }
+        else
+        {
+            params.put("UnicodeEscape", "false");
+        }
+        if ("Entity Escape".equalsIgnoreCase(p_targetCharset))
+        {
+            p_targetCharset = "ISO-8859-1";
+            params.put("EntityEscape", "true");
+        }
+        else
+        {
+            params.put("EntityEscape", "false");
+        }
+        params.put(CompanyWrapper.CURRENT_COMPANY_ID, p_companyId);
+        params.put("TargetLocale", p_targetLocale);
+        params.put("TargetCharset", p_targetCharset);
+        params.put("BOMType", Integer.valueOf(p_bomType));
+        params.put("CxeRequestType", p_cxeRequestType);
+        params.put("MessageId", p_messageId);
+        params.put("ExportLocation", p_exportLocation);
+        params.put("LocaleSubDir", p_localeSubDir);
+        params.put("ExportBatchId", p_exportBatchId);
+        params.put("PageCount", p_pageCount);
+        params.put("PageNum", p_pageNum);
+        params.put("DocPageCount", p_docPageCount);
+        params.put("DocPageNum", p_docPageNum);
+
+        params.put(DocumentumOperator.DCTM_NEWOBJECTID, newObjId);
+        params.put(DocumentumOperator.DCTM_WORKFLOWID, String.valueOf(wfId));
+        params.put(DocumentumOperator.DCTM_ISJOBDONE, new Boolean(isJobDone));
+
+        params.put("SessionId", p_sessionId);
+        params.put("TargetFileName", p_fileName);
+        params.put("SourcePageBomType", Integer.valueOf(p_sourcePageBomType));
+        params.put("IsFinalExport", new Boolean(p_isFinalExport));
+
+        exportMsg.setParameters(params);
+        exportMsg.setEventFlowXml(p_eventFlowXml);
+        exportMsg.setMessageData(p_gxml);
+
+        return exportMsg;
+    }
 
     /**
      * Returns the Import success or Failure message to TeamSite
-     *
-     * @param p_efxml string of event flow xml
-     * @param p_jobState string of IMPORT_FAILED or PENDING
-     * @param p_message string of message with details of files
+     * 
+     * @param p_efxml
+     *            string of event flow xml
+     * @param p_jobState
+     *            string of IMPORT_FAILED or PENDING
+     * @param p_message
+     *            string of message with details of files
      * @exception IOException
      * @exception JMSException
      * @exception NamingException
      */
     static public void returnImportStatusToTeamSite(String p_efxml,
-        String p_jobState, String p_message, String p_companyId)
-        throws JMSException, NamingException, IOException
+            String p_jobState, String p_message, String p_companyId)
+            throws JMSException, NamingException, IOException
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.TEAMSITE_JOB_STATUS_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.TEAMSITE_JOB_STATUS_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         cxeMessage.setEventFlowXml(p_efxml);
         HashMap params = new HashMap();
@@ -1181,32 +1390,33 @@ public class CxeProxy
         params.put("TeamSiteMessage", p_message);
         cxeMessage.setParameters(params);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_TEAMSITE_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
     }
 
     /**
-     * A special import for aligner/filesystem method.
-     * To invoke this method, we assume this method can get correct company id 
-     * from the CompanyThreadLocal. That's to say, the invoker should have already 
-     * set the correct company id in CompanyThreadLocal.
-     *
-     * @param p_alignerExtractor An object used to control the
-     * asynchronous alignment process and wait for the results
+     * A special import for aligner/filesystem method. To invoke this method, we
+     * assume this method can get correct company id from the
+     * CompanyThreadLocal. That's to say, the invoker should have already set
+     * the correct company id in CompanyThreadLocal.
+     * 
+     * @param p_alignerExtractor
+     *            An object used to control the asynchronous alignment process
+     *            and wait for the results
      * @exception JMSException
      * @exception NamingException
      */
     static public void importFromFileSystemForAligner(
-        AlignerExtractor p_alignerExtractor)
-        throws JMSException, NamingException
+            AlignerExtractor p_alignerExtractor) throws JMSException,
+            NamingException
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.FILE_SYSTEM_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
-        HashMap params = cxeMessage.getParameters(); 
+        HashMap params = cxeMessage.getParameters();
         CompanyWrapper.saveCurrentCompanyIdInMap(params, s_logger);
         params.put("Filename", p_alignerExtractor.getFilename());
         params.put("JobName", p_alignerExtractor.getName());
@@ -1218,12 +1428,12 @@ public class CxeProxy
         params.put("IsAutomaticImport", Boolean.FALSE);
         params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
 
-        //put in special values for the aligner
+        // put in special values for the aligner
         params.put("AlignerExtractor", p_alignerExtractor.getName());
         params.put(IMPORT_TYPE, IMPORT_TYPE_ALIGNER);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_FILE_SYSTEM_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
@@ -1231,32 +1441,39 @@ public class CxeProxy
 
     /**
      * Initiates a Documentum import using JMS.
-     *
-     * @param p_objID Documentum object ID
-     * @param p_filename path based filename
-     * @param p_jobName job name
-     * @param p_batchId batch Id
-     * @param p_fileProfileId file profile ID
-     * @param p_pageCount number of pages in the batch
-     * @param p_pageNum number of the current page in the batch
-     * (starting from 1)
-     * @param dctmFileAttrXml - the xml string for DCTM file attributes.
+     * 
+     * @param p_objID
+     *            Documentum object ID
+     * @param p_filename
+     *            path based filename
+     * @param p_jobName
+     *            job name
+     * @param p_batchId
+     *            batch Id
+     * @param p_fileProfileId
+     *            file profile ID
+     * @param p_pageCount
+     *            number of pages in the batch
+     * @param p_pageNum
+     *            number of the current page in the batch (starting from 1)
+     * @param dctmFileAttrXml
+     *            - the xml string for DCTM file attributes.
      * 
      * @exception JMSException
      * @exception NamingException
      */
-    static public void importFromDocumentum(String p_objID, String p_fileName, String p_jobName, 
-            String p_batchId, String p_fileProfileId, Integer p_pageCount, Integer p_pageNum, 
-            Integer p_docPageCount, Integer p_docPageNum, boolean isAttrFile, String dctmFileAttrXml,
-            String userId)
-        throws JMSException, NamingException
+    static public void importFromDocumentum(String p_objID, String p_fileName,
+            String p_jobName, String p_batchId, String p_fileProfileId,
+            Integer p_pageCount, Integer p_pageNum, Integer p_docPageCount,
+            Integer p_docPageNum, boolean isAttrFile, String dctmFileAttrXml,
+            String userId) throws JMSException, NamingException
     {
-        CxeMessageType type = CxeMessageType.getCxeMessageType(
-            CxeMessageType.DOCUMENTUM_FILE_SELECTED_EVENT);
+        CxeMessageType type = CxeMessageType
+                .getCxeMessageType(CxeMessageType.DOCUMENTUM_FILE_SELECTED_EVENT);
         CxeMessage cxeMessage = new CxeMessage(type);
         HashMap params = cxeMessage.getParameters();
         params.put(DocumentumOperator.DCTM_OBJECTID, p_objID);
-        //        params.put("DocbaseName", p_docbaseName);
+        // params.put("DocbaseName", p_docbaseName);
         String companyId = getCompanyIdByFileProfileId(p_fileProfileId);
         params.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
         params.put("Filename", p_fileName);
@@ -1282,76 +1499,82 @@ public class CxeProxy
         params.put("IsAutomaticImport", Boolean.FALSE);
         params.put("OverrideFileProfileAsUnextracted", Boolean.FALSE);
 
-        String jmsTopic = EventTopicMap.JMS_PREFIX +
-            EventTopicMap.FOR_DOCUMENTUM_SOURCE_ADAPTER;
+        String jmsTopic = EventTopicMap.JMS_PREFIX
+                + EventTopicMap.FOR_DOCUMENTUM_SOURCE_ADAPTER;
         ObjectMessage om = getTopicSession().createObjectMessage(cxeMessage);
         TopicPublisher sender = getPublisher(jmsTopic);
         sender.publish(om);
     }
-    
+
     private static String getCompanyIdByFileProfileId(String p_fileProfileId)
     {
         String companyId = null;
-        try {
+        try
+        {
             FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
-                .getFileProfileById(Long.parseLong(p_fileProfileId), false);
+                    .getFileProfileById(Long.parseLong(p_fileProfileId), false);
             companyId = fp.getCompanyId();
-        } catch (Exception e) {
+        }
+        catch (Exception e)
+        {
             throw new EnvoyServletException(e);
-        } 
-        
+        }
+
         return companyId;
     }
-    
+
     /**
      * Sends message using JMS, after sending, it should close some resources.
+     * 
      * @param msg
      * @param jmsTopic
      */
-    private static void sendMessage(CxeMessage msg, String jmsTopic) 
+    private static void sendMessage(CxeMessage msg, String jmsTopic)
     {
         ObjectMessage om = null;
         TopicPublisher sender = null;
-        try 
+        try
         {
             om = s_sendMessageTopicSession.createObjectMessage(msg);
-            
-            AppServerWrapper s_appServerWrapper = AppServerWrapperFactory.getAppServerWrapper();
-            if (s_appServerWrapper.getJ2EEServerName().equals(AppServerWrapperFactory.JBOSS)) 
+
+            AppServerWrapper s_appServerWrapper = AppServerWrapperFactory
+                    .getAppServerWrapper();
+            if (s_appServerWrapper.getJ2EEServerName().equals(
+                    AppServerWrapperFactory.JBOSS))
             {
                 jmsTopic = EventTopicMap.TOPIC_PREFIX_JBOSS + jmsTopic;
             }
             Topic newTopic = (Topic) s_context.lookup(jmsTopic);
             sender = s_sendMessageTopicSession.createPublisher(newTopic);
             sender.publish(om);
-        } 
-        catch (NamingException e) 
+        }
+        catch (NamingException e)
         {
             s_logger.error("Failed to open topic connection", e);
         }
-        catch (JMSException e) 
+        catch (JMSException e)
         {
             s_logger.error("Failed to open jms", e);
-        } 
-        finally 
+        }
+        finally
         {
-            try 
+            try
             {
-                if (sender != null) 
+                if (sender != null)
                 {
                     sender.close();
                 }
-                if (om != null) 
+                if (om != null)
                 {
                     om = null;
                 }
 
-            } 
+            }
             catch (JMSException e)
             {
-                 s_logger.error("Failed to close jms", e);
+                s_logger.error("Failed to close jms", e);
             }
-        }               
+        }
 
     }
 }

@@ -135,7 +135,7 @@ public class PtagPageGenerator
             }
             catch (DiplomatBasicParserException ex)
             {
-                CATEGORY.error(ex);
+                CATEGORY.error(ex.getMessage(), ex);
                 throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.INVALID_GXML, ex);
             }

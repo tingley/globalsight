@@ -68,6 +68,7 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.extractor.idml.IdmlExtractor",             // IDML
         "com.globalsight.ling.docproc.extractor.fm.Extractor",               // for mif
         "com.globalsight.ling.docproc.extractor.passolo.PassoloExtractor",
+        "com.globalsight.ling.docproc.extractor.windowspe.WindowsPEExtractor",
         };
 
     // Codec class names.
@@ -111,7 +112,8 @@ public class ExtractorRegistry
         "com.globalsight.ling.common.XmlEnDecoder",       //RESX
         "com.globalsight.ling.common.XmlEnDecoder",        // IDML
         "com.globalsight.ling.common.MifEnDecoder",        //MIF
-        "com.globalsight.ling.common.XmlEnDecoder"         //Passolo
+        "com.globalsight.ling.common.XmlEnDecoder",        //Passolo
+        "com.globalsight.ling.common.XmlEnDecoder"         //windows pe
         };
 
     // Post merge process class names
@@ -155,7 +157,8 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",    // RESX
         "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",  // IDML
         "com.globalsight.ling.docproc.merger.fm.FmPostMergeProcessor",     //MIF
-        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor"  // Passolo
+        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",  // Passolo
+        "com.globalsight.ling.docproc.merger.xml.NoOpPostMergeProcessor"  // windows pe
         };
 
     // format names used in diplomat
@@ -198,7 +201,8 @@ public class ExtractorRegistry
         FORMAT_RESX,
         FORMAT_IDML,
         FORMAT_MIF,
-        FORMAT_PASSOLO
+        FORMAT_PASSOLO,
+        FORMAT_WINDOWSPE,
     };
 
 

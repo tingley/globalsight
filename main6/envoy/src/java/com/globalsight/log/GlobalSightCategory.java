@@ -15,19 +15,7 @@
  *  
  */
 
-
 package com.globalsight.log;
-
-import java.util.HashMap;
-
-import org.apache.log4j.Category;
-import org.apache.log4j.Logger;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.spi.LoggerFactory;
-import org.apache.log4j.Level;
-import org.apache.log4j.helpers.LogLog;
-
-import java.util.Enumeration;
 
 /**
  * Extends Logger for some separation and control of log4j logging.
@@ -38,9 +26,10 @@ public class GlobalSightCategory
 
     /**
      * Return line continuation string to be used in logging.
-     *
-     * <p>This is not a static method so some category specific
-     * behavior could be used.
+     * 
+     * <p>
+     * This is not a static method so some category specific behavior could be
+     * used.
      */
     public static String getLineContinuation()
     {

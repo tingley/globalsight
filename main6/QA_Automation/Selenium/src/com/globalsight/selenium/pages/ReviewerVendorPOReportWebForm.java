@@ -1,11 +1,11 @@
 package com.globalsight.selenium.pages;
 
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 public class ReviewerVendorPOReportWebForm
 {
     public static final String REPORT_LINK = "link="
-            + ConfigUtil.getConfigData("COMPANY_NAME") + " Reviewer Vendor PO";
+            + ConfigUtil.getConfigData("company") + " Reviewer Vendor PO";
     public static final String POPUP_WINDOW_NAME = "ReviewerVendorPOundefined1";
 
     public static final String PROJECTS_SELECTOR = "projectId";

@@ -20,12 +20,11 @@ package com.globalsight.everest.webapp.pagehandler.administration.config.attribu
 import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.entity.customAttribute.JobAttribute;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class CostCenterAction implements AttributeAction
 {
-    static private final Logger logger = Logger
-            .getLogger(HibernateUtil.class);
+    static private final Logger logger = 
+            Logger.getLogger(CostCenterAction.class);
 
     private static final String NAME = "protect_cost_center";
     private boolean isSeted = true;

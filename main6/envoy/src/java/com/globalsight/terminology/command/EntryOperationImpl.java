@@ -26,9 +26,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.globalsight.everest.util.comparator.TbLanguageComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.ConceptHelper;
 import com.globalsight.terminology.Definition;
@@ -43,14 +46,15 @@ import com.globalsight.terminology.java.TbLanguage;
 import com.globalsight.terminology.java.TbTerm;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.SessionInfo;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
 public class EntryOperationImpl implements EntryOperation
 {
     /*
-     *  If the termbase has huge data, use hibernate cascade query will get low 
-     *  efficiency, so here use jdbc just for export.
-     */    
+     * If the termbase has huge data, use hibernate cascade query will get low
+     * efficiency, so here use jdbc just for export.
+     */
     public String getEntryForExport(long tbid, long p_entryId, long p_termId,
             String p_srcLang, String p_trgLang, SessionInfo p_session)
             throws TermbaseException
@@ -97,10 +101,12 @@ public class EntryOperationImpl implements EntryOperation
                             + "where "
                             + "l.Cid  ="
                             + p_entryId
-                            + " and l.TBID=" + tbid + " and t.Cid ="
+                            + " and l.TBID="
+                            + tbid
+                            + " and t.Cid ="
                             + p_entryId
-                            + " and t.TBID=" + tbid + " and t.Lid = l.Lid "
-                            + "order by l.lid");
+                            + " and t.TBID="
+                            + tbid + " and t.Lid = l.Lid " + "order by l.lid");
 
             long previousLid = 0;
             while (rset.next())
@@ -170,8 +176,6 @@ public class EntryOperationImpl implements EntryOperation
 
             result.append("</conceptGrp>");
 
-           
-
             if (CATEGORY.isDebugEnabled())
             {
                 CATEGORY.debug("Get entry " + p_entryId + ": "
@@ -208,12 +212,12 @@ public class EntryOperationImpl implements EntryOperation
 
         return "";
     }
-    
+
     /**
      * <p>
-     * Retrieves an entry for export as xml string conforming to the Entry Structure
-     * Schema, with source/target language group and source term specially
-     * marked for easy formatting in the viewer.
+     * Retrieves an entry for export as xml string conforming to the Entry
+     * Structure Schema, with source/target language group and source term
+     * specially marked for easy formatting in the viewer.
      * </p>
      * 
      * @return the empty string if the entry does not exist, else an XML string
@@ -271,8 +275,8 @@ public class EntryOperationImpl implements EntryOperation
                         result.append("</langSet>");
                     }
 
-                    result.append("<langSet").append(" xml:lang=\"").append(
-                            langLocale).append("\">");
+                    result.append("<langSet").append(" xml:lang=\"")
+                            .append(langLocale).append("\">");
                 }
 
                 result.append("<ntig>").append("<termGrp>").append("<term>");
@@ -328,7 +332,7 @@ public class EntryOperationImpl implements EntryOperation
             SqlUtil.fireConnection(conn);
         }
     }
-    
+
     private String getEntry(long p_entryId, long p_termId, String p_srcLang,
             String p_trgLang, SessionInfo p_session, boolean isForBrowser)
             throws TermbaseException
@@ -339,8 +343,10 @@ public class EntryOperationImpl implements EntryOperation
         {
             TbConcept tConcept = HibernateUtil.get(TbConcept.class, p_entryId);
             result.append("<conceptGrp>");
-            result.append(ConceptHelper.fixConceptXml(tConcept.getXml(), p_entryId));
-            
+            String conceptXml = ConceptHelper.fixConceptXml(tConcept.getXml(),
+                    p_entryId);
+            result.append(fixConceptXml(conceptXml));
+
             Iterator ite = tConcept.getLanguages().iterator();
 
             // fix for the sort order for the entries, related to GBS-1693
@@ -349,7 +355,7 @@ public class EntryOperationImpl implements EntryOperation
             TbLanguage source = null;
             TbLanguage target = null;
             ArrayList<TbLanguage> otherLanguages = new ArrayList<TbLanguage>();
-            while(ite.hasNext())
+            while (ite.hasNext())
             {
                 TbLanguage tl = (TbLanguage) ite.next();
                 String langName = tl.getName();
@@ -368,9 +374,9 @@ public class EntryOperationImpl implements EntryOperation
                     otherLanguages.add(tl);
                 }
             }
-            Collections.sort(otherLanguages, new TbLanguageComparator(Locale
-                    .getDefault()));
-            
+            Collections.sort(otherLanguages,
+                    new TbLanguageComparator(Locale.getDefault()));
+
             ArrayList<TbLanguage> languages = new ArrayList<TbLanguage>();
             if (source != null)
             {
@@ -388,7 +394,7 @@ public class EntryOperationImpl implements EntryOperation
                 TbLanguage tl = (TbLanguage) ite.next();
                 String langName = tl.getName();
                 String langLocale = tl.getLocal();
- 
+
                 result.append("<languageGrp>");
                 result.append("<language name=\"");
                 result.append(EditUtil.encodeXmlEntities(langName));
@@ -408,7 +414,7 @@ public class EntryOperationImpl implements EntryOperation
                 result.append("/>");
                 String lxml = tl.getXml();
                 result.append(lxml);
-              
+
                 Iterator terms = tl.getTerms().iterator();
                 while (terms.hasNext())
                 {
@@ -425,7 +431,7 @@ public class EntryOperationImpl implements EntryOperation
                     }
 
                     result.append(" termId=\"" + term.getId() + "\">");
-                    
+
                     if (isForBrowser)
                     {
                         result.append(EditUtil.encodeTohtml(EditUtil
@@ -435,7 +441,7 @@ public class EntryOperationImpl implements EntryOperation
                     {
                         result.append(EditUtil.encodeXmlEntities(termContent));
                     }
-                    
+
                     result.append("</term>");
                     result.append(term.getXml());
                     result.append("</termGrp>");
@@ -448,40 +454,40 @@ public class EntryOperationImpl implements EntryOperation
         }
         catch (Exception e)
         {
-            
-            CATEGORY.error(e);
+
+            CATEGORY.error(e.getMessage(), e);
         }
 
         return result.toString();
     }
-    
+
     @Override
     public String getEntry(long p_entryId, long p_termId, String p_srcLang,
             String p_trgLang, SessionInfo p_session) throws TermbaseException
     {
-        return getEntry(p_entryId, p_termId, p_srcLang, p_trgLang, p_session, false);
+        return getEntry(p_entryId, p_termId, p_srcLang, p_trgLang, p_session,
+                false);
     }
 
     @Override
-    public String getEntry(long p_entryId, String fileType, SessionInfo p_session)
-            throws TermbaseException
+    public String getEntry(long p_entryId, String fileType,
+            SessionInfo p_session) throws TermbaseException
     {
         if (fileType != null
-                && fileType
-                        .equalsIgnoreCase(WebAppConstants.TERMBASE_TBX))
+                && fileType.equalsIgnoreCase(WebAppConstants.TERMBASE_TBX))
         {
             return getTbxEntry(p_entryId, p_session);
-            
+
         }
         else
         {
             return getEntry(p_entryId, 0, "", "", p_session);
         }
     }
-    
+
     @Override
-    public String getEntryForBrowser(long id,
-            SessionInfo p_session) throws TermbaseException
+    public String getEntryForBrowser(long id, SessionInfo p_session)
+            throws TermbaseException
     {
         return getEntry(id, 0, "", "", p_session, true);
     }
@@ -491,33 +497,35 @@ public class EntryOperationImpl implements EntryOperation
     {
         StringBuffer result = new StringBuffer();
         result.append("<termEntry id=\"").append(p_entryId).append("\">");
-        
+
         TbConcept tConcept = HibernateUtil.get(TbConcept.class, p_entryId);
         Set set = tConcept.getLanguages();
         Iterator ite = set.iterator();
-        
-        while(ite.hasNext())
+
+        while (ite.hasNext())
         {
             TbLanguage tl = (TbLanguage) ite.next();
             String langLocale = tl.getLocal();
             result.append("<langSet").append(" xml:lang=\"");
             result.append(langLocale).append("\">");
-            
+
             Iterator terms = tl.getTerms().iterator();
-            
-            while(terms.hasNext()) {
+
+            while (terms.hasNext())
+            {
                 TbTerm term = (TbTerm) terms.next();
                 result.append("<ntig>").append("<termGrp>").append("<term>");
-                result.append(EditUtil.encodeXmlEntities(EditUtil.encodeXmlEntities(term.getTermContent())));
+                result.append(EditUtil.encodeXmlEntities(EditUtil
+                        .encodeXmlEntities(term.getTermContent())));
                 result.append("</term>");
                 result.append("</termGrp>").append("</ntig>");
             }
-            
+
             result.append("</langSet>");
         }
-        
+
         result.append("</termEntry>");
-        
+
         return result.toString();
     }
 
@@ -544,20 +552,21 @@ public class EntryOperationImpl implements EntryOperation
         try
         {
             TbConcept tc = HibernateUtil.get(TbConcept.class, p_entryId);
-            HibernateUtil.delete(tc); 
+            HibernateUtil.delete(tc);
         }
         catch (Exception ex)
         {
             CATEGORY.warn("Entry " + p_entryId + " could not be deleted.", ex);
             throw new TermbaseException(ex);
         }
-        
+
         CATEGORY.info("Entry " + p_entryId + " deleted.");
     }
 
     @Override
-    public String lockEntry (long tb_id, long p_entryId, boolean p_steal,
-            HashMap m_entryLocks, SessionInfo p_session) throws TermbaseException
+    public String lockEntry(long tb_id, long p_entryId, boolean p_steal,
+            HashMap m_entryLocks, SessionInfo p_session)
+            throws TermbaseException
     {
         String result = "";
         LockInfo myLock = makeLock(tb_id, p_entryId, p_session);
@@ -591,7 +600,7 @@ public class EntryOperationImpl implements EntryOperation
             if (CATEGORY.isDebugEnabled())
             {
                 CATEGORY.debug("Locked entry " + p_entryId + " for user "
-                        + p_session.getUserName());
+                        + p_session.getUserDisplayName());
             }
 
             result = myLock.asXML();
@@ -601,8 +610,9 @@ public class EntryOperationImpl implements EntryOperation
     }
 
     @Override
-    public void unlockEntry(long p_entryId, String p_cookie, 
-            HashMap m_entryLocks, SessionInfo p_session) throws TermbaseException
+    public void unlockEntry(long p_entryId, String p_cookie,
+            HashMap m_entryLocks, SessionInfo p_session)
+            throws TermbaseException
     {
         LockInfo lock;
         Long key = new Long(p_entryId);
@@ -637,7 +647,7 @@ public class EntryOperationImpl implements EntryOperation
         {
             throw new TermbaseException(MSG_ENTRY_NOT_LOCKED, null, null);
         }
-        
+
     }
 
     @Override
@@ -647,8 +657,7 @@ public class EntryOperationImpl implements EntryOperation
         ConceptHelper cp = new ConceptHelper();
         try
         {
-            TbConcept tc = cp.updateConcept(p_entryId, p_newEntry,
-                    p_session);
+            TbConcept tc = cp.updateConcept(p_entryId, p_newEntry, p_session);
             // produce language-level statements
             HibernateUtil.saveOrUpdate(tc);
         }
@@ -656,7 +665,7 @@ public class EntryOperationImpl implements EntryOperation
         {
             throw new TermbaseException(e);
         }
-        
+
     }
 
     @Override
@@ -671,7 +680,7 @@ public class EntryOperationImpl implements EntryOperation
 
         return result.asXML();
     }
-    
+
     /**
      * Creates and initializes a lock object.
      */
@@ -679,14 +688,14 @@ public class EntryOperationImpl implements EntryOperation
     {
         LockInfo result = new LockInfo(tb_id, p_entryId);
 
-        result.setUser(p_session.getUserName());
+        result.setUser(p_session.getUserDisplayName());
         result.setEmail("");
 
         // Timestamp and cookie set in LockInfo.init();
 
         return result;
     }
-    
+
     /**
      * Hook to override who can steal locks. Currently, every user can overide
      * everybody else's lock.
@@ -699,4 +708,23 @@ public class EntryOperationImpl implements EntryOperation
         return true;
     }
 
+    private String fixConceptXml(String xml)
+    {
+        Pattern p = Pattern
+                .compile("(<transac type[^>]*>)([\\s\\S]*?)(</transac>)");
+        Matcher m = p.matcher(xml);
+        while (m.find())
+        {
+            String transac = m.group(2);
+            if (StringUtil.isEmpty(transac))
+            {
+                continue;
+            }
+            String newTransac = UserUtil.getUserNameById(transac);
+            String newString = m.group(1) + newTransac + m.group(3);
+            xml = xml.replace(m.group(), newString);
+        }
+
+        return xml;
+    }
 }

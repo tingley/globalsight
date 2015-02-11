@@ -139,7 +139,7 @@ public class FileUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
         else
@@ -163,7 +163,7 @@ public class FileUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }            
         }
     }
@@ -244,7 +244,7 @@ public class FileUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
             
             String[] cmd =
@@ -255,7 +255,7 @@ public class FileUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
         else
@@ -282,7 +282,7 @@ public class FileUtil
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }

@@ -16,7 +16,6 @@
  */
 package com.globalsight.cxe.adapter.cap;
 
-
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -45,13 +44,13 @@ import com.globalsight.util.edit.EditUtil;
  */
 public class CapImporter
 {
-    //////////////////////////////////////
-    // Constants                        //
-    //////////////////////////////////////
+    // ////////////////////////////////////
+    // Constants //
+    // ////////////////////////////////////
 
-    //////////////////////////////////////
-    // Private Members                  //
-    //////////////////////////////////////
+    // ////////////////////////////////////
+    // Private Members //
+    // ////////////////////////////////////
 
     private org.apache.log4j.Logger m_logger;
 
@@ -60,7 +59,7 @@ public class CapImporter
     private String m_messageId = null;
     private String m_exportBatchId = null;
 
-    //information needed for the L10nRequestXml
+    // information needed for the L10nRequestXml
     private String m_dataSourceType = null;
     private String m_dataSourceId = null;
     private String m_externalPageId = null;
@@ -75,11 +74,11 @@ public class CapImporter
     private String m_docPageNumber = null;
     private String m_jobPrefixName = null;
     private String m_importInitiatorId = null;
-    //the original CXE request type that CAP passes in for export or preview
+    // the original CXE request type that CAP passes in for export or preview
     private String m_origCxeRequestType;
     private Long m_exportedTime = null;
     private CxeMessage m_cxeMessage = null;
-    
+
     private String m_priority = null;
 
     /** CAP L10nRequest Type */
@@ -88,13 +87,13 @@ public class CapImporter
     /** CXE Import Request Type -- l10n or aligner */
     private String m_cxeImportRequestType = null;
 
-    //////////////////////////////////////
-    // Constructors                     //
-    //////////////////////////////////////
+    // ////////////////////////////////////
+    // Constructors //
+    // ////////////////////////////////////
 
-    public CapImporter(CxeMessage p_cxeMessage, org.apache.log4j.Logger p_logger,
-        int p_requestType)
-        throws Exception
+    public CapImporter(CxeMessage p_cxeMessage,
+            org.apache.log4j.Logger p_logger, int p_requestType)
+            throws Exception
     {
         m_cxeMessage = p_cxeMessage;
         m_eventFlowXml = p_cxeMessage.getEventFlowXml();
@@ -103,39 +102,40 @@ public class CapImporter
     }
 
     /**
-     * Static method that will return the number of imports waiting in
-     * the JMS queue.  If the session hasn't been set up or an exception
-     * occurs then "0" is returned.
+     * Static method that will return the number of imports waiting in the JMS
+     * queue. If the session hasn't been set up or an exception occurs then "0"
+     * is returned.
      */
     static public long getNumberOfWaitingImports()
     {
-        //no standard way to do this yet..
+        // no standard way to do this yet..
         return 0;
     }
 
-    //////////////////////////////////////
-    // Package Private Methods          //
-    //////////////////////////////////////
+    // ////////////////////////////////////
+    // Package Private Methods //
+    // ////////////////////////////////////
 
     /**
-     * Creates an l10nxml and then sends the eventFlowXml,
-     * content filename, and then sends a JMS message to the
-     * L10nRequester queue
-     *
-     * @param p_eventFlowXml event flow xml
-     * @param p_content MessageData
-     * @param p_exception exception message (XML)
+     * Creates an l10nxml and then sends the eventFlowXml, content filename, and
+     * then sends a JMS message to the L10nRequester queue
+     * 
+     * @param p_eventFlowXml
+     *            event flow xml
+     * @param p_content
+     *            MessageData
+     * @param p_exception
+     *            exception message (XML)
      * @exception CapAdapterException
      */
-    void sendContent()
-        throws CapAdapterException
+    void sendContent() throws CapAdapterException
     {
         try
         {
             parseEventFlowXml();
 
-            GeneralException exception =
-                (GeneralException) m_cxeMessage.getParameters().get("Exception");
+            GeneralException exception = (GeneralException) m_cxeMessage
+                    .getParameters().get("Exception");
 
             if (exception != null)
             {
@@ -143,11 +143,13 @@ public class CapImporter
             }
             else
             {
-                m_logger.info("Uploading import request to CAP for: " + m_displayName);
+                m_logger.info("Uploading import request to CAP for: "
+                        + m_displayName);
             }
 
             String l10nRequestXml = makeL10nRequestXml();
-            String contentFileName = readContentFileName(m_cxeMessage.getMessageData());
+            String contentFileName = readContentFileName(m_cxeMessage
+                    .getMessageData());
 
             HashMap hm = new HashMap();
             CompanyWrapper.saveCurrentCompanyIdInMap(hm, m_logger);
@@ -156,7 +158,7 @@ public class CapImporter
             hm.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
             hm.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
             hm.put(CxeToCapRequest.EXCEPTION, exception);
-            //for GS Edition job
+            // for GS Edition job
             hm.put("parametersInMap", m_cxeMessage.getParameters());
 
             // See whether the CXE import type was l10n or aligner.
@@ -169,17 +171,17 @@ public class CapImporter
                 hm.put("DocPageCount", m_docPageCount);
                 hm.put("DocPageNumber", m_docPageNumber);
                 hm.put("AlignerExtractor",
-                    m_cxeMessage.getParameters().get("AlignerExtractor"));
+                        m_cxeMessage.getParameters().get("AlignerExtractor"));
 
-                JmsHelper.sendMessageToQueue((Serializable)hm,
-                    JmsHelper.JMS_ALIGNER_QUEUE);
+                JmsHelper.sendMessageToQueue((Serializable) hm,
+                        JmsHelper.JMS_ALIGNER_QUEUE);
             }
             else
             {
-                //m_logger.info("Sending message to JMS_IMPORTING_QUEUE for import.");
+                // m_logger.info("Sending message to JMS_IMPORTING_QUEUE for import.");
 
-                JmsHelper.sendMessageToQueue((Serializable)hm,
-                    JmsHelper.JMS_IMPORTING_QUEUE);
+                JmsHelper.sendMessageToQueue((Serializable) hm,
+                        JmsHelper.JMS_IMPORTING_QUEUE);
             }
         }
         catch (Exception e)
@@ -191,155 +193,212 @@ public class CapImporter
             throw new CapAdapterException("HTTPIm", errorArgs, e);
         }
     }
+    
+    public HashMap getContent()
+    {
+    	try
+        {
+            parseEventFlowXml();
 
+            GeneralException exception = (GeneralException) m_cxeMessage
+                    .getParameters().get("Exception");
 
-    //////////////////////////////
-    // Private Methods          //
-    //////////////////////////////
+            if (exception != null)
+            {
+                m_logger.info("Uploading import failure for: " + m_displayName);
+            }
+            else
+            {
+                m_logger.info("Uploading import request to CAP for: "
+                        + m_displayName);
+            }
+
+            String l10nRequestXml = makeL10nRequestXml();
+            String contentFileName = readContentFileName(m_cxeMessage
+                    .getMessageData());
+
+            HashMap hm = new HashMap();
+            CompanyWrapper.saveCurrentCompanyIdInMap(hm, m_logger);
+            hm.put(CxeToCapRequest.REQUEST_TYPE, new Integer(m_requestType));
+            hm.put(CxeToCapRequest.CONTENT, contentFileName);
+            hm.put(CxeToCapRequest.EVENT_FLOW_XML, m_eventFlowXml);
+            hm.put(CxeToCapRequest.L10N_REQUEST_XML, l10nRequestXml);
+            hm.put(CxeToCapRequest.EXCEPTION, exception);
+            // for GS Edition job
+            hm.put("parametersInMap", m_cxeMessage.getParameters());
+
+            // See whether the CXE import type was l10n or aligner.
+            if (m_cxeImportRequestType.equals(CxeProxy.IMPORT_TYPE_ALIGNER))
+            {
+                m_logger.info("Sending message to JMS_ALIGNER_QUEUE for aligner.");
+
+                hm.put("PageCount", m_pageCount);
+                hm.put("PageNumber", m_pageNumber);
+                hm.put("DocPageCount", m_docPageCount);
+                hm.put("DocPageNumber", m_docPageNumber);
+                hm.put("AlignerExtractor",
+                        m_cxeMessage.getParameters().get("AlignerExtractor"));
+            }
+
+            return hm;
+        }
+        catch (Exception e)
+        {
+            String[] errorArgs = new String[2];
+            errorArgs[0] = "CapTargetAdapter";
+            errorArgs[1] = m_displayName;
+            m_logger.error("Import upload failed.", e);
+            throw new CapAdapterException("HTTPIm", errorArgs, e);
+        }
+    }
+
+    // ////////////////////////////
+    // Private Methods //
+    // ////////////////////////////
 
     /**
      * Fills member data from parsing the EventFlowXml
      */
-    private void parseEventFlowXml()
-        throws Exception
+    private void parseEventFlowXml() throws Exception
     {
         // first find information from the EventFlowXml
-    	StringReader sr  = null;
-    	try
-    	{
-	        sr = new StringReader(m_eventFlowXml);
-	        InputSource is = new InputSource(sr);
-	        DOMParser parser = new DOMParser();
-	        // don't validate
-	        parser.setFeature("http://xml.org/sax/features/validation", false);
-	        parser.parse(is);
-	        Element rootElement = parser.getDocument().getDocumentElement();
-	        Element e = null;
-	
-	        NodeList nl = null;
-	        nl = rootElement.getElementsByTagName("source");
-	        Element sourceElement = (Element) nl.item(0);
-	        m_dataSourceType = sourceElement.getAttribute("dataSourceType");
-	        m_dataSourceId = sourceElement.getAttribute("dataSourceId");
-	        m_pageIsCxePreviewable =
-	            sourceElement.getAttribute("pageIsCxePreviewable");
-	        m_cxeImportRequestType = sourceElement.getAttribute("importRequestType");
-	
-	        m_importInitiatorId = sourceElement.getAttribute("importInitiatorId");
-	
-	        nl = rootElement.getElementsByTagName("displayName");
-	        e = (Element) nl.item(0);
-	        m_externalPageId = e.getFirstChild().getNodeValue();
-	        m_displayName = m_externalPageId;
-	
-	        nl = rootElement.getElementsByTagName("baseHref");
-	        if (nl == null || nl.getLength() == 0)
-	        {
-	            m_baseHref = null;
-	        }
-	        else
-	        {
-	            e = (Element) nl.item(0);
-	            m_baseHref = e.getFirstChild().getNodeValue();
-	        }
-	
-	        nl = sourceElement.getElementsByTagName("charset");
-	        e = (Element) nl.item(0);
-	        m_originalCharacterEncoding = e.getFirstChild().getNodeValue();
-	
-	
-	        nl = rootElement.getElementsByTagName("batchInfo");
-	        e = (Element) nl.item(0);
-	        m_l10nProfileId = e.getAttribute("l10nProfileId");
-	
-	        // the jobName is optional in the EventFlowXml
-	        nl = rootElement.getElementsByTagName("jobName");
-	        if (nl.getLength() > 0)
-	        {
-	            e = (Element) nl.item(0);
-	            m_jobPrefixName = e.getFirstChild().getNodeValue();
-	        }
-	        else
-	        {
-	            m_jobPrefixName = null;
-	        }
-	
-	        nl = rootElement.getElementsByTagName("priority");
-	        if (nl.getLength() > 0)
-	        {
-	            e = (Element) nl.item(0);
-	            m_priority = e.getFirstChild().getNodeValue();
-	        }
-	        else
-	        {
-	            m_priority = "3";
-	        }
-	        
-	        nl = rootElement.getElementsByTagName("batchId");
-	        e = (Element) nl.item(0);
-	        m_batchId = e.getFirstChild().getNodeValue();
-	
-	        nl = rootElement.getElementsByTagName("pageCount");
-	        e = (Element) nl.item(0);
-	        m_pageCount = e.getFirstChild().getNodeValue();
-	
-	        nl = rootElement.getElementsByTagName("pageNumber");
-	        e = (Element) nl.item(0);
-	        m_pageNumber = e.getFirstChild().getNodeValue();
-	
-	        nl = rootElement.getElementsByTagName("docPageCount");
-	        e = (Element) nl.item(0);
-	        m_docPageCount = e.getFirstChild().getNodeValue();
-	
-	        nl = rootElement.getElementsByTagName("docPageNumber");
-	        e = (Element) nl.item(0);
-	        m_docPageNumber = e.getFirstChild().getNodeValue();
-	
-	        // the messageId is optional in the EventFlowXml
-	        nl = rootElement.getElementsByTagName("capMessageId");
-	        if (nl.getLength() > 0)
-	        {
-	            e = (Element) nl.item(0);
-	            m_messageId = e.getFirstChild().getNodeValue();
-	        }
-	        else
-	        {
-	            m_messageId = null;
-	        }
-	
-	        // the original cxe request type is optional in the EventFlowXml
-	        nl = rootElement.getElementsByTagName("cxeRequestType");
-	        if (nl.getLength() > 0)
-	        {
-	            e = (Element) nl.item(0);
-	            m_origCxeRequestType = e.getFirstChild().getNodeValue();
-	        }
-	        else
-	        {
-	            m_origCxeRequestType = null;
-	        }
-	
-	        // get out the export batch ID
-	        nl = rootElement.getElementsByTagName("exportBatchInfo");
-	        if (nl.getLength() > 0)
-	        {
-	            e = (Element) nl.item(0);
-	            NodeList nl2 = e.getElementsByTagName("exportBatchId");
-	            e= (Element) nl2.item(0);
-	            m_exportBatchId = e.getFirstChild().getNodeValue();
-	        }
-	        else
-	        {
-	            m_exportBatchId = "N/A";
-	        }
-    	}
-    	finally
-    	{
-    		if (sr != null)
-    		{
+        StringReader sr = null;
+        try
+        {
+            sr = new StringReader(m_eventFlowXml);
+            InputSource is = new InputSource(sr);
+            DOMParser parser = new DOMParser();
+            // don't validate
+            parser.setFeature("http://xml.org/sax/features/validation", false);
+            parser.parse(is);
+            Element rootElement = parser.getDocument().getDocumentElement();
+            Element e = null;
+
+            NodeList nl = null;
+            nl = rootElement.getElementsByTagName("source");
+            Element sourceElement = (Element) nl.item(0);
+            m_dataSourceType = sourceElement.getAttribute("dataSourceType");
+            m_dataSourceId = sourceElement.getAttribute("dataSourceId");
+            m_pageIsCxePreviewable = sourceElement
+                    .getAttribute("pageIsCxePreviewable");
+            m_cxeImportRequestType = sourceElement
+                    .getAttribute("importRequestType");
+
+            m_importInitiatorId = sourceElement
+                    .getAttribute("importInitiatorId");
+
+            nl = rootElement.getElementsByTagName("displayName");
+            e = (Element) nl.item(0);
+            m_externalPageId = e.getFirstChild().getNodeValue();
+            m_displayName = m_externalPageId;
+
+            nl = rootElement.getElementsByTagName("baseHref");
+            if (nl == null || nl.getLength() == 0)
+            {
+                m_baseHref = null;
+            }
+            else
+            {
+                e = (Element) nl.item(0);
+                m_baseHref = e.getFirstChild().getNodeValue();
+            }
+
+            nl = sourceElement.getElementsByTagName("charset");
+            e = (Element) nl.item(0);
+            m_originalCharacterEncoding = e.getFirstChild().getNodeValue();
+
+            nl = rootElement.getElementsByTagName("batchInfo");
+            e = (Element) nl.item(0);
+            m_l10nProfileId = e.getAttribute("l10nProfileId");
+
+            // the jobName is optional in the EventFlowXml
+            nl = rootElement.getElementsByTagName("jobName");
+            if (nl.getLength() > 0)
+            {
+                e = (Element) nl.item(0);
+                m_jobPrefixName = e.getFirstChild().getNodeValue();
+            }
+            else
+            {
+                m_jobPrefixName = null;
+            }
+
+            nl = rootElement.getElementsByTagName("priority");
+            if (nl.getLength() > 0)
+            {
+                e = (Element) nl.item(0);
+                m_priority = e.getFirstChild().getNodeValue();
+            }
+            else
+            {
+                m_priority = "3";
+            }
+
+            nl = rootElement.getElementsByTagName("batchId");
+            e = (Element) nl.item(0);
+            m_batchId = e.getFirstChild().getNodeValue();
+
+            nl = rootElement.getElementsByTagName("pageCount");
+            e = (Element) nl.item(0);
+            m_pageCount = e.getFirstChild().getNodeValue();
+
+            nl = rootElement.getElementsByTagName("pageNumber");
+            e = (Element) nl.item(0);
+            m_pageNumber = e.getFirstChild().getNodeValue();
+
+            nl = rootElement.getElementsByTagName("docPageCount");
+            e = (Element) nl.item(0);
+            m_docPageCount = e.getFirstChild().getNodeValue();
+
+            nl = rootElement.getElementsByTagName("docPageNumber");
+            e = (Element) nl.item(0);
+            m_docPageNumber = e.getFirstChild().getNodeValue();
+
+            // the messageId is optional in the EventFlowXml
+            nl = rootElement.getElementsByTagName("capMessageId");
+            if (nl.getLength() > 0)
+            {
+                e = (Element) nl.item(0);
+                m_messageId = e.getFirstChild().getNodeValue();
+            }
+            else
+            {
+                m_messageId = null;
+            }
+
+            // the original cxe request type is optional in the EventFlowXml
+            nl = rootElement.getElementsByTagName("cxeRequestType");
+            if (nl.getLength() > 0)
+            {
+                e = (Element) nl.item(0);
+                m_origCxeRequestType = e.getFirstChild().getNodeValue();
+            }
+            else
+            {
+                m_origCxeRequestType = null;
+            }
+
+            // get out the export batch ID
+            nl = rootElement.getElementsByTagName("exportBatchInfo");
+            if (nl.getLength() > 0)
+            {
+                e = (Element) nl.item(0);
+                NodeList nl2 = e.getElementsByTagName("exportBatchId");
+                e = (Element) nl2.item(0);
+                m_exportBatchId = e.getFirstChild().getNodeValue();
+            }
+            else
+            {
+                m_exportBatchId = "N/A";
+            }
+        }
+        finally
+        {
+            if (sr != null)
+            {
                 sr.close();
-    		}
-    	}
+            }
+        }
     }
 
     /**
@@ -347,7 +406,7 @@ public class CapImporter
      */
     private String makeL10nRequestXml()
     {
-        //create the l10nxml
+        // create the l10nxml
         String l10xml = null;
         StringBuffer b = new StringBuffer(XmlUtil.formattedL10nRequestXmlDtd());
         b.append("<l10nRequestXml dataSourceType=\"");
@@ -360,7 +419,7 @@ public class CapImporter
         b.append("\">");
         b.append(EditUtil.encodeXmlEntities(m_externalPageId));
         b.append("</externalPageId>\n");
-        
+
         if (m_importInitiatorId != null)
         {
             b.append("<importInitiatorId>");
@@ -369,8 +428,8 @@ public class CapImporter
         }
 
         b.append("<originalSourceFileContent>");
-        String originalSourceFileContent = (String)m_cxeMessage.getParameters().get(
-            BaseAdapter.PARAM_ORIGINAL_FILE_CONTENT);
+        String originalSourceFileContent = (String) m_cxeMessage
+                .getParameters().get(BaseAdapter.PARAM_ORIGINAL_FILE_CONTENT);
         b.append(EditUtil.encodeXmlEntities(originalSourceFileContent));
         b.append("</originalSourceFileContent>");
 
@@ -387,11 +446,11 @@ public class CapImporter
             b.append(EditUtil.encodeXmlEntities(m_baseHref));
             b.append("</baseHref>\n");
         }
-        
+
         b.append("<priority>");
         b.append(m_priority);
         b.append("</priority>\n");
-        
+
         b.append("<batchInfo>\n");
         b.append("<batchId>");
         b.append(EditUtil.encodeXmlEntities(m_batchId));
@@ -425,21 +484,26 @@ public class CapImporter
         return l10xml;
     }
 
-
     /**
      * Reads the message data and returns a filename containing the message data
-     *
-     * @param p_fmd  MessageData object
+     * 
+     * @param p_fmd
+     *            MessageData object
      * @return String of GXML
      */
-    private String readContentFileName(MessageData p_fmd)
-        throws Exception
+    private String readContentFileName(MessageData p_fmd) throws Exception
     {
         // This is dangerous since it may not be a FileMessageData
         // object, in that case the code could read the data and write
         // it to a new FileMessageData object using the createFrom()
         // method, but since we know we're using FileMessageData we'll
         // risk it here.
+        if (p_fmd == null)
+        {
+            // for some reason, the MessageData was not set and transferred from
+            // previous MDB
+            return null;
+        }
         FileMessageData fmd = (FileMessageData) p_fmd;
         return fmd.getName();
     }

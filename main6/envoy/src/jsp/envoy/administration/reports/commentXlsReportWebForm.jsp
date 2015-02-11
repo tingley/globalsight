@@ -121,9 +121,7 @@ function submitForm()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("optionally_select_values")%><em><%=bundle.getString("lb_shutdownSubmit")%></em> <%=bundle.getString("to_generate_the_report")%>
-<%=bundle.getString("the")%> <em>&lt;<%=bundle.getString("all")%>&gt;</EM> <%=bundle.getString("selection_chooses")%> <%=bundle.getString("hold_the")%> <EM><%=bundle.getString("shift")%></EM> <%=bundle.getString("key_to_multi_select_items")%>
-</SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/commentXlsReport.jsp">
@@ -139,6 +137,9 @@ function submitForm()
          stateList.add(Job.DISPATCHED);
          stateList.add(Job.LOCALIZED);
          stateList.add(Job.EXPORTED);
+         stateList.add(Job.READY_TO_BE_DISPATCHED);
+         stateList.add(Job.EXPORT_FAIL);
+         stateList.add(Job.ARCHIVED);
          Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
          ArrayList jobList = new ArrayList(jobs);
          Collections.sort(jobList, new JobComparator(JobComparator.NAME,uiLocale));
@@ -186,9 +187,12 @@ function submitForm()
 <td class="standardText" VALIGN="BOTTOM">
 <select name="status" MULTIPLE size="4">
 <option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
 <option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
 <option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
 <option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+<option value='<%=Job.EXPORT_FAIL%>'><%= bundle.getString("lb_exported_failed") %></option>
+<option value='<%=Job.ARCHIVED%>'><%= bundle.getString("lb_archived") %></option>
 </select>
 </td>
 </tr>

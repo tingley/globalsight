@@ -101,7 +101,7 @@ public class CVSUtil {
 			p_file.mkdirs();
 			return true;
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			return false;
 		}
 	}
@@ -155,7 +155,7 @@ public class CVSUtil {
 			}
 			result += "\r\n" + line;
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		} finally {
 			if (in != null) {
 				in.close();
@@ -212,7 +212,7 @@ public class CVSUtil {
 				logger.info(result);
 			}
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 		} finally {
 			if (in != null) {
 				in.close();
@@ -243,7 +243,7 @@ public class CVSUtil {
 			}
 			return 0;
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return -1;
 		} finally {
 			try {
@@ -363,7 +363,7 @@ public class CVSUtil {
 			}
 			pstmt.executeBatch();
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 		} finally {
 			try {
 				pstmt.close();
@@ -462,22 +462,24 @@ public class CVSUtil {
 		if (p_jobName == null || p_jobName.trim().equals(""))
 			return -1L;
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
 			conn = ConnectionPool.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select * from cvs_source_files where status=2 and job_name='" + p_jobName + "'");
+			String sql = "select * from cvs_source_files where status=2 and job_name=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, p_jobName);
+			rs = pstmt.executeQuery();
 			if (rs.next())
 				return rs.getLong("module_id");
 			else
 				return -1L;
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return -1L;
 		} finally {
 			try {
-				stmt.close();
+				pstmt.close();
 				ConnectionPool.returnConnection(conn);
 			} catch (Exception e) {
 			}
@@ -488,22 +490,24 @@ public class CVSUtil {
 		if (p_jobName == null || p_jobName.trim().equals(""))
 			return "";
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String jobNotes = "";
 		try {
 			conn = ConnectionPool.getConnection();
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select * from cvs_source_files where status=2 and job_name='" + p_jobName + "'");
+			String sql = "select * from cvs_source_files where status=2 and job_name=?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, p_jobName);
+            rs = pstmt.executeQuery();
 			if (rs.next())
 				jobNotes = rs.getString("JOB_NOTES");
 			return jobNotes;
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return "";
 		} finally {
 			try {
-				stmt.close();
+				pstmt.close();
 				ConnectionPool.returnConnection(conn);
 			} catch (Exception e) {
 			}
@@ -512,7 +516,7 @@ public class CVSUtil {
 	
 	public static boolean isCVSJob(String p_jobName) {
 		long result = getCVSJobModuleId(p_jobName);
-		logger.info("isCVSJob===" + result);
+		logger.debug("isCVSJob===" + result);
 		return result > 0;
 	}
 	
@@ -644,7 +648,7 @@ public class CVSUtil {
 			}
 			
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 		}
 	}
 	
@@ -675,7 +679,7 @@ public class CVSUtil {
 			else
 				return result;
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 			return "";
 		}
 	}
@@ -701,7 +705,7 @@ public class CVSUtil {
 			}
 			return tmp;
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			return p_filename;
 		}
 	}
@@ -722,7 +726,7 @@ public class CVSUtil {
 
 			return true;
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 			return false;
 		} finally {
 			try {
@@ -770,10 +774,10 @@ public class CVSUtil {
 						+ " *****\n\n";
 			} catch (Exception e) {
 				line = "\n***** Exited failure *****\n" + e.getMessage();
-				logger.error(e.toString());
+				logger.error(e.getMessage(), e);
 			}
 		} catch (Exception e) {
-			logger.error(e.toString());
+			logger.error(e.getMessage(), e);
 		} finally {
 			if (in != null) {
 				in.close();
@@ -805,7 +809,7 @@ public class CVSUtil {
 			if (f.list() != null && f.list().length > 0)
 				result = true;
 		} catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error(e.getMessage(), e);
 		}
 		return result;
 	}

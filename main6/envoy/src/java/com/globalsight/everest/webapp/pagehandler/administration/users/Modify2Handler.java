@@ -44,6 +44,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.StringUtil;
 
 public class Modify2Handler extends PageHandler {
     public static final String MOD_ROLES = "modRoles";
@@ -71,7 +72,7 @@ public class Modify2Handler extends PageHandler {
 
         String action = p_theRequest.getParameter(USER_ACTION);
         
-        if (action != null && action.intern() == USER_ACTION_MODIFY_LOCALES) {
+        if (action != null && action.equals(USER_ACTION_MODIFY_LOCALES)) {
             // We're back to here from MOD3. Extract source, target, and
             // cost map, and add them into the wrapper. Clear turds off
             // the session Mgr.
@@ -87,10 +88,24 @@ public class Modify2Handler extends PageHandler {
             }
             setRolesData(session, p_theRequest, wrapper);
         } else if (action != null
-                && (action.intern() == USER_ACTION_CANCEL_FROM_ACTIVITIES || action
+                && (action.equals(USER_ACTION_CANCEL_FROM_ACTIVITIES) || action
                         .equals("self"))) {
             // this came from MOD3 cancel button - do nothing
             // or if came from sort/next/prev
+            setRolesData(session, p_theRequest, wrapper);
+        } else if (action != null && action.equals(USER_ACTION_REMOVE_ROLES)) {
+            String tmp = p_theRequest.getParameter("radioBtn");
+            if (!StringUtil.isEmpty(tmp)) {
+                String[] value = tmp.split(",");
+                String sourceLocale = value[0];
+                String targetLocale = value[1];
+                String companyId = value[2];
+                Vector roles = wrapper.getTmpRoles();
+                Hashtable sourceTargetMap = wrapper.getTmpSourceTargetMap();
+                
+                wrapper.removeRoles(roles, sourceTargetMap, sourceLocale, targetLocale, companyId);
+            }
+            
             setRolesData(session, p_theRequest, wrapper);
         } else {
             // We're here from MOD1, and we need to get the base data from

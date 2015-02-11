@@ -4,15 +4,18 @@
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
 
-    <class name="com.globalsight.everest.comment.IssueEditionRelation" table="ISSUE_EDITION_RELATION">
-    
-        <id name="id" column="ID" type="long">
-            <generator class="native" />
-        </id>
+	<class name="com.globalsight.everest.comment.IssueEditionRelation" table="ISSUE_EDITION_RELATION">
 
-        <property name="originalTuId" length="20" column="ORIGINAL_TU_ID" type="long" not-null="false" />
-        <property name="originalTuvId" length="20" column="ORIGINAL_TUV_ID" type="long" not-null="false" />
-        <property name="originalIssueHistoryId" length="60" column="ORIGINAL_ISSUE_HISTORY_ID" type="string" not-null="false" />
-        <many-to-one name="tuv" column="TUV_ID" class="com.globalsight.everest.tuv.TuvImpl" not-null="true" lazy="false" />
-    </class>
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<property name="originalTuId" length="20" column="ORIGINAL_TU_ID" type="long" not-null="false" />
+		<property name="originalTuvId" length="20" column="ORIGINAL_TUV_ID" type="long" not-null="false" />
+		<property name="originalIssueHistoryId" length="60" column="ORIGINAL_ISSUE_HISTORY_ID" type="string" not-null="false" />
+		<!-- 
+		<many-to-one name="tuv" column="TUV_ID" class="com.globalsight.everest.tuv.TuvImpl" not-null="true" lazy="false" />
+		-->
+		<property name="tuvId" length="20" column="TUV_ID" type="long" not-null="true" />
+	</class>
 </hibernate-mapping>

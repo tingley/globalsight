@@ -598,7 +598,7 @@ public class TmReportHandler extends BasicReportHandler
             boolean defaultContextMatch = PageHandler.isDefaultContextMatch(job);
             
             singleRowDataList.add(isInContextMatch);
-            // NO_USE_EXACT_MATCH_WORD_COUNT
+            // TOTAL_EXACT_MATCH_WORD_COUNT
             singleRowDataList.add(noUseExactMatchWordCount);
             singleRowDataList.add(defaultContextMatch);
             useInContextInfos.add(singleRowDataList);
@@ -632,7 +632,7 @@ public class TmReportHandler extends BasicReportHandler
         m_jobSelect = new StringBuffer();
         m_jobSelect.append("SELECT");
         m_jobSelect.append(" job.id as \"JobId\",");
-        m_jobSelect.append(" target_page.NO_USE_EXACT_MATCH_WORD_COUNT as \"")
+        m_jobSelect.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"")
                 .append("NOUSEEXACT").append("\", ").append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"CONTEXT\" ");
     }
 

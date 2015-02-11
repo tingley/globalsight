@@ -174,7 +174,6 @@ public class WordCountHandler extends PageHandler
         p_sessionMgr.setAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY, exactMatchOnly);
         p_sessionMgr.setAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH, isInContextMatch);
         p_sessionMgr.setAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH, isDefaultContextMatch);
-        List wfs = (List)job.getWorkflows();
         String wfids = (String) p_request.getParameter(
             JobManagementHandler.WF_ID);
 
@@ -187,9 +186,8 @@ public class WordCountHandler extends PageHandler
         
         List sublist = new ArrayList();
         // pull out ones the user is interested in
-        for (int i = 0 ; i < wfs.size(); i++)
+        for (Workflow wf : job.getWorkflows())
         {
-            Workflow wf = (Workflow) wfs.get(i);
             if (hash.get(String.valueOf(wf.getId())) != null)
             {
                 sublist.add(wf);

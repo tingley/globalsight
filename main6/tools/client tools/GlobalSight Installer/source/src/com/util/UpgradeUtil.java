@@ -62,7 +62,7 @@ public class UpgradeUtil extends InstallUtil
             }
             catch (IOException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 throw new RuntimeException("Can't find server path");
             }
         }

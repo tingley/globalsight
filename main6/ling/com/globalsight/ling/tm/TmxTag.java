@@ -71,10 +71,10 @@ public class TmxTag
         }
         catch (JDOMException e)
         {
-            CATEGORY.error(e, e);
+            CATEGORY.error(e.getMessage(), e);
             throw new LingManagerException(e);
         } catch (IOException e) {
-            CATEGORY.error(e, e);
+            CATEGORY.error(e.getMessage(), e);
             throw new LingManagerException(e);
         }
     }
@@ -329,7 +329,7 @@ public class TmxTag
         }
         catch (IOException e)
         {
-            CATEGORY.error(e, e);
+            CATEGORY.error(e.getMessage(), e);
             throw new LingManagerException(e);
         }
 

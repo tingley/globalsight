@@ -54,8 +54,29 @@ long pageId = state.getTargetPageId().longValue();
 Object vpdfobj = sessionMgr.getAttribute("tgt_view_pdf");
 boolean viewPdf = vpdfobj == null ? false : true;
 
+String msgPreviewNotInstalled = "";
+if (!hasPreview)
+{
+   String keyPreviewNotInstalled = EditUtil.warnPreviewNotInstalled(pageFormat);
+   if (keyPreviewNotInstalled.length() > 0)
+   {
+       msgPreviewNotInstalled = bundle.getString(keyPreviewNotInstalled);
+   }
+}
+
+String msgPdfPreviewNotInstalled = "";
+if (!hasPDFPreview)
+{
+   String keyPdfPreviewNotInstalled = EditUtil.warnPdfPreviewNotInstalled(state);
+   if (keyPdfPreviewNotInstalled.length() > 0)
+   {
+       msgPdfPreviewNotInstalled = bundle.getString(keyPdfPreviewNotInstalled);
+   }
+}
+
 String pageName = pageInfo.getPageName();
 String pageNamePath = pageName.replaceAll("\\\\","/");
+pageNamePath = EditUtil.toJavascript(pageNamePath);
 String dataSource = pageInfo.getDataSourceType();
 
 if (dataSource.equals(ExportConstants.TEAMSITE))
@@ -104,6 +125,8 @@ StringBuffer str_targetLocale = new StringBuffer();
 String targetLocale = "";
 String lb_pdf_preview = bundle.getString("lb_pdf_preview");
 
+GlobalSightLocale trg = null;
+
 if (state.isViewerMode() || (state.isReviewMode() && state.getUserIsPm()))
 {
     str_targetLocale.append("<select name='tarLocales' onchange='switchTargetLocale(this[this.selectedIndex].value)' style='font-size: 8pt;'>");
@@ -112,11 +135,11 @@ if (state.isViewerMode() || (state.isReviewMode() && state.getUserIsPm()))
     Collections.sort(targetLocales, new GlobalSightLocaleComparator(Locale.getDefault()));
     for (int i = 0, max = targetLocales.size(); i < max; i++)
     {
-        Locale trg = ((GlobalSightLocale)targetLocales.get(i)).getLocale();
+        trg = (GlobalSightLocale)targetLocales.get(i);
 
         str_targetLocale.append("<option ");
 
-        if (trg.equals(state.getTargetLocale().getLocale()))
+        if (trg.equals(state.getTargetLocale()))
         {
             str_targetLocale.append("selected ");
         }
@@ -239,6 +262,11 @@ function canCloseTarget()
     return true;
 }
 
+function warnPreviewNoInstalled(msg)
+{   
+    alert(msg);
+}
+
 function raiseSegmentEditor()
 {
     var fr_target = findTargetFrame();
@@ -324,7 +352,7 @@ function showPreview()
         }
         var index = srcPagePath.indexOf('/');
         var targetPagePath = targetLocale + srcPagePath.substring(index);
-        window.parent.showPreviewPage(targetPagePath);
+        window.parent.showPreviewPage2(targetPagePath, targetLocale, '<%=pageId%>');
         //window.parent.showPreviewPage('<%=pageNamePath%>');
         <% } %>
         
@@ -434,10 +462,15 @@ function doOnload()
 <%if(hasPDFPreview){ %>
  <A id="idPDFPreview" CLASS="HREFBoldWhite" HREF="javascript:showPDFPreview()"
       onfocus="this.blur();"><%=lb_pdf_preview%></A> |
-<%}%>
+<% } else if (msgPdfPreviewNotInstalled.length() > 0) {%>
+     <A CLASS="HREFBoldWhite" HREF="javascript:warnPreviewNoInstalled('<%=msgPdfPreviewNotInstalled%>')"
+      onfocus="this.blur();"><%=lb_pdf_preview%></A> |
+ <% } %>
 <% if (hasPreview) { %>
-      <A id="idPreview" CLASS="HREFBoldWhite" HREF="#"
-      onclick="showPreview(); return false;"
+      <A id="idPreview" CLASS="HREFBoldWhite" HREF="javascript:showPreview()"
+      onfocus="this.blur();"><%=lb_preview%></A> |
+<% } else if (msgPreviewNotInstalled.length() > 0) {%>
+     <A CLASS="HREFBoldWhite" HREF="javascript:warnPreviewNoInstalled('<%=msgPreviewNotInstalled%>')"
       onfocus="this.blur();"><%=lb_preview%></A> |
 <% } %>
 <% if (hasDynamicPreview) { %>

@@ -24,9 +24,8 @@ import java.util.Vector;
 /**
  * SystemResourceBundle, a singleton class wrapped around java
  * PropertyResourceBundle designed for Envoy to read locale texts from
- * LocaleResource property files.  Used for UI, Exception, and Email
- * texts.
- *
+ * LocaleResource property files. Used for UI, Exception, and Email texts.
+ * 
  * @see java.util.ResourceBundle
  */
 public class SystemResourceBundle
@@ -45,7 +44,7 @@ public class SystemResourceBundle
 
     /**
      * Get the instance of the resource bundle.
-     *
+     * 
      * @return SystemResourceBundle
      */
     public static SystemResourceBundle getInstance()
@@ -60,28 +59,29 @@ public class SystemResourceBundle
 
     /**
      * Get the resource bundle based on the type and locale.
-     *
-     * @param p_localeResource The resource type.  Email, UI, or Exception.
-     * @param p_locale The locale to obtain the appropriate resource bundle.
+     * 
+     * @param p_localeResource
+     *            The resource type. Email, UI, or Exception.
+     * @param p_locale
+     *            The locale to obtain the appropriate resource bundle.
      * @return ResourceBundle
      */
     public ResourceBundle getResourceBundle(String p_localeResource,
-        Locale p_locale)
+            Locale p_locale)
     {
         String key = p_localeResource + "_" + p_locale.toString();
-
+        
         if (!m_map.containsKey(key))
         {
-            m_map.put(key,
-                ResourceBundle.getBundle(p_localeResource, p_locale));
+            m_map.put(key, new MyResourceBundle(p_localeResource, p_locale));
         }
-
+        
         return (ResourceBundle) m_map.get(key);
     }
 
     /**
      * Get the supported locales.
-     *
+     * 
      * @return A Vector containing the supported locales.
      */
     public Vector getSupportedLocales()

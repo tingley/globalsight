@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jms.Message;
 import javax.jms.ObjectMessage;
@@ -189,7 +190,7 @@ public class JobCancelMDB extends GenericQueueMDB
                 HibernateUtil.saveOrUpdate(job);
             }
 
-            log.error(oe);
+            log.error(oe.getMessage(), oe);
         }
         finally
         {
@@ -201,12 +202,10 @@ public class JobCancelMDB extends GenericQueueMDB
      * Change the state of each secondary target file.
      */
     private void updateSecondaryTargetFileState(
-            List<SecondaryTargetFile> p_stfs, String p_state) throws Exception
+            Set<SecondaryTargetFile> p_stfs, String p_state) throws Exception
     {
-        int size = p_stfs == null ? 0 : p_stfs.size();
-        for (int i = 0; i < size; i++)
+        for (SecondaryTargetFile stf : p_stfs)
         {
-            SecondaryTargetFile stf = p_stfs.get(i);
             stf.setState(p_state);
             HibernateUtil.update(stf);
         }
@@ -336,7 +335,7 @@ public class JobCancelMDB extends GenericQueueMDB
                 HibernateUtil.saveOrUpdate(job);
             }
 
-            log.error(we);
+            log.error(we.getMessage(), we);
             String[] args = new String[1];
             if (workflowId != null)
             {

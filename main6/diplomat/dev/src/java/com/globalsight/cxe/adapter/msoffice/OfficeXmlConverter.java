@@ -29,6 +29,8 @@ public class OfficeXmlConverter
 
     public String convertXmlToOffice(String p_odFileName, String p_xmlDir) throws Exception
     {
+    	OfficeXmlRepairer.repair(p_xmlDir);
+    	
         File xmlDir = new File(p_xmlDir);
         File parent = xmlDir.getParentFile();
         File zipFile = new File(parent, p_odFileName);

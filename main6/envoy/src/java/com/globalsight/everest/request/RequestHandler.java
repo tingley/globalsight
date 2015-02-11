@@ -91,8 +91,8 @@ public interface RequestHandler
      *
      */
     public void setExceptionInRequest(long p_requestId,
-                                      GeneralException p_exception)
-        throws RequestHandlerException, RemoteException;
+            GeneralException p_exception) throws RequestHandlerException,
+            RemoteException;
 
     
     public long createWorkflowRequest(WorkflowRequest p_request,
@@ -101,24 +101,8 @@ public interface RequestHandler
         throws RemoteException, GeneralException;
 
     public void setExceptionInWorkflowRequest(WorkflowRequest p_request,
-                                              GeneralException p_exception) throws RequestHandlerException,RemoteException;
-    /**
-     * Create a request based on the information specified.
-     *
-     * @param p_requestType int The type of request
-     * @param p_gxml The GXML or PRSXML that contains the content to be localized.
-     * @param p_l10nRequestXml The XML that contains various parameters needed for localizing this request.
-     * @param p_eventFlowXml The XML to send back to CXE on export.
-     * @param p_exception The exception as a string, to associate with the request (any error).
-     *
-     * @exception RequestHandlerException The component internal exception.
-     */
-    long submitRequest(int p_requestType,
-                       String p_gxml,
-                       String p_l10nRequestXml,
-                       String p_eventFlowXml,       
-                       GeneralException p_exception)  
-        throws RequestHandlerException, RemoteException;                
+            GeneralException p_exception) throws RequestHandlerException,
+            RemoteException;
 
     /**
      * Import the page that is part of the specified request.

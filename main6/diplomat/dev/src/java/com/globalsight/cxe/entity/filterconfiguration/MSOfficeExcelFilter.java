@@ -53,6 +53,7 @@ public class MSOfficeExcelFilter implements Filter
     private String contentPostFilterTableName = null;
     private long companyId;
     private boolean altTranslate = false;
+    private boolean tabNamesTranslate = false;
 
     public long getId()
     {
@@ -80,6 +81,8 @@ public class MSOfficeExcelFilter implements Filter
                 .append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
         sb.append("\"altTranslate\":").append(altTranslate).append(",");
+        sb.append("\"tabNamesTranslate\":").append(tabNamesTranslate)
+                .append(",");
         sb.append("\"contentPostFilterId\":").append(contentPostFilterId)
                 .append(",");
         sb.append("\"contentPostFilterTableName\":").append("\"")
@@ -136,6 +139,16 @@ public class MSOfficeExcelFilter implements Filter
     public void setAltTranslate(boolean altTranslate)
     {
         this.altTranslate = altTranslate;
+    }
+
+    public boolean isTabNamesTranslate()
+    {
+        return tabNamesTranslate;
+    }
+
+    public void setTabNamesTranslate(boolean tabNamesTranslate)
+    {
+        this.tabNamesTranslate = tabNamesTranslate;
     }
 
     public void setContentPostFilterId(long contentPostFilterId)

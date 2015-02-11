@@ -294,7 +294,7 @@ public class Update
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
             StackTraceElement[] trace = e.getStackTrace();
             for (StackTraceElement msg : trace)
             {

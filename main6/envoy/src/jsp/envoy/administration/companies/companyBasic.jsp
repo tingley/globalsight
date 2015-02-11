@@ -1,3 +1,4 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/activityError.jsp"
          import="com.globalsight.everest.servlet.util.SessionManager,
@@ -18,7 +19,7 @@
 %>
 <jsp:useBean id="cancel" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
-<jsp:useBean id="next" scope="request"
+<jsp:useBean id="save" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
     ResourceBundle bundle = PageHandler.getBundle(session);
@@ -32,17 +33,17 @@
     String lbsave = bundle.getString("lb_save");
 	String lbnext = bundle.getString("lb_next");
     boolean edit = false;
-    String nextURL = next.getPageURL();
+    String saveURL = save.getPageURL();
     String title = null;
     if (request.getAttribute("edit") != null)
     {
         edit = true;
-        nextURL += "&action=" + CompanyConstants.EDIT;
+        saveURL += "&action=" + CompanyConstants.EDIT;
         title = bundle.getString("lb_edit") + " " + bundle.getString("lb_company");
     }
     else
     {
-        nextURL += "&action=" + CompanyConstants.NEXT;
+        saveURL += "&action=" + CompanyConstants.CREATE;
         title = bundle.getString("lb_new") + " " + bundle.getString("lb_company");
     }
     
@@ -63,6 +64,7 @@
     String sessionTime = "";
     boolean isReviewOnly = false;
     String enableTM3Checked = "";
+    String separateLmTuTuvTablesChecked = "";
     if (company != null)
     {
         companyName = company.getName();
@@ -100,6 +102,10 @@
         
         if (company.getTmVersion().getValue() == 3)
             enableTM3Checked = "checked";
+        
+        if (company.getSeparateTmTuTuvTables() == 1){
+            separateLmTuTuvTablesChecked = "checked";
+        }
     }
 %>
 <html>
@@ -122,11 +128,22 @@ function submitForm(formAction)
         companyForm.action = "<%=cancelURL%>";
         companyForm.submit();
     }
-    if (formAction == "next")
+    else if (formAction == "save")
     {
-		if (confirmForm() && confirmTime())
+    	if (confirmForm() && confirmTime())
 		{
-			companyForm.action = "<%=nextURL%>";
+    		var tbox = document.getElementById("to");
+    		if (tbox.options.length == 0)
+    		{
+    			alert("<c:out value='${alert}'/>");
+    			return false;
+    		}
+    		for(var i=0;i<tbox.options.length;i++)
+    		{
+    			tbox.options[i].selected=true;
+    		}
+            
+        	companyForm.action = "<%=saveURL%>";
             companyForm.submit();
 		}
     }
@@ -175,7 +192,21 @@ function confirmForm()
         companyForm.nameField.value = "";
         companyForm.nameField.focus();
         return false;
-    }        
+    }   
+    
+    //Check if the company name is one of key words
+    var companyName = ATrim(companyForm.nameField.value).toLowerCase();
+	var words = new Array("com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9", "con", "prn", "aux", "nul", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9");
+	var tmp = "", tmpPrefix = "";
+	for (x in words) {
+	  tmp = words[x];
+	  tmpPrefix = tmp + ".";
+	  if (companyName == tmp || companyName.indexOf(tmpPrefix) == 0) {
+		alert("<%=EditUtil.toJavascript(bundle.getString("msg_invalid_company_name"))%>");
+		return false;
+	  }
+	}
+    
     if (hasSpecialChars(companyForm.nameField.value))
     {
         alert("<%=EditUtil.toJavascript(bundle.getString("lb_name"))%>" +
@@ -270,6 +301,138 @@ function doOnload()
     {
     	onEnableSSO(eval("<%=isSsoChecked%>"));
     }   
+}
+
+function move(f,t) {
+	var fbox = document.getElementById(f);
+	var tbox = document.getElementById(t);
+	for(var i=0; i<fbox.options.length; i++) {
+		if(fbox.options[i].selected && fbox.options[i].value != "") {
+			var no = new Option();
+			no.value = fbox.options[i].value;
+			no.text = fbox.options[i].text;
+			no.title = fbox.options[i].title;
+			tbox.options[tbox.options.length] = no;
+			fbox.options[i].value = "";
+			fbox.options[i].text = "";
+			fbox.options[i].title = "";
+   		}
+	}
+	BumpUp(fbox);
+	SortD(tbox);
+}
+
+function BumpUp(box)  {
+	for(var i=0; i<box.options.length; i++) {
+		if(box.options[i].value == "")  {
+			for(var j=i; j<box.options.length-1; j++)  {
+				box.options[j].value = box.options[j+1].value;
+				box.options[j].text = box.options[j+1].text;
+				box.options[j].title = box.options[j+1].title;
+			}
+			var ln = i;
+			break;
+		}
+	}
+	if(ln < box.options.length)  {
+		box.options.length -= 1;
+		BumpUp(box);
+   	}
+}
+
+function SortD(box){
+	var temp_opts = new Array();
+	var temp = new Object();
+	for(var i=0; i<box.options.length; i++){
+		temp_opts[i] = box.options[i];
+	}
+
+	for(var x=0; x<temp_opts.length-1; x++){
+		for(var y=(x+1); y<temp_opts.length; y++){
+			if(temp_opts[x].text.toLowerCase() > temp_opts[y].text.toLowerCase()){
+				temp = temp_opts[x].text;
+				temp_opts[x].text = temp_opts[y].text;
+	      		temp_opts[y].text = temp;
+	      		
+	      		temp = temp_opts[x].value;
+	      		temp_opts[x].value = temp_opts[y].value;
+	      		temp_opts[y].value = temp;
+
+	      		temp = temp_opts[x].title;
+	      		temp_opts[x].title = temp_opts[y].title;
+	      		temp_opts[y].title = temp;
+	      	}
+	   	}
+	}
+
+	for(var j=0; j<box.options.length; j++){
+		box.options[j].value = temp_opts[j].value;
+		box.options[j].text = temp_opts[j].text;
+		box.options[j].title = temp_opts[j].title;
+	}
+}
+
+function isLetterAndNumber(str){
+	var reg = new RegExp("^[A-Za-z0-9 _,.-]+$");
+	return (reg.test(str));
+}
+
+function isChinese(str){
+	return str.match(/[\u4e00-\u9fa5]/g);
+}
+
+function addTo()
+{
+	var txt = document.getElementById("newCategory").value;
+	if(txt.indexOf(",")>0)
+	{
+		alert("<%=bundle.getString("msg_company_category_invalid") %>");
+		return;
+	}
+	if(Trim(txt) != "")
+	{
+		txt = Trim(txt);
+		if (!isLetterAndNumber(txt) && !isChinese(txt))
+		{
+			alert("<c:out value='${alert_illegal}' escapeXml='false'/>");
+			return false;
+		}
+		
+		var toBox = document.getElementById("to");
+		var fromBox = document.getElementById("from");
+		for (var i=0;i<toBox.options.length;i++)
+		{
+			if(toBox.options[i].text.toLowerCase()==txt.toLowerCase())
+			{
+				alert("<c:out value='${alert_same}'/>");
+				return false;
+			}
+		}
+		for (var j=0;j<fromBox.options.length;j++)
+		{
+			if(fromBox.options[j].text.toLowerCase()==txt.toLowerCase())
+			{
+				alert("<c:out value='${alert_same}'/>");
+				return false;
+			}
+		}
+		var op = new Option();
+		op.value = txt;
+		op.text = txt;
+		op.title = txt;
+		toBox.options[toBox.options.length] = op;
+		document.getElementById("newCategory").value = "";
+
+		SortD(toBox);
+	}
+}
+
+function Trim(str)
+{
+	if(str=="") return str;
+	var newStr = ""+str;
+	RegularExp = /^\s+|\s+$/gi;
+	return newStr.replace( RegularExp,"" );
 }
 </script>
 
@@ -370,11 +533,75 @@ function doOnload()
             </td>
         </tr>
         
+        <tr valign="top">
+    		<td colspan=3>
+    			<br/><div class="standardText"><c:out value="${helpMsg}"/>:</div>
+      			<table border="0" class="standardText" cellpadding="2">
+      			<tr>
+      				<td>
+      					<span><c:out value="${labelForLeftTable}"/>
+      				</td>
+      				<td>&nbsp;</td>
+      				<td>
+      					<span><c:out value="${labelForRightTable}"/>
+      				</td>
+      			</tr>
+        		<tr>
+        			<td>
+        				<select id="from" name="from" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${fromList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        			<td>
+        				<table>
+						<tr>
+		              	<td>
+		                	<input type="button" name="addButton" value=" >> "
+		                    onclick="move('from','to')"><br>
+		              	</td>
+		            	</tr>
+		            	<tr><td>&nbsp;</td></tr>
+		            	<tr>
+		                	<td>
+		                	<input type="button" name="removedButton" value=" << "
+		                    onclick="move('to','from')">
+							</td>
+						</tr>
+						</table>
+        			</td>
+        			<td>
+        				<select id="to" name="to" multiple class="standardText" size="10" style="width:250">
+        				<c:forEach var="op" items="${toList}">
+	      					<option title="${op.value}" value="${op.key}">${op.value}</option>
+	    				</c:forEach>
+        				</select>
+        			</td>
+        		</tr>
+				</table>
+				<table border="0" class="standardText" cellpadding="2">
+        		<tr>
+        			<td>
+	        			<span><c:out value="${label}"/></span> :
+        			</td>
+        			<td>
+        				<input id="newCategory" size="40" maxlength="100">
+        				<input style="display:none">
+        			</td>
+        			<td>
+        				<input type="button" name="add" value="<c:out value='${addButton}'/>" onclick="addTo()">
+        			</td>
+        		</tr>
+      			</table>
+    		</td>
+  		</tr>
+        
         <tr><td colspan="3">&nbsp;</td></tr>
         <tr>
             <td colspan="3">
                 <input type="button" name="<%=lbcancel%>" value="<%=lbcancel%>" onclick="submitForm('cancel')">
-                <input type="button" name="<%=lbnext%>" value="<%=lbnext%>" onclick="submitForm('next')">
+                <input type="button" name="<%=lbsave%>" value="<%=lbsave%>" onclick="submitForm('save')">
             </td>
         </tr>
 

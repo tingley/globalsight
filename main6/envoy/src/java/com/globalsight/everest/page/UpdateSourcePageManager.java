@@ -56,7 +56,7 @@ public class UpdateSourcePageManager
                         }
                         catch (Exception e)
                         {
-                            logger.error(e);
+                            logger.error(e.getMessage(), e);
                         }
                         
                         result.remove(i);
@@ -86,7 +86,7 @@ public class UpdateSourcePageManager
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
     

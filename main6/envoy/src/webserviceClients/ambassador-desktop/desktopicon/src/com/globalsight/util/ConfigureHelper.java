@@ -391,11 +391,11 @@ public class ConfigureHelper
 		}
 		catch (FileNotFoundException e)
 		{
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 		catch (IOException e)
 		{
-			log.error(e);
+			log.error(e.getMessage(), e);
 		}
 	}
 

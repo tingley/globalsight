@@ -179,7 +179,7 @@ public class PreviewXMLPageHandler extends PageHandler
         		catch (Exception e)
         		{
         			if (CATEGORY.isDebugEnabled()) {
-            			CATEGORY.error(e.getMessage());        				
+            			CATEGORY.error(e.getMessage(), e);        				
         			}
         			String errMsg = e.getMessage();
         			errMsg = errMsg.replace("\"", "'");
@@ -256,7 +256,7 @@ public class PreviewXMLPageHandler extends PageHandler
     	try 
     	{
 	    	ExportHelper helper = new ExportHelper();
-	    	targetFile = helper.getTargetXmlPage(targetPageId, CxeMessageType.XML_IMPORTED_EVENT);
+	    	targetFile = helper.getTargetXmlPage(targetPageId, CxeMessageType.XML_IMPORTED_EVENT, true);
     	}
     	catch(Exception e)
     	{

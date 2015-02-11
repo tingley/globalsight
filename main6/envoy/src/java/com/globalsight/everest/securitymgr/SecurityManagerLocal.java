@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
 
 import org.apache.log4j.Logger;
 
@@ -40,6 +39,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.vendormanagement.Vendor;
 import com.globalsight.everest.vendormanagement.VendorInfo;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GeneralException;
 
@@ -79,26 +79,35 @@ public class SecurityManagerLocal implements SecurityManager
     // Begin: UserManager Implementation
     // ///////////////////////////////////////////////////////////
 
+    public User authenticateUserByName(String p_userName, String p_password)
+            throws RemoteException, SecurityManagerException
+    {
+        return authenticateUser(UserUtil.getUserIdByName(p_userName),
+                p_password);
+    }
+
     /**
      * Authenticate the user by the provided credentials and return the user
      * information upon a successful login.
      * 
-     * @exception SecurityManagerException -
-     *                Component related exception.
+     * @exception SecurityManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
-    public User authenticateUser(String p_userName, String p_password)
+    public User authenticateUser(String p_userId, String p_password)
             throws RemoteException, SecurityManagerException
     {
         User loginUser = null;
+        String userName = UserUtil.getUserNameById(p_userId);
 
         // Validate parameter
-        if (p_userName == null || "".equals(p_userName.trim())
+        if (userName == null || "".equals(userName.trim())
                 || p_password == null || "".equals(p_password.trim()))
         {
-            String[] messageArgument = { "Invalid login info received: "
-                    + p_userName + ", password=" + p_password };
+            String[] messageArgument =
+            { "Invalid login info received: " + userName + ", password="
+                    + p_password };
 
             CATEGORY.info("SecurityManagerException is thrown from: "
                     + "SecurityManagerLocal::authenticateUser(): "
@@ -128,40 +137,41 @@ public class SecurityManagerLocal implements SecurityManager
         // if duplicate logins aren't allowed and the user is not
         // an anonymous user and the user is already logged in
         // do not allow login - throw exception
-        if (!allowDupLogins && m_loggedInUsers.contains(p_userName)
-                && !p_userName.equals(User.ANONYMOUS_VV_USER_ID))
+        if (!allowDupLogins && m_loggedInUsers.contains(userName)
+                && !userName.equals(User.ANONYMOUS_VV_USER_ID))
         {
-            String[] args = { p_userName };
+            String[] args =
+            { userName };
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_CONCURRENT_LOGIN, args,
                     null);
         }
 
         // pass user info back
-		try
-		{
-			loginUser = m_userManager.getUser(p_userName);
-			UserLdapHelper.authenticate(p_password, loginUser.getPassword());
-		}
-		catch (NamingException ex)
-		{
-			String[] messageArgument =
-			{ "LDAP error for user " + p_userName };
+        try
+        {
+            loginUser = m_userManager.getUser(p_userId);
+            UserLdapHelper.authenticate(p_password, loginUser.getPassword());
+        }
+        catch (NamingException ex)
+        {
+            String[] messageArgument =
+            { "LDAP error for user " + userName };
 
-			CATEGORY.info("SecurityManagerException is thrown from: "
-					+ "SecurityManagerLocal::authenticateUser(): "
-					+ messageArgument[0]);
+            CATEGORY.info("SecurityManagerException is thrown from: "
+                    + "SecurityManagerLocal::authenticateUser(): "
+                    + messageArgument[0]);
 
-			throw new SecurityManagerException(
-					SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
-					messageArgument, ex);
-		}
-		catch (GeneralException e)
-		{
-            String[] messageArgument = { "UserManager failed to get info for user "
-                    + p_userName };
+            throw new SecurityManagerException(
+                    SecurityManagerException.MSG_FAILED_TO_AUTHENTICATE,
+                    messageArgument, ex);
+        }
+        catch (GeneralException e)
+        {
+            String[] messageArgument =
+            { "UserManager failed to get info for user " + userName };
 
-            CATEGORY.error("SecurityManagerException is thrown from: "
+            CATEGORY.info("SecurityManagerException is thrown from: "
                     + "SecurityManagerLocal::authenticateUser(): "
                     + messageArgument[0]);
 
@@ -173,10 +183,10 @@ public class SecurityManagerLocal implements SecurityManager
         // check case of user Id.
         // It turns out that LDAP authentication is case insensitive.
         // But userid must be case-sensitive in this system.
-        if (!p_userName.equalsIgnoreCase(loginUser.getUserId()))
+        if (!userName.equalsIgnoreCase(loginUser.getUserName()))
         {
-            String[] messageArgument = { "Case of user name " + p_userName
-                    + " is not correct" };
+            String[] messageArgument =
+            { "Case of user name " + userName + " is not correct" };
 
             CATEGORY.info("SecurityManagerException is thrown from: "
                     + "SecurityManagerLocal::authenticateUser(): "
@@ -190,8 +200,8 @@ public class SecurityManagerLocal implements SecurityManager
         // check user status
         if (!loginUser.isActive())
         {
-            String[] messageArgument = { "User " + p_userName
-                    + " is not an active user" };
+            String[] messageArgument =
+            { "User " + userName + " is not an active user" };
 
             CATEGORY.warn("SecurityManagerException is thrown from: "
                     + "SecurityManagerLocal::authenticateUser(): "
@@ -203,7 +213,7 @@ public class SecurityManagerLocal implements SecurityManager
         }
         // made it all the way to here so the user is authenticated
         // add to list of logged in users
-        m_loggedInUsers.add(p_userName);
+        m_loggedInUsers.add(userName);
         return loginUser;
     }
 
@@ -226,8 +236,8 @@ public class SecurityManagerLocal implements SecurityManager
         if (p_objectWithFields instanceof Vendor)
         {
             Vendor v = (Vendor) p_objectWithFields;
-            return vendorFieldSecurities(p_requestingUser, v.getId(), v
-                    .getProjects(), p_checkProjects, true);
+            return vendorFieldSecurities(p_requestingUser, v.getId(),
+                    v.getProjects(), p_checkProjects, true);
         }
         else if (p_objectWithFields instanceof VendorInfo)
         {
@@ -241,9 +251,11 @@ public class SecurityManagerLocal implements SecurityManager
             }
             catch (Exception e)
             {
-                CATEGORY.error("Failed to get the projects for vendor "
-                        + v.getId() + " to get the field security.", e);
-                String args[] = { Long.toString(v.getId()) };
+                CATEGORY.error(
+                        "Failed to get the projects for vendor " + v.getId()
+                                + " to get the field security.", e);
+                String args[] =
+                { Long.toString(v.getId()) };
                 throw new SecurityManagerException(
                         SecurityManagerException.MSG_FAILED_TO_GET_VENDOR_FIELD_SECURITY,
                         args, e);
@@ -275,8 +287,9 @@ public class SecurityManagerLocal implements SecurityManager
                 catch (Exception e)
                 {
                     CATEGORY.error("Failed to get the field security for user "
-                            + u.getUserId(), e);
-                    String[] errorArgs = { u.getUserId() };
+                            + u.getUserName(), e);
+                    String[] errorArgs =
+                    { u.getUserName() };
                     throw new SecurityManagerException(
                             SecurityManagerException.MSG_FAILED_TO_GET_USER_FIELD_SECURITY,
                             errorArgs, e);
@@ -359,7 +372,8 @@ public class SecurityManagerLocal implements SecurityManager
             {
                 CATEGORY.error("Failed to save the field security for vendor "
                         + v.getId(), e);
-                String args[] = { Long.toString(v.getId()) };
+                String args[] =
+                { Long.toString(v.getId()) };
                 throw new SecurityManagerException(
                         SecurityManagerException.MSG_FAILED_TO_SAVE_VENDOR_FIELD_SECURITY,
                         args, e);
@@ -389,13 +403,14 @@ public class SecurityManagerLocal implements SecurityManager
                     HibernateUtil.save(ufs);
                 }
                 CATEGORY.info("Set the field security for user "
-                        + u.getUserId() + " with " + p_fs.toString());
+                        + u.getUserName() + " with " + p_fs.toString());
             }
             catch (Exception e)
             {
                 CATEGORY.error("Failed to save the field security for user "
-                        + u.getUserId(), e);
-                String args[] = { u.getUserId() };
+                        + u.getUserName(), e);
+                String args[] =
+                { u.getUserName() };
                 throw new SecurityManagerException(
                         SecurityManagerException.MSG_FAILED_TO_SAVE_USER_FIELD_SECURITY,
                         args, e);
@@ -404,11 +419,10 @@ public class SecurityManagerLocal implements SecurityManager
         else
         {
 
-            CATEGORY
-                    .error("Trying to set the field security on an object that isn't recognized.  Object: "
-                            + p_objectWithFields.toString()
-                            + " with "
-                            + p_fs.toString());
+            CATEGORY.error("Trying to set the field security on an object that isn't recognized.  Object: "
+                    + p_objectWithFields.toString()
+                    + " with "
+                    + p_fs.toString());
         }
     }
 
@@ -432,7 +446,8 @@ public class SecurityManagerLocal implements SecurityManager
         {
             CATEGORY.error("Failed to remove the field security for object "
                     + p_objectWithFields.toString());
-            String args[] = { p_objectWithFields.toString() };
+            String args[] =
+            { p_objectWithFields.toString() };
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_TO_REMOVE_FIELD_SECURITY,
                     args, e);
@@ -455,7 +470,8 @@ public class SecurityManagerLocal implements SecurityManager
         }
         catch (NamingException le)
         {
-            String[] messageArgument = { "Failed to get LDAP connection pool!" };
+            String[] messageArgument =
+            { "Failed to get LDAP connection pool!" };
             CATEGORY.error("SecurityManagerException is thrown from: "
                     + "SecurityManagerException::initServer(): "
                     + messageArgument[0], le);
@@ -470,7 +486,8 @@ public class SecurityManagerLocal implements SecurityManager
         }
         catch (GeneralException ge)
         {
-            String[] messageArgument = { "Couldn't find UserManager!" };
+            String[] messageArgument =
+            { "Couldn't find UserManager!" };
             CATEGORY.error("SecurityManagerException is thrown from: "
                     + "SecurityManagerException::initServer(): "
                     + messageArgument[0], ge);
@@ -509,8 +526,7 @@ public class SecurityManagerLocal implements SecurityManager
                 if (uProjects != null && uProjects.size() > 0)
                 {
                     for (Iterator vpi = p_vendorProjects.iterator(); vpi
-                            .hasNext()
-                            && !found;)
+                            .hasNext() && !found;)
                     {
                         Project p = (Project) vpi.next();
                         if (uProjects.contains(p))
@@ -523,11 +539,13 @@ public class SecurityManagerLocal implements SecurityManager
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to verify if the user "
-                    + p_requestingUser.getUserId()
-                    + " is in the same project as vendor " + p_vendorId, e);
-            String[] args = { p_requestingUser.getUserId(),
-                    Long.toString(p_vendorId) };
+            CATEGORY.error(
+                    "Failed to verify if the user "
+                            + p_requestingUser.getUserName()
+                            + " is in the same project as vendor " + p_vendorId,
+                    e);
+            String[] args =
+            { p_requestingUser.getUserName(), Long.toString(p_vendorId) };
 
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_VENDOR_PROJECTS_VERIFY,
@@ -579,11 +597,13 @@ public class SecurityManagerLocal implements SecurityManager
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to verify if the user "
-                    + p_requestingUser.getUserId()
-                    + " is in the same project as user " + p_user.getUserId(),
-                    e);
-            String[] args = { p_requestingUser.getUserId(), p_user.getUserId() };
+            CATEGORY.error(
+                    "Failed to verify if the user "
+                            + p_requestingUser.getUserName()
+                            + " is in the same project as user "
+                            + p_user.getUserName(), e);
+            String[] args =
+            { p_requestingUser.getUserName(), p_user.getUserName() };
 
             throw new SecurityManagerException(
                     SecurityManagerException.MSG_FAILED_USER_PROJECTS_VERIFY,
@@ -619,7 +639,8 @@ public class SecurityManagerLocal implements SecurityManager
                 CATEGORY.error(
                         "Failed to get the vendor field security for vendor "
                                 + p_vendorId, e);
-                String[] errorArgs = { Long.toString(p_vendorId) };
+                String[] errorArgs =
+                { Long.toString(p_vendorId) };
                 throw new SecurityManagerException(
                         SecurityManagerException.MSG_FAILED_TO_GET_VENDOR_FIELD_SECURITY,
                         errorArgs, e);

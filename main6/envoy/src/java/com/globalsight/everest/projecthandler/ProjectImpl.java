@@ -18,20 +18,15 @@ package com.globalsight.everest.projecthandler;
 
 // java
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-// globalsight
 import com.globalsight.cxe.entity.customAttribute.AttributeSet;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.usermgr.UserManagerException;
 
 /**
  * This interface provides access to the project in Envoy.
@@ -41,8 +36,8 @@ public class ProjectImpl extends PersistentObject implements Project,
         Serializable
 {
     private static final long serialVersionUID = 1620074336358442246L;
-    private static final Logger CATEGORY = Logger
-            .getLogger(ProjectImpl.class.getName());
+    private static final Logger CATEGORY = Logger.getLogger(ProjectImpl.class
+            .getName());
     // Used for TOPLink Querying
     public static final String PM_USER_ID = "m_userId";
     public static final String QP_USER_ID = "m_qpId";
@@ -60,10 +55,15 @@ public class ProjectImpl extends PersistentObject implements Project,
     // it doesn't hold duplicates
     private Set m_userIds = new TreeSet();
     private AttributeSet attributeSet;
-    
+
     private float m_pmcost = 0.1f;
-    
+
     private int poRequired = 1;
+
+    // Auto-accept task and Auto-send report options.
+    private boolean reviewOnlyAutoAccept = false;
+    private boolean reviewOnlyAutoSend = false;
+    private boolean autoAcceptPMTask = false;
 
     /**
      * Constructor.
@@ -174,11 +174,13 @@ public class ProjectImpl extends PersistentObject implements Project,
         {
             try
             {
-                m_projectManager = ServerProxy.getUserManager().getUser(m_userId);
+                m_projectManager = ServerProxy.getUserManager().getUser(
+                        m_userId);
             }
             catch (Exception e)
             {
-                CATEGORY.error(e);
+                CATEGORY.warn("Failed to get project manager " + m_userId
+                        + " from LDAP.");
             }
         }
         return m_projectManager;
@@ -237,7 +239,7 @@ public class ProjectImpl extends PersistentObject implements Project,
      */
     public Object getQuotePerson()
     {
-    	if (m_quotePerson == null)
+        if (m_quotePerson == null)
         {
             CATEGORY.debug("getQuotePerson null for m_qpId " + m_qpId + " "
                     + toDebugString());
@@ -292,18 +294,18 @@ public class ProjectImpl extends PersistentObject implements Project,
      */
     public void setQuotePerson(Object p_quotePerson)
     {
-    	if (p_quotePerson instanceof String) 
-    	{
-    		m_qpId = (String) p_quotePerson;
-    	}
-    	else if (p_quotePerson instanceof User)
-    	{
-    		m_quotePerson = (User) p_quotePerson;
-    		m_qpId = m_quotePerson.getUserId();
-    	}
+        if (p_quotePerson instanceof String)
+        {
+            m_qpId = (String) p_quotePerson;
+        }
+        else if (p_quotePerson instanceof User)
+        {
+            m_quotePerson = (User) p_quotePerson;
+            m_qpId = m_quotePerson.getUserId();
+        }
         else
         {
-        	m_quotePerson = null;
+            m_quotePerson = null;
             m_qpId = "";
         }
     }
@@ -410,8 +412,7 @@ public class ProjectImpl extends PersistentObject implements Project,
                 + (m_userId == null ? "null" : m_userId)
                 + " m_projectManager="
                 + (m_projectManager == null ? "null" : m_projectManager
-                        .toString()
-                        + "m_userIds=" + m_userIds.toString())
+                        .toString() + "m_userIds=" + m_userIds.toString())
                 + " m_quotePerson="
                 + (m_quotePerson == null ? "null" : m_quotePerson.toString()
                         + "m_userIds=" + m_userIds.toString());
@@ -419,9 +420,14 @@ public class ProjectImpl extends PersistentObject implements Project,
 
     public boolean equals(Object p_object)
     {
-        if (this == p_object) { return true; }
-        if (p_object instanceof ProjectImpl) { return this
-                .equals((ProjectImpl) p_object); }
+        if (this == p_object)
+        {
+            return true;
+        }
+        if (p_object instanceof ProjectImpl)
+        {
+            return this.equals((ProjectImpl) p_object);
+        }
         return false;
     }
 
@@ -437,7 +443,6 @@ public class ProjectImpl extends PersistentObject implements Project,
     //
     // protected methods
     //
-
 
     public String getManagerUserId()
     {
@@ -457,8 +462,8 @@ public class ProjectImpl extends PersistentObject implements Project,
             id = m_quotePerson.getUserId();
         }
         return id;
-    }
-;
+    };
+
     public void setQuoteUserId(String p_userId)
     {
         m_qpId = p_userId;
@@ -473,10 +478,9 @@ public class ProjectImpl extends PersistentObject implements Project,
     {
         this.m_termbase = m_termbase;
     }
-    
+
     /**
-     * Deactivate this L10nProfile object. 
-     * I.e. logically delete it.
+     * Deactivate this L10nProfile object. I.e. logically delete it.
      */
     public void deactivate()
     {
@@ -493,19 +497,54 @@ public class ProjectImpl extends PersistentObject implements Project,
         this.attributeSet = attributeSet;
     }
 
-	public float getPMCost() {
-		return m_pmcost;
-	}
+    public float getPMCost()
+    {
+        return m_pmcost;
+    }
 
-	public void setPMCost(float mPmcost) {
-		m_pmcost = mPmcost;
-	}
-    
-    public int getPoRequired() {
+    public void setPMCost(float mPmcost)
+    {
+        m_pmcost = mPmcost;
+    }
+
+    public int getPoRequired()
+    {
         return poRequired;
     }
 
-    public void setPoRequired(int poRequired) {
+    public void setPoRequired(int poRequired)
+    {
         this.poRequired = poRequired;
     }
+
+    public boolean getReviewOnlyAutoAccept()
+    {
+        return reviewOnlyAutoAccept;
+    }
+
+    public void setReviewOnlyAutoAccept(boolean reviewAutoAccept)
+    {
+        this.reviewOnlyAutoAccept = reviewAutoAccept;
+    }
+
+    public boolean getReviewOnlyAutoSend()
+    {
+        return reviewOnlyAutoSend;
+    }
+
+    public void setReviewOnlyAutoSend(boolean reviewAutoSend)
+    {
+        this.reviewOnlyAutoSend = reviewAutoSend;
+    }
+
+    public boolean getAutoAcceptPMTask()
+    {
+        return autoAcceptPMTask;
+    }
+
+    public void setAutoAcceptPMTask(boolean autoAcceptPMTask)
+    {
+        this.autoAcceptPMTask = autoAcceptPMTask;
+    }
+
 }

@@ -155,7 +155,7 @@ public class SegmentCommentHandler
         try
         {
             return ServerProxy.getCommentManager().getIssues(
-                        Issue.TYPE_SEGMENT, targPageId+"_");
+                        Issue.TYPE_SEGMENT, targPageId+"\\_");
         }
         catch (Exception e)
         {

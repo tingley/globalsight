@@ -59,7 +59,7 @@ public class SegmentationRuleFileValidator implements ErrorHandler,
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
     }
 

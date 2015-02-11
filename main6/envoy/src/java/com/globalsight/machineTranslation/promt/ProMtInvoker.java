@@ -183,7 +183,7 @@ public final class ProMtInvoker
                     .info("Fail to get 'Topic Template' info for direction id "
                             + dirId
                             + " , please check if the proMt server is configured correctly.");
-            s_logger.error(ex);
+            s_logger.error(ex.getMessage(), ex);
             throw new Exception(ex.getMessage());
         }
 
@@ -207,7 +207,7 @@ public final class ProMtInvoker
         catch (Exception e)
         {
             s_logger.info("Fail to get target translated text!");
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
             throw new Exception(e.getMessage());
         }
 

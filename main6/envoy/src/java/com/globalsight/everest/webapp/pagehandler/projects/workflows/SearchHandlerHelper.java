@@ -16,23 +16,14 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import com.globalsight.everest.foundation.Timestamp;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.localemgr.LocaleManagerException;
-import com.globalsight.everest.page.TargetPage;
-import com.globalsight.everest.page.pageexport.ExportParameters;
+import java.util.Collection;
+import java.util.List;
+
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.tm.TmManager;
+import com.globalsight.everest.tm.searchreplace.ActivitySearchReportQueryResult;
 import com.globalsight.everest.tm.searchreplace.JobSearchReplaceManager;
 import com.globalsight.everest.tm.searchreplace.JobSearchReportQueryResult;
-import com.globalsight.everest.tm.searchreplace.ActivitySearchReportQueryResult;
-
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
 
 /**
  * A helper class for all job search/replace related page handlers.
@@ -82,14 +73,14 @@ public class SearchHandlerHelper
     /**
      * Persist the replaces segments.
      */
-    public static void replace(List tuvInfos)
+    public static void replace(List tuvInfos, String companyId)
         throws EnvoyServletException
     {
         try
         {
             JobSearchReplaceManager jobSearchMgr =
                 ServerProxy.getTmManager().getJobSearchReplaceManager();
-            jobSearchMgr.replace(tuvInfos);
+            jobSearchMgr.replace(tuvInfos, companyId);
         }
         catch (Exception e)
         {

@@ -32,6 +32,7 @@ import org.jbpm.taskmgmt.exe.PooledActor;
 import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.diplomat.util.database.ConnectionPool;
+import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
@@ -72,11 +73,115 @@ public class TaskInterimPersistenceAccessor
     private static final String SQL_INSERT_TRIGGERED = "insert into TASK_INTERIM values(null,null,null,'TRIGGERED',?)";
 
     /**
+     * Updates the activity to 'ACCEPTED' state for the assignee who has
+     * accepted the activity (and the pm) and deletes the activities with
+     * 'ACTIVE' state from other users.
+     * 
+     * @param taskInstance
+     *            The task instance {@link TaskInstance}.
+     */
+    public static void acceptInterimActivity(TaskInstance taskInstance)
+    {
+        Connection cnn = null;
+        PreparedStatement ps = null;
+        long taskId = taskInstance.getTask().getTaskNode().getId();
+        String actor = taskInstance.getActorId();
+        String pm = taskInstance.getDescription();
+        try
+        {
+            cnn = ConnectionPool.getConnection();
+            ps = cnn.prepareStatement(SQL_UPDATE_ACTIVITY);
+            ps.setLong(1, taskId);
+            ps.setString(2, actor);
+            ps.executeUpdate();
+            if (!actor.equals(pm))
+            {
+                ps.setString(2, pm);
+                ps.executeUpdate();
+            }
+            // delete the activities with 'ACTIVE' state from other users
+            // (excluding the pm)
+            deleteAvailableActivity(cnn, taskId, actor, pm);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to update activity with TASK_ID " + taskId,
+                    e);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(ps);
+            ConnectionPool.silentReturnConnection(cnn);
+        }
+    }
+
+    /**
+     * Cancels the active activities from the workflow(s) being canceled.
+     * 
+     * @param taskList
+     *            The list of active activities.
+     */
+    public static void cancelInterimActivities(List<?> taskList)
+    {
+        Connection connection = null;
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            for (int i = 0; i < taskList.size(); i++)
+            {
+                Object[] tasks = (Object[]) taskList.get(i);
+                for (Object task : tasks)
+                {
+                    try
+                    {
+						skipInterimActivity(
+								((WorkflowTaskInstance) task).getTaskId(),
+								connection);
+                    }
+                    catch (Exception e)
+                    {
+                        CATEGORY.error(
+                                "Error found in cancelInterimActivities.", e);
+                    }
+                }
+            }
+        }
+        catch (ConnectionPoolException e)
+        {
+        	CATEGORY.error("Fail to get connection in cancelInterimActivities.", e);
+		}
+        finally
+        {
+			if (connection != null)
+				ConnectionPool.silentReturnConnection(connection);
+        }
+
+    }
+
+    /**
+     * Deletes the activity records belonging to the given user.
+     * 
+     * @param userId
+     *            The user that is being removed.
+     */
+    public static void deleteInterimUser(String userId)
+    {
+        try
+        {
+            deleteDirtyActivities(null, userId);
+        }
+        catch (Exception e)
+        {
+            // do nothing
+        }
+    }
+
+    /**
      * Adds activity for the assignees (and the pm) to TASK_INTERIM table with
      * 'ACTIVE' state.
      * 
      * @param taskInstance
-     *            The task instance {@code TaskInstance}.
+     *            The task instance {@link TaskInstance}.
      * 
      */
     public static void dispatchInterimActivity(TaskInstance taskInstance)
@@ -138,81 +243,11 @@ public class TaskInterimPersistenceAccessor
     }
 
     /**
-     * Checks if this is an activity of GS Edition type.
-     * 
-     * @param activityName
-     *            The activity name.
-     * 
-     * @return true or false.
-     */
-    private static boolean isGSEditionActivity(String activityName)
-    {
-        try
-        {
-            Activity activity = ServerProxy.getJobHandler().getActivity(
-                    activityName);
-            if (activity != null && activity.isType(Activity.TYPE_GSEDITION))
-            {
-                return true;
-            }
-        }
-        catch (Exception e1)
-        {
-            CATEGORY.error("Failed to get activity " + activityName);
-        }
-
-        return false;
-    }
-
-    /**
-     * Updates the activity to 'ACCEPTED' state for the assignee who has
-     * accepted the activity (and the pm) and deletes the activities with
-     * 'ACTIVE' state from other users.
-     * 
-     * @param taskInstance
-     *            The task instance {@code TaskInstance}.
-     */
-    public static void acceptInterimActivity(TaskInstance taskInstance)
-    {
-        Connection cnn = null;
-        PreparedStatement ps = null;
-        long taskId = taskInstance.getTask().getTaskNode().getId();
-        String actor = taskInstance.getActorId();
-        String pm = taskInstance.getDescription();
-        try
-        {
-            cnn = ConnectionPool.getConnection();
-            ps = cnn.prepareStatement(SQL_UPDATE_ACTIVITY);
-            ps.setLong(1, taskId);
-            ps.setString(2, actor);
-            ps.executeUpdate();
-            if (!actor.equals(pm))
-            {
-                ps.setString(2, pm);
-                ps.executeUpdate();
-            }
-            // delete the activities with 'ACTIVE' state from other users
-            // (excluding the pm)
-            deleteAvailableActivity(cnn, taskId, actor, pm);
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to update activity with TASK_ID " + taskId,
-                    e);
-        }
-        finally
-        {
-            ConnectionPool.silentClose(ps);
-            ConnectionPool.silentReturnConnection(cnn);
-        }
-    }
-
-    /**
      * Deletes the activity with 'ACCEPETED' state from the translator (and the
      * pm) when this activity is completed.
      * 
      * @param taskInstance
-     *            The task instance {@code TaskInstance}.
+     *            The task instance {@link TaskInstance}.
      */
     public static void endInterimActivity(TaskInstance taskInstance)
     {
@@ -239,148 +274,6 @@ public class TaskInterimPersistenceAccessor
         {
             ConnectionPool.silentClose(ps);
             ConnectionPool.silentReturnConnection(cnn);
-        }
-    }
-
-    /**
-     * Cancels the active activities from the workflow(s) being canceled.
-     * 
-     * @param taskList
-     *            The list of active activities.
-     */
-    public static void cancelInterimActivities(List<?> taskList)
-    {
-        for (int i = 0; i < taskList.size(); i++)
-        {
-            Object[] tasks = (Object[]) taskList.get(i);
-            for (Object task : tasks)
-            {
-                skipInterimActivity(((WorkflowTaskInstance) task).getTaskId());
-            }
-        }
-    }
-
-    /**
-     * Deletes the activities rejected by the user and adds them to the other
-     * assignees or the pm.
-     * 
-     * @param taskInstance
-     *            The task instance {@code TaskInstance}.
-     */
-    public static void rejectInterimActivity(TaskInstance taskInstance)
-    {
-        // skip the activities by the task id first
-        long taskId = taskInstance.getTask().getTaskNode().getId();
-        skipInterimActivity(taskId);
-        // dispatch the activity to the new assignees in the task instance
-        dispatchInterimActivity(taskInstance);
-    }
-
-    /**
-     * Checks and reassigns the activity to new assignees (and the pm).
-     * 
-     * @param taskInstance
-     *            The task instance {@code TaskInstance}.
-     */
-    public static void reassignInterimActivity(TaskInstance taskInstance)
-    {
-        Connection cnn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        long taskId = taskInstance.getTask().getTaskNode().getId();
-        try
-        {
-            cnn = ConnectionPool.getConnection();
-            ps = cnn.prepareStatement(SQL_QUERY_ACTIVITY);
-            ps.setLong(1, taskId);
-            rs = ps.executeQuery();
-            if (!rs.next())
-            {
-                // indicates this activity has not been dispatched
-                // ignore the actions below
-                return;
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to query the activity with TASK_ID "
-                    + taskId, e);
-        }
-        finally
-        {
-            ConnectionPool.silentClose(rs);
-            ConnectionPool.silentClose(ps);
-            ConnectionPool.silentReturnConnection(cnn);
-        }
-        // same action as reject if this activity has been dispatched or
-        // accepted
-        rejectInterimActivity(taskInstance);
-    }
-
-    /**
-     * Deletes the activity available from the users when it is skipped.
-     * 
-     * @param taskId
-     *            The task id, corresponding to TASK_ID column in TASK_INFO
-     *            table.
-     */
-    public static void skipInterimActivity(long taskId)
-    {
-        Connection cnn = null;
-        PreparedStatement ps = null;
-        try
-        {
-            cnn = ConnectionPool.getConnection();
-            ps = cnn.prepareStatement(SQL_DELETE_TRASHED_ACTIVITY);
-            ps.setLong(1, taskId);
-            ps.executeUpdate();
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to delete activity with TASK_ID " + taskId,
-                    e);
-        }
-        finally
-        {
-            ConnectionPool.silentClose(ps);
-            ConnectionPool.silentReturnConnection(cnn);
-        }
-    }
-
-    /**
-     * Deletes the activities with 'ACTIVE' state from other users excluding the
-     * given translator.
-     * 
-     * @param cnn
-     *            The database connection.
-     * @param taskId
-     *            The task id, corresponding to TASK_ID column in TASK_INFO
-     *            table.
-     * @param actor
-     *            The user who accepts the activity.
-     * @param pm
-     *            The project manager.
-     */
-    private static void deleteAvailableActivity(Connection cnn, long taskId,
-            String actor, String pm)
-    {
-        PreparedStatement ps = null;
-        try
-        {
-            ps = cnn.prepareStatement(SQL_DELETE_AVAILABLE_ACTIVITY);
-            ps.setLong(1, taskId);
-            ps.setString(2, actor);
-            ps.setString(3, pm);
-            ps.executeUpdate();
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error(
-                    "Failed to delete activities with TASK_ID " + taskId, e);
-        }
-        finally
-        {
-            ConnectionPool.silentClose(ps);
         }
     }
 
@@ -432,38 +325,6 @@ public class TaskInterimPersistenceAccessor
         }
 
         return map;
-    }
-
-    /**
-     * Sets 'TRIGGERED' state for the given user.
-     * 
-     * @param cnn
-     *            The database connection.
-     * @param userId
-     *            The user who is logging in the first time.
-     * 
-     * @throws Exception
-     */
-    private static void setTriggeredMark(Connection cnn, String userId)
-            throws Exception
-    {
-        PreparedStatement ps = null;
-        try
-        {
-            ps = cnn.prepareStatement(SQL_INSERT_TRIGGERED);
-            ps.setString(1, userId);
-            ps.executeUpdate();
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to set the 'TRIGGERED' mark for user "
-                    + userId, e);
-            throw e;
-        }
-        finally
-        {
-            ConnectionPool.silentClose(ps);
-        }
     }
 
     /**
@@ -550,6 +411,270 @@ public class TaskInterimPersistenceAccessor
     }
 
     /**
+     * Judges if this user has been triggered with the interim table.
+     * 
+     * @param userId
+     *            The user.
+     * 
+     * @return true or false.
+     */
+    public static boolean isTriggered(String userId)
+    {
+        Connection cnn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try
+        {
+            cnn = ConnectionPool.getConnection();
+            ps = cnn.prepareStatement(SQL_QUERY_TRIGGERED);
+            ps.setString(1, userId);
+            rs = ps.executeQuery();
+            if (!rs.next())
+            {
+                // indicates the interim table has not been used for this user.
+                return false;
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to query 'TRIGGERED' state for user "
+                    + userId, e);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(rs);
+            ConnectionPool.silentClose(ps);
+            ConnectionPool.silentReturnConnection(cnn);
+        }
+        return true;
+    }
+
+    /**
+     * Checks and reassigns the activity to new assignees (and the pm).
+     * 
+     * @param taskInstance
+     *            The task instance {@link TaskInstance}.
+     */
+    public static void reassignInterimActivity(TaskInstance taskInstance)
+    {
+        Connection cnn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        long taskId = taskInstance.getTask().getTaskNode().getId();
+        try
+        {
+            cnn = ConnectionPool.getConnection();
+            ps = cnn.prepareStatement(SQL_QUERY_ACTIVITY);
+            ps.setLong(1, taskId);
+            rs = ps.executeQuery();
+            if (!rs.next())
+            {
+                // indicates this activity has not been dispatched
+                // ignore the actions below
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to query the activity with TASK_ID "
+                    + taskId, e);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(rs);
+            ConnectionPool.silentClose(ps);
+            ConnectionPool.silentReturnConnection(cnn);
+        }
+        // same action as reject if this activity has been dispatched or
+        // accepted
+        rejectInterimActivity(taskInstance);
+    }
+
+    /**
+     * Refreshes the activities for the given users.
+     * 
+     * @param userIds
+     *            A group of users that need to be updated.
+     */
+    public static void refreshActivities(String[] userIds)
+    {
+        for (String userId : userIds)
+        {
+            initializeUserTasks(userId);
+        }
+    }
+
+    /**
+     * Deletes the activities rejected by the user and adds them to the other
+     * assignees or the pm.
+     * 
+     * @param taskInstance
+     *            The task instance {@link TaskInstance}.
+     */
+    public static void rejectInterimActivity(TaskInstance taskInstance)
+    {
+        Connection connection = null;
+        try
+        {
+            connection = ConnectionPool.getConnection();
+            
+            // skip the activities by the task id first
+            long taskId = taskInstance.getTask().getTaskNode().getId();
+            skipInterimActivity(taskId, connection);
+            // dispatch the activity to the new assignees in the task instance
+            dispatchInterimActivity(taskInstance);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Error found in rejectInterimActivity.", e);
+        }
+        finally
+        {
+            ConnectionPool.silentReturnConnection(connection);
+        }
+    }
+
+    /**
+     * Deletes the activity available from the users when it is skipped.
+     * 
+     * @param taskId
+     *            The task id, corresponding to TASK_ID column in TASK_INFO
+     *            table.
+     */
+    public static void skipInterimActivity(long taskId, Connection connection)
+    {
+        PreparedStatement ps = null;
+        boolean returnInternalConnection = false;
+        try
+        {
+            if (connection == null) {
+                connection = ConnectionPool.getConnection();
+                returnInternalConnection = true;
+            }
+            ps = connection.prepareStatement(SQL_DELETE_TRASHED_ACTIVITY);
+            ps.setLong(1, taskId);
+            ps.executeUpdate();
+        }
+        catch (Exception e)
+        {
+			CATEGORY.error("Failed to delete activity with TASK_ID " + taskId, e);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(ps);
+            if (returnInternalConnection) {
+            	ConnectionPool.silentReturnConnection(connection);
+            }
+        }
+    }
+
+    /**
+     * Deletes the activities with 'ACTIVE' state from other users excluding the
+     * given translator.
+     * 
+     * @param cnn
+     *            The database connection.
+     * @param taskId
+     *            The task id, corresponding to TASK_ID column in TASK_INFO
+     *            table.
+     * @param actor
+     *            The user who accepts the activity.
+     * @param pm
+     *            The project manager.
+     */
+    private static void deleteAvailableActivity(Connection cnn, long taskId,
+            String actor, String pm)
+    {
+        PreparedStatement ps = null;
+        try
+        {
+            ps = cnn.prepareStatement(SQL_DELETE_AVAILABLE_ACTIVITY);
+            ps.setLong(1, taskId);
+            ps.setString(2, actor);
+            ps.setString(3, pm);
+            ps.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error(
+                    "Failed to delete activities with TASK_ID " + taskId, e);
+        }
+        finally
+        {
+            ConnectionPool.silentClose(ps);
+        }
+    }
+
+    /**
+     * Deletes the dirty activities that were inserted before setting
+     * 'TRIGGERED'.
+     * 
+     * @param cnn
+     *            The database connection.
+     * @param userId
+     *            The user who is logging in the first time.
+     */
+    private static void deleteDirtyActivities(Connection cnn, String userId)
+            throws Exception
+    {
+        Connection c = cnn;
+        PreparedStatement ps = null;
+        try
+        {
+            if (c == null)
+            {
+                c = ConnectionPool.getConnection();
+            }
+            ps = c.prepareStatement(SQL_DELETE_DIRTY_ACTIVITY);
+            ps.setString(1, userId);
+            ps.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to delete the dirty activities from user "
+                    + userId, e);
+            throw e;
+        }
+        finally
+        {
+            ConnectionPool.silentClose(ps);
+            if (cnn == null)
+            {
+                // this is request from deleteInterimUser() which needs to close
+                // connection right away
+                ConnectionPool.silentReturnConnection(c);
+            }
+        }
+    }
+
+    /**
+     * Checks if this is an activity of GS Edition type.
+     * 
+     * @param activityName
+     *            The activity name.
+     * 
+     * @return true or false.
+     */
+    private static boolean isGSEditionActivity(String activityName)
+    {
+        try
+        {
+            Activity activity = ServerProxy.getJobHandler().getActivity(
+                    activityName);
+            if (activity != null && activity.isType(Activity.TYPE_GSEDITION))
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to get activity " + activityName, e);
+        }
+
+        return false;
+    }
+
+    /**
      * Removes special tasks that are out of date.
      * 
      * @param tasks
@@ -575,41 +700,30 @@ public class TaskInterimPersistenceAccessor
     }
 
     /**
-     * Refreshes the activities for the given users.
-     * 
-     * @param userIds
-     *            A group of users that need to be updated.
-     */
-    public static void refreshActivities(String[] userIds)
-    {
-        for (String userId : userIds)
-        {
-            initializeUserTasks(userId);
-        }
-    }
-
-    /**
-     * Deletes the dirty activities that were inserted before setting
-     * 'TRIGGERED'.
+     * Sets 'TRIGGERED' state for the given user.
      * 
      * @param cnn
      *            The database connection.
      * @param userId
      *            The user who is logging in the first time.
+     * 
+     * @throws Exception
      */
-    private static void deleteDirtyActivities(Connection cnn, String userId)
+    private static void setTriggeredMark(Connection cnn, String userId)
+            throws Exception
     {
         PreparedStatement ps = null;
         try
         {
-            ps = cnn.prepareStatement(SQL_DELETE_DIRTY_ACTIVITY);
+            ps = cnn.prepareStatement(SQL_INSERT_TRIGGERED);
             ps.setString(1, userId);
             ps.executeUpdate();
         }
         catch (Exception e)
         {
-            CATEGORY.error("Failed to delete the dirty activities from user "
+            CATEGORY.error("Failed to set the 'TRIGGERED' mark for user "
                     + userId, e);
+            throw e;
         }
         finally
         {
@@ -669,44 +783,5 @@ public class TaskInterimPersistenceAccessor
         {
             ConnectionPool.silentClose(ps);
         }
-    }
-
-    /**
-     * Judges if this user has been triggered with the interim table.
-     * 
-     * @param userId
-     *            The user.
-     * 
-     * @return true or false.
-     */
-    public static boolean isTriggered(String userId)
-    {
-        Connection cnn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try
-        {
-            cnn = ConnectionPool.getConnection();
-            ps = cnn.prepareStatement(SQL_QUERY_TRIGGERED);
-            ps.setString(1, userId);
-            rs = ps.executeQuery();
-            if (!rs.next())
-            {
-                // indicates the interim table has not been used for this user.
-                return false;
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error("Failed to query 'TRIGGERED' state for user "
-                    + userId, e);
-        }
-        finally
-        {
-            ConnectionPool.silentClose(rs);
-            ConnectionPool.silentClose(ps);
-            ConnectionPool.silentReturnConnection(cnn);
-        }
-        return true;
     }
 }

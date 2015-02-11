@@ -118,6 +118,13 @@ public class WelcomeHandler
         	String forwardUrl = p_request.getParameter("forwardUrl");
         	if(forwardUrl != null && !"".equals(forwardUrl))
         	{
+                // GBS-2343: If there is no pageName in forwardUrl, the old
+                // pageName LOG1 will be reused, and we will end up looping.
+                if (forwardUrl.indexOf("pageName=") == -1)
+                {
+                    throw new ServletException(
+                        "forwardUrl does not contain a pageName parameter (corrupt URL?)");
+                }
         		RequestDispatcher dispatcher = p_request.getRequestDispatcher(forwardUrl);
         		dispatcher.forward(p_request, p_response);
         		return;

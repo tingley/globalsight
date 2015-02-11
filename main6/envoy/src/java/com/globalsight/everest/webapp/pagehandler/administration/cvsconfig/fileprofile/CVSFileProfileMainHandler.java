@@ -174,7 +174,7 @@ public class CVSFileProfileMainHandler extends PageHandler {
 			}
 			manager.add(fileProfiles);
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error(e.getMessage(), e);
 		}
 		
 	}

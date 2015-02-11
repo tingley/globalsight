@@ -63,7 +63,9 @@ import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.securitymgr.FieldSecurity;
 import com.globalsight.everest.securitymgr.UserFieldSecurity;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.taskmanager.TaskInterimPersistenceAccessor;
 import com.globalsight.everest.vendormanagement.UpdatedDataEvent;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 
 /**
@@ -99,7 +101,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException le)
         {
-            String[] errorMsgArg = { "Couldn't connect to LDAP" };
+            String[] errorMsgArg =
+            { "Couldn't connect to LDAP" };
 
             CATEGORY.error(
                     "UserManagerException is thrown from: "
@@ -155,7 +158,8 @@ public class UserManagerLocal implements UserManager
         // Validate the parameter
         if (p_role == null || (!(p_role.isRoleValid())))
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_INVALID_ROLE };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_ROLE };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addRole(): " + "(Role name= "
@@ -180,27 +184,33 @@ public class UserManagerLocal implements UserManager
             try
             {
                 reactivateRole(dirContext, p_role);
-                errorMsgArg = new String[] { UserManagerException.ARG_ROLE_ALREADY_EXIST };
+                errorMsgArg = new String[]
+                { UserManagerException.ARG_ROLE_ALREADY_EXIST };
             }
             catch (NamingException lde)
             {
-                errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_REACTIVATE_ROLE };
+                errorMsgArg = new String[]
+                { UserManagerException.ARG_FAILED_TO_REACTIVATE_ROLE };
             }
         }
         catch (InvalidAttributesException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_INVALID_ATTRIBUTE };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addRole(): " + "(Role name= "
-                    + p_role.toString() + ")" + errorMsgArg[0], ex);
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_ATTRIBUTE };
+            CATEGORY.error(
+                    "UserManagerException is thrown from: "
+                            + "UserManagerLocal::addRole(): " + "(Role name= "
+                            + p_role.toString() + ")" + errorMsgArg[0], ex);
             throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
-            CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::addRole(): " + "(Role name= "
-                    + p_role.toString() + ")" + errorMsgArg[0], ex);
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            CATEGORY.error(
+                    "UserManagerException is thrown from: "
+                            + "UserManagerLocal::addRole(): " + "(Role name= "
+                            + p_role.toString() + ")" + errorMsgArg[0], ex);
             throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
         }
         finally
@@ -224,6 +234,35 @@ public class UserManagerLocal implements UserManager
     }
 
     /**
+     * Removes the specified role from LDAP database.
+     */
+    public void removeRoleFromLDAP(String roleName) throws RemoteException,
+            UserManagerException
+    {
+        // check out a connection from the pool with a system defined user bond.
+        DirContext dirContext = checkOutConnection(true);
+
+        String roleDN = RoleLdapHelper.getRoleDN(roleName);
+
+        try
+        {
+            dirContext.destroySubcontext(roleDN);
+        }
+        catch (NamingException e)
+        {
+            CATEGORY.error("Failed to delete role " + roleName + " from LDAP.",
+                    e);
+            throw new UserManagerException(
+                    UserManagerException.MSG_DELETE_ROLE_ERROR, null, e);
+        }
+        finally
+        {
+            // return the connection to the pool
+            checkInConnection(dirContext);
+        }
+    }
+
+    /**
      * @see UserManager.addUser(User, User, List, FieldSecurity, List, List)
      */
     public void addUser(User p_userRequestingAdd, User p_user,
@@ -231,8 +270,48 @@ public class UserManagerLocal implements UserManager
             throws RemoteException, UserManagerException
     {
         addUserBasicInfo(p_userRequestingAdd, p_user, p_projectIds,
-                p_fieldSecurity);
+                p_fieldSecurity, true);
         addUserRoles(p_user, p_roles);
+    }
+
+    /**
+     * @see UserManager.addUser(User, User, List, FieldSecurity, List, List)
+     */
+    public void addUser(User p_userRequestingAdd, User p_user,
+            List p_projectIds, FieldSecurity p_fieldSecurity, List p_roles,
+            boolean needEncodePwd) throws RemoteException, UserManagerException
+    {
+        addUserBasicInfo(p_userRequestingAdd, p_user, p_projectIds,
+                p_fieldSecurity, needEncodePwd);
+        addUserRoles(p_user, p_roles);
+    }
+
+    /**
+     * Removes the specified user from LDAP database.
+     */
+    public void removeUserFromLDAP(String userId) throws RemoteException,
+            UserManagerException
+    {
+        // check out a connection from the pool with a system defined user bond.
+        DirContext dirContext = checkOutConnection(true);
+
+        String userDN = UserLdapHelper.getUserDN(userId);
+
+        try
+        {
+            dirContext.destroySubcontext(userDN);
+        }
+        catch (NamingException e)
+        {
+            CATEGORY.error("Failed to delete user " + userId + " from LDAP.", e);
+            throw new UserManagerException(
+                    UserManagerException.MSG_DELETE_USER_ERROR, null, e);
+        }
+        finally
+        {
+            // return the connection to the pool
+            checkInConnection(dirContext);
+        }
     }
 
     /**
@@ -254,7 +333,8 @@ public class UserManagerLocal implements UserManager
         if (p_uid.equals(LdapHelper.LDAP_LOGIN))
         {
             // throw exception
-            errorMsgArg = new String[] { UserManagerException.ARG_PROTECTED_USER };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_PROTECTED_USER };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeUser(): " + "(User Id = "
@@ -297,7 +377,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException e)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_DELETE_USER_FROM_ROLES };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_DELETE_USER_FROM_ROLES };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeUser(): " + "(User Id = "
@@ -320,6 +401,9 @@ public class UserManagerLocal implements UserManager
         catch (Exception e)
         { /* exception is logged in TaskManager */
         }
+        // remove user owned activities from interim table (TASK_INTERIM)
+        TaskInterimPersistenceAccessor.deleteInterimUser(p_uid);
+        UserUtil.removeUserFromUserIdUserName(p_uid);
 
         try
         {
@@ -360,7 +444,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_DEACTIVATE_USER_ROLES };
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_DEACTIVATE_USER_ROLES };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::deactivateUser(): " + "(User Id = "
                     + p_uid + ")\n" + errorMsgArg[0], ex);
@@ -427,7 +512,8 @@ public class UserManagerLocal implements UserManager
         if (p_uid.equals(LdapHelper.LDAP_LOGIN))
         {
             // throw exception
-            errorMsgArg = new String[] { UserManagerException.ARG_PROTECTED_USER };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_PROTECTED_USER };
 
             CATEGORY.error("Can't deactiavte the ldap connection user " + p_uid
                     + ")\n" + errorMsgArg[0], null);
@@ -448,7 +534,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException e)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_DEACTIVATE_USER_ROLES };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_DEACTIVATE_USER_ROLES };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::deactivateUser(): " + "(User Id = "
@@ -487,7 +574,8 @@ public class UserManagerLocal implements UserManager
         {
             checkInConnection(dirContext);
             CATEGORY.error("deleteUser " + p_uid + " " + ex.toString(), ex);
-            errorMsgArg = new String[] { UserManagerException.ARG_USER_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_USER_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::deleteUser(): " + "(User Id = "
                     + p_uid + ")\n" + errorMsgArg[0], ex);
@@ -498,7 +586,8 @@ public class UserManagerLocal implements UserManager
             // return the connection to the pool
             checkInConnection(dirContext);
             CATEGORY.error("deleteUser " + p_uid + " " + ex.toString(), ex);
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::deleteUser(): " + "(User Id = "
                     + p_uid + ")\n" + errorMsgArg[0], ex);
@@ -521,11 +610,12 @@ public class UserManagerLocal implements UserManager
         // Validate the parameter
         if (p_user == null || (!p_user.isUserValid()))
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_INVALID_USER };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_USER };
 
             CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Id = "
-                    + (p_user == null ? null : p_user.getUserId()) + "):\n"
+                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
+                    + (p_user == null ? null : p_user.getUserName()) + "):\n"
                     + errorMsgArg[0], null);
 
             throw new UserManagerException(errorMsgKey, errorMsgArg, null);
@@ -551,9 +641,10 @@ public class UserManagerLocal implements UserManager
         }
         catch (Exception e)
         {
-            CATEGORY
-                    .error("Failed to modify the user " + p_user.getUserId(), e);
-            errorMsgArg = new String[] { p_user.getUserId() };
+            CATEGORY.error("Failed to modify the user " + p_user.getUserName(),
+                    e);
+            errorMsgArg = new String[]
+            { p_user.getUserName() };
             throw new UserManagerException(errorMsgKey, errorMsgArg, e);
         }
 
@@ -566,31 +657,34 @@ public class UserManagerLocal implements UserManager
         try
         {
             // Modify the entry
-            dirContext.modifyAttributes(UserLdapHelper.getUserDN(p_user
-                    .getUserId()), modSet);
+            dirContext.modifyAttributes(
+                    UserLdapHelper.getUserDN(p_user.getUserId()), modSet);
         }
         catch (NoSuchAttributeException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_USER_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_USER_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Id = "
-                    + p_user.getUserId() + "):\n" + errorMsgArg[0], ex);
+                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
+                    + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
             throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
         }
         catch (InvalidAttributesException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_INVALID_ATTRIBUTE };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_ATTRIBUTE };
             CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Id = "
-                    + p_user.getUserId() + "):\n" + errorMsgArg[0], ex);
+                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
+                    + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
             throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
-                    + "UserManagerLocal::modifyUser(): " + "(User Id = "
-                    + p_user.getUserId() + "):\n" + errorMsgArg[0], ex);
+                    + "UserManagerLocal::modifyUser(): " + "(User Name = "
+                    + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
             throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
         }
         finally
@@ -610,12 +704,12 @@ public class UserManagerLocal implements UserManager
     /**
      * Get user matched the given uid
      * 
-     * @param p_uid -
-     *            The user id
+     * @param p_uid
+     *            - The user id
      * 
      * @return a User object
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      * @throws UserManagerException
@@ -629,7 +723,7 @@ public class UserManagerLocal implements UserManager
         String errorMsgKey = UserManagerException.MSG_GET_USER_ERROR;
         if (p_uid == null || p_uid.trim().equals(""))
             return null;
-        
+
         // check out a connection from the connection pool
         DirContext dirContext = checkOutConnection(false);
 
@@ -638,10 +732,10 @@ public class UserManagerLocal implements UserManager
         Attributes userEntry = null;
         try
         {
-            if(p_uid!=null)
+            if (p_uid != null)
             {
-            	String userDN = UserLdapHelper.getUserDN(p_uid);
-            	userEntry = dirContext.getAttributes(userDN);
+                String userDN = UserLdapHelper.getUserDN(p_uid);
+                userEntry = dirContext.getAttributes(userDN);
             }
             // if a user was found
             if (userEntry != null)
@@ -650,15 +744,18 @@ public class UserManagerLocal implements UserManager
             }
             else
             {
-                CATEGORY.error("User " + p_uid + " does not exist in LDAP!");
-                String[] args = { UserManagerException.ARG_USER_NOT_EXIST };
+                CATEGORY.info("User " + p_uid + " does not exist in LDAP!");
+                String[] args =
+                { UserManagerException.ARG_USER_NOT_EXIST };
                 throw new UserManagerException(errorMsgKey, args, null);
             }
         }
         catch (NameNotFoundException ex)
         {
-            CATEGORY.error("User " + p_uid + " does not exist in LDAP!", ex);
-            String[] args = { UserManagerException.ARG_USER_NOT_EXIST };
+            CATEGORY.info("User " + p_uid
+                    + " does not exist or has been deleted from LDAP.");
+            String[] args =
+            { UserManagerException.ARG_USER_NOT_EXIST };
             throw new UserManagerException(errorMsgKey, args, ex);
         }
         catch (NamingException ex)
@@ -673,6 +770,15 @@ public class UserManagerLocal implements UserManager
         }
 
         return outUser;
+    }
+
+    /**
+     * Gets user matched the given name.
+     */
+    public User getUserByName(String p_userName) throws RemoteException,
+            UserManagerException
+    {
+        return getUser(UserUtil.getUserIdByName(p_userName));
     }
 
     /**
@@ -739,8 +845,8 @@ public class UserManagerLocal implements UserManager
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
                 ContainerRole.ROLE_TYPE_VALUE);
 
-        Attribute[] roleAttrs = { typeAttr, activityAttr, sourceAttr,
-                targetAttr };
+        Attribute[] roleAttrs =
+        { typeAttr, activityAttr, sourceAttr, targetAttr };
 
         // check out a connection from the connection pool
         DirContext dirContext = checkOutConnection(false);
@@ -752,7 +858,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (Exception e)
         {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
             CATEGORY.error("failed to get usernames from role: "
                     + p_activityName + ", " + p_sourceLocale + ", "
                     + p_targetLocale, e);
@@ -788,7 +895,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (Exception e)
         {
-            String[] errorMsgArg = { UserManagerException.ARG_FAILED_TO_GET_COMPANY_ENTRIES };
+            String[] errorMsgArg =
+            { UserManagerException.ARG_FAILED_TO_GET_COMPANY_ENTRIES };
 
             CATEGORY.error("getCompanyNames :: " + errorMsgArg[0], e);
 
@@ -810,7 +918,8 @@ public class UserManagerLocal implements UserManager
         DirContext dirContext = checkOutConnection(false);
         setConnectionOptions(dirContext);
 
-        String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_FIRST_NAME,
+        String[] attrs = new String[]
+        { UserLdapHelper.LDAP_ATTR_FIRST_NAME,
                 UserLdapHelper.LDAP_ATTR_LAST_NAME,
                 UserLdapHelper.LDAP_ATTR_EMAIL,
                 UserLdapHelper.LDAP_ATTR_CC_EMAIL,
@@ -820,7 +929,8 @@ public class UserManagerLocal implements UserManager
         // Search User entries based on the uids
         try
         {
-            String[] uids = { p_userId };
+            String[] uids =
+            { p_userId };
             String filter = UserLdapHelper.getSearchFilterOnUIDs(uids);
 
             SearchControls constraints = new SearchControls();
@@ -843,7 +953,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            String[] errorMsgArg = { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            String[] errorMsgArg =
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
             CATEGORY.error("getEmailInformationForUser :: " + errorMsgArg[0],
                     ex);
             throw new UserManagerException(
@@ -873,7 +984,8 @@ public class UserManagerLocal implements UserManager
         DirContext dirContext = checkOutConnection(false);
         setConnectionOptions(dirContext);
 
-        String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_FIRST_NAME,
+        String[] attrs = new String[]
+        { UserLdapHelper.LDAP_ATTR_FIRST_NAME,
                 UserLdapHelper.LDAP_ATTR_LAST_NAME,
                 UserLdapHelper.LDAP_ATTR_EMAIL,
                 UserLdapHelper.LDAP_ATTR_CC_EMAIL,
@@ -890,7 +1002,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { p_userIds.toString() };
+            errorMsgArg = new String[]
+            { p_userIds.toString() };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::getEmailInformationForUsers(): "
                     + errorMsgArg[0], ex);
@@ -911,12 +1024,13 @@ public class UserManagerLocal implements UserManager
      * 
      * @return An array of user names.
      * 
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
-    public String[] getUserNames() throws RemoteException, UserManagerException
+    public String[] getUserNamesFromCurrentAndSuperCompany()
+            throws RemoteException, UserManagerException
     {
         // check out a connection from the connection pool
         DirContext dirContext = checkOutConnection(false);
@@ -926,7 +1040,8 @@ public class UserManagerLocal implements UserManager
         try
         {
             String filter = UserLdapHelper.getSearchFilter();
-            String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_USERID };
+            String[] attrs = new String[]
+            { UserLdapHelper.LDAP_ATTR_USER_NAME };
 
             SearchControls constraints = new SearchControls();
             constraints.setReturningObjFlag(true);
@@ -936,16 +1051,61 @@ public class UserManagerLocal implements UserManager
             NamingEnumeration res = dirContext.search(
                     UserLdapHelper.USER_BASE_DN, filter, constraints);
 
-            userNames = UserLdapHelper.getUIDsFromSearchResults(res);
+            userNames = UserLdapHelper.getNamesFromSearchResults(res);
         }
         catch (NamingException ex)
         {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
 
-            CATEGORY
-                    .error("UserManagerException is thrown from: "
-                            + "UserManagerLocal::getUserNames(): "
+            CATEGORY.error(
+                    "UserManagerException is thrown from: "
+                            + "UserManagerLocal::getUserNamesFromCurrentAndSuperCompany(): "
                             + errorMsgArg[0], ex);
+            throw new UserManagerException(
+                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
+        }
+        finally
+        {
+            // return the connection to the pool
+            checkInConnection(dirContext);
+        }
+
+        return userNames;
+    }
+
+    public String[] getUserNamesFromAllCompanies() throws RemoteException,
+            UserManagerException
+    {
+        // check out a connection from the connection pool
+        DirContext dirContext = checkOutConnection(false);
+        String[] userNames = null;
+        setConnectionOptions(dirContext);
+        // Search User names
+        try
+        {
+            String filter = UserLdapHelper.getSearchFilterForAllCompanies();
+            String[] attrs = new String[]
+            { UserLdapHelper.LDAP_ATTR_USER_NAME };
+
+            SearchControls constraints = new SearchControls();
+            constraints.setReturningObjFlag(true);
+            constraints.setCountLimit(0);
+            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
+            constraints.setReturningAttributes(attrs);
+            NamingEnumeration res = dirContext.search(
+                    UserLdapHelper.USER_BASE_DN, filter, constraints);
+
+            userNames = UserLdapHelper.getNamesFromSearchResults(res);
+        }
+        catch (NamingException ex)
+        {
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+
+            CATEGORY.error("UserManagerException is thrown from: "
+                    + "UserManagerLocal::getUserNamesFromAllCompanies(): "
+                    + errorMsgArg[0], ex);
             throw new UserManagerException(
                     UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
         }
@@ -972,7 +1132,8 @@ public class UserManagerLocal implements UserManager
         {
             // get all active and created user ids
             String filter = UserLdapHelper.getSearchFilter();
-            String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_USERID };
+            String[] attrs = new String[]
+            { UserLdapHelper.LDAP_ATTR_USERID };
 
             SearchControls constraints = new SearchControls();
             constraints.setReturningObjFlag(true);
@@ -1019,66 +1180,12 @@ public class UserManagerLocal implements UserManager
     }
 
     /**
-     * Gets all the user names. This is necessary when checking for duplicate
-     * name. A user name can NOT be re-used even if they have been deactivated.
-     * 
-     * @return An array of all user names.
-     * 
-     * @exception UserManagerException -
-     *                Component related exception.
-     * @exception java.rmi.RemoteException
-     *                Network related exception.
+     * @see UserManager.getUserIdsByFilter(String, Project)
      */
-    public String[] getAllUserNames() throws RemoteException,
-            UserManagerException
-    {
-        // check out a connection from the connection pool
-        DirContext dirContext = checkOutConnection(false);
-        String[] userNames = null;
-        setConnectionOptions(dirContext);
-
-        // Search User names
-        try
-        {
-            String filter = UserLdapHelper.getSearchFilterForAllUsers();
-            String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_USERID };
-
-            SearchControls constraints = new SearchControls();
-            constraints.setReturningObjFlag(true);
-            constraints.setCountLimit(0);
-            constraints.setSearchScope(SearchControls.SUBTREE_SCOPE);
-            constraints.setReturningAttributes(attrs);
-            NamingEnumeration res = dirContext.search(
-                    UserLdapHelper.USER_BASE_DN, filter, constraints);
-
-            userNames = UserLdapHelper.getUIDsFromSearchResults(res);
-        }
-        catch (NamingException ex)
-        {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-            CATEGORY
-                    .error("UserManagerException is thrown from: "
-                            + "UserManagerLocal::getUserNames(): "
-                            + errorMsgArg[0], ex);
-            throw new UserManagerException(
-                    UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
-        }
-        finally
-        {
-            // return the connection to the pool
-            checkInConnection(dirContext);
-        }
-
-        return userNames;
-    }
-
-    /**
-     * @see UserManager.getUserNamesByFilter(String, Project)
-     */
-    public String[] getUserNamesByFilter(String p_roleName, Project p_project)
+    public String[] getUserIdsByFilter(String p_roleName, Project p_project)
             throws RemoteException, UserManagerException
     {
-        String[] userNames = null;
+        String[] userIds = null;
 
         if (p_roleName != null)
         {
@@ -1087,11 +1194,12 @@ public class UserManagerLocal implements UserManager
             setConnectionOptions(dirContext);
             try
             {
-                userNames = getUserIdsFromRole(p_roleName, dirContext);
+                userIds = getUserIdsFromRole(p_roleName, dirContext);
             }
             catch (Exception e)
             {
-                String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+                String[] errorMsgArg = new String[]
+                { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
                 CATEGORY.error("UserManagerException is thrown from: "
                         + "UserManagerLocal::getUserNamesByRole(): "
                         + errorMsgArg[0], e);
@@ -1110,13 +1218,13 @@ public class UserManagerLocal implements UserManager
             // role is null, so just get all users and then let the filter sort
             // it out
             Vector allUsers = getUsers();
-            userNames = new String[allUsers.size()];
+            userIds = new String[allUsers.size()];
             Iterator userIter = allUsers.iterator();
             int i = 0;
             while (userIter.hasNext())
             {
                 User u = (User) userIter.next();
-                userNames[i++] = u.getUserId();
+                userIds[i++] = u.getUserId();
             }
 
         }
@@ -1124,20 +1232,20 @@ public class UserManagerLocal implements UserManager
         // if project was specified then filter by it
         if (p_project != null)
         {
-            return filterUsersByProject(userNames, p_project);
+            return filterUsersByProject(userIds, p_project);
         }
         else
         // otherwise just return the ones found
         {
-            return userNames;
+            return userIds;
         }
     }
 
     /**
-     * @see UserManager.getUserNamesFromRoles(String[], Project)
+     * @see UserManager.getUserIdsFromRoles(String[], Project)
      */
-    public String[] getUserNamesFromRoles(String[] p_roleNames,
-            Project p_project) throws RemoteException, UserManagerException
+    public String[] getUserIdsFromRoles(String[] p_roleNames, Project p_project)
+            throws RemoteException, UserManagerException
     {
         // sanity check
         if (p_roleNames == null || p_roleNames.length == 0)
@@ -1162,7 +1270,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (Exception ex)
         {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
 
             throw new UserManagerException(
                     UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ex);
@@ -1181,7 +1290,7 @@ public class UserManagerLocal implements UserManager
     public List getUsersByFilter(String p_roleName, Project p_project)
             throws RemoteException, UserManagerException
     {
-        String[] userNames = getUserNamesByFilter(p_roleName, p_project);
+        String[] userIds = getUserIdsByFilter(p_roleName, p_project);
 
         // check out a connection from the connection pool
         DirContext dirContext = checkOutConnection(false);
@@ -1189,11 +1298,12 @@ public class UserManagerLocal implements UserManager
         List users = null;
         try
         {
-            users = getUsers(userNames, null, dirContext);
+            users = getUsers(userIds, null, dirContext);
         }
         catch (NamingException ldp)
         {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
             CATEGORY.error(
                     "Failed to get all the users that match the filter - Role: "
                             + p_roleName + ", Project: " + p_project.getName()
@@ -1208,12 +1318,12 @@ public class UserManagerLocal implements UserManager
         }
         return users;
     }
-    
+
     /**
-     *  get users from ldap follow the filter
+     * get users from ldap follow the filter
      */
-    public List getUsersByFilter(String p_filter)
-            throws RemoteException, UserManagerException
+    public List getUsersByFilter(String p_filter) throws RemoteException,
+            UserManagerException
     {
         // check out a connection from the connection pool
         DirContext dirContext = checkOutConnection(false);
@@ -1225,8 +1335,11 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ldp)
         {
-            String[] errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
-            CATEGORY.error("Failed to get all the users that match the filter - filter: "+ p_filter,ldp);
+            String[] errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            CATEGORY.error(
+                    "Failed to get all the users that match the filter - filter: "
+                            + p_filter, ldp);
             throw new UserManagerException(
                     UserManagerException.MSG_GET_USERS_ERROR, errorMsgArg, ldp);
         }
@@ -1241,29 +1354,30 @@ public class UserManagerLocal implements UserManager
      * @see UserManager.getUsersFromEmail(String)
      */
     @SuppressWarnings("unchecked")
-	public List getUsersByEmail(String p_email) 
-    	throws UserManagerException, RemoteException{
-    	
-    	List result = new ArrayList();
-    	String filter = UserLdapHelper.getSearchFilterForEmail(p_email);
-    	result = getUsersByFilter(filter);
-		
-		return result;
+    public List getUsersByEmail(String p_email) throws UserManagerException,
+            RemoteException
+    {
+
+        List result = new ArrayList();
+        String filter = UserLdapHelper.getSearchFilterForEmail(p_email);
+        result = getUsersByFilter(filter);
+
+        return result;
     }
-    
+
     /**
      * Get users matched the specified criteria
      * 
-     * @param p_userAttrs -
-     *            Arrtibute array contains the User entry attributes
-     * @param p_roleAttrs -
-     *            Attribute array contains the Role entry attributes
+     * @param p_userAttrs
+     *            - Arrtibute array contains the User entry attributes
+     * @param p_roleAttrs
+     *            - Attribute array contains the Role entry attributes
      * @param p_project
      * @return a Vector of User objects
-     * @exception UserManagerException -
-     *                Component related exception.
-     * @exception java.rmi.RemoteException -
-     *                Network related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
+     * @exception java.rmi.RemoteException
+     *                - Network related exception.
      */
     public Vector getUsers(Attribute[] p_userAttrs, Attribute[] p_roleAttrs,
             Project p_project) throws RemoteException, UserManagerException
@@ -1275,10 +1389,10 @@ public class UserManagerLocal implements UserManager
      * Get all active and created users.
      * 
      * @return a Vector of User objects
-     * @exception UserManagerException -
-     *                Component related exception.
-     * @exception java.rmi.RemoteException -
-     *                Network related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
+     * @exception java.rmi.RemoteException
+     *                - Network related exception.
      */
     public Vector getUsers() throws RemoteException, UserManagerException
     {
@@ -1313,8 +1427,8 @@ public class UserManagerLocal implements UserManager
      * Get all active and created users for current company only.
      * 
      * @return a Vector of User objects
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -1348,6 +1462,77 @@ public class UserManagerLocal implements UserManager
         }
 
         return users;
+    }
+
+    /**
+     * Gets all users including inactive ones from specified company.
+     */
+    public Vector<User> getUsersFromCompany(String companyId)
+            throws RemoteException, UserManagerException
+    {
+        String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
+
+        Vector<User> users = new Vector<User>();
+
+        // check out a connection from the connection pool
+        DirContext dirContext = checkOutConnection(true);
+        setConnectionOptions(dirContext);
+
+        String filter = UserLdapHelper.getSearchFilterForUsersFromCompany(
+                companyId, true);
+        try
+        {
+            users = getUsers(filter.toString(), null, dirContext);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to get users from company with id: "
+                    + companyId, e);
+            throw new UserManagerException(errorMsgKey, null, e);
+        }
+        finally
+        {
+            // return the connection to the pool
+            checkInConnection(dirContext);
+        }
+
+        return users;
+    }
+
+    /**
+     * Gets all roles including inactive ones from specified company.
+     */
+    public List<Role> getRolesFromCompany(String companyId)
+            throws RemoteException, UserManagerException
+    {
+        List<Role> roles = new ArrayList<Role>();
+
+        String filter = RoleLdapHelper.getSearchFilterForAllRoles(true);
+        Vector<Role> allRoles = getRoles(filter.toString(), null, false,
+                companyId);
+        if (allRoles != null)
+        {
+            for (Role r : allRoles)
+            {
+                Activity a = r.getActivity();
+                if (a == null)
+                {
+                    roles.add(r);
+                    continue;
+                }
+                String activityName = a.getActivityName();
+                int index = activityName.lastIndexOf("_");
+                if (index > 0)
+                {
+                    String companyIdStr = activityName.substring(index + 1);
+                    if (companyIdStr.equalsIgnoreCase(companyId))
+                    {
+                        roles.add(r);
+                    }
+                }
+            }
+        }
+        return roles;
     }
 
     /**
@@ -1458,8 +1643,8 @@ public class UserManagerLocal implements UserManager
         Attribute typeAttr = new BasicAttribute(
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE, "U");
 
-        Attribute[] ldapAttrs = { typeAttr, activityAttr, sourceAttr,
-                targetAttr };
+        Attribute[] ldapAttrs =
+        { typeAttr, activityAttr, sourceAttr, targetAttr };
         String filter = null;
         try
         {
@@ -1510,8 +1695,8 @@ public class UserManagerLocal implements UserManager
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
                 ContainerRole.ROLE_TYPE_VALUE);
 
-        Attribute[] ldapAttrs = { typeAttr, activityAttr, sourceAttr,
-                targetAttr };
+        Attribute[] ldapAttrs =
+        { typeAttr, activityAttr, sourceAttr, targetAttr };
         String filter = null;
         String[] attrs = null;
         try
@@ -1541,7 +1726,8 @@ public class UserManagerLocal implements UserManager
         Attribute typeAttr = new BasicAttribute(
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
                 ContainerRole.ROLE_TYPE_VALUE);
-        Attribute[] ldapAttrs = { typeAttr, sourceAttr, targetAttr };
+        Attribute[] ldapAttrs =
+        { typeAttr, sourceAttr, targetAttr };
 
         String filter = null;
         String[] attrs = null;
@@ -1593,14 +1779,15 @@ public class UserManagerLocal implements UserManager
     {
         StringBuffer buf = new StringBuffer();
         buf.append(p_activity.getId()).append(" ").append(p_activity.getName())
-                .append(" ").append(p_sourceLocale).append(" ").append(
-                        p_targetLocale);
+                .append(" ").append(p_sourceLocale).append(" ")
+                .append(p_targetLocale);
         Attribute cnAttr = new BasicAttribute(
                 RoleLdapHelper.LDAP_ATTR_ROLE_NAME, buf.toString());
         Attribute typeAttr = new BasicAttribute(
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
                 ContainerRole.ROLE_TYPE_VALUE);
-        Attribute[] ldapAttrs = { typeAttr, cnAttr };
+        Attribute[] ldapAttrs =
+        { typeAttr, cnAttr };
         String filter = null;
         String[] attrs = null;
         try
@@ -1642,8 +1829,8 @@ public class UserManagerLocal implements UserManager
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
                 ContainerRole.ROLE_TYPE_VALUE);
 
-        Attribute[] ldapAttrs = { typeAttr, activityAttr, sourceAttr,
-                targetAttr };
+        Attribute[] ldapAttrs =
+        { typeAttr, activityAttr, sourceAttr, targetAttr };
         String filter = null;
         String[] attrs = null;
         try
@@ -1681,7 +1868,8 @@ public class UserManagerLocal implements UserManager
                 RoleLdapHelper.LDAP_ATTR_ROLE_TYPE,
                 ContainerRole.ROLE_TYPE_VALUE);
 
-        Attribute[] ldapAttrs = { typeAttr, rateIdAttr };
+        Attribute[] ldapAttrs =
+        { typeAttr, rateIdAttr };
         String filter = null;
         String[] attrs = null;
         try
@@ -1708,12 +1896,12 @@ public class UserManagerLocal implements UserManager
     /**
      * Removes users from a role.
      * 
-     * @param p_uids -
-     *            The user id to be deleted.
-     * @param p_roleName -
-     *            The role to add the user to.
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @param p_uids
+     *            - The user id to be deleted.
+     * @param p_roleName
+     *            - The role to add the user to.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -1733,7 +1921,8 @@ public class UserManagerLocal implements UserManager
         if (p_roleName == null || "".equals(p_roleName.trim()))
         {
             // throw exception
-            errorMsgArg = new String[] { UserManagerException.ARG_INVALID_ROLE_NAME };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_ROLE_NAME };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeUsersFromRole(): "
@@ -1758,7 +1947,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NameNotFoundException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_ROLE_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_ROLE_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeUsersFromRole(): "
                     + "(role name = " + p_roleName + ", users = " + p_uids
@@ -1767,7 +1957,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (InvalidAttributesException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_USERS_NOT_IN_ROLE };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_USERS_NOT_IN_ROLE };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeUsersFromRole(): "
                     + "(role name = " + p_roleName + ", users = " + p_uids
@@ -1776,7 +1967,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeUsersFromRole(): "
                     + "(role name = " + p_roleName + ", users = " + p_uids
@@ -1794,12 +1986,12 @@ public class UserManagerLocal implements UserManager
     /**
      * Adds users to a role.
      * 
-     * @param p_uids -
-     *            The user ids to be added.
-     * @param p_roleName -
-     *            The role to add the user to.
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @param p_uids
+     *            - The user ids to be added.
+     * @param p_roleName
+     *            - The role to add the user to.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -1818,7 +2010,8 @@ public class UserManagerLocal implements UserManager
         if (p_roleName == null || "".equals(p_roleName.trim()))
         {
             // throw exception
-            errorMsgArg = new String[] { UserManagerException.ARG_INVALID_ROLE_NAME };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_INVALID_ROLE_NAME };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addUsersToRole(): " + "(role name = "
@@ -1836,7 +2029,8 @@ public class UserManagerLocal implements UserManager
             // validate the users
             if (!areUsersExist(p_uids, dirContext))
             {
-                errorMsgArg = new String[] { UserManagerException.ARG_USERS_NOT_EXIST };
+                errorMsgArg = new String[]
+                { UserManagerException.ARG_USERS_NOT_EXIST };
 
                 CATEGORY.error("UserManagerException is thrown from: "
                         + "UserManagerLocal::addUsersToRole(): "
@@ -1847,9 +2041,10 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException e)
         { // failed to validate these users
-            // return the connection to the pool
+          // return the connection to the pool
             checkInConnection(dirContext);
-            errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_VALIDATE_USERS };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_VALIDATE_USERS };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addUsersToRole(): " + "(role name = "
@@ -1871,7 +2066,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NameNotFoundException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_ROLE_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_ROLE_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addUsersToRole(): " + "(role name = "
                     + p_roleName + ", users = " + p_uids + ")\n"
@@ -1884,7 +2080,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addUsersToRole(): " + "(role name = "
                     + p_roleName + ", users = " + p_uids + ")\n"
@@ -1904,8 +2101,8 @@ public class UserManagerLocal implements UserManager
      * @param p_roleName
      *            the role name.
      * @returns the Role with the role name.
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -1996,7 +2193,7 @@ public class UserManagerLocal implements UserManager
      * 
      * @return a Vector of User objects
      */
-    Vector getUsers(String p_filter, String[] p_targetAttrs,
+    Vector<User> getUsers(String p_filter, String[] p_targetAttrs,
             DirContext dirContext) throws NamingException
     {
 
@@ -2042,8 +2239,8 @@ public class UserManagerLocal implements UserManager
      * too - but not roles.
      */
     private void addUserBasicInfo(User p_userRequestingAdd, User p_user,
-            List p_projectIds, FieldSecurity p_fieldSecurity)
-            throws UserManagerException, RemoteException
+            List p_projectIds, FieldSecurity p_fieldSecurity,
+            boolean needEncodePwd) throws UserManagerException, RemoteException
     {
         String errorMsgKey = UserManagerException.MSG_ADD_USER_ERROR;
         String[] errorMsgArg;
@@ -2053,7 +2250,8 @@ public class UserManagerLocal implements UserManager
             // Validate the parameter
             if (p_user == null || (!p_user.isUserValid()))
             {
-                errorMsgArg = new String[] { UserManagerException.ARG_INVALID_USER };
+                errorMsgArg = new String[]
+                { UserManagerException.ARG_INVALID_USER };
 
                 CATEGORY.error("UserManagerException is thrown from: "
                         + "UserManagerLocal::addUser(): " + errorMsgArg[0],
@@ -2073,7 +2271,8 @@ public class UserManagerLocal implements UserManager
             DirContext dirContext = checkOutConnection(true);
 
             // generate a LDAP entry for the user
-            Attributes entry = UserLdapHelper.convertUserToLDAPEntry(p_user);
+            Attributes entry = UserLdapHelper.convertUserToLDAPEntry(p_user,
+                    needEncodePwd);
             String tmpDN = UserLdapHelper.getUserDN(p_user.getUserId());
             try
             {
@@ -2082,18 +2281,20 @@ public class UserManagerLocal implements UserManager
             }
             catch (SchemaViolationException ex)
             {
-                errorMsgArg = new String[] { UserManagerException.ARG_INVALID_ATTRIBUTE };
+                errorMsgArg = new String[]
+                { UserManagerException.ARG_INVALID_ATTRIBUTE };
                 CATEGORY.error("UserManagerException is thrown from: "
-                        + "UserManagerLocal::addUser(): " + "(User Id = "
-                        + p_user.getUserId() + "):\n" + errorMsgArg[0], ex);
+                        + "UserManagerLocal::addUser(): " + "(User Name = "
+                        + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
                 throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
             }
             catch (NamingException ex)
             {
-                errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+                errorMsgArg = new String[]
+                { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
                 CATEGORY.error("UserManagerException is thrown from: "
-                        + "UserManagerLocal::addUser(): " + "(User Id = "
-                        + p_user.getUserId() + "):\n" + errorMsgArg[0], ex);
+                        + "UserManagerLocal::addUser(): " + "(User Name = "
+                        + p_user.getUserName() + "):\n" + errorMsgArg[0], ex);
                 throw new UserManagerException(errorMsgKey, errorMsgArg, ex);
             }
             finally
@@ -2116,9 +2317,11 @@ public class UserManagerLocal implements UserManager
         {
             // if either of these fail - remove the user which removes
             // it from permission groups, roles and projects
+            UserUtil.removeUserFromUserIdUserName(p_user.getUserId());
             removeUser(p_userRequestingAdd, p_user.getUserId());
-            CATEGORY.error("Failed to add the user " + p_user.getUserId(), e);
-            errorMsgArg = new String[] { p_user.getUserId() };
+            CATEGORY.error("Failed to add the user " + p_user.getUserName(), e);
+            errorMsgArg = new String[]
+            { p_user.getUserName() };
             throw new UserManagerException(errorMsgKey, errorMsgArg, e);
         }
     }
@@ -2141,9 +2344,9 @@ public class UserManagerLocal implements UserManager
                 for (int i = 0; i < p_roles.size(); i++)
                 {
                     Role curRole = (Role) p_roles.get(i);
-                    Role cContainerRole = getContainerRole(curRole
-                            .getActivity(), curRole.getSourceLocale(), curRole
-                            .getTargetLocale());
+                    Role cContainerRole = getContainerRole(
+                            curRole.getActivity(), curRole.getSourceLocale(),
+                            curRole.getTargetLocale());
 
                     if (cContainerRole != null)
                     {
@@ -2151,9 +2354,16 @@ public class UserManagerLocal implements UserManager
                         // the user is active
                         if (p_user.isActive())
                         {
-                            String[] uids = { p_user.getUserId() };
+                            String[] uids =
+                            { p_user.getUserId() };
                             addUsersToRole(uids, cContainerRole.getName());
                             curRole.setState(User.State.ACTIVE);
+                            UserRole userRole = (UserRole) curRole;
+                            if (userRole.getUser() == null)
+                            {
+                                userRole.setUser(UserUtil
+                                        .getUserIdByName(userRole.getUserName()));
+                            }
                         }
                         // add the user role - its state reflects CREATED or
                         // ACTIVE
@@ -2166,11 +2376,10 @@ public class UserManagerLocal implements UserManager
                         // exist
                         // otherwise some things are corrupted or removed
                         // manually
-                        CATEGORY
-                                .error("The container role doesn't exist for user role "
-                                        + curRole.getName()
-                                        + ".  However the activity and locale pairs do. "
-                                        + " Something is out of sync between the database and ldap.");
+                        CATEGORY.error("The container role doesn't exist for user role "
+                                + curRole.getName()
+                                + ".  However the activity and locale pairs do. "
+                                + " Something is out of sync between the database and ldap.");
                         failedRoles[numOfFailedRoles] = curRole.getName();
                         numOfFailedRoles++;
                     }
@@ -2184,7 +2393,7 @@ public class UserManagerLocal implements UserManager
         }
         catch (Exception ex)
         {
-            throw createUserRoleException(p_user.getUserId(), ex,
+            throw createUserRoleException(p_user.getUserName(), ex,
                     numOfFailedRoles, failedRoles);
         }
 
@@ -2193,7 +2402,7 @@ public class UserManagerLocal implements UserManager
         if (numOfFailedRoles > 0)
         {
             // create an exception since some of the roles failed
-            throw createUserRoleException(p_user.getUserId(), null,
+            throw createUserRoleException(p_user.getUserName(), null,
                     numOfFailedRoles, failedRoles);
         }
     }
@@ -2202,8 +2411,8 @@ public class UserManagerLocal implements UserManager
      * Modifies the user with the roles specified.
      * 
      * @param p_user
-     * @param p_newRoleList -
-     *            The list of roles the user should be associated with. If an
+     * @param p_newRoleList
+     *            - The list of roles the user should be associated with. If an
      *            empty list then remove all roles from the user. If NULL ignore
      *            the request and leave the user with their current roles.
      */
@@ -2221,7 +2430,8 @@ public class UserManagerLocal implements UserManager
                 // and add/modify/remove appropriately
                 Collection oldRoles = getUserRoles(p_user);
                 List unchangedRoles = new ArrayList();
-                String[] uids = { p_user.getUserId() };
+                String[] uids =
+                { p_user.getUserId() };
 
                 // find all the removed roles and REMOVE then
                 // find the unmodified roles and add them to the list.
@@ -2240,8 +2450,9 @@ public class UserManagerLocal implements UserManager
                         // the old role not found in the new list - so remove
                         if (!found)
                         {
-                            Role cRole1 = getContainerRole(oldRole1
-                                    .getActivity(), oldRole1.getSourceLocale(),
+                            Role cRole1 = getContainerRole(
+                                    oldRole1.getActivity(),
+                                    oldRole1.getSourceLocale(),
                                     oldRole1.getTargetLocale());
 
                             if (cRole1 != null)
@@ -2263,12 +2474,11 @@ public class UserManagerLocal implements UserManager
                                 // always exist
                                 // otherwise some things are corrupted or
                                 // removed manually
-                                CATEGORY
-                                        .error("The container role doesn't exist for user role "
-                                                + oldRole1.getName()
-                                                + ", so the user couldn't be removed from the role."
-                                                + "  However the activity and locale pairs do. "
-                                                + " Something is out of sync between the database and ldap.");
+                                CATEGORY.error("The container role doesn't exist for user role "
+                                        + oldRole1.getName()
+                                        + ", so the user couldn't be removed from the role."
+                                        + "  However the activity and locale pairs do. "
+                                        + " Something is out of sync between the database and ldap.");
                                 failedRoles[numOfFailedRoles] = oldRole1
                                         .getName();
                                 numOfFailedRoles++;
@@ -2305,8 +2515,8 @@ public class UserManagerLocal implements UserManager
                     {
                         // add to container Role
                         Role cRole2 = getContainerRole(newRole2.getActivity(),
-                                newRole2.getSourceLocale(), newRole2
-                                        .getTargetLocale());
+                                newRole2.getSourceLocale(),
+                                newRole2.getTargetLocale());
                         if (cRole2 != null)
                         {
                             if (p_user.isActive())
@@ -2323,11 +2533,10 @@ public class UserManagerLocal implements UserManager
                             // exist
                             // otherwise some things are corrupted or removed
                             // manually
-                            CATEGORY
-                                    .error("The container role doesn't exist for user role "
-                                            + newRole2.getName()
-                                            + ".  However the activity and locale pairs do. "
-                                            + " Something is out of sync between the database and ldap.");
+                            CATEGORY.error("The container role doesn't exist for user role "
+                                    + newRole2.getName()
+                                    + ".  However the activity and locale pairs do. "
+                                    + " Something is out of sync between the database and ldap.");
                             failedRoles[numOfFailedRoles] = newRole2.getName();
                             numOfFailedRoles++;
                         }
@@ -2339,7 +2548,7 @@ public class UserManagerLocal implements UserManager
                 // ServerProxy.getWorkflowServer().refreshIflowCache();
                 if (numOfFailedRoles > 0)
                 {
-                    throw createUserRoleException(p_user.getUserId(), null,
+                    throw createUserRoleException(p_user.getUserName(), null,
                             numOfFailedRoles, failedRoles);
                 }
             }
@@ -2349,7 +2558,7 @@ public class UserManagerLocal implements UserManager
             }
             catch (Exception ex)
             {
-                throw createUserRoleException(p_user.getUserId(), ex,
+                throw createUserRoleException(p_user.getUserName(), ex,
                         numOfFailedRoles, failedRoles);
             }
         }
@@ -2386,7 +2595,8 @@ public class UserManagerLocal implements UserManager
 
                     // strip off just the name - from "cn=" to the "userid"
                     String containerRole = roleDn.substring(3, index - 1);
-                    String uids[] = { p_uid };
+                    String uids[] =
+                    { p_uid };
                     addUsersToRole(uids, containerRole);
                 }
             } // end for
@@ -2398,11 +2608,11 @@ public class UserManagerLocal implements UserManager
      * Deactiavte the user roles the user is associated with and remove the user
      * from the container roles.
      * 
-     * @param p_uids -
-     *            The user id to be deactivated.
+     * @param p_uids
+     *            - The user id to be deactivated.
      * @param dirContext
-     * @exception UserManagerException -
-     *                Component related exception.
+     * @exception UserManagerException
+     *                - Component related exception.
      * @exception java.rmi.RemoteException
      *                Network related exception.
      */
@@ -2472,14 +2682,12 @@ public class UserManagerLocal implements UserManager
         }
         catch (Exception e)
         {
-            CATEGORY
-                    .error(
-                            "UserManagerException is thrown from: "
-                                    + "UserManagerLocal::associateUserWithProjects() for "
-                                    + p_userId + " with projects "
-                                    + p_projectIds.toString(), e);
+            CATEGORY.error("UserManagerException is thrown from: "
+                    + "UserManagerLocal::associateUserWithProjects() for "
+                    + p_userId + " with projects " + p_projectIds.toString(), e);
 
-            String[] args = { p_userId, p_projectIds.toString() };
+            String[] args =
+            { p_userId, p_projectIds.toString() };
             throw new UserManagerException(
                     UserManagerException.MSG_FAILED_TO_ASSOCIATE_USER_WITH_PROJECTS,
                     args, e);
@@ -2665,7 +2873,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NameNotFoundException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_ROLE_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_ROLE_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::deleteRole(): " + "(role name = "
                     + p_roleDN + ")\n" + errorMsgArg[0], ex);
@@ -2673,7 +2882,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::deleteRole(): " + "(role name = "
                     + p_roleDN + ")\n" + errorMsgArg[0], ex);
@@ -2693,7 +2903,8 @@ public class UserManagerLocal implements UserManager
             throws NamingException
     {
 
-        String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_USERID };
+        String[] attrs = new String[]
+        { UserLdapHelper.LDAP_ATTR_USERID };
         try
         {
             dirContext.getAttributes(UserLdapHelper.getUserDN(p_uid), attrs);
@@ -2772,22 +2983,36 @@ public class UserManagerLocal implements UserManager
 
         // generate a ModificationItem[] to hold the attributes to be modified
         ModificationItem[] modSet = RoleLdapHelper
-                .deleteUsersModificationSet(new String[] { p_uid });
+                .deleteUsersModificationSet(new String[]
+                { p_uid });
         // Modify the entry
         dirContext.modifyAttributes(p_roleDN, modSet);
     }
 
-    public Vector getRoles(String p_filter, String[] p_attrs,
+    public Vector<Role> getRoles(String p_filter, String[] p_attrs,
             boolean p_withRates) throws UserManagerException
     {
-        return getRoles(p_filter, p_attrs, p_withRates, -1);
+        return getRoles(p_filter, p_attrs, p_withRates, null, -1);
     }
 
-    private Vector getRoles(String p_filter, String[] p_attrs,
+    private Vector<Role> getRoles(String p_filter, String[] p_attrs,
+            boolean p_withRates, String companyId) throws UserManagerException
+    {
+        return getRoles(p_filter, p_attrs, p_withRates, companyId, -1);
+    }
+
+    private Vector<Role> getRoles(String p_filter, String[] p_attrs,
             boolean p_withRates, long p_projectId) throws UserManagerException
     {
+        return getRoles(p_filter, p_attrs, p_withRates, null, p_projectId);
+    }
+
+    private Vector<Role> getRoles(String p_filter, String[] p_attrs,
+            boolean p_withRates, String companyId, long p_projectId)
+            throws UserManagerException
+    {
         String errorMsgKey = UserManagerException.MSG_GET_ROLES_ERROR;
-        Vector outputRoles = null;
+        Vector<Role> outputRoles = null;
 
         DirContext dirContext = checkOutConnection(false);
         setConnectionOptions(dirContext);
@@ -2805,7 +3030,7 @@ public class UserManagerLocal implements UserManager
 
             // generate role objects
             outputRoles = RoleLdapHelper.getRolesFromSearchResults(res,
-                    p_withRates, p_projectId);
+                    p_withRates, companyId, p_projectId);
 
         }
         catch (NamingException ex)
@@ -2840,8 +3065,8 @@ public class UserManagerLocal implements UserManager
         }
         else
         {
-            String args[] = { p_activity.getName(), p_sourceLocale,
-                    p_targetLocale };
+            String args[] =
+            { p_activity.getName(), p_sourceLocale, p_targetLocale };
             throw new UserManagerException(
                     UserManagerException.MSG_ROLE_DOES_NOT_EXIST, args, null);
         }
@@ -2898,15 +3123,16 @@ public class UserManagerLocal implements UserManager
      * Get the UserIds of the User entry that match the given LDAP attributes.
      * Return empty array if search is performed but no match found.
      */
-    private String[] getUserIds(Attribute[] p_userAttrs, DirContext dirContext)
+    private String[] getUserNames(Attribute[] p_userAttrs, DirContext dirContext)
             throws NamingException
     {
 
-        String[] uids = null;
+        String[] userNames = null;
 
         if (p_userAttrs != null && p_userAttrs.length != 0)
         {
-            String[] attrs = new String[] { UserLdapHelper.LDAP_ATTR_USERID };
+            String[] attrs = new String[]
+            { UserLdapHelper.LDAP_ATTR_USER_NAME };
             String filter = UserLdapHelper.getSearchFilter(p_userAttrs);
 
             SearchControls constraints = new SearchControls();
@@ -2917,10 +3143,10 @@ public class UserManagerLocal implements UserManager
             NamingEnumeration res = dirContext.search(
                     UserLdapHelper.USER_BASE_DN, filter, constraints);
 
-            uids = UserLdapHelper.getUIDsFromSearchResults(res);
+            userNames = UserLdapHelper.getNamesFromSearchResults(res);
         }
 
-        return uids;
+        return userNames;
     }
 
     /**
@@ -2935,7 +3161,8 @@ public class UserManagerLocal implements UserManager
 
         if (p_roleAttrs != null && p_roleAttrs.length != 0)
         {
-            String[] attrs = new String[] { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
+            String[] attrs = new String[]
+            { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
             String filter = RoleLdapHelper.getSearchFilter(p_roleAttrs);
 
             SearchControls constraints = new SearchControls();
@@ -2961,14 +3188,15 @@ public class UserManagerLocal implements UserManager
     {
 
         String[] uids = null;
-        String[] attrs = new String[] { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
+        String[] attrs = new String[]
+        { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
 
         if (p_roleName != null && p_roleName.trim().length() != 0)
         {
             try
             {
-                Attributes roleEntry = dirContext.getAttributes(RoleLdapHelper
-                        .getRoleDN(p_roleName), attrs);
+                Attributes roleEntry = dirContext.getAttributes(
+                        RoleLdapHelper.getRoleDN(p_roleName), attrs);
                 Attribute attr = roleEntry
                         .get(RoleLdapHelper.LDAP_ATTR_MEMBERSHIP);
 
@@ -3008,7 +3236,8 @@ public class UserManagerLocal implements UserManager
         String filter = RoleLdapHelper
                 .getSearchFilterForRolesOnRoleNames(p_roleNames);
 
-        String[] attrs = new String[] { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
+        String[] attrs = new String[]
+        { RoleLdapHelper.LDAP_ATTR_MEMBERSHIP };
 
         Set userIds = new TreeSet();
 
@@ -3090,10 +3319,9 @@ public class UserManagerLocal implements UserManager
     {
         String errorMsgKey = UserManagerException.MSG_GET_USERS_ERROR;
 
-        String[] uidSet1 = null;
-        String[] uidSet2 = null;
-        String[] uidSet3 = null;
-        String[] commonUids = null;
+        String[] nameSet = null;
+        String[] uidSet = null;
+        String[] commonUidSet = null;
 
         Vector result = null;
         String[] errorMsgArg;
@@ -3102,16 +3330,17 @@ public class UserManagerLocal implements UserManager
         DirContext dirContext = checkOutConnection(false);
         setConnectionOptions(dirContext);
 
-        // Search uids from the User branch
+        // Search names from the User branch
         try
         {
-            uidSet1 = getUserIds(p_userAttrs, dirContext);
+            nameSet = getUserNames(p_userAttrs, dirContext);
         }
         catch (NamingException e)
         {
             // return the connection to the pool
             checkInConnection(dirContext);
-            errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_UIDS_FROM_USER };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_UIDS_FROM_USER };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::getUsers(): " + errorMsgArg[0], e);
             throw new UserManagerException(errorMsgKey, errorMsgArg, e);
@@ -3120,40 +3349,40 @@ public class UserManagerLocal implements UserManager
         // Search the uids from the Role branch
         try
         {
-            uidSet3 = getUserIdsFromRole(p_roleAttrs, dirContext);
+            uidSet = getUserIdsFromRole(p_roleAttrs, dirContext);
         }
         catch (NamingException e)
         {
             // return the connection to the pool
             checkInConnection(dirContext);
 
-            errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_UIDS_FROM_ROLE };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_UIDS_FROM_ROLE };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::getUsers(): " + errorMsgArg[0], e);
 
             throw new UserManagerException(errorMsgKey, errorMsgArg, e);
         }
-
-        // get the common set of user ids of the three search,
-        // excluding the null set
-        commonUids = LdapHelper.getCommonSet(uidSet1, LdapHelper.getCommonSet(
-                uidSet2, uidSet3));
+        // get the common set of user ids
+        commonUidSet = LdapHelper.getCommonSet(
+                UserUtil.convertUserNamesToUserIds(nameSet), uidSet);
 
         // filter out the users that are in the specified project
         if (p_project != null)
         {
-            commonUids = filterUsersByProject(commonUids, p_project);
+            commonUidSet = filterUsersByProject(commonUidSet, p_project);
         }
 
         // Search User entries based on the common set of uids
         try
         {
-            result = getUsers(commonUids, p_targetUserAttrs, dirContext);
+            result = getUsers(commonUidSet, p_targetUserAttrs, dirContext);
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_FAILED_TO_GET_USERS_ENTRIES };
 
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::getUsers(): " + errorMsgArg[0], ex);
@@ -3175,8 +3404,8 @@ public class UserManagerLocal implements UserManager
             throws UserManagerException, RemoteException
     {
         String errorMsgKey = UserManagerException.MSG_ADD_RATE_TO_ROLE_ERROR;
-        String[] errorMsgArg = { Long.toString(p_rate.getId()),
-                p_role.getName() };
+        String[] errorMsgArg =
+        { Long.toString(p_rate.getId()), p_role.getName() };
 
         // if the rate being added has a duplicate name - this is an error
         if (isDuplicateRateName(p_rate.getName(), p_role))
@@ -3188,18 +3417,20 @@ public class UserManagerLocal implements UserManager
         DirContext dirContext = checkOutConnection(true);
 
         // generate a ModificationItem[] to hold the attributes to be modified
-        String rates[] = { Long.toString(p_rate.getId()) };
+        String rates[] =
+        { Long.toString(p_rate.getId()) };
         ModificationItem[] modSet = RoleLdapHelper
                 .addRatesModificationSet(rates);
         try
         {
             // Modify the entry
-            dirContext.modifyAttributes(RoleLdapHelper.getRoleDN(p_role
-                    .getName()), modSet);
+            dirContext.modifyAttributes(
+                    RoleLdapHelper.getRoleDN(p_role.getName()), modSet);
         }
         catch (NameNotFoundException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_ROLE_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_ROLE_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addRateToRole(): " + "(role name = "
                     + p_role.getName() + ", rate = " + rates + ")\n"
@@ -3208,7 +3439,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::addRateToRole(): " + "(role name = "
                     + p_role.getName() + ", rate = " + rates + ")\n"
@@ -3229,26 +3461,28 @@ public class UserManagerLocal implements UserManager
             throws UserManagerException
     {
         String errorMsgKey = UserManagerException.MSG_REMOVE_RATE_FROM_ROLE_ERROR;
-        String[] errorMsgArg = { Long.toString(p_rate.getId()),
-                p_role.getName() };
+        String[] errorMsgArg =
+        { Long.toString(p_rate.getId()), p_role.getName() };
 
         // check out a connection from the pool with a system defined user bond.
         DirContext dirContext = checkOutConnection(true);
 
         // generate a ModificationItem[] to hold the attributes to be modified
-        String rates[] = { Long.toString(p_rate.getId()) };
+        String rates[] =
+        { Long.toString(p_rate.getId()) };
         ModificationItem[] modSet = RoleLdapHelper
                 .deleteRatesModificationSet(rates);
 
         try
         {
             // Modify the entry
-            dirContext.modifyAttributes(RoleLdapHelper.getRoleDN(p_role
-                    .getName()), modSet);
+            dirContext.modifyAttributes(
+                    RoleLdapHelper.getRoleDN(p_role.getName()), modSet);
         }
         catch (NameNotFoundException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_ROLE_NOT_EXIST };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_ROLE_NOT_EXIST };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeRateFromRole(): "
                     + "(role name = " + p_role.getName() + ", rate = " + rates
@@ -3261,7 +3495,8 @@ public class UserManagerLocal implements UserManager
         }
         catch (NamingException ex)
         {
-            errorMsgArg = new String[] { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
+            errorMsgArg = new String[]
+            { UserManagerException.ARG_LDAP_UNKNOWN_ERROR };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::removeRateFromRole(): "
                     + "(role name = " + p_role.getName() + ", rate = " + rates
@@ -3282,7 +3517,8 @@ public class UserManagerLocal implements UserManager
             throws NamingException
     {
         Vector roleDNs = null;
-        String[] attrs = new String[] { RoleLdapHelper.ROLE_LDAP_RDN_ATTRIBUTE };
+        String[] attrs = new String[]
+        { RoleLdapHelper.ROLE_LDAP_RDN_ATTRIBUTE };
         String filter = RoleLdapHelper.getSearchFilterOnUserId(p_uid);
         // search
         SearchControls constraints = new SearchControls();
@@ -3305,7 +3541,8 @@ public class UserManagerLocal implements UserManager
     private Vector getInactiveRoleDNs(String p_uid, DirContext dirContext)
             throws NamingException
     {
-        String[] attrs = new String[] { RoleLdapHelper.ROLE_LDAP_RDN_ATTRIBUTE };
+        String[] attrs = new String[]
+        { RoleLdapHelper.ROLE_LDAP_RDN_ATTRIBUTE };
         String filter = RoleLdapHelper
                 .getSearchFilterForInactiveRolesOnUserId(p_uid);
 
@@ -3430,8 +3667,8 @@ public class UserManagerLocal implements UserManager
             // return the connection to the pool
             checkInConnection(dirContext);
 
-            String[] errorMsgArg = { "(binding user id =" + getLDAPLoginDN()
-                    + ")\n" };
+            String[] errorMsgArg =
+            { "(binding user id =" + getLDAPLoginDN() + ")\n" };
             CATEGORY.error("UserManagerException is thrown from: "
                     + "UserManagerLocal::bindUserToConnection(): "
                     + errorMsgArg[0], ne);
@@ -3525,10 +3762,10 @@ public class UserManagerLocal implements UserManager
     /**
      * Calculates the users that logged in the system.
      * 
-     * @param p_userName -
-     *            the user name.
-     * @param p_sessionId -
-     *            the session id of the user.
+     * @param p_userName
+     *            - the user name.
+     * @param p_sessionId
+     *            - the session id of the user.
      */
     public void loggedInUsers(String p_userName, String p_sessionId)
     {
@@ -3543,10 +3780,10 @@ public class UserManagerLocal implements UserManager
     /**
      * Calculates the users after logging out the system.
      * 
-     * @param p_userName -
-     *            the user name.
-     * @param p_sessionId -
-     *            the session id of the user.
+     * @param p_userName
+     *            - the user name.
+     * @param p_sessionId
+     *            - the session id of the user.
      */
     public void loggedOutUsers(String p_userName, String p_sessionId)
     {

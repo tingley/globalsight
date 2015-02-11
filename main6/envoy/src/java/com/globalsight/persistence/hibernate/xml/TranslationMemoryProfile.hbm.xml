@@ -113,21 +113,14 @@
 
         <property name="mtEngine" length="60" column="MT_ENGINE"
             type="string" not-null="false" unique="false" />
-        <property name="autoCommitToTM" column="MT_AUTOCOMMIT_TO_TM"
-            type="yes_no" not-null="true" unique="false" />
-        <property name="overrideNonExactMatches"
-            column="MT_OVERRIDE_MATCHES" type="yes_no" not-null="true"
-            unique="false" />
+    	<property name="useMT" column="USE_MT" type="yes_no"
+    		not-null="true" unique="false" />
+        <property name="mtConfidenceScore" column="MT_CONFIDENCE_SCORE" type="long"
+            not-null="false" unique="false" />
         <property name="showInEditor" column="MT_SHOW_IN_EDITOR"
             type="yes_no" not-null="true" unique="false" />
-        <property name="isMTSensitiveLeveraging"
-            column="IS_MT_SENSITIVE_LEVERAGING" type="yes_no"
-            not-null="true" unique="false" />
-        <property name="mtSensitivePenalty"
-            column="MT_PENALTY" type="long"
-            not-null="false" unique="false" />
-            
-        <property name="ptsurl" column="PTSURL"
+
+         <property name="ptsurl" column="PTSURL"
             type="string" not-null="false" unique="false" />
         <property name="ptsUsername" column="PTS_USERNAME"
             type="string" not-null="false" unique="false" />
@@ -139,6 +132,10 @@
         <property name="msMTUrl" column="MS_MT_URL"
             type="string" not-null="false" unique="false" />
         <property name="msMTAppID" column="MS_MT_APPID"
+            type="string" not-null="false" unique="false" />
+        <property name="msMTClientID" column="MS_MT_CLIENTID"
+            type="string" not-null="false" unique="false" />
+        <property name="msMTClientSecret" column="MS_MT_CLIENT_SECRET"
             type="string" not-null="false" unique="false" />
         <property name="msMTUrlFlag" column="MS_MT_URL_FLAG"
             type="string" not-null="false" unique="false" />
@@ -182,5 +179,10 @@
                  
         <one-to-one name="tdatm" class="com.globalsight.everest.foundation.TDATM" property-ref="translationMemoryProfile"/> 
 
+        <set name="attributes" inverse="true" cascade="all">
+			<key column="TMP_ID" />
+			<one-to-many
+				class="com.globalsight.cxe.entity.customAttribute.TMPAttribute" />
+		</set>
     </class>
 </hibernate-mapping>

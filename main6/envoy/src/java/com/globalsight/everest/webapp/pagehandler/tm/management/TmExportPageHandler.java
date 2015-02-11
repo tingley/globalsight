@@ -129,6 +129,7 @@ public class TmExportPageHandler
         String tmid    = (String)p_request.getParameter(RADIO_TM_ID);
         String name    = null;
         String definition = null;
+        String tmtype = "TM2";
         Tm tm = null;
 
         IExportManager exporter =
@@ -151,6 +152,9 @@ public class TmExportPageHandler
                 // not the TM is empty.
                 definition = LingServerProxy.getTmCoreManager()
                         .getTmStatistics(tm, uiLocale, true).asXML(true);
+                
+                Long tm3id = tm.getTm3Id();
+                tmtype = tm3id == null ? "TM2" : "TM3";
             }
 
             if (options != null)
@@ -195,6 +199,7 @@ public class TmExportPageHandler
                 sessionMgr.setAttribute(TM_PROJECT, definition);
                 sessionMgr.setAttribute(TM_EXPORT_OPTIONS, options);
                 sessionMgr.setAttribute(TM_EXPORTER, exporter);
+                sessionMgr.setAttribute(TM_TYPE, tmtype);
             }
             else if (action.equals(TM_ACTION_ANALYZE_TM))
             {

@@ -17,7 +17,8 @@
 package com.globalsight.everest.util.comparator;
 
 import com.globalsight.ling.tm.TuvLing;
-import java.util.Comparator;
+
+import java.util.Date;
 import java.util.Locale;
 
 /**
@@ -26,28 +27,60 @@ import java.util.Locale;
  * overwrite equals() like the BaseTmTuv - AbstractTmTuv -
  * SegmentTmTuv classes from the tm2 package do.
  */
-public class TuvComparator
-    extends StringComparator
+public class TuvComparator extends StringComparator
 {
+    private static final long serialVersionUID = -3512515336271113942L;
+    
+    public static final int EXACT_MATCH_FORMAT = 0;
+    public static final int LAST_MODIFIED = 1;
+
     public TuvComparator()
     {
         // Locale doesn't matter since we're only interested in the
         // equals() semantics, not collation.
         super(Locale.US);
     }
+    
+    public TuvComparator(int p_type, Locale p_locale)
+    {
+        super(p_type, p_locale);
+    }
 
     /**
-     * Performs a comparison of two TUV objects based on their exact
-     * match key.
+     * Performs a comparison of two TUV objects based on selected type.
      */
     public int compare(Object p_A, Object p_B)
     {
         TuvLing a = (TuvLing)p_A;
         TuvLing b = (TuvLing)p_B;
 
-        String aValue = a.getExactMatchFormat();
-        String bValue = b.getExactMatchFormat();
+        int rv;
+        switch (m_type)
+        {
+            case LAST_MODIFIED:
+                Date aDate = a.getLastModified();
+                Date bDate = b.getLastModified();
+                if (aDate != null && bDate == null) {
+                    rv = 1;
+                } else if (aDate == null && bDate != null) {
+                    rv = -1;
+                } else {
+                    if (aDate.after(bDate))
+                        rv = 1;
+                    else if (aDate.equals(bDate))
+                        rv = 0;
+                    else
+                        rv = -1;
+                }
+            break;
+            
+            default:
+                String aValue = a.getExactMatchFormat();
+                String bValue = b.getExactMatchFormat();
 
-        return this.compareStrings(aValue, bValue);
+                return rv = this.compareStrings(aValue, bValue);
+        }
+
+        return rv;
     }
 }

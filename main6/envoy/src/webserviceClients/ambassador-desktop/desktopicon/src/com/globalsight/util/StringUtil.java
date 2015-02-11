@@ -131,4 +131,52 @@ public class StringUtil
         byte[] bs = s.getBytes(encoding);
         return new String(removeBom(bs), encoding);
     }
+
+    /**
+     * Compares the numbers in two strings.
+     */
+    public static int compareStringNum(String first, String second)
+            throws Exception
+    {
+        String[] firstS = first.split("\\.");
+        String[] secondS = second.split("\\.");
+        try
+        {
+            int length = firstS.length > secondS.length ? firstS.length
+                    : secondS.length;
+            for (int i = 0; i < length; i++)
+            {
+                if (i < firstS.length)
+                {
+                    int firstNumber = Integer.parseInt(firstS[i]);
+                    if (i < secondS.length)
+                    {
+                        int secondNumber = Integer.parseInt(secondS[i]);
+                        if (firstNumber > secondNumber)
+                        {
+                            return 1;
+                        }
+                        else if (firstNumber < secondNumber)
+                        {
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        return 1;
+                    }
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
+        catch (NumberFormatException nfe)
+        {
+            throw new Exception(nfe);
+        }
+
+        return 0;
+    }
 }

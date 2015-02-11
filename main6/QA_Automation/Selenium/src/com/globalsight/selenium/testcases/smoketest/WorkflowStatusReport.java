@@ -12,7 +12,8 @@ import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.DownloadFileRead.FileRead;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.WorkflowStatusReportWebForm;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 /**
@@ -21,29 +22,15 @@ import com.thoughtworks.selenium.Selenium;
  * @author leon
  * 
  */
-public class WorkflowStatusReport
+public class WorkflowStatusReport extends BaseTestCase
 {
-    private Selenium selenium;
     private int i = 0;
-
-    @BeforeClass
-    public void beforeClass()
-    {
-        selenium = CommonFuncs.initSelenium();
-        CommonFuncs.loginSystemWithAdmin(selenium);
-    }
-
-    @AfterClass
-    public void afterClass()
-    {
-        selenium.stop();
-    }
 
     @Test
     public void generateReport()
     {
-        selenium.click(MainFrame.Reports_MENU);
-        selenium.click(MainFrame.MainReportsPage_SUBMENU);
+        selenium.click(MainFrame.REPORTS_MENU);
+        selenium.click(MainFrame.REPORTS_MAIN_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(WorkflowStatusReportWebForm.REPORT_LINK);
         selenium.selectWindow(WorkflowStatusReportWebForm.POPUP_WINDOW_NAME);

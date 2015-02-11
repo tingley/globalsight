@@ -390,6 +390,17 @@ private String getSubFileName(String p_filename)
     	  bomTypeElement.disabled = true;
     }
 
+	//for GBS-2599
+	function handleSelectAll() {
+		if (exportForm && exportForm.selectAll) {
+			if (exportForm.selectAll.checked) {
+				checkAll('exportForm');
+			}
+			else {
+				clearAll('exportForm'); 
+			}
+		}
+	}
     </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -471,8 +482,11 @@ private String getSubFileName(String p_filename)
                                 <TABLE CELLPADDING="4" CELLSPACING="0" BORDER="0"> 
                                     <% if (b_exportMultipleActivities == false) { %>
                                     <TR CLASS="tableHeadingBasic">                                    
-                                        <% if (b_exportForUpdate==false) {%>
-                                        <TD NOWRAP><IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"></TD>
+                                        <% if (b_exportForUpdate==false) {%>   
+                                        <TD NOWRAP width="5px">
+											<input type="checkbox" onclick="handleSelectAll()" name="selectAll" checked="true" style="position:relative;left:-3px;"/>
+											<IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"/>
+										</TD>
                                         <TD NOWRAP>
                                             <SPAN CLASS="whiteBold">
                                             <%=bundle.getString("lb_target_locales")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -565,7 +579,7 @@ private String getSubFileName(String p_filename)
         <TR CLASS="tableHeadingBasic"><TD COLSPAN=4><%=bundle.getString("lb_target_locale")%>: <%=targetLocale%></TD>
         <TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD><TD>&nbsp;</TD></TR>
         <TR CLASS="tableHeadingBasic">
-        <TD NOWRAP><IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"></TD>
+        <TD NOWRAP width="5px"><input type="checkbox" onclick="handleSelectAll()" name="selectAll" checked="true" style="position:relative;left:-3px;"/><IMG SRC="/globalsight/images/spacer.gif" WIDTH="20" HEIGHT="1"></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_job")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_source_locale")%>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</SPAN></TD>
         <TD NOWRAP><SPAN CLASS="whiteBold"><%=bundle.getString("lb_localized")%></SPAN>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</TD>
@@ -582,6 +596,7 @@ private String getSubFileName(String p_filename)
         <%
         for (int i=0; i < a.size(); i++)
         {
+        	StringBuilder sb = new StringBuilder();
             Workflow w = (Workflow) a.get(i);
             L10nProfile l10nProfile = LocProfileHandlerHelper.getL10nProfile(
                 w.getJob().getL10nProfileId());
@@ -591,7 +606,16 @@ private String getSubFileName(String p_filename)
                                            request,
                                            l10nProfile,
                                            b_exportMultipleActivities);
-            %><%=workflowText%><%
+            sb.append(workflowText);
+            if (i == a.size() - 1)
+            {
+            	sb.append("<INPUT TYPE=\"hidden\" NAME=\"");
+                sb.append(JobManagementHandler.JOB_ID);
+                sb.append("\" VALUE=\"");
+                sb.append(w.getJob().getId());
+                sb.append("\">");
+            }
+            %><%=sb.toString()%><%
         }    
     }
 %>
@@ -620,7 +644,6 @@ private String getSubFileName(String p_filename)
             <div id="data">
             <% } %>
             <TABLE CELLPADDING="2" CELLSPACING="0" BORDER="0" CLASS="standardText">
-                <TBODY>
                 <COL WIDTH="20"> <!-- Spacer -->
                 <COL WIDTH="10"> <!-- Bullet -->
                 <COL WIDTH="500"> <!-- Page path -->
@@ -800,7 +823,7 @@ private String getSubFileName(String p_filename)
         long knownFormatTypeId = -1;
         for (FileProfile fp : fps) {
             knownFormatTypeId = fp.getKnownFormatTypeId();
-            needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7;
+            needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45;
             if (needBOMProcessing)
                 break;
         }
@@ -878,7 +901,6 @@ private String getSubFileName(String p_filename)
         p_sb.append("<div id=\"data\">\r\n");
         p_sb.append("<TABLE BORDER=\"0\" CELLPADDING=0");
         p_sb.append(" CELLSPACING=0 CLASS=\"standardText\">\r\n");
-        p_sb.append("<TBODY>");
         p_sb.append("<COL WIDTH=20>   <!-- Spacer column -->");
         p_sb.append("<COL WIDTH=20>   <!-- Checkbox -->");
         p_sb.append("<COL WIDTH=400>  <!-- Page path -->");
@@ -1035,6 +1057,12 @@ private String getSubFileName(String p_filename)
                 sb.append(workflowText);
             }
         }
+        sb.append("<INPUT TYPE=\"hidden\" NAME=\"");
+        sb.append(JobManagementHandler.JOB_ID);
+        sb.append("\" VALUE=\"");
+        sb.append(p_job.getId());
+        sb.append("\">");
+        
         return sb.toString();
     }
 
@@ -1111,10 +1139,11 @@ private String getSubFileName(String p_filename)
                 {
                     checkboxName = "transCheckbox";
                 }
+
                 sb.append("<INPUT TYPE=CHECKBOX ");
                 sb.append("NAME=" + checkboxName + " ");
                 sb.append("VALUE=" + wfId + " ");
-                sb.append("CHECKED ONCLICK=\"checkWorkflowPages(this);\">");
+                sb.append("CHECKED ONCLICK=\"checkWorkflowPages(this);\">"); 
             }
             sb.append("</TD>\r\n");
 
@@ -1233,7 +1262,7 @@ private String getSubFileName(String p_filename)
             long knownFormatTypeId = -1;
             for (FileProfile fp : fps) {
                 knownFormatTypeId = fp.getKnownFormatTypeId();
-                needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7;
+                needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45;
                 if (needBOMProcessing)
                     break;
             }
@@ -1360,7 +1389,7 @@ private String getSubFileName(String p_filename)
                 long knownFormatTypeId = -1;
                 for (FileProfile fp : fps) {
                     knownFormatTypeId = fp.getKnownFormatTypeId();
-                    needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7;
+                    needBOMProcessing = knownFormatTypeId == 1 || knownFormatTypeId == 7 || knownFormatTypeId == 45;
                     if (needBOMProcessing)
                         break;
                 }
@@ -1431,7 +1460,7 @@ private String getSubFileName(String p_filename)
 
         // display the Primary Target Pages (both extracted and unextracted)
         List pages = p_wf.getTargetPages();
-        List stfs = p_wf.getSecondaryTargetFiles();
+        Set<SecondaryTargetFile> stfs = p_wf.getSecondaryTargetFiles();
         int stfSize = stfs.size();               
         String wfValue = null;
 
@@ -1491,9 +1520,8 @@ private String getSubFileName(String p_filename)
             
             addInitialTableSettings(sb);                             
 
-            for (int i = 0 ; i < stfSize ; i++)
+            for (SecondaryTargetFile stf : stfs)
             {
-                SecondaryTargetFile stf = (SecondaryTargetFile)stfs.get(i);
                 long stfId = stf.getId();
 
                 String storagePath = stf.getStoragePath();
@@ -1525,7 +1553,7 @@ private String getSubFileName(String p_filename)
         }
         catch (Exception e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
             throw new EnvoyServletException(e);
         }
 

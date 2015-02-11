@@ -294,6 +294,58 @@ public class TermbaseList
         return tb;
     }
 
+    public static TermbaseInfo getTermbaseInfo(long id)
+    {
+        String companyId = null;
+        HashMap companyMap = null;
+        Termbase tb = null;
+
+        synchronized (s_termbases)
+        {
+            companyId = CompanyThreadLocal.getInstance().getValue();
+            if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId))
+            {
+                loop: for (Iterator iter = s_termbases.values().iterator(); iter
+                        .hasNext();)
+                {
+                    companyMap = (HashMap) iter.next();
+                    for (Iterator it = companyMap.values().iterator(); it
+                            .hasNext();)
+                    {
+                        Termbase termbase = (Termbase) it.next();
+                        if (termbase.getId() == id)
+                        {
+                            tb = termbase;
+                            break loop;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                companyMap = (HashMap) s_termbases.get(companyId);
+                if (companyMap == null)
+                {
+                    companyMap = new HashMap();
+                    s_termbases.put(companyId, companyMap);
+                }
+                for (Iterator iter = companyMap.values().iterator(); iter
+                        .hasNext();)
+                {
+                    Termbase termbase = (Termbase) iter.next();
+                    if (termbase.getId() == id)
+                    {
+                        tb = termbase;
+                        break;
+                    }
+                }
+            }
+        }
+        TermbaseInfo tbi = new TermbaseInfo(tb.getId(), tb.getName(),
+                tb.getDescription(), tb.getCompanyId());
+        return tbi;
+    }
+
     /**
      * Returns a list of termbase names and descriptions known to
      * the server sorted based on rules for the given locale.

@@ -28,7 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
-import com.globalsight.machineTranslation.promt.ProMTProxy;
+import com.globalsight.machineTranslation.MTHelper;
 
 public class SegmentUtil
 {
@@ -186,8 +186,8 @@ public class SegmentUtil
     }
     
     public static String restoreSegment(String segment, String localCode) {
-        String restoreStr = ProMTProxy.wrappText(segment, localCode);
-        restoreStr = ProMTProxy.revertXlfSegment(restoreStr,localCode);
+        String restoreStr = MTHelper.wrappText(segment, localCode);
+        restoreStr = MTHelper.revertXlfSegment(restoreStr,localCode);
         
         return restoreStr;
     }

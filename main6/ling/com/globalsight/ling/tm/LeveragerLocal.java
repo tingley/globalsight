@@ -51,123 +51,113 @@ import com.globalsight.util.GlobalSightLocale;
 
 /**
  * This class is the implementation of the Leverager Interface.
+ * 
  * @see Leverager
  */
-public class LeveragerLocal
-    implements Leverager
+public class LeveragerLocal implements Leverager
 {
-    private static final Logger CATEGORY =
-        Logger.getLogger(
-            LeveragerLocal.class);
+    private static final Logger CATEGORY = Logger
+            .getLogger(LeveragerLocal.class);
 
     // Cache of locale id and GlobalSightLocale map
     private static Hashtable s_localeCache = new Hashtable();
 
-
-
-    public void leverageForReimport(
-        SourcePage p_sourcePage,
-        TargetLocaleLgIdsMapper p_localeLgIdsMapper,
-        GlobalSightLocale p_sourceLocale,
-        LeverageDataCenter p_leverageDataCenter)
-        throws RemoteException,
-               LingManagerException
+    public void leverageForReimport(SourcePage p_sourcePage,
+            TargetLocaleLgIdsMapper p_localeLgIdsMapper,
+            GlobalSightLocale p_sourceLocale,
+            LeverageDataCenter p_leverageDataCenter) throws RemoteException,
+            LingManagerException
     {
         try
         {
             Map tuvMap = getTuvMap(p_leverageDataCenter, p_sourcePage);
 
             Collection levMatchesList = null;
-            if(tuvMap.size() > 0)
+            if (tuvMap.size() > 0)
             {
-                levMatchesList = leverageLgemForReimport
-                    (p_sourcePage, p_localeLgIdsMapper,
-                        p_sourceLocale, p_leverageDataCenter, tuvMap);
+                levMatchesList = leverageLgemForReimport(p_sourcePage,
+                        p_localeLgIdsMapper, p_sourceLocale,
+                        p_leverageDataCenter, tuvMap);
             }
-        
-            if(levMatchesList != null)
+
+            if (levMatchesList != null)
             {
-                LeverageMatchResults levMatchResults
-                    = new LeverageMatchResults();
-            
-                for(Iterator it = levMatchesList.iterator(); it.hasNext();)
+                LeverageMatchResults levMatchResults = new LeverageMatchResults();
+
+                for (Iterator it = levMatchesList.iterator(); it.hasNext();)
                 {
-                    LeverageMatches levMatches = (LeverageMatches)it.next();
+                    LeverageMatches levMatches = (LeverageMatches) it.next();
                     levMatchResults.add(levMatches);
                 }
-            
-                p_leverageDataCenter.addLeverageResultsOfWholeSegment(
-                    levMatchResults);
+
+                p_leverageDataCenter
+                        .addLeverageResultsOfWholeSegment(levMatchResults);
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
             throw new LingManagerException(e);
         }
     }
 
-
     /**
-     * Leverages segments from the previous leverage group
-     * Returns a Collection of LeverageMatches
+     * Leverages segments from the previous leverage group Returns a Collection
+     * of LeverageMatches
      */
-    private Collection leverageLgemForReimport(
-        SourcePage p_sourcePage,
-        TargetLocaleLgIdsMapper p_localeLgIdsMapper,
-        GlobalSightLocale p_sourceLocale,
-        LeverageDataCenter p_leverageDataCenter,
-        Map p_tuvMap)
-        throws LingManagerException
+    private Collection leverageLgemForReimport(SourcePage p_sourcePage,
+            TargetLocaleLgIdsMapper p_localeLgIdsMapper,
+            GlobalSightLocale p_sourceLocale,
+            LeverageDataCenter p_leverageDataCenter, Map p_tuvMap)
+            throws LingManagerException
     {
         long time_PERFORMANCE = 0;
         Collection matchResults = new ArrayList();
         Connection connection = null;
-        ResultSet resultSet=null;
+        ResultSet resultSet = null;
         try
         {
-            connection =
-                PersistenceService.getInstance().getConnectionForImport();
+            connection = PersistenceService.getInstance()
+                    .getConnectionForImport();
 
             StoredProcedureParams params = new StoredProcedureParams();
 
-            Iterator it =
-                p_localeLgIdsMapper.getAllLocaleLgIdsPairs().iterator();
+            Iterator it = p_localeLgIdsMapper.getAllLocaleLgIdsPairs()
+                    .iterator();
 
             // get LGEM matches per locale group that has the same
             // leverage group ids
             while (it.hasNext())
             {
-                TargetLocaleLgIdsMapper.LocaleLgIdsPair lgIdsByLocale
-                    = (TargetLocaleLgIdsMapper.LocaleLgIdsPair)it.next();
+                TargetLocaleLgIdsMapper.LocaleLgIdsPair lgIdsByLocale = (TargetLocaleLgIdsMapper.LocaleLgIdsPair) it
+                        .next();
 
                 params.setParamsForLgem(p_tuvMap.values(), p_sourceLocale,
-                    lgIdsByLocale.getLocales(),
-                    lgIdsByLocale.getLgIds());
+                        lgIdsByLocale.getLocales(), lgIdsByLocale.getLgIds());
 
                 time_PERFORMANCE = System.currentTimeMillis();
 
                 // get LGEM hits
-                resultSet = findLevGroupExactMatches(
-                    connection, params);
+                resultSet = findLevGroupExactMatches(connection, params,
+                        p_sourcePage.getCompanyId());
 
                 CATEGORY.debug("Performance:: findLevGroupExactMatches for "
-                    + p_sourcePage.getExternalPageId() + " time = "
-                    + (System.currentTimeMillis() - time_PERFORMANCE));
+                        + p_sourcePage.getExternalPageId() + " time = "
+                        + (System.currentTimeMillis() - time_PERFORMANCE));
 
-                LgemPostProcessor lgemProcessor =
-                    new LgemPostProcessor(p_tuvMap, p_sourcePage.getId(),
-                        p_tuvMap.keySet(), lgIdsByLocale.getLocales());
+                LgemPostProcessor lgemProcessor = new LgemPostProcessor(
+                        p_tuvMap, p_sourcePage.getId(), p_tuvMap.keySet(),
+                        lgIdsByLocale.getLocales());
 
                 time_PERFORMANCE = System.currentTimeMillis();
 
-                matchResults.addAll(
-                    postProcessAndSave(resultSet, lgemProcessor,
+                matchResults.addAll(postProcessAndSave(resultSet,
+                        lgemProcessor,
                         p_leverageDataCenter.getLeverageOptions()));
 
                 CATEGORY.debug("Performance:: lgem postProcessAndSave for "
-                    + p_sourcePage.getExternalPageId() + " time = "
-                    + (System.currentTimeMillis() - time_PERFORMANCE));
+                        + p_sourcePage.getExternalPageId() + " time = "
+                        + (System.currentTimeMillis() - time_PERFORMANCE));
             }
         }
         catch (Exception e)
@@ -183,34 +173,31 @@ public class LeveragerLocal
         return matchResults;
     }
 
-
     private ResultSet findLevGroupExactMatches(Connection p_connection,
-        StoredProcedureParams p_params)
-        throws LingManagerException
+            StoredProcedureParams p_params, String companyId)
+            throws LingManagerException
     {
         ResultSet results = null;
 
         try
         {
-            results = StoredProcCaller.findReimportMatches(
-                p_connection,
-                p_params.getNumberForReimport(),
-                p_params.getStringParams());
+            results = StoredProcCaller.findReimportMatches(p_connection,
+                    p_params.getNumberForReimport(),
+                    p_params.getStringParams(), companyId);
         }
         catch (PersistenceException ex)
         {
             CATEGORY.error("error with stored procedure "
-                + StoredProcCaller.LGEM_SP, ex);
+                    + StoredProcCaller.LGEM_SP, ex);
             throw new LingManagerException(ex);
         }
 
         return results;
     }
 
-
     private Collection postProcessAndSave(ResultSet p_resultSet,
-        BasePostProcessor p_postProcessor, LeverageOptions p_leverageOptions)
-        throws LingManagerException
+            BasePostProcessor p_postProcessor, LeverageOptions p_leverageOptions)
+            throws LingManagerException
     {
         // we didn't find any matches
         if (p_resultSet == null)
@@ -225,20 +212,19 @@ public class LeveragerLocal
             while (p_resultSet.next())
             {
                 CandidateMatch cm = populateCandidateMatch(
-                    p_postProcessor.getMatchType(), p_resultSet);
+                        p_postProcessor.getMatchType(), p_resultSet);
 
                 if (prevId != cm.getOriginalSourceId())
                 {
                     Collection cmList = p_postProcessor.postProcess(prevId);
-                    if(cmList != null && cmList.size() > 0)
+                    if (cmList != null && cmList.size() > 0)
                     {
-                        LeverageMatches levMatches
-                            = convertCandidateMatchesToLeverageMatches(
+                        LeverageMatches levMatches = convertCandidateMatchesToLeverageMatches(
                                 cmList, p_postProcessor.getOriginalTuv(prevId),
                                 p_leverageOptions);
                         matchResults.add(levMatches);
                     }
-                    
+
                     prevId = cm.getOriginalSourceId();
                 }
 
@@ -246,16 +232,15 @@ public class LeveragerLocal
             }
 
             Collection cmList = p_postProcessor.postProcess(prevId);
-            if(cmList != null && cmList.size() > 0)
+            if (cmList != null && cmList.size() > 0)
             {
-                LeverageMatches levMatches
-                    = convertCandidateMatchesToLeverageMatches(
+                LeverageMatches levMatches = convertCandidateMatchesToLeverageMatches(
                         cmList, p_postProcessor.getOriginalTuv(prevId),
                         p_leverageOptions);
                 matchResults.add(levMatches);
             }
-            
-            //p_postProcessor.saveHits();
+
+            // p_postProcessor.saveHits();
         }
         catch (SQLException ex)
         {
@@ -270,10 +255,9 @@ public class LeveragerLocal
         return matchResults;
     }
 
-
     private CandidateMatch populateCandidateMatch(int p_matchType,
-        ResultSet p_resultSet)
-        throws LingManagerException, SQLException, DbAccessException
+            ResultSet p_resultSet) throws LingManagerException, SQLException,
+            DbAccessException
     {
         CandidateMatch cm = new CandidateMatch();
 
@@ -284,8 +268,7 @@ public class LeveragerLocal
         cm.setMatchedTargetId(p_resultSet.getLong("match_tgt_id"));
 
         // fuzzy score - default is 100
-        short fuzzyScore =
-            (short)(p_resultSet.getDouble("fuzzy_score") * 100.0);
+        short fuzzyScore = (short) (p_resultSet.getDouble("fuzzy_score") * 100.0);
 
         if (!p_resultSet.wasNull())
         {
@@ -297,7 +280,7 @@ public class LeveragerLocal
         if (src == null || src.length() <= 0)
         {
             // must be a CLOB
-        	cm.setGxmlSource(p_resultSet.getString("src_segment_clob"));
+            cm.setGxmlSource(p_resultSet.getString("src_segment_clob"));
         }
         else
         {
@@ -309,7 +292,7 @@ public class LeveragerLocal
         if (trg == null || trg.length() <= 0)
         {
             // must be a CLOB
-        	cm.setGxmlTarget(p_resultSet.getString("segment_clob"));
+            cm.setGxmlTarget(p_resultSet.getString("segment_clob"));
         }
         else
         {
@@ -317,8 +300,7 @@ public class LeveragerLocal
         }
 
         // matched target locale
-        GlobalSightLocale loc =
-            getLocaleById(p_resultSet.getLong("locale_id"));
+        GlobalSightLocale loc = getLocaleById(p_resultSet.getLong("locale_id"));
 
         cm.setTargetLocale(loc);
 
@@ -329,26 +311,25 @@ public class LeveragerLocal
         cm.setMatchType(p_matchType);
 
         // set order num to 1 tentatively
-        cm.setOrderNum((short)1);
+        cm.setOrderNum((short) 1);
 
         // set latest modificaton timestamp of target tuv
         cm.setTimestamp(p_resultSet.getTimestamp("timestamp"));
 
         cm.setFormat(p_resultSet.getString("format"));
         cm.setType(p_resultSet.getString("type"));
-        
+
         String localize_type = p_resultSet.getString("localize_type");
         cm.setTranslatable(localize_type.equals("T"));
-        
+
         return cm;
     }
 
-
     private GlobalSightLocale getLocaleById(long p_localeId)
-        throws LingManagerException
+            throws LingManagerException
     {
         Long localeId = new Long(p_localeId);
-        GlobalSightLocale loc = (GlobalSightLocale)s_localeCache.get(localeId);
+        GlobalSightLocale loc = (GlobalSightLocale) s_localeCache.get(localeId);
 
         if (loc == null)
         {
@@ -369,106 +350,104 @@ public class LeveragerLocal
         return loc;
     }
 
-
     /**
      * Retrieves original source TUVs from LeverageDataCenter object
-     *
-     * @param p_leverageDataCenter LeverageDataCenter object. This
-     * contains source segments of a page already.
-     * @param p_sourcePage source page
-     * @return map of tuv id and BaseTmTuv
-     *         Key: tuv id (Long)
-     *         Value: BaseTmTuv object
+     * 
+     * @param p_leverageDataCenter
+     *            LeverageDataCenter object. This contains source segments of a
+     *            page already.
+     * @param p_sourcePage
+     *            source page
+     * @return map of tuv id and BaseTmTuv Key: tuv id (Long) Value: BaseTmTuv
+     *         object
      */
-    private Map getTuvMap(
-        LeverageDataCenter p_leverageDataCenter, SourcePage p_sourcePage)
-        throws Exception
+    private Map getTuvMap(LeverageDataCenter p_leverageDataCenter,
+            SourcePage p_sourcePage) throws Exception
     {
         Map tuvMap = new HashMap();
-        Set sourceSegments = p_leverageDataCenter.getOriginalWholeSegments();
+        Set sourceSegments = p_leverageDataCenter
+                .getOriginalWholeSegments(p_sourcePage.getCompanyId());
 
-        for(Iterator it = sourceSegments.iterator(); it.hasNext();)
+        for (Iterator it = sourceSegments.iterator(); it.hasNext();)
         {
-            BaseTmTuv tm2Tuv = (BaseTmTuv)it.next();
+            BaseTmTuv tm2Tuv = (BaseTmTuv) it.next();
             tuvMap.put(new Long(tm2Tuv.getId()), tm2Tuv);
         }
 
         return tuvMap;
     }
 
-
     private LeverageMatches convertCandidateMatchesToLeverageMatches(
-        Collection p_candidateMatchList, BaseTmTuv p_originalSegment,
-        LeverageOptions p_leverageOptions)
+            Collection p_candidateMatchList, BaseTmTuv p_originalSegment,
+            LeverageOptions p_leverageOptions)
     {
-        LeverageMatches leverageMatches
-            = new LeverageMatches(p_originalSegment, p_leverageOptions);
+        LeverageMatches leverageMatches = new LeverageMatches(
+                p_originalSegment, p_leverageOptions);
 
         HashMap tuIdTuMap = new HashMap();
-        for(Iterator it = p_candidateMatchList.iterator(); it.hasNext();)
+        for (Iterator it = p_candidateMatchList.iterator(); it.hasNext();)
         {
-            CandidateMatch cm = (CandidateMatch)it.next();
+            CandidateMatch cm = (CandidateMatch) it.next();
 
             Long matchedTuId = new Long(cm.getMatchedTuId());
-            LeveragedTu tu = (LeveragedTu)tuIdTuMap.get(matchedTuId);
+            LeveragedTu tu = (LeveragedTu) tuIdTuMap.get(matchedTuId);
 
-            if(tu == null)
+            if (tu == null)
             {
-                tu = getTuWithSourceFromCandidateMatch(
-                    cm, p_originalSegment.getLocale());
+                tu = getTuWithSourceFromCandidateMatch(cm,
+                        p_originalSegment.getLocale());
                 tuIdTuMap.put(matchedTuId, tu);
             }
-            
+
             LeveragedTuv targetTuv = getTargetTuvFromCandidateMatch(cm);
             tu.addTuv(targetTuv);
         }
-        
-        for(Iterator it = tuIdTuMap.values().iterator(); it.hasNext();)
+
+        for (Iterator it = tuIdTuMap.values().iterator(); it.hasNext();)
         {
-            leverageMatches.add((LeveragedTu)it.next());
+            leverageMatches.add((LeveragedTu) it.next());
         }
-        
+
         return leverageMatches;
     }
 
-
-    private LeveragedTu getTuWithSourceFromCandidateMatch(
-        CandidateMatch p_cm, GlobalSightLocale p_sourceLocale)
+    private LeveragedTu getTuWithSourceFromCandidateMatch(CandidateMatch p_cm,
+            GlobalSightLocale p_sourceLocale)
     {
-        LeveragedPageTu tu = new LeveragedPageTu(p_cm.getMatchedTuId(),
-            0 /* tm id */, p_cm.getFormat(), p_cm.getType(),
-            p_cm.isTranslatable(), p_sourceLocale);
+        LeveragedPageTu tu = new LeveragedPageTu(p_cm.getMatchedTuId(), 0 /*
+                                                                           * tm
+                                                                           * id
+                                                                           */,
+                p_cm.getFormat(), p_cm.getType(), p_cm.isTranslatable(),
+                p_sourceLocale);
 
         tu.setMatchState(MatchState.UNVERIFIED_EXACT_MATCH);
         tu.setScore(100);
         tu.setMatchTableType(LeveragedTu.PAGE_JOB_TABLE);
-        
+
         LeveragedPageTuv sourceTuv = new LeveragedPageTuv(
-            p_cm.getMatchedSourceId(), p_cm.getGxmlSource(), p_sourceLocale);
+                p_cm.getMatchedSourceId(), p_cm.getGxmlSource(), p_sourceLocale);
 
         tu.addTuv(sourceTuv);
-        
+
         return tu;
     }
 
-
     private LeveragedTuv getTargetTuvFromCandidateMatch(CandidateMatch p_cm)
     {
-        LeveragedPageTuv tuv = new LeveragedPageTuv(
-            p_cm.getMatchedTargetId(), p_cm.getGxmlTarget(),
-            p_cm.getTargetGlobalSightLocale());
+        LeveragedPageTuv tuv = new LeveragedPageTuv(p_cm.getMatchedTargetId(),
+                p_cm.getGxmlTarget(), p_cm.getTargetGlobalSightLocale());
 
         return tuv;
     }
- 
+
     static private void returnConnection(Connection p_connection)
     {
         if (p_connection != null)
         {
             try
             {
-                PersistenceService.getInstance().returnConnection(
-                    p_connection);
+                PersistenceService.getInstance().returnConnection(p_connection);
             }
             catch (Throwable e)
             {

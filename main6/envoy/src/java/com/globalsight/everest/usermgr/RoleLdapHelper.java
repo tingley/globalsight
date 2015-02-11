@@ -73,8 +73,8 @@ public class RoleLdapHelper extends LdapHelper
     // Protected constants
     //
 
-    protected static final String[] LDAP_USER_OBJECT_CLASSES = { "top",
-            "groupOfUniqueNames", "localizationRole" };
+    protected static final String[] LDAP_USER_OBJECT_CLASSES =
+    { "top", "groupOfUniqueNames", "localizationRole" };
     protected static final String LDAP_ROLE_END_OBJECT_CLASS = "localizationRole";
 
     //
@@ -110,6 +110,42 @@ public class RoleLdapHelper extends LdapHelper
     static String getRoleDN(String p_roleId)
     {
         return ROLE_LDAP_RDN_ATTRIBUTE + "=" + p_roleId + ", " + ROLE_BASE_DN;
+    }
+
+    /**
+     * Gets the LDAP search filter for searching all LDAP role group entries.
+     * <p>
+     * since there is no company property for the group entry, we have to search
+     * all the group entries.
+     * 
+     * @param searchOutOfDateRoles
+     *            - whether to search the groups that are in deleted and
+     *            inactive status.
+     */
+    static String getSearchFilterForAllRoles(boolean searchOutOfDateRoles)
+    {
+        StringBuffer buf = new StringBuffer();
+        buf.append("(&(");
+        buf.append(LDAP_ATTR_OBJECT_CLASS);
+        buf.append("=");
+        buf.append(LDAP_ROLE_END_OBJECT_CLASS);
+        buf.append(")");
+        if (!searchOutOfDateRoles)
+        {
+            buf.append("(!(");
+            buf.append(LDAP_ATTR_STATUS);
+            buf.append("=");
+            buf.append(LDAP_DELETED_STATUS);
+            buf.append("))");
+            buf.append("(!(");
+            buf.append(LDAP_ATTR_STATUS);
+            buf.append("=");
+            buf.append(LDAP_DEACTIVE_STATUS);
+            buf.append("))");
+        }
+        buf.append(")");
+
+        return buf.toString();
     }
 
     /**
@@ -162,7 +198,7 @@ public class RoleLdapHelper extends LdapHelper
             {
                 String userId = UserLdapHelper.parseUserIdFromDn(p_userDns[i]);
                 // if the list of project users is null, then add all users.
-                // Also if the the user is part of the project's user 
+                // Also if the the user is part of the project's user
                 if (p_projectUserIds == null
                         || p_projectUserIds.contains(userId))
                 {
@@ -286,24 +322,25 @@ public class RoleLdapHelper extends LdapHelper
     }
 
     /**
-     * @param p_searchResults -
-     *            The search results for querying for role(s) These results are
-     *            used to build Roles from.
-     * @param p_withRates -
-     *            Specifies 'true' if the rate collection associated with the
+     * @param p_searchResults
+     *            - The search results for querying for role(s) These results
+     *            are used to build Roles from.
+     * @param p_withRates
+     *            - Specifies 'true' if the rate collection associated with the
      *            role should be populated (Role.getRates()) or 'false' if it
      *            shouldn't be populated. Performance will be much better if the
      *            rates do not need to be retrieved.
-     * @param p_projectId -
-     *            The id of the project where a user for the given role belongs
-     *            to. This is an optional parameter.
+     * @param p_projectId
+     *            - The id of the project where a user for the given role
+     *            belongs to. This is an optional parameter.
      */
-    static Vector getRolesFromSearchResults(NamingEnumeration p_searchResults,
-            boolean p_withRates, long p_projectId) throws NamingException,
+    static Vector<Role> getRolesFromSearchResults(
+            NamingEnumeration p_searchResults, boolean p_withRates,
+            String companyId, long p_projectId) throws NamingException,
             UserManagerException
     {
 
-        Vector roleList = new Vector();
+        Vector<Role> roleList = new Vector<Role>();
         while (p_searchResults.hasMoreElements())
         {
             Object searchResultObj = p_searchResults.nextElement();
@@ -316,7 +353,7 @@ public class RoleLdapHelper extends LdapHelper
                 try
                 {
                     Role role = getRoleFromLdapEntry(entry, p_withRates,
-                            p_projectId);
+                            companyId, p_projectId);
                     if (role != null)
                     {
                         roleList.addElement(role);
@@ -324,7 +361,7 @@ public class RoleLdapHelper extends LdapHelper
                 }
                 catch (UserManagerException ume)
                 {
-                    // Couldn't find the activity in database.  Already
+                    // Couldn't find the activity in database. Already
                     // logged by previous message, so just continue.
                 }
             }
@@ -336,10 +373,10 @@ public class RoleLdapHelper extends LdapHelper
 
     static String[] getSearchAttributeNames()
     {
-        return new String[] { LDAP_ATTR_ACTIVITY, LDAP_ATTR_SOURCE_LOCALE,
-                LDAP_ATTR_TARGET_LOCALE, LDAP_ATTR_COST, LDAP_ATTR_RATES,
-                LDAP_ATTR_ROLE_TYPE, LDAP_ATTR_ROLE_NAME, LDAP_ATTR_MEMBERSHIP,
-                LDAP_ATTR_STATUS };
+        return new String[]
+        { LDAP_ATTR_ACTIVITY, LDAP_ATTR_SOURCE_LOCALE, LDAP_ATTR_TARGET_LOCALE,
+                LDAP_ATTR_COST, LDAP_ATTR_RATES, LDAP_ATTR_ROLE_TYPE,
+                LDAP_ATTR_ROLE_NAME, LDAP_ATTR_MEMBERSHIP, LDAP_ATTR_STATUS };
     }
 
     static String getSearchFilterForContainerRolesOnUserId(String p_userId)
@@ -473,7 +510,7 @@ public class RoleLdapHelper extends LdapHelper
             if (searchResultObj instanceof SearchResult)
             {
                 SearchResult tmpSearchResult = (SearchResult) searchResultObj;
-                //get DN of Search Result 
+                // get DN of Search Result
                 String dn = ((Context) tmpSearchResult.getObject())
                         .getNameInNamespace();
                 dnList.addElement(dn);
@@ -484,14 +521,14 @@ public class RoleLdapHelper extends LdapHelper
         return dnList.size() == 0 ? null : dnList;
     }
 
-//    private static String getEntryDN(Attributes entry) throws NamingException
-//    {
-//        Attribute cnAttr = entry.get("cn");
-//        String cnValue = getSingleAttributeValue(cnAttr);
-//        String tmpDN = "cn=" + cnValue + "," + ROLE_BASE_DN;
-//
-//        return tmpDN;
-//    }
+    // private static String getEntryDN(Attributes entry) throws NamingException
+    // {
+    // Attribute cnAttr = entry.get("cn");
+    // String cnValue = getSingleAttributeValue(cnAttr);
+    // String tmpDN = "cn=" + cnValue + "," + ROLE_BASE_DN;
+    //
+    // return tmpDN;
+    // }
 
     /**
      * Generate a ModificationItem[] for deleting users from a role.
@@ -508,8 +545,8 @@ public class RoleLdapHelper extends LdapHelper
         {
             String userId = p_uids[i];
             attrSet[i] = new ModificationItem(DirContext.REMOVE_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_MEMBERSHIP, UserLdapHelper
-                            .getUserDN(userId)));
+                    generateLDAPAttribute(LDAP_ATTR_MEMBERSHIP,
+                            UserLdapHelper.getUserDN(userId)));
         }
 
         return attrSet;
@@ -639,8 +676,8 @@ public class RoleLdapHelper extends LdapHelper
         {
             String userId = p_uids[i];
             attrSet[i] = new ModificationItem(DirContext.ADD_ATTRIBUTE,
-                    generateLDAPAttribute(LDAP_ATTR_MEMBERSHIP, UserLdapHelper
-                            .getUserDN(userId)));
+                    generateLDAPAttribute(LDAP_ATTR_MEMBERSHIP,
+                            UserLdapHelper.getUserDN(userId)));
         }
 
         return attrSet;
@@ -672,19 +709,19 @@ public class RoleLdapHelper extends LdapHelper
     //
 
     /**
-     * @param p_entry -
-     *            One LDAP entry that represents a role
-     * @param p_withRates -
-     *            Specifies 'true' if the rate collection associated with the
+     * @param p_entry
+     *            - One LDAP entry that represents a role
+     * @param p_withRates
+     *            - Specifies 'true' if the rate collection associated with the
      *            role should be populated, 'false' if it shouldn't be
      *            populated.
-     * @param p_projectId -
-     *            The id of the project where a user for the given role belongs
-     *            to. This is an optional parameter.
+     * @param p_projectId
+     *            - The id of the project where a user for the given role
+     *            belongs to. This is an optional parameter.
      */
     private static Role getRoleFromLdapEntry(Attributes p_entry,
-            boolean p_withRates, long p_projectId) throws UserManagerException,
-            NamingException
+            boolean p_withRates, String p_companyId, long p_projectId)
+            throws UserManagerException, NamingException
     {
 
         Role retVal = null;
@@ -696,7 +733,8 @@ public class RoleLdapHelper extends LdapHelper
         String activityName = null;
 
         // For "AppletResourceBundle_en.properties  file issue" issue
-        String companyId = CompanyWrapper.getCurrentCompanyId();
+        String companyId = p_companyId == null ? CompanyWrapper
+                .getCurrentCompanyId() : p_companyId;
         boolean isSuperAdmin = CompanyWrapper.SUPER_COMPANY_ID
                 .equalsIgnoreCase(companyId);
         try
@@ -775,7 +813,8 @@ public class RoleLdapHelper extends LdapHelper
                         }
                     }
 
-                    // if the rate collection should be populated - then retrieve them
+                    // if the rate collection should be populated - then
+                    // retrieve them
                     if (p_withRates)
                     {
                         attr = p_entry.get(LDAP_ATTR_RATES);
@@ -817,7 +856,8 @@ public class RoleLdapHelper extends LdapHelper
         {
             CATEGORY.error("Couldn't find the activity " + activityName, je);
 
-            String args[] = { activityName };
+            String args[] =
+            { activityName };
             throw new UserManagerException(
                     UserManagerException.MSG_GET_ACTIVITY_ERROR, args, je);
         }

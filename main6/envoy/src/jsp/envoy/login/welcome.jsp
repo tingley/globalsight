@@ -1,7 +1,15 @@
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page contentType="text/html; charset=UTF-8"
 	errorPage="/envoy/common/error.jsp"
-	import="java.util.*,com.globalsight.util.resourcebundle.ResourceBundleConstants,com.globalsight.everest.permission.Permission,com.globalsight.everest.webapp.WebAppConstants,com.globalsight.everest.webapp.javabean.NavigationBean,com.globalsight.everest.webapp.pagehandler.PageHandler,com.globalsight.everest.webapp.webnavigation.LinkHelper,com.globalsight.everest.taskmanager.Task,java.util.ResourceBundle"
+	import="java.util.*,
+			com.globalsight.util.resourcebundle.ResourceBundleConstants,
+			com.globalsight.everest.permission.Permission,
+			com.globalsight.everest.webapp.WebAppConstants,
+			com.globalsight.everest.webapp.javabean.NavigationBean,
+			com.globalsight.everest.webapp.pagehandler.PageHandler,
+			com.globalsight.everest.webapp.webnavigation.LinkHelper,
+			com.globalsight.everest.taskmanager.Task,
+			java.util.ResourceBundle"
 	session="true"%>
 <%
 	ResourceBundle bundle = PageHandler.getBundle(session);
@@ -61,7 +69,7 @@ function openWizardWindow(url)
       <TD>
         <p class="helloText">
         <SCRIPT LANGUAGE="JAVASCRIPT">
-            printf("<%=bundle.getString("helper_text_welcome")%>", "<%=userHeader.getUserId()%>");
+            printf("<%=bundle.getString("helper_text_welcome")%>", "<%=userHeader.getUserName()%>");
         </SCRIPT>
         </p>
         <P class="helloTextDetail">
@@ -295,13 +303,13 @@ function openWizardWindow(url)
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsServerUrl%>"><%=bundle.getString("lb_cvsservers")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.CVS_MODULES%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsModuleUrl%>"><%=bundle.getString("lb_cvsmodule")%></A><BR>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsModuleUrl%>"><%=bundle.getString("lb_cvsmodules")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.CVS_MODULE_MAPPING%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsModuleMappingUrl%>"><%=bundle.getString("lb_cvs_module_mapping")%></A><BR>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsModuleMappingUrl%>"><%=bundle.getString("lb_cvs_module_mappings")%></A><BR>
         </amb:permission>
         <amb:permission name="<%=Permission.CVS_FILE_PROFILES%>" >
-          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsFileProfileUrl%>"><%=bundle.getString("lb_cvs_file_profile")%></A><BR>
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=cvsFileProfileUrl%>"><%=bundle.getString("lb_cvs_file_profiles")%></A><BR>
         </amb:permission>
 
 <%
@@ -420,14 +428,16 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.RSS_READER%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=rssReaderUrl%>"><%=bundle.getString("lb_rss_reader")%></A><BR>
         </amb:permission>
-        
+        <amb:permission name="<%=Permission.CREATE_JOB%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=createJobUrl%>"><%=bundle.getString("lb_create_job")%></A><BR>
+        </amb:permission>
       </TD>
     <%
     	}
     %>
     <%
     	if (hasMyJobsMenu || hasMyActivitiesMenu || hasReportsMenu
-    			|| hasContentManagerMenu || hasVendorMenu) {
+    			|| hasContentManagerMenu || hasVendorMenu||hasTMTBSearchMenu) {
     %>
       <TD width="33%"<%if (colspanCounter > 1) {%> style="border:solid #ccc;border-width:0 0 0 1px;padding-left: 10px"<%}%>>
         <amb:permission name="<%=Permission.JOBS_VIEW%>" >
@@ -436,6 +446,16 @@ function openWizardWindow(url)
         <amb:permission name="<%=Permission.ACTIVITIES_VIEW%>" >
           <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tasksSearchUrl%>"><%=bundle.getString("lb_my_activities")%></A><BR>
         </amb:permission>
+        <amb:permission name="<%=Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=simpleOfflineUploadUrl%>"><%=bundle.getString("lb_offline_upload")%></A><BR>
+        </amb:permission>
+        <amb:permission name="<%=Permission.ACTIVITIES_TM_SEARCH%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tmSearchUrl%>"><%=bundle.getString("lb_tm_search2")%></A><BR>
+        </amb:permission>
+        <amb:permission name="<%=Permission.ACTIVITIES_TB_SEARCH%>" >
+          <span class="navPoint">&#183;</span> <A CLASS="welcomePageLink" HREF="<%=tbSearchUrl%>"><%=bundle.getString("permission.terminology.search")%></A><BR>
+        </amb:permission>
+        
         <%
         	if (b_reports) {
         %>

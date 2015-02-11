@@ -98,7 +98,6 @@ function doCancel()
 <P>
 
 <TABLE CELLSPACING="0" CELLPADDING="4" BORDER="0">
-<TBODY>
 <COL WIDTH=250>
 <COL>
   <FORM name="profileForm" action="<%=save.getPageURL()%>" method="post">

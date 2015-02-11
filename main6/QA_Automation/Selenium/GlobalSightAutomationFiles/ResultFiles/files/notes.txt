@@ -1,0 +1,1 @@
+This folder is used for saving the dowloaded files from GlobalSight by Firefox!

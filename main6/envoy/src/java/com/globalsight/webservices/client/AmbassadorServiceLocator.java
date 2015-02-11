@@ -22,7 +22,7 @@ public class AmbassadorServiceLocator extends org.apache.axis.client.Service imp
     }
 
     // Use to get a proxy class for AmbassadorWebService
-    private java.lang.String AmbassadorWebService_address = "http://10.10.11.206/globalsight/services/AmbassadorWebService";
+    private java.lang.String AmbassadorWebService_address = "http://10.10.215.40:8080/globalsight/services/AmbassadorWebService";
 
     public java.lang.String getAmbassadorWebServiceAddress() {
         return AmbassadorWebService_address;

@@ -571,6 +571,17 @@ function doOnLoad()
    rowNum = 0; //reset table row number
    parseDefinition();
 }
+
+//for GBS-2599,by fan
+function handleSelectAll(self) {
+	if (self.checked) {
+		checkAllWithName('indexform', 'checkbox'); 
+		clickIndex();
+	} else {
+		clearAll('indexform'); 
+		clickIndex();
+	}
+}
 </SCRIPT>
 </HEAD>
 <BODY onload="doOnLoad();" LEFTMARGIN="0" RIGHTMARGIN="0" 
@@ -607,7 +618,7 @@ function doOnLoad()
   <THEAD>
     <TR style="background-color: #a6b8ce">
       <TD align="left"   width="25%"><%=bundle.getString("lb_termbase_index") %></TD>
-      <TD align="center" width="25%"><%=bundle.getString("lb_termbase_indexed") %></TD>
+      <TD align="center" width="25%"><input type="checkbox" onclick="handleSelectAll(this)"/><%=bundle.getString("lb_termbase_indexed") %></TD>
       <TD align="right"  width="25%"><%=bundle.getString("lb_size") %></TD>
       <TD align="right"  width="25%"><%=bundle.getString("lb_termbase_index_size") %></TD>
     </TR>
@@ -616,7 +627,7 @@ function doOnLoad()
   <TBODY id="idTableBody"></TBODY>
   </FORM>
   <tfoot>
-    <TR>
+    <!--TR>
       <TD align="left"   width="25%"></TD>
       <TD align="left"  colspan="3"><div align="center">
                 <A CLASS="standardHREF" 
@@ -625,7 +636,7 @@ function doOnLoad()
                    HREF="javascript:clearAll('indexform'); clickIndex();"><%=bundle.getString("lb_clear_all") %></A></div>
        </TD>
 
-    </TR>
+    </TR-->
   </tfoot>
 </TABLE>
 </DIV>

@@ -24,30 +24,33 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.Map.Entry;
 
-import javax.jms.JMSException;
-import javax.naming.NamingException;
+//import javax.jms.JMSException;
+//import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
+import com.globalsight.cxe.entity.customAttribute.TMPAttributeManager;
 import com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFile;
 import com.globalsight.everest.projecthandler.AsiaOnlineLP2DomainInfo;
 import com.globalsight.everest.projecthandler.LeverageProjectTM;
 import com.globalsight.everest.projecthandler.ProMTInfo;
+import com.globalsight.everest.projecthandler.TMProfileMTInfo;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.util.comparator.TMProfileComparator;
-import com.globalsight.everest.util.jms.JmsHelper;
+//import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
@@ -55,6 +58,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.machineTranslation.asiaOnline.DomainCombination;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 
 /**
  * TMProfileHandler is the page handler responsible for displaying a list of tm
@@ -108,43 +112,19 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 
         String action = (String) p_request
                 .getParameter(TMProfileConstants.ACTION);
-        if (action != null && action.equals(TMProfileConstants.SAVE_ACTION))
+        if (TMProfileConstants.SAVE_ACTION.equals(action))
         {
             if (tmProfile == null)
             {
                 tmProfile = parseHTTPRequest(p_request, "NEW");
 
-                // Judge if the tm profile with the same name has existed,
+                // Check if the TM profile with the same name has existed,
                 // otherwise do not save it.
-                boolean ifSave = true;
-                try
-                {
-                    Collection allTMProfiles = ServerProxy.getProjectHandler()
-                            .getAllTMProfiles();
-                    if (allTMProfiles != null && allTMProfiles.size() > 0)
-                    {
-                        Iterator itTmProfiles = allTMProfiles.iterator();
-                        while (itTmProfiles.hasNext())
-                        {
-                            TranslationMemoryProfile innerTmProfile = (TranslationMemoryProfile) itTmProfiles
-                                    .next();
-                            String tmProfileName = innerTmProfile.getName();
-                            if (tmProfileName != null
-                                    && tmProfileName
-                                            .equals(tmProfile.getName()))
-                            {
-                                ifSave = false;
-                            }
-                        }
-                    }
-                } 
-                catch (Exception e)
-                {
-                    ifSave = false;
-                }
-
+                boolean ifSave = checkTmProfileNameExisted(tmProfile.getName());
                 if (ifSave)
                 {
+                    String tmpAttributes = p_request.getParameter("tmpAttributes");
+                    TMPAttributeManager.setTMPAttributes(tmProfile, tmpAttributes);
                     TMProfileHandlerHelper.saveTMProfile(tmProfile);
                     clearSessionExceptTableInfo(sess, TMP_KEY);
                     saveRelationShipWithSR(p_request, tmProfile);
@@ -153,204 +133,93 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             else
             {
                 tmProfile = parseHTTPRequest(p_request, "MODIFY");
-                boolean orderchanged = tmProfile.tmOrderChanged();
+//                boolean orderchanged = tmProfile.tmOrderChanged();
+                String tmpAttributes = p_request.getParameter("tmpAttributes");
+                TMPAttributeManager.setTMPAttributes(tmProfile, tmpAttributes);
                 TMProfileHandlerHelper.saveTMProfile(tmProfile);
                 clearSessionExceptTableInfo(sess, TMP_KEY);
-                if (orderchanged)
-                {
-                    ArrayList msg = new ArrayList();
-                    msg.add(tmProfile.getProjectTMsToLeverageFrom());
-                    msg.add(Long.toString(tmProfile.getId()));
-                    try
-                    {
-                        JmsHelper.sendMessageToQueue(msg,
-                                JmsHelper.JMS_UPDATE_lEVERAGE_MATCH_QUEUE);
-                    }
-                    catch (JMSException e)
-                    {
-                        CATEGORY.error(e);
-                        throw new EnvoyServletException(e);
-                    }
-                    catch (NamingException e)
-                    {
-                        CATEGORY.error(e);
-                        throw new EnvoyServletException(e);
-                    }
-                }
+//                if (orderchanged)
+//                {
+//                    ArrayList msg = new ArrayList();
+//                    msg.add(tmProfile.getProjectTMsToLeverageFrom());
+//                    msg.add(Long.toString(tmProfile.getId()));
+//                    String currentCompanyId = CompanyThreadLocal.getInstance()
+//                            .getValue();
+//                    msg.add(currentCompanyId);
+//                    try
+//                    {
+//                        JmsHelper.sendMessageToQueue(msg,
+//                                JmsHelper.JMS_UPDATE_lEVERAGE_MATCH_QUEUE);
+//                    }
+//                    catch (JMSException e)
+//                    {
+//                        CATEGORY.error(e.getMessage(), e);
+//                        throw new EnvoyServletException(e);
+//                    }
+//                    catch (NamingException e)
+//                    {
+//                        CATEGORY.error(e.getMessage(), e);
+//                        throw new EnvoyServletException(e);
+//                    }
+//                }
 
                 saveRelationShipWithSR(p_request, tmProfile);
             }
         }
-        else if (action != null
-                && action.equals(TMProfileConstants.CANCEL_ACTION))
+        else if (TMProfileConstants.CANCEL_ACTION.equals(action))
         {
             clearSessionExceptTableInfo(sess, TMP_KEY);
         }
-        else if (action != null
-                && action.equals(TMProfileConstants.CANCEL_MT_OPTIONS_ACTION))
+        else if (TMProfileConstants.CANCEL_MT_OPTIONS_ACTION.equals(action))
         {
             clearSessionExceptTableInfo(sess, TMP_KEY);
         }
-        else if (action != null
-                && action.equals(TMProfileConstants.SAVE_MT_OPTIONS_ACTION))
+        else if (TMProfileConstants.SAVE_MT_OPTIONS_ACTION.equals(action))
         {
             String engine = p_request.getParameter(TMProfileConstants.MT_ENGINE);
             if (engine != null && !"asia_online".equalsIgnoreCase(engine))
             {
-                tmProfile = setMTCommonOptions(p_request, tmProfile);                
+                setMTCommonOptions(p_request, tmProfile);
             }
 
-            // For "ProMT" only
-            if("promt".equals(engine.toLowerCase().trim())) 
+            // For "ProMT"
+            if ("promt".equals(engine.toLowerCase().trim()))
             {
-            	//set pts url
-                String ptsUrl = p_request.getParameter(TMProfileConstants.MT_PTSURL);
-                if (ptsUrl != null && !"".equals(ptsUrl.trim())
-                		&& !"null".equals(ptsUrl.trim())) 
-                {
-                	tmProfile.setPtsurl(ptsUrl.trim());
-                }
-                //set pts username
-                String ptsUsername = p_request.getParameter(TMProfileConstants.MT_PTS_USERNAME);
-                tmProfile.setPtsUsername(ptsUsername.trim());
-                //set pts password
-                String ptsPassword = p_request.getParameter(TMProfileConstants.MT_PTS_PASSWORD);
-                tmProfile.setPtsPassword(ptsPassword);
-                // set pts url flag
-                String ptsUrlFlag = p_request.getParameter(TMProfileConstants.MT_PTS_URL_FLAG);
-                tmProfile.setPtsUrlFlag(ptsUrlFlag);
-                
-                HashMap dirMap = (HashMap) sessionMgr.getAttribute("directionsMap");
-                Vector promtInfosVector = new Vector();
-                if (dirMap != null && !dirMap.isEmpty()) 
-                {
-                    Iterator dirIt = dirMap.entrySet().iterator();
-                    while (dirIt.hasNext()) 
-                    {
-                    	ProMTInfo promtInfo = new ProMTInfo();
-                    	Entry dirEntry = (Entry) dirIt.next();
-                    	String dirId = (String) dirEntry.getValue();
-                    	promtInfo.setDirId(Long.parseLong(dirId));
-                    	promtInfo.setDirName((String) dirEntry.getKey());
-                    	String tpl = p_request.getParameter((String)dirEntry.getKey());
-                    	promtInfo.setTopicTemplateId(tpl);
-                    	promtInfo.setTMProfile(tmProfile);
-                    	promtInfosVector.addElement(promtInfo);
-                    }
-                }
-                tmProfile.setAllPromtInfo(promtInfosVector);
+            	setPromtParams(p_request, tmProfile);
+            	
+            	TMProfileHandlerHelper.saveTMProfile(tmProfile);
             }
-            
-            // For MS Translator only
-            if ("ms_translator".equals(engine.toLowerCase().trim()))
+            // For MS Translator
+            else if ("ms_translator".equals(engine.toLowerCase().trim()))
             {
-            	String url = p_request.getParameter(TMProfileConstants.MT_MS_URL);
-            	String appid = p_request.getParameter(TMProfileConstants.MT_MS_APPID);
-            	String url_flag = p_request.getParameter(TMProfileConstants.MT_MS_URL_FLAG);
-            	String category = p_request.getParameter(TMProfileConstants.MT_MS_CATEGORY);
-            	if (url != null && !"".equals(url.trim()))
-            	{
-            		tmProfile.setMsMTUrl(url.trim());
-            	}
-            	if (appid != null && !appid.trim().equals("")) 
-            	{
-            		tmProfile.setMsMTAppID(appid.trim());
-            	}
-            	if (url_flag != null && !url_flag.equals("")) 
-            	{
-            		tmProfile.setMsMTUrlFlag(url_flag);
-            	}
-            	if (category != null && !category.equals(""))
-            	{
-            	    tmProfile.setMsMTCategory(category);
-            	}
+            	setMsMtParams(p_request, tmProfile);
+
+            	TMProfileHandlerHelper.saveTMProfile(tmProfile);
             }
-            
-            // For Asia Online only
-            if ("asia_online".equals(engine.toLowerCase().trim()))
+            // for Safaba
+            else if ("safaba".equals(engine.toLowerCase().trim())) 
             {
-                Vector tmProfileAoInfoVec = new Vector();
-                HashMap domainCombinations = (HashMap) sessionMgr
-                        .getAttribute("domainCombinationMap");
-                if (domainCombinations != null && domainCombinations.size() > 0)
-                {
-                    Iterator lpCodeEntryIter = domainCombinations.entrySet().iterator();
-                    while (lpCodeEntryIter.hasNext())
-                    {
-                        AsiaOnlineLP2DomainInfo aoLP2DC = new AsiaOnlineLP2DomainInfo();
-                        
-                        Map.Entry entry = (Map.Entry) lpCodeEntryIter.next();
-                        String lpCode = (String) entry.getKey();
-                        aoLP2DC.setLanguagePairCode(Long.parseLong(lpCode));
+            	setSafabaParams(p_request, tmProfile);
+            }
+            // For Asia Online
+            else if ("asia_online".equals(engine.toLowerCase().trim()))
+            {
+            	setAOParams(p_request, tmProfile);
 
-                        List dcListForSpecifiedLPCode = (List) entry.getValue();
-                        DomainCombination firstDC = 
-                            (DomainCombination) dcListForSpecifiedLPCode.get(0);
-                        String lpName = firstDC.getSourceAbbreviation() + "-"
-                                + firstDC.getTargetAbbreviation();
-                        aoLP2DC.setLanguagePairName(lpName);
-
-                        String dcCode = p_request.getParameter(lpCode);
-                        aoLP2DC.setDomainCombinationCode(Long.parseLong(dcCode));
-                        aoLP2DC.setTmProfile(tmProfile);
-                        tmProfileAoInfoVec.addElement(aoLP2DC);
-                    }
-                }
-                
-                tmProfile.setTmProfileAoInfoVector(tmProfileAoInfoVec);
+                TMProfileHandlerHelper.saveTMProfile(tmProfile);
             }
 
-            TMProfileHandlerHelper.saveTMProfile(tmProfile);
             clearInvalidPromtAndAOSettings();
-            
+
             clearSessionExceptTableInfo(sess, TMP_KEY);
         }
-        else if (action != null
-				&& action.equals(TMProfileConstants.REMOVE_ACTION)) 
+        else if (TMProfileConstants.REMOVE_ACTION.equals(action)) 
         {
-			String id = (String) p_request
-					.getParameter(WebAppConstants.RADIO_BUTTON);
-			if (id == null
-					|| p_request.getMethod().equalsIgnoreCase(
-							WebAppConstants.REQUEST_METHOD_GET)) 
-			{
-				p_response
-						.sendRedirect("/globalsight/ControlServlet?activityName=tmProfiles");
-				return;
-			}
-			if (id != null) 
-			{
-				long tmProfileId = -1;
-				try {
-					tmProfileId = Long.parseLong(id);
-				} 
-				catch (NumberFormatException nfe) 
-				{
-				}
-				TranslationMemoryProfile tmProfileToBeDeleted = TMProfileHandlerHelper
-						.getTMProfileById(tmProfileId);
-
-				try 
-				{
-					ServerProxy.getProjectHandler().removeTmProfile(
-							tmProfileToBeDeleted);
-					clearSessionExceptTableInfo(sess, TMP_KEY);
-
-					SegmentationRuleFile segRuleFile = ServerProxy
-							.getSegmentationRuleFilePersistenceManager()
-							.getSegmentationRuleFileByTmpid(id);
-					ServerProxy.getSegmentationRuleFilePersistenceManager()
-							.deleteSegmentationRuleFile(segRuleFile);
-				} 
-				catch (Exception e) 
-				{
-					CATEGORY.error(e.getMessage());
-				}
-			}
-
+        	removeTmProfile(p_request, p_response);
 		}
 
         selectTMProfilesForDisplay(p_request, sess);
+
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(p_pageDescriptor, p_request, p_response,
                 p_context);
@@ -378,17 +247,29 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         }
     }
 
-    // Select all tm profiles that should be displayed
-    private void selectTMProfilesForDisplay(HttpServletRequest p_request,
+    /**
+     * Select all tm profiles that should be displayed
+     */
+	@SuppressWarnings("unchecked")
+	private void selectTMProfilesForDisplay(HttpServletRequest p_request,
             HttpSession p_session) throws ServletException, IOException,
             EnvoyServletException
     {
         Locale uiLocale = (Locale) p_session
                 .getAttribute(WebAppConstants.UILOCALE);
-        List tmProfiles = null;
+        List<TranslationMemoryProfile> tmProfiles = null;
         try
         {
             tmProfiles = TMProfileHandlerHelper.getAllTMProfiles();
+
+            // Filter data by name, storage TM, company ...
+            filterTmProfilesByName(p_request, tmProfiles);
+            filterTMProfilesByStorageTm(p_request, tmProfiles);
+            filterTmProfilesByCompany(p_request, tmProfiles);
+
+            // num_per_page
+            determineNumPerPage(p_request);
+
             setTableNavigation(p_request, p_session, tmProfiles,
                     new TMProfileComparator(uiLocale), num_per_page, TMPS_LIST,
                     TMP_KEY);
@@ -400,7 +281,156 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
 
     }
 
-    private TranslationMemoryProfile parseHTTPRequest(
+    /**
+     * Filter TM Profiles by name.
+     */
+	private void filterTmProfilesByName(HttpServletRequest p_request,
+			List<TranslationMemoryProfile> tmProfiles)
+    {
+		// Decide the "name" first.
+		SessionManager sessionMgr = getSessionManager(p_request);
+        String name = p_request.getParameter(TMProfileConstants.FILTER_NAME);
+        if (name == null)
+        {
+        	name = (String) sessionMgr.getAttribute(TMProfileConstants.FILTER_NAME);
+        }
+        if (name == null)
+        {
+            name = "";
+        }
+        sessionMgr.setAttribute(TMProfileConstants.FILTER_NAME, name.trim());
+
+        // Filter by name
+        if (!StringUtil.isEmpty(name))
+        {
+            for (Iterator tmpIt = tmProfiles.iterator(); tmpIt.hasNext();)
+            {
+                TranslationMemoryProfile tmp = (TranslationMemoryProfile) tmpIt.next();
+                String tmpName = tmp.getName().toLowerCase();
+                if (tmpName.indexOf(name.trim().toLowerCase()) == -1)
+                {
+                    tmpIt.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Filter TM Profiles by storage TM.
+     */
+	private void filterTMProfilesByStorageTm(HttpServletRequest p_request,
+			List<TranslationMemoryProfile> tmProfiles)
+	{
+		// Decide the "storage TM name" first.
+		SessionManager sessionMgr = getSessionManager(p_request);
+		String storageTmName = p_request
+				.getParameter(TMProfileConstants.FILTER_STORAGE_TM);
+        if (storageTmName == null)
+        {
+			storageTmName = (String) sessionMgr
+					.getAttribute(TMProfileConstants.FILTER_STORAGE_TM);
+        }
+        if (storageTmName == null)
+        {
+        	storageTmName = "";
+        }
+        sessionMgr.setAttribute(TMProfileConstants.FILTER_STORAGE_TM, storageTmName.trim());
+
+        // Filter by storage TM name
+        if (!StringUtil.isEmpty(storageTmName))
+        {
+            for (Iterator tmpIt = tmProfiles.iterator(); tmpIt.hasNext();)
+            {
+                TranslationMemoryProfile tmp =
+                		(TranslationMemoryProfile) tmpIt.next();
+                long storageTmId = tmp.getProjectTmIdForSave();
+                String loopStorageTmName = "";
+                try {
+					loopStorageTmName = ServerProxy.getProjectHandler()
+							.getProjectTMById(storageTmId, false).getName();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				if (loopStorageTmName.toLowerCase().indexOf(
+						storageTmName.trim().toLowerCase()) == -1)
+                {
+                    tmpIt.remove();
+                }
+            }
+        }
+	}
+
+    /**
+     * Filter TM Profiles by company.
+     */
+	private void filterTmProfilesByCompany(HttpServletRequest p_request,
+			List<TranslationMemoryProfile> tmProfiles)
+	{
+		// Decide the "name" first.
+		SessionManager sessionMgr = getSessionManager(p_request);
+		String companyName = p_request
+				.getParameter(TMProfileConstants.FILTER_COMPANY_NAME);
+        if (companyName == null)
+        {
+			companyName = (String) sessionMgr
+					.getAttribute(TMProfileConstants.FILTER_COMPANY_NAME);
+        }
+        if (companyName == null)
+        {
+        	companyName = "";
+        }
+		sessionMgr.setAttribute(TMProfileConstants.FILTER_COMPANY_NAME,
+				companyName.trim());
+
+        // Filter by name
+        if (!StringUtil.isEmpty(companyName))
+        {
+            String sql = "SELECT tmp.*  FROM tm_profile tmp, project_tm tm, company com "
+            		+ " WHERE tmp.PROJECT_TM_ID_FOR_SAVE = tm.ID "
+            	    + " AND tm.COMPANY_ID = com.ID "
+            		+ " AND com.NAME LIKE '%" + companyName + "%'";
+			List<TranslationMemoryProfile> tmpList2 = HibernateUtil
+					.searchWithSql(TranslationMemoryProfile.class, sql);
+
+            for (Iterator tmpIt = tmProfiles.iterator(); tmpIt.hasNext();)
+            {
+                TranslationMemoryProfile tmp = (TranslationMemoryProfile) tmpIt.next();
+                if (!tmpList2.contains(tmp))
+                {
+                    tmpIt.remove();
+                }
+            }
+        }
+	}
+
+	private void determineNumPerPage(HttpServletRequest request)
+	{
+		SessionManager sessionMgr = getSessionManager(request);
+        String tmProfileNumPerPage = request.getParameter("numOfPageSize");
+        if (StringUtil.isEmpty(tmProfileNumPerPage))
+        {
+        	tmProfileNumPerPage = (String) sessionMgr.getAttribute("tmProfileNumPerPage");
+        }
+ 
+        if (tmProfileNumPerPage != null){
+        	sessionMgr.setAttribute("tmProfileNumPerPage", tmProfileNumPerPage.trim());
+            if ("all".equalsIgnoreCase(tmProfileNumPerPage))
+            {
+            	num_per_page = Integer.MAX_VALUE;
+            }
+            else
+            {
+                try {
+                	num_per_page = Integer.parseInt(tmProfileNumPerPage);
+                } catch (NumberFormatException ignore){
+                	num_per_page = 10;
+                }
+            }
+        }
+	}
+
+	private TranslationMemoryProfile parseHTTPRequest(
             HttpServletRequest p_request, String p_requestType)
             throws ServletException, IOException, EnvoyServletException
     {
@@ -548,7 +578,6 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         tmProfile.setTypeDifferencePenalty(typeDiffPenalty);
 
         //
-
         String isRefTm = p_request.getParameter("isRefTm");
         String refTmP = p_request.getParameter("refTmPenalty");
         long refTmPenalty = -1;
@@ -795,9 +824,8 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         // set default MT options
         if (p_requestType.equals("NEW"))
         {
-            tmProfile.setMtEngine(TMProfileConstants.MT_ENGINE_GOOGLE);
-            tmProfile.setOverrideNonExactMatches(false);
-            tmProfile.setAutoCommitToTM(false);
+            tmProfile.setMtEngine(TMProfileConstants.MT_ENGINE_MSTRANSLATOR);
+            tmProfile.setUseMT(false);
             tmProfile.setShowInEditor(false);
             tmProfile.setPtsurl("");
         }
@@ -811,71 +839,37 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
     }
     
     /**
-     * Set common options for machine translation engines.
-     * 
-     * @param p_request
-     * @param p_tmProfile
-     * 
-     * @return
+     * Set common options for machine translation engines into TM profile.
      */
-    private TranslationMemoryProfile setMTCommonOptions(
-            HttpServletRequest p_request, TranslationMemoryProfile p_tmProfile)
+	private void setMTCommonOptions(HttpServletRequest p_request,
+			TranslationMemoryProfile p_tmProfile)
     {
         // MT engine
         String engine = p_request.getParameter(TMProfileConstants.MT_ENGINE);
         p_tmProfile.setMtEngine(engine);
-        // MT override non-exact matches under threshold
-        String overrideNonExactMatches = p_request
-                .getParameter(TMProfileConstants.MT_OVERRIDE_MATCHES);
-        if (overrideNonExactMatches == null
-                || !"on".equals(overrideNonExactMatches))
+        // User MT
+        String useMT = p_request.getParameter(TMProfileConstants.MT_USE_MT);
+        if (useMT == null || !"on".equals(useMT))
         {
-            p_tmProfile.setOverrideNonExactMatches(false);
+            p_tmProfile.setUseMT(false);
         }
         else
         {
-            p_tmProfile.setOverrideNonExactMatches(true);
+            p_tmProfile.setUseMT(true);
         }
-        // auto commit to TM
-        String autoCommitToTM = p_request
-                .getParameter(TMProfileConstants.MT_AUTOCOMMIT_TO_TM);
-        if (autoCommitToTM == null || !"on".equals(autoCommitToTM))
-        {
-            p_tmProfile.setAutoCommitToTM(false);
+
+        // MtConfidenceScore
+        String mtConfidenceScore = p_request.getParameter("mtConfidenceScore");
+        long long_mtConfidenceScore = 0;
+        try {
+        	long_mtConfidenceScore = Long.parseLong(mtConfidenceScore);
+        	if (long_mtConfidenceScore < 0 || long_mtConfidenceScore > 100) {
+        		long_mtConfidenceScore = 0;
+        	}
+        } catch (Exception ex) {
+
         }
-        else
-        {
-            p_tmProfile.setAutoCommitToTM(true);
-        }
-        // isMtSensitiveLeveraging
-        String isMtSensitiveLeveraging = p_request.getParameter("mtLeveraging");
-        if (isMtSensitiveLeveraging == null
-                || !"on".equals(isMtSensitiveLeveraging))
-        {
-            p_tmProfile.setIsMTSensitiveLeveraging(false);
-        }
-        else
-        {
-            p_tmProfile.setIsMTSensitiveLeveraging(true);
-        }
-        // MtSensitivePenalty
-        String mtSensitivePenalty = p_request
-                .getParameter("mtSensitivePenalty");
-        long long_mtSensitivePenalty = 1;
-        try
-        {
-            long_mtSensitivePenalty = Long.parseLong(mtSensitivePenalty);
-            // if "MT-sensitive Leveraging" is not checked,mt penalty is set to 1.
-            if (!p_tmProfile.getIsMTSensitiveLeveraging()
-                    && (long_mtSensitivePenalty > 100 || long_mtSensitivePenalty < 1))
-            {
-                long_mtSensitivePenalty = 1;
-            }
-        }
-        catch (Exception ex)
-        {
-        }
-        p_tmProfile.setMtSensitivePenalty(long_mtSensitivePenalty);
+        p_tmProfile.setMtConfidenceScore(long_mtConfidenceScore);
 
         // show in segment editor
         String showInEditor = p_request
@@ -888,8 +882,6 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         {
             p_tmProfile.setShowInEditor(true);
         }
-        
-        return p_tmProfile;
     }
     
     /**
@@ -897,7 +889,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
      */
     private void clearInvalidPromtAndAOSettings()
     {
-        try 
+        try
         {
             String sql = "delete from tm_profile_ao_info where tm_profile_id is null";
             HibernateUtil.executeSql(sql);
@@ -910,5 +902,320 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             
         }
     }
+    
+    /**
+     * Check if the TM profile name has been existed in system.
+     */
+    private boolean checkTmProfileNameExisted(String p_tmProfileName)
+    {
+    	boolean result = true;
+        try
+        {
+			Collection allTMProfiles =
+					ServerProxy.getProjectHandler().getAllTMProfiles();
+            if (allTMProfiles != null && allTMProfiles.size() > 0)
+            {
+            	for (Iterator it = allTMProfiles.iterator(); it.hasNext();)
+                {
+                    TranslationMemoryProfile innerTmProfile =
+                    		(TranslationMemoryProfile) it.next();
+                    String tmProfileName = innerTmProfile.getName();
+					if (tmProfileName != null
+							&& tmProfileName.equals(p_tmProfileName))
+                    {
+                        result = false;
+                        break;
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            result = false;
+        }
 
+        return result;
+    }
+
+    /**
+     * Set Promt specified parameters into TM profile object for save.
+     */
+	private void setPromtParams(HttpServletRequest p_request,
+			TranslationMemoryProfile tmProfile)
+	{
+    	//set pts url
+        String ptsUrl = p_request.getParameter(TMProfileConstants.MT_PTSURL);
+        if (ptsUrl != null && !"".equals(ptsUrl.trim())
+        		&& !"null".equals(ptsUrl.trim())) 
+        {
+        	tmProfile.setPtsurl(ptsUrl.trim());
+        }
+        //set pts username
+        String ptsUsername = p_request.getParameter(TMProfileConstants.MT_PTS_USERNAME);
+        tmProfile.setPtsUsername(ptsUsername.trim());
+        //set pts password
+        String ptsPassword = p_request.getParameter(TMProfileConstants.MT_PTS_PASSWORD);
+        if (TMProfileHandlerHelper.checkPassword(ptsPassword))
+        {
+            tmProfile.setPtsPassword(ptsPassword);
+        }
+        // set pts url flag
+        String ptsUrlFlag = p_request.getParameter(TMProfileConstants.MT_PTS_URL_FLAG);
+        tmProfile.setPtsUrlFlag(ptsUrlFlag);
+
+		HashMap dirMap = (HashMap) getSessionManager(p_request).getAttribute(
+				"directionsMap");
+        Vector promtInfosVector = new Vector();
+        if (dirMap != null && !dirMap.isEmpty()) 
+        {
+            Iterator dirIt = dirMap.entrySet().iterator();
+            while (dirIt.hasNext()) 
+            {
+            	ProMTInfo promtInfo = new ProMTInfo();
+            	Entry dirEntry = (Entry) dirIt.next();
+            	String dirId = (String) dirEntry.getValue();
+            	promtInfo.setDirId(Long.parseLong(dirId));
+            	promtInfo.setDirName((String) dirEntry.getKey());
+            	String tpl = p_request.getParameter((String)dirEntry.getKey());
+            	promtInfo.setTopicTemplateId(tpl);
+            	promtInfo.setTMProfile(tmProfile);
+            	promtInfosVector.addElement(promtInfo);
+            }
+        }
+
+        tmProfile.setAllPromtInfo(promtInfosVector);
+	}
+
+    /**
+     * Set MS MT specified parameters into TM profile object for save.
+     */
+	private void setMsMtParams(HttpServletRequest p_request,
+			TranslationMemoryProfile tmProfile)
+	{
+		String url = p_request.getParameter(TMProfileConstants.MT_MS_URL);
+		String url_flag = p_request
+				.getParameter(TMProfileConstants.MT_MS_URL_FLAG);
+		String category = p_request
+				.getParameter(TMProfileConstants.MT_MS_CATEGORY);
+		String clientId = p_request
+				.getParameter(TMProfileConstants.MT_MS_CLIENT_ID);
+		String clientSecret = p_request
+				.getParameter(TMProfileConstants.MT_MS_CLIENT_SECRET);
+
+    	if (url != null && !"".equals(url.trim()))
+    	{
+    		tmProfile.setMsMTUrl(url.trim());
+    	}
+
+    	if (StringUtils.isNotEmpty(clientId))
+        {
+            tmProfile.setMsMTClientID(clientId);
+        }
+
+    	if (StringUtils.isNotEmpty(clientSecret)
+                && TMProfileHandlerHelper.checkPassword(clientSecret))
+        {
+            tmProfile.setMsMTClientSecret(clientSecret);
+        }
+
+        if (url_flag != null && !"".equals(url_flag)
+				&& !"null".equalsIgnoreCase(url_flag)) 
+    	{
+    		tmProfile.setMsMTUrlFlag(url_flag);
+    	}
+
+		if (category != null && !category.equals(""))
+    	{
+    	    tmProfile.setMsMTCategory(category);
+    	}
+	}
+
+    /**
+     * Set Safaba specified parameters into TM profile object for save.
+     */
+	private void setSafabaParams(HttpServletRequest p_request,
+			TranslationMemoryProfile tmProfile)
+	{
+		String safaHost = p_request
+				.getParameter(TMProfileConstants.MT_SAFA_HOST);
+		String safaPort = p_request
+				.getParameter(TMProfileConstants.MT_SAFA_PORT);
+		String safaCompanyName = p_request
+				.getParameter(TMProfileConstants.MT_SAFA_COMPANY_NAME);
+		String safaClient = p_request
+				.getParameter(TMProfileConstants.MT_SAFA_CLIENT);
+		String safaPassword = p_request
+				.getParameter(TMProfileConstants.MT_SAFA_PASSWORD);
+
+		if (StringUtils.isEmpty(safaPassword)
+				|| !TMProfileHandlerHelper.checkPassword(safaPassword))
+        {
+			SessionManager sessionMgr = getSessionManager(p_request);
+			safaPassword = (String) sessionMgr
+					.getAttribute(TMProfileConstants.MT_SAFA_PASSWORD);
+            sessionMgr.removeElement(TMProfileConstants.MT_SAFA_PASSWORD);
+        }
+        
+        List<TMProfileMTInfo> mtInfoList = new ArrayList<TMProfileMTInfo>();
+        if (StringUtils.isNotEmpty(safaHost))
+        {
+            TMProfileMTInfo mtInfo = new TMProfileMTInfo("safaba",
+                    TMProfileConstants.MT_SAFA_HOST, safaHost);
+            mtInfo.setTmProfile(tmProfile);
+            mtInfoList.add(mtInfo);
+        }
+        if (StringUtils.isNotEmpty(safaPort))
+        {
+            TMProfileMTInfo mtInfo = new TMProfileMTInfo("safaba",
+                    TMProfileConstants.MT_SAFA_PORT, safaPort);
+            mtInfo.setTmProfile(tmProfile);
+            mtInfoList.add(mtInfo);
+        }
+        if (StringUtils.isNotEmpty(safaCompanyName))
+        {
+            TMProfileMTInfo mtInfo = new TMProfileMTInfo("safaba",
+                    TMProfileConstants.MT_SAFA_COMPANY_NAME,
+                    safaCompanyName);
+            mtInfo.setTmProfile(tmProfile);
+            mtInfoList.add(mtInfo);
+        }
+        if (StringUtils.isNotEmpty(safaPassword)
+                && TMProfileHandlerHelper.checkPassword(safaPassword))
+        {
+            TMProfileMTInfo mtInfo = new TMProfileMTInfo("safaba",
+                    TMProfileConstants.MT_SAFA_PASSWORD, safaPassword);
+            mtInfo.setTmProfile(tmProfile);
+            mtInfoList.add(mtInfo);
+        }                
+        if (StringUtils.isNotEmpty(safaClient))
+        {
+            TMProfileMTInfo mtInfo = new TMProfileMTInfo("safaba",
+                    TMProfileConstants.MT_SAFA_CLIENT, safaClient);
+            mtInfo.setTmProfile(tmProfile);
+            mtInfoList.add(mtInfo);
+        }
+
+        try
+        {
+            TMProfileHandlerHelper.saveTMProfile(tmProfile);
+
+            List<TMProfileMTInfo> formerData = (List<TMProfileMTInfo>) 
+                    TMProfileHandlerHelper.getMtinfoByTMProfileIdAndEngine(
+                            tmProfile.getId(), tmProfile.getMtEngine());
+            
+            // Keep safaba password, if there is no value. 
+            TMProfileMTInfo newSafaPasswordMT = TMProfileHandlerHelper
+                    .getMTInfo(mtInfoList, tmProfile.getId(),
+                            tmProfile.getMtEngine(),
+                            TMProfileConstants.MT_SAFA_PASSWORD);
+            if (newSafaPasswordMT == null)
+            {
+                TMProfileMTInfo oldSafaPasswordMT = TMProfileHandlerHelper
+                        .getMTInfo(formerData, tmProfile.getId(),
+                                tmProfile.getMtEngine(),
+                                TMProfileConstants.MT_SAFA_PASSWORD);
+                formerData.remove(oldSafaPasswordMT);
+            }
+                
+            HibernateUtil.delete(formerData);
+            HibernateUtil.save(mtInfoList);
+        }
+        catch (Exception e)
+        {
+            CATEGORY.error("Failed to save Safaba data.", e);
+        }	
+	}
+
+    /**
+     * Set Asian Online specified parameters into TM profile object for save.
+     */
+	private void setAOParams(HttpServletRequest p_request,
+			TranslationMemoryProfile tmProfile)
+	{
+        Vector tmProfileAoInfoVec = new Vector();
+        HashMap domainCombinations = (HashMap) getSessionManager(p_request)
+                .getAttribute("domainCombinationMap");
+        if (domainCombinations != null && domainCombinations.size() > 0)
+        {
+            Iterator lpCodeEntryIter = domainCombinations.entrySet().iterator();
+            while (lpCodeEntryIter.hasNext())
+            {
+                AsiaOnlineLP2DomainInfo aoLP2DC = new AsiaOnlineLP2DomainInfo();
+                
+                Map.Entry entry = (Map.Entry) lpCodeEntryIter.next();
+                String lpCode = (String) entry.getKey();
+                aoLP2DC.setLanguagePairCode(Long.parseLong(lpCode));
+
+                List dcListForSpecifiedLPCode = (List) entry.getValue();
+                DomainCombination firstDC = 
+                    (DomainCombination) dcListForSpecifiedLPCode.get(0);
+                String lpName = firstDC.getSourceAbbreviation() + "-"
+                        + firstDC.getTargetAbbreviation();
+                aoLP2DC.setLanguagePairName(lpName);
+
+                String dcCode = p_request.getParameter(lpCode);
+                aoLP2DC.setDomainCombinationCode(Long.parseLong(dcCode));
+                aoLP2DC.setTmProfile(tmProfile);
+                tmProfileAoInfoVec.addElement(aoLP2DC);
+            }
+        }
+
+        tmProfile.setTmProfileAoInfoVector(tmProfileAoInfoVec);
+	}
+
+	/**
+	 * Remove TM profile.
+	 */
+	private void removeTmProfile(HttpServletRequest p_request,
+			HttpServletResponse p_response) throws IOException
+	{
+		String id = (String) p_request
+				.getParameter(TMProfileConstants.TM_PROFILE_ID);
+		if (id == null
+				|| p_request.getMethod().equalsIgnoreCase(
+						WebAppConstants.REQUEST_METHOD_GET)) 
+		{
+			p_response.sendRedirect("/globalsight/ControlServlet?activityName=tmProfiles");
+			return;
+		}
+
+		if (id != null) 
+		{
+			long tmProfileId = -1;
+			try {
+				tmProfileId = Long.parseLong(id);
+			} 
+			catch (NumberFormatException nfe) 
+			{
+			}
+			TranslationMemoryProfile tmProfileToBeDeleted = TMProfileHandlerHelper
+					.getTMProfileById(tmProfileId);
+
+			try 
+			{
+				ServerProxy.getProjectHandler().removeTmProfile(
+						tmProfileToBeDeleted);
+				clearSessionExceptTableInfo(p_request.getSession(false), TMP_KEY);
+
+				SegmentationRuleFile segRuleFile = ServerProxy
+						.getSegmentationRuleFilePersistenceManager()
+						.getSegmentationRuleFileByTmpid(id);
+				ServerProxy.getSegmentationRuleFilePersistenceManager()
+						.deleteSegmentationRuleFile(segRuleFile);
+			} 
+			catch (Exception e) 
+			{
+				CATEGORY.error(e.getMessage(), e);
+			}
+		}
+	}
+
+	private SessionManager getSessionManager(HttpServletRequest request)
+	{
+		HttpSession session = request.getSession(false);
+		SessionManager sessionMgr = (SessionManager) session
+				.getAttribute(SESSION_MANAGER);
+
+		return sessionMgr;
+	}
 }

@@ -69,7 +69,7 @@ String helpFile = bundle.getString("help_progress_window");
 <SCRIPT>
 var g_opener = null;
 var g_fromInlineEditor = false;
-
+var isChrome = window.navigator.userAgent.indexOf("Chrome") > -1;
 var g_showPreview = false;
 
 var helpFile = "<%=helpFile%>";
@@ -260,8 +260,9 @@ function togglePreview(p_checked)
 function showPreview()
 {
   idPreviewText.innerHTML = g_opener.GetSegmentPreview();
-//  alert("idPreviewText.innerHTML :" + idPreviewText.innerHTML);
-
+  if(isChrome){
+	  document.getElementById("idPreview").style.left = 240;
+  }
   // disable main editor links
   var links = idPreviewText.getElementsByTagName("A");
   if (links)

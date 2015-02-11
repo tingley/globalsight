@@ -33,66 +33,54 @@ import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.util.database.PreparedStatementBatch;
 
 /**
- * Performs an in-place update of existing source page data: modified
- * TUs and TUVs are updated, unmodified but reordered TUs and TUVs are
- * ordered into their new place, and template parts are re-created.
+ * Performs an in-place update of existing source page data: modified TUs and
+ * TUVs are updated, unmodified but reordered TUs and TUVs are ordered into
+ * their new place, and template parts are re-created.
  */
-public class UpdateGxmlPersistenceCommand
-    extends PersistenceCommand
+public class UpdateGxmlPersistenceCommand extends PersistenceCommand
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            "EditSourcePage" /*UpdateGxmlPersistenceCommand.class*/);
+    private static Logger s_logger = Logger
+            .getLogger(UpdateGxmlPersistenceCommand.class);
 
-    private static final String s_INSERT_TP_NONCLOB =
-        "insert into template_part(id, template_id, order_num, skeleton_string, tu_id) values(null,?,?,?,?)";
+    private static final String s_INSERT_TP_NONCLOB = "insert into template_part(id, template_id, order_num, skeleton_string, tu_id) values(null,?,?,?,?)";
 
-//    private static final String s_INSERT_TP_CLOB =
-//        "insert into template_part(id, template_id, order_num, skeleton_clob, tu_id) values(?,?,?,empty_clob(),?)";
-    private static final String s_INSERT_TP_CLOB =
-        "insert into template_part(id, template_id, order_num, skeleton_clob, tu_id) values(null,?,?,?,?)";
+    // private static final String s_INSERT_TP_CLOB =
+    // "insert into template_part(id, template_id, order_num, skeleton_clob, tu_id) values(?,?,?,empty_clob(),?)";
+    private static final String s_INSERT_TP_CLOB = "insert into template_part(id, template_id, order_num, skeleton_clob, tu_id) values(null,?,?,?,?)";
 
-//    private static final String s_SELECT_TP_CLOB =
-//        "select * from template_part where id = ? for update ";
+    // private static final String s_SELECT_TP_CLOB =
+    // "select * from template_part where id = ? for update ";
 
-    private static final String s_INSERT_TU =
-        "insert into translation_unit values(null,?,?,?,?,?,?,?)";
+    private static final String s_INSERT_TU = "insert into translation_unit values(null,?,?,?,?,?,?,?)";
 
-    private static final String s_UPDATE_TU =
-        "update translation_unit set order_num=?, pid=? where id=?";
+    private static final String s_UPDATE_TU = "update translation_unit set order_num=?, pid=? where id=?";
 
-    private static final String s_UPDATE_TUV =
-        "update translation_unit_variant set order_num=? where id=?";
+    private static final String s_UPDATE_TUV = "update translation_unit_variant set order_num=? where id=?";
 
-    private static final String s_INSERT_TUV_NONCLOB =
-        "insert into Translation_Unit_Variant " +
-        "(id, order_num, locale_id, tu_id, is_indexed, segment_string, " +
-        " word_count, exact_match_key, state, merge_state, timestamp, " +
-        " last_modified) values(null,?,?,?,?,?,?,?,?,?,?,?)";
+    private static final String s_INSERT_TUV_NONCLOB = "insert into Translation_Unit_Variant "
+            + "(id, order_num, locale_id, tu_id, is_indexed, segment_string, "
+            + " word_count, exact_match_key, state, merge_state, timestamp, "
+            + " last_modified) values(null,?,?,?,?,?,?,?,?,?,?,?)";
 
-//    private static final String s_INSERT_TUV_CLOB =
-//        "insert into Translation_Unit_Variant " +
-//        "(id, order_num, locale_id, tu_id, is_indexed, word_count, " +
-//        " exact_match_key, state, merge_state, timestamp, last_modified, " +
-//        " segment_clob) values(?,?,?,?,?,?,?,?,?,?,?,empty_clob())";
-    
-    private static final String s_INSERT_TUV_CLOB =
-        "insert into Translation_Unit_Variant " +
-        "(id, order_num, locale_id, tu_id, is_indexed, word_count, " +
-        " exact_match_key, state, merge_state, timestamp, last_modified, " +
-        " segment_clob) values(null,?,?,?,?,?,?,?,?,?,?,?)";
+    // private static final String s_INSERT_TUV_CLOB =
+    // "insert into Translation_Unit_Variant " +
+    // "(id, order_num, locale_id, tu_id, is_indexed, word_count, " +
+    // " exact_match_key, state, merge_state, timestamp, last_modified, " +
+    // " segment_clob) values(?,?,?,?,?,?,?,?,?,?,?,empty_clob())";
 
-//    private static final String s_SELECT_TUV_CLOB =
-//        "select * from translation_unit_variant where id = ? for update";
+    private static final String s_INSERT_TUV_CLOB = "insert into Translation_Unit_Variant "
+            + "(id, order_num, locale_id, tu_id, is_indexed, word_count, "
+            + " exact_match_key, state, merge_state, timestamp, last_modified, "
+            + " segment_clob) values(null,?,?,?,?,?,?,?,?,?,?,?)";
 
-    private static final String s_UPDATE_TUV_NONCLOB =
-        "update translation_unit_variant set segment_string=? where id=?";
+    // private static final String s_SELECT_TUV_CLOB =
+    // "select * from translation_unit_variant where id = ? for update";
 
-//    private static final String s_UPDATE_TUV_CLOB =
-//        "update translation_unit_variant set segment_clob=empty_clob() where id=?";
-    private static final String s_UPDATE_TUV_CLOB =
-        "update translation_unit_variant set segment_clob=? where id=?";
+    private static final String s_UPDATE_TUV_NONCLOB = "update translation_unit_variant set segment_string=? where id=?";
 
+    // private static final String s_UPDATE_TUV_CLOB =
+    // "update translation_unit_variant set segment_clob=empty_clob() where id=?";
+    private static final String s_UPDATE_TUV_CLOB = "update translation_unit_variant set segment_clob=? where id=?";
 
     //
     // Members
@@ -110,12 +98,12 @@ public class UpdateGxmlPersistenceCommand
 
     private PreparedStatementBatch m_ps_tp1Batch = null;
     private PreparedStatement m_ps_tp2;
-//    private PreparedStatement m_ps_tp3;
+    // private PreparedStatement m_ps_tp3;
 
     private PreparedStatementBatch m_ps_tu1Batch = null;
     private PreparedStatementBatch m_ps_tuv1Batch = null;
     private PreparedStatementBatch m_ps_tuv2Batch = null;
-//    private PreparedStatement m_ps_tuv3 = null;
+    // private PreparedStatement m_ps_tuv3 = null;
 
     private PreparedStatementBatch m_ps_tuv3Batch = null;
     private PreparedStatementBatch m_ps_tuv4Batch = null;
@@ -123,22 +111,23 @@ public class UpdateGxmlPersistenceCommand
     private PreparedStatementBatch m_ps_tuBatch = null;
     private PreparedStatementBatch m_ps_tuvBatch = null;
 
+    private String m_companyId;
+
     //
     // Constructor
     //
 
     /**
-     * Unmodified TUs get updated (pid+order);
-     * Modified TUs get inserted.
-     * TUVs and template parts all get inserted.
-     *
+     * Unmodified TUs get updated (pid+order); Modified TUs get inserted. TUVs
+     * and template parts all get inserted.
+     * 
      * All IDs (primary keys) must be preassigned.
      */
-    public UpdateGxmlPersistenceCommand(
-        ArrayList p_nonClobTemplateParts, ArrayList p_clobTemplateParts,
-        ArrayList p_modifiedTus, ArrayList p_nonClobTuvs, ArrayList p_clobTuvs,
-        ArrayList p_nonClobLocTuvs, ArrayList p_clobLocTuvs,
-        ArrayList p_allTus, ArrayList p_allTuvs)
+    public UpdateGxmlPersistenceCommand(ArrayList p_nonClobTemplateParts,
+            ArrayList p_clobTemplateParts, ArrayList p_modifiedTus,
+            ArrayList p_nonClobTuvs, ArrayList p_clobTuvs,
+            ArrayList p_nonClobLocTuvs, ArrayList p_clobLocTuvs,
+            ArrayList p_allTus, ArrayList p_allTuvs)
     {
         m_nonClobTemplateParts = p_nonClobTemplateParts;
         m_clobTemplateParts = p_clobTemplateParts;
@@ -151,12 +140,17 @@ public class UpdateGxmlPersistenceCommand
         m_allTuvs = p_allTuvs;
     }
 
+    public void setCompanyId(String companyId)
+    {
+        m_companyId = companyId;
+    }
+
     //
     // Methods
     //
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -172,12 +166,12 @@ public class UpdateGxmlPersistenceCommand
         {
             close(m_ps_tp1Batch);
             close(m_ps_tp2);
-//            close(m_ps_tp3);
+            // close(m_ps_tp3);
 
             close(m_ps_tu1Batch);
             close(m_ps_tuv1Batch);
             close(m_ps_tuv2Batch);
-//            close(m_ps_tuv3);
+            // close(m_ps_tuv3);
             close(m_ps_tuv3Batch);
             close(m_ps_tuv4Batch);
 
@@ -187,90 +181,89 @@ public class UpdateGxmlPersistenceCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
         if (m_nonClobTemplateParts.size() > 0)
         {
             m_ps_tp1Batch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_INSERT_TP_NONCLOB, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_INSERT_TP_NONCLOB, true);
         }
 
         if (m_clobTemplateParts.size() > 0)
         {
             m_ps_tp2 = p_connection.prepareStatement(s_INSERT_TP_CLOB);
-//            m_ps_tp3 = p_connection.prepareStatement(s_SELECT_TP_CLOB);
+            // m_ps_tp3 = p_connection.prepareStatement(s_SELECT_TP_CLOB);
         }
 
         if (m_modifiedTus.size() > 0)
         {
             m_ps_tu1Batch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_INSERT_TU, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_INSERT_TU, true);
         }
 
         if (m_nonClobTuvs.size() > 0)
         {
             m_ps_tuv1Batch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_INSERT_TUV_NONCLOB, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_INSERT_TUV_NONCLOB, true);
         }
 
         if (m_clobTuvs.size() > 0)
         {
             m_ps_tuv2Batch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_INSERT_TUV_CLOB, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_INSERT_TUV_CLOB, true);
 
-//            m_ps_tuv3 = p_connection.prepareStatement(s_SELECT_TUV_CLOB);
+            // m_ps_tuv3 = p_connection.prepareStatement(s_SELECT_TUV_CLOB);
         }
 
         if (m_nonClobLocTuvs.size() > 0)
         {
             m_ps_tuv3Batch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_UPDATE_TUV_NONCLOB, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_UPDATE_TUV_NONCLOB, true);
         }
 
         if (m_clobLocTuvs.size() > 0)
         {
             m_ps_tuv4Batch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_UPDATE_TUV_CLOB, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_UPDATE_TUV_CLOB, true);
         }
 
         if (m_allTus.size() > 0)
         {
             m_ps_tuBatch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_UPDATE_TU, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_UPDATE_TU, true);
         }
 
         if (m_allTuvs.size() > 0)
         {
             m_ps_tuvBatch = new PreparedStatementBatch(
-                PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-                p_connection, s_UPDATE_TUV, true);
+                    PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                    s_UPDATE_TUV, true);
         }
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
         if (m_nonClobTemplateParts.size() > 0)
         {
-            //get the first prepared statement for non-clob parts
+            // get the first prepared statement for non-clob parts
             for (int i = 0, max = m_nonClobTemplateParts.size(); i < max; i++)
             {
-                TemplatePart tp = (TemplatePart)m_nonClobTemplateParts.get(i);
+                TemplatePart tp = (TemplatePart) m_nonClobTemplateParts.get(i);
 
-                //insert into template_part(id, template_id, order_num,
+                // insert into template_part(id, template_id, order_num,
                 // skeleton_string, tu_id) values(?,?,?,?,?)
                 PreparedStatement ps = m_ps_tp1Batch.getNextPreparedStatement();
 
-//                ps.setLong(1, tp.getId());
+                // ps.setLong(1, tp.getId());
                 ps.setLong(1, tp.getTemplateId());
                 ps.setInt(2, tp.getOrder());
                 ps.setString(3, tp.getSkeleton());
@@ -288,8 +281,9 @@ public class UpdateGxmlPersistenceCommand
                 if (s_logger.isDebugEnabled())
                 {
                     String s = s_INSERT_TP_NONCLOB;
-//                    s = s.replaceFirst("\\?", String.valueOf(tp.getId()));
-                    s = s.replaceFirst("\\?", String.valueOf(tp.getTemplateId()));
+                    // s = s.replaceFirst("\\?", String.valueOf(tp.getId()));
+                    s = s.replaceFirst("\\?",
+                            String.valueOf(tp.getTemplateId()));
                     s = s.replaceFirst("\\?", String.valueOf(tp.getOrder()));
                     s = s.replaceFirst("\\?", "'" + tp.getSkeleton() + "'");
                     s = s.replaceFirst("\\?", String.valueOf(tp.getTuId()));
@@ -302,11 +296,11 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_clobTemplateParts.size(); i < max; i++)
             {
-                TemplatePart tp = (TemplatePart)m_clobTemplateParts.get(i);
+                TemplatePart tp = (TemplatePart) m_clobTemplateParts.get(i);
 
-                //insert into template_part(id, template_id, order_num,
+                // insert into template_part(id, template_id, order_num,
                 // skeleton_clob, tu_id) values(?,?,?,empty_clob(),?)
-//                m_ps_tp2.setLong(1, tp.getId());
+                // m_ps_tp2.setLong(1, tp.getId());
                 m_ps_tp2.setLong(1, tp.getTemplateId());
                 m_ps_tp2.setInt(2, tp.getOrder());
                 m_ps_tp2.setString(3, tp.getSkeletonClob());
@@ -324,8 +318,9 @@ public class UpdateGxmlPersistenceCommand
                 if (s_logger.isDebugEnabled())
                 {
                     String s = s_INSERT_TP_CLOB;
-//                    s = s.replaceFirst("\\?", String.valueOf(tp.getId()));
-                    s = s.replaceFirst("\\?", String.valueOf(tp.getTemplateId()));
+                    // s = s.replaceFirst("\\?", String.valueOf(tp.getId()));
+                    s = s.replaceFirst("\\?",
+                            String.valueOf(tp.getTemplateId()));
                     s = s.replaceFirst("\\?", String.valueOf(tp.getOrder()));
                     s = s.replaceFirst("\\?", String.valueOf(tp.getTuId()));
                     s = s + " - CLOB=" + tp.getSkeleton();
@@ -338,12 +333,12 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_modifiedTus.size(); i < max; i++)
             {
-                TuImplVo tu = (TuImplVo)m_modifiedTus.get(i);
+                TuImplVo tu = (TuImplVo) m_modifiedTus.get(i);
 
-                //insert into translation_unit values(?,?,?,?,?,?,?,?)
+                // insert into translation_unit values(?,?,?,?,?,?,?,?)
                 PreparedStatement ps = m_ps_tu1Batch.getNextPreparedStatement();
 
-//                ps.setLong(1, tu.getId());
+                // ps.setLong(1, tu.getId());
                 ps.setLong(1, tu.getOrder());
                 ps.setLong(2, tu.getTmId());
                 ps.setString(3, tu.getDataType());
@@ -357,14 +352,19 @@ public class UpdateGxmlPersistenceCommand
                 if (s_logger.isDebugEnabled())
                 {
                     String s = s_INSERT_TU;
-//                    s = s.replaceFirst("\\?", String.valueOf(tu.getId()));
-                    s = s.replaceFirst("\\?", "ordernum=" + String.valueOf(tu.getOrder()));
-                    s = s.replaceFirst("\\?", "tmid=" + String.valueOf(tu.getTmId()));
+                    // s = s.replaceFirst("\\?", String.valueOf(tu.getId()));
+                    s = s.replaceFirst("\\?",
+                            "ordernum=" + String.valueOf(tu.getOrder()));
+                    s = s.replaceFirst("\\?",
+                            "tmid=" + String.valueOf(tu.getTmId()));
                     s = s.replaceFirst("\\?", String.valueOf(tu.getDataType()));
                     s = s.replaceFirst("\\?", String.valueOf(tu.getTuType()));
-                    s = s.replaceFirst("\\?", String.valueOf(tu.getLocalizableType()));
-                    s = s.replaceFirst("\\?", "lgid=" + String.valueOf(tu.getLeverageGroupId()));
-                    s = s.replaceFirst("\\?", "pid=" + String.valueOf(tu.getPid()));
+                    s = s.replaceFirst("\\?",
+                            String.valueOf(tu.getLocalizableType()));
+                    s = s.replaceFirst("\\?",
+                            "lgid=" + String.valueOf(tu.getLeverageGroupId()));
+                    s = s.replaceFirst("\\?",
+                            "pid=" + String.valueOf(tu.getPid()));
                     System.err.println(s);
                 }
             }
@@ -374,19 +374,20 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_nonClobTuvs.size(); i < max; i++)
             {
-                TuvImplVo tuv = (TuvImplVo)m_nonClobTuvs.get(i);
+                TuvImplVo tuv = (TuvImplVo) m_nonClobTuvs.get(i);
 
-                //insert into Translation_Unit_Variant ....
-                PreparedStatement ps = m_ps_tuv1Batch.getNextPreparedStatement();
+                // insert into Translation_Unit_Variant ....
+                PreparedStatement ps = m_ps_tuv1Batch
+                        .getNextPreparedStatement();
 
-//                ps.setLong  (1, tuv.getId());
-                ps.setLong  (1, tuv.getOrder());
-                ps.setLong  (2, tuv.getLocaleId());
-                ps.setLong  (3, tuv.getTu().getId());
+                // ps.setLong (1, tuv.getId());
+                ps.setLong(1, tuv.getOrder());
+                ps.setLong(2, tuv.getLocaleId());
+                ps.setLong(3, tuv.getTu(m_companyId).getId());
                 ps.setString(4, "N");
                 ps.setString(5, tuv.getGxml());
-                ps.setLong  (6, tuv.getWordCount());
-                ps.setLong  (7, tuv.getExactMatchKey());
+                ps.setLong(6, tuv.getWordCount());
+                ps.setLong(7, tuv.getExactMatchKey());
                 ps.setString(8, tuv.getStateName());
                 ps.setString(9, tuv.getMergeState());
                 ps.setTimestamp(10, now);
@@ -397,14 +398,22 @@ public class UpdateGxmlPersistenceCommand
                 if (s_logger.isDebugEnabled())
                 {
                     String s = s_INSERT_TUV_NONCLOB;
-//                    s = s.replaceFirst("\\?", String.valueOf(tuv.getId()));
-                    s = s.replaceFirst("\\?", "order=" + String.valueOf(tuv.getOrder()));
-                    s = s.replaceFirst("\\?", "locale=" + String.valueOf(tuv.getLocaleId()));
-                    s = s.replaceFirst("\\?", "tuid=" + String.valueOf(tuv.getTu().getId()));
+                    // s = s.replaceFirst("\\?", String.valueOf(tuv.getId()));
+                    s = s.replaceFirst("\\?",
+                            "order=" + String.valueOf(tuv.getOrder()));
+                    s = s.replaceFirst("\\?",
+                            "locale=" + String.valueOf(tuv.getLocaleId()));
+                    s = s.replaceFirst(
+                            "\\?",
+                            "tuid="
+                                    + String.valueOf(tuv.getTu(m_companyId)
+                                            .getId()));
                     s = s.replaceFirst("\\?", "N");
                     s = s.replaceFirst("\\?", "'" + tuv.getGxml() + "'");
-                    s = s.replaceFirst("\\?", "wordcount=" + String.valueOf(tuv.getWordCount()));
-                    s = s.replaceFirst("\\?", "crc=" + String.valueOf(tuv.getExactMatchKey()));
+                    s = s.replaceFirst("\\?",
+                            "wordcount=" + String.valueOf(tuv.getWordCount()));
+                    s = s.replaceFirst("\\?",
+                            "crc=" + String.valueOf(tuv.getExactMatchKey()));
                     s = s.replaceFirst("\\?", tuv.getStateName());
                     s = s.replaceFirst("\\?", tuv.getMergeState());
                     System.err.println(s);
@@ -416,18 +425,19 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_clobTuvs.size(); i < max; i++)
             {
-                TuvImplVo tuv = (TuvImplVo)m_clobTuvs.get(i);
+                TuvImplVo tuv = (TuvImplVo) m_clobTuvs.get(i);
 
-                //insert into Translation_Unit_Variant ....
-                PreparedStatement ps = m_ps_tuv2Batch.getNextPreparedStatement();
+                // insert into Translation_Unit_Variant ....
+                PreparedStatement ps = m_ps_tuv2Batch
+                        .getNextPreparedStatement();
 
-//                ps.setLong  (1, tuv.getId());
-                ps.setLong  (1, tuv.getOrder());
-                ps.setLong  (2, tuv.getLocaleId());
-                ps.setLong  (3, tuv.getTu().getId());
+                // ps.setLong (1, tuv.getId());
+                ps.setLong(1, tuv.getOrder());
+                ps.setLong(2, tuv.getLocaleId());
+                ps.setLong(3, tuv.getTu(m_companyId).getId());
                 ps.setString(4, "N");
-                ps.setLong  (5, tuv.getWordCount());
-                ps.setLong  (6, tuv.getExactMatchKey());
+                ps.setLong(5, tuv.getWordCount());
+                ps.setLong(6, tuv.getExactMatchKey());
                 ps.setString(7, tuv.getStateName());
                 ps.setString(8, tuv.getMergeState());
                 ps.setTimestamp(9, now);
@@ -439,13 +449,16 @@ public class UpdateGxmlPersistenceCommand
                 if (s_logger.isDebugEnabled())
                 {
                     String s = s_INSERT_TUV_CLOB;
-//                    s = s.replaceFirst("\\?", String.valueOf(tuv.getId()));
+                    // s = s.replaceFirst("\\?", String.valueOf(tuv.getId()));
                     s = s.replaceFirst("\\?", String.valueOf(tuv.getOrder()));
                     s = s.replaceFirst("\\?", String.valueOf(tuv.getLocaleId()));
-                    s = s.replaceFirst("\\?", String.valueOf(tuv.getTu().getId()));
+                    s = s.replaceFirst("\\?",
+                            String.valueOf(tuv.getTu(m_companyId).getId()));
                     s = s.replaceFirst("\\?", "N");
-                    s = s.replaceFirst("\\?", String.valueOf(tuv.getWordCount()));
-                    s = s.replaceFirst("\\?", String.valueOf(tuv.getExactMatchKey()));
+                    s = s.replaceFirst("\\?",
+                            String.valueOf(tuv.getWordCount()));
+                    s = s.replaceFirst("\\?",
+                            String.valueOf(tuv.getExactMatchKey()));
                     s = s.replaceFirst("\\?", tuv.getStateName());
                     s = s.replaceFirst("\\?", tuv.getMergeState());
                     s = s + " - CLOB=" + tuv.getGxml();
@@ -459,13 +472,14 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_nonClobLocTuvs.size(); i < max; i++)
             {
-                TuvImplVo tuv = (TuvImplVo)m_nonClobLocTuvs.get(i);
+                TuvImplVo tuv = (TuvImplVo) m_nonClobLocTuvs.get(i);
 
-                //update tuv set segment_string=? where id=?
-                PreparedStatement ps = m_ps_tuv3Batch.getNextPreparedStatement();
+                // update tuv set segment_string=? where id=?
+                PreparedStatement ps = m_ps_tuv3Batch
+                        .getNextPreparedStatement();
 
                 ps.setString(1, tuv.getGxml());
-                ps.setLong  (2, tuv.getId());
+                ps.setLong(2, tuv.getId());
 
                 ps.addBatch();
 
@@ -483,13 +497,14 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_clobLocTuvs.size(); i < max; i++)
             {
-                TuvImplVo tuv = (TuvImplVo)m_clobLocTuvs.get(i);
+                TuvImplVo tuv = (TuvImplVo) m_clobLocTuvs.get(i);
 
-                //update tuv set segment_clob=empty_clob() where id=?
-                PreparedStatement ps = m_ps_tuv4Batch.getNextPreparedStatement();
+                // update tuv set segment_clob=empty_clob() where id=?
+                PreparedStatement ps = m_ps_tuv4Batch
+                        .getNextPreparedStatement();
 
                 ps.setString(1, tuv.getGxml());
-                ps.setLong  (2, tuv.getId());
+                ps.setLong(2, tuv.getId());
                 ps.addBatch();
 
                 if (s_logger.isDebugEnabled())
@@ -507,9 +522,9 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_allTus.size(); i < max; i++)
             {
-                TuImplVo tu = (TuImplVo)m_allTus.get(i);
+                TuImplVo tu = (TuImplVo) m_allTus.get(i);
 
-                //update translation_unit set order_num=?, pid=? where id=?
+                // update translation_unit set order_num=?, pid=? where id=?
                 PreparedStatement ps = m_ps_tuBatch.getNextPreparedStatement();
 
                 ps.setLong(1, tu.getOrder());
@@ -533,9 +548,9 @@ public class UpdateGxmlPersistenceCommand
         {
             for (int i = 0, max = m_allTuvs.size(); i < max; i++)
             {
-                TuvImplVo tuv = (TuvImplVo)m_allTuvs.get(i);
+                TuvImplVo tuv = (TuvImplVo) m_allTuvs.get(i);
 
-                //update translation_unit_variant set order_num=?, where id=?
+                // update translation_unit_variant set order_num=?, where id=?
                 PreparedStatement ps = m_ps_tuvBatch.getNextPreparedStatement();
 
                 ps.setLong(1, tuv.getOrder());
@@ -554,8 +569,7 @@ public class UpdateGxmlPersistenceCommand
         }
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         if (m_modifiedTus.size() > 0)
         {
@@ -571,45 +585,45 @@ public class UpdateGxmlPersistenceCommand
         {
             m_ps_tuv2Batch.executeBatches();
 
-//            Clob clob = null;
-//            CLOB oclob;
-//            Writer writer = null;
-//            ResultSet rs = null;
-//
-//            try
-//            {
-//                for (int i = 0, max = m_clobTuvs.size(); i < max; i++)
-//                {
-//                    TuvImplVo tuv = (TuvImplVo)m_clobTuvs.get(i);
-//
-//                    m_ps_tuv3.setLong(1, tuv.getId());
-//                    rs = m_ps_tuv3.executeQuery();
-//
-//                    if (rs.next())
-//                    {
-//                        clob = rs.getClob(6);
-//                        oclob = (CLOB)clob;
-//
-//                        writer = oclob.getCharacterOutputStream();
-//                        StringReader sr = new StringReader(tuv.getGxml());
-//                        char[] buffer = new char[oclob.getChunkSize()];
-//                        int charsRead = 0;
-//                        while ((charsRead = sr.read(buffer)) != -1)
-//                        {
-//                            writer.write(buffer, 0, charsRead);
-//                        }
-//                        close(writer);
-//                        writer = null;
-//                    }
-//                    close(rs);
-//                    rs = null;
-//                }
-//            }
-//            finally
-//            {
-//                close(writer);
-//                close(rs);
-//            }
+            // Clob clob = null;
+            // CLOB oclob;
+            // Writer writer = null;
+            // ResultSet rs = null;
+            //
+            // try
+            // {
+            // for (int i = 0, max = m_clobTuvs.size(); i < max; i++)
+            // {
+            // TuvImplVo tuv = (TuvImplVo)m_clobTuvs.get(i);
+            //
+            // m_ps_tuv3.setLong(1, tuv.getId());
+            // rs = m_ps_tuv3.executeQuery();
+            //
+            // if (rs.next())
+            // {
+            // clob = rs.getClob(6);
+            // oclob = (CLOB)clob;
+            //
+            // writer = oclob.getCharacterOutputStream();
+            // StringReader sr = new StringReader(tuv.getGxml());
+            // char[] buffer = new char[oclob.getChunkSize()];
+            // int charsRead = 0;
+            // while ((charsRead = sr.read(buffer)) != -1)
+            // {
+            // writer.write(buffer, 0, charsRead);
+            // }
+            // close(writer);
+            // writer = null;
+            // }
+            // close(rs);
+            // rs = null;
+            // }
+            // }
+            // finally
+            // {
+            // close(writer);
+            // close(rs);
+            // }
         }
 
         if (m_nonClobLocTuvs.size() > 0)
@@ -621,45 +635,45 @@ public class UpdateGxmlPersistenceCommand
         {
             m_ps_tuv4Batch.executeBatches();
 
-//            Clob clob = null;
-//            CLOB oclob;
-//            Writer writer = null;
-//            ResultSet rs = null;
-//
-//            try
-//            {
-//                for (int i = 0, max = m_clobLocTuvs.size(); i < max; i++)
-//                {
-//                    TuvImplVo tuv = (TuvImplVo)m_clobLocTuvs.get(i);
-//
-//                    m_ps_tuv3.setLong(1, tuv.getId());
-//                    rs = m_ps_tuv3.executeQuery();
-//
-//                    if (rs.next())
-//                    {
-//                        clob = rs.getClob(6);
-//                        oclob = (CLOB)clob;
-//
-//                        writer = oclob.getCharacterOutputStream();
-//                        StringReader sr = new StringReader(tuv.getGxml());
-//                        char[] buffer = new char[oclob.getChunkSize()];
-//                        int charsRead = 0;
-//                        while ((charsRead = sr.read(buffer)) != -1)
-//                        {
-//                            writer.write(buffer, 0, charsRead);
-//                        }
-//                        close(writer);
-//                        writer = null;
-//                    }
-//                    close(rs);
-//                    rs = null;
-//                }
-//            }
-//            finally
-//            {
-//                close(writer);
-//                close(rs);
-//            }
+            // Clob clob = null;
+            // CLOB oclob;
+            // Writer writer = null;
+            // ResultSet rs = null;
+            //
+            // try
+            // {
+            // for (int i = 0, max = m_clobLocTuvs.size(); i < max; i++)
+            // {
+            // TuvImplVo tuv = (TuvImplVo)m_clobLocTuvs.get(i);
+            //
+            // m_ps_tuv3.setLong(1, tuv.getId());
+            // rs = m_ps_tuv3.executeQuery();
+            //
+            // if (rs.next())
+            // {
+            // clob = rs.getClob(6);
+            // oclob = (CLOB)clob;
+            //
+            // writer = oclob.getCharacterOutputStream();
+            // StringReader sr = new StringReader(tuv.getGxml());
+            // char[] buffer = new char[oclob.getChunkSize()];
+            // int charsRead = 0;
+            // while ((charsRead = sr.read(buffer)) != -1)
+            // {
+            // writer.write(buffer, 0, charsRead);
+            // }
+            // close(writer);
+            // writer = null;
+            // }
+            // close(rs);
+            // rs = null;
+            // }
+            // }
+            // finally
+            // {
+            // close(writer);
+            // close(rs);
+            // }
         }
 
         // After all new objects have been inserted, update TU/TUV orders
@@ -685,44 +699,44 @@ public class UpdateGxmlPersistenceCommand
         {
             m_ps_tp2.executeBatch();
 
-//            Clob clob = null;
-//            CLOB oclob;
-//            Writer writer = null;
-//            ResultSet rs = null;
-//
-//            try
-//            {
-//                for (int i = 0, max = m_clobTemplateParts.size(); i < max; i++)
-//                {
-//                    TemplatePart tp = (TemplatePart)m_clobTemplateParts.get(i);
-//
-//                    m_ps_tp3.setLong(1, tp.getId());
-//                    rs = m_ps_tp3.executeQuery();
-//                    if (rs.next())
-//                    {
-//                        clob = rs.getClob(4);
-//
-//                        oclob = (CLOB)clob;
-//                        writer = oclob.getCharacterOutputStream();
-//                        StringReader sr = new StringReader(tp.getSkeletonClob());
-//                        char[] buffer = new char[oclob.getChunkSize()];
-//                        int charsRead = 0;
-//                        while ((charsRead = sr.read(buffer)) != -1)
-//                        {
-//                            writer.write(buffer, 0, charsRead);
-//                        }
-//                        close(writer);
-//                        writer = null;
-//                    }
-//                    close(rs);
-//                    rs = null;
-//                }
-//            }
-//            finally
-//            {
-//                close(writer);
-//                close(rs);
-//            }
+            // Clob clob = null;
+            // CLOB oclob;
+            // Writer writer = null;
+            // ResultSet rs = null;
+            //
+            // try
+            // {
+            // for (int i = 0, max = m_clobTemplateParts.size(); i < max; i++)
+            // {
+            // TemplatePart tp = (TemplatePart)m_clobTemplateParts.get(i);
+            //
+            // m_ps_tp3.setLong(1, tp.getId());
+            // rs = m_ps_tp3.executeQuery();
+            // if (rs.next())
+            // {
+            // clob = rs.getClob(4);
+            //
+            // oclob = (CLOB)clob;
+            // writer = oclob.getCharacterOutputStream();
+            // StringReader sr = new StringReader(tp.getSkeletonClob());
+            // char[] buffer = new char[oclob.getChunkSize()];
+            // int charsRead = 0;
+            // while ((charsRead = sr.read(buffer)) != -1)
+            // {
+            // writer.write(buffer, 0, charsRead);
+            // }
+            // close(writer);
+            // writer = null;
+            // }
+            // close(rs);
+            // rs = null;
+            // }
+            // }
+            // finally
+            // {
+            // close(writer);
+            // close(rs);
+            // }
         }
     }
 }

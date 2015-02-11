@@ -1,3 +1,19 @@
+/**
+ * Copyright 2009 Welocalize, Inc.
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.
+ * 
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ * 
+ */
 package com.globalsight.everest.edit.offline.xliff;
 
 import java.io.IOException;
@@ -15,12 +31,12 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
 
 import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.everest.comment.Comment;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpConstants;
 import com.globalsight.everest.edit.offline.AmbassadorDwUpException;
 import com.globalsight.everest.edit.offline.XliffConstants;
@@ -29,6 +45,7 @@ import com.globalsight.everest.edit.offline.page.OfflinePageData;
 import com.globalsight.everest.edit.offline.page.OfflineSegmentData;
 import com.globalsight.everest.integration.ling.tm2.LeverageMatch;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
@@ -36,6 +53,7 @@ import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.tda.TdaHelper;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflowmanager.Workflow;
@@ -81,8 +99,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     {
     }
 
-    protected void writeXlfDocBody(boolean isTmx, boolean editAll)
-            throws AmbassadorDwUpException
+    protected void writeXlfDocBody(boolean isTmx, boolean editAll,
+            DownloadParams p_downloadParams) throws AmbassadorDwUpException
     {
         OfflineSegmentData osd = null;
 
@@ -92,7 +110,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
             try
             {
-                writeTranslationUnit(osd, m_page, isTmx, editAll);
+                writeTranslationUnit(osd, m_page, isTmx, editAll, p_downloadParams);
             }
             catch (Exception ex)
             {
@@ -107,10 +125,10 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         writeDocumentHeader(p_downloadParams);
     }
 
-    private void writeAltTranslationUnit(OfflineSegmentData p_osd)
-            throws IOException
+    private void writeAltTranslationUnit(OfflineSegmentData p_osd,
+            String companyId) throws IOException
     {
-        writeTmMatch(p_osd);
+        writeTmMatch(p_osd, companyId);
         writeTerminology(p_osd);
     }
 
@@ -138,7 +156,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         }
         catch (DiplomatBasicParserException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
 
         return segment;
@@ -149,11 +167,11 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
      * writing leverage match results into exported xliff file
      */
     public String getAltByMatch(LeverageMatch leverageMatch,
-            OfflineSegmentData osd)
+            OfflineSegmentData osd, String p_companyId)
     {
         String altTrans = new String();
 
-        //altFlag to flag the leverageMatch form alt-trans
+        // altFlag to flag the leverageMatch form alt-trans
         int altFlag = -100;
         String score = StringUtil.formatPercent(leverageMatch.getScoreNum(), 2);
 
@@ -166,53 +184,58 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         try
         {
             Tuv sourceTuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                    leverageMatch.getOriginalSourceTuvId());
+                    leverageMatch.getOriginalSourceTuvId(), p_companyId);
             String targetLocal = new String();
             String sourceLocal = new String();
             boolean isFromXliff = false;
-            
-            if(leverageMatch.getProjectTmIndex() != altFlag) {
-                sourceLocal = 
-                    ServerProxy.getLocaleManager().getLocaleById
-                        (sourceTuv.getLocaleId()).getLocaleCode();
+
+            if (leverageMatch.getProjectTmIndex() != altFlag)
+            {
+                sourceLocal = ServerProxy.getLocaleManager()
+                        .getLocaleById(sourceTuv.getLocaleId()).getLocaleCode();
                 targetLocal = leverageMatch.getTargetLocale().getLocaleCode();
-                
+
                 if (sourceTuv != null
-                        && sourceTuv.getTu().getDataType().equals(
-                                IFormatNames.FORMAT_XLIFF))
+                        && sourceTuv.getTu(p_companyId).getDataType()
+                                .equals(IFormatNames.FORMAT_XLIFF))
                 {
                     isFromXliff = true;
                 }
             }
-            
+
             String sourceStr = leverageMatch.getMatchedOriginalSource();
             String targetStr = leverageMatch.getLeveragedTargetString();
-            
+
             if (leverageMatch.getProjectTmIndex() == Leverager.TDA_TM_PRIORITY)
             {
-                //not do anything
+                // not do anything
             }
             else if (leverageMatch.getProjectTmIndex() == Leverager.REMOTE_TM_PRIORITY)
             {
                 sourceStr = GxmlUtil.stripRootTag(sourceStr);
             }
-            else if(leverageMatch.getProjectTmIndex() == Leverager.MT_PRIORITY) {
+            else if (leverageMatch.getProjectTmIndex() == Leverager.MT_PRIORITY)
+            {
                 if (isFromXliff)
                 {
-                    sourceStr = SegmentUtil.restoreSegment(sourceStr, sourceLocal);
-                    targetStr = SegmentUtil.restoreSegment(targetStr, targetLocal);
+                    sourceStr = SegmentUtil.restoreSegment(sourceStr,
+                            sourceLocal);
+                    targetStr = SegmentUtil.restoreSegment(targetStr,
+                            targetLocal);
                 }
-                else {
+                else
+                {
                     sourceStr = GxmlUtil.stripRootTag(sourceStr);
                 }
             }
-            else if(leverageMatch.getProjectTmIndex() == altFlag) {
-                //for offline download, write out the alt-trans
+            else if (leverageMatch.getProjectTmIndex() == altFlag)
+            {
+                // for offline download, write out the alt-trans
                 sourceStr = GxmlUtil.stripRootTag(sourceStr);
             }
             else if (leverageMatch.getProjectTmIndex() == Leverager.XLIFF_PRIORITY)
             {
-                TuImpl tu = (TuImpl) sourceTuv.getTu();
+                TuImpl tu = (TuImpl) sourceTuv.getTu(p_companyId);
                 String xliffTarget = tu.getXliffTargetGxml().getTextValue();
 
                 if (xliffTarget != null && Text.isBlank(xliffTarget))
@@ -227,10 +250,12 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 {
                     // is populate by the xliff target, need to return to the
                     // original
-                    sourceStr = SegmentUtil.restoreSegment(sourceStr, sourceLocal);
-                    targetStr = SegmentUtil.restoreSegment(targetStr, targetLocal);
+                    sourceStr = SegmentUtil.restoreSegment(sourceStr,
+                            sourceLocal);
+                    targetStr = SegmentUtil.restoreSegment(targetStr,
+                            targetLocal);
                 }
-               
+
             }
             else
             {
@@ -238,8 +263,10 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 {
                     if (osd == null)
                     {
-                        sourceStr = SegmentUtil.restoreSegment(sourceStr, sourceLocal);
-                        targetStr = SegmentUtil.restoreSegment(targetStr, targetLocal);
+                        sourceStr = SegmentUtil.restoreSegment(sourceStr,
+                                sourceLocal);
+                        targetStr = SegmentUtil.restoreSegment(targetStr,
+                                targetLocal);
                     }
                     else
                     {
@@ -251,8 +278,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 else
                 {
                     String srcTmTuvString = TmUtil.getSourceTextForTuv(
-                            leverageMatch.getTmId(), matchedTmTuvId, sourceTuv
-                                    .getLocaleId());
+                            leverageMatch.getTmId(), matchedTmTuvId,
+                            sourceTuv.getLocaleId());
                     sourceStr = GxmlUtil.stripRootTag(srcTmTuvString);
                 }
             }
@@ -263,12 +290,14 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             if (osd == null)
             {
                 altTrans = MessageFormat.format(TM_PATTERN1, score,
-                        repairForAltTrans(sourceStr), repairForAltTrans(targetStr));
+                        repairForAltTrans(sourceStr),
+                        repairForAltTrans(targetStr));
             }
             else
             {
                 altTrans = MessageFormat.format(TM_PATTERN, score,
-                        repairForAltTrans(sourceStr), repairForAltTrans(targetStr));
+                        repairForAltTrans(sourceStr),
+                        repairForAltTrans(targetStr));
             }
 
             // If target TUV is never changed, adjust the "origin".
@@ -289,7 +318,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
                 }
                 else if (projectTmIndex == Leverager.XLIFF_PRIORITY)
                 {
-                    TuImpl tu = (TuImpl) sourceTuv.getTu();
+                    TuImpl tu = (TuImpl) sourceTuv.getTu(p_companyId);
                     if (tu != null && tu.isXliffTranslationMT() && osd == null)
                     {
                         String temp = Extractor.IWS_TRANSLATION_MT;
@@ -336,10 +365,11 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         return altTrans;
     }
 
-    private void writeTmMatch(OfflineSegmentData osd) throws IOException
+    private void writeTmMatch(OfflineSegmentData p_osd, String p_companyId)
+            throws IOException
     {
-        List<LeverageMatch> list = osd.getOriginalFuzzyLeverageMatchList();
-        List<LeverageMatch> list2 = new ArrayList();
+        List<LeverageMatch> list = p_osd.getOriginalFuzzyLeverageMatchList();
+        List<LeverageMatch> list2 = new ArrayList<LeverageMatch>();
 
         if (list != null)
         {
@@ -347,11 +377,13 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         }
 
         Tuv tuv = ServerProxy.getTuvManager().getTuvForSegmentEditor(
-                osd.getTrgTuvId());
-        Set xliffAltSet = tuv.getXliffAlt();
+                p_osd.getTrgTuvId(), p_companyId);
+        Tuv sourceTuv = p_osd.getSourceTuv();
+
+        Set xliffAltSet = tuv.getXliffAlt(true);
         int altFlag = -100;
 
-        if (xliffAltSet != null)
+        if (xliffAltSet != null && xliffAltSet.size() > 0)
         {
             Iterator it = xliffAltSet.iterator();
 
@@ -359,12 +391,15 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             {
                 XliffAlt alt = (XliffAlt) it.next();
                 LeverageMatch lm = new LeverageMatch();
+                if (sourceTuv != null)
+                {
+                    lm.setOriginalSourceTuvId(sourceTuv.getId());
+                }
                 String str = EditUtil.decodeXmlEntities(alt.getSourceSegment());
+                float score = (float) TdaHelper.PecentToDouble(alt.getQuality());
+                
                 lm.setMatchedOriginalSource(str);
-                lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));
-                float score = (float) TdaHelper
-                        .PecentToDouble(alt.getQuality());
-
+                lm.setMatchedText(EditUtil.decodeXmlEntities(alt.getSegment()));            
                 lm.setScoreNum(score);
                 lm.setProjectTmIndex(altFlag);
                 list2.add(lm);
@@ -378,7 +413,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
             for (int i = 0; i < list2.size(); i++)
             {
                 LeverageMatch leverageMatch = list2.get(i);
-                m_outputStream.write(getAltByMatch(leverageMatch, osd));
+                m_outputStream.write(getAltByMatch(leverageMatch, p_osd, p_companyId));
             }
         }
     }
@@ -445,8 +480,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
     }
 
     private void writeTranslationUnit(OfflineSegmentData p_osd,
-            OfflinePageData m_page, boolean isTmx, boolean editAll)
-            throws IOException, RegExException
+            OfflinePageData m_page, boolean isTmx, boolean editAll,
+            DownloadParams p_downloadParams) throws IOException, RegExException
     {
         String srcSegment;
         String trgSegment;
@@ -465,6 +500,10 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
         srcSegment = p_osd.getDisplaySourceTextWithNewLinebreaks(String
                 .valueOf(NORMALIZED_LINEBREAK));
+
+        Task task = TaskHelper.getTask(Long.parseLong(m_page.getTaskId()));
+        String companyId = task != null ? task.getCompanyId() : CompanyWrapper
+                .getCurrentCompanyId();
         try
         {
             srcSegment = util.preProcessInternalText(srcSegment).getSegment();
@@ -480,7 +519,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         }
         catch (DiplomatBasicParserException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
 
         trgSegment = p_osd.getDisplayTargetTextWithNewLineBreaks(String
@@ -491,16 +530,24 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
 
             if (("xlf").equalsIgnoreCase(dataType))
             {
-                String targetLocal = ServerProxy.getLocaleManager()
-                        .getLocaleById(p_osd.getTargetTuv().getLocaleId())
-                        .getLocaleCode();
-                trgSegment = SegmentUtil.restoreSegment(p_osd.getTargetTuv()
-                        .getGxml(), targetLocal);
+                // Added for "Populate 100% Target Segments" option, GBS-2796
+                if (p_downloadParams.isPopulate100())
+                {
+                    String targetLocal = ServerProxy.getLocaleManager()
+                            .getLocaleById(p_osd.getTargetTuv().getLocaleId())
+                            .getLocaleCode();
+                    trgSegment = SegmentUtil.restoreSegment(p_osd
+                            .getTargetTuv().getGxml(), targetLocal);
+                }
+                else
+                {
+                    trgSegment = srcSegment;
+                }
             }
         }
         catch (DiplomatBasicParserException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
 
         // write ID and mactch type
@@ -548,7 +595,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         {
             // if (p_osd.getOriginalFuzzyLeverageMatchList() != null)
             // {
-            writeAltTranslationUnit(p_osd);
+            writeAltTranslationUnit(p_osd, companyId);
             // }
         }
 
@@ -633,7 +680,7 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             throw new AmbassadorDwUpException(e);
         }
 
@@ -667,7 +714,8 @@ public class ListViewWorkXLIFFWriter extends XLIFFWriterUnicode
         {
             m_outputStream.write(XliffConstants.HASH_MARK);
             m_outputStream.write("User name:");
-            m_outputStream.write(p_downloadParams.getUser().getUserId());
+            m_outputStream.write(UserUtil.getUserNameById(p_downloadParams
+                    .getUser().getUserId()));
             m_outputStream.write(m_strEOL);
         }
         else

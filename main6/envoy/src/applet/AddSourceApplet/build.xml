@@ -6,8 +6,9 @@
 
 	<target name="build">
 		<mkdir dir="dist"/>
-        <javac encoding="ISO-8859-1"  debug="on" target="1.6" srcdir="src" destdir="dist"
-            classpath=".:${basedir.old}/${commonJarLib}/commons-httpclient-3.0-rc2.jar" />
+        <javac encoding="ISO-8859-1"  debug="on" target="1.6" srcdir="src" destdir="dist">
+		   <classpath refid="addFiles.class.path"/>
+		</javac>
 	</target>
 
 	<target name="all" depends="build">
@@ -21,4 +22,12 @@
 		<delete dir="dist"></delete>
 	</target>
 
+	<path id="addFiles.class.path">
+		   <pathelement path =".:${basedir.old}/${commonJarLib}/commons-httpclient-3.0-rc2.jar"/>
+           <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/axis.jar"/>
+		   <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/commons-discovery.jar"/>
+	       <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/jaxrpc.jar"/>
+	       <pathelement path =".:${basedir.old}/${apacheAxisJarLib}/wsdl4j.jar"/>
+  	       <pathelement path =".:${basedir.old}/${appletLib}/webServiceClient.jar"/>
+	</path>
 </project>

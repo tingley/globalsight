@@ -1,6 +1,6 @@
 package com.globalsight.selenium.pages;
 
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 /**
  * OnlineJobs Report
@@ -11,7 +11,7 @@ import com.globalsight.selenium.properties.ConfigUtil;
 public class OnlineJobsReportWebForm
 {
     public static final String REPORT_LINK = "link="
-            + ConfigUtil.getConfigData("COMPANY_NAME") + " Online Jobs";
+            + ConfigUtil.getConfigData("company") + " Online Jobs";
     public static final String POPUP_WINDOW_NAME = "OnlineJobsundefined1";
 
     public static final String PROJECT_SELECTOR = "projectId";

@@ -6,7 +6,7 @@ import com.globalsight.selenium.pages.CVSModule;
 import com.globalsight.selenium.pages.CVSModuleMapping;
 import com.globalsight.selenium.pages.CVSServer;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.thoughtworks.selenium.Selenium;
 
 /**
@@ -43,10 +43,10 @@ public class CVSFuncs
                 .getConfigData("CVSServerUserName");
         String cvsServerUSerPassword = ConfigUtil
                 .getConfigData("CVSServerUSerPassword");
-        String sandBox = ConfigUtil.getConfigData("Sandbox");
+        String sandBox = ConfigUtil.getConfigData("sandbox");
 
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSSERVERS_SUBMENU);
+        selenium.click(MainFrame.SETUP_MENU);
+        selenium.click(MainFrame.CVS_SERVERS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(CVSServer.NEW_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
@@ -69,8 +69,8 @@ public class CVSFuncs
     public void createCVSModule(Selenium selenium, String cvsServerName,
             String moduleNameForGS, String moduleNameInCVSServer)
     {
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSMODULES_SUBMENU);
+        selenium.click(MainFrame.SETUP_MENU);
+        selenium.click(MainFrame.CVS_MODULES_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(CVSModule.New_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
@@ -114,8 +114,8 @@ public class CVSFuncs
             String sourceLocale, String targetLoacle, String sourceModule,
             String targetModule, String sourceName, String targetName)
     {
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSMODULEMAPPINGS_SUBMENU);
+        selenium.click(MainFrame.SETUP_MENU);
+        selenium.click(MainFrame.CVS_MODULE_MAPPINGS_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(CVSModuleMapping.New_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
@@ -164,8 +164,8 @@ public class CVSFuncs
     public void createCVSFileProfiles(Selenium selenium, String project,
             String server, String srcLocale, String htmlFileProfile)
     {
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.CVSFILEPROFILES_SUBMENU);
+        selenium.click(MainFrame.SETUP_MENU);
+        selenium.click(MainFrame.CVS_FILE_PROFILES_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(CVSFileProfiles.New_BUTTON);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
@@ -188,7 +188,7 @@ public class CVSFuncs
             String sourceLocale, String project, String cvsModule,
             String targetLocale)
     {
-        selenium.click(MainFrame.DataSources_MENU);
+        selenium.click(MainFrame.DATA_SOURCES_MENU);
         selenium.click(MainFrame.CreateCVSJob);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.type(CVSJobProgress.JOBNAME, jobName);

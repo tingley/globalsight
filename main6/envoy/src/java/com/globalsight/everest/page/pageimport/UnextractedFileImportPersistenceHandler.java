@@ -35,7 +35,7 @@ public class UnextractedFileImportPersistenceHandler
 {
     private static Logger c_logger =
         Logger.getLogger(
-            TargetPageImportPersistenceHandler.class);
+                UnextractedFileImportPersistenceHandler.class);
 
     //
     // Constructor

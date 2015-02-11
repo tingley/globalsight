@@ -66,12 +66,12 @@ public class CreateUserWrapper
     protected boolean promptIsActive = true;
 
     protected Hashtable m_sourceTargetMap = null;
-    
+
     protected ArrayList m_defaultRoles = null;
-    
+
     protected HashMap m_defaultRolesHash = null;
-    
-    protected String m_ssoUserName = "";
+
+    protected String m_ssoUserId = null;
 
     /**
      * Default constructor.
@@ -121,7 +121,7 @@ public class CreateUserWrapper
                 ((Role) userRole).setActivity(curKey);
                 ((Role) userRole).setSourceLocale(p_sourceLocale);
                 ((Role) userRole).setTargetLocale(p_targetLocale);
-                userRole.setUser(m_user.getUserId());
+                userRole.setUserName(m_user.getUserName());
                 if (UserUtil.isJobCostingEnabled())
                 {
                     long expense = Long.parseLong((String) params.elementAt(1));
@@ -325,6 +325,11 @@ public class CreateUserWrapper
         m_user.setUserId(p_userId);
     }
 
+    public void setUserName(String p_userName)
+    {
+        m_user.setUserName(p_userName);
+    }
+
     /**
      * Sets the projects.
      */
@@ -356,15 +361,15 @@ public class CreateUserWrapper
     {
         m_calendar = p_calendar;
     }
-    
-    public void setSsoUserName(String p_ssoUserName)
+
+    public void setSsoUserId(String p_ssoUserId)
     {
-        m_ssoUserName = p_ssoUserName;
+        m_ssoUserId = p_ssoUserId;
     }
-    
-    public String getSsoUserName()
+
+    public String getSsoUserId()
     {
-        return m_ssoUserName;
+        return m_ssoUserId;
     }
 
     /**
@@ -373,6 +378,11 @@ public class CreateUserWrapper
     public String getUserId()
     {
         return m_user.getUserId();
+    }
+
+    public String getUserName()
+    {
+        return m_user.getUserName();
     }
 
     /**

@@ -186,10 +186,6 @@ public class NewProjectsHandler extends PageHandler
         }
         else
         {
-        	if (CompanyWrapper.SUPER_COMPANY_ID.equals(companyId)) 
-        	{
-        		projects.clear();
-        	}
             Collections.sort(projects, new ProjectComparator(Locale
                     .getDefault()));
             request.setAttribute("addedProjects", projects);

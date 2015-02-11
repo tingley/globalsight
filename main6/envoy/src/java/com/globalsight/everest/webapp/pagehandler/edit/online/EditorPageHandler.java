@@ -14,7 +14,6 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.io.File;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Vector;
@@ -43,25 +41,31 @@ import com.globalsight.everest.comment.IssueImpl;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.online.CommentThreadView;
 import com.globalsight.everest.edit.online.CommentView;
+import com.globalsight.everest.edit.online.OnlineEditorConstants;
 import com.globalsight.everest.edit.online.PageInfo;
 import com.globalsight.everest.edit.online.PaginateInfo;
 import com.globalsight.everest.edit.online.RenderingOptions;
+import com.globalsight.everest.edit.online.SegmentFilter;
 import com.globalsight.everest.edit.online.SegmentView;
 import com.globalsight.everest.edit.online.UIConstants;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuImpl;
+import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
@@ -88,7 +92,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             .getLogger(EditorPageHandler.class);
 
     private static int DEFAULT_VIEWMODE_IF_NO_PREVIEW = VIEWMODE_TEXT;
-    
+
     /**
      * Determines whether PMs can edit all target pages.
      * 
@@ -190,8 +194,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     WebAppConstants.WORK_OBJECT);
             sessionMgr.setAttribute(WebAppConstants.JOB_ID,
                     Long.toString(theTask.getJobId()));
-            sessionMgr.setAttribute(WebAppConstants.TARGETVIEW_LOCALE, theTask
-                    .getTargetLocale().getDisplayName());
+            sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
+                    String.valueOf(theTask.getTargetLocale().getId()));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
 
             state = new EditorState();
@@ -231,9 +235,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             sessionMgr.setAttribute(WebAppConstants.EDITORSTATE, state);
             // store jobId, target language and source page id for Lisa QA
             // report
-            sessionMgr.setAttribute(WebAppConstants.JOB_ID, jobId);
-            sessionMgr.setAttribute(WebAppConstants.TARGETVIEW_LOCALE,
-                    getTargetLang(jobId, srcPageId));
+            sessionMgr.setAttribute(WebAppConstants.JOB_ID,
+                    Long.parseLong(jobId));
+            sessionMgr.setAttribute(ReportConstants.TARGETLOCALE_LIST,
+                    getTargetIDS(jobId, srcPageId));
             sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID, srcPageId);
 
             initializeFromJob(state, p_request, jobId, srcPageId, trgPageId,
@@ -254,9 +259,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
      * 
      * @throws EnvoyServletException
      */
-    private String getTargetLang(String p_jobId, String p_srcPageId)
+    private String getTargetIDS(String p_jobId, String p_srcPageId)
             throws EnvoyServletException
     {
+        StringBuffer result = new StringBuffer();
         try
         {
             Job job = ServerProxy.getJobHandler().getJobById(
@@ -265,23 +271,25 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             for (Iterator it = wfs.iterator(); it.hasNext();)
             {
                 Workflow wf = (Workflow) it.next();
-                if (Workflow.PENDING.equals(wf.getState())
-                        || Workflow.CANCELLED.equals(wf.getState())
+                if (Workflow.CANCELLED.equals(wf.getState())
                         || Workflow.EXPORT_FAILED.equals(wf.getState())
                         || Workflow.IMPORT_FAILED.equals(wf.getState()))
                 {
                     continue;
                 }
-                Collection targetPages = wf.getTargetPages();
-                for (Iterator itr = targetPages.iterator(); itr.hasNext();)
-                {
-                    TargetPage tp = (TargetPage) itr.next();
-                    if (p_srcPageId.equals(Long.toString(tp.getSourcePage()
-                            .getId())))
-                    {
-                        return wf.getTargetLocale().getDisplayName();
-                    }
-                }
+
+                /*
+                 * Canceled for GBS-2419 Collection targetPages =
+                 * wf.getTargetPages(); for (Iterator itr =
+                 * targetPages.iterator(); itr.hasNext();) { TargetPage tp =
+                 * (TargetPage) itr.next(); if
+                 * (p_srcPageId.equals(Long.toString(tp.getSourcePage()
+                 * .getId()))) { return wf.getTargetLocale().getDisplayName(); }
+                 * }
+                 */
+
+                result.append(wf.getTargetLocale().getId()).append(",");
+
             }
         }
         catch (Exception e)
@@ -289,7 +297,9 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             CATEGORY.error("Problem getting job from database ", e);
             throw new EnvoyServletException(e);
         }
-        return "";
+
+        result.deleteCharAt(result.length() - 1);
+        return result.toString();
     }
 
     /**
@@ -404,6 +414,38 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
         }
 
+        // Find Repeated Segments
+        if ((value = p_request.getParameter(WebAppConstants.PROPAGATE_ACTION)) != null)
+        {
+            if (value.equalsIgnoreCase(WebAppConstants.PROPAGATE_ACTION_FIND))
+            {
+                p_state.setNeedFindRepeatedSegments(true);
+            }
+            else
+            {
+                p_state.setNeedFindRepeatedSegments(false);
+            }
+        }
+
+        // Show/Hide PTags
+        if ((value = p_request.getParameter("pTagsAction")) != null)
+        {
+            if (value.equalsIgnoreCase(WebAppConstants.PTAGS_ACTION_FIND))
+            {
+                p_state.setNeedShowPTags(true);
+            }
+            else
+            {
+                p_state.setNeedShowPTags(false);
+            }
+        }
+        
+        if ((value = p_request.getParameter("segmentFilter")) != null)
+        {
+            p_state.setSegmentFilter(p_request.getParameter("segmentFilter"));
+        }
+
+        // Save
         if ((value = p_request.getParameter("save")) != null)
         {
             long tuId = p_state.getTuId();
@@ -449,7 +491,15 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             }
 
             bUpdateTarget = true;
+            if (OnlineEditorConstants.SEGMENT_FILTER_ICE.equals(p_state
+                    .getSegmentFilter()))
+            {
+                bUpdateSource = true;
+                p_request.setAttribute("refreshSource", "true");
+            }
         }
+        
+        p_request.setAttribute("segmentFilter", p_state.getSegmentFilter());
 
         // Sat Jun 07 00:56:22 2003 CvdL: remember the segment
         // last viewed in the Segment Editor so the Main Editor
@@ -551,6 +601,17 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     .getSourcePageId().toString();
             p_sessionMgr.setAttribute(WebAppConstants.SOURCE_PAGE_ID,
                     currentSrcPageId);
+            
+            if(SegmentFilter.isFilterSegment(p_state))
+            {
+                bUpdateTarget = true;
+                bUpdateSource = true;
+                if (OnlineEditorConstants.SEGMENT_FILTER_ICE.equals(p_state
+                        .getSegmentFilter()))
+                {
+                    p_request.setAttribute("refreshSource", "true");
+                }
+            }
         }
 
         if ((value = p_request.getParameter("search")) != null)
@@ -586,6 +647,14 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         // me_source or me_target is getting called and then update.
         boolean isIE = (p_request.getHeader("User-Agent").toLowerCase()
                 .indexOf("msie")) != -1 ? true : false;
+        if (bUpdateTarget || needTargetPageView(p_pageDescriptor, p_state))
+        {
+            HashMap<String, String> hm = new HashMap<String, String>();
+            hm = getSearchParamsInMap(p_request);
+            updateTargetPageView(p_state, p_request.getSession(),
+                    p_isTaskAssignee, isIE, hm);
+        }
+        
         if (bUpdateSource || needSourcePageView(p_pageDescriptor, p_state))
         {
             if (p_request.getParameter("searchByUser") != null)
@@ -608,33 +677,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             {
                 updateSourcePageView(p_state, p_request, p_isTaskAssignee,
                         isIE, null);
-            }
-        }
-
-        if (bUpdateTarget || needTargetPageView(p_pageDescriptor, p_state))
-        {
-            if (p_request.getParameter("searchByUser") != null)
-            {
-                String userId = p_request.getParameter("searchByUser");
-                HashMap<String, String> hm = new HashMap<String, String>();
-                hm.put("userId", userId);
-
-                updateTargetPageView(p_state, p_request.getSession(),
-                        p_isTaskAssignee, isIE, hm);
-            }
-            else if (p_request.getParameter("searchBySid") != null)
-            {
-                String sid = p_request.getParameter("searchBySid");
-                HashMap<String, String> hm = new HashMap<String, String>();
-                hm.put("sid", sid);
-
-                updateTargetPageView(p_state, p_request.getSession(),
-                        p_isTaskAssignee, isIE, hm);
-            }
-            else
-            {
-                updateTargetPageView(p_state, p_request.getSession(),
-                        p_isTaskAssignee, isIE, null);
             }
         }
 
@@ -681,6 +723,25 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             t.start();
         }
 
+    }
+
+    private HashMap<String, String> getSearchParamsInMap(
+            HttpServletRequest p_request)
+    {
+        HashMap<String, String> hm = new HashMap<String, String>();
+
+        if (p_request.getParameter("searchByUser") != null)
+        {
+            String userId = p_request.getParameter("searchByUser");
+            hm.put("userId", userId);
+        }
+        else if (p_request.getParameter("searchBySid") != null)
+        {
+            String sid = p_request.getParameter("searchBySid");
+            hm.put("sid", sid);
+        }
+
+        return hm;
     }
 
     /**
@@ -941,35 +1002,33 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             HashMap p_searchMap) throws EnvoyServletException
     {
         int viewMode = p_state.getLayout().getTargetViewMode();
+
         int editorMode = 0;
         if (p_state.isReviewMode())
         {
-            editorMode = (p_state.isReadOnly() && p_isTaskAssignee) ? UIConstants.UIMODE_REVIEW_READ_ONLY
-                    : UIConstants.UIMODE_REVIEW;
+            if (p_state.isReadOnly() && p_isTaskAssignee)
+            {
+                editorMode = UIConstants.UIMODE_REVIEW_READ_ONLY;
+            }
+            else
+            {
+                editorMode = UIConstants.UIMODE_REVIEW;
+            }
         }
         else
         {
             editorMode = UIConstants.UIMODE_EDITOR;
         }
+        RenderingOptions renderingOptions = initRenderingOptions(p_session,
+                editorMode, viewMode, UIConstants.EDITMODE_DEFAULT);
+        p_state.setRenderingOptions(renderingOptions);
+
         String html;
+        html = EditorHelper.getTargetPageView(p_state, false, p_searchMap);
 
-        // Sat Oct 26 00:11:27 2002 CvdL: I think we need separate
-        // rendering options for source & target. The options can be
-        // different and cannot be shared. See updateSourcePageView().
-        // Also, allocating a new RenderingOptions object is too much.
-        p_state.setRenderingOptions(initRenderingOptions(p_session, editorMode,
-                viewMode, UIConstants.EDITMODE_DEFAULT));
-
-        if (p_searchMap != null)
-        {
-            html = EditorHelper.getTargetPageView(p_state, false, p_searchMap);
-        }
-        else
-        {
-            html = EditorHelper.getTargetPageView(p_state, false);
-        }
         html = OfficeContentPostFilterHelper.fixHtmlForSkeleton(html);
         html = replaceImgForFirefox(html, p_isIE);
+
         p_state.setTargetPageHtml(html);
     }
 
@@ -1036,16 +1095,10 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
     private RenderingOptions initRenderingOptions(HttpSession p_session,
             int p_uiMode, int p_viewMode, int p_editMode)
     {
-        SessionManager mgr = (SessionManager) p_session
-                .getAttribute(WebAppConstants.SESSION_MANAGER);
         PermissionSet permSet = (PermissionSet) p_session
                 .getAttribute(WebAppConstants.PERMISSIONS);
         return new RenderingOptions(p_uiMode, p_viewMode, p_editMode, permSet);
     }
-
-    //
-    // Initialization logic for jobs and activities
-    //
 
     /**
      * Initializes editor state from an activity, i.e. when the editor is opened
@@ -1489,7 +1542,6 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         String termImgPath = FileUploadHelper.DOCROOT + "terminologyImg";
         File parentFilePath = new File(termImgPath.toString());
         File[] files = parentFilePath.listFiles();
-        File img = null;
 
         if (files != null && files.length > 0)
         {
@@ -1515,7 +1567,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
         return null;
     }
 
-    private void shareImg(long tuId, long tuvId, boolean overwrite)
+    private void shareImg(long tuId, long tuvId, boolean overwrite,
+            String companyId)
     {
         File img = getTuvCommentImg(tuvId);
 
@@ -1525,8 +1578,16 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
             String name = img.getName();
             String type = name.substring(name.indexOf("."));
 
-            TuImpl tu = HibernateUtil.get(TuImpl.class, tuId);
-            for (Object obj : tu.getTuvs())
+            TuImpl tu = null;
+            try
+            {
+                tu = SegmentTuUtil.getTuById(tuId, companyId);
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error(e.getMessage(), e);
+            }
+            for (Object obj : tu.getTuvs(true, companyId))
             {
                 TuvImpl tuv = (TuvImpl) obj;
                 if (tuvId != tuv.getId())
@@ -1548,7 +1609,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     }
                     catch (IOException e)
                     {
-                        CATEGORY.error(e);
+                        CATEGORY.error(e.getMessage(), e);
                     }
                 }
             }
@@ -1617,41 +1678,51 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
 
         if (share && update)
         {
-            shareImg(Long.parseLong(tuId), Long.parseLong(tuvId), overwrite);
+            SourcePage sp = null;
+            try
+            {
+                sp = ServerProxy.getPageManager().getSourcePage(
+                        p_state.getSourcePageId());
+            }
+            catch (Exception e)
+            {
+                CATEGORY.error("Problem getting source page", e);
+                throw new EnvoyServletException(e);
+            }
+            String companyId = String.valueOf(sp.getCompanyId());
+            shareImg(Long.parseLong(tuId), Long.parseLong(tuvId), overwrite,
+                    companyId);
 
-            TuImpl tu = HibernateUtil.get(TuImpl.class, Long.parseLong(tuId));
+            TuImpl tu = null;
+            try
+            {
+                tu = SegmentTuUtil.getTuById(Long.parseLong(tuId), companyId);
+            }
+            catch (Exception e)
+            {
+                throw new EnvoyServletException(e);
+            }
+
             if (tu == null)
             {
                 CATEGORY.error("Can not find tu with id: " + tuId);
             }
             else
             {
-                String sql = " select tp.* from TRANSLATION_UNIT_VARIANT tuv, "
-                        + "TRANSLATION_UNIT tu,TARGET_PAGE_LEVERAGE_GROUP tplg, "
-                        + "WORKFLOW w, TARGET_PAGE tp where tuv.id = ? "
-                        + "and tuv.TU_ID = tu.id "
-                        + "and tu.LEVERAGE_GROUP_ID = tplg.LG_ID "
-                        + "and tplg.TP_ID = tp.id "
-                        + "and tp.WORKFLOW_IFLOW_INSTANCE_ID = w.IFLOW_INSTANCE_ID "
-                        + "and tuv.STATE != 'OUT_OF_DATE' "
-                        + "and w.TARGET_LOCALE_ID = tuv.LOCALE_ID";
-
-                Map<Long, TuvImpl> tuvs = tu.getTuvAsSet();
-                List<Long> localeIds = new ArrayList<Long>();
-                localeIds.addAll(tuvs.keySet());
-
-                for (Long id : localeIds)
+                @SuppressWarnings("unchecked")
+                Map<Long, Tuv> tuvs = tu.getTuvAsSet(true, companyId);
+                for (Iterator iter = tuvs.entrySet().iterator(); iter.hasNext();)
                 {
-                    TuvImpl tuv = tuvs.get(id);
+                    Map.Entry entry = (Map.Entry) iter.next();
+                    Long localeId = (Long) entry.getKey();
+                    TuvImpl tuv = (TuvImpl) entry.getValue();
 
                     if (tuv.getId() == Long.parseLong(tuvId))
                     {
                         continue;
                     }
-
-                    List<TargetPage> tPages = HibernateUtil.searchWithSql(
-                            TargetPage.class, sql, tuv.getId());
-                    if (tPages.size() == 0)
+                    TargetPage tp = sp.getTargetPageByLocaleId(localeId);
+                    if (tp == null)
                     {
                         continue;
                     }
@@ -1659,7 +1730,7 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                     String hql = "from IssueImpl i where "
                             + "i.levelObjectTypeAsString = :type "
                             + "&& i.levelObjectId = :oId";
-                    Map map = new HashMap();
+                    Map<String, Object> map = new HashMap<String, Object>();
                     map.put("type", "S");
                     map.put("oId", tuv.getId());
 
@@ -1667,8 +1738,8 @@ public class EditorPageHandler extends PageHandler implements EditorConstants
                             map);
                     if (issue == null)
                     {
-                        String key = CommentHelper.makeLogicalKey(tPages.get(0)
-                                .getId(), tu.getId(), tuv.getId(), 0);
+                        String key = CommentHelper.makeLogicalKey(tp.getId(),
+                                tu.getId(), tuv.getId(), 0);
                         issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv.getId(),
                                 title, priority, status, category,
                                 p_user.getUserId(), comment, key);

@@ -14,15 +14,17 @@
  *  limitations under the License.
  *  
  */
-
 package com.globalsight.ling.tw.internal;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class InternalTexts
 {
     private String segment;
     private HashMap<String, String> internalTexts = new HashMap<String, String>();
+    // key - original internal tag string; value - wrapped internal tag string
+    private Map<String, String> wrappedInternalTexts = new HashMap<String, String>();
 
     public HashMap<String, String> getInternalTexts()
     {
@@ -43,9 +45,19 @@ public class InternalTexts
     {
         this.segment = segment;
     }
-    
+
     public void addInternalTags(String tag, String segment)
     {
         internalTexts.put(tag, segment);
+    }
+
+    public void addWrappedInternalTags(String oriTag, String wrappedTag)
+    {
+        wrappedInternalTexts.put(oriTag, wrappedTag);
+    }
+
+    public Map<String, String> getWrappedInternalTexts()
+    {
+        return wrappedInternalTexts;
     }
 }

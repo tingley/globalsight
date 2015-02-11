@@ -58,18 +58,18 @@ public class JobSearchCriteria
     /**
      * Return the search result based on the specified search criteria object.
      * 
-     * @param p_searchCriteriaParams -
-     *            The search criteria object.
+     * @param p_searchCriteriaParams
+     *            - The search criteria object.
      */
     public List<?> search(SearchCriteriaParameters p_searchCriteriaParams)
             throws Exception
     {
         hql.append("select distinct j from JobImpl j ")
-           .append(" inner join j.requestSet r ")
-           .append(" inner join j.workflowInstanceSet w ")
-           .append(" inner join w.workflowOwnerSet wfo ")
-           .append(" inner join r.l10nProfile.project p ")
-           .append(" where 1=1 ");
+                .append(" left join j.requestSet r ")
+                .append(" left join j.workflowInstanceSet w ")
+                .append(" left join w.workflowOwnerSet wfo ")
+                .append(" left join r.l10nProfile.project p ")
+                .append(" where 1=1 ");
 
         m_isCaseSensitive = p_searchCriteriaParams.isCaseSensitive();
         Map<?, ?> criteria = p_searchCriteriaParams.getParameters();
@@ -85,88 +85,223 @@ public class JobSearchCriteria
             switch (((Integer) (keys[i])).intValue())
             {
             // job name
-            case JobSearchParameters.JOB_NAME:
-                jobName(keys[i], criteria);
-                break;
+                case JobSearchParameters.JOB_NAME:
+                    jobName(keys[i], criteria);
+                    break;
 
-            // job id
-            case JobSearchParameters.JOB_ID:
-                jobId(keys[i], criteria);
-                break;
+                // job id
+                case JobSearchParameters.JOB_ID:
+                    jobId(keys[i], criteria);
+                    break;
 
-            // job state
-            case JobSearchParameters.STATE:
-                jobState(keys[i], criteria);
-                break;
+                // job state
+                case JobSearchParameters.STATE:
+                    jobState(keys[i], criteria);
+                    break;
 
-            // priority
-            case JobSearchParameters.PRIORITY:
-                jobPriority(keys[i], criteria);
-                break;
+                // priority
+                case JobSearchParameters.PRIORITY:
+                    jobPriority(keys[i], criteria);
+                    break;
 
-            // project id
-            case JobSearchParameters.PROJECT_ID:
-                jobProject(keys[i], criteria);
-                break;
+                // project id
+                case JobSearchParameters.PROJECT_ID:
+                    jobProject(keys[i], criteria);
+                    break;
 
-            // Source locale
-            case JobSearchParameters.SOURCE_LOCALE:
-                sourceLocaleExpression(keys[i], criteria);
-                break;
+                // Source locale
+                case JobSearchParameters.SOURCE_LOCALE:
+                    sourceLocaleExpression(keys[i], criteria);
+                    break;
 
-            // target locale
-            case JobSearchParameters.TARGET_LOCALE:
-                targetLocaleExpression(keys[i], criteria);
-                break;
+                // target locale
+                case JobSearchParameters.TARGET_LOCALE:
+                    targetLocaleExpression(keys[i], criteria);
+                    break;
 
-            // Job creation start date (x ago)
-            case JobSearchParameters.CREATION_START:
-                creationStartExpression(keys[i], criteria);
-                break;
+                // Job creation start date (x ago)
+                case JobSearchParameters.CREATION_START:
+                    creationStartExpression(keys[i], criteria);
+                    break;
 
-            // Job creation start date (date)
-            case JobSearchParameters.CREATION_START_DATE:
-                creationStartDateExpression(keys[i], criteria);
-                break;
+                // Job creation start date (date)
+                case JobSearchParameters.CREATION_START_DATE:
+                    creationStartDateExpression(keys[i], criteria);
+                    break;
 
-            // Job creation end date (x ago)
-            case JobSearchParameters.CREATION_END:
-                creationEndExpression(keys[i], criteria);
-                break;
+                // Job creation end date (x ago)
+                case JobSearchParameters.CREATION_END:
+                    creationEndExpression(keys[i], criteria);
+                    break;
 
-            // Job creation end date (date)
-            case JobSearchParameters.CREATION_END_DATE:
-                creationEndDateExpression(keys[i], criteria);
-                break;
+                // Job creation end date (date)
+                case JobSearchParameters.CREATION_END_DATE:
+                    creationEndDateExpression(keys[i], criteria);
+                    break;
 
-            // Job est completion start date
-            case JobSearchParameters.EST_COMPLETION_START:
-                estCompletionStartExpression(keys[i], criteria);
-                break;
+                // Job est completion start date
+                case JobSearchParameters.EST_COMPLETION_START:
+                    estCompletionStartExpression(keys[i], criteria);
+                    break;
 
-            // Job creation end date
-            case JobSearchParameters.EST_COMPLETION_END:
-                estCompletionEndExpression(keys[i], criteria);
-                break;
+                // Job creation end date
+                case JobSearchParameters.EST_COMPLETION_END:
+                    estCompletionEndExpression(keys[i], criteria);
+                    break;
 
-            // User
-            case JobSearchParameters.USER:
-                userExpression(keys[i], criteria);
-                break;
+                // User
+                case JobSearchParameters.USER:
+                    userExpression(keys[i], criteria);
+                    break;
 
-            default:
-                break;
+                // Job est completion start date
+                case JobSearchParameters.EXPORT_DATE_START:
+                    exportStartExpression(keys[i], criteria);
+                    break;
+
+                // Job creation end date
+                case JobSearchParameters.EXPORT_DATE_END:
+                    exportEndExpression(keys[i], criteria);
+                    break;
+                        
+                default:
+                    break;
             }
         }
-        
+
         createCompanyExpression();
-        
+
         String sql = hql.toString();
-        
+
         sql += " order by j.id";// make the query in the reverse order
         return HibernateUtil.search(sql, params);
     }
-    
+
+    private void exportEndExpression(Object object, Map<?, ?> criteria)
+    {
+        Integer amount = (Integer) criteria.get(object);
+        String condition = (String) criteria.get(new Integer(
+                JobSearchParameters.EXPORT_DATE_END_OPTIONS));
+
+        Calendar now = Calendar.getInstance();
+        if (amount != null || !condition.equals(SearchCriteriaParameters.NOW))
+        {
+            int negativeAmount = (int) 0 - amount.intValue();
+            int positiveAmount = amount.intValue();
+            if (condition.equals(SearchCriteriaParameters.HOURS_AGO) == false
+                    && condition
+                            .equals(SearchCriteriaParameters.HOURS_FROM_NOW) == false)
+            {
+                // if it's not hours ago, then start counting back from
+                // tonight just before midnight
+                now.set(Calendar.HOUR_OF_DAY, 23);
+                now.set(Calendar.MINUTE, 59);
+                now.set(Calendar.SECOND, 59);
+                now.set(Calendar.MILLISECOND, 999);
+            }
+
+            if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
+            {
+                now.add(Calendar.MONTH, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.WEEKS_AGO))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.DAYS_AGO))
+            {
+                now.add(Calendar.DATE, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
+            {
+                now.add(Calendar.MONTH, positiveAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.DAYS_FROM_NOW))
+            {
+                now.add(Calendar.DATE, positiveAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.HOURS_FROM_NOW))
+            {
+                now.add(Calendar.HOUR_OF_DAY, positiveAmount);
+            }
+            else
+            {
+                // assume SearchCriteriaParameters.HOURS_AGO
+                now.add(Calendar.HOUR_OF_DAY, negativeAmount);
+            }
+        }
+
+        hql.append(" and j.timestamp <= :exportEndDate ");
+        params.put("exportEndDate", now.getTime());
+    }
+
+    private void exportStartExpression(Object object, Map<?, ?> criteria)
+    {
+        Integer amount = (Integer) criteria.get(object);
+        String condition = (String) criteria.get(new Integer(
+                JobSearchParameters.EXPORT_DATE_START_OPTIONS));
+
+        Calendar now = Calendar.getInstance();
+        if (amount != null || !condition.equals(SearchCriteriaParameters.NOW))
+        {
+            int negativeAmount = (int) 0 - amount.intValue();
+            int positiveAmount = amount.intValue();
+
+            if (condition.equals(SearchCriteriaParameters.HOURS_AGO) == false
+                    && condition
+                            .equals(SearchCriteriaParameters.HOURS_FROM_NOW) == false)
+            {
+                // if it's not hours ago, then start counting back from
+                // this morning just past midnight
+                now.set(Calendar.HOUR_OF_DAY, 0);
+                now.set(Calendar.MINUTE, 0);
+                now.set(Calendar.SECOND, 0);
+                now.set(Calendar.MILLISECOND, 0);
+            }
+
+            if (condition.equals(SearchCriteriaParameters.MONTHS_AGO))
+            {
+                now.add(Calendar.MONTH, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.WEEKS_AGO))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.DAYS_AGO))
+            {
+                now.add(Calendar.DATE, negativeAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.MONTHS_FROM_NOW))
+            {
+                now.add(Calendar.MONTH, positiveAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.WEEKS_FROM_NOW))
+            {
+                now.add(Calendar.WEEK_OF_YEAR, positiveAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.DAYS_FROM_NOW))
+            {
+                now.add(Calendar.DATE, positiveAmount);
+            }
+            else if (condition.equals(SearchCriteriaParameters.HOURS_FROM_NOW))
+            {
+                now.add(Calendar.HOUR_OF_DAY, positiveAmount);
+            }
+            else
+            {
+                // assume SearchCriteriaParameters.HOURS_AGO
+                now.add(Calendar.HOUR_OF_DAY, negativeAmount);
+            }
+        }
+
+        hql.append(" and j.timestamp >= :exportDate ");
+        params.put("exportDate", now.getTime());
+    }
+
     private void createCompanyExpression()
     {
         String currentId = CompanyThreadLocal.getInstance().getValue();
@@ -273,8 +408,8 @@ public class JobSearchCriteria
             projectIds = (List<Long>) keyCriteria;
         }
 
-        hql.append(" and r.l10nProfile.project in (").append(
-                convertList(projectIds)).append(") ");
+        hql.append(" and r.l10nProfile.project in (")
+                .append(convertList(projectIds)).append(") ");
     }
 
     /**
@@ -340,8 +475,8 @@ public class JobSearchCriteria
             now.add(Calendar.HOUR_OF_DAY, negativeAmount);
         }
 
-        hql.append(" and j.createDate >= :createDate ");
-        params.put("createDate", now.getTime());
+        hql.append(" and j.createDate >= :createExpressionStartDate ");
+        params.put("createExpressionStartDate", now.getTime());
     }
 
     /*
@@ -351,8 +486,8 @@ public class JobSearchCriteria
     private void creationStartDateExpression(Object p_key, Map<?, ?> criteria)
     {
         Date createDate = (Date) criteria.get(p_key);
-        hql.append(" and j.createDate >= :createDate ");
-        params.put("createDate", createDate);
+        hql.append(" and j.createDate >= :createStartDate ");
+        params.put("createStartDate", createDate);
     }
 
     /*
@@ -362,8 +497,8 @@ public class JobSearchCriteria
     private void creationEndDateExpression(Object p_key, Map<?, ?> criteria)
     {
         Date startDateEnd = (Date) criteria.get(p_key);
-        hql.append(" and j.createDate <= :startDateEnd ");
-        params.put("startDateEnd", startDateEnd);
+        hql.append(" and j.createDate <= :createEndDate ");
+        params.put("createEndDate", startDateEnd);
     }
 
     /*
@@ -408,8 +543,8 @@ public class JobSearchCriteria
             }
         }
 
-        hql.append(" and j.createDate <= :startDateEnd ");
-        params.put("startDateEnd", now.getTime());
+        hql.append(" and j.createDate <= :createExpressionEndDate ");
+        params.put("createExpressionEndDate", now.getTime());
     }
 
     /*
@@ -475,9 +610,8 @@ public class JobSearchCriteria
             }
         }
 
-        hql
-                .append(" and w.estimatedCompletionDate >= :estimatedCompletionDate ");
-        params.put("estimatedCompletionDate", now.getTime());
+        hql.append(" and w.estimatedCompletionDate >= :estimatedCompletionStartDate ");
+        params.put("estimatedCompletionStartDate", now.getTime());
     }
 
     /*
@@ -542,16 +676,14 @@ public class JobSearchCriteria
             }
         }
 
-        hql
-                .append(" and w.estimatedCompletionDate <= :estimatedCompletionDate ");
-        params.put("estimatedCompletionDate", now.getTime());
+        hql.append(" and w.estimatedCompletionDate <= :estimatedCompletionEndDate ");
+        params.put("estimatedCompletionEndDate", now.getTime());
     }
 
     /*
-     * Prepare the search expression based on the user's id. 
-     * 
-	 */
-	private void userExpression(Object p_key, Map<?, ?> criteria)
+     * Prepare the search expression based on the user's id.
+     */
+    private void userExpression(Object p_key, Map<?, ?> criteria)
     {
         User user = (User) criteria.get(p_key);
         String userid = user.getUserId();
@@ -565,78 +697,82 @@ public class JobSearchCriteria
         {
             s_logger.error("Failed to get permissions for user " + userid, e);
         }
-        
-        
+
         if (perms.getPermissionFor(Permission.JOB_SCOPE_ALL))
-		{
-	        return;
-		}
-		else 
-        {	
-			if (perms.getPermissionFor(Permission.PROJECTS_MANAGE))
-	        {
-				hql.append(" and ( r.l10nProfile.project.managerUserId = :userId ");
-			    params.put("userId", userid);
-			    if(perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
-		        {
-		        	hql.append(" or wfo.ownerId = :ownerId ");
-		            params.put("ownerId", userid);
-		        }
-			    if(perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
-				{
-		            List allProjectsIds = getMyProjects(userid);
-		            String projectsIdsStr = convertList(allProjectsIds);
-		            hql.append(" or r.l10nProfile.project.id in (" + projectsIdsStr + ") ");
-				}
-			    hql.append(")");
+        {
+            return;
+        }
+        else
+        {
+            if (perms.getPermissionFor(Permission.PROJECTS_MANAGE))
+            {
+                hql.append(" and ( r.l10nProfile.project.managerUserId = :userId ");
+                params.put("userId", userid);
+                if (perms
+                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                {
+                    hql.append(" or wfo.ownerId = :ownerId ");
+                    params.put("ownerId", userid);
+                }
+                if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                {
+                    List allProjectsIds = getMyProjects(userid);
+                    String projectsIdsStr = convertList(allProjectsIds);
+                    hql.append(" or r.l10nProfile.project.id in ("
+                            + projectsIdsStr + ") ");
+                }
+                hql.append(")");
             }
-			else
-			{
-			  if(perms.getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
-	          {
-	        	hql.append(" and ( wfo.ownerId = :ownerId ");
-	            params.put("ownerId", userid);
-	            if(perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
-				{
-		            List allProjectsIds = getMyProjects(userid);
-		            String projectsIdsStr = convertList(allProjectsIds);
-		            hql.append(" or r.l10nProfile.project.id in (" + projectsIdsStr + ") ");
-				}
-	            hql.append(")");
-	          }
-			  else
-			  {
-			    if(perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
-			    {
-	              List allProjectsIds = getMyProjects(userid);
-	              String projectsIdsStr = convertList(allProjectsIds);
-	              hql.append(" and ( r.l10nProfile.project.id in (" + projectsIdsStr + ") ");
-	              hql.append(")");
-			    }
-			    else
-			    {
-			    	hql.append("and 1=2");
-			    }
-			  }
-           }
-		}
+            else
+            {
+                if (perms
+                        .getPermissionFor(Permission.PROJECTS_MANAGE_WORKFLOWS))
+                {
+                    hql.append(" and ( wfo.ownerId = :ownerId ");
+                    params.put("ownerId", userid);
+                    if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                    {
+                        List allProjectsIds = getMyProjects(userid);
+                        String projectsIdsStr = convertList(allProjectsIds);
+                        hql.append(" or r.l10nProfile.project.id in ("
+                                + projectsIdsStr + ") ");
+                    }
+                    hql.append(")");
+                }
+                else
+                {
+                    if (perms.getPermissionFor(Permission.JOB_SCOPE_MYPROJECTS))
+                    {
+                        List allProjectsIds = getMyProjects(userid);
+                        String projectsIdsStr = convertList(allProjectsIds);
+                        hql.append(" and ( r.l10nProfile.project.id in ("
+                                + projectsIdsStr + ") ");
+                        hql.append(")");
+                    }
+                    else
+                    {
+                        hql.append("and 1=2");
+                    }
+                }
+            }
+        }
     }
-    
+
     private List getMyProjects(String userid)
     {
-    	List<Long> condition = new ArrayList<Long>();
-    	List allProjects = (List)ProjectHandlerHelper.getProjectByUser(userid);
-		Iterator itAllProjects = allProjects.iterator();
-	    while(itAllProjects.hasNext())
-	    {
-	    	Project project = (Project)itAllProjects.next();
-	    	Set userIds = (Set) project.getUserIds();
-	    	if(userIds.contains(userid))
-	    	{
-	    		condition.add(project.getId());
-	    	}	
-	    }
-    	return condition;
+        List<Long> condition = new ArrayList<Long>();
+        List allProjects = (List) ProjectHandlerHelper.getProjectByUser(userid);
+        Iterator itAllProjects = allProjects.iterator();
+        while (itAllProjects.hasNext())
+        {
+            Project project = (Project) itAllProjects.next();
+            Set userIds = (Set) project.getUserIds();
+            if (userIds.contains(userid))
+            {
+                condition.add(project.getId());
+            }
+        }
+        return condition;
     }
 
     private void pmExpression(User p_user)

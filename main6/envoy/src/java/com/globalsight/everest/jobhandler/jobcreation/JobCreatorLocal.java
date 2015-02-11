@@ -25,20 +25,16 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.ResourceBundle;
-import java.util.Set;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.w3c.dom.Element;
@@ -49,6 +45,7 @@ import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.util.CxeProxy;
 import com.globalsight.cxe.util.EventFlowXmlParser;
+import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.comment.Comment;
 import com.globalsight.everest.comment.CommentManagerWLRemote;
 import com.globalsight.everest.comment.Issue;
@@ -74,8 +71,8 @@ import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.UpdateSourcePageManager;
+import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
-import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
 import com.globalsight.everest.request.BatchInfo;
 import com.globalsight.everest.request.Request;
@@ -83,19 +80,24 @@ import com.globalsight.everest.request.RequestHandler;
 import com.globalsight.everest.request.RequestImpl;
 import com.globalsight.everest.request.reimport.ActivePageReimporter;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.taskmanager.TaskImpl;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.everest.workflow.EventNotificationHelper;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
+import com.globalsight.everest.workflowmanager.WorkflowOwner;
+import com.globalsight.ling.tm2.TmUtil;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.persistence.jobcreation.AddRequestToJobCommand;
 import com.globalsight.persistence.jobcreation.JobCreationQuery;
 import com.globalsight.persistence.jobcreation.UpdateWorkflowAndPageStatesCommand;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.date.DateHelper;
+import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.mail.MailerConstants;
 import com.globalsight.util.modules.Modules;
 import com.globalsight.util.resourcebundle.LocaleWrapper;
@@ -109,8 +111,7 @@ import com.globalsight.util.resourcebundle.SystemResourceBundle;
  */
 public class JobCreatorLocal implements JobCreator
 {
-    private static Logger c_logger = Logger
-            .getLogger(JobCreatorLocal.class);
+    private static Logger c_logger = Logger.getLogger(JobCreatorLocal.class);
     private static SystemResourceBundle m_sysResBundle = SystemResourceBundle
             .getInstance();
 
@@ -124,7 +125,9 @@ public class JobCreatorLocal implements JobCreator
             .systemNotificationEnabled();
 
     public static Vector<String> PROCESS_BATCH_IDS = new Vector<String>();
-    
+
+    private static final String LOCK = new String();
+
     //
     // PUBLIC CONSTRUCTOR
     //
@@ -157,128 +160,107 @@ public class JobCreatorLocal implements JobCreator
     public void addRequestToJob(Request p_request) throws RemoteException,
             JobCreationException
     {
-        c_logger.info("Running in addRequestToJob.");
         HashMap pages = null;
-        Job job = null;
-        long profileId = p_request.getL10nProfile().getId();
         String batchId = null;
-        
+        Job job = null;
+
         try
         {
             BatchInfo info = p_request.getBatchInfo();
             boolean isBatch = (info != null);
-            
+
             if (isBatch)
             {
                 batchId = info.getBatchId();
                 while (true)
                 {
-                    if (!PROCESS_BATCH_IDS.contains(batchId))
+                    synchronized (LOCK)
                     {
-                        PROCESS_BATCH_IDS.add(batchId);
-                        break;
+                        if (!PROCESS_BATCH_IDS.contains(batchId))
+                        {
+                            PROCESS_BATCH_IDS.add(batchId);
+                            break;
+                        }
                     }
-                    Thread.sleep(3000);
+                    Thread.sleep(2000);
                 }
             }
-            
+
+            EventFlowXmlParser parser = new EventFlowXmlParser();
+            parser.parse(p_request.getEventFlowXml());
+
+            String theJobId = parser.getJobId();
+            if (theJobId != null)
+            {
+                // as another request in another thread may have updated the
+                // job, load the updated job from DB
+                job = JobCreationMonitor
+                        .loadJobFromDB(Long.parseLong(theJobId));
+                // Update the job to "LEVERAGING" state (GBS-2137)
+                if (Job.EXTRACTING.equals(job.getState()))
+                {
+                    JobCreationMonitor.updateJobState(job, Job.LEVERAGING);
+                }
+            }
+
+            // Import source page, target page and do leveraging
             pages = m_requestProcessor.processRequest(p_request);
 
             SourcePage sp = (SourcePage) pages.remove(p_request
                     .getL10nProfile().getSourceLocale().getIdAsLong());
-
             BatchMonitor monitor = new BatchMonitor();
-            job = availableJob(p_request, monitor, isBatch, pages);
-            
-            //for GS Edition job
-            long jobId = job.getId();
-            HashMap editionJobParams = p_request.getEditionJobParams();
-            if (editionJobParams != null && editionJobParams.size() > 0)
+            if (job != null)
             {
-                //save edition job related info.
-                saveEditionJobInfo(jobId, editionJobParams);
-                
-                //job comments info (seems this won't be used)
-                Comment comment = saveJobComments(jobId, editionJobParams, p_request);
-                
-                //segment comments handling
-                HashMap segComments = (HashMap) editionJobParams.get("segComments");
-                long targetLocaleId = p_request.getTargetLocalesToImport()[0].getId();
-                saveSegCommentsToTargetServer(segComments, sp);
+                // from GBS-2137, job has already been initialized earlier
+                job = processJob(job, p_request, pages);
             }
+            else
+            {
+                job = availableJob(p_request, monitor, isBatch, pages);
+            }
+
+            // Handle GS Edition job
+            handleEditionJob(p_request, sp, job.getId());
 
             boolean isBatchComplete = isBatchComplete(job, monitor);
-            
             if (isBatchComplete)
             {
-                List<Workflow> rWorkflows = new ArrayList<Workflow>();
-                
-                Collection<Workflow> ws = job.getWorkflows();
-                for (Workflow w : ws)
-                {
-                    if (w.getAllTargetPages().size() == 0)
-                    {
-                        rWorkflows.add(w);
-                    }
-                }
-                
-                ws.removeAll(rWorkflows);
-                HibernateUtil.saveOrUpdate(job);
-                
-                for (Workflow w : rWorkflows)
-                {
-                    HibernateUtil.delete(w);
-                }
+                updateForWorkflowsWithoutTargetPages(job);
             }
 
+            // Add the source language document to the CorpusTM
             if (p_request.getType() == Request.EXTRACTED_LOCALIZATION_REQUEST)
             {
-                addSourceDocToCorpus(sp, p_request, job, isBatchComplete,
+                addSourceDocToCorpus(sp, p_request, job,
                         p_request.getBatchInfo());
             }
 
+            // Update job state
             updateJobState(job, isBatch, isBatchComplete, sp);
 
-            // Is this documentum job?
-            if (p_request.getDataSourceType().equalsIgnoreCase(
-                    DocumentumOperator.DCTM_CATEGORY))
+            // Handle Documentum job
+            if (DocumentumOperator.DCTM_CATEGORY.equalsIgnoreCase(p_request
+                    .getDataSourceType()))
             {
-                try
-                {
-                    String eventFlowXml = p_request.getEventFlowXml();
-                    EventFlowXmlParser parser = new EventFlowXmlParser();
-                    parser.parse(eventFlowXml);
-                    Element msCategory = parser
-                            .getCategory(DocumentumOperator.DCTM_CATEGORY);
-                    c_logger.debug("Starting to create a documentum job......");
-
-                    String dctmObjId = parser.getCategoryDaValue(msCategory,
-                            DocumentumOperator.DCTM_OBJECTID)[0];
-                    String isAttrFileStr = parser.getCategoryDaValue(
-                            msCategory, DocumentumOperator.DCTM_ISATTRFILE)[0];
-                    String userId = parser.getCategoryDaValue(msCategory,
-                            DocumentumOperator.DCTM_USERID)[0];
-                    Boolean isAttrFile = Boolean.valueOf(isAttrFileStr);
-
-                    if (!isAttrFile.booleanValue())
-                    {
-                        handleDocumentumJob(job, dctmObjId, userId);
-                    }
-                    c_logger.debug("Finish to create a documentum job");
-                }
-                catch (NoSuchElementException nex)
-                {
-                    c_logger.debug("Not a valid Documentum job");
-                }
-                catch (Exception ex)
-                {
-                    c_logger
-                            .error(
-                                    "Failed to write attribute back to Documentum server",
-                                    ex);
-                }
+                priorHandleDocumentumJob(parser, job);
             }
             
+            // remove job cache after batch complete
+            if (isBatchComplete)
+            {
+                String uuid = parser.getJobUuid();
+                if (uuid == null && job != null && job instanceof JobImpl)
+                {
+                    uuid = ((JobImpl) job).getUuid();
+                }
+                
+                if (uuid != null)
+                {
+                    RuntimeCache.clearJobAttributes(uuid);
+                }
+            }
+
+            // Validates all XML files included in the job.
             if (isBatchComplete)
             {
                 XmlDtdManager.validateJob(job);
@@ -286,7 +268,12 @@ public class JobCreatorLocal implements JobCreator
         }
         catch (Exception e)
         {
-            c_logger.debug("exception in job creation", e);
+            c_logger.debug("Exception in job creation", e);
+
+            if (job != null)
+            {
+                JobCreationMonitor.updateJobState(job, Job.IMPORTFAILED);
+            }
 
             // with this failure the pages need to be marked as import
             // failed because they aren't successfully added to a job.
@@ -301,7 +288,8 @@ public class JobCreatorLocal implements JobCreator
             {
             }
 
-            String[] args = { Long.toString(p_request.getId()),
+            String[] args =
+            { Long.toString(p_request.getId()),
                     job == null ? null : Long.toString(job.getId()) };
             throw new JobCreationException(
                     JobCreationException.MSG_FAILED_TO_ADD_REQUEST_TO_JOB,
@@ -321,12 +309,184 @@ public class JobCreatorLocal implements JobCreator
     //
 
     /**
+     * Continues to proceed with the creation of a job on the initial one.
+     * <p>
+     * Since GBS-2137, creating job will use this method instead of
+     * availableJob().
+     */
+    private Job processJob(Job p_job, Request p_request, HashMap p_targetPages)
+            throws JobCreationException
+    {
+        Session session = HibernateUtil.getSession();
+        Transaction transaction = session.beginTransaction();
+        Connection connection = null;
+
+        try
+        {
+            p_job.addRequest(p_request);
+            session.update(p_job);
+
+            Collection<Workflow> listOfWorkflows = p_job.getWorkflows();
+            if (listOfWorkflows != null && listOfWorkflows.size() > 0)
+            {
+                listOfWorkflows = new ArrayList<Workflow>(listOfWorkflows);
+            }
+            else
+            {
+                listOfWorkflows = m_jobAdditionEngine.createWorkflowInstances(
+                        p_request, (JobImpl) p_job, p_targetPages);
+                persistJob((JobImpl) p_job, (RequestImpl) p_request,
+                        (List<Workflow>) listOfWorkflows, session);
+            }
+
+            String hql = "from WorkflowImpl w where w.job.id = :jobId "
+                    + "and w.targetLocale.id = :targetLocaleId";
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("jobId", p_job.getId());
+
+            connection = ConnectionPool.getConnection();
+
+            for (Iterator it = p_targetPages.values().iterator(); it.hasNext();)
+            {
+                TargetPage tp = (TargetPage) it.next();
+                map.put("targetLocaleId", tp.getLocaleId());
+                List<WorkflowImpl> ws = (List<WorkflowImpl>) HibernateUtil
+                        .search(hql, map);
+                for (WorkflowImpl w : ws)
+                {
+                    if (Workflow.CANCELLED.equalsIgnoreCase(w.getState()))
+                    {
+                        continue;
+                    }
+                    tp.setWorkflowInstance(w);
+                    w.addTargetPage(tp);
+                    tp.setCVSTargetModule(m_jobAdditionEngine.getTargetModule(
+                            tp, connection));
+                    tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                    session.update(tp);
+                    session.update(w);
+                    break;
+                }
+            }
+
+            transaction.commit();
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Failed to create a new job for request: "
+                    + p_request.getId(), e);
+            try
+            {
+                transaction.rollback();
+                String args[] = new String[1];
+                args[0] = Long.toString(p_request.getId());
+                throw new JobCreationException(
+                        JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
+                        args, e);
+            }
+            catch (Exception sqle)
+            {
+                String args[] = new String[1];
+                args[0] = Long.toString(p_request.getId());
+                throw new JobCreationException(
+                        JobCreationException.MSG_FAILED_TO_CREATE_NEW_JOB,
+                        args, e);
+            }
+        }
+        finally
+        {
+            ConnectionPool.silentReturnConnection(connection);
+        }
+
+        try
+        {
+            getJobDispatchEngine().createDispatcher(p_job);
+        }
+        catch (Exception e)
+        {
+            c_logger.error(
+                    "Failed to create a dispatcher for job: "
+                            + p_job.getJobName(), e);
+        }
+        JobAdditionEngine.addJobNote(p_targetPages, (JobImpl) p_job);
+
+        return p_job;
+    }
+
+    /**
+     * Persists the job with attributes set into database.
+     */
+    private void persistJob(JobImpl job, RequestImpl request,
+            List<Workflow> listOfWorkflows, Session session)
+            throws PersistenceException
+    {
+        try
+        {
+            job.setIsWordCountReached(false);
+            job.setLeverageMatchThreshold((int) request.getL10nProfile()
+                    .getTranslationMemoryProfile().getFuzzyMatchThreshold());
+            boolean isDefaultContextMatch = PageHandler
+                    .isDefaultContextMatch(request);
+            boolean isInContextMatch = PageHandler.isInContextMatch(request);
+            if (isDefaultContextMatch)
+            {
+                job.setLeverageOption(Job.DEFAULT_CONTEXT);
+            }
+            else if (isInContextMatch)
+            {
+                job.setLeverageOption(Job.IN_CONTEXT);
+            }
+            else
+            {
+                job.setLeverageOption(Job.EXACT_ONLY);
+            }
+
+            for (Iterator<Workflow> it = listOfWorkflows.iterator(); it
+                    .hasNext();)
+            {
+                WorkflowImpl workflow = (WorkflowImpl) it.next();
+                workflow.setJob(job);
+                workflow.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                workflow.setCompanyId(job.getCompanyId());
+                workflow.setPriority(job.getPriority());
+
+                // create the workflow owners for each workflow
+                List wfOwners = workflow.getWorkflowOwners();
+                for (int i = 0; i < wfOwners.size(); i++)
+                {
+                    WorkflowOwner wfo = (WorkflowOwner) wfOwners.get(i);
+                    wfo.setWorkflow(workflow);
+                }
+
+                // go through all tasks for the workflow
+                Collection tasks = workflow.getTasks().values();
+                for (Iterator i = tasks.iterator(); i.hasNext();)
+                {
+                    TaskImpl t = (TaskImpl) i.next();
+                    t.setStateStr("DEACTIVE");
+                    t.setCompanyId(job.getCompanyId());
+                }
+                session.saveOrUpdate(workflow);
+            }
+            job.setWorkflowInstances(listOfWorkflows);
+
+            session.saveOrUpdate(job);
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Error updating job: " + job.getJobName()
+                    + " in database.", e);
+            throw new PersistenceException(e);
+        }
+    }
+
+    /**
      * Return an appropriate existing job, or create a new one if none exists.
      * This method uses a try-finally (no catch required) block to ensure that
      * all waiting threads are notified when the method is finished.
      */
-    private synchronized Job availableJob(Request p_request,
-            BatchMonitor p_monitor, boolean p_isBatch, HashMap p_targetPages)
+    private Job availableJob(Request p_request, BatchMonitor p_monitor,
+            boolean p_isBatch, HashMap p_targetPages)
             throws JobCreationException
     {
         JobImpl job = null;
@@ -334,7 +494,7 @@ public class JobCreatorLocal implements JobCreator
         int numberOfRowsUpdated = 0;
         Session session = HibernateUtil.getSession();
         Transaction transaction = session.beginTransaction();
-        long profileId = p_request.getL10nProfile().getId();
+
         try
         {
             connection = session.connection();
@@ -350,54 +510,62 @@ public class JobCreatorLocal implements JobCreator
             {
                 // get the job
                 c_logger.debug("The number of rows is " + numberOfRowsUpdated);
-                job = (JobImpl)HibernateUtil.get(JobImpl.class, arjc.getJobId());
+                job = (JobImpl) HibernateUtil.get(JobImpl.class,
+                        arjc.getJobId());
                 job.setId(arjc.getJobId());
                 job.setState(p_isBatch ? Job.BATCHRESERVED : Job.PENDING);
-                
-                if(p_request.getPriority() != null && 
-                        !"".equals(p_request.getPriority()) && 
-                        !"null".equals(p_request.getPriority()) ) {
+
+                if (p_request.getPriority() != null
+                        && !"".equals(p_request.getPriority())
+                        && !"null".equals(p_request.getPriority()))
+                {
                     job.setPriority(Integer.parseInt(p_request.getPriority()));
                 }
-                
+
                 session.update(job);
 
                 // verify if there are target pages add them to the workflow(s)
-                // if only error pages then target pages won't exist.                
+                // if only error pages then target pages won't exist.
                 if (p_targetPages != null && p_targetPages.size() > 0)
                 {
                     Collection c = p_targetPages.values();
                     Iterator it = c.iterator();
                     String hql = "from WorkflowImpl w where w.job.id = :jId "
                             + "and w.targetLocale.id = :tId";
-                    Map<String,Long> map = new HashMap<String, Long>();
+                    Map<String, Long> map = new HashMap<String, Long>();
                     map.put("jId", job.getIdAsLong());
                     while (it.hasNext())
                     {
                         TargetPage tp = (TargetPage) it.next();
                         map.put("tId", new Long(tp.getLocaleId()));
-                        List<WorkflowImpl> ws = (List<WorkflowImpl>) HibernateUtil.search(hql,
-                                map);
-                        if (ws.size() > 0)
+                        List<WorkflowImpl> ws = (List<WorkflowImpl>) HibernateUtil
+                                .search(hql, map);
+
+                        for (WorkflowImpl w : ws)
                         {
-                            WorkflowImpl w = ws.get(0);
+                            if (Workflow.CANCELLED.equalsIgnoreCase(w
+                                    .getState()))
+                                continue;
+
                             tp.setWorkflowInstance(w);
                             w.addTargetPage(tp);
-                            tp.setTimestamp(new Timestamp(System.currentTimeMillis()));
+                            tp.setTimestamp(new Timestamp(System
+                                    .currentTimeMillis()));
                             session.update(tp);
                             session.update(w);
+                            break;
                         }
                     }
-                    
+
                     // Add job notes for uploaded files if it had.
                     JobAdditionEngine.addJobNote(p_targetPages, job);
                 }
             }
-            
+
             connection.commit();
             // commit all together
             transaction.commit();
-            
+
         }
         catch (Exception e)
         {
@@ -431,13 +599,11 @@ public class JobCreatorLocal implements JobCreator
                     connection.close();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                c_logger.error(e);
+                c_logger.error(e.getMessage(), e);
             }
         }
-        
-        
 
         // A job does not exist yet, create one.
         if (numberOfRowsUpdated == 0)
@@ -446,10 +612,11 @@ public class JobCreatorLocal implements JobCreator
             {
                 job = (JobImpl) newJob(p_request, p_monitor, p_isBatch,
                         p_targetPages);
-                
-                if(p_request.getPriority() != null && 
-                        !"".equals(p_request.getPriority()) && 
-                        !"null".equals(p_request.getPriority()) ) {
+
+                if (p_request.getPriority() != null
+                        && !"".equals(p_request.getPriority())
+                        && !"null".equals(p_request.getPriority()))
+                {
                     job.setPriority(Integer.parseInt(p_request.getPriority()));
                 }
             }
@@ -462,7 +629,7 @@ public class JobCreatorLocal implements JobCreator
                         args, e);
             }
         }
-        
+
         job.setPageCount(job.getSourcePages().size());
 
         return job;
@@ -482,24 +649,28 @@ public class JobCreatorLocal implements JobCreator
                 p_targetPages);
     }
 
-    private synchronized void updateJobState(Job p_job, boolean p_isBatch,
+    private void updateJobState(Job p_job, boolean p_isBatch,
             boolean p_isBatchComplete, SourcePage p_sp)
             throws JobCreationException
     {
         try
         {
+            if (c_logger.isDebugEnabled())
+            {
+                c_logger.info("Begin update job state for job " + p_job.getId());
+            }
             if (p_isBatch)
             {
-
                 // if batch and complete
                 if (p_isBatchComplete)
                 {
                     AddingSourcePageManager.removeAllAddingFiles(p_job.getId());
-                    UpdateSourcePageManager.removeAllUpdatedFiles(p_job.getId());
-                    
+                    UpdateSourcePageManager
+                            .removeAllUpdatedFiles(p_job.getId());
+
                     List<Workflow> dispatchedWK = new ArrayList<Workflow>();
                     Job job = null;
-                    
+
                     Collection<Workflow> wks = p_job.getWorkflows();
                     for (Workflow w : wks)
                     {
@@ -539,21 +710,22 @@ public class JobCreatorLocal implements JobCreator
                         }
                         else
                         {
-                            // Sends email for creating job successfully
-                            sendEmailForJobImportSucc(job);
-                            
+                            // As word-counts have been calculated previous,
+                            // here
+                            // need not do it again.
                             getJobDispatchEngine().dispatchBatchJob(job);
-                            
+
                             String orgState = job.getOrgState();
                             if (orgState != null)
                             {
                                 job.setOrgState(null);
                                 job.setState(orgState);
                                 HibernateUtil.update(job);
-                                
+
                                 for (Workflow w : dispatchedWK)
                                 {
-                                    if (Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
+                                    if (Workflow.READY_TO_BE_DISPATCHED
+                                            .equals(w.getState()))
                                     {
                                         w.setState(Workflow.DISPATCHED);
                                         HibernateUtil.update(w);
@@ -563,7 +735,7 @@ public class JobCreatorLocal implements JobCreator
                         }
                     }
 
-//                    job.setPageCount(job.getSourcePages().size());
+                    // job.setPageCount(job.getSourcePages().size());
                     String details = getJobContentInfo(job);
                     // if there are errors in the job send an email to
                     // the appropriate people
@@ -574,6 +746,16 @@ public class JobCreatorLocal implements JobCreator
                         sendEmailFromAdmin(job, false);
                     }
                     notifyCXEofJobState(job, p_sp, details);
+                }
+                else
+                {
+                    // for GBS-2137, one page is to be finished, update the job
+                    // to "PROCESSING" state
+                    if (Job.LEVERAGING.equals(p_job.getState()))
+                    {
+                        JobCreationMonitor
+                                .updateJobState(p_job, Job.PROCESSING);
+                    }
                 }
             }
             else if (containsImportFailRequests(p_job))
@@ -601,6 +783,10 @@ public class JobCreatorLocal implements JobCreator
                 {
                     getJobDispatchEngine().wordCountIncreased(job);
                 }
+            }
+            if (c_logger.isDebugEnabled())
+            {
+                c_logger.info("Done update job state for job " + p_job.getId());
             }
         }
         catch (Exception e)
@@ -660,6 +846,34 @@ public class JobCreatorLocal implements JobCreator
     }
 
     /**
+     * If one work-flow has no any target pages, remove it from job.
+     * 
+     * @param job
+     * @throws Exception
+     */
+    private void updateForWorkflowsWithoutTargetPages(Job job) throws Exception
+    {
+        List<Workflow> rWorkflows = new ArrayList<Workflow>();
+
+        Collection<Workflow> ws = job.getWorkflows();
+        for (Workflow w : ws)
+        {
+            if (w.getAllTargetPages().size() == 0)
+            {
+                rWorkflows.add(w);
+            }
+        }
+
+        ws.removeAll(rWorkflows);
+        HibernateUtil.saveOrUpdate(job);
+
+        for (Workflow w : rWorkflows)
+        {
+            HibernateUtil.delete(w);
+        }
+    }
+
+    /**
      * Return true if the job itself or any of its requests have failed import.
      */
     private boolean containsImportFailRequests(Job p_job)
@@ -678,8 +892,7 @@ public class JobCreatorLocal implements JobCreator
             {
                 Request r = (Request) it.next();
                 importFailed = (r.getType() < 0); // if the type is less than
-                // '0' then
-                // it is a negative error type.
+                // '0' then it is a negative error type.
             }
         }
         catch (Exception e)
@@ -748,17 +961,12 @@ public class JobCreatorLocal implements JobCreator
         int reimportOption = ActivePageReimporter.getReimportOption();
         if (reimportOption == ActivePageReimporter.REIMPORT_NEW_TARGETS)
         {
-            Connection connection = null;
-
+            Session session = TmUtil.getStableSession();
             try
             {
-                connection = HibernateUtil.getSession().connection();
-                connection.setAutoCommit(false);
-
                 UpdateWorkflowAndPageStatesCommand updateState = new UpdateWorkflowAndPageStatesCommand(
                         p_job);
-                updateState.persistObjects(connection);
-                connection.commit();
+                updateState.persistObjects(session.connection());
 
                 // check if there are any requests that should be marked as
                 // failed
@@ -775,34 +983,20 @@ public class JobCreatorLocal implements JobCreator
             }
             catch (Exception e)
             {
-                c_logger
-                        .debug(
-                                "exception while updating the workflow and source page states depending on the target.",
-                                e);
-                try
-                {
-                    connection.rollback();
-                }
-                catch (Exception sqle)
-                {
-                }
-                String[] args = { Long.toString(p_job.getId()) };
+                c_logger.debug(
+                        "exception while updating the workflow and source page states depending on the target.",
+                        e);
+                String[] args =
+                { Long.toString(p_job.getId()) };
                 throw new JobCreationException(
                         JobCreationException.MSG_FAILED_TO_UPDATE_WORKFLOW_AND_PAGE_STATE,
                         args, e);
             }
             finally
             {
-                try
+                if (session != null)
                 {
-                    if (connection != null)
-                    {
-                        connection.close();
-                    }
-                }
-                catch (Exception e)
-                {
-                    c_logger.error(e);
+                    TmUtil.closeStableSession(session);
                 }
             }
         }
@@ -848,8 +1042,7 @@ public class JobCreatorLocal implements JobCreator
      *            the source page that has successfully imported.
      */
     private void addSourceDocToCorpus(SourcePage p_sourcePage,
-            Request p_request, Job p_job, boolean p_isBatchComplete,
-            BatchInfo p_batchInfo)
+            Request p_request, Job p_job, BatchInfo p_batchInfo)
     {
         if (!Modules.isCorpusInstalled())
         {
@@ -872,10 +1065,16 @@ public class JobCreatorLocal implements JobCreator
 
         try
         {
+            if (c_logger.isDebugEnabled())
+            {
+                c_logger.info("Begin adding source page to corpusTM : "
+                        + p_sourcePage.getExternalPageId());
+            }
+
             boolean deleteOriginal = true;
             String gxml = p_request.getGxml();
-            File originalSourceFile = new File(p_request
-                    .getOriginalSourceFileContent());
+            File originalSourceFile = new File(
+                    p_request.getOriginalSourceFileContent());
 
             CorpusManagerWLRemote corpusManager = ServerProxy
                     .getCorpusManager();
@@ -884,7 +1083,7 @@ public class JobCreatorLocal implements JobCreator
                             originalSourceFile, deleteOriginal);
             CorpusDocGroup cdg = sourceCorpusDoc.getCorpusDocGroup();
 
-            StringBuffer msg = new StringBuffer("Added source page ");
+            StringBuffer msg = new StringBuffer("Done adding source page ");
             msg.append(p_sourcePage.getExternalPageId());
             msg.append(" (");
             msg.append(cdg.getId()).append("/");
@@ -904,8 +1103,10 @@ public class JobCreatorLocal implements JobCreator
             // reimport finally ran the call above "new File(
             // p_request.getOriginalSourceFileContent())" encountered
             // a null pointer exception.
-            c_logger.error("Could not add source page "
-                    + p_sourcePage.getExternalPageId() + " to corpus.", ex);
+            c_logger.error(
+                    "Could not add source page "
+                            + p_sourcePage.getExternalPageId() + " to corpus.",
+                    ex);
         }
     }
 
@@ -928,8 +1129,8 @@ public class JobCreatorLocal implements JobCreator
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            SourcePage clone = (SourcePage) session.get(SourcePage.class, sp
-                    .getIdAsLong());
+            SourcePage clone = (SourcePage) session.get(SourcePage.class,
+                    sp.getIdAsLong());
             clone.setCuvId(p_sourceCorpusDoc.getIdAsLong());
             session.update(clone);
             transaction.commit();
@@ -955,64 +1156,6 @@ public class JobCreatorLocal implements JobCreator
 
     }
 
-    // Sends the notification for creating job successful
-    private void sendEmailForJobImportSucc(Job p_job) throws Exception
-    {
-        if (!m_systemNotificationEnabled)
-        {
-            return;
-        }
-
-        String companyIdStr = p_job.getCompanyId();
-        Project project = ServerProxy.getProjectHandler().getProjectById(p_job.getProjectId());
-        GlobalSightLocale sourceLocale = p_job.getSourceLocale();
-        Date createDate = p_job.getCreateDate();
-        User jobUploader = p_job.getCreateUser();
-        String fpNames = "";
-        List<FileProfile> fps = p_job.getAllFileProfiles();
-        Set<String> fpSet = new HashSet<String>();
-        for (FileProfile fp : fps)
-        {
-            String tempFPName = fp.getName();
-            boolean isXLZ = ServerProxy.getFileProfilePersistenceManager()
-                                       .isXlzReferenceXlfFileProfile(tempFPName);
-            if (isXLZ)
-            {
-                tempFPName = tempFPName.substring(0, tempFPName.length() - 4);
-            }
-            fpSet.add(tempFPName);
-        }
-        fpNames = fpSet.toString();
-        fpNames = fpNames.substring(1, fpNames.length() - 1);
-
-        String messageArgs[] = new String[8];
-        messageArgs[0] = Long.toString(p_job.getId());
-        messageArgs[1] = p_job.getJobName();
-        messageArgs[2] = project.getName();
-        messageArgs[3] = sourceLocale.getDisplayName();
-        messageArgs[4] = String.valueOf(p_job.getWordCount());
-//        messageArgs[5] = DateHelper.getFormattedDateAndTime(createDate,Locale.US);
-        messageArgs[6] = jobUploader.getSpecialNameForEmail();
-        messageArgs[7] = fpNames;
-
-        String subject = MailerConstants.JOB_IMPORT_SUCC_SUBJECT;
-        String message = MailerConstants.JOB_IMPORT_SUCC_MESSAGE;
-        List<String> receiverList = new ArrayList<String>();
-        receiverList.add(jobUploader.getUserId());
-        String managerID = project.getProjectManagerId();
-        if (null != managerID && !receiverList.contains(managerID))
-        {
-            receiverList.add(managerID);
-        }
-
-        for (int i = 0; i < receiverList.size(); i++)
-        {
-            User receiver = (User) ServerProxy.getUserManager().getUser(receiverList.get(i));
-            messageArgs[5] = DateHelper.getFormattedDateAndTimeFromUser(createDate,receiver);
-            sendEmail(receiver, messageArgs, subject, message, companyIdStr);
-        }
-    }
-    
     // Sends mail from the Admin to the PM about a Job that contains Import
     // Failures
     private void sendEmailFromAdmin(Job p_job, boolean p_reimportAsUnextracted)
@@ -1081,12 +1224,14 @@ public class JobCreatorLocal implements JobCreator
         if (shouldNotifyPm)
         {
             String pmUserId = l10nProfile.getProject().getProjectManagerId();
-            if (!mailList.contains(pmUserId)) {
+            if (!mailList.contains(pmUserId))
+            {
                 User pm = ServerProxy.getUserManager().getUser(pmUserId);
                 Locale pmLocale = LocaleWrapper.getLocale(pm
                         .getDefaultUILocale());
 
-                if (pmLocale != loc) {
+                if (pmLocale != loc)
+                {
                     messageArgs[2] = createEmailMessageBody(p_job, pmLocale,
                             p_reimportAsUnextracted);
                 }
@@ -1098,7 +1243,7 @@ public class JobCreatorLocal implements JobCreator
 
     // send mail to user (Project manager / Workflow Manager)
     private void sendEmail(User p_user, String[] p_messageArgs,
-            String p_subject, String p_message, String p_companyIdStr) 
+            String p_subject, String p_message, String p_companyIdStr)
             throws Exception
     {
         if (!m_systemNotificationEnabled)
@@ -1124,8 +1269,9 @@ public class JobCreatorLocal implements JobCreator
         if (p_job.getState().equals(Job.IMPORTFAILED)
                 || p_reimportAsUnextracted)
         {
-            msgBody.append(bundle.getString(p_reimportAsUnextracted ? 
-                    "msg_import_correction_source_pages" : "msg_import_fail_source_pages"));
+            msgBody.append(bundle
+                    .getString(p_reimportAsUnextracted ? "msg_import_correction_source_pages"
+                            : "msg_import_fail_source_pages"));
 
             msgBody.append(":\r\n\r\n");
 
@@ -1180,9 +1326,7 @@ public class JobCreatorLocal implements JobCreator
                             msgBody.append(tp.getSourcePage()
                                     .getExternalPageId());
                             msgBody.append("\r\n      ");
-                            msgBody
-                                    .append(bundle
-                                            .getString("lb_failed_due_to"));
+                            msgBody.append(bundle.getString("lb_failed_due_to"));
                             msgBody.append(": ");
                             msgBody.append(tp.getImportError()
                                     .getLocalizedMessage());
@@ -1206,7 +1350,7 @@ public class JobCreatorLocal implements JobCreator
         boolean notifyFailure = p_job.getRequestList().size() == 0
                 || m_specialFormatTypes.size() == 0;
 
-        // if no format types are set in property file, just udpate job state
+        // if no format types are set in property file, just update job state
         if (notifyFailure)
         {
             updateJobState(p_job, Job.IMPORTFAILED);
@@ -1228,8 +1372,9 @@ public class JobCreatorLocal implements JobCreator
             String preMergeEvent = parser.getPreMergeEvent();
 
             notifyFailure = preMergeEvent == null
-                    || CxeMessageType.getCxeMessageType(
-                            CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT)
+                    || CxeMessageType
+                            .getCxeMessageType(
+                                    CxeMessageType.UNEXTRACTED_LOCALIZED_EVENT)
                             .getName().equals(preMergeEvent)
                     || !m_specialFormatTypes.contains(name);
             if (notifyFailure)
@@ -1255,31 +1400,38 @@ public class JobCreatorLocal implements JobCreator
 
         if (DataSourceType.TEAM_SITE.equals(dataSourceType))
         {
-            CxeProxy.importFromTeamSite(p_parser.getDataValue("category",
-                    "SourceFileName"), p_parser.getConvertedFileName(), Integer
-                    .parseInt(p_parser.getSourceFileSize()), p_parser
-                    .getSourceLocale(), p_parser.getSourceEncoding(), p_parser
-                    .getBatchId(), 1, 1, 1, 1,
-                    p_parser.getSourceDataSourceId(), p_parser
-                            .getL10nProfileId(), jobName, p_parser
-                            .getDataValue("category", "UserName"), p_parser
-                            .getServerName(), p_parser.getStoreName(),
+            CxeProxy.importFromTeamSite(
+                    p_parser.getDataValue("category", "SourceFileName"),
+                    p_parser.getConvertedFileName(),
+                    Integer.parseInt(p_parser.getSourceFileSize()),
+                    p_parser.getSourceLocale(), p_parser.getSourceEncoding(),
+                    p_parser.getBatchId(), 1, 1, 1, 1,
+                    p_parser.getSourceDataSourceId(),
+                    p_parser.getL10nProfileId(), jobName,
+                    p_parser.getDataValue("category", "UserName"),
+                    p_parser.getServerName(), p_parser.getStoreName(),
                     Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N);
 
         }
         else if (DataSourceType.VIGNETTE.equals(dataSourceType))
         {
-            CxeProxy.importFromVignette(jobName, p_parser.getBatchId(), 1, 1,
-                    1, 1, p_parser.getDataValue("category", "ObjectId"),
-                    p_parser.getDataValue("category", "Path"), p_parser
-                            .getSourceDataSourceId(), p_parser.getDataValue(
-                            "category", "SourceProjectMid")
+            CxeProxy.importFromVignette(
+                    jobName,
+                    p_parser.getBatchId(),
+                    1,
+                    1,
+                    1,
+                    1,
+                    p_parser.getDataValue("category", "ObjectId"),
+                    p_parser.getDataValue("category", "Path"),
+                    p_parser.getSourceDataSourceId(),
+                    p_parser.getDataValue("category", "SourceProjectMid")
                             + "|"
                             + p_parser.getDataValue("category",
-                                    "TargetProjectMid"), p_parser.getDataValue(
-                            "category", "ReturnStatus"), p_parser.getDataValue(
-                            "category", "VersionFlag"), Boolean.TRUE,
-                    CxeProxy.IMPORT_TYPE_L10N);
+                                    "TargetProjectMid"),
+                    p_parser.getDataValue("category", "ReturnStatus"),
+                    p_parser.getDataValue("category", "VersionFlag"),
+                    Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N);
         }
         else if (dataSourceType != null
                 && dataSourceType.startsWith(DataSourceType.FILE_SYSTEM))
@@ -1288,11 +1440,11 @@ public class JobCreatorLocal implements JobCreator
             String fileName = p_parser.getDataValue("source", "Filename");
             String initiatorId = p_parser.getDataValue("source",
                     "importInitiator");
-            CxeProxy.importFromFileSystem(fileName, jobName, null, batchId, p_parser
-                    .getSourceDataSourceId(), new Integer(1), new Integer(1),
-                    new Integer(1), new Integer(1), new Boolean(isAutoImport),
-                    Boolean.TRUE, CxeProxy.IMPORT_TYPE_L10N, initiatorId,
-                    new Integer(0));
+            CxeProxy.importFromFileSystem(fileName, jobName, null, batchId,
+                    p_parser.getSourceDataSourceId(), new Integer(1),
+                    new Integer(1), new Integer(1), new Integer(1),
+                    new Boolean(isAutoImport), Boolean.TRUE,
+                    CxeProxy.IMPORT_TYPE_L10N, initiatorId, new Integer(0));
         }
         else
         {
@@ -1320,9 +1472,8 @@ public class JobCreatorLocal implements JobCreator
         }
         catch (Exception e)
         {
-            c_logger
-                    .error("Failed to discard the job with import failed state. "
-                            + e);
+            c_logger.error("Failed to discard the job with import failed state. "
+                    + e);
         }
     }
 
@@ -1337,8 +1488,8 @@ public class JobCreatorLocal implements JobCreator
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            Job jobClone = (Job) session.get(p_job.getClass(), new Long(p_job
-                    .getId()));
+            Job jobClone = (Job) session.get(p_job.getClass(),
+                    new Long(p_job.getId()));
             jobClone.setState(p_state);
             session.update(jobClone);
             transaction.commit();
@@ -1377,8 +1528,7 @@ public class JobCreatorLocal implements JobCreator
 
             if (value == null || value.length() == 0)
             {
-                c_logger
-                        .debug("No format types to handle during import failure.");
+                c_logger.debug("No format types to handle during import failure.");
                 return;
             }
 
@@ -1424,7 +1574,7 @@ public class JobCreatorLocal implements JobCreator
             {
                 return;
             }
-            
+
             Request r = requests.iterator().next();
 
             EventFlowXmlParser parser = new EventFlowXmlParser();
@@ -1458,6 +1608,7 @@ public class JobCreatorLocal implements JobCreator
     {
         Locale uiLocale = new Locale("en", "US");
         StringBuffer sB = new StringBuffer();
+        @SuppressWarnings("unchecked")
         List sourcePages = new ArrayList(p_job.getSourcePages());
         for (int i = 0; i < sourcePages.size(); i++)
         {
@@ -1473,193 +1624,287 @@ public class JobCreatorLocal implements JobCreator
             sB.append("Message="
                     + ((state.equals(PageState.IMPORT_FAIL) || (curPage
                             .getRequest().getType() < 0)) ? curPage
-                            .getRequest().getException().getTopLevelMessage(
-                                    uiLocale) : "") + "\n");
+                            .getRequest().getException()
+                            .getTopLevelMessage(uiLocale) : "") + "\n");
         }
         return sB.toString();
+    }
+
+    /**
+     * Prior real Documentum job handling.
+     */
+    private void priorHandleDocumentumJob(EventFlowXmlParser parser, Job job)
+    {
+        try
+        {
+            Element msCategory = parser
+                    .getCategory(DocumentumOperator.DCTM_CATEGORY);
+            c_logger.debug("Starting to create a documentum job......");
+
+            String dctmObjId = parser.getCategoryDaValue(msCategory,
+                    DocumentumOperator.DCTM_OBJECTID)[0];
+            String isAttrFileStr = parser.getCategoryDaValue(msCategory,
+                    DocumentumOperator.DCTM_ISATTRFILE)[0];
+            String userId = parser.getCategoryDaValue(msCategory,
+                    DocumentumOperator.DCTM_USERID)[0];
+            Boolean isAttrFile = Boolean.valueOf(isAttrFileStr);
+
+            if (!isAttrFile.booleanValue())
+            {
+                handleDocumentumJob(job, dctmObjId, userId);
+            }
+            c_logger.debug("Finish to create a documentum job");
+        }
+        catch (NoSuchElementException nex)
+        {
+            c_logger.debug("Not a valid Documentum job");
+        }
+        catch (Exception ex)
+        {
+            c_logger.error(
+                    "Failed to write attribute back to Documentum server", ex);
+        }
     }
 
     /**
      * Write the custom attributes back to Documentum Server, including jobId,
      * Workflow Ids.
      * 
-     * @param job -
-     *            The new job created just now.
-     * @param objId -
-     *            Documentum Object Id.
+     * @param job
+     *            - The new job created just now.
+     * @param objId
+     *            - Documentum Object Id.
      * @throws Exception
      */
     private void handleDocumentumJob(Job job, String objId, String userId)
             throws Exception
     {
-
-        Collection wfIdsList = new ArrayList();
-        Connection connection = PersistenceService.getInstance()
-                .getConnection();
+    	Connection connection = null;
         PreparedStatement psQueryWfIds = null;
-        StringBuffer debugInfo = new StringBuffer();
-
-        // Find all the workflows for this Documentum Job.
-        String jobId = String.valueOf(job.getJobId());
-        debugInfo.append("JobId=").append(jobId).append(", ");
-        debugInfo.append("WorkflowIds=");
-
-        psQueryWfIds = connection
-                .prepareStatement(DocumentumOperator.DCTM_SELWFI_SQL);
-        psQueryWfIds.setLong(1, job.getId());
-        ResultSet rs = psQueryWfIds.executeQuery();
-        while (rs.next())
+        ResultSet rs = null;
+        try
         {
-            long wfId = rs.getLong(1);
-            wfIdsList.add(new Long(wfId));
-            debugInfo.append(wfId).append(" ");
-        }
-        psQueryWfIds.close();
+            Collection<Long> wfIdsList = new ArrayList<Long>();
+            connection = DbUtil.getConnection();
+            StringBuffer debugInfo = new StringBuffer();
 
-        PersistenceService.getInstance().returnConnection(connection);
-        c_logger
-                .debug("Writing the custom attributes(jobId, workflow ids) back to Documentum server");
-        // Write custom attributes(jobId, workflow ids) back to Documentum
-        // Server.
-        DocumentumOperator.getInstance().writeCustomAttrsBack(userId, objId,
-                jobId, wfIdsList);
-        c_logger.debug(debugInfo.toString());
+            // Find all the workflows for this Documentum Job.
+            String jobId = String.valueOf(job.getJobId());
+            debugInfo.append("JobId=").append(jobId).append(", ");
+            debugInfo.append("WorkflowIds=");
+
+            psQueryWfIds = connection
+                    .prepareStatement(DocumentumOperator.DCTM_SELWFI_SQL);
+            psQueryWfIds.setLong(1, job.getId());
+            rs = psQueryWfIds.executeQuery();
+            while (rs.next())
+            {
+                long wfId = rs.getLong(1);
+                wfIdsList.add(new Long(wfId));
+                debugInfo.append(wfId).append(" ");
+            }
+
+            c_logger.debug("Writing the custom attributes(jobId, workflow ids) back to Documentum server");
+            // Write custom attributes(jobId, workflow ids) back to Documentum
+            // Server.
+            DocumentumOperator.getInstance().writeCustomAttrsBack(userId, objId,
+                    jobId, wfIdsList);
+            c_logger.debug(debugInfo.toString());        	
+        }
+        finally
+        {
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(psQueryWfIds);
+        	DbUtil.silentReturnConnection(connection);
+        }
     }
-    
+
+    // ////////////////////////////////////////////////////////////////////////
+    // /////////////////// GS Edition Private Methods Start ///////////////////
+    // ////////////////////////////////////////////////////////////////////////
+    /**
+     * Handle GS Edition related things.
+     * 
+     * @throws Exception
+     */
+    private void handleEditionJob(Request p_request, SourcePage p_sp,
+            long p_jobId) throws Exception
+    {
+        HashMap editionJobParams = p_request.getEditionJobParams();
+        if (editionJobParams != null && editionJobParams.size() > 0)
+        {
+            // save edition job related info.
+            saveEditionJobInfo(p_jobId, editionJobParams);
+
+            // job comments info (seems this won't be used)
+            saveJobComments(p_jobId, editionJobParams, p_request);
+
+            // segment comments handling
+            HashMap segComments = (HashMap) editionJobParams.get("segComments");
+            saveSegCommentsToTargetServer(segComments, p_sp);
+        }
+    }
+
     /**
      * Save Edition job info.
+     * 
      * @param p_jobId
      * @param p_editonJobInfoMap
      * @throws Exception
      */
-    private void saveEditionJobInfo(long p_jobId, HashMap p_editonJobInfoMap) 
-        throws Exception
+    private void saveEditionJobInfo(long p_jobId, HashMap p_editonJobInfoMap)
+            throws Exception
     {
         String jobId = String.valueOf(p_jobId);
         String originalTaskId = (String) p_editonJobInfoMap.get("taskId");
         String originalEndpoint = (String) p_editonJobInfoMap.get("wsdlUrl");
         String originalUserName = (String) p_editonJobInfoMap.get("userName");
         String originalPassword = (String) p_editonJobInfoMap.get("password");
-        
-        JobEditionInfo jei = new JobEditionInfo(jobId, originalTaskId, 
+
+        JobEditionInfo jei = new JobEditionInfo(jobId, originalTaskId,
                 originalEndpoint, originalUserName, originalPassword);
-        
-        if(!isEdtionJobInfoExist(jobId, originalEndpoint)) {
-            try {
+
+        if (!isEdtionJobInfoExist(jobId, originalEndpoint))
+        {
+            try
+            {
                 HibernateUtil.save(jei);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 String message = "Failed to save edition job info.";
                 c_logger.error(message);
-    //          throw new Exception(message, e);
+                // throw new Exception(message, e);
             }
         }
     }
-    
+
     /*
-     * If a job has 2 or more pages, when create job on GS Edition server, 
-     * ambassador will create JobEditionInfo 2 or more times, so check if
-     * the JobEditionInfo has been created, that will insure the JobEditionInfo
-     * will only be created once.
+     * If a job has 2 or more pages, when create job on GS Edition server,
+     * ambassador will create JobEditionInfo 2 or more times, so check if the
+     * JobEditionInfo has been created, that will insure the JobEditionInfo will
+     * only be created once.
      */
-    private boolean isEdtionJobInfoExist(String jobId, String originalEndpoint) {
-        try {
+    private boolean isEdtionJobInfoExist(String jobId, String originalEndpoint)
+    {
+        try
+        {
             String hql = "from JobEditionInfo a where a.jobId = :id and a.url = :url";
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("id", jobId);
             map.put("url", originalEndpoint);
             Collection servers = HibernateUtil.search(hql, map);
             Iterator i = servers.iterator();
-            
-            if(i.hasNext()) {
+
+            if (i.hasNext())
+            {
                 return true;
             }
         }
-        catch (Exception pe) {
-            c_logger.error("Persistence Exception when retrieving JobEditionInfo", pe);
+        catch (Exception pe)
+        {
+            c_logger.error(
+                    "Persistence Exception when retrieving JobEditionInfo", pe);
         }
-        
+
         return false;
     }
-    
+
     /*
-     * When create GS Edition job on remote GS EDITION server, the issues of 
-     * serverA will take to the remote server and be new issues of the new job of
-     * remote GS Edition server, if the job has 2 or more pages, every page will
-     * call  saveSegCommentsToTargetServer() to save issues, so should check if the
-     * tuv issues have been added.
+     * When create GS Edition job on remote GS EDITION server, the issues of
+     * serverA will take to the remote server and be new issues of the new job
+     * of remote GS Edition server, if the job has 2 or more pages, every page
+     * will call saveSegCommentsToTargetServer() to save issues, so should check
+     * if the tuv issues have been added.
      */
-    private boolean isEditionIssueExist(long newTUVId) {
-        try {
+    private boolean isEditionIssueExist(long newTUVId)
+    {
+        try
+        {
             String hql = "from IssueImpl a where a.levelObjectId = :id";
             HashMap<String, Long> map = new HashMap<String, Long>();
             map.put("id", newTUVId);
             Collection issues = HibernateUtil.search(hql, map);
             Iterator i = issues.iterator();
-            
-            if(i.hasNext()) {
+
+            if (i.hasNext())
+            {
                 return true;
             }
         }
-        catch (Exception pe) {
-            c_logger.error("Persistence Exception when retrieving JobEditionInfo", pe);
+        catch (Exception pe)
+        {
+            c_logger.error(
+                    "Persistence Exception when retrieving JobEditionInfo", pe);
         }
-        
+
         return false;
     }
-    
-    private Comment saveJobComments(long p_jobId, HashMap p_editionJobInfoMap, Request p_request)
-        throws Exception
+
+    private Comment saveJobComments(long p_jobId, HashMap p_editionJobInfoMap,
+            Request p_request) throws Exception
     {
         Comment comment = null;
-        try {
+        try
+        {
             EventFlowXmlParser parser = new EventFlowXmlParser();
             parser.parse(p_request.getEventFlowXml());
             String currentUserName = parser.getSourceImportInitiatorId();
-            
-            Vector jobComments = (Vector) p_editionJobInfoMap.get("jobComments");
-            String originalWsdlUrl = (String) p_editionJobInfoMap.get("wsdlUrl");
+
+            Vector jobComments = (Vector) p_editionJobInfoMap
+                    .get("jobComments");
+            String originalWsdlUrl = (String) p_editionJobInfoMap
+                    .get("wsdlUrl");
             if (jobComments != null && jobComments.size() > 0)
             {
                 Iterator jobCommentsIter = jobComments.iterator();
-                WorkObject currentJob = JobPersistenceAccessor.getJob(p_jobId, true);
+                WorkObject currentJob = JobPersistenceAccessor.getJob(p_jobId,
+                        true);
                 while (jobCommentsIter.hasNext())
                 {
-                    //jobComment style: <id>+_+<create_date>+_+<creator_user_id>
-                    //+_+<comment_text>+_+<comment_object_id>+_+<comment_object_type>+_+<original_id>
+                    // jobComment style:
+                    // <id>+_+<create_date>+_+<creator_user_id>
+                    // +_+<comment_text>+_+<comment_object_id>+_+<comment_object_type>+_+<original_id>
                     String jobComment = (String) jobCommentsIter.next();
                     String[] jcs = jobComment.split("\\+\\_\\+");
                     String originalId = null;
                     String commentStr = null;
-                    for (int i=0; i<jcs.length; i++)
+                    for (int i = 0; i < jcs.length; i++)
                     {
-                        if (i==0){
+                        if (i == 0)
+                        {
                             originalId = jcs[i];
                         }
-                        if (i==3){
+                        if (i == 3)
+                        {
                             commentStr = jcs[i];
                         }
                     }
 
                     comment = ServerProxy.getCommentManager().saveComment(
-                            currentJob, p_jobId, currentUserName+ " " + currentUserName, 
+                            currentJob, p_jobId,
+                            currentUserName + " " + currentUserName,
                             commentStr, originalId, originalWsdlUrl);
                 }
             }
-        } catch (Exception ex) {
-            String msg = "Failed to save comment for job : " + p_jobId;
-            c_logger.error(msg);
-//          throw new Exception(msg, ex);
         }
-        
+        catch (Exception ex)
+        {
+            String msg = "Failed to save comment for job : " + p_jobId;
+            c_logger.error(msg, ex);
+            // throw new Exception(msg, ex);
+        }
+
         return comment;
     }
-    
-    private void saveSegCommentsToTargetServer(HashMap p_segComments, SourcePage p_sourcePage)
+
+    private void saveSegCommentsToTargetServer(HashMap p_segComments,
+            SourcePage p_sourcePage)
     {
         CommentManagerWLRemote commentManager = ServerProxy.getCommentManager();
-        
+
         Iterator iter = null;
-        if (p_segComments != null && p_segComments.size() > 0) 
+        if (p_segComments != null && p_segComments.size() > 0)
         {
             iter = p_segComments.entrySet().iterator();
         }
@@ -1667,24 +1912,28 @@ public class JobCreatorLocal implements JobCreator
         while (iter != null && iter.hasNext())
         {
             Map.Entry entry = (Map.Entry) iter.next();
-            long _tuId = ((Long) entry.getKey()).longValue();//key
-            HashMap issueCommentMap = (HashMap) entry.getValue();//value
-            
+            long _tuId = ((Long) entry.getKey()).longValue();// key
+            HashMap issueCommentMap = (HashMap) entry.getValue();// value
+
             long _issueId = ((Long) issueCommentMap.get("IssueID")).longValue();
-            long _issueObjectId = ((Long) issueCommentMap.get("LevelObjectId")).longValue(); //original segment/tuv id
-//          String _issueObjectType = (String) issueCommentMap.get("LevelObjectType");
-            //java.util.Date _createDate = (java.util.Date) issueCommentMap.get("CreateDate");
+            long _issueObjectId = ((Long) issueCommentMap.get("LevelObjectId"))
+                    .longValue(); // original segment/tuv id
+            // String _issueObjectType = (String)
+            // issueCommentMap.get("LevelObjectType");
+            // java.util.Date _createDate = (java.util.Date)
+            // issueCommentMap.get("CreateDate");
             String _creatorUserId = (String) issueCommentMap.get("CreatorId");
             String _title = (String) issueCommentMap.get("Title");
             String _priority = (String) issueCommentMap.get("Priority");
             String _status = (String) issueCommentMap.get("Status");
-//          String _logicalKey = (String) issueCommentMap.get("LogicalKey");
+            // String _logicalKey = (String) issueCommentMap.get("LogicalKey");
             String _category = (String) issueCommentMap.get("Category");
-            
-            //get newTuvId by original TuId and TuvId.
+
+            // get newTuvId by original TuId and TuvId.
             long newTuvId = -1;
             IssueEditionRelation ier = null;
-            try {
+            try
+            {
                 String hql = "from IssueEditionRelation a where a.originalTuId = :originalTuId and a.originalTuvId = :originalTuvId";
                 HashMap<String, Long> map = new HashMap<String, Long>();
                 map.put("originalTuId", new Long(_tuId));
@@ -1692,122 +1941,177 @@ public class JobCreatorLocal implements JobCreator
                 Collection coll = HibernateUtil.search(hql, map);
                 Iterator itr = coll.iterator();
 
-                //Iterator itr = HibernateUtil.search(hql, new Long(_tuId), new Long(_issueObjectId)).iterator();
+                // Iterator itr = HibernateUtil.search(hql, new Long(_tuId), new
+                // Long(_issueObjectId)).iterator();
                 if (itr != null && itr.hasNext())
                 {
                     ier = (IssueEditionRelation) itr.next();
-                    newTuvId = ier.getTuv().getId();
+                    newTuvId = ier.getTuvId();
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 c_logger.error("Failed to get newTuvId by originalTuId : "
-                        + _tuId + " and originalTuvId : " + _issueObjectId + " from IssueEditionRelation");
+                        + _tuId + " and originalTuvId : " + _issueObjectId
+                        + " from IssueEditionRelation");
             }
 
-            //When create GS Edition job on remote GS EDITION server, the issues of 
-            // serverA will take to the remote server and be new issues of the new job of
-            //remote GS Edition server, if the job has 2 or more pages, every page will
-            //call  saveSegCommentsToTargetServer() to save issues, so should check if the new
-            //tuv issues have been added.
-            if(!isEditionIssueExist(newTuvId)) {
-                //1.Save segment comments
-                //2.Fill out values of columns:ORIGINAL_TUV_ID and ORIGINAL_ISSUE_HISTORY_ID in "issue_edition_relation" table.
-                if (newTuvId > 0) 
+            // When create GS Edition job on remote GS EDITION server, the
+            // issues of
+            // serverA will take to the remote server and be new issues of the
+            // new job of
+            // remote GS Edition server, if the job has 2 or more pages, every
+            // page will
+            // call saveSegCommentsToTargetServer() to save issues, so should
+            // check if the new
+            // tuv issues have been added.
+            if (!isEditionIssueExist(newTuvId))
+            {
+                // 1.Save segment comments
+                // 2.Fill out values of columns:ORIGINAL_TUV_ID and
+                // ORIGINAL_ISSUE_HISTORY_ID in "issue_edition_relation" table.
+                if (newTuvId > 0)
                 {
                     List issueHistoryIdPairList = new ArrayList();
-                    Vector _issueHistoriesVector = (Vector) issueCommentMap.get("HistoryVec");
-                    if (_issueHistoriesVector != null && _issueHistoriesVector.size() > 0 )
+                    Vector _issueHistoriesVector = (Vector) issueCommentMap
+                            .get("HistoryVec");
+                    if (_issueHistoriesVector != null
+                            && _issueHistoriesVector.size() > 0)
                     {
-                        for (int i=0; i<_issueHistoriesVector.size(); i++)
+                        for (int i = 0; i < _issueHistoriesVector.size(); i++)
                         {
-                            HashMap issueHistoryMap = (HashMap) _issueHistoriesVector.get(i);
-                            long _historyId = ((Long)issueHistoryMap.get("HistoryID")).longValue();
-                            String _reportedBy = (String) issueHistoryMap.get("ReportedBy");
-                            String _comment = (String) issueHistoryMap.get("Comment");
-                            GlobalSightLocale[] aaa = p_sourcePage.getRequest().getTargetLocalesToImport();
-                            //add an new issue
+                            HashMap issueHistoryMap = (HashMap) _issueHistoriesVector
+                                    .get(i);
+                            long _historyId = ((Long) issueHistoryMap
+                                    .get("HistoryID")).longValue();
+                            String _reportedBy = (String) issueHistoryMap
+                                    .get("ReportedBy");
+                            String _comment = (String) issueHistoryMap
+                                    .get("Comment");
+                            GlobalSightLocale[] aaa = p_sourcePage.getRequest()
+                                    .getTargetLocalesToImport();
+                            // add an new issue
                             long newIssueId = -1;
-                            if (i==0)
+                            if (i == 0)
                             {
-                                try {
+                                try
+                                {
                                     /*
-                                    Iterator targetPageItr = p_sourcePage.getTargetPages().iterator();
-                                    long tpLocaleId = -1;
-                                    if (targetPageItr.hasNext()) {
-                                        TargetPage tp = (TargetPage) targetPageItr.next();
-                                        tpLocaleId = tp.getLocaleId();
-                                    }
-                                    */
-                                    long targetPageId = ServerProxy.getPageManager()
-                                            .getTargetPage(p_sourcePage.getId(), aaa[0].getId()).getId();
-                                    long newTuId = ServerProxy.getTuvManager()
-                                            .getTuvForSegmentEditor(newTuvId).getTu().getId();
-    
-                                    String logicalKey = CommentHelper.makeLogicalKey(targetPageId, newTuId, newTuvId, 0);
-    
-                                    Issue newIssue = commentManager
-                                        .addIssue(Issue.TYPE_SEGMENT, newTuvId, _title, 
-                                                _priority, _status, _category, 
-                                                        _creatorUserId, _comment, logicalKey);
+                                     * Iterator targetPageItr =
+                                     * p_sourcePage.getTargetPages().iterator();
+                                     * long tpLocaleId = -1; if
+                                     * (targetPageItr.hasNext()) { TargetPage tp
+                                     * = (TargetPage) targetPageItr.next();
+                                     * tpLocaleId = tp.getLocaleId(); }
+                                     */
+                                    long targetPageId = ServerProxy
+                                            .getPageManager()
+                                            .getTargetPage(
+                                                    p_sourcePage.getId(),
+                                                    aaa[0].getId()).getId();
+                                    long newTuId = ServerProxy
+                                            .getTuvManager()
+                                            .getTuvForSegmentEditor(newTuvId,
+                                                    p_sourcePage.getCompanyId())
+                                            .getTuId();
+
+                                    String logicalKey = CommentHelper
+                                            .makeLogicalKey(targetPageId,
+                                                    newTuId, newTuvId, 0);
+
+                                    Issue newIssue = commentManager.addIssue(
+                                            Issue.TYPE_SEGMENT, newTuvId,
+                                            _title, _priority, _status,
+                                            _category, _creatorUserId,
+                                            _comment, logicalKey);
                                     newIssueId = newIssue.getId();
-                                    //only one history in this issue now
-                                    IssueHistoryImpl his = (IssueHistoryImpl)newIssue.getHistory().get(0);
-                                    long newHistoryId = ((IssueHistoryImpl) newIssue.getHistory().get(0)).getDbId();
-                                    issueHistoryIdPairList.add(_historyId + "_" + newHistoryId);
-                                } catch (Exception e) {
-                                    c_logger.error("Failed to add new issue for tuvId : " + newTuvId);
+                                    // only one history in this issue now
+                                    IssueHistoryImpl his = (IssueHistoryImpl) newIssue
+                                            .getHistory().get(0);
+                                    long newHistoryId = ((IssueHistoryImpl) newIssue
+                                            .getHistory().get(0)).getDbId();
+                                    issueHistoryIdPairList.add(_historyId + "_"
+                                            + newHistoryId);
+                                }
+                                catch (Exception e)
+                                {
+                                    c_logger.error("Failed to add new issue for tuvId : "
+                                            + newTuvId);
                                 }
                             }
-                            //reply one by one
+                            // reply one by one
                             else
                             {
-                                //add issue successfully when i==0
-                                if (newIssueId > 0) 
+                                // add issue successfully when i==0
+                                if (newIssueId > 0)
                                 {
                                     try
                                     {
-                                        Issue newIssue = commentManager.replyToIssue(newIssueId, _title, _priority, 
-                                                        _status, _category, _reportedBy, _comment);
-                                        Iterator historyItr = newIssue.getHistory().iterator();
-                                        while (historyItr != null && historyItr.hasNext())
+                                        Issue newIssue = commentManager
+                                                .replyToIssue(newIssueId,
+                                                        _title, _priority,
+                                                        _status, _category,
+                                                        _reportedBy, _comment);
+                                        Iterator historyItr = newIssue
+                                                .getHistory().iterator();
+                                        while (historyItr != null
+                                                && historyItr.hasNext())
                                         {
-                                            long newHistoryId = ((IssueHistoryImpl) historyItr.next()).getId();
-                                            String historyIDPair = _historyId + "_" + newHistoryId;
-                                            if ( !issueHistoryIdPairList.contains(historyIDPair) )
+                                            long newHistoryId = ((IssueHistoryImpl) historyItr
+                                                    .next()).getId();
+                                            String historyIDPair = _historyId
+                                                    + "_" + newHistoryId;
+                                            if (!issueHistoryIdPairList
+                                                    .contains(historyIDPair))
                                             {
-                                                issueHistoryIdPairList.add(historyIDPair);
+                                                issueHistoryIdPairList
+                                                        .add(historyIDPair);
                                             }
                                         }
                                     }
-                                    catch (Exception e) 
+                                    catch (Exception e)
                                     {
-                                        c_logger.error("Failed to replyToIssue for issueId : " + newIssueId);
+                                        c_logger.error("Failed to replyToIssue for issueId : "
+                                                + newIssueId);
                                     }
                                 }
                             }
                         }
                     }
-                    //end of issueHistory handling
-                    
-                    //2.Fill out values of columns:ORIGINAL_TUV_ID and ORIGINAL_ISSUE_HISTORY_ID in "issue_edition_relation" table.
+                    // end of issueHistory handling
+
+                    // 2.Fill out values of columns:ORIGINAL_TUV_ID and
+                    // ORIGINAL_ISSUE_HISTORY_ID in "issue_edition_relation"
+                    // table.
                     ier.setOriginalTuvId(_issueObjectId);
                     Iterator tmpItr = issueHistoryIdPairList.iterator();
                     StringBuffer tmpStrBuffer = new StringBuffer();
-                    while (tmpItr.hasNext()) {
-                        if (tmpStrBuffer.length() <= 0) {
-                            tmpStrBuffer = tmpStrBuffer.append((String) tmpItr.next());
-                        } else {
-                            tmpStrBuffer.append(",").append((String) tmpItr.next());
+                    while (tmpItr.hasNext())
+                    {
+                        if (tmpStrBuffer.length() <= 0)
+                        {
+                            tmpStrBuffer = tmpStrBuffer.append((String) tmpItr
+                                    .next());
+                        }
+                        else
+                        {
+                            tmpStrBuffer.append(",").append(
+                                    (String) tmpItr.next());
                         }
                     }
-                    if (tmpStrBuffer.length() > 0) {
-                        ier.setOriginalIssueHistoryId(tmpStrBuffer.toString());                 
+                    if (tmpStrBuffer.length() > 0)
+                    {
+                        ier.setOriginalIssueHistoryId(tmpStrBuffer.toString());
                     }
-    
+
                     HibernateUtil.saveOrUpdate(ier);
                 }
             }
 
-        }//end of segComments handling
+        }// end of segComments handling
     }
+    // ////////////////////////////////////////////////////////////////////////
+    // /////////////////// GS Edition Private Methods END /////////////////////
+    // ////////////////////////////////////////////////////////////////////////
 
 }

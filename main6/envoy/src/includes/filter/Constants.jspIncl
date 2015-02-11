@@ -86,7 +86,9 @@ var jsAddAdditionalHead = "<%= bundle.getString("lb_filter_AddAdditionalHead")%>
 var jsEnableEntityEscape = "<%= bundle.getString("lb_filter_EnableEntityEscape")%>";
 var jsUnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_UnextractableWordParagraphStyles")%>";
 var jsUnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
+var jsUnextractableExcelCellStyles = "<%= bundle.getString("lb_filter_UnextractableExcelCellStyles")%>";
 var jsInternalTextCharacterStyles = "<%= bundle.getString("lb_filter_InternalTextCharacterStyles")%>";
+var jsWordInternalTextCharacterStyles = "<%= bundle.getString("lb_filter_wordInternalTextCharacterStyles")%>";
 var jsTranslateHeaderInformation = "<%= bundle.getString("lb_filter_TranslateHeaderInformation")%>";
 var jsInternalTextPostFilter = "<%= bundle.getString("lb_filter_InternalTextPostFilter")%>";
 var jsStyleType = "<%= bundle.getString("lb_filter_StyleType")%>";
@@ -174,6 +176,10 @@ var jsOptionContentIncTags = "<%= bundle.getString("lb_filter_ContentInclusionTa
 var jsOptionEntities = "<%= bundle.getString("lb_filter_Entities") %>";
 var jsOptionProcessIns = "<%= bundle.getString("lb_filter_ProcessingInstructions") %>";
 var jsOptionPreserveWsTags = "<%= bundle.getString("lb_filter_PreserveWhitespaceTags") %>";
+var jsSrcCmtXmlComment = "<%= bundle.getString("lb_filter_SrcCmtXmlComment") %>";
+var jsSrcCmtXmlTag = "<%= bundle.getString("lb_filter_SrcCmtXmlTag") %>";
+var jsFromAttr = "<%= bundle.getString("lb_filter_fromAttribute") %>";
+var jsAttrName = "<%= bundle.getString("lb_filter_AttrName") %>";
 
 var jsOperatorEqual = "<%= bundle.getString("lb_filter_condition_equal") %>";
 var jsOperatorNotEqual = "<%= bundle.getString("lb_filter_condition_notequal") %>";
@@ -184,10 +190,12 @@ var jsEditConfiguredTag = "<%= bundle.getString("lb_filter_EditConfiguredTag") %
 var jsAddConfiguredTag = "<%= bundle.getString("lb_filter_AddConfiguredTag") %>";
 var jsTranslateableAttr = "<%= bundle.getString("lb_filter_TranslatableAttributes") %>";
 var jsNonTransAttr = "<%= bundle.getString("lb_filter_msg_noTransAttribute") %>";
+var jsNonAttr = "<%= bundle.getString("msg_html_internal_tag_att_name_null") %>";
 var jsContentInclude = "<%= bundle.getString("lb_filter_Include") %>";
 var jsContentExclude = "<%= bundle.getString("lb_filter_Exclude") %>";
 var jsContentIncludeExclude = jsContentInclude + "/" + jsContentExclude;
 var jsEmptyTagFormat = "<%= bundle.getString("lb_filter_EmptyTagFormat") %>";
+var jsEmptyTagFormatPreserve = "<%= bundle.getString("lb_filter_FormatPreserve") %>";
 var jsEmptyTagFormatOpen = "<%= bundle.getString("lb_filter_FormatOpen") %>" + "(&lt;tag&gt;&lt;/tag&gt;)";
 var jsEmptyTagFormatClose = "<%= bundle.getString("lb_filter_FormatClose") %>" + "(&lt;tag/&gt;)";
 var jsCDataPostFilterTags = "<%= bundle.getString("lb_filter_CDataPostFilterTags") %>";
@@ -217,15 +225,31 @@ var jsO2010TransFileinfo = "<%= bundle.getString("lb_filter_o2010Filter_transFil
 var jsO2010UnextractableWordParagraphStyles = "<%= bundle.getString("lb_filter_UnextractableWordParagraphStyles")%>";
 var jsO2010UnextractableWordCharacterStyles = "<%= bundle.getString("lb_filter_UnextractableWordCharacterStyles")%>";
 var jsO2010XmlFilter = "<%= bundle.getString("lb_filter_o2010Filter_xmlFilter") %>";
-var jsO2010TransMaster = "<%= bundle.getString("lb_ppt_master_translate") %>";
+var jsO2010TransMaster = "<%= bundle.getString("lb_filter_extract_slidemaster") %>";
 
 var lbReferencedFileProfileName = "<%= bundle.getString("lb_filter_referenced_FPName") %>";
 var lbReferencedFilterName = "<%= bundle.getString("lb_filter_referenced_FilterName") %>";
+var lbExtractTabNames = "<%= bundle.getString("lb_filter_extract_tab_names") %>";
 var lbExtractAlt = "<%= bundle.getString("lb_filter_extract_alt") %>";
+var lbExtractUrl = "<%= bundle.getString("lb_filter_extract_url") %>";
+var lbExtractHiddenText = "<%= bundle.getString("lb_filter_extract_hiddentext") %>";
 var lbExtractToc = "<%= bundle.getString("lb_filter_extract_toc") %>";
+var lbExtractNotes = "<%= bundle.getString("lb_filter_extract_notes") %>";
+var lbExtractPPTNotes = "<%= bundle.getString("lb_filter_extract_pptnotes") %>";
+var lbExtractPPTLayout = "<%= bundle.getString("lb_filter_extract_slidelayout") %>";
+var lbExtractPPTNoteMaster = "<%= bundle.getString("lb_filter_extract_notemaster") %>";
+var lbExtractPPTHandoutMaster = "<%= bundle.getString("lb_filter_extract_handoutmaster") %>";
+var lbExtractExcelTabNames = "<%= bundle.getString("lb_filter_extract_excel_tab_names") %>";
 
 var lbReferencedJobName = "<%= bundle.getString("lb_filter_referenced_JobName") %>";
 var jsAlertBaseFilter = "<%= bundle.getString("lb_filter_basefilter_alert") %>";
+
+var jsFilterNameFMFilter = "<%= bundle.getString("lb_filter_fmfilter") %>";
+var jsFilterDescFMFilter = "<%= bundle.getString("lb_filter_fmfilter_desc") %>";
+var jsExposeFootNote = "<%= bundle.getString("lb_filter_translate_footnote")%>";
+var jsExposeLeftMasterPage = "<%= bundle.getString("lb_filter_translate_left_master_page")%>";
+var jsExposeRightMasterPage = "<%= bundle.getString("lb_filter_translate_right_master_page")%>";
+var jsExposeOtherMasterPage = "<%= bundle.getString("lb_filter_translate_other_master_page")%>";
 
 <%
 java.util.Map<String, String> namemap = new java.util.HashMap<String, String>();
@@ -242,6 +266,7 @@ namemap.put("openoffice_filter", "jsFilterNameOO");
 namemap.put("office2010_filter", "jsFilterNameO2010");
 namemap.put("po_filter", "jsFilterNamePO");
 namemap.put("base_filter", "jsFilterNameBase");
+namemap.put("frame_maker_filter", "jsFilterNameFMFilter");
 
 java.util.Map<String, String> descmap = new java.util.HashMap<String, String>();
 descmap.put("java_properties_filter", "jsFilterDescJavaProperties");
@@ -257,6 +282,7 @@ descmap.put("openoffice_filter", "jsFilterDescOO");
 descmap.put("office2010_filter", "jsFilterDescO2010");
 descmap.put("po_filter", "jsFilterDescPO");
 descmap.put("base_filter", "jsFilterDescBase");
+descmap.put("frame_maker_filter", "jsFilterDescFMFilter");
 %>
 
 function getFilterNameByTableName(tablename)

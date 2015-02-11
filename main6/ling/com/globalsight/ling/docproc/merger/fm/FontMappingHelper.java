@@ -35,16 +35,23 @@ import com.globalsight.everest.util.system.SystemConfiguration;
  */
 public class FontMappingHelper
 {
-    static private final Logger CATEGORY = Logger
-            .getLogger(FontMappingHelper.class);
     private static final Object lock = new Object();
-    private static String propertiesFile = "/properties/AdobeAdapter.properties";
     private static List<FontMapping> fontMappingList = null;
     private static String ignoreKeys = "=maxTimeToWait=";
 
     static
     {
         init();
+    }
+    
+    protected static String getPropertiesFile()
+    {
+        return "/properties/AdobeAdapter.properties";
+    }
+    
+    protected static Logger getLogger()
+    {
+        return Logger.getLogger(FontMappingHelper.class);
     }
 
     /**
@@ -135,12 +142,11 @@ public class FontMappingHelper
 
         return false;
     }
-    
+
     public static boolean isInddXml(String p_format, String p_content)
     {
         if ("xml".equalsIgnoreCase(p_format) && p_content != null
-                && p_content.contains("</Inddgsstory>")
-                && p_content.contains("</Root>")
+                && p_content.contains("</Inddgsstory>") && p_content.contains("</Root>")
                 && p_content.contains("InddFontFamily="))
         {
             return true;
@@ -150,31 +156,33 @@ public class FontMappingHelper
     }
 
     public static String processInddXml(String p_targetLocale, String p_content)
-    {        
+    {
         if (p_targetLocale == null || p_content == null)
         {
             return p_content;
         }
-        
+
         if (!isLocaleWithFonts(p_targetLocale))
         {
             return p_content;
         }
-        
+
         String defaultFont = getDefaultMappingFont(p_targetLocale);
         Pattern inddTagPattern = Pattern.compile("<Indd([^>]+)>");
         Matcher m = inddTagPattern.matcher(p_content);
-        
-        while(m.find())
+
+        while (m.find())
         {
+            String oriTag = m.group();
             String tag = m.group();
-            String oriFont = null;
-            if (tag.contains(" InddFontFamily=\""))
+            String newTag = null;
+            // handle InddFontFamily="MingLiU"
+            if (tag.contains("InddFontFamily=\""))
             {
-                String newTag = null;
-                StringIndex si = StringIndex.getValueBetween(new StringBuffer(tag), 0, " InddFontFamily=\"", "\"");
-                oriFont = si.value;
-                
+                StringIndex si = StringIndex.getValueBetween(new StringBuffer(tag), 0,
+                        "InddFontFamily=\"", "\"");
+                String oriFont = si.value;
+
                 String mappingFont = getMappingFont(oriFont, p_targetLocale);
                 if (mappingFont != null)
                 {
@@ -184,14 +192,43 @@ public class FontMappingHelper
                 {
                     newTag = tag.replace(oriFont, defaultFont);
                 }
-                
-                if (newTag != null)
-                {
-                    p_content = p_content.replace(tag, newTag);
-                }
+            }
+
+            if (newTag != null)
+            {
+                p_content = p_content.replace(oriTag, newTag);
             }
         }
-        
+
+        // handle [Bold-10-Helvetica]source: [/Bold-10-Helvetica]
+        Pattern fontTagPattern = Pattern
+                .compile("(\\[[^\\]/-]+-[\\d\\.]+-)([^\\]]+)(\\].*?\\[/[^\\]-]+-[\\d\\.]+-)([^\\]]+)(\\])", Pattern.DOTALL);
+        Matcher fontTagM = fontTagPattern.matcher(p_content);
+        while (fontTagM.find())
+        {
+            String oriContent = fontTagM.group();
+            String g1 = fontTagM.group(1);
+            String g3 = fontTagM.group(3);
+            String g5 = fontTagM.group(5);
+            String oriFont = fontTagM.group(2);
+            String newContent = null;
+
+            String mappingFont = getMappingFont(oriFont, p_targetLocale);
+            if (mappingFont != null)
+            {
+                newContent = g1 + mappingFont + g3 + mappingFont + g5;
+            }
+            else if (defaultFont != null)
+            {
+                newContent = g1 + defaultFont + g3 + defaultFont + g5;
+            }
+
+            if (newContent != null)
+            {
+                p_content = p_content.replace(oriContent, newContent);
+            }
+        }
+
         return p_content;
     }
 
@@ -213,7 +250,7 @@ public class FontMappingHelper
                 Properties properties = new Properties();
 
                 // load root properties first
-                properties.load(FontMappingHelper.class.getResourceAsStream(propertiesFile));
+                properties.load(FontMappingHelper.class.getResourceAsStream(getPropertiesFile()));
 
                 for (Enumeration e = properties.keys(); e.hasMoreElements();)
                 {
@@ -239,11 +276,11 @@ public class FontMappingHelper
             }
             catch (Throwable ex)
             {
-                CATEGORY.error("Failed to load font mapping from AdobeAdapter.properties.", ex);
+                getLogger().error("Failed to load font mapping from file: " + getPropertiesFile(), ex);
             }
         }
     }
-    
+
     protected static void initForDebug(List<FontMapping> fms)
     {
         fontMappingList = fms;

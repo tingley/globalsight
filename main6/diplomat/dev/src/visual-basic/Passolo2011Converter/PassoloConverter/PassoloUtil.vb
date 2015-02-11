@@ -35,7 +35,7 @@ Public Class PassoloUtil
     End Function
 
     Public Function encodeString(ByVal s As String)
-        s = s.Replace("\r", "\\r")
+        s = s.Replace("\", "\\")
         's = s.Replace("\n", "\\n")
         s = s.Replace(Chr(13), "\r")
         's = s.Replace(Chr(10), "\n")
@@ -47,7 +47,7 @@ Public Class PassoloUtil
         s = s.Replace("\r", Chr(13))
         's = s.Replace("\n", Chr(10))
 
-        s = s.Replace("\\r", "\r")
+        s = s.Replace("\\", "\")
         's = s.Replace("\\n", "\n")
         Return s
     End Function

@@ -27,8 +27,16 @@ MSExcelFilter.prototype.edit = function(filterId, color, specialFilters, topFilt
 	str.append("<tr>");
 	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
-	var isCheckExtractAlt = (this.filter.altTranslate) ? "checked":"";
-	str.append("<input id='excelAltTranslate' type='checkbox' name='excelAltTranslate' value='"+this.filter.altTranslate+"' "+isCheckExtractAlt+"/>");
+	var isCheckedExtractAlt = (this.filter.altTranslate) ? "checked":"";
+	str.append("<input id='excelAltTranslate' type='checkbox' name='excelAltTranslate' value='"+this.filter.altTranslate+"' "+isCheckedExtractAlt+"/>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractExcelTabNames + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	var isCheckedExtractTabNames = (this.filter.tabNamesTranslate) ? "checked":"";
+	str.append("<input id='excelTabNamesTranslate' type='checkbox' name='excelTabNamesTranslate' value='"+this.filter.tabNamesTranslate+"' "+isCheckedExtractTabNames+"/>");
 	str.append("</td>");
 	str.append("</tr>");
 	
@@ -83,6 +91,13 @@ MSExcelFilter.prototype.generateDiv = function (topFilterId, color)
 	str.append("<td class='htmlFilter_left_td'>" + lbExtractAlt + "" + "</td>");
 	str.append("<td class='htmlFilter_right_td'>");
 	str.append("<input id='excelAltTranslate' type='checkbox' name='excelAltTranslate' value='false' />");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + lbExtractExcelTabNames + "" + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input id='excelTabNamesTranslate' type='checkbox' name='excelTabNamesTranslate' value='false' />");
 	str.append("</td>");
 	str.append("</tr>");
 	
@@ -142,6 +157,7 @@ function saveMsOfficeExcelFilter()
 	
 	var filterDesc = document.getElementById("excelDesc").value;
 	var altTranslate = document.getElementById("excelAltTranslate").checked;
+	var tabNamesTranslate = document.getElementById("excelTabNamesTranslate").checked;
 	
 	var contentPostFilterIdAndTableName = document.getElementById("excelContentPostFilterSelect").value;
 	var contentPostFilterIndex = contentPostFilterIdAndTableName.indexOf("-");
@@ -162,6 +178,7 @@ function saveMsOfficeExcelFilter()
 			filterDesc:filterDesc, 
 			companyId:companyId,
 			altTranslate:altTranslate,
+			tabNamesTranslate:tabNamesTranslate,
 			contentPostFilterId:contentPostFilterId,
 			contentPostFilterTableName:contentPostFilterTableName,
 			baseFilterId:baseFilterId
@@ -193,6 +210,7 @@ function updateExcelFilterCallback(data)
 		jpFilter.filterName = checkExistExcelCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistExcelCallback.obj.filterDesc;
 		jpFilter.altTranslate = checkExistExcelCallback.obj.altTranslate;
+		jpFilter.tabNamesTranslate = checkExistExcelCallback.obj.tabNamesTranslate;
 		jpFilter.contentPostFilterId = checkExistExcelCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistExcelCallback.obj.contentPostFilterTableName;
 		jpFilter.companyId = companyId;
@@ -228,6 +246,8 @@ function saveExcelFilterCallback(data)
 		jpFilter.filterTableName = "ms_office_excel_filter";
 		jpFilter.filterName = checkExistExcelCallback.obj.filterName;
 		jpFilter.filterDescription = checkExistExcelCallback.obj.filterDesc;
+		jpFilter.altTranslate = checkExistExcelCallback.obj.altTranslate;
+		jpFilter.tabNamesTranslate = checkExistExcelCallback.obj.tabNamesTranslate;
 		jpFilter.companyId = companyId;
 		jpFilter.contentPostFilterId = checkExistExcelCallback.obj.contentPostFilterId;
 		jpFilter.contentPostFilterTableName = checkExistExcelCallback.obj.contentPostFilterTableName;

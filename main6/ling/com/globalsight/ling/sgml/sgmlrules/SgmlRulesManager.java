@@ -235,7 +235,7 @@ public class SgmlRulesManager
         catch (CatalogException ex)
         {
             // "PUBLIC ID ... already exists"
-            CATEGORY.error(ex.getMessage());
+            CATEGORY.error(ex.getMessage(), ex);
 
             throw ex;
         }

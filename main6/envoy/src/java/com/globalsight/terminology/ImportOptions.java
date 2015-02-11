@@ -27,7 +27,6 @@ import com.globalsight.util.edit.EditUtil;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.Node;
 
 import java.util.*;
 
@@ -59,6 +58,7 @@ public class ImportOptions
     public static final String TYPE_CSV = "csv";
     public static final String TYPE_MTW = "mtw";
     public static final String TYPE_MTF = "mtf";  // MultiTerm 5+
+    public static final String TYPE_TBX = "tbx";
 
     //
     // Private Classes

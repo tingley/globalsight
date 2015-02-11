@@ -300,6 +300,16 @@ INSERT INTO KNOWN_FORMAT_TYPE VALUES (
    51,'Passolo 2011','Passolo 2011','passolo',
    'PASSOLO_IMPORTED_EVENT', 'XML_LOCALIZED_EVENT'
 );
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+   52,'INDD (CS5.5)','InDesign INDD CS5.5','indd_cs5.5',
+   'ADOBE_IMPORTED_EVENT', 'XML_LOCALIZED_EVENT'
+);
+
+INSERT INTO KNOWN_FORMAT_TYPE VALUES (
+   53,'Windows Portable Executable','Windows Portable Executable','windows_pe',
+   'WINPE_IMPORTED_EVENT', 'XML_LOCALIZED_EVENT'
+);
 -- 
 --  NOTE: ids > 500 are reserved for customer-specific file formats.
 -- 

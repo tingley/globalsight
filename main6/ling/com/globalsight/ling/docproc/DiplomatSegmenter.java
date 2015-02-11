@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
 import org.apache.regexp.RE;
 import org.apache.regexp.RESyntaxException;
 
@@ -32,6 +33,7 @@ import com.globalsight.everest.segmentationhelper.XmlLoader;
 import com.globalsight.ling.common.LocaleCreater;
 import com.globalsight.ling.common.Text;
 import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.common.srccomment.SourceComment;
 import com.globalsight.ling.docproc.extractor.html.OfficeContentPostFilterHelper;
 import com.globalsight.util.edit.EditUtil;
 
@@ -55,6 +57,8 @@ public class DiplomatSegmenter
     //
     // Member Variables
     //
+    
+    private static final Logger logger = Logger.getLogger(DiplomatSegmenter.class);
 
     private boolean m_preserveWhitespace = false;
 
@@ -145,7 +149,7 @@ public class DiplomatSegmenter
             // Matches <bpt>..</bpt> optionally followed by <ph> and
             // <it> at the end of a string.
             m_startTagsAtEnd = new RE(
-                    "<bpt[^>]+>[^<]*(<[^>]*>[^<]*</[^>]*>[^<]*)*</bpt>([:space:]*<(ph|it)[^>]+>[^<]*(<[^>]*>[^<]*</[^>]*>[^<]*)*</\\3>)*[:space:]*$",
+                    "<bpt[^>]+>[^<]*?(<[^>]*?>[^<]*?</[^>]*?>[^<]*)*</bpt>([:space:]*?<(ph|it)[^>]+>[^<]*?(<[^>]*?>[^<]*?</[^>]*?>[^<]*)*</\\3>)*[:space:]*?$",
                     RE.MATCH_NORMAL);
         }
         catch (RESyntaxException e) // SNH (Should Not Happen)
@@ -489,6 +493,7 @@ public class DiplomatSegmenter
      * positions. Takes into account intervening TMX tags.
      */
     private List<String> splitOriSegmentWithRule(ArrayList<Integer> p_breaks)
+            throws Exception
     {
         List<String> result = new ArrayList<String>();
 
@@ -529,8 +534,18 @@ public class DiplomatSegmenter
                     + iTotalTagLen;
             iEnd += m_globalAdjust;
 
-            String seg = m_segment.substring(iStart, iEnd);
-            result.add(seg);
+            try
+            {
+                String seg = m_segment.substring(iStart, iEnd);
+                result.add(seg);
+            }
+            catch(Exception ex)
+            {
+                logger.error("substring error, segment: " + m_segment);
+                logger.error("iStart " + iStart + " iEnd " + iEnd);
+                logger.error("substring error!", ex);
+                throw ex;
+            }
 
             iTotalIncrease += iIncrease;
             iTotalTagLen += iTagLen;
@@ -915,7 +930,8 @@ public class DiplomatSegmenter
 
         List<SegmentNode> nodes = Segmentation.handleSrxExtension(p_srxRule,
                 segments);
-        for (SegmentNode segmentNode : nodes)
+        List<SegmentNode> nodes2 = SourceComment.handleSrcComment(nodes);
+        for (SegmentNode segmentNode : nodes2)
         {
             p_element.addSegment(segmentNode);
         }

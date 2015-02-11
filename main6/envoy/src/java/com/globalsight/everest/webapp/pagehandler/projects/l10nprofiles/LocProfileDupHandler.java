@@ -71,8 +71,7 @@ public class LocProfileDupHandler extends PageHandler
             clearSessionManager(session);
         }
 
-        SessionManager sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
-        String id = (String)p_request.getParameter(RADIO_BUTTON);
+        String id = (String)p_request.getParameter("radioBtn");
         if (id == null
 				|| p_request.getMethod().equalsIgnoreCase(
 						REQUEST_METHOD_GET)) 
@@ -81,8 +80,8 @@ public class LocProfileDupHandler extends PageHandler
 					.sendRedirect("/globalsight/ControlServlet?activityName=locprofiles");
 			return;
 		}
-        sessionMgr.setAttribute(DUP_LOC_PROFILE, id);
-        getLocales(p_request, session);
+        p_request.setAttribute("DupLocProfile", id);//TODO
+        getLocales(p_request);
 
         // Call parent invokePageHandler() to set link beans and invoke JSP
         super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
@@ -116,8 +115,7 @@ public class LocProfileDupHandler extends PageHandler
      * Put the source, target, and locale pairs in the request
      * for the dup workflow page
      */
-    private void getLocales(HttpServletRequest p_request,
-                                           HttpSession p_session)
+    private void getLocales(HttpServletRequest p_request)
         throws ServletException, IOException, EnvoyServletException
 
     {

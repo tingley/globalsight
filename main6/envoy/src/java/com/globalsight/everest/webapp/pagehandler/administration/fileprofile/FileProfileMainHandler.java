@@ -38,7 +38,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
@@ -59,6 +58,7 @@ import com.globalsight.everest.util.comparator.FileProfileComparator;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
@@ -74,8 +74,8 @@ import com.globalsight.util.GeneralException;
 public class FileProfileMainHandler extends PageHandler
 {
     static private final Logger logger = Logger
-            .getLogger(FileProfileMainHandler.class); 
-    
+            .getLogger(FileProfileMainHandler.class);
+
     /**
      * Invokes this PageHandler
      * 
@@ -119,7 +119,7 @@ public class FileProfileMainHandler extends PageHandler
             }
             else if (FileProfileConstants.EDIT.equals(action))
             {
-                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
+                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
                 {
                     p_response
                             .sendRedirect("/globalsight/ControlServlet?activityName=fileprofiles");
@@ -131,7 +131,7 @@ public class FileProfileMainHandler extends PageHandler
             }
             else if (FileProfileConstants.REMOVE.equals(action))
             {
-                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
+                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
                 {
                     p_response
                             .sendRedirect("/globalsight/ControlServlet?activityName=fileprofiles");
@@ -141,7 +141,7 @@ public class FileProfileMainHandler extends PageHandler
             }
             else if (FileProfileConstants.SEARCH_ACTION.equals(action))
             {
-                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET)) 
+                if (p_request.getMethod().equalsIgnoreCase(REQUEST_METHOD_GET))
                 {
                     p_response
                             .sendRedirect("/globalsight/ControlServlet?activityName=fileprofiles");
@@ -201,7 +201,7 @@ public class FileProfileMainHandler extends PageHandler
             throws EnvoyServletException
     {
         FileProfileImpl fp = new FileProfileImpl();
-                
+
         setRequestParams(p_request, fp);
 
         try
@@ -221,51 +221,52 @@ public class FileProfileMainHandler extends PageHandler
         }
     }
 
-    private void updateXslPath(HttpServletRequest p_request, FileProfileImpl fp) throws Exception
+    private void updateXslPath(HttpServletRequest p_request, FileProfileImpl fp)
+            throws Exception
     {
         String xslPath = p_request.getParameter("tmpXslPath");
         StringBuffer updatedPath = new StringBuffer("");
-        logger.info("temporary xsl path: " + xslPath);
-        
+
         if (xslPath != null && !xslPath.equals(""))
         {
             File file = new File(xslPath);
-            
-            updatedPath.append(xslPath.substring(0, xslPath.lastIndexOf("~TMP")));
+
+            updatedPath
+                    .append(xslPath.substring(0, xslPath.lastIndexOf("~TMP")));
             updatedPath.append(fp.getId());
-            logger.info("updated xsl path: " + updatedPath.toString());
-            
+
             File updatedFile = new File(updatedPath.toString());
             if (updatedFile.exists())
             {
                 File[] files = updatedFile.listFiles();
-                for (int i = 0;i < files.length;i++)
+                for (int i = 0; i < files.length; i++)
                     files[i].delete();
                 updatedFile.delete();
             }
-            
+
             if (!file.getParentFile().renameTo(updatedFile))
             {
                 logger.error("Failed to rename XSL temporary path.");
             }
 
         }
-        
+
     }
-    
+
     private void removeRelevantXslFile(String id) throws Exception
     {
-    
-        String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + id;
+
+        String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/"
+                + id;
         File xslFiles = new File(xslPath);
         if (xslFiles.exists())
         {
             File[] files = xslFiles.listFiles();
-            for (int i = 0;i < files.length;i++)
+            for (int i = 0; i < files.length; i++)
                 files[i].delete();
             xslFiles.delete();
         }
-        
+
     }
 
     private void modifyFileProfile(HttpServletRequest p_request)
@@ -282,51 +283,55 @@ public class FileProfileMainHandler extends PageHandler
         {
             fp = HibernateUtil.get(FileProfileImpl.class, fp.getId());
             fp.setIsActive(false);
-            
+
             setRequestParams(p_request, newFp);
             if (newFp.getKnownFormatTypeId() == 48)
                 processXLZFormat(p_request, newFp);
-            
+
             HibernateUtil.saveOrUpdate(newFp);
             fp.setNewId(newFp.getId());
             String oldName = fp.getName();
             String newName = newFp.getName();
             fp.setName(newName);
             HibernateUtil.saveOrUpdate(fp);
-            
+
             if (!newName.equals(oldName))
             {
-               String hql = "from FileProfileImpl f where f.newId = :oId";
+                String hql = "from FileProfileImpl f where f.newId = :oId";
                 Map map = new HashMap();
                 map.put("oId", fp.getId());
-                
-                List<FileProfileImpl> fps = (List<FileProfileImpl>)HibernateUtil.search(hql, map);
+
+                List<FileProfileImpl> fps = (List<FileProfileImpl>) HibernateUtil
+                        .search(hql, map);
                 for (FileProfileImpl f : fps)
                 {
                     f.setName(newName);
                     f.setNewId(newFp.getId());
                 }
-                
+
                 HibernateUtil.saveOrUpdate(fps);
             }
-            
+
             HibernateUtil.commit(tx);
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
             HibernateUtil.rollback(tx);
             throw new EnvoyServletException(e);
         }
-        
-        boolean isRmoveXsl = "true".equals(p_request.getParameter("removeXslFile"));
-        
+
+        boolean isRmoveXsl = "true".equals(p_request
+                .getParameter("removeXslFile"));
+
         if (!isRmoveXsl)
         {
-            String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + fp.getId();
-            String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + newFp.getId();
+            String xslPath = AmbFileStoragePathUtils.getXslDir().getPath()
+                    + "/" + fp.getId();
+            String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath()
+                    + "/" + newFp.getId();
             File xslFiles = new File(xslPath);
-            
+
             try
             {
                 if (xslFiles.exists())
@@ -334,25 +339,25 @@ public class FileProfileMainHandler extends PageHandler
                     File newXslFile = new File(newXslPath);
                     FileUtil.copyFolder(xslFiles, newXslFile);
                 }
-            } 
+            }
             catch (Exception e)
             {
-               logger.error(e);
-               throw new EnvoyServletException(e);
+                logger.error(e.getMessage(), e);
+                throw new EnvoyServletException(e);
             }
         }
-        
+
         try
         {
             updateXslPath(p_request, newFp);
-        } 
+        }
         catch (Exception e)
         {
-           logger.error(e);
-           throw new EnvoyServletException(e);
+            logger.error(e.getMessage(), e);
+            throw new EnvoyServletException(e);
         }
     }
-    
+
     private void processXLZFormat(HttpServletRequest p_request,
             FileProfileImpl p_fp)
     {
@@ -390,17 +395,17 @@ public class FileProfileMainHandler extends PageHandler
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 
     private void removeFileProfile(HttpServletRequest p_request,
             HttpSession p_session) throws EnvoyServletException
     {
-        try 
+        try
         {
             String idString = (String) p_request.getParameter(RADIO_BUTTON);
-            if (idString != null) 
+            if (idString != null)
             {
                 String id = idString.split(",")[0];
                 FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
@@ -414,7 +419,7 @@ public class FileProfileMainHandler extends PageHandler
                         .deleteFileProfile(fp);
 
                 // Don't really remove
-                //removeRelevantXslFile(id);
+                // removeRelevantXslFile(id);
             }
         }
         catch (Exception e)
@@ -427,24 +432,34 @@ public class FileProfileMainHandler extends PageHandler
      * Get the request params and set them in the FileProfile.
      */
     private void setRequestParams(HttpServletRequest p_request, FileProfile p_fp)
-    { 
+    {
         p_fp.setName(p_request.getParameter("fpName"));
         String filterInfo = p_request.getParameter("filterInfo");
-        if(filterInfo != null)
+        if (filterInfo != null)
         {
             String[] filterInfoArray = filterInfo.split(",");
             long filterId = Long.parseLong(filterInfoArray[0]);
             p_fp.setFilterId(filterId);
-            if(filterInfoArray.length == 2)
+            if (filterInfoArray.length == 2)
             {
                 String filterTableName = filterInfoArray[1];
                 p_fp.setFilterTableName(filterTableName);
-            } else
+            }
+            else
                 p_fp.setFilterTableName(null);
         }
-//        int filterId = Integer.parseInt((p_request.getParameter("filterInfo")!=null)? (String)p_request.getParameter("filterInfo") : "-1");
-//        p_fp.setFilterId(filterId);
-        p_fp.setDescription(p_request.getParameter("desc"));
+        // int filterId =
+        // Integer.parseInt((p_request.getParameter("filterInfo")!=null)?
+        // (String)p_request.getParameter("filterInfo") : "-1");
+        // p_fp.setFilterId(filterId);
+
+        // for bug GBS-2590, by fan
+        char[] xmlEncodeChar =
+        { '<', '>', '&', '"' };
+        String desc = XmlFilterHelper.encodeSpecifiedEntities(
+                p_request.getParameter("desc"), xmlEncodeChar);
+        p_fp.setDescription(desc);
+
         p_fp.setCompanyId(CompanyThreadLocal.getInstance().getValue());
         p_fp.setSupportSid(p_request.getParameter("supportSid") != null);
         p_fp.setUnicodeEscape(p_request.getParameter("unicodeEscape") != null);
@@ -468,7 +483,7 @@ public class FileProfileMainHandler extends PageHandler
         {
             p_fp.setXmlRuleFileId(0);
         }
-        
+
         KnownFormatTypeImpl knownFormat = HibernateUtil.get(
                 KnownFormatTypeImpl.class, Long.parseLong(formatInfo));
         if (knownFormat != null
@@ -481,7 +496,8 @@ public class FileProfileMainHandler extends PageHandler
             String dtdIds = p_request.getParameter("dtdIds");
             if (dtdIds != null && !"-1".equals(dtdIds))
             {
-                p_fp.setXmlDtd(HibernateUtil.get(XmlDtdImpl.class, Long.parseLong(dtdIds)));
+                p_fp.setXmlDtd(HibernateUtil.get(XmlDtdImpl.class,
+                        Long.parseLong(dtdIds)));
             }
             else
             {
@@ -514,30 +530,30 @@ public class FileProfileMainHandler extends PageHandler
         {
             p_fp.byDefaultExportStf(true);
         }
-        
+
         String jsFilter = p_request.getParameter("jsFilter");
         if (jsFilter == null || jsFilter.trim().length() == 0)
         {
             jsFilter = null;
         }
         p_fp.setJsFilterRegex(jsFilter);
-        
+
         String terminologyApproval = p_request.getParameter("terminologyRadio");
-        
-        if(terminologyApproval != null) {
+
+        if (terminologyApproval != null)
+        {
             p_fp.setTerminologyApproval(Integer.parseInt(terminologyApproval));
         }
-        
+
         String BOMType = p_request.getParameter("bomType");
         p_fp.setBOMType(Integer.parseInt(BOMType));
 
         /**
-        String referenceFPId = p_request.getParameter("xlfFp");
-        if (referenceFPId == null || referenceFPId == "-1")
-            p_fp.setReferenceFP(0);
-        else
-            p_fp.setReferenceFP(Long.parseLong(referenceFPId));
-        */
+         * String referenceFPId = p_request.getParameter("xlfFp"); if
+         * (referenceFPId == null || referenceFPId == "-1")
+         * p_fp.setReferenceFP(0); else
+         * p_fp.setReferenceFP(Long.parseLong(referenceFPId));
+         */
     }
 
     /**
@@ -578,15 +594,19 @@ public class FileProfileMainHandler extends PageHandler
 
         p_request.setAttribute("l10nprofiles", l10nprofiles);
         CVSFileProfileManagerLocal cvsFPManager = new CVSFileProfileManagerLocal();
-        ArrayList<CVSFileProfile> cvsfps = (ArrayList<CVSFileProfile>)cvsFPManager.getAllCVSFileProfiles();
-        ArrayList<String> existCVSFPs = new ArrayList<String>();;
-        if (cvsfps != null) {
-            for (CVSFileProfile f : cvsfps) {
+        ArrayList<CVSFileProfile> cvsfps = (ArrayList<CVSFileProfile>) cvsFPManager
+                .getAllCVSFileProfiles();
+        ArrayList<String> existCVSFPs = new ArrayList<String>();
+        ;
+        if (cvsfps != null)
+        {
+            for (CVSFileProfile f : cvsfps)
+            {
                 existCVSFPs.add(String.valueOf(f.getFileProfile().getId()));
             }
         }
         p_request.setAttribute("existCVSFPs", existCVSFPs);
-        
+
         checkPreReqData(p_request, p_session, l10nprofiles);
     }
 
@@ -618,8 +638,7 @@ public class FileProfileMainHandler extends PageHandler
             {
                 throw new EnvoyServletException(e);
             }
-            String localizationprofiles = p_request
-                    .getParameter("locprofiles");
+            String localizationprofiles = p_request.getParameter("locprofiles");
             if (!localizationprofiles.equals("-1"))
 
                 params.setLocProfilesId(Long.valueOf(localizationprofiles));

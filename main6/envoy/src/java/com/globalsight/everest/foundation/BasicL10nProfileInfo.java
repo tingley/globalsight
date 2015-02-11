@@ -23,7 +23,52 @@ public class BasicL10nProfileInfo implements java.io.Serializable
     protected String m_description = null;
     protected int m_count = -1;
     protected String m_companyId = null;
-    
+    protected String m_tmProfileName = null;
+    protected String m_projectName = null;
+    protected char m_isAutoDispatch;
+    protected String m_srcLocaleName = null;
+
+
+    public String getSrcLocaleName()
+    {
+        return m_srcLocaleName;
+    }
+
+    public void setSrcLocaleName(String m_srcLocaleName)
+    {
+        this.m_srcLocaleName = m_srcLocaleName;
+    }
+
+    public String getProjectName()
+    {
+        return m_projectName;
+    }
+
+    public void setProjectName(String m_projectName)
+    {
+        this.m_projectName = m_projectName;
+    }
+
+    public String getTmProfileName()
+    {
+        return m_tmProfileName;
+    }
+
+    public void setTmProfileName(String m_tmProfileName)
+    {
+        this.m_tmProfileName = m_tmProfileName;
+    }
+
+    public char getIsAutoDispatch()
+    {
+        return m_isAutoDispatch;
+    }
+
+    public void setIsAutoDispatch(char isAutoDispatch)
+    {
+        this.m_isAutoDispatch = isAutoDispatch;
+    }
+
     /**
     * Default Constructor
     */

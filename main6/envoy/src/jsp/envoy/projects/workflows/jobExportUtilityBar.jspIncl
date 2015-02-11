@@ -3,9 +3,10 @@
     <TR>
         <TD WIDTH=6><IMG SRC="/globalsight/images/tab_left_light_gray.gif" HEIGHT=30 WIDTH=6></TD>
         <!-- Check All/Clear All -->
-        <TD><A CLASS="standardHREF" HREF="javascript: checkAll('exportForm');"><%=bundle.getString("lb_check_all")%></A> | 
+        <!--for gbs-2599
+	TD><A CLASS="standardHREF" HREF="javascript: checkAll('exportForm');"><%=bundle.getString("lb_check_all")%></A> | 
             <A CLASS="standardHREF" HREF="javascript: clearAll('exportForm');"><%=bundle.getString("lb_clear_all")%>
-        </TD>
+        </TD-->
         <TD ALIGN="RIGHT">
             <!-- Buttons -->
             <INPUT TYPE="BUTTON" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>"

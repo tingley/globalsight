@@ -20,6 +20,7 @@
             com.globalsight.everest.servlet.util.ServerProxy,
             com.globalsight.util.edit.GxmlUtil,
             com.globalsight.util.date.DateHelper,
+            com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
             java.util.Iterator,
             java.util.List,
             java.util.Locale,
@@ -124,9 +125,9 @@ if (tmMatches != null)
         
         TuvBasicInfo matchedTuvBasicInfo = p.getMatchedTuvBasicInfo();
         String matchedTuvJobName = p.getMatchedTuvJobName()==null?"N/A":p.getMatchedTuvJobName();
-        String creationUser = (matchedTuvBasicInfo==null)?"N/A":matchedTuvBasicInfo.getCreationUser();
+        String creationUser = (matchedTuvBasicInfo==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getCreationUser());
         String creationDate  = (matchedTuvBasicInfo==null)?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getCreationDate());
-        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":matchedTuvBasicInfo.getModifyUser();
+        String modifyUser = (matchedTuvBasicInfo==null||matchedTuvBasicInfo.getModifyUser()==null)?"N/A":UserUtil.getUserNameById(matchedTuvBasicInfo.getModifyUser());
         String modifyDate  = (matchedTuvBasicInfo==null||modifyUser=="N/A")?"N/A":DateHelper.getFormattedDateAndTime(matchedTuvBasicInfo.getModifyDate());
         
         stb_segments.append("\", creationDate: \"");

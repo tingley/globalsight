@@ -5,7 +5,7 @@
 		<id name="id" column="ID" type="long">
 			<generator class="native" />
 		</id>
-		<property name="name" length="60" column="NAME" type="string" not-null="true" unique="false"/>	
+		<property name="name" length="60" column="NAME" type="string" not-null="true" unique="false"/>
 		<property name="companyId" column="COMPANY_ID" type="string" not-null="true" unique="false"/>
 		<property name="organization" length="400" column="ORGANIZATION" type="string" not-null="false" unique="false"/>
 		<property name="description" length="500" column="DESCRIPTION" type="string" not-null="false" unique="false"/>
@@ -17,6 +17,16 @@
 		<property name="remoteTmProfileId" column="REMOTE_TM_PROFILE_ID" type="long" not-null="false" unique="false" />
 		<property name="remoteTmProfileName" length="60" column="REMOTE_TM_PROFILE_NAME" type="string" not-null="false" unique="false"/>
         <property name="tm3Id" type="long" column="TM3_ID" not-null="false" />
+        <property name="convertRate" type="int" column="CONVERT_RATE" not-null="false"/>
+        <property name="lastTUId" type="long" column="LAST_TU_ID" not-null="false"/>
+        <property name="convertedTM3Id" type="long" column="CONVERTED_TM3_ID" not-null="false"/>
+        <property name="status" type="string" length="20" column="STATUS" not-null="false"/>
+        
+        <set name="attributes" inverse="true" cascade="save-update" lazy="false">
+			<key column="TM_ID" />
+			<one-to-many
+				class="com.globalsight.cxe.entity.customAttribute.TMAttribute" />
+		</set>
 
 	</class>
 </hibernate-mapping>

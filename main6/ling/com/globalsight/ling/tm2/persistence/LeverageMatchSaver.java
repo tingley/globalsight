@@ -25,6 +25,7 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
@@ -95,6 +96,8 @@ public class LeverageMatchSaver
     public void saveMatchesToDb(SourcePage p_sourcePage,
             LeverageDataCenter p_leverageDataCenter) throws Exception
     {
+        String companyId = p_sourcePage != null ? p_sourcePage.getCompanyId()
+                : CompanyWrapper.getCurrentCompanyId();
         Collection nonClobMatches = new ArrayList();
         // Collection clobMatches = new ArrayList();
         LeverageOptions leverageOptions = p_leverageDataCenter
@@ -108,14 +111,15 @@ public class LeverageMatchSaver
                     .next();
 
             // walk through all target locales in the LeverageMatches
-            Iterator itLocales = levMatches.targetLocaleIterator();
+            Iterator itLocales = levMatches.targetLocaleIterator(companyId);
             while (itLocales.hasNext())
             {
                 GlobalSightLocale targetLocale = (GlobalSightLocale) itLocales
                         .next();
 
                 // walk through all matches in the locale
-                Iterator itMatch = levMatches.matchIterator(targetLocale);
+                Iterator itMatch = levMatches.matchIterator(targetLocale,
+                        companyId);
                 while (itMatch.hasNext())
                 {
                     LeveragedTuv matchedTuv = (LeveragedTuv) itMatch.next();

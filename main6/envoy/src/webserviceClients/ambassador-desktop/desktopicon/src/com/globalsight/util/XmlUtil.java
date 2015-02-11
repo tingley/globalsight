@@ -71,7 +71,7 @@ public class XmlUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -83,7 +83,7 @@ public class XmlUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -113,7 +113,7 @@ public class XmlUtil
         }
         catch (JAXBException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return "";
@@ -147,7 +147,7 @@ public class XmlUtil
         }
         catch (JAXBException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return ob;
@@ -222,7 +222,7 @@ public class XmlUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -234,7 +234,7 @@ public class XmlUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

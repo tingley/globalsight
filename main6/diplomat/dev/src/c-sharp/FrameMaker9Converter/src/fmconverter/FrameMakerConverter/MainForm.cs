@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using GlobalSight.Common;
 using System.IO;
+using System.Diagnostics;
 
 namespace FrameMakerConverter
 {
@@ -34,6 +35,8 @@ namespace FrameMakerConverter
                 // fm dir
                 dir = AppConfig.GetAppConfig("FmDir");
                 this.tbFM.Text = dir;
+
+                this.cbAutoStart.Checked = AppConfig.AutoStart;
             }
             catch { }
         }
@@ -69,12 +72,12 @@ namespace FrameMakerConverter
                 }
                 else
                 {
-                    MessageBox.Show("FrameMaker Converter can't be started because of file (" + fmdir + "\\FrameMaker.exe) does not exists!");
+                    MessageBox.Show(this, "FrameMaker Converter can't be started because of file (" + fmdir + "\\FrameMaker.exe) does not exists!");
                 }
             }
             else
             {
-                MessageBox.Show("Please set the FrameMaker directory first");
+                MessageBox.Show(this, "Please set the FrameMaker directory first");
             }
 
             if (!isFrameOk)
@@ -96,12 +99,12 @@ namespace FrameMakerConverter
                 }
                 else
                 {
-                    MessageBox.Show("FrameMaker Converter can't be started because of directory (" + dir + ") does not exists!");
+                    MessageBox.Show(this, "FrameMaker Converter can't be started because of directory (" + dir + ") does not exists!");
                 }
             }
             else
             {
-                MessageBox.Show("Please set the Conversion directory first");
+                MessageBox.Show(this, "Please set the Conversion directory first");
             }
 
             if (isConvOk && isFrameOk)
@@ -115,7 +118,7 @@ namespace FrameMakerConverter
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("FrameMaker Converter can't be started with exception: " + ex.ToString());
+                    MessageBox.Show(this, "FrameMaker Converter can't be started with exception: " + ex.ToString());
                 }
             }
         }
@@ -152,8 +155,47 @@ namespace FrameMakerConverter
             {
                 stopFrame();
             }
+            else
+            {
+                e.Cancel = true;
+            }
+        }
 
-            e.Cancel = result == DialogResult.Cancel;
+        private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Application.Exit();
+            Process[] pary = Process.GetProcessesByName(Process.GetCurrentProcess().ProcessName);
+            foreach (Process p in pary)
+            {
+                p.Kill();
+            }
+        }
+
+        private void cbAutoStart_CheckedChanged(object sender, EventArgs e)
+        {
+            AppConfig.AutoStart = cbAutoStart.Checked;
+        }
+
+        public void autoStart()
+        {
+            this.cbAutoStart.Checked = AppConfig.AutoStart;
+            string dir = AppConfig.GetAppConfig("Dir");
+            if (dir == null || "".Equals(dir.Trim()))
+            {
+                return;
+            }
+            string dir2 = AppConfig.GetAppConfig("FmDir");
+            if (dir2 == null || "".Equals(dir2.Trim()))
+            {
+                return;
+            }
+
+            String oriText = this.cbAutoStart.Text;
+            this.cbAutoStart.Text = "Auto Starting...";
+            this.cbAutoStart.Enabled = false;
+            startFrame();
+            this.cbAutoStart.Text = oriText;
+            this.cbAutoStart.Enabled = true;
         }
     }
 }

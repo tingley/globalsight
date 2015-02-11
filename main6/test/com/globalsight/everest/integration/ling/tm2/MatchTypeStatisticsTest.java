@@ -1,6 +1,5 @@
 package com.globalsight.everest.integration.ling.tm2;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,18 +7,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.globalsight.ling.tm.LeverageMatchLingManager;
+import com.globalsight.ling.tm2.leverage.MatchState;
+import com.globalsight.util.ClassUtil;
+
 public class MatchTypeStatisticsTest
 {
     private MatchTypeStatistics ms = null;
     private int threshold = 0;
-//    LeverageMatch match = null;
-    
-    // word count calculated by threshold
-    private static final int THRESHOLD_NO_MATCH = 11;
-    private static final int THRESHOLD_HI_FUZZY = 12;
-    private static final int THRESHOLD_MED_HI_FUZZY = 13;
-    private static final int THRESHOLD_MED_FUZZY = 14;
-    
+        
     private List<LeverageMatch> matchList = new ArrayList<LeverageMatch>();
     
     @Before
@@ -52,36 +48,123 @@ public class MatchTypeStatisticsTest
     }
     
     @Test
-    public void testAddMatchTypeForCosting() throws Exception
+    public void testAddMatchType() throws Exception
     {
         for (int i = 0; i < matchList.size(); i++)
         {
             LeverageMatch match = matchList.get(i);
             threshold = 75;
             ms = new MatchTypeStatistics(threshold);
-            Method method = ms.getClass().getDeclaredMethod(
-                    "addMatchTypeForCosting", LeverageMatch.class);
-            method.setAccessible(true);
-            method.invoke(ms, match);
-            Types types = ms.getTypesByThreshold(i + 1, "0");
-            
+            ClassUtil.testMethod(ms, "addMatchType", match);
+            Types types = ms.getTypes(i + 1, "0");
+
             float score = match.getScoreNum();
-            if (score < 100 && score >= 95)
-            {
-                Assert.assertEquals(THRESHOLD_HI_FUZZY, types.getStatisticsMatchType());
-            }
-            else if (score < 95 && score >= 85)
-            {
-                Assert.assertEquals(THRESHOLD_MED_HI_FUZZY, types.getStatisticsMatchType());
-            }
-            else if (score < 85 && score >= 75) 
-            {
-                Assert.assertEquals(THRESHOLD_MED_FUZZY, types.getStatisticsMatchType());
-            }
-            else 
-            {
-                Assert.assertEquals(THRESHOLD_NO_MATCH, types.getStatisticsMatchType());
+            if (score < 100 && score >= 95) {
+                Assert.assertEquals(MatchTypeStatistics.THRESHOLD_HI_FUZZY,
+                        types.getStatisticsMatchTypeByThreshold());
+            } else if (score < 95 && score >= 85) {
+                Assert.assertEquals(
+                        MatchTypeStatistics.THRESHOLD_MED_HI_FUZZY,
+                        types.getStatisticsMatchTypeByThreshold());
+            } else if (score < 85 && score >= 75) {
+                Assert.assertEquals(
+                        MatchTypeStatistics.THRESHOLD_MED_FUZZY,
+                        types.getStatisticsMatchTypeByThreshold());
+            } else {
+                Assert.assertEquals(
+                        MatchTypeStatistics.THRESHOLD_NO_MATCH,
+                        types.getStatisticsMatchTypeByThreshold());
             }
         }
     }
+    
+    @Test
+    public void testDeterminIsSubLevMatch()
+    {
+        threshold = 75;
+        ms = new MatchTypeStatistics(threshold);
+        float matchPoint = 74.568f;
+        Boolean result = (Boolean) ClassUtil.testMethod(ms,
+                "determinIsSubLevMatch", matchPoint);
+        Assert.assertTrue(result == true);
+
+        matchPoint = 49.512f;
+        result = (Boolean) ClassUtil.testMethod(ms, "determinIsSubLevMatch",
+                matchPoint);
+        Assert.assertTrue(result != true);
+    }
+    
+    @Test
+    public void testDetermineLingManagerType()
+    {
+        threshold = 75;
+        ms = new MatchTypeStatistics(threshold);
+
+        float matchPoint = 100;
+        MatchState matchState = MatchState.SEGMENT_TM_EXACT_MATCH;
+        int result = (Integer) ClassUtil.testMethod(ms,
+                "determineLingManagerType", matchPoint, matchState);
+        Assert.assertEquals(LeverageMatchLingManager.EXACT, result);
+
+        matchPoint = 85.01f;
+        matchState = MatchState.FUZZY_MATCH;
+        result = (Integer) ClassUtil.testMethod(ms, "determineLingManagerType",
+                matchPoint, matchState);
+        Assert.assertEquals(LeverageMatchLingManager.FUZZY, result);
+
+        matchState = MatchState.NOT_A_MATCH;
+        result = (Integer) ClassUtil.testMethod(ms, "determineLingManagerType",
+                matchPoint, matchState);
+        Assert.assertEquals(LeverageMatchLingManager.NO_MATCH, result);
+    }
+    
+    @Test
+    public void testDetermineStatisticsTypeForFuzzyMatch()
+    {
+        threshold = 75;
+        ms = new MatchTypeStatistics(threshold);
+
+        float matchPoint = 74.562f;
+        int result = (Integer) ClassUtil.testMethod(ms,
+                "determineStatisticsTypeForFuzzyMatch", matchPoint);
+        Assert.assertEquals(MatchTypeStatistics.LOW_FUZZY, result);
+
+        matchPoint = 95.00f;
+        result = (Integer) ClassUtil.testMethod(ms,
+                "determineStatisticsTypeForFuzzyMatch", matchPoint);
+        Assert.assertEquals(MatchTypeStatistics.HI_FUZZY, result);
+    }
+    
+    @Test
+    public void testDetermineCostingStatisticsTypeForFuzzyMatch()
+    {
+        threshold = 95;
+        float matchPoint = 95.23f;
+        ms = new MatchTypeStatistics(threshold);
+        int result = (Integer) ClassUtil.testMethod(ms,
+                "determineCostingStatisticsTypeForFuzzyMatch", matchPoint);
+        Assert.assertEquals(MatchTypeStatistics.THRESHOLD_HI_FUZZY, result);
+
+        threshold = 90;
+        matchPoint = 94.23f;
+        ms = new MatchTypeStatistics(threshold);
+        result = (Integer) ClassUtil.testMethod(ms,
+                "determineCostingStatisticsTypeForFuzzyMatch", matchPoint);
+        Assert.assertEquals(MatchTypeStatistics.THRESHOLD_MED_HI_FUZZY, result);
+
+        threshold = 75;
+        matchPoint = 80.23f;
+        ms = new MatchTypeStatistics(threshold);
+        result = (Integer) ClassUtil.testMethod(ms,
+                "determineCostingStatisticsTypeForFuzzyMatch", matchPoint);
+        Assert.assertEquals(MatchTypeStatistics.THRESHOLD_MED_FUZZY, result);
+
+        threshold = 70;
+        matchPoint = 74.23f;
+        ms = new MatchTypeStatistics(threshold);
+        result = (Integer) ClassUtil.testMethod(ms,
+                "determineCostingStatisticsTypeForFuzzyMatch", matchPoint);
+        Assert.assertEquals(MatchTypeStatistics.THRESHOLD_LOW_FUZZY, result);
+    }
+
 }

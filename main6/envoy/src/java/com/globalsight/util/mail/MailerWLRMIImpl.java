@@ -98,6 +98,17 @@ public class MailerWLRMIImpl
                                  p_subjectKey, p_messageKey, 
                                  p_messageArguments, p_companyIdStr);
     }
+    
+    public void sendMail(EmailInformation p_sendFromEmailInfo,
+            EmailInformation p_recipientEmailInfo, String p_subjectKey,
+            String p_messageKey, String[] p_messageArguments,
+            String[] p_attachments, long p_companyId)
+            throws MailerException, RemoteException
+    {
+        m_localInstance.sendMail(p_sendFromEmailInfo, p_recipientEmailInfo,
+                p_subjectKey, p_messageKey, p_messageArguments, p_attachments,
+                p_companyId);
+    }
 
     /**
      * @see Mailer.sendMailFromAdmin(String, String[], String, String)

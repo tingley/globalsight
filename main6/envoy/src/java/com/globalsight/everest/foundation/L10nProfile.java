@@ -44,7 +44,7 @@ public interface L10nProfile
      * Set compnay id in request. It is used to create job, workflow,
      * taskinfo.
      */
-    public void setCompanyId(String p_companyId);
+    public void setCompanyId(String p_companyId); 
     
     /**
      * Returns the company id stored in request.
@@ -93,7 +93,7 @@ public interface L10nProfile
      * Set the TM Choice for this localization profile
      * @param p_tmChoice 0, 1 or 2 are the permitted values
      */
-    void setTMChoice(int p_tmChoice);
+    void setTmChoice(int p_tmChoice);
 
     /**
      * The value for TM choice will be returned-no TM, regular TM or
@@ -101,7 +101,7 @@ public interface L10nProfile
      * @return int 0,1,2 will be returned - see statics at top of
      * interface
      */
-    int getTMChoice();
+    int getTmChoice();
 
     /**
      * @return the code set that the particular target locale is
@@ -311,11 +311,7 @@ public interface L10nProfile
 
     void addTMProfile(TranslationMemoryProfile p_tmProfile);
 
-    Collection getTranslationMemoryProfiles();
-
     TranslationMemoryProfile getTranslationMemoryProfile();
-
-    void setTMProfiles(Vector p_tmProfiles);
 
     public List<Long> getUnActivelocaleIds();
 

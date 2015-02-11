@@ -38,37 +38,13 @@
 <%
     SessionManager sessionManager = 
         (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
+    //From task upload or simple offline upload
+    boolean fromTaskUpload = WebAppConstants.UPLOAD_FROMTASKUPLOAD
+            .equals(sessionManager.getAttribute(WebAppConstants.UPLOAD_ORIGIN));
     ResourceBundle bundle = PageHandler.getBundle(session);
-    Task task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
-    int state = task.getState();
-    long task_id = task.getId();
-    boolean review_only = task.isType(Task.TYPE_REVIEW);
-
-    String detailUrl = detail.getPageURL() + 
-        "&" + WebAppConstants.TASK_ACTION + 
-        "=" + WebAppConstants.TASK_ACTION_RETRIEVE + 
-        "&" + WebAppConstants.TASK_STATE + 
-        "=" + state +
-        "&" + WebAppConstants.TASK_ID + 
-        "=" + task_id;
-    String urlDone = done.getPageURL() + 
-    "&" + WebAppConstants.UPLOAD_ACTION +
-    "=" + WebAppConstants.UPLOAD_ACTION_DONE;
-
-    // links
-    String downloadUrl = download.getPageURL();
-    String uploadUrl = startupload.getPageURL() +
-        "&" + WebAppConstants.UPLOAD_ACTION +
-        "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD;
-    String downloadReportUrl = downloadreport.getPageURL();
-    String uploadReportUrl = uploadreport.getPageURL();
-    String commentUrl = comment.getPageURL();
-    String cancelUrl = cancel.getPageURL();
-    String supportFilesUrl = supportFiles.getPageURL();
-    String errorPageUrl = errorPage.getPageURL();
-
+    
     // labels
-    String title = bundle.getString("lb_upload");
+    String title = bundle.getString("lb_tab_upload");
     String instruction = bundle.getString("msg_upload");
     String lbCancel = bundle.getString("lb_cancel");
     String labelActivity = bundle.getString("lb_activity") + bundle.getString("lb_colon");
@@ -76,14 +52,64 @@
     String lbDetails = bundle.getString("lb_details");
     String lbWorkoffline = bundle.getString("lb_work_offline");
     String lbComments = bundle.getString("lb_comments");
-    String lbDownload = bundle.getString("lb_download");
-    String lbUpload = bundle.getString("lb_upload");
+    String lbDownload = bundle.getString("lb_tab_download");
+    String lbUpload = bundle.getString("lb_tab_upload");
     String lbDownloadReport = bundle.getString("lb_download_report");
     String lbUploadReport = bundle.getString("lb_upload_report");
     String lbStartUpload = bundle.getString("lb_upload_start");
     String lbLastError = bundle.getString("lb_last_error");
     String lb_refresh = bundle.getString("lb_refresh");
     String lb_search_msg = "Please wait. Uploading files...";
+    
+    Task task = null;
+    int state;
+    long task_id ;
+    boolean review_only;
+    String activityName=null;
+    String jobName=null;
+    // links
+    String detailUrl=null;
+    String downloadUrl=null;
+    String commentUrl=null;
+    String downloadReportUrl=null;
+    String uploadReportUrl=null;
+    
+    String urlDone = done.getPageURL() + 
+            "&" + WebAppConstants.UPLOAD_ACTION +
+            "=" + WebAppConstants.UPLOAD_ACTION_DONE;;
+    String uploadUrl = startupload.getPageURL() +
+            "&" + WebAppConstants.UPLOAD_ACTION +
+            "=" + WebAppConstants.UPLOAD_ACTION_START_UPLOAD;;
+    String cancelUrl = cancel.getPageURL();
+    String supportFilesUrl = supportFiles.getPageURL();
+    String errorPageUrl = errorPage.getPageURL();
+    
+    String helpTextUpload = bundle.getString("helper_text_offline_upload");
+    
+    if(fromTaskUpload)
+    {
+        task = (Task)TaskHelper.retrieveObject(session, WebAppConstants.WORK_OBJECT);
+        state = task.getState();
+        task_id = task.getId();
+        review_only = task.isType(Task.TYPE_REVIEW);
+
+        detailUrl = detail.getPageURL() + 
+            "&" + WebAppConstants.TASK_ACTION + 
+            "=" + WebAppConstants.TASK_ACTION_RETRIEVE + 
+            "&" + WebAppConstants.TASK_STATE + 
+            "=" + state +
+            "&" + WebAppConstants.TASK_ID + 
+            "=" + task_id;
+        downloadUrl = download.getPageURL();
+        downloadReportUrl = downloadreport.getPageURL();
+        uploadReportUrl = uploadreport.getPageURL();
+        commentUrl = comment.getPageURL();
+        
+        // Get data for the Hints table
+        activityName = task.getTaskName();
+        jobName = task.getJobName();
+        helpTextUpload = bundle.getString("helper_text_upload");
+    }
 
 
     // control name
@@ -91,10 +117,6 @@
 
     boolean hasPrevError
        = (String)sessionManager.getAttribute(OfflineConstants.ERROR_MESSAGE) == null ? false : true;
-
-    // Get data for the Hints table
-    String activityName = task.getTaskName();
-    String jobName = task.getJobName();
 
     // Determine if LocalizationParticipants (translators) are allowed
     // to upload Support Files. 
@@ -158,13 +180,15 @@ function doOnLoad()
 <%@ include file="/envoy/wizards/guides.jspIncl" %>
 
 <DIV ID="contentLayer" STYLE=" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;">
-
+<%if(fromTaskUpload){%>
 <P CLASS="mainHeading"><%=labelJobName%> <%=jobName%></P>
-
+<%} else {%>
+<P CLASS="mainHeading"><%=bundle.getString("lb_offline_upload")%></P>
+<%} %>
 <TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0 CLASS=standardText>
 <TR>
 <TD WIDTH=500>
-<%=EditUtil.toJavascript(bundle.getString("helper_text_upload"))%>
+<%=EditUtil.toJavascript(helpTextUpload)%>
 <P>
 <%
 if (b_supportFileUpload) {
@@ -180,6 +204,7 @@ if (b_supportFileUpload) {
 <P></P>
 
 <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0">
+<%if(fromTaskUpload){%>
 <TR>
 <TD>
 <!-- Tabs table -->
@@ -220,6 +245,7 @@ if (b_supportFileUpload) {
 <TR>
 <TD CLASS="tableHeadingBasic" COLSPAN="2" HEIGHT=1 WIDTH="500"><IMG SRC="/globalsight/images/spacer.gif" HEIGHT="1" WIDTH="1"></TD>
 </TR>
+<% }%>
 
 <TR>
 <TD COLSPAN="2">&nbsp;</TD>

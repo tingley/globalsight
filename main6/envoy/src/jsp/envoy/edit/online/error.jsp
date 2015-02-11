@@ -1,20 +1,20 @@
 <%@ page
     contentType="text/html; charset=UTF-8"
     isErrorPage="true"
-    import="java.util.*,com.globalsight.everest.webapp.pagehandler.PageHandler,
+    import="java.util.*,
+            com.globalsight.everest.servlet.ControlServlet,
+            com.globalsight.everest.webapp.pagehandler.PageHandler,
                  com.globalsight.everest.webapp.javabean.ErrorBean,
          com.globalsight.util.resourcebundle.ResourceBundleConstants,
          com.globalsight.util.resourcebundle.SystemResourceBundle,
                  com.globalsight.everest.webapp.WebAppConstants,
-          org.apache.log4j.Logger,
          java.util.Locale, java.util.ResourceBundle"
     session="true"
 %>
 <jsp:useBean id="error" scope="request"
  class="com.globalsight.everest.webapp.javabean.ErrorBean" />
 <%
-    Logger.getLogger("com.globalsight.everest.webapp.jsp").
-        error("Exception in JSP", exception);
+    ControlServlet.handleJSPException(exception);
 
     ResourceBundle bundle = PageHandler.getBundle(session);
     String title = bundle.getString("lb_system_error");

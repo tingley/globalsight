@@ -52,7 +52,7 @@ public class ValidationHelper
      */
 	public static boolean validateJobName(String p_jobname)
 	{
-		String re = "[\\w+-.\\s+]{1,}";
+		String re = "[\\w+-.\\s+']{1,}";
 		
 		//replace space to "" before matching to allow space in job name
 //		p_jobname = p_jobname.replaceAll("\\s+", "");

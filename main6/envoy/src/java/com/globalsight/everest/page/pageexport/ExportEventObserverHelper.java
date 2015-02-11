@@ -77,7 +77,8 @@ public class ExportEventObserverHelper
             long id = (Long) p_pageIds.get(i);
             TargetPage targetPage = HibernateUtil.get(TargetPage.class,
                     id);
-            PassoloUtil.addExportingPage(targetPage, exportBatchId);
+            if (targetPage != null)
+                PassoloUtil.addExportingPage(targetPage, exportBatchId);
         }
         
         return exportBatchId;

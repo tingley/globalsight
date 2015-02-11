@@ -20,6 +20,7 @@ package com.globalsight.everest.secondarytargetfile;
 import java.io.File;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -390,13 +391,10 @@ public final class SecondaryTargetFileMgrLocal implements
     /*
      * Check to see if all stfs of a workflow have been exported...
      */
-    private boolean isExported(List p_stfs)
+    private boolean isExported(Set<SecondaryTargetFile> p_stfs)
     {
-        int size = p_stfs == null ? 0 : p_stfs.size();
-        for (int i = 0; i < size; i++)
+        for (SecondaryTargetFile stf : p_stfs)
         {
-            SecondaryTargetFile stf = (SecondaryTargetFile) p_stfs.get(i);
-
             if (!SecondaryTargetFileState.EXPORTED.equals(stf.getState()))
             {
                 return false;
@@ -541,15 +539,15 @@ public final class SecondaryTargetFileMgrLocal implements
      */
     private boolean stfExists(Workflow p_wf, SecondaryTargetFile p_stf)
     {
-        List stfs = p_wf.getSecondaryTargetFiles();
-
-        int size = stfs == null ? 0 : stfs.size();
         boolean exists = false;
 
-        for (int i = 0; (!exists && i < size); i++)
+        for (SecondaryTargetFile stf : p_wf.getSecondaryTargetFiles())
         {
-            SecondaryTargetFile stf = (SecondaryTargetFile) stfs.get(i);
             exists = stf.getStoragePath().equals(p_stf.getStoragePath());
+            if (exists)
+            {
+                break;
+            }
         }
 
         return exists;

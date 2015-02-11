@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.text.MessageFormat;
@@ -22,15 +38,28 @@ public class MSOffice2010Filter implements Filter
     private boolean headerTranslate = true;
     private boolean masterTranslate = false;
     private boolean fileinfoTranslate = false;
+    private boolean notesTranslate = false;
+    private boolean pptlayoutTranslate = false;
+    private boolean notemasterTranslate = false;
+    private boolean handoutmasterTranslate = false;
+    private boolean excelTabNamesTranslate = false;
+    private boolean toolTipsTranslate = false;
+    private boolean hiddenTextTranslate = false;
+    private boolean urlTranslate = false;
+    private boolean tableOfContentTranslate = false;
     private long companyId;
     private long xmlFilterId = -2;
-    private long secondFilterId = -2;
-    private String secondFilterTableName = "";
+    private long contentPostFilterId = -2;
+    private String contentPostFilterTableName = null;
 
     private List<String> unextractableWordParagraphStyles = new ArrayList<String>();
     private List<String> unextractableWordCharacterStyles = new ArrayList<String>();
+    private List<String> unextractableExcelCellStyles = new ArrayList<String>();
     private List<String> allParagraphStyles = new ArrayList<String>();
     private List<String> allCharacterStyles = new ArrayList<String>();
+    private List<String> allExcelCellStyles = new ArrayList<String>();
+    private List<String> allInternalTextStyles = new ArrayList<String>();
+    private List<String> selectedInternalTextStyles = new ArrayList<String>();
 
     private final String ENTIEY_START = "<entities>";
     private final String ENTIEY_END = "</entities>";
@@ -44,7 +73,11 @@ public class MSOffice2010Filter implements Filter
         allParagraphStyles.add("tw4winExternal");
 
         allCharacterStyles.add("DONOTTRANSLATE_char");
-        allCharacterStyles.add("tw4winInternal");
+        allCharacterStyles.add("tw4winExternal");
+
+        allInternalTextStyles.add("tw4winInternal");
+        
+        allExcelCellStyles.add("tw4winExternal");
     }
 
     public boolean checkExists(String filterName, long companyId)
@@ -75,6 +108,19 @@ public class MSOffice2010Filter implements Filter
         allParagraphStyles = toList(allStyles);
     }
 
+    public String getExcelCellStyles()
+    {
+    	return buildToXml(unextractableExcelCellStyles, allExcelCellStyles);
+    }
+    
+    public void setExcelCellStyles(String styles)
+    {
+    	unextractableExcelCellStyles = getSelectedStyles(styles);
+    	allExcelCellStyles = getAllStyles(styles);
+        FilterHelper.sort(unextractableExcelCellStyles);
+        FilterHelper.sort(allExcelCellStyles);
+    }
+    
     public String getCharacterStyles()
     {
         return buildToXml(unextractableWordCharacterStyles, allCharacterStyles);
@@ -93,6 +139,12 @@ public class MSOffice2010Filter implements Filter
         unextractableWordCharacterStyles = toList(selectedStyles);
         allCharacterStyles = toList(allStyles);
     }
+    
+    public void setExcelCellStyles(String selectedStyles, String allStyles)
+    {
+    	unextractableExcelCellStyles = toList(selectedStyles);
+    	allExcelCellStyles = toList(allStyles);
+    }
 
     public String getUnextractableWordParagraphStyles()
     {
@@ -102,6 +154,35 @@ public class MSOffice2010Filter implements Filter
     public String getUnextractableWordCharacterStyles()
     {
         return toString(unextractableWordCharacterStyles);
+    }
+    
+    public List<String> getUnextractableExcelCellStyles()
+    {
+    	return unextractableExcelCellStyles;
+    }
+    
+    public String getInternalTextStyles()
+    {
+        return buildToXml(selectedInternalTextStyles, allInternalTextStyles);
+    }
+
+    public void setInternalTextStyles(String styles)
+    {
+        selectedInternalTextStyles = getSelectedStyles(styles);
+        allInternalTextStyles = getAllStyles(styles);
+        FilterHelper.sort(selectedInternalTextStyles);
+        FilterHelper.sort(allInternalTextStyles);
+    }
+
+    public void setInTextStyles(String selectedStyles, String allStyles)
+    {
+        selectedInternalTextStyles = toList(selectedStyles);
+        allInternalTextStyles = toList(allStyles);
+    }
+
+    public String getSelectedInternalTextStyles()
+    {
+        return toString(selectedInternalTextStyles);
     }
 
     public static String toString(List<String> styles)
@@ -149,7 +230,8 @@ public class MSOffice2010Filter implements Filter
     {
         ArrayList<Filter> filters = null;
         filters = new ArrayList<Filter>();
-        String hql = "from MSOffice2010Filter oof where oof.companyId=" + companyId;
+        String hql = "from MSOffice2010Filter oof where oof.companyId="
+                + companyId;
         filters = (ArrayList<Filter>) HibernateUtil.search(hql);
         Collections.sort(filters, new FilterComparator(Locale.getDefault()));
         return filters;
@@ -159,31 +241,84 @@ public class MSOffice2010Filter implements Filter
     {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        sb.append("\"filterTableName\":").append(
-                "\"" + FilterConstants.OFFICE2010_TABLENAME + "\"").append(",");
+        sb.append("\"filterTableName\":")
+                .append("\"" + FilterConstants.OFFICE2010_TABLENAME + "\"")
+                .append(",");
         sb.append("\"id\":").append(id).append(",");
         sb.append("\"companyId\":").append(companyId).append(",");
-        sb.append("\"filterName\":").append("\"").append(FilterHelper.escape(filterName)).append(
-                "\"").append(",");
-        sb.append("\"filterDescription\":").append("\"").append(
-                FilterHelper.escape(filterDescription)).append("\"").append(",");
-        sb.append("\"unextractableWordParagraphStyles\":").append("\"").append(
-                FilterHelper.escape(toString(unextractableWordParagraphStyles))).append("\"")
+        sb.append("\"filterName\":").append("\"")
+                .append(FilterHelper.escape(filterName)).append("\"")
                 .append(",");
-        sb.append("\"allParagraphStyles\":").append("\"").append(
-                FilterHelper.escape(toString(allParagraphStyles))).append("\"").append(",");
-        sb.append("\"unextractableWordCharacterStyles\":").append("\"").append(
-                FilterHelper.escape(toString(unextractableWordCharacterStyles))).append("\"")
+        sb.append("\"filterDescription\":").append("\"")
+                .append(FilterHelper.escape(filterDescription)).append("\"")
                 .append(",");
-        sb.append("\"allCharacterStyles\":").append("\"").append(
-                FilterHelper.escape(toString(allCharacterStyles))).append("\"").append(",");
+        sb.append("\"unextractableWordParagraphStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableWordParagraphStyles)))
+                .append("\"").append(",");
+        sb.append("\"allParagraphStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allParagraphStyles)))
+                .append("\"").append(",");
+        sb.append("\"unextractableWordCharacterStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(unextractableWordCharacterStyles)))
+                .append("\"").append(",");
+        sb.append("\"allCharacterStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allCharacterStyles)))
+                .append("\"").append(",");
+        
+        sb.append("\"unextractableExcelCellStyles\":")
+        .append("\"")
+        .append(FilterHelper
+                .escape(toString(unextractableExcelCellStyles)))
+        .append("\"").append(",");
+        sb.append("\"allExcelCellStyles\":").append("\"")
+        .append(FilterHelper.escape(toString(allExcelCellStyles)))
+        .append("\"").append(",");
+        
+        sb.append("\"selectedInternalTextStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(selectedInternalTextStyles))).append("\"")
+                .append(",");
+        sb.append("\"selectedInternalTextStyles\":")
+                .append("\"")
+                .append(FilterHelper
+                        .escape(toString(selectedInternalTextStyles)))
+                .append("\"").append(",");
+        sb.append("\"allInternalTextStyles\":").append("\"")
+                .append(FilterHelper.escape(toString(allInternalTextStyles)))
+                .append("\"").append(",");
         sb.append("\"headerTranslate\":").append(headerTranslate).append(",");
         sb.append("\"masterTranslate\":").append(masterTranslate).append(",");
-        sb.append("\"fileinfoTranslate\":").append(fileinfoTranslate).append(",");
+        sb.append("\"fileinfoTranslate\":").append(fileinfoTranslate)
+                .append(",");
+        sb.append("\"notesTranslate\":").append(notesTranslate).append(",");
+        sb.append("\"pptlayoutTranslate\":").append(pptlayoutTranslate)
+                .append(",");
+        sb.append("\"notemasterTranslate\":").append(notemasterTranslate)
+                .append(",");
+        sb.append("\"handoutmasterTranslate\":").append(handoutmasterTranslate)
+                .append(",");
+        sb.append("\"excelTabNamesTranslate\":").append(excelTabNamesTranslate)
+                .append(",");
+        sb.append("\"hiddenTextTranslate\":").append(hiddenTextTranslate)
+                .append(",");
+        sb.append("\"tableOfContentTranslate\":")
+                .append(tableOfContentTranslate).append(",");
+        sb.append("\"toolTipsTranslate\":").append(toolTipsTranslate)
+                .append(",");
+        sb.append("\"urlTranslate\":").append(urlTranslate).append(",");
         sb.append("\"xmlFilterId\":").append(xmlFilterId).append(",");
-        sb.append("\"secondFilterId\":").append(secondFilterId).append(",");
-        sb.append("\"secondFilterTableName\":").append("\"").append(
-                FilterHelper.escape(secondFilterTableName)).append("\"");
+        sb.append("\"contentPostFilterId\":").append(contentPostFilterId)
+                .append(",");
+        sb.append("\"contentPostFilterTableName\":").append("\"")
+                .append(FilterHelper.escape(contentPostFilterTableName))
+                .append("\",");
+        sb.append("\"baseFilterId\":")
+                .append("\"")
+                .append(BaseFilterManager.getBaseFilterIdByMapping(id,
+                        FilterConstants.OFFICE2010_TABLENAME)).append("\"");
         sb.append("}");
         return sb.toString();
     }
@@ -287,7 +422,7 @@ public class MSOffice2010Filter implements Filter
     {
         this.headerTranslate = headerTranslate;
     }
-    
+
     public boolean isMasterTranslate()
     {
         return masterTranslate;
@@ -297,7 +432,7 @@ public class MSOffice2010Filter implements Filter
     {
         this.masterTranslate = masterTranslate;
     }
-    
+
     public boolean isFileinfoTranslate()
     {
         return fileinfoTranslate;
@@ -306,6 +441,96 @@ public class MSOffice2010Filter implements Filter
     public void setFileinfoTranslate(boolean fileinfoTranslate)
     {
         this.fileinfoTranslate = fileinfoTranslate;
+    }
+    
+    public boolean isTableOfContentTranslate()
+    {
+        return tableOfContentTranslate;
+    }
+
+    public void setTableOfContentTranslate(boolean tableOfContentTranslate)
+    {
+        this.tableOfContentTranslate = tableOfContentTranslate;
+    }
+
+    public boolean isNotesTranslate()
+    {
+        return notesTranslate;
+    }
+
+    public void setNotesTranslate(boolean notesTranslate)
+    {
+        this.notesTranslate = notesTranslate;
+    }
+
+    public boolean isPptlayoutTranslate()
+    {
+        return pptlayoutTranslate;
+    }
+
+    public void setPptlayoutTranslate(boolean pptlayoutTranslate)
+    {
+        this.pptlayoutTranslate = pptlayoutTranslate;
+    }
+
+    public boolean isNotemasterTranslate()
+    {
+        return notemasterTranslate;
+    }
+
+    public void setNotemasterTranslate(boolean notemasterTranslate)
+    {
+        this.notemasterTranslate = notemasterTranslate;
+    }
+
+    public boolean isHandoutmasterTranslate()
+    {
+        return handoutmasterTranslate;
+    }
+
+    public void setHandoutmasterTranslate(boolean handoutmasterTranslate)
+    {
+        this.handoutmasterTranslate = handoutmasterTranslate;
+    }
+
+    public boolean isExcelTabNamesTranslate()
+    {
+        return excelTabNamesTranslate;
+    }
+
+    public void setExcelTabNamesTranslate(boolean excelTabNamesTranslate)
+    {
+        this.excelTabNamesTranslate = excelTabNamesTranslate;
+    }
+
+    public boolean isToolTipsTranslate()
+    {
+        return toolTipsTranslate;
+    }
+
+    public void setToolTipsTranslate(boolean toolTipsTranslate)
+    {
+        this.toolTipsTranslate = toolTipsTranslate;
+    }
+
+    public boolean isUrlTranslate()
+    {
+        return urlTranslate;
+    }
+
+    public void setUrlTranslate(boolean urlTranslate)
+    {
+        this.urlTranslate = urlTranslate;
+    }
+
+    public boolean isHiddenTextTranslate()
+    {
+        return hiddenTextTranslate;
+    }
+
+    public void setHiddenTextTranslate(boolean hiddenTextTranslate)
+    {
+        this.hiddenTextTranslate = hiddenTextTranslate;
     }
 
     public long getCompanyId()
@@ -328,24 +553,24 @@ public class MSOffice2010Filter implements Filter
         return this.xmlFilterId;
     }
 
-    public void setSecondFilterId(long secondFilterId)
+    public long getContentPostFilterId()
     {
-        this.secondFilterId = secondFilterId;
+        return contentPostFilterId;
     }
 
-    public long getSecondFilterId()
+    public void setContentPostFilterId(long contentPostFilterId)
     {
-        return this.secondFilterId;
+        this.contentPostFilterId = contentPostFilterId;
     }
 
-    public void setSecondFilterTableName(String secondFilterTableName)
+    public String getContentPostFilterTableName()
     {
-        this.secondFilterTableName = secondFilterTableName;
+        return contentPostFilterTableName;
     }
 
-    public String getSecondFilterTableName()
+    public void setContentPostFilterTableName(String contentPostFilterTableName)
     {
-        return this.secondFilterTableName;
+        this.contentPostFilterTableName = contentPostFilterTableName;
     }
 
     public String getFilterTableName()

@@ -1,0 +1,2 @@
+# GBS-1649 MS 2010 filter config option to control whether or not URLs are exposed for translation
+ALTER TABLE `office2010_filter` ADD COLUMN `IS_URL_TRANSLATE` CHAR(1) NOT NULL DEFAULT 'N' AFTER `IS_HIDDENTEXT_TRANSLATE`;

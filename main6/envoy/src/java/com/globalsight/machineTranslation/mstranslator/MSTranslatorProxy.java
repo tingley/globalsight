@@ -16,23 +16,17 @@
  */
 package com.globalsight.machineTranslation.mstranslator;
 
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
-
 import org.apache.log4j.Logger;
-
-import org.datacontract.schemas._2004._07.microsoft_mt_web_service.ArrayOfTranslateArrayResponse;
-import org.datacontract.schemas._2004._07.microsoft_mt_web_service.TranslateArrayResponse;
-import org.datacontract.schemas._2004._07.microsoft_mt_web_service.TranslateOptions;
-import org.tempuri.LanguageService;
+import org.datacontract.schemas._2004._07.Microsoft_MT_Web_Service_V2.TranslateArrayResponse;
+import org.datacontract.schemas._2004._07.Microsoft_MT_Web_Service_V2.TranslateOptions;
 import org.tempuri.SoapService;
+import org.tempuri.SoapServiceLocator;
 
 import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
 import com.globalsight.machineTranslation.AbstractTranslator;
@@ -40,7 +34,7 @@ import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.LanguagePair;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.TranslationRequest;
-import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
+import com.microsofttranslator.api.V2.LanguageService;
 
 /**
  * Acts as a proxy to the translation Machine Translation Service: MS Translator.
@@ -61,13 +55,16 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
      * Hash Set of all supported language pairs ("Technical" domain)
      */
     private static final HashSet s_supportedTechnicalLanguagePairs;
+    
+    private static String MSMT_ACCESS_TOKEN = null;
+    private static final String MS_MT_EXPIRE_ERROR = "The incoming token has expired";
 
     /**
      * Only list English to others and others to English.
      */
     static
     {
-    	s_supportedGeneralLanguagePairs = new HashSet(100);
+        s_supportedGeneralLanguagePairs = new HashSet(100);
     	
         //Arabic
     	s_supportedGeneralLanguagePairs.add("en_ar");
@@ -188,7 +185,6 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         s_supportedTechnicalLanguagePairs.add("en_th");
         //English to Turkish
         s_supportedTechnicalLanguagePairs.add("en_tr");
-        
         //Japanese to Korean
         s_supportedTechnicalLanguagePairs.add("ja_ko");
         //Chinese Simplified to Chinese Traditional
@@ -242,23 +238,43 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         {
             String endpoint = (String) paramMap
                     .get(MachineTranslator.MSMT_ENDPOINT);
-            String msAppId = (String) paramMap
-                    .get(MachineTranslator.MSMT_APPID);
-
+//            String msAppId = (String) paramMap
+//                    .get(MachineTranslator.MSMT_APPID);
+            String msClientId = (String) paramMap
+                    .get(MachineTranslator.MSMT_CLIENTID);
+            String msClientSecret = (String) paramMap
+                    .get(MachineTranslator.MSMT_CLIENT_SECRET);
+            LanguageService service = null;
             try
             {
-                URL baseUrl = org.tempuri.SoapService.class.getResource(".");
-                URL url = new URL(baseUrl, endpoint);
-                SoapService soap = new SoapService(url);
-                LanguageService service = soap.getBasicHttpBindingLanguageService();
-                ArrayOfstring languageArray = service.getLanguagesForTranslate(msAppId);
-
-                return (languageArray.getString().contains(sourceLang) 
-                        && languageArray.getString().contains(targetLang));
+                if (MSMT_ACCESS_TOKEN == null)
+                {
+                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId, msClientSecret);
+                }
+                SoapService soap = new SoapServiceLocator(endpoint);
+                service = soap.getBasicHttpBinding_LanguageService();
+                String[] languageArray = service.getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
+                
+                List<String> tmp = Arrays.asList(languageArray);
+                return tmp.contains(sourceLang) && tmp.contains(targetLang);
             }
             catch (Exception ex)
             {
-                CATEGORY.error(ex.getMessage());
+                if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR))
+                {
+                    try
+                    {
+                        MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId, msClientSecret);
+                        String[] languageArray = service.getLanguagesForTranslate(MSMT_ACCESS_TOKEN);
+                        List<String> tmp = Arrays.asList(languageArray);
+                        return tmp.contains(sourceLang) && tmp.contains(targetLang);
+                    }
+                    catch (Exception e)
+                    {
+                        CATEGORY.error(e.getMessage(), e);
+                    }
+                }
+                CATEGORY.error(ex.getMessage(), ex);
             }
         }
 
@@ -323,28 +339,54 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     	// the MS translator use the public URL
     	else if (msMtUrlFlag != null && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_PUBLIC)) {
     		String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
-    		String msAppId = (String) paramMap.get(MachineTranslator.MSMT_APPID);
+//    		String msAppId = (String) paramMap.get(MachineTranslator.MSMT_APPID);
     		String msCategory = (String) paramMap.get(MachineTranslator.MSMT_CATEGORY);
+    		String msClientId = (String) paramMap.get(MachineTranslator.MSMT_CLIENTID);
+            String msClientSecret = (String) paramMap.get(MachineTranslator.MSMT_CLIENT_SECRET);
     		
+            LanguageService service = null;
     		String exceptionMsg = null;
     		try {
-    			URL baseUrl = org.tempuri.SoapService.class.getResource(".");
-    			URL url = new URL(baseUrl, endpoint);
-    			SoapService soap = new SoapService(url);
-    			LanguageService service = soap.getBasicHttpBindingLanguageService();
+    		    if (MSMT_ACCESS_TOKEN == null)
+                {
+                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId, msClientSecret);
+                }
+    		    SoapService soap = new SoapServiceLocator(endpoint);
+                service = soap.getBasicHttpBinding_LanguageService();
     			
     			boolean needTranslateAgain = true;
         		int count = 0;
-        		
         		//try at most 3 times
-        		while (needTranslateAgain && count < 3) {
+        		while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3) {
 	    			count++;
-	    			result = service.translate(msAppId, p_string, sourceLang,
+	    			result = service.translate(MSMT_ACCESS_TOKEN, p_string, sourceLang,
                             targetLang, MachineTranslator.MSMT_CONTENT_TYPE,
                             msCategory);
 	    			needTranslateAgain = false;
         		}
     		} catch (Exception ex) {
+    		    if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR))
+    		    {
+    		        try
+                    {
+                        MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId, msClientSecret);
+                        boolean needTranslateAgain = true;
+                        int count = 0;
+                        //try at most 3 times
+                        while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3) {
+                            count++;
+                            result = service.translate(MSMT_ACCESS_TOKEN, p_string, sourceLang,
+                                    targetLang, MachineTranslator.MSMT_CONTENT_TYPE,
+                                    msCategory);
+                            needTranslateAgain = false;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        CATEGORY.error(e.getMessage(), e);
+                    }
+    		    }
+    		    
     			exceptionMsg = ex.getMessage();
     		}
     		if (result == null || "".equals(result)) {
@@ -358,7 +400,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     }
     
     protected String[] doBatchTranslation(Locale p_sourceLocale,
-            Locale p_targetLocale, String[] p_segments)
+            Locale p_targetLocale, String[] segments)
             throws MachineTranslationException
     {
     	String[] results = null;
@@ -385,7 +427,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 
             // TranslationRequest
             TranslationRequest transRequest = new TranslationRequest();
-            transRequest.setTexts(p_segments);
+            transRequest.setTexts(segments);
             // language pair
             LanguagePair lp = new LanguagePair(sourceLang, targetLang);
             transRequest.setLangPair(lp);
@@ -411,57 +453,75 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         {
             String endpoint = (String) paramMap
                     .get(MachineTranslator.MSMT_ENDPOINT);
-            String msAppId = (String) paramMap
-                    .get(MachineTranslator.MSMT_APPID);
             String msCategory = (String) paramMap
                     .get(MachineTranslator.MSMT_CATEGORY);
+            String msClientId = (String) paramMap
+                    .get(MachineTranslator.MSMT_CLIENTID);
+            String msClientSecret = (String) paramMap
+                    .get(MachineTranslator.MSMT_CLIENT_SECRET);
 
-            ArrayOfTranslateArrayResponse result = null;
+            LanguageService service = null;
+            TranslateArrayResponse[] result = null;
+            TranslateOptions options = new TranslateOptions();
+            options.setCategory(msCategory);
+            options.setContentType(MachineTranslator.MSMT_CONTENT_TYPE);
             try
             {
-                URL baseUrl = org.tempuri.SoapService.class.getResource(".");
-                URL url = new URL(baseUrl, endpoint);
-                SoapService soap = new SoapService(url);
-                LanguageService service = soap
-                        .getBasicHttpBindingLanguageService();
+                if (MSMT_ACCESS_TOKEN == null)
+                {
+                    MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId, msClientSecret);
+                }
+                SoapService soap = new SoapServiceLocator(endpoint);
+                service = soap.getBasicHttpBinding_LanguageService();
 
                 boolean needTranslateAgain = true;
                 int count = 0;
-
-                TranslateOptions options = new TranslateOptions();
-                JAXBElement<String> category = new JAXBElement<String>(
-                        new QName("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2",
-                                "category"), String.class, msCategory);
-                JAXBElement<String> contentType = new JAXBElement<String>(
-                        new QName("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2",
-                                "contentType"), String.class,
-                        MachineTranslator.MSMT_CONTENT_TYPE);
-                options.setCategory(category);
-                options.setContentType(contentType);
-                
-                ArrayOfstring segmentsArray = new ArrayOfstring();
-                List segmentsList = Arrays.asList(p_segments);
-                segmentsArray.getString().addAll(segmentsList);
-
                 // try at most 3 times
-                while (needTranslateAgain && count < 3)
+                while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3)
                 {
                     count++;
-                    result = service.translateArray(msAppId, segmentsArray,
+                    result = service.translateArray(MSMT_ACCESS_TOKEN, segments,
                             sourceLang, targetLang, options);
                     needTranslateAgain = false;
-                }
-                List resultList = result.getTranslateArrayResponse();
-                results = new String[resultList.size()];
-                for (int i = 0; i < resultList.size(); i++)
-                {
-                    results[i] = ((TranslateArrayResponse) resultList.get(i))
-                            .getTranslatedText().getValue();
                 }
             }
             catch (Exception ex)
             {
+                if (ex.getMessage().contains(MS_MT_EXPIRE_ERROR))
+                {
+                    try
+                    {
+                        MSMT_ACCESS_TOKEN = MSMTUtil.getAccessToken(msClientId, msClientSecret);
+                        boolean needTranslateAgain = true;
+                        int count = 0;
+                        // try at most 3 times
+                        while (MSMT_ACCESS_TOKEN != null && needTranslateAgain && count < 3)
+                        {
+                            count++;
+                            result = service.translateArray(MSMT_ACCESS_TOKEN, segments,
+                                    sourceLang, targetLang, options);
+                            needTranslateAgain = false;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        exceptionMsg = e.getMessage();
+                    }
+                }
                 exceptionMsg = ex.getMessage();
+            }
+            if (result != null)
+            {
+                results = new String[result.length];
+                for (int i = 0; i < result.length; i++)
+                {
+                    results[i] = result[i].getTranslatedText();
+                }
+            }
+            else
+            {
+                CATEGORY.error("The translation result is null. "
+                        + segments.length + " sentences are not translated.");
             }
         }
 
@@ -470,13 +530,6 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
             CATEGORY.error(exceptionMsg);
         }
 
-        /*
-        if (results == null || results.length != p_segments.length)
-        {
-            results = p_segments;
-        }
-    	*/
-        
     	return results;
     }
     
@@ -530,51 +583,5 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
 		}
 		
 		return lang;
-    }
-    
-    public static void main(String[] args)
-    {
-        String[] segments = {"<bpt erasable=\"yes\" i=\"1\" type=\"bold\" x=\"1\">&lt;b&gt;</bpt>Welocalize - About Us<ept i=\"1\">&lt;/b&gt;</ept>",
-                "<it i=\"1\" type=\"x-span\" pos=\"begin\" x=\"1\"><span style=\"font-family:&quot;Arial&quot;,&quot;sans-serif&quot;\"></it>Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications.",
-                "<it i=\"1\" type=\"x-span\" pos=\"begin\" x=\"1\">&lt;span style=&apos;font-family:&amp;quot;Arial&amp;quot;,&amp;quot;sans-serif&amp;quot;&apos;&gt;</it>We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results."};
-        String endpoint = "http://api.microsofttranslator.com/V2/Soap.svc";
-        String msAppId = "375BDCCCC3ACD1AB526A199883AB2C315B377A33";
-
-        ArrayOfTranslateArrayResponse result = null;
-        try
-        {
-            URL baseUrl = org.tempuri.SoapService.class.getResource(".");
-            URL url = new URL(baseUrl, endpoint);
-            SoapService soap = new SoapService(url);
-            LanguageService service = soap.getBasicHttpBindingLanguageService();
-
-            boolean needTranslateAgain = true;
-            int count = 0;
-
-            TranslateOptions options = new TranslateOptions();
-            ArrayOfstring segmentsArray = new ArrayOfstring();
-            List segmentsList = Arrays.asList(segments);
-            segmentsArray.getString().addAll(segmentsList);
-
-            // try at most 3 times
-            while (needTranslateAgain && count < 3)
-            {
-                count++;
-                result = service.translateArray(msAppId, segmentsArray,
-                        "en", "zh-CHS", options);
-                needTranslateAgain = false;
-            }
-            List resultList = result.getTranslateArrayResponse();
-            String[] results = new String[resultList.size()];
-            for (int i = 0; i < resultList.size(); i++)
-            {
-                results[i] = ((TranslateArrayResponse) resultList.get(i))
-                        .getTranslatedText().getValue();
-            }
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
-        }
     }
 }

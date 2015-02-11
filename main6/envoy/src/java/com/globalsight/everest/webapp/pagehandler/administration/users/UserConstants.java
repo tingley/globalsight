@@ -16,7 +16,6 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.users;
 
-
 public interface UserConstants
 {
     // Constant for saving activity in session
@@ -29,7 +28,7 @@ public interface UserConstants
     public static final String ROLE_KEY = "role";
     public static final String PROJECT_LIST = "projects";
     public static final String PROJECT_KEY = "project";
-    
+
     // Actions
     public static final String CANCEL = "cancel";
     public static final String CREATE = "create";
@@ -42,5 +41,5 @@ public interface UserConstants
     public static final String MODIFY_USER_WRAPPER = "modifyUserWrapper";
     public static final String ADD_ANOTHER = "addAnother";
     public static final String SEARCH_PARAMS = "searchParams";
-    
+
 }

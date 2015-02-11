@@ -106,7 +106,7 @@ public class XmlDtdManager
         }
         catch (Exception e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -181,7 +181,7 @@ public class XmlDtdManager
             }
             catch (Exception e)
             {
-                logger.error(e);
+                logger.error(e.getMessage(), e);
             }
         }
         return users;
@@ -347,7 +347,7 @@ public class XmlDtdManager
                             }
                             catch (Exception e1)
                             {
-                                logger.error(e1);
+                                logger.error("Failed to send DTD validation failure email", e1);
                             }
                         }
                     }
@@ -416,7 +416,7 @@ public class XmlDtdManager
                 }
                 catch (IOException e)
                 {
-                    logger.error(e);
+                    logger.error(e.getMessage(), e);
                 }
                 catch (DtdException e)
                 {
@@ -437,7 +437,7 @@ public class XmlDtdManager
                         }
                         catch (Exception e1)
                         {
-                            logger.error(e1);
+                            logger.error("Failed to send DTD validation failure email", e1);
                         }
                     }
                 }
@@ -479,7 +479,7 @@ public class XmlDtdManager
                 }
                 catch (Exception e)
                 {
-                    logger.error(e);
+                    logger.info("DTD validation failed: " + e.getMessage());
                     throw new DtdException(e);
                 }
             }

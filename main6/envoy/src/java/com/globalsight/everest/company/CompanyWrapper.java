@@ -52,6 +52,7 @@ public class CompanyWrapper
     public static final String CURRENT_COMPANY_ID = "currentCompanyId";
 
     private static Company superCompany;
+	private static HashMap<String, String> idViewName = new HashMap<String, String>();
 
     // ////////////////////////////////////////////////////////////////////////////////
     // Begin: Constructor
@@ -75,11 +76,10 @@ public class CompanyWrapper
      * 
      * @return The companies' names.
      */
-    @SuppressWarnings("unchecked")
     public static String[] getAllCompanyNames() throws PersistenceException
     {
         String[] strCompanyNames = null;
-        String hql = "from Company";
+        String hql = "from Company c where c.isActive = 'Y'";
         Collection<?> col = HibernateUtil.search(hql);
         Set<String> companyNames = new TreeSet<String>();
         for (Iterator<?> iter = col.iterator(); iter.hasNext();)
@@ -91,6 +91,23 @@ public class CompanyWrapper
         companyNames.toArray(strCompanyNames);
 
         return strCompanyNames;
+    }
+    
+	public static HashMap<String, String> getAllCompanyRefer()
+			throws PersistenceException
+    {
+        String hql = "from Company c where c.isActive = 'Y'";
+        idViewName = new HashMap<String, String>();
+
+        Collection<?> col = HibernateUtil.search(hql);
+        for (Iterator<?> iter = col.iterator(); iter.hasNext();)
+        {
+            Company company = (Company) iter.next();
+        
+            idViewName.put(Long.toString(company.getId()), company.getCompanyName());
+        }
+
+        return idViewName;
     }
 
     public static Vector<Long> addCompanyIdBoundArgs(Vector<Long> args)
@@ -113,8 +130,8 @@ public class CompanyWrapper
         return args;
     }
 
-    public static HashMap<String, Long> addCompanyIdBoundArgs(String mapKey1, String mapKey2)
-            throws PersistenceException
+    public static HashMap<String, Long> addCompanyIdBoundArgs(String mapKey1,
+            String mapKey2) throws PersistenceException
     {
         String currentId = CompanyThreadLocal.getInstance().getValue();
         HashMap<String, Long> map = new HashMap<String, Long>();
@@ -138,8 +155,7 @@ public class CompanyWrapper
         Long[] bounds = new Long[2];
         bounds[0] = new Long(-1);
         String maxCompanySql = "select max(id) from COMPANY";
-        Number maxId = (Number) HibernateUtil
-                .getFirstWithSql(maxCompanySql);
+        Number maxId = (Number) HibernateUtil.getFirstWithSql(maxCompanySql);
         bounds[1] = new Long(maxId.longValue());
 
         return bounds;
@@ -147,21 +163,17 @@ public class CompanyWrapper
 
     public static String getCompanyNameById(String id)
     {
-        Company company = null;
-        try
-        {
-            company = getCompanyById(id);
-        }
-        catch (PersistenceException e)
-        {
-            return "Null Company";
-        }
-        if (company == null)
-        {
-            return "Null Company";
-        }
+		String name = idViewName.get(id);
+		if (name == null) {
+			getAllCompanyRefer();
+		}
 
-        return company.getName();
+		name = idViewName.get(id);
+		if (name == null) {
+			return "Null Company";
+		} else {
+			return name;
+		}
     }
 
     public static String getCompanyIdByName(String strName)
@@ -173,9 +185,11 @@ public class CompanyWrapper
     /**
      * Get a Company instance with company name
      * 
-     * @param strName not null able
-     * @return a Company instance which name is same as {@link strName}, return null if this company name does
-     *         not exist or isActive is false for that company.
+     * @param strName
+     *            not null able
+     * @return a Company instance which name is same as {@link strName}, return
+     *         null if this company name does not exist or isActive is false for
+     *         that company.
      * @throws PersistenceException
      */
     public static Company getCompanyByName(String strName)
@@ -183,8 +197,8 @@ public class CompanyWrapper
     {
         try
         {
-            return ServerProxy.getJobHandler().getCompany(
-                    strName.toUpperCase());
+            return ServerProxy.getJobHandler()
+                    .getCompany(strName.toUpperCase());
         }
         catch (Exception e)
         {
@@ -245,7 +259,8 @@ public class CompanyWrapper
         return isSuperCompanyName(getCompanyNameById(id));
     }
 
-    public static void saveCurrentCompanyIdInMap(Map<String, String> map, Logger logger)
+    public static void saveCurrentCompanyIdInMap(Map<String, String> map,
+            Logger logger)
     {
         String companyId = CompanyThreadLocal.getInstance().getValue();
         if (logger != null && logger.isDebugEnabled())
@@ -258,13 +273,13 @@ public class CompanyWrapper
             map.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
         }
     }
-    
+
     public static List<String> getCompanyCategoryList(String companyId)
     {
         String hql = "select c.category from Category as c where c.companyId = "
-            + companyId;
+                + companyId;
         List<String> categoryList = (List<String>) HibernateUtil.search(hql);
-        
+
         if (categoryList == null || categoryList.size() == 0)
         {
             String[] keyArray = new String[]
@@ -273,8 +288,8 @@ public class CompanyWrapper
                     "lb_spelling_grammar_punctuation_error" };
             categoryList = Arrays.asList(keyArray);
         }
-        
+
         return categoryList;
     }
-    
+
 }

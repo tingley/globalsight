@@ -140,7 +140,7 @@ function showProgress(entryCount, percentage, message)
 
   //idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(window.navigator.userAgent.indexOf("Firefox")>0)
+  if(window.navigator.userAgent.indexOf("Firefox")>0 || window.navigator.userAgent.indexOf("Chrome")>0)
   {
     idProgressBar.style.minHeight = '15px';
 	idProgressBar.innerHTML='&nbsp';    

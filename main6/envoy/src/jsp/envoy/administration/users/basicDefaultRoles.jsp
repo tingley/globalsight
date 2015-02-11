@@ -45,7 +45,7 @@
     String lbUserName = bundle.getString("lb_user_name");
     
     ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(UserConstants.MODIFY_USER_WRAPPER);
-    String userName = wrapper.getUserId();
+    String userName = wrapper.getUserName();
 
     String editMark = (String)sessionMgr.getAttribute("isEdit");
     boolean isEdit = false;
@@ -87,6 +87,7 @@
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
@@ -169,6 +170,14 @@ function setActivity() {
     RolesForm.action = "<%=selfUrl%>&action=setActivity";
     RolesForm.submit();
 }
+
+function check_all(){
+	if($("#checkAll").is(":checked")){
+		$(":checkbox").attr("checked","true");
+	} else {
+		$(":checkbox").removeAttr("checked");
+	}
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
@@ -239,7 +248,7 @@ function setActivity() {
       </td>
     </tr>
     <tr>
-      <td class='standardText' style="vertical-align:top;padding-top:13px;"><%=bundle.getString("lb_activity_types") %>:</td>
+      <td class='standardText' style="vertical-align:top;padding-top:13px;"><%=bundle.getString("lb_activity_types") %><input type="checkbox" id="checkAll" onclick="check_all()"/>:</td>
       <td class='standardText'>
         <table border="0">
           <tr>

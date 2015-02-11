@@ -1,6 +1,6 @@
 package com.globalsight.selenium.pages;
 
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 /**
  * Job Status Report
@@ -11,7 +11,7 @@ import com.globalsight.selenium.properties.ConfigUtil;
 public class JobStatusReportWebForm
 {
     public static final String REPORT_LINK = "link="
-            + ConfigUtil.getConfigData("COMPANY_NAME") + " Job Status";
+            + ConfigUtil.getConfigData("company") + " Job Status";
     public static final String POPUP_WINDOW_NAME = "JobStatusundefined1";
 
     public static final String PROJECTS_SELECTOR = "projectId";

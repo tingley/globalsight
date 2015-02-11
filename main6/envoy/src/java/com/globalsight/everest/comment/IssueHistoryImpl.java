@@ -142,14 +142,10 @@ public class IssueHistoryImpl extends PersistentObject implements IssueHistory
         }
     }
 
-    //
-    // package methods
-    //
-
     /**
      * 
      */
-    void dateReported(Date p_date)
+    public void dateReported(Date p_date)
     {
         m_dateReported = p_date;
     }
@@ -158,7 +154,7 @@ public class IssueHistoryImpl extends PersistentObject implements IssueHistory
      * Set the comment text to what is specified. From the UI it should already
      * be less than 4000 characters but truncate for other cases.
      */
-    void setComment(String p_comment)
+    public void setComment(String p_comment)
     {
         m_comment = p_comment;
         if (p_comment != null)

@@ -32,7 +32,7 @@ public class AttributeGroupsFuncs extends BasicFuncs {
 		}
 
 		Assert.assertEquals(
-				this.findElementsOnTables(selenium, "link=" + iGroupName), true);
+				this.isElementPresent(selenium, "link=" + iGroupName), true);
 	}
 
 	/**

@@ -49,6 +49,7 @@
             this.bAllStop = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label5 = new System.Windows.Forms.Label();
+            this.cbAutoStartAll = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // textBox1
@@ -222,11 +223,23 @@
             this.label5.TabIndex = 0;
             this.label5.Text = "Conversion Directory";
             // 
+            // cbAutoStartAll
+            // 
+            this.cbAutoStartAll.AutoSize = true;
+            this.cbAutoStartAll.Location = new System.Drawing.Point(30, 231);
+            this.cbAutoStartAll.Name = "cbAutoStartAll";
+            this.cbAutoStartAll.Size = new System.Drawing.Size(109, 21);
+            this.cbAutoStartAll.TabIndex = 21;
+            this.cbAutoStartAll.Text = "Auto Start All";
+            this.cbAutoStartAll.UseVisualStyleBackColor = true;
+            this.cbAutoStartAll.CheckedChanged += new System.EventHandler(this.cbAutoStartAll_CheckedChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(477, 341);
+            this.Controls.Add(this.cbAutoStartAll);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.bAllStop);
@@ -249,7 +262,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MS Office 2003 Converters - Version: 8.2";
+            this.Text = "MS Office 2003 Converters - Version: 8.2.1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -275,5 +288,6 @@
         private System.Windows.Forms.Button bAllStop;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.CheckBox cbAutoStartAll;
     }
 }

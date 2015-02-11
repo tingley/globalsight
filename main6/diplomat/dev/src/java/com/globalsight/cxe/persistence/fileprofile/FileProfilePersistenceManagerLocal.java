@@ -305,8 +305,16 @@ public class FileProfilePersistenceManagerLocal implements
             }
 
             sql.append("') union select * from FILE_PROFILE where ");
-            sql.append(" is_active = 'Y' and id not in ( select distinct (");
-            sql.append(" file_profile_id ) from FILE_PROFILE_EXTENSION ) ");
+            sql.append(" is_active = 'Y'");
+            if (!CompanyWrapper.SUPER_COMPANY_ID.equals(String
+                    .valueOf(p_companyId)))
+            {
+                sql.append(" and companyId='");
+                sql.append(p_companyId);
+                sql.append("'");
+            }
+            sql.append(" and id not in (select distinct (");
+            sql.append("file_profile_id) from FILE_PROFILE_EXTENSION)");
 
             return HibernateUtil.searchWithSql(FileProfileImpl.class,
                     sql.toString());

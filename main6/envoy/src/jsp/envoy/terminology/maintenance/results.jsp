@@ -462,13 +462,13 @@ function doLoad()
       <TABLE CELLPADDING="0" CELLSPACING="0" BORDER="0"
 	id="idHits" STRIPED="true"
 	STYLE="border: solid 1px <%=skin.getProperty("skin.list.borderColor")%>">
-	<THEAD>
 	  <COL VALIGN="top"> <!-- checkbox -->
 	  <COL VALIGN="top" ALIGN="center" class="standardText"
 	  STYLE="padding-left: 4px; padding-right: 4px"> <!-- ID -->
 	  <COL VALIGN="top" ALIGN="center"
 	  STYLE="padding-left: 4px; padding-right: 4px"> <!-- Browser -->
 	  <COL VALIGN="top" class="standardText" width="80%"> <!-- Entry -->
+	<THEAD>
 	  <TR CLASS="tableHeadingBasic">
 	    <TD HEIGHT="20">&nbsp;</TD>
 	    <TD HEIGHT="20" ALIGN="CENTER"><%=lb_id%></TD>

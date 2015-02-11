@@ -43,8 +43,9 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
     protected void createTuStorage(Connection conn) throws SQLException {
         // XXX I could split this out between bilingual and multilingual
         // if I wanted by dropping the locale
+        String tuTableName = getTuTableName();
         StringBuilder stmt = new StringBuilder(
-            "CREATE TABLE " + getTuTableName() + " (" +
+            "CREATE TABLE " + tuTableName + " (" +
             "id bigint NOT NULL, " +
             "srcLocaleId bigint NOT NULL, ");
         for (TM3Attribute attr : getInlineAttributes()) {
@@ -57,8 +58,9 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
         SQLUtil.exec(conn, stmt.toString());
 
         // Now create the TUV table
+        String tuvTableName = getTuvTableName();
         SQLUtil.exec(conn,
-            "CREATE TABLE " + getTuvTableName() + " (" +
+            "CREATE TABLE " + tuvTableName + " (" +
             "id bigint NOT NULL, " +
             "tuId bigint NOT NULL, " +
             "localeId bigint NOT NULL, " +
@@ -70,12 +72,11 @@ abstract class DedicatedStorageInfo<T extends TM3Data>  extends StorageInfo<T> {
             "KEY (tuId, localeId), " +
             "KEY (fingerprint), " +
             "KEY (localeId), " + 
-            "FOREIGN KEY (tuId) REFERENCES " + getTuTableName() + " (id) ON DELETE CASCADE, " +
+            "FOREIGN KEY (tuId) REFERENCES " + tuTableName + " (id) ON DELETE CASCADE, " +
             "FOREIGN KEY (firstEventID) REFERENCES TM3_EVENTS (id), " +
             "FOREIGN KEY (lastEventID) REFERENCES TM3_EVENTS (id) " +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8"
         );
-        
     }
     
     // XXX This is now shared by all multilingual TMs

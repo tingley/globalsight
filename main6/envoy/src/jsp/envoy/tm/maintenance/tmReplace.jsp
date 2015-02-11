@@ -1,8 +1,11 @@
+<%@page import="com.globalsight.everest.permission.Permission"%>
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.foundation.User,
             com.globalsight.util.progress.ProcessStatus,
+            com.globalsight.everest.permission.Permission,
             com.globalsight.everest.webapp.WebAppConstants,
             com.globalsight.everest.webapp.javabean.NavigationBean,
             com.globalsight.everest.webapp.pagehandler.PageHandler,
@@ -66,6 +69,8 @@ String lbSource = bundle.getString("lb_tm_search_source_locale") +
     bundle.getString("lb_colon");
 String lbTarget = bundle.getString("lb_tm_search_target_locale") +
     bundle.getString("lb_colon");
+String lbTMName = bundle.getString("lb_tm_name");
+String lbSid = bundle.getString("lb_sid");
 String lbDeleteTuvBtn = bundle.getString("lb_delete_tuv");
 String lbDeleteTuBtn = bundle.getString("lb_delete_tu");
 
@@ -268,7 +273,7 @@ function submitForm(buttonClicked)
             bundle.getString("msg_deleting_selected_items"))%>");
         disableButtons();
     }
-
+    
     ReplaceForm.submit();
 }
 
@@ -353,12 +358,23 @@ function isTargetFindEmpty()
 
 function disableButtons()
 {
-    document.all.ReplaceBtnTop.disabled = true;
-    document.all.ReplaceBtnBottom.disabled = true;
-    document.all.DeleteTuvBtnTop.disabled = true;
-    document.all.DeleteTuvBtnBottom.disabled = true;
-    document.all.DeleteTuBtnTop.disabled = true;
-    document.all.DeleteTuBtnBottom.disabled = true;
+	if(document.all.ReplaceBtnTop)
+	{
+		document.all.ReplaceBtnTop.disabled = true;
+	    document.all.ReplaceBtnBottom.disabled = true;
+	}
+	
+	if(document.all.DeleteTuvBtnTop)
+	{
+		document.all.DeleteTuvBtnTop.disabled = true;
+	    document.all.DeleteTuvBtnBottom.disabled = true;
+	}
+	
+	if(document.all.DeleteTuBtnTop)
+	{
+		document.all.DeleteTuBtnTop.disabled = true;
+	    document.all.DeleteTuBtnBottom.disabled = true;
+	} 
 }
 
 function doOnLoad()
@@ -392,6 +408,16 @@ function doOnUnload()
       try { corpuswins[i].close(); } catch (ignore) {}
    }
 }
+
+//for GBS-2599
+function handleSelectAll() {
+    if (ReplaceForm.selectAll.checked) {
+    	setAllSegmentReplaceCheckBoxes(true);
+    }
+    else {
+    	setAllSegmentReplaceCheckBoxes(false);
+    }
+}
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0"
@@ -421,6 +447,7 @@ function doOnUnload()
     <P><%=bundle.getString("helper_text_replace")%><P>
     <P><B><%=lbNumberOfSegFound%> <%=numRecords%></B></P>
     <!-- Lower table -->
+    <amb:permission name="<%=Permission.TM_SEARCH_ADVANCED%>" >
     <TABLE CELLPADDING="2" CELLSPACING="2" BORDER="0" CLASS="standardText">
      <TR>
       <TD><%=lbReplaceColon%></TD>
@@ -452,6 +479,7 @@ function doOnUnload()
       </TD>
      </TR>
     </TABLE>
+    </amb:permission>
     <!-- end lower table -->
    </TD>
   </TR>
@@ -474,12 +502,12 @@ function doOnUnload()
  <TABLE CELLSPACING="0" CELLPADDING="0" WIDTH="100%" BGCOLOR="#DFDFDF">
   <TR>
    <TD HEIGHT=30>
-    <A CLASS="standardHREF" HREF="#"
+    <!--A CLASS="standardHREF" HREF="#"
      onclick="setAllSegmentReplaceCheckBoxes(true); return false">
      <%=checkAllLinkText%></A><SPAN CLASS="standardText"> | </SPAN>
     <A CLASS="standardHREF" HREF="#"
      onclick="setAllSegmentReplaceCheckBoxes(false); return false">
-     <%=clearAllLinkText%></A>
+     <%=clearAllLinkText%></A-->
    </TD>
    <TD COLSPAN=2 ALIGN="right">
      <P id="statusMessageTop" CLASS="standardText">
@@ -501,12 +529,16 @@ function doOnUnload()
      onclick="submitForm('cancel');" CLASS="detailText">
     <INPUT TYPE="BUTTON" NAME="BackBtnTop" VALUE="<%=lbBackBtn%>"
      onclick="submitForm('back');" CLASS="detailText">
+    <amb:permission name="<%=Permission.TM_SEARCH_ADVANCED%>" >
     <INPUT TYPE="BUTTON" NAME="ReplaceBtnTop" VALUE="<%=lbReplaceBtn%>"
      onclick="submitForm('replace');" CLASS="detailText">
-    <INPUT TYPE="BUTTON" NAME="DeleteTuvBtnTop" VALUE="<%=lbDeleteTuvBtn%>"
+    </amb:permission>
+    <amb:permission name="<%=Permission.TM_DELETE_ENTRY%>" >
+      <INPUT TYPE="BUTTON" NAME="DeleteTuvBtnTop" VALUE="<%=lbDeleteTuvBtn%>"
      onclick="submitForm('deleteTuv');" CLASS="detailText">
-    <INPUT TYPE="BUTTON" NAME="DeleteTuBtnTop" VALUE="<%=lbDeleteTuBtn%>"
+     <INPUT TYPE="BUTTON" NAME="DeleteTuBtnTop" VALUE="<%=lbDeleteTuBtn%>"
      onclick="submitForm('deleteTu');" CLASS="detailText">
+    </amb:permission>
    </TD>
   </TR>
  </TABLE>
@@ -531,13 +563,15 @@ function doOnUnload()
   <COL VALIGN="top"> <!-- Source -->
   <COL VALIGN="top"> <!-- Target -->
   <TR CLASS="tableHeadingBasic">
-   <TD HEIGHT="20">&nbsp;</TD>
+   <TD HEIGHT="20"><input type="checkbox" onclick="handleSelectAll()" name="selectAll" checked="true"/></TD>
    <TD HEIGHT="20" ALIGN="CENTER"><%=lbId%></TD>
    <% if (b_corpus) {%>
    <TD HEIGHT="20" ALIGN="CENTER"><%=bundle.getString("lb_corpus_context")%></TD>
    <%}%>
    <TD HEIGHT="20" ALIGN="LEFT"><%=lbSource%> <%=sourceSearchLocaleDisplayName%></TD>
    <TD HEIGHT="20" ALIGN="LEFT"><%=lbTarget%> <%=targetSearchLocaleDisplayName%></TD>
+   <TD HEIGHT="20" ALIGN="LEFT" width=100><%=lbTMName%></TD>
+   <TD HEIGHT="20" ALIGN="LEFT" width=50><%=lbSid%></TD>
   </TR>
   </THEAD>
   <TBODY>
@@ -559,12 +593,12 @@ function doOnUnload()
  <TABLE CELLSPACING="0" CELLPADDING="0" WIDTH="100%" BGCOLOR="#DFDFDF">
   <TR>
    <TD HEIGHT=30>
-    <A CLASS="standardHREF" HREF="#"
+    <!--A CLASS="standardHREF" HREF="#"
      ONCLICK="setAllSegmentReplaceCheckBoxes(true); return false">
      <%=checkAllLinkText%></A><SPAN CLASS="standardText"> | </SPAN>
     <A CLASS="standardHREF" HREF="#"
      ONCLICK="setAllSegmentReplaceCheckBoxes(false); return false">
-     <%=clearAllLinkText%></A>
+     <%=clearAllLinkText%></A-->
    </TD>
 <%}%>
    <TD COLSPAN=2 ALIGN="right">

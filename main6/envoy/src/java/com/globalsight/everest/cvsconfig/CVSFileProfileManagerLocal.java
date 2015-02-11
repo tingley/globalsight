@@ -36,7 +36,7 @@ public class CVSFileProfileManagerLocal {
 		} catch (PersistenceException e) {
 			try {
 				transaction.rollback();
-				c_logger.error(e.toString(), e);
+				c_logger.error(e.getMessage(), e);
 			} catch (Exception e2) {
 			}
 		}
@@ -60,7 +60,7 @@ public class CVSFileProfileManagerLocal {
 		} catch (Exception e) {
 			try {
 				transaction.rollback();
-				c_logger.error(e);
+				c_logger.error(e.getMessage(), e);
 			} catch (Exception e2) {
 			}
 		}
@@ -86,7 +86,7 @@ public class CVSFileProfileManagerLocal {
 		} catch (Exception e) {
 			try {
 				transaction.rollback();
-				c_logger.error(e);
+				c_logger.error(e.getMessage(), e);
 			} catch (Exception e2) {
 			}
 		}
@@ -103,7 +103,7 @@ public class CVSFileProfileManagerLocal {
 		} catch (Exception e) {
 			try {
 				transaction.rollback();
-				c_logger.error(e);
+				c_logger.error(e.getMessage(), e);
 			} catch (Exception e2) {
 			}
 		}
@@ -161,7 +161,7 @@ public class CVSFileProfileManagerLocal {
 		} catch (Exception e) {
 			try {
 				transaction.rollback();
-				c_logger.error(e);
+				c_logger.error(e.getMessage(), e);
 			} catch (Exception e2) {
 			}
 		}

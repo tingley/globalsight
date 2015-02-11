@@ -201,13 +201,13 @@ public class Plug_7_1_6_2 implements Plug
             }
             catch (FileNotFoundException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 ui.error(e.getMessage());
                 System.out.println();
             }
             catch (IOException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 ui.error(e.getMessage());
                 System.out.println();
             }

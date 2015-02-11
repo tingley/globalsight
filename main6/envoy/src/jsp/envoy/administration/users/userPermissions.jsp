@@ -72,12 +72,12 @@
     {
         ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(
           UserConstants.MODIFY_USER_WRAPPER);
-        userName = wrapper.getUserId();
+        userName = wrapper.getUserName();
     } else
     {
         CreateUserWrapper wrapper = (CreateUserWrapper)sessionMgr.getAttribute(
           UserConstants.CREATE_USER_WRAPPER);
-        userName = wrapper.getUserId();
+        userName = wrapper.getUserName();
     }
     
     //Is current user Super User?
@@ -173,6 +173,11 @@ function addPermGroup()
 
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+
+			//for GBS-1995,by fan
+		    //set the selected element of left list is empty
+		    from.options[i] = null;
+            i--;
         }
     }
 
@@ -181,6 +186,7 @@ function addPermGroup()
 
 function removePermGroup()
 {
+	var from = UserForm.from;
     var to = UserForm.to;
 
     if (to.selectedIndex == -1)
@@ -193,6 +199,11 @@ function removePermGroup()
     {
         if (to.options[i].selected)
         {
+			//for GBS-1995,by fan
+		    //add selected element to left list
+		    var len = from.options.length;
+            from.options[len] = new Option(to.options[i].text, to.options[i].value);
+
             to.options[i] = null;
             i--;
         }
@@ -240,6 +251,12 @@ function savePermGroups()
 
     UserForm.toField.value = options_string;
 }
+
+//adjust select tag width, by fan 
+function changeSelectWidth(selected){
+	if(selected.options[selected.selectedIndex].text.length*7 >= 220)  selected.style.width=selected.options[selected.selectedIndex].text.length*7 + 'px';
+	else selected.style.width=200;
+}
 </script>
 </head>
 
@@ -279,15 +296,39 @@ function savePermGroups()
   </tr>
   <tr>
     <td>
-      <select name="from" multiple class="standardText" size=15>  
+      <select name="from" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">   
 <%
             if (allPerms != null)
             {
                 for (int i=0; i < allPerms.size(); i++)
                 {
                     PermissionGroup perm = (PermissionGroup)allPerms.get(i);
-                    out.println("<option value=\"" + perm.getId() + "\">" +
-                                 perm.getName() + "</option>");
+//                    out.println("<option value=\"" + perm.getId() + "\">" +
+//                                 perm.getName() + "</option>");
+
+					//for GBS-1995,by fan
+					//don't display the element in the left list ,if the the element is existed in the right list.
+					if (userPermsList != null)
+					{
+						boolean isExist = false;  //if the user is existed in the right list, return true.
+						for (int j = 0; j < userPermsList.size(); j++)
+						{
+							PermissionGroup addedPerm = (PermissionGroup)userPermsList.get(j);
+							if(addedPerm.getName().equals(perm.getName())) isExist = true;
+						}
+						if(!isExist)
+						{		
+%>
+							<option value="<%=perm.getId()%>" ><%=perm.getName()%></option>
+<%
+						}
+					}
+					else
+					{
+%>
+							<option value="<%=perm.getId()%>" ><%=perm.getName()%></option>
+<%
+					}
                 }
             }
 %>
@@ -311,7 +352,7 @@ function savePermGroups()
       </table>
     </td>
     <td>   
-      <select name="to" multiple class="standardText" size=15>    
+      <select name="to" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">    
 <%
             if (userPermsList != null)
             {
@@ -339,7 +380,7 @@ function savePermGroups()
     </td>
     <td>&nbsp;</td>
     <td>
-      <select name="to" class="standardText" size="15">
+      <select name="to" class="standardText" size="15" style="width:200px" onchange="changeSelectWidth(this)">
 <%
 						PermissionGroup curPerm = null;
 				    if (userPermsList != null && userPermsList.size() > 0)

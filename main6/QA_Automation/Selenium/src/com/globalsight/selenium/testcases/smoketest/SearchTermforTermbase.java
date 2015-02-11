@@ -1,94 +1,45 @@
 package com.globalsight.selenium.testcases.smoketest;
 
 import org.testng.Reporter;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.TerminologyFuncs;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.TerminologyElements;
-import com.globalsight.selenium.properties.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
-import com.thoughtworks.selenium.Selenium;
 
+public class SearchTermforTermbase extends BaseTestCase
+{
 
-public class SearchTermforTermbase extends BaseTestCase {
+    private TerminologyFuncs terminologyFuncs = new TerminologyFuncs();
 
-	private Selenium selenium;
-	private TerminologyFuncs eTerminology = new TerminologyFuncs();
-	@Test
-	public void searchTermForTermbase() throws Exception
-	{
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.Terminology_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		
-		selenium.click(TerminologyElements.MAIN_SEARCHTERMS_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	
-		String testCaseName = getClass().getName();
-		String iterm = ConfigUtil.getDataInCase(testCaseName, "Iterm");
-		String sourcelocale = ConfigUtil.getDataInCase(testCaseName, "SourceLocale");
-		String targetlocale = ConfigUtil.getDataInCase(testCaseName, "TargetLocale");
-		String matchtype= ConfigUtil.getDataInCase(testCaseName, "MatchType");
-		String selecttermbase = ConfigUtil.getDataInCase(testCaseName, "SelectTermbase");
-		
-		selenium.select(TerminologyElements.Source_Locale,"label="+sourcelocale.trim());
-		selenium.select(TerminologyElements.Target_Locale,"label="+targetlocale.trim());	
-		selenium.addSelection(TerminologyElements.Select_Termbases, "label="+selecttermbase.trim());
-		selenium.select(TerminologyElements.MatchType,"label="+matchtype.trim());
-		selenium.type(TerminologyElements.SearchForTerm,iterm);
-		selenium.click(TerminologyElements.Search_Button);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		int num=1;
-		
-		String result = eTerminology.searchterms(selenium, iterm.trim(),num);
-		Reporter.log(result);
-	}  
-	  @BeforeMethod
-	  public void beforeMethod() {
-		  CommonFuncs.loginSystemWithAdmin(selenium);
-	  }
+    @Test
+    public void searchTermForTermbase() throws Exception
+    {
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.TERMINOLOGY_SUBMENU);
 
-	  @AfterMethod
-	  public void afterMethod() {
-		  CommonFuncs.logoutSystem(selenium);
-	  }
+        clickAndWait(selenium, TerminologyElements.MAIN_SEARCHTERMS_BUTTON);
 
-	  @BeforeClass
-	  public void beforeClass() {
-	  }
+        String iterm = getProperty("tb.search.term");
+        String sourceLocale = getProperty("tb.search.sourceLocale");
+        String targetLocale = getProperty("tb.search.targetLocale");
+        String matchType = getProperty("tb.search.matchType");
+        String tbName = getProperty("tb.name");
 
-	  @AfterClass
-	  public void afterClass() {
-	  }
+        selenium.select(TerminologyElements.SOURCE_LOCALE, "label="
+                + sourceLocale.trim());
+        selenium.select(TerminologyElements.TARGET_LOCALE, "label="
+                + targetLocale.trim());
+        selenium.addSelection(TerminologyElements.SELECTED_TERMBASE, "label="
+                + tbName.trim());
+        selenium.select(TerminologyElements.MATCH_TYPE,
+                "label=" + matchType.trim());
+        selenium.type(TerminologyElements.SEARCH_TERM, iterm);
 
-	  @BeforeTest
-	  public void beforeTest() {
-		  selenium=CommonFuncs.initSelenium();
-	  }
+        clickAndWait(selenium, TerminologyElements.Search_Button);
 
-	  @AfterTest
-	  public void afterTest() {
-		  CommonFuncs.endSelenium(selenium);
-	  }
-
-	  @BeforeSuite
-	  public void beforeSuite() {
-	  }
-
-	  @AfterSuite
-	  public void afterSuite() {
-	  }
-
+        String result = terminologyFuncs.searchterms(selenium, iterm.trim(), 1);
+        Reporter.log(result);
+    }
 }
-
-

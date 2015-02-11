@@ -16,23 +16,20 @@
  */
 package com.globalsight.cxe.adapter;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.cxe.adapter.AdapterResult;
-import com.globalsight.cxe.adapter.CxeProcessor;
-import com.globalsight.cxe.message.CxeMessage;
-import com.globalsight.cxe.message.CxeMessageType;
-import com.globalsight.cxe.message.MessageData;
-import com.globalsight.cxe.message.FileMessageData;
-import com.globalsight.cxe.message.MessageDataFactory;
-
-import com.globalsight.cxe.util.EventFlowXmlParser;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.util.GeneralException;
-import java.io.InputStream;
 import java.io.IOException;
 import java.util.HashMap;
+
+import org.apache.log4j.Logger;
+
+import com.globalsight.cxe.message.CxeMessage;
+import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.cxe.message.FileMessageData;
+import com.globalsight.cxe.message.MessageData;
+import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.cxe.util.EventFlowXmlParser;
 import com.globalsight.everest.page.pageexport.ExportConstants;
+import com.globalsight.everest.util.system.SystemConfiguration;
+import com.globalsight.util.GeneralException;
 
 /**
  * The BaseAdapter is a class that all adapters extend.<br>
@@ -83,8 +80,7 @@ public abstract class BaseAdapter
         m_adapterBaseName = className.substring(className.lastIndexOf(".") + 1);
         m_loggingCategory = p_loggingCategory;
         m_parser = new EventFlowXmlParser();
-        m_logger = Logger
-                .getLogger(p_loggingCategory);
+        m_logger = Logger.getLogger(p_loggingCategory);
     }
 
     // ////////////////////////////////////
@@ -365,11 +361,11 @@ public abstract class BaseAdapter
         catch (IOException ioe)
         {
             getLogger()
-                    .error(
-                            "Could not create message data in import error event.",
+                    .error("Could not create message data in import error event.",
                             ioe);
         }
         errorMsg.setParameters(p_cxeMessage.getParameters());
+        p_exception.setLogger(null);
         errorMsg.getParameters().put("Exception", p_exception);
         AdapterResult[] results = new AdapterResult[1];
         results[0] = new AdapterResult(errorMsg);
@@ -403,8 +399,7 @@ public abstract class BaseAdapter
         catch (IOException ioe)
         {
             getLogger()
-                    .error(
-                            "Could not create message data in import error event.",
+                    .error("Could not create message data in import error event.",
                             ioe);
         }
 

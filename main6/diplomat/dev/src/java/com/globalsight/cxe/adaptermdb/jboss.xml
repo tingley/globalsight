@@ -210,6 +210,31 @@
             </mdb-subscription-id>
         </message-driven>
         
+        <message-driven>
+            <ejb-name>WindowsPESourceAdapterMDB</ejb-name><!--javax.jms.Topic-->
+            <destination-jndi-name>
+                topic/com.globalsight.cxe.jms.ForWindowsPESourceAdapter
+            </destination-jndi-name>
+            <jndi-name>
+                com.globalsight.cxe.adaptermdb.windowspe.WindowsPESourceAdapterMDB
+            </jndi-name>
+            <mdb-subscription-id>
+                WindowsPESourceAdapterMDB
+            </mdb-subscription-id>
+        </message-driven>
+        <message-driven>
+            <ejb-name>WindowsPETargetAdapterMDB</ejb-name>
+            <destination-jndi-name>
+                topic/com.globalsight.cxe.jms.ForWindowsPETargetAdapter
+            </destination-jndi-name>
+            <jndi-name>
+                com.globalsight.cxe.adaptermdb.windowspe.WindowsPETargetAdapterMDB
+            </jndi-name>
+            <mdb-subscription-id>
+                WindowsPETargetAdapterMDB
+            </mdb-subscription-id>
+        </message-driven>
+        
 		<message-driven>
 			<ejb-name>OpenOfficeSourceAdapterMDB</ejb-name><!--javax.jms.Topic-->
 			<destination-jndi-name>

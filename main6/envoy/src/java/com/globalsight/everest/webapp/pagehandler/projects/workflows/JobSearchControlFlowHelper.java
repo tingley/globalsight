@@ -67,43 +67,39 @@ class JobSearchControlFlowHelper
     public String determineLinkToFollow()
         throws EnvoyServletException
     {
-        HttpSession p_session = m_request.getSession(false);
         String destinationPage = null;
         String fromRequest = (String) m_request.getParameter("fromRequest");
         String searchType = (String) m_request.getParameter("searchType");
 
         // searchType should only be null for paging purposes
-        if (searchType == null || searchType.equals("search") ||
+        if (searchType == null || "search".equals(searchType) ||
             fromRequest == null)
         {
             destinationPage = (String)m_request.getParameter("linkName");
         }
         else if (fromRequest != null &&
-             (searchType.equals(JobSearchConstants.JOB_SEARCH_COOKIE) ||
-                 searchType.equals(JobSearchConstants.MINI_JOB_SEARCH_COOKIE)))
+             (JobSearchConstants.JOB_SEARCH_COOKIE.equals(searchType) ||
+                 JobSearchConstants.MINI_JOB_SEARCH_COOKIE.equals(searchType)))
         {  
-            HttpSession session = m_request.getSession(false);
-            SessionManager sessionMgr =
-                (SessionManager)session.getAttribute(SESSION_MANAGER);
             String status = (String) m_request.getParameter(JobSearchConstants.STATUS_OPTIONS);
-            if (status.equals(Job.PENDING))
+            if (Job.PENDING.equals(status))
                  destinationPage = "pending";
-            else if (status.equals(Job.READY_TO_BE_DISPATCHED))
+            else if (Job.READY_TO_BE_DISPATCHED.equals(status))
                 destinationPage = "ready";
-            else if (status.equals(Job.DISPATCHED))
+            else if (Job.DISPATCHED.equals(status))
                 destinationPage = "progress";
-            else if (status.equals(Job.LOCALIZED))
+            else if (Job.LOCALIZED.equals(status))
                 destinationPage = "complete";
-            else if (status.equals(Job.DTPINPROGRESS))
+            else if (Job.DTPINPROGRESS.equals(status))
                 destinationPage = "dtpprogress";
-            else if (status.equals(Job.ARCHIVED))
+            else if (Job.ARCHIVED.equals(status))
                 destinationPage = "archived";
-            else if (status.equals(Job.EXPORTED))
+            else if (Job.EXPORTED.equals(status))
                 destinationPage = "exported";
             else
             	destinationPage = "allStatus";
         }
-        else if (searchType.equals("goToSearch"))
+        else if ("goToSearch".equals(searchType))
         {
             destinationPage = "jobSearch";
         }

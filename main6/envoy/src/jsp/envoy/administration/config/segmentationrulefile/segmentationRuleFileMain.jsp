@@ -10,7 +10,7 @@
             com.globalsight.everest.util.comparator.SegmentationRuleFileComparator, 
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
             com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileType,
-            com.globalsight.everest.servlet.util.ServerProxy,
+            com.globalsight.everest.company.CompanyWrapper,
             java.util.*"
     session="true"
 %>
@@ -172,7 +172,7 @@ function gotoTMP()
         </amb:column>
         <% if (isSuperAdmin) { %>
         <amb:column label="lb_company_name" sortBy="<%=SegmentationRuleFileComparator.ASC_COMPANY%>">
-            <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(segmentationRuleFile.getCompanyId())).getCompanyName()%>
+            <%=CompanyWrapper.getCompanyNameById(segmentationRuleFile.getCompanyId())%>
         </amb:column>
         <% } %>
       </amb:table>

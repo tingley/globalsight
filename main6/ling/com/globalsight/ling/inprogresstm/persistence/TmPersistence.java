@@ -99,8 +99,6 @@ public class TmPersistence
     // delete sql
     private static final String DELETE_FROM = "DELETE FROM ";
     private static final String DELETE_SRC = " WHERE job_id = ?";
-    private static final String DELETE_TRG1 = " WHERE src_id in (SELECT id FROM ";
-    private static final String DELETE_TRG2 = " WHERE job_id = ?)";
     private static final String DELETE_TRG3 = " WHERE id = ?";
 
     // insert sql
@@ -528,7 +526,7 @@ public class TmPersistence
             throws Exception
     {
         String deleteSql = DELETE_FROM
-                + (p_isTranslatable ? TRG_T_TABLE : TRG_T_TABLE) + DELETE_TRG3;
+                + (p_isTranslatable ? TRG_T_TABLE : TRG_L_TABLE) + DELETE_TRG3;
 
         PreparedStatement ps = null;
         try
@@ -680,8 +678,14 @@ public class TmPersistence
     private void deleteTargetSegments(long p_jobId, String p_targetTable,
             String p_sourceTable) throws Exception
     {
-        String deleteSql = DELETE_FROM + p_targetTable + DELETE_TRG1
-                + p_sourceTable + DELETE_TRG2;
+        StringBuilder deleteBuf = new StringBuilder();
+        deleteBuf.append("delete _trgTable_ from _trgTable_, _srcTable_ ");
+        deleteBuf.append("where _trgTable_.src_id = _srcTable_.id ");
+        deleteBuf.append(" and _srcTable_.job_id = ? ");
+
+		String deleteSql = deleteBuf.toString()
+				.replaceAll("_srcTable_", p_sourceTable)
+				.replaceAll("_trgTable_", p_targetTable);
 
         PreparedStatement ps = null;
         try

@@ -28,24 +28,21 @@ import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.util.database.PreparedStatementBatch;
 
 /**
- * This abstract class is an implementation of the "Command"
- * Design Pattern for persistence purposes. Subclasses of
- * this class will different implementations of the persistObjects()
- * method. The persistObjects() method is an instance of the
- * "Template Method" Design Pattern.
+ * This abstract class is an implementation of the "Command" Design Pattern for
+ * persistence purposes. Subclasses of this class will different implementations
+ * of the persistObjects() method. The persistObjects() method is an instance of
+ * the "Template Method" Design Pattern.
  */
 public abstract class PersistenceCommand
 {
-    private static Logger s_logger =
-        Logger.getLogger(
-            PersistenceCommand.class);
+    private static Logger s_logger = Logger.getLogger(PersistenceCommand.class);
 
     public PersistenceCommand()
     {
     }
 
     public void persistObjects(Connection p_connection)
-        throws PersistenceException
+            throws PersistenceException
     {
         try
         {
@@ -60,14 +57,16 @@ public abstract class PersistenceCommand
     }
 
     public abstract void createPreparedStatement(Connection p_connection)
-        throws Exception;
+            throws Exception;
+
     public abstract void setData() throws Exception;
+
     public abstract void batchStatements() throws Exception;
 
     public long allocateSequenceNumberRange(SequenceStore p_seqStore)
     {
         long sequenceNumberValue = p_seqStore.getSequenceNumberValue();
-        long numberOfObjects =     p_seqStore.getNumberOfObjects();
+        long numberOfObjects = p_seqStore.getNumberOfObjects();
         long primaryKey;
         primaryKey = Math.abs((sequenceNumberValue - numberOfObjects) + 1);
         return primaryKey;
@@ -76,7 +75,7 @@ public abstract class PersistenceCommand
     /**
      * Closes a Statement and logs out any problems with it.
      */
-    public static void close (Statement p_statement)
+    public static void close(Statement p_statement)
     {
         if (p_statement != null)
         {
@@ -94,7 +93,7 @@ public abstract class PersistenceCommand
     /**
      * Closes a Statement and logs out any problems with it.
      */
-    public static void close (PreparedStatementBatch p_batch)
+    public static void close(PreparedStatementBatch p_batch)
     {
         if (p_batch != null)
         {
@@ -105,7 +104,7 @@ public abstract class PersistenceCommand
     /**
      * Closes a result set and logs out any problems with it.
      */
-    public static void close (ResultSet p_resultSet)
+    public static void close(ResultSet p_resultSet)
     {
         if (p_resultSet != null)
         {
@@ -123,7 +122,7 @@ public abstract class PersistenceCommand
     /**
      * Closes a Writer and logs out any problems with it.
      */
-    public static void close (Writer p_writer)
+    public static void close(Writer p_writer)
     {
         if (p_writer != null)
         {

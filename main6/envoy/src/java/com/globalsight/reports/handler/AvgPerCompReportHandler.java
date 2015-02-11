@@ -32,6 +32,7 @@ import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.reports.Constants;
 import com.globalsight.reports.JobTableModel;
 import com.globalsight.reports.WorkflowTableModel;
@@ -80,11 +81,11 @@ public class AvgPerCompReportHandler extends BasicReportHandler
     /**
      * The entry of the handler. This method will dispatch the
      * HttpServletRequest to different page based on the value of
-     * <code>Constants.REPORT_ACT</code>.
-     * <code>Constants.REPORT_ACT_PREP</code> means this is request for
-     * prepare the parameter data, then system will show the parameter page.
-     * <code>Constants.REPORT_ACT_CREATE</code> means create the real report
-     * based on the user input data, then system will show the report page.
+     * <code>Constants.REPORT_ACT</code>. <code>Constants.REPORT_ACT_PREP</code>
+     * means this is request for prepare the parameter data, then system will
+     * show the parameter page. <code>Constants.REPORT_ACT_CREATE</code> means
+     * create the real report based on the user input data, then system will
+     * show the report page.
      */
     public void invokeHandler(HttpServletRequest req, HttpServletResponse res,
             ServletContext p_context) throws Exception
@@ -97,22 +98,25 @@ public class AvgPerCompReportHandler extends BasicReportHandler
         if (Constants.REPORT_ACT_PREP.equalsIgnoreCase(act))
         {
             addMoreReportParameters(req); // prepare data for parameter web
-                                            // page
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_PREP), req, res, p_context);
+                                          // page
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_PREP), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_CREATE.equalsIgnoreCase(act))
         {
             createReport(req); // fill report DataWrap with data
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
         else if (Constants.REPORT_ACT_TURNPAGE.equalsIgnoreCase(act))
         {
             String pageId = req.getParameter(Constants.REPORT_SHOWPAGE_PAGEID);
             bindData(req, pageId); // bind the data to one report page
-            dispatcherForward(ReportHandlerFactory.getTargetUrl(reportKey
-                    + Constants.REPORT_ACT_CREATE), req, res, p_context);
+            dispatcherForward(
+                    ReportHandlerFactory.getTargetUrl(reportKey
+                            + Constants.REPORT_ACT_CREATE), req, res, p_context);
         }
     }
 
@@ -159,8 +163,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
             // get all the project managers for parameter web page
             ArrayList projectManagers = new ArrayList();
             c = ConnectionPool.getConnection();
-            
-            String currentId = CompanyThreadLocal.getInstance().getValue();           
+
+            String currentId = CompanyThreadLocal.getInstance().getValue();
             if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentId))
             {
                 ps = c.prepareStatement(PM_QUERY);
@@ -170,7 +174,7 @@ public class AvgPerCompReportHandler extends BasicReportHandler
             {
                 ps = c.prepareStatement(PM_QUERY_GS);
             }
-            
+
             ResultSet rs = ps.executeQuery();
             projectManagers.add(ReportsPackage.getMessage(m_bundle,
                     Constants.CRITERIA_ALLPMS));
@@ -191,8 +195,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
 
             req.setAttribute(Constants.PROJECT_MGR_ARRAY, projectManagers);
             req.setAttribute(Constants.PROJECT_MGR_DEFVALUE, defvalue);
-            req.setAttribute(Constants.PROJECT_MGR_LABEL, ReportsPackage
-                    .getMessage(m_bundle, Constants.PROJECT_MGR));
+            req.setAttribute(Constants.PROJECT_MGR_LABEL,
+                    ReportsPackage.getMessage(m_bundle, Constants.PROJECT_MGR));
         }
         finally
         {
@@ -241,7 +245,9 @@ public class AvgPerCompReportHandler extends BasicReportHandler
         else
         {
             jobs = new ArrayList(ServerProxy.getJobHandler()
-                    .getJobsByManagerIdAndState(projectManager, DISPATCHED));
+                    .getJobsByManagerIdAndState(
+                            UserUtil.getUserIdByName(projectManager),
+                            DISPATCHED));
             jobs.addAll(ServerProxy.getJobHandler().getJobsByManagerIdAndState(
                     projectManager, LOCALIZED));
         }
@@ -274,8 +280,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
             // only show jobs with workflows
             if (wtm.getRowCount() > 0)
             {
-                int subcols[] = new int[] { WorkflowTableModel.TRGLOCALE,
-                        WorkflowTableModel.PER_COMPLETE };
+                int subcols[] = new int[]
+                { WorkflowTableModel.TRGLOCALE, WorkflowTableModel.PER_COMPLETE };
 
                 jobForm.add(2, subcols);
                 jobForm.add(3, wtm);
@@ -351,8 +357,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
     /**
      * Adds a form at the top with the selected PM and workflow state <br>
      * 
-     * @param projectManager --
-     *            the selected PM
+     * @param projectManager
+     *            -- the selected PM
      */
     private void addCriteriaFormAtTop(String projectManager)
     {
@@ -374,8 +380,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
     /**
      * Returns an array list containing each job's workflows <br>
      * 
-     * @param p_jobs --
-     *            LinkedList of jobids
+     * @param p_jobs
+     *            -- LinkedList of jobids
      */
     private ArrayList getAllWorkflowsForAllJobs(LinkedList p_jobs)
     {
@@ -405,8 +411,8 @@ public class AvgPerCompReportHandler extends BasicReportHandler
      * Returns a HashMap containing workflowtablemodels for each job <br>
      * 
      * @param p_jtm
-     * @param p_jobWorkflows --
-     *            an arraylist of arraylists for each job containing the
+     * @param p_jobWorkflows
+     *            -- an arraylist of arraylists for each job containing the
      *            workflows
      * @return HashMap of WorkflowTableModels
      */
@@ -429,10 +435,10 @@ public class AvgPerCompReportHandler extends BasicReportHandler
     /**
      * Adds a form to the report containing the job information <br>
      * 
-     * @param jtm --
-     *            the JobTableModel
-     * @param r --
-     *            the current row
+     * @param jtm
+     *            -- the JobTableModel
+     * @param r
+     *            -- the current row
      * @param jobForm
      */
     private void addJobForm(JobTableModel jtm, int r, ArrayList jobForm)

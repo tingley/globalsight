@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -33,7 +32,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -45,7 +43,7 @@ import org.hibernate.Session;
 import com.globalsight.cxe.adapter.cap.CapImporter;
 import com.globalsight.cxe.adapter.passolo.PassoloUtil;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
-import com.globalsight.everest.comment.IssueEditionRelation;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.jobhandler.Job;
@@ -58,6 +56,9 @@ import com.globalsight.everest.page.PageState;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.page.pageimport.optimize.OptimizeUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvIndexUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvPersistence;
 import com.globalsight.everest.projecthandler.ProjectHandler;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.request.Request;
@@ -66,8 +67,6 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.tm.util.Tmx;
 import com.globalsight.everest.tuv.CustomTuType;
 import com.globalsight.everest.tuv.LeverageGroup;
-import com.globalsight.everest.tuv.RemovedPrefixTag;
-import com.globalsight.everest.tuv.RemovedSuffixTag;
 import com.globalsight.everest.tuv.RemovedTag;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.TuImpl;
@@ -79,7 +78,7 @@ import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatNames;
-import com.globalsight.ling.common.Text;
+import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
@@ -120,48 +119,13 @@ public class ExtractedFileImporter extends FileImporter
     static private Boolean s_autoReplaceTerms = setTermLeverageOptions();
     private static Logger c_logger = Logger
             .getLogger(ExtractedFileImporter.class.getName());
-
-    private static String TRANSLATION_MT = "<iws:status translation_type=\"machine_translation";
-    private static String SEGMENT_LOCKED = "lock_status=\"locked\"";
-    private static String SCORE_100 = "tm_score=\"100.00\"";
-    private static String SPELL_START = "<ph[^>]*>&lt;w:proofErr w:type=&quot;spellStart&quot;/&gt;</ph>";
-    private static String SPELL_END = "<ph[^>]*>&lt;w:proofErr w:type=&quot;spellEnd&quot;/&gt;</ph>";
-    private static String SPELL_START_2 = "<ph[^>]*>&lt;w:proofErr w:type=&quot;gramStart&quot;/&gt;</ph>";
-    private static String SPELL_END_2 = "<ph[^>]*>&lt;w:proofErr w:type=&quot;gramEnd&quot;/&gt;</ph>";
-    private static String LAST_RENDER = "<ph[^>]*>&lt;w:lastRenderedPageBreak/&gt;</ph>";
-
-    private static String REGEX_BPT = "<bpt[^>]*i=\"([^\"]*)\"[^>]*>";
-    private static String REGEX_BPT_ALL = "(<bpt[^>]*i=\"{0}\"[^>]*>)[^>]*</bpt>[\\d\\D]*(<ept[^>]*i=\"{0}\"[^>]*>)[^>]*</ept>";
-    private static String REGEX_BPT_ALL2 = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>([\\d\\D]*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
-    private static String REGEX_BPT_ALL3 = "(<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>)([\\d\\D]*)(<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>)";
-    private static String REGEX_BPT_ALL4 = "(<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>\\s*)([\\d\\D]*)(\\s*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>)";
-    private static String REGEX_BPT_ALL_SPACE = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>([ ]*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
-    private static String REGEX_SAME_TAG = "(<bpt[^>]*>)([^<]*)(</bpt>)([^<]*)(<ept[^>]*>)([^<]*)(</ept>)(<bpt[^>]*>)([^<]*)(</bpt>)([^<]*)(<ept[^>]*>)([^<]*)(</ept>)";
-    private static String REGEX_IT = "\\s*<[pi][^>]*>[^<]*</[pi][^>]*>\\s*";
-    private static String REGEX_IT2 = "(<it[^>]*>)([^<]*)(</it>)";
-    private static String REGEX_TAG = "(<[^be][^>]*>)([^<]*)(</[^>]*>)";
-    private static String REGEX_SEGMENT = "(<segment[^>]*>)([\\d\\D]*?)</segment>";
-    private static String REGEX_PH_AFTER = "(<[^>]*>)([^<]*)(</[^>]*>)<ph[^>]*>([^<]*)</ph>";
-    private static String REGEX_PH_BEFORE = "<ph[^>]*>([^<]*)</ph>(<[^>]*>)([^<]*)(</[^>]*>)";
-
-    private static String PRESERVE = "&lt;w:t xml:space=&quot;preserve&quot;&gt;";
-    private static String NO_PRESERVE = "&lt;w:t&gt;";
-    private static String RSIDRPR_REGEX = " w:rsidRPr=&quot;[^&]*&quot;";
-    private static String RSIDR_REGEX = " w:rsidR=&quot;[^&]*&quot;";
+    private static XmlEntities m_xmlDecoder = new XmlEntities();
 
     public static String EMPTYTARGET = "empty target";
-
-    // for xliff
-    // record the <source> tu_id array of a tanstable, so the next <target> can
-    // save the tu_id
-    TuImpl tuSource = new TuImpl();
-    // record the <target> id for save the alt_segment.
-    long targetUnitID = 0;
 
     //
     // Constructor
     //
-
     ExtractedFileImporter()
     {
         super();
@@ -188,7 +152,7 @@ public class ExtractedFileImporter extends FileImporter
 
         c_logger.info("Importing page: " + p_request.getExternalPageId());
         long start_PERFORMANCE = System.currentTimeMillis();
-        long lnProfileId = p_request.getL10nProfile().getId();
+
         try
         {
             long time_PERFORMANCE = System.currentTimeMillis();
@@ -204,7 +168,7 @@ public class ExtractedFileImporter extends FileImporter
             {
                 ExactMatchedSegments exactMatchedSegments = null;
 
-                if (p_request.getL10nProfile().getTMChoice() != L10nProfile.NO_TM)
+                if (p_request.getL10nProfile().getTmChoice() != L10nProfile.NO_TM)
                 {
                     c_logger.info("TM leveraging for page: "
                             + p_request.getExternalPageId());
@@ -412,6 +376,8 @@ public class ExtractedFileImporter extends FileImporter
     private SourcePage createPageFromGxml(Request p_request)
             throws FileImportException
     {
+        String companyId = p_request.getCompanyId();
+
         SourcePage page = null;
         GxmlRootElement gxmlRootElement = null;
 
@@ -438,14 +404,13 @@ public class ExtractedFileImporter extends FileImporter
             tus = createTUs(p_request, page, gxmlRootElement);
             srcTuvs = createTUVs(p_request, tus);
             setExactMatchKeysForSrcTUVs(srcTuvs);
-            List templates = generateTemplates(page, gxmlRootElement, tus);
-            page.setCompanyId(p_request.getCompanyId());
+            page.setCompanyId(companyId);
 
             // Re-calculate word-count from excluded items.
             if (srcTuvs != null && srcTuvs.size() > 0)
             {
                 Tuv tuv = (Tuv) srcTuvs.get(0);
-                String generateFrom = tuv.getTu().getGenerateFrom();
+                String generateFrom = tuv.getTu(companyId).getGenerateFrom();
                 boolean isWSXlf = TuImpl.FROM_WORLDSERVER
                         .equalsIgnoreCase(generateFrom);
                 // World Server XLF segments DO NOT need this as WS XLF need
@@ -456,7 +421,19 @@ public class ExtractedFileImporter extends FileImporter
                 }
             }
 
+            // Set tuId and tuvId for all TUs and TUVs in this source page.
+            setTuTuvIds(page);
+
+            // Generate templates
+            List templates = generateTemplates(page, gxmlRootElement, tus);
+
+            // Save source page, leverage group and page template.
             HibernateUtil.save(page);
+
+            // Save TU, TUV and related data.
+            page = SegmentTuTuvPersistence.saveTuTuvAndRelatedData(page);
+
+            // Save templatePart data.
             Iterator iterator = templates.iterator();
             while (iterator.hasNext())
             {
@@ -688,20 +665,22 @@ public class ExtractedFileImporter extends FileImporter
         }
         catch (Exception e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
         }
 
         List elements = p_GxmlElement.getChildElements();
         // for xliff file
-        String xliffTargetLan = new String();
-        XliffAlt alt = new XliffAlt();
         String generatFrom = new String();
+        HashMap<String, String> attributeMap = new HashMap<String, String>();
+        IXliffTuCreation tuc = new XliffTuCreation();
 
         // for PO File
         if (IFormatNames.FORMAT_PO.equals(pageDataType))
         {
-            xliffTargetLan = p_GxmlElement
+            String xliffTargetLan = p_GxmlElement
                     .getAttribute(DiplomatNames.Attribute.TARGETLANGUAGE);
+            attributeMap.put("xliffTargetLan", xliffTargetLan);
+            tuc.setAttribute(attributeMap);
         }
 
         for (int i = 0, max = elements.size(); i < max; i++)
@@ -721,181 +700,16 @@ public class ExtractedFileImporter extends FileImporter
                 case GxmlElement.TRANSLATABLE: // 2
                     // for xliff
                     String xliffpart = elem.getAttribute("xliffPart");
-                    String xliffTranslationType = elem
-                            .getAttribute(Extractor.IWS_TRANSLATION_TYPE);
-                    String xliffTMScore = elem
-                            .getAttribute(Extractor.IWS_TM_SCORE);
-                    String xliffSourceContent = elem
-                            .getAttribute(Extractor.IWS_SOURCE_CONTENT);
+                    boolean isCreateTu = true;
 
-                    if (xliffpart != null && xliffpart.equals("target"))
+                    if (xliffpart != null)
                     {
-                        GxmlElement seg = (GxmlElement) elem.getChildElements()
-                                .get(0);
-                        ArrayList array = (ArrayList) p_lg.getTus();
 
-                        TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
-                        TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale
-                                .getId());
-
-                        // for transmitting GS Edition segment comments.
-                        if (p_request.getEditionJobParams() != null)
-                        {
-                            try
-                            {
-                                if (elem.getAttribute("tuID") != null)
-                                {
-                                    long oldTuID = Long.parseLong(elem
-                                            .getAttribute("tuID"));
-
-                                    HashMap editionParaMap = (HashMap) p_request
-                                            .getEditionJobParams().get(
-                                                    "segComments");
-                                    HashMap issueMap = (HashMap) editionParaMap
-                                            .get(oldTuID);
-
-                                    IssueEditionRelation ie = new IssueEditionRelation();
-                                    ie.setTuv(tuvPre);
-                                    ie.setOriginalTuId(oldTuID);
-
-                                    if (issueMap != null)
-                                    {
-                                        ie.setOriginalTuvId((Long) issueMap
-                                                .get("LevelObjectId"));
-
-                                        Vector historyVec = (Vector) issueMap
-                                                .get("HistoryVec");
-                                        String originalIssueHistoryId = "";
-
-                                        for (int x = 0; x < historyVec.size(); x++)
-                                        {
-                                            HashMap history = (HashMap) historyVec
-                                                    .get(x);
-
-                                            if (x == historyVec.size() - 1)
-                                            {
-                                                originalIssueHistoryId = originalIssueHistoryId
-                                                        + ""
-                                                        + history
-                                                                .get("HistoryID");
-                                            }
-                                            else
-                                            {
-                                                originalIssueHistoryId = originalIssueHistoryId
-                                                        + history
-                                                                .get("HistoryID")
-                                                        + ",";
-                                            }
-                                        }
-
-                                        ie.setOriginalIssueHistoryId(originalIssueHistoryId);
-                                    }
-
-                                    Set ieSet = tuvPre
-                                            .getIssueEditionRelation();
-
-                                    if (ieSet != null)
-                                    {
-                                        ieSet.add(ie);
-                                        tuvPre.setIssueEditionRelation(ieSet);
-                                    }
-                                    else
-                                    {
-                                        HashSet hs = new HashSet();
-                                        hs.add(ie);
-                                        tuvPre.setIssueEditionRelation(hs);
-                                    }
-                                }
-
-                            }
-                            catch (Exception e)
-                            {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        if (Text.isBlank(seg.getTextValue()))
-                        {
-                            // Tuv srcTuv =
-                            // tuPre.getTuv(p_sourceLocale.getId());
-                            // tuPre.setXliffTarget(srcTuv.getGxml());
-                            tuPre.setXliffTarget(seg.toGxml());
-                            ((TuImpl) p_tuList.get(p_tuList.size() - 1))
-                                    .setXliffTarget(seg.toGxml());
-                        }
-                        else
-                        {
-                            // String str =
-                            // tuvPre.encodeGxmlAttributeEntities(seg.toGxml(pageDataType));
-                            tuPre.setXliffTarget(seg.toGxml(pageDataType));
-                            ((TuImpl) p_tuList.get(p_tuList.size() - 1))
-                                    .setXliffTarget(seg.toGxml(pageDataType));
-                        }
-
-                        if (xliffTargetLan != null
-                                && !xliffTargetLan.equals(""))
-                        {
-                            tuPre.setXliffTargetLanguage(xliffTargetLan);
-                        }
-
-                        if (xliffTranslationType != null
-                                && xliffTranslationType.length() > 0)
-                        {
-                            tuPre.setXliffTranslationType(xliffTranslationType);
-                        }
-
-                        if (xliffTMScore != null && xliffTMScore.length() > 0)
-                        {
-                            tuPre.setIwsScore(xliffTMScore);
-                        }
-
-                        if (!generatFrom.isEmpty())
-                        {
-                            tuPre.setGenerateFrom(generatFrom);
-                        }
-
-                        if (xliffSourceContent != null
-                                && xliffSourceContent.length() > 0)
-                        {
-                            tuPre.setSourceContent(xliffSourceContent);
-                        }
-
-                        String state = elem.getAttribute("passoloState");
-                        if (state != null)
-                        {
-                            tuPre.setPassoloState(state);
-                        }
+                        isCreateTu = tuc.transProcess(p_request, xliffpart,
+                                elem, p_lg, p_tuList, p_sourceLocale);
                     }
-                    else if (xliffpart != null && xliffpart.equals("altTarget"))
-                    {
-                        // if(altLanguage != null) {
-                        String altLanguage = elem.getAttribute("altLanguage");
-                        String altQuality = elem.getAttribute("altQuality");
-                        GxmlElement seg = (GxmlElement) elem.getChildElements()
-                                .get(0);
-                        ArrayList array = (ArrayList) p_lg.getTus();
-                        TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
-                        TuvImpl tuvPre = (TuvImpl) tuPre.getTuv(p_sourceLocale
-                                .getId());
-                        alt.setSegment(seg.toGxml(pageDataType));
-                        alt.setLanguage(altLanguage);
-                        alt.setQuality(altQuality);
-                        alt.setTuv(tuvPre);
-                        tuvPre.addXliffAlt(alt);
 
-                        array.set(array.size() - 1, tuPre);
-                        // }
-                    }
-                    else if (xliffpart != null && xliffpart.equals("altSource"))
-                    {
-                        GxmlElement seg = (GxmlElement) elem.getChildElements()
-                                .get(0);
-                        ArrayList array = (ArrayList) p_lg.getTus();
-
-                        alt = new XliffAlt();
-                        alt.setSourceSegment(seg.toGxml(pageDataType));
-                    }
-                    else
+                    if (isCreateTu)
                     {
                         ArrayList tus = createTranslatableSegments(elem,
                                 p_request, p_page, p_sourceLocale, p_tmId,
@@ -904,7 +718,8 @@ public class ExtractedFileImporter extends FileImporter
                         for (int j = 0, maxj = tus.size(); j < maxj; j++)
                         {
                             tu = (Tu) tus.get(j);
-                            Tuv tuv = tu.getTuv(p_sourceLocale.getId());
+                            Tuv tuv = tu.getTuv(p_sourceLocale.getId(),
+                                    p_request.getCompanyId());
                             if (tuv.getSid() == null)
                             {
                                 if (sid != null)
@@ -973,32 +788,34 @@ public class ExtractedFileImporter extends FileImporter
                                     .indexOf("\"") + 1);
                             String tempStr3 = tempStr2.substring(0,
                                     tempStr2.indexOf("\""));
-                            xliffTargetLan = tempStr3;
+
+                            attributeMap.put("xliffTargetLan", tempStr3);
                         }
 
                         if (lowcase.indexOf("tool") > -1
                                 && lowcase.indexOf("worldserver") > -1)
                         {
                             generatFrom = TuImpl.FROM_WORLDSERVER;
-
+                            attributeMap.put("generatFrom", generatFrom);
+                            tuc = new WsTuCreation();
                         }
+
+                        tuc.setAttribute(attributeMap);
                     }
 
-                    ArrayList array = (ArrayList) p_lg.getTus();
+                    // ArrayList array = (ArrayList) p_lg.getTus();
 
                     // Sets XliffTranslationType in above code.
                     /*
                      * if (nodeValue1.indexOf(TRANSLATION_MT) > 0) { TuImpl
                      * tuPre = (TuImpl)array.get(array.size()-1);
                      * tuPre.setXliffTranslationType(TuImpl.TRANSLATION_MT); }
+                     * 
+                     * 
+                     * if (nodeValue1.indexOf(SEGMENT_LOCKED) > 0) { TuImpl
+                     * tuPre = (TuImpl) array.get(array.size() - 1);
+                     * tuPre.setXliffLocked(true); }
                      */
-
-                    if (nodeValue1.indexOf(SEGMENT_LOCKED) > 0)
-                    {
-                        TuImpl tuPre = (TuImpl) array.get(array.size() - 1);
-                        tuPre.setXliffLocked(true);
-                    }
-
                     break;
             }
         }
@@ -1014,7 +831,7 @@ public class ExtractedFileImporter extends FileImporter
     private ArrayList createTUVs(Request p_request, ArrayList p_tus)
             throws Exception
     {
-        ArrayList srcTuvs = new ArrayList(p_tus.size());
+        ArrayList<Tuv> srcTuvs = new ArrayList<Tuv>(p_tus.size());
         long sourceLocaleId = getSourceLocale(p_request).getId();
         int order = 1;
 
@@ -1040,7 +857,7 @@ public class ExtractedFileImporter extends FileImporter
 
             tu.setSourceTmName(sourceTmName);
 
-            Tuv tuv = tu.getTuv(sourceLocaleId);
+            Tuv tuv = tu.getTuv(sourceLocaleId, p_request.getCompanyId());
 
             tuv.setCreatedDate(new Date());
             tuv.setCreatedUser(creationId);
@@ -1158,8 +975,8 @@ public class ExtractedFileImporter extends FileImporter
                             Tu tTu = createLocalizableSegment(elem, p_request,
                                     page, sourceLocale, tmId);
 
-                            pageWordCount += tTu.getTuv(sourceLocale.getId())
-                                    .getWordCount();
+                            pageWordCount += tTu.getTuv(sourceLocale.getId(),
+                                    p_request.getCompanyId()).getWordCount();
 
                             lg.addTu(tTu);
                             tuList.add(tTu);
@@ -1178,7 +995,9 @@ public class ExtractedFileImporter extends FileImporter
                                 Tu lTu = (Tu) tus.get(j);
 
                                 pageWordCount += lTu.getTuv(
-                                        sourceLocale.getId()).getWordCount();
+                                        sourceLocale.getId(),
+                                        p_request.getCompanyId())
+                                        .getWordCount();
 
                                 lg.addTu(lTu);
                                 tuList.add(lTu);
@@ -1215,7 +1034,7 @@ public class ExtractedFileImporter extends FileImporter
             for (int i = 0, max = tuList.size(); i < max; i++)
             {
                 Tu tu = (Tu) tuList.get(i);
-                Tuv tuv = tu.getTuv(sourceLocaleId);
+                Tuv tuv = tu.getTuv(sourceLocaleId, p_request.getCompanyId());
 
                 tu.setOrder(order);
                 tu.setSourceTmName(sourceTmName);
@@ -1403,15 +1222,19 @@ public class ExtractedFileImporter extends FileImporter
      * Creates TUs and TUVs for the segments that are translatable in the
      * segment passed in.
      */
-    private ArrayList createTranslatableSegments(GxmlElement p_elem,
+    private ArrayList<Tu> createTranslatableSegments(GxmlElement p_elem,
             Request p_request, SourcePage p_page,
             GlobalSightLocale p_sourceLocale, long p_tmId, String p_pageDataType)
             throws FileImportException
     {
+        String companyId = p_request != null ? p_request.getCompanyId()
+                : CompanyWrapper.getCurrentCompanyId();
+
         TuvManager tm = getTuvManager();
 
-        ArrayList tuList = new ArrayList();
+        ArrayList<Tu> tuList = new ArrayList<Tu>();
         String str_tuType = p_elem.getAttribute(GxmlNames.TRANSLATABLE_TYPE);
+        String translate = p_elem.getAttribute("translate");
 
         long pid = Long.parseLong(p_elem
                 .getAttribute(GxmlNames.TRANSLATABLE_BLOCKID));
@@ -1475,7 +1298,10 @@ public class ExtractedFileImporter extends FileImporter
             try
             {
                 Tu tu = tm.createTu(p_tmId, tuDataType, tuType, 'T', pid);
-
+                if (translate != null && !"".equals(translate.trim()))
+                {
+                    tu.setTranslate(translate);
+                }
                 Integer segWordCount = seg
                         .getAttributeAsInteger(GxmlNames.SEGMENT_WORDCOUNT);
                 if (excludedTypes.contains(tuType.getName()))
@@ -1495,6 +1321,7 @@ public class ExtractedFileImporter extends FileImporter
                     }
                     catch (NumberFormatException e)
                     {
+
                     }
                 }
 
@@ -1506,24 +1333,19 @@ public class ExtractedFileImporter extends FileImporter
                 String fileName = p_page.getExternalPageId();
                 String oriGxml = seg.toGxml(p_pageDataType);
 
-                if (isOptimizeFile(tuDataType))
+                String srcComment = seg.getAttribute("srcComment");
+                srcComment = srcComment == null ? null : srcComment.trim();
+                srcComment = "".equals(srcComment) ? null : srcComment;
+                if (srcComment != null)
                 {
-                    tuv = setGxmlForOffice((TuvImpl) tuv, oriGxml);
-                }
-                else if (isOpenOfficeFile(tuDataType))
-                {
-                    tuv = setGxmlForOpenOffice((TuvImpl) tuv, oriGxml);
-                }
-                else if (isIdmlFile(fileName))
-                {
-                    tuv = setGxmlForIdml((TuvImpl) tuv, oriGxml);
-                }
-                else
-                {
-                    tuv.setGxml(oriGxml);
+                    srcComment = m_xmlDecoder.decodeStringBasic(srcComment);
                 }
 
+                OptimizeUtil op = new OptimizeUtil();
+                op.setGxml((TuvImpl)tuv, oriGxml, companyId, tuDataType, fileName, p_pageDataType);
+
                 tuv.setSid(p_elem.getAttribute("sid"));
+                tuv.setSrcComment(srcComment);
 
                 tu.addTuv(tuv);
 
@@ -1543,1004 +1365,6 @@ public class ExtractedFileImporter extends FileImporter
         return tuList;
     }
 
-    private boolean isOptimizeFile(String tuDataType)
-    {
-        if (tuDataType == null)
-            return false;
-
-        return tuDataType == null ? false : IFormatNames.FORMAT_OFFICE_XML
-                .equals(tuDataType);
-    }
-
-    private boolean isOpenOfficeFile(String tuDataType)
-    {
-        if (tuDataType == null)
-            return false;
-
-        return tuDataType == null ? false : IFormatNames.FORMAT_OPENOFFICE_XML
-                .equals(tuDataType);
-    }
-
-    private boolean isIdmlFile(String fileName)
-    {
-        int index = fileName.lastIndexOf('.');
-        if (index < 0)
-            return false;
-
-        String type = fileName.substring(index);
-        return ".idml".equalsIgnoreCase(type);
-    }
-
-    /**
-     * Extracts a removed tag from a bpt fragment.
-     * 
-     * @param s
-     *            a bpt fragment
-     * @return the extracted removed tag.
-     */
-    private RemovedTag extract(String s)
-    {
-        RemovedTag tag = null;
-
-        if (s.indexOf("&lt;w:br/&gt;") > 0)
-        {
-            return tag;
-        }
-
-        String regex = "</[^>]*>([^<]+)<[^/]";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-        List<String> contents = new ArrayList<String>();
-        while (m.find())
-        {
-            contents.add(m.group(1));
-        }
-
-        if (contents.size() == 1)
-        {
-            tag = new RemovedTag();
-            String content = contents.get(0);
-            int index = s.indexOf('>' + content + '<') + 1;
-            String start = s.substring(0, index);
-            String end = s.substring(index + content.length());
-
-            tag.addOrgString(s);
-            tag.addNewString(content);
-            tag.setPrefixString(getContent(start, tag));
-            tag.setSuffixString(getContent(end, tag));
-        }
-
-        return tag;
-    }
-
-    private String mergeMultiTags(String s)
-    {
-        String result = s;
-        Pattern p = Pattern.compile("<[^>]*>[^<]*</[^>]*>");
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String all = m.group();
-            int index = result.indexOf(all);
-            String temp = result.substring(index);
-
-            String allTags = getAllLinkedTags(temp);
-            String mergedTag = mergeLinkedTags(allTags);
-            if (!mergedTag.equals(allTags))
-            {
-                result = result.replace(allTags, mergedTag);
-                m = p.matcher(result);
-            }
-        }
-
-        return result;
-    }
-
-    private String getContent(String s)
-    {
-        String regex = "<[^>]*>([^<]*)</[^>]*>";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-
-        StringBuffer result = new StringBuffer();
-        while (m.find())
-        {
-            result.append(m.group(1));
-        }
-
-        return result.toString();
-    }
-
-    private String mergeLinkedTags(String s)
-    {
-        Pattern p = Pattern.compile(REGEX_IT2);
-        Matcher m = p.matcher(s);
-        if (m.find())
-        {
-            return m.group(1) + getContent(s) + m.group(3);
-        }
-
-        Pattern p2 = Pattern.compile(REGEX_TAG);
-        Matcher m2 = p2.matcher(s);
-        if (m2.find())
-        {
-            return m2.group(1) + getContent(s) + m2.group(3);
-        }
-
-        return s;
-    }
-
-    private boolean hasContent(String s)
-    {
-        if (s.indexOf("<sub") > -1)
-            return true;
-
-        String regex = "</[^>]*>([^<]+)<[^/]";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-        return m.find();
-    }
-
-    private boolean isAllTags(String s)
-    {
-        if (hasContent(s))
-        {
-            return false;
-        }
-
-        String temp = s;
-        Pattern p = Pattern.compile(REGEX_BPT);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String i = m.group(1);
-            String regex = MessageFormat.format(REGEX_BPT_ALL2, i);
-            Pattern p2 = Pattern.compile(regex);
-            Matcher m2 = p2.matcher(s);
-
-            if (m2.find())
-            {
-                String all = m2.group();
-                String s2 = m2.group(1);
-                if (hasContent(all) || !isAllTags(s2))
-                {
-                    return false;
-                }
-
-                temp = temp.replace(all, "");
-                m = p.matcher(temp);
-            }
-        }
-
-        return true;
-    }
-
-    private String getAllLinkedTags(String s)
-    {
-        StringBuffer sb = new StringBuffer();
-
-        Pattern p = Pattern.compile("^" + REGEX_BPT);
-        Pattern p2 = Pattern.compile("^<[^>]*>[^<]*</[^>]*>");
-
-        while (true)
-        {
-            Matcher m = p.matcher(s);
-            if (m.find())
-            {
-                String i = m.group(1);
-                String regex = MessageFormat.format(REGEX_BPT_ALL, i);
-                Pattern p3 = Pattern.compile(regex);
-                Matcher m2 = p3.matcher(s);
-
-                if (m2.find())
-                {
-                    String all = m2.group();
-                    if (isAllTags(all))
-                    {
-                        sb.append(all);
-                        s = s.substring(all.length());
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
-            else if (s.startsWith("<ept"))
-            {
-                break;
-            }
-            else
-            {
-                Matcher m2 = p2.matcher(s);
-
-                if (m2.find())
-                {
-                    String all = m2.group();
-                    if (all.indexOf("<sub") > -1)
-                        break;
-
-                    sb.append(all);
-                    s = s.substring(all.length());
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Gets a string that contains all content. The tagNum of the
-     * <code>tag</code> will be updated.
-     * 
-     * @param s
-     *            the gxml
-     * @param tag
-     *            the tagNum will be updated
-     * @return the string string that contains all content.
-     */
-    private String getContent(String s, RemovedTag tag)
-    {
-        String regex = "<[^>]*>([^<]*)</[^>]*>";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-
-        StringBuffer result = new StringBuffer();
-        int i = tag.getTagNum();
-        while (m.find())
-        {
-            result.append(m.group(1));
-            i++;
-        }
-
-        tag.setTagNum(i);
-        return result.toString();
-    }
-
-    /**
-     * Gets all tags that will be removed from the gxml.
-     * 
-     * @param s
-     *            the gxml of a tuv.
-     * @return ArrayList<RemovedTag>. All tags that will be removed.
-     */
-    private List<RemovedTag> getTags(String s)
-    {
-        Map<RemovedTag, Integer> map = new HashMap<RemovedTag, Integer>();
-
-        Pattern p = Pattern.compile(REGEX_BPT);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL,
-                    m.group(1)));
-            Matcher m2 = p2.matcher(s);
-
-            if (m2.find())
-            {
-                String all = m2.group();
-                RemovedTag tag = extract(all);
-
-                if (tag != null)
-                {
-                    Integer size = map.get(tag);
-                    if (size == null)
-                    {
-                        size = 0;
-                    }
-                    else
-                    {
-                        for (RemovedTag key : map.keySet())
-                        {
-                            if (key.equals(tag))
-                            {
-                                key.mergeString(tag);
-                                break;
-                            }
-                        }
-                    }
-
-                    map.put(tag, size + 1);
-                }
-                s = s.replace(all, "");
-                m = p.matcher(s);
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        List<RemovedTag> tags = new ArrayList<RemovedTag>(map.keySet());
-        for (int i = tags.size() - 1; i >= 0; i--)
-        {
-            RemovedTag tag = tags.get(i);
-
-            for (int j = i - 1; j >= 0; j--)
-            {
-                RemovedTag tag2 = tags.get(j);
-
-                if (tag2.sameAs(tag))
-                {
-                    int n = map.get(tag);
-                    map.put(tag2, map.get(tag2) + n);
-                    map.put(tag, 0);
-
-                    break;
-                }
-            }
-        }
-
-        List<RemovedTag> removedTags = new ArrayList<RemovedTag>();
-
-        int n = 0;
-        RemovedTag tagF = null;
-        for (RemovedTag tag : map.keySet())
-        {
-            int num = map.get(tag);
-
-            if (num > n)
-            {
-                tagF = tag;
-                n = map.get(tag);
-            }
-            else if (num == n && tagF != null)
-            {
-                if (tag.getTagNum() > tagF.getTagNum())
-                {
-                    tagF = tag;
-                }
-                else if (tag.getPrefixString().length() > tagF
-                        .getPrefixString().length())
-                {
-                    tagF = tag;
-                }
-            }
-        }
-
-        if (tagF != null)
-        {
-            boolean isPreserve = false;
-
-            removedTags.add(tagF);
-            for (RemovedTag tag : map.keySet())
-            {
-                if (tag.sameAs(tagF))
-                {
-                    removedTags.add(tag);
-
-                    if (tag.getPrefixString().indexOf(PRESERVE) > 0)
-                    {
-                        isPreserve = true;
-                    }
-                }
-            }
-
-            if (isPreserve)
-            {
-                String ps = tagF.getPrefixString();
-                ps = ps.replace(NO_PRESERVE, PRESERVE);
-                tagF.setPrefixString(ps);
-            }
-        }
-
-        return removedTags;
-    }
-
-    private String removeUnusedTag(String gxml)
-    {
-        String s = gxml.replaceAll(SPELL_START, "");
-        s = s.replaceAll(SPELL_END, "");
-        s = s.replaceAll(SPELL_START_2, "");
-        s = s.replaceAll(SPELL_END_2, "");
-        s = s.replaceAll(LAST_RENDER, "");
-
-        return s;
-    }
-
-    private TuvImpl setGxmlForIdml(TuvImpl tuv, String gxml)
-    {
-        if (gxml != null)
-        {
-            gxml = mergeOneBpt(gxml);
-            gxml = removeTags(tuv, gxml);
-            gxml = mergeMultiTags(gxml);
-            gxml = mergePh(gxml);
-
-            gxml = removeAllPrefixAndSuffixTags(tuv, gxml);
-        }
-
-        tuv.setGxml(gxml);
-
-        return tuv;
-    }
-
-    private TuvImpl setGxmlForOpenOffice(TuvImpl tuv, String gxml)
-    {
-        if (gxml != null)
-        {
-            gxml = mergeOneBpt(gxml);
-            gxml = removeTags(tuv, gxml);
-            gxml = mergeMultiTags(gxml);
-            gxml = mergePh(gxml);
-
-            gxml = removeAllPrefixAndSuffixTags(tuv, gxml);
-        }
-
-        tuv.setGxml(gxml);
-
-        return tuv;
-    }
-
-    private String mergePh(String s)
-    {
-        s = mergePhAfter(s);
-        s = mergePhBefore(s);
-
-        return s;
-    }
-
-    private String mergePhBefore(String s)
-    {
-        Pattern p = Pattern.compile(REGEX_PH_BEFORE);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String all = m.group();
-            int index = s.indexOf(all);
-            if (index > -1)
-            {
-                String content1 = m.group(1);
-                String tagStart = m.group(2);
-                String content2 = m.group(3);
-                String tagEnd = m.group(4);
-
-                String changed = tagStart + content1 + content2 + tagEnd;
-                s = s.replace(all, changed);
-                m = p.matcher(s);
-            }
-        }
-        return s;
-    }
-
-    private String mergePhAfter(String s)
-    {
-        Pattern p = Pattern.compile(REGEX_PH_AFTER);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String all = m.group();
-            int index = s.indexOf(all);
-            if (index > -1)
-            {
-                String tagStart = m.group(1);
-                String content1 = m.group(2);
-                String tagEnd = m.group(3);
-                String content2 = m.group(4);
-
-                String changed = tagStart + content1 + content2 + tagEnd;
-                s = s.replace(all, changed);
-                m = p.matcher(s);
-            }
-        }
-        return s;
-    }
-
-    /**
-     * Updates gxml for office 2010. Some tags will be removed and some tags
-     * will be merged to one.
-     * 
-     * @param tuv
-     *            the tuv to update
-     * @param gxml
-     *            the gxml of the tuv
-     * @return updated tuv
-     */
-    private TuvImpl setGxmlForOffice(TuvImpl tuv, String gxml)
-    {
-        if (gxml != null)
-        {
-            // gxml = removeUnusedTag(gxml);
-            // gxml = mergeSameTags(gxml);
-            gxml = removeTagForSpace(gxml);
-            gxml = mergeOneBpt(gxml);
-            gxml = removeTags(tuv, gxml);
-            gxml = mergeMultiTags(gxml);
-            gxml = removeAllPrefixAndSuffixTags(tuv, gxml);
-        }
-
-        tuv.setGxml(gxml);
-
-        return tuv;
-    }
-
-    private String removeAllPrefixAndSuffixTags(TuvImpl tuv, String g)
-    {
-        String gxml = removePrefixTag(tuv, g);
-        gxml = removeSuffixTag(tuv, gxml);
-        gxml = removePrefixAndSuffixTags(tuv, gxml);
-
-        if (!gxml.equals(g))
-            return removeAllPrefixAndSuffixTags(tuv, gxml);
-
-        return gxml;
-    }
-
-    private String removePrefixAndSuffixTags(TuvImpl tuv, String gxml)
-    {
-        if (gxml == null || gxml.length() == 0)
-        {
-            return gxml;
-        }
-
-        TuImpl tu = (TuImpl) tuv.getTu();
-        if (tu.getRemovedTag() != null)
-            return gxml;
-
-        Pattern p = Pattern.compile(REGEX_SEGMENT);
-        Matcher m = p.matcher(gxml);
-        if (m.find())
-        {
-            String segment = m.group(1);
-            String content = m.group(2);
-
-            String temp = content.trim();
-            if (temp.startsWith("<"))
-            {
-                Pattern p2 = Pattern.compile("^" + REGEX_BPT);
-                Matcher m2 = p2.matcher(temp);
-                if (m2.find())
-                {
-                    String i = m2.group(1);
-                    String m2content = m2.group();
-                    // do not remove internal tag
-                    if (m2content.contains("internal=\"yes\""))
-                    {
-                        return gxml;
-                    }
-
-                    String regex = MessageFormat.format("^" + REGEX_BPT_ALL4
-                            + "$", i);
-                    Pattern p3 = Pattern.compile(regex);
-                    Matcher m3 = p3.matcher(temp);
-
-                    if (m3.find())
-                    {
-                        String prefixString = m3.group(1);
-                        String suffixString = m3.group(3);
-                        String newContent = m3.group(2);
-
-                        gxml = segment + newContent + "</segment>";
-
-                        RemovedPrefixTag tag = tu.getPrefixTag();
-                        if (tag == null)
-                        {
-                            tag = new RemovedPrefixTag();
-                            tag.setTu(tu);
-                            tu.setPrefixTag(tag);
-                        }
-
-                        String s = tag.getString();
-                        if (s == null)
-                            s = "";
-
-                        tag.setString(s + prefixString);
-
-                        RemovedSuffixTag tag2 = tu.getSuffixTag();
-                        if (tag2 == null)
-                        {
-                            tag2 = new RemovedSuffixTag();
-                            tag2.setTu(tu);
-                            tu.setSuffixTag(tag2);
-                        }
-
-                        String s2 = tag2.getString();
-                        if (s2 == null)
-                            s2 = "";
-
-                        tag2.setString(suffixString + s2);
-                    }
-                }
-            }
-        }
-
-        return gxml;
-    }
-
-    /**
-     * Removes some tags and save the removed tags to database.
-     * 
-     * @param tuv
-     *            the tuv to update
-     * @param gxml
-     *            the gxml of the tuv
-     * @return new gxml of the tuv
-     */
-    private String removeTags(TuvImpl tuv, String gxml)
-    {
-        List<RemovedTag> removedTags = getTags(gxml);
-        if (removedTags.size() > 0)
-        {
-            boolean flag = false;
-            for (RemovedTag tag : removedTags)
-            {
-                if (!flag)
-                {
-                    flag = true;
-                    TuImpl tu = (TuImpl) tuv.getTu();
-                    tu.addRemoveTag(tag);
-                    tag.setTu(tu);
-                }
-
-                for (int i = 0; i < tag.getOrgStrings().size(); i++)
-                {
-                    gxml = gxml.replace(tag.getOrgStrings().get(i), tag
-                            .getNewStrings().get(i));
-                }
-            }
-        }
-
-        return gxml;
-    }
-
-    private String removePrefixTag(TuvImpl tuv, String gxml)
-    {
-        if (gxml == null || gxml.length() == 0)
-        {
-            return gxml;
-        }
-
-        Pattern p = Pattern.compile(REGEX_SEGMENT);
-        Matcher m = p.matcher(gxml);
-        if (m.find())
-        {
-            String segment = m.group(1);
-            String content = m.group(2);
-
-            String temp = content.trim();
-
-            if (temp.startsWith("<") && !temp.startsWith("<bpt"))
-            {
-                Pattern p2 = Pattern.compile("^" + REGEX_IT);
-                Matcher m2 = p2.matcher(temp);
-                if (m2.find())
-                {
-                    String prefixTag = m2.group();
-
-                    TuImpl tu = (TuImpl) tuv.getTu();
-                    RemovedPrefixTag tag = tu.getPrefixTag();
-                    if (tag == null)
-                    {
-                        tag = new RemovedPrefixTag();
-                        tag.setTu(tu);
-                        tu.setPrefixTag(tag);
-                    }
-
-                    String s = tag.getString();
-                    if (s == null)
-                        s = "";
-
-                    tag.setString(s + prefixTag);
-                    content = content.replaceFirst("^" + REGEX_IT, "");
-                    gxml = segment + content + "</segment>";
-                }
-            }
-        }
-
-        return gxml;
-    }
-
-    private String removeSuffixTag(TuvImpl tuv, String gxml)
-    {
-        if (gxml == null || gxml.length() == 0)
-        {
-            return gxml;
-        }
-
-        Pattern p = Pattern.compile(REGEX_SEGMENT);
-        Matcher m = p.matcher(gxml);
-        if (m.find())
-        {
-            String segment = m.group(1);
-            String content = m.group(2);
-
-            String temp = content.trim();
-
-            if (temp.endsWith(">"))
-            {
-                Pattern p2 = Pattern.compile("(" + REGEX_IT + ")*$");
-                Matcher m2 = p2.matcher(temp);
-                if (m2.find())
-                {
-                    String suffixTag = m2.group();
-                    TuImpl tu = (TuImpl) tuv.getTu();
-
-                    RemovedSuffixTag tag2 = tu.getSuffixTag();
-                    if (tag2 == null)
-                    {
-                        tag2 = new RemovedSuffixTag();
-                        tag2.setTu(tu);
-                        tu.setSuffixTag(tag2);
-                    }
-
-                    String s2 = tag2.getString();
-                    if (s2 == null)
-                        s2 = "";
-
-                    tag2.setString(suffixTag + s2);
-
-                    content = content.replace(suffixTag, "");
-                    gxml = segment + content + "</segment>";
-                }
-            }
-        }
-
-        return gxml;
-    }
-
-    /**
-     * Merges some tags to one bpt.
-     * 
-     * @param s
-     *            the gxml to update
-     * @return new gxml after merging.
-     */
-    private String mergeOneBpt(String s)
-    {
-        Pattern p = Pattern.compile(REGEX_BPT);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL,
-                    m.group(1)));
-            Matcher m2 = p2.matcher(s);
-
-            if (m2.find())
-            {
-                String all = m2.group();
-                RemovedTag tag = extractForOneBpt(all);
-                if (tag != null && tag.getTagNum() > 2)
-                {
-                    String content = tag.getNewStrings().get(0);
-                    String bpt = m2.group(1) + tag.getPrefixString() + "</bpt>";
-                    String ept = m2.group(2) + tag.getSuffixString() + "</ept>";
-                    String newString = bpt + content + ept;
-                    s = s.replace(tag.getOrgStrings().get(0), newString);
-                    m = p.matcher(s);
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-        return s;
-    }
-
-    private RemovedTag extractForOneBpt(String s)
-    {
-        RemovedTag tag = null;
-
-        String regex = "</[^>]*>([^<]+)<[^/]";
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-
-        List<String> contents = new ArrayList<String>();
-        while (m.find())
-        {
-            contents.add(m.group(1));
-        }
-
-        String content = null;
-
-        if (contents.size() == 0)
-        {
-            return null;
-        }
-
-        if (contents.size() == 1)
-        {
-            content = contents.get(0);
-        }
-
-        if (contents.size() > 1)
-        {
-            String first = contents.get(0);
-            String end = contents.get(contents.size() - 1);
-
-            int firstIndex = s.indexOf('>' + first + '<') + 1;
-            int endIndex = s.indexOf('>' + end + '<') + 1 + end.length();
-
-            content = s.substring(firstIndex, endIndex);
-            if (content.indexOf("<bpt") > 0 || content.indexOf("<ept") > 0)
-            {
-                content = null;
-            }
-        }
-
-        if (content != null)
-        {
-            tag = new RemovedTag();
-            // String content = contents.get(0);
-            int index = s.indexOf('>' + content + '<') + 1;
-            String start = s.substring(0, index);
-            String end = s.substring(index + content.length());
-
-            tag.addOrgString(s);
-            tag.addNewString(content);
-            tag.setPrefixString(getContent(start, tag));
-            tag.setSuffixString(getContent(end, tag));
-        }
-
-        return tag;
-    }
-
-    /**
-     * Merges the same tags.
-     * 
-     * @param s
-     *            the gxml to udpate
-     * @return new gxml after merging
-     */
-    private String mergeSameTags(String s)
-    {
-        List<String> contents = new ArrayList<String>();
-        String flag = "gsFlag";
-
-        int i = 0;
-        while (s.indexOf(flag) > -1)
-        {
-            i++;
-            s += i;
-        }
-
-        Pattern p = Pattern.compile(REGEX_SAME_TAG);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            String all = m.group();
-            String bpt1 = m.group(2);
-            String content1 = m.group(4);
-            String ept1 = m.group(6);
-            String bpt2 = m.group(9);
-            String content2 = m.group(11);
-            String ept2 = m.group(13);
-
-            boolean match = false;
-            if (ept1.equals(ept2))
-            {
-                bpt1 = bpt1.replace(PRESERVE, "");
-                bpt2 = bpt2.replace(PRESERVE, "");
-
-                bpt1 = bpt1.replaceAll(RSIDRPR_REGEX, "");
-                bpt2 = bpt2.replaceAll(RSIDRPR_REGEX, "");
-
-                bpt1 = bpt1.replaceAll(RSIDR_REGEX, "");
-                bpt2 = bpt2.replaceAll(RSIDR_REGEX, "");
-
-                if (bpt1.equals(bpt2))
-                {
-                    match = true;
-                }
-                else
-                {
-                    String tmp2 = bpt2.replaceAll(
-                            "&lt;w:rFonts w:hint=&quot;[^/]*&quot;/&gt;", "");
-                    if (bpt1.equals(tmp2))
-                    {
-                        match = true;
-                    }
-                }
-            }
-
-            if (match)
-            {
-                String b1 = m.group(2);
-                String b2 = m.group(9);
-                if (b1.length() > b2.length())
-                {
-                    StringBuffer s2 = new StringBuffer(m.group(1));
-                    s2.append(b1).append(m.group(3)).append(content1);
-                    s2.append(content2).append(m.group(5)).append(ept1);
-                    s2.append(m.group(7));
-
-                    s = s.replace(all, s2.toString());
-                    m = p.matcher(s);
-                }
-                else
-                {
-                    StringBuffer s2 = new StringBuffer(m.group(8));
-                    s2.append(b2).append(m.group(10)).append(content1);
-                    s2.append(content2).append(m.group(12)).append(ept2);
-                    s2.append(m.group(14));
-                    s = s.replace(all, s2.toString());
-                    m = p.matcher(s);
-                }
-            }
-            else
-            {
-                Pattern p2 = Pattern.compile(REGEX_BPT);
-                Matcher m2 = p2.matcher(s);
-                if (m2.find())
-                {
-                    String s2 = m2.group();
-                    contents.add(s2);
-                    s = s.replaceFirst(REGEX_BPT, flag);
-                    m = p.matcher(s);
-                }
-            }
-        }
-
-        for (String content : contents)
-        {
-            s = s.replaceFirst(flag, content);
-        }
-
-        return s;
-    }
-
-    /**
-     * Removes tags that only includes a space.
-     * 
-     * @param s
-     *            the gxml to update
-     * @return new gxml after removing
-     */
-    private String removeTagForSpace(String s)
-    {
-        Pattern p = Pattern.compile(REGEX_BPT);
-        Matcher m = p.matcher(s);
-        while (m.find())
-        {
-            int currentid = -1;
-            try
-            {
-                currentid = Integer.parseInt(m.group(1));
-            }
-            catch (Exception e)
-            {
-            }
-
-            String currentRe = MessageFormat.format(REGEX_BPT_ALL_SPACE,
-                    currentid);
-            Pattern p2 = Pattern.compile(currentRe);
-            Matcher m2 = p2.matcher(s);
-
-            if (m2.find())
-            {
-                String all = m2.group();
-                // check the attribute from next
-                String nextRe = MessageFormat.format(REGEX_BPT_ALL3,
-                        currentid + 1);
-                Pattern p3 = Pattern.compile(nextRe);
-                Matcher m3 = p3.matcher(s);
-                String nextBpt = null;
-                if (m3.find())
-                {
-                    nextBpt = m3.group(1);
-                }
-
-                if (isSpaceRemovable(all, nextBpt))
-                {
-                    s = s.replace(all, m2.group(1));
-                }
-            }
-        }
-        return s;
-    }
-
-    private boolean isSpaceRemovable(String all, String nextBpt)
-    {
-        String ulineKey = " u=&quot;sng&quot; ";
-        boolean cannotRemove = (nextBpt != null && nextBpt.contains(ulineKey) && !all
-                .contains(ulineKey));
-
-        return !cannotRemove;
-    }
 
     /**
      * Creates the templates for the source page/extracted file that has been
@@ -2549,7 +1373,7 @@ public class ExtractedFileImporter extends FileImporter
     private List generateTemplates(SourcePage p_page, GxmlRootElement p_doc,
             List p_tuList) throws FileImportException
     {
-        List templates = new ArrayList();
+        List<PageTemplate> templates = new ArrayList<PageTemplate>();
 
         TemplateGenerator tg = new TemplateGenerator();
         PageTemplate template;
@@ -2619,7 +1443,7 @@ public class ExtractedFileImporter extends FileImporter
         boolean useLeveragedSegments = false;
         boolean useLeveragedTerms = false;
         L10nProfile profile = p_request.getL10nProfile();
-        if (profile.getTMChoice() != L10nProfile.NO_TM)
+        if (profile.getTmChoice() != L10nProfile.NO_TM)
         {
             useLeveragedSegments = true;
         }
@@ -2722,11 +1546,23 @@ public class ExtractedFileImporter extends FileImporter
                     .next());
         }
 
+        GlobalSightLocale[] jobLocales = p_request.getTargetLocalesToImport();
+        LeveragingLocales newLeveragingLocales = new LeveragingLocales();
+        for (int i = 0; i < jobLocales.length; i++)
+        {
+            Set<GlobalSightLocale> levLocales = leveragingLocales
+                    .getLeveragingLocales(jobLocales[i]);
+            Set<GlobalSightLocale> newLevLocales = new HashSet<GlobalSightLocale>();
+            newLevLocales.addAll(levLocales);
+            newLeveragingLocales.setLeveragingLocale(jobLocales[i],
+                    newLevLocales);
+        }
+
         TranslationMemoryProfile tmProfile = l10nProfile
                 .getTranslationMemoryProfile();
 
         LeverageOptions leverageOptions = new LeverageOptions(tmProfile,
-                leveragingLocales);
+                newLeveragingLocales);
 
         TmCoreManager tmCoreManager = LingServerProxy.getTmCoreManager();
 
@@ -2806,7 +1642,8 @@ public class ExtractedFileImporter extends FileImporter
                 }
             }
             // retrieve exact matches
-            exactMatchedSegments = leverageDataCenter.getExactMatchedSegments();
+            exactMatchedSegments = leverageDataCenter
+                    .getExactMatchedSegments(p_request.getCompanyId());
         }
         catch (Exception e)
         {
@@ -2944,7 +1781,8 @@ public class ExtractedFileImporter extends FileImporter
                 Tu tu = (Tu) itTus.next();
                 if (!tu.isLocalizable())
                 {
-                    result.add(tu.getTuv(sourceLocaleId));
+                    result.add(tu.getTuv(sourceLocaleId,
+                            p_sourcePage.getCompanyId()));
                 }
             }
         }
@@ -3285,6 +2123,88 @@ public class ExtractedFileImporter extends FileImporter
         }
 
         return targetLocaleErrors;
+    }
+
+    /**
+     * Set tuId and tuvId for all TUs and TUVs in current source page. And need
+     * set these TuIds and TuvIds into its related business objects such as
+     * xliffAlt, RemovedTag etc.
+     * 
+     * @param p_sourcePage
+     */
+    @SuppressWarnings("unchecked")
+    private void setTuTuvIds(SourcePage p_sourcePage)
+    {
+        if (p_sourcePage == null)
+            return;
+
+        String companyId = p_sourcePage.getCompanyId();
+
+        List<LeverageGroup> lgList = p_sourcePage.getExtractedFile()
+                .getLeverageGroups();
+        for (LeverageGroup lg : lgList)
+        {
+            Collection tus = lg.getTus(false);
+            // Set tuIds for all TUs
+            SegmentTuTuvIndexUtil.setTuIds(tus);
+
+            // Set tuIds into its own
+            // TUVs,RemovedTag,RemovedPrefixTag,RemovedSuffixTag.
+            List<Tuv> allTuvs = new ArrayList<Tuv>();
+            for (Iterator tuIter = tus.iterator(); tuIter.hasNext();)
+            {
+                TuImpl tu = (TuImpl) tuIter.next();
+                allTuvs.addAll(tu.getTuvs(false, companyId));
+
+                // Set tuId into its own Tuvs
+                for (Iterator tuvIter = tu.getTuvs(false, companyId).iterator(); tuvIter
+                        .hasNext();)
+                {
+                    TuvImpl tuv = (TuvImpl) tuvIter.next();
+                    tuv.setTuId(tu.getId());
+                }
+                // Set tuId into its RemovedTags
+                if (tu.hasRemovedTags())
+                {
+                    for (Iterator tagIt1 = tu.getRemovedTags().iterator(); tagIt1
+                            .hasNext();)
+                    {
+                        RemovedTag rt = (RemovedTag) tagIt1.next();
+                        rt.setTuId(tu.getId());
+                    }
+                }
+                // Set tuId into its RemovedPrefixTag
+                if (tu.getPrefixTag() != null)
+                {
+                    tu.getPrefixTag().setTuId(tu.getId());
+                }
+                // Set tuId into its RemovedSuffixTag
+                if (tu.getSuffixTag() != null)
+                {
+                    tu.getSuffixTag().setTuId(tu.getId());
+                }
+            }
+
+            // Set tuvIds for all TUVs
+            SegmentTuTuvIndexUtil.setTuvIds(allTuvs);
+
+            // Set tuvIds into its own XliffAlt objects (for XLF/XLZ/PASSOLO
+            // formats)
+            for (Iterator tuvIter = allTuvs.iterator(); tuvIter.hasNext();)
+            {
+                TuvImpl tuv = (TuvImpl) tuvIter.next();
+                Set<XliffAlt> xlfAlts = tuv.getXliffAlt(false);
+                if (xlfAlts != null && xlfAlts.size() > 0)
+                {
+                    for (Iterator xlfAltIter = xlfAlts.iterator(); xlfAltIter
+                            .hasNext();)
+                    {
+                        XliffAlt alt = (XliffAlt) xlfAltIter.next();
+                        alt.setTuvId(tuv.getId());
+                    }
+                }
+            }
+        }
     }
 
     public static boolean getLeveragematch()

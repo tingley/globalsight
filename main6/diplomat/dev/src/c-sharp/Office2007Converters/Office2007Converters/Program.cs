@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Threading;
+using GlobalSight.Common;
 
 namespace GlobalSight.Office2007Converters
 {
@@ -15,7 +17,15 @@ namespace GlobalSight.Office2007Converters
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            MainForm mf = new MainForm();
+
+            if (AppConfig.AutoStartAll)
+            {
+                Thread t = new Thread(new ThreadStart(mf.autoStartAll));
+                t.Start();
+            }
+
+            Application.Run(mf);
         }
     }
 }

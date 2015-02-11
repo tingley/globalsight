@@ -12,6 +12,9 @@
                   java.util.ResourceBundle,
                   com.globalsight.everest.company.CompanyThreadLocal,
                   com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
+                  com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfoComparator,
                   com.globalsight.everest.usermgr.UserLdapHelper,
                   com.globalsight.everest.webapp.WebAppConstants,
                   com.globalsight.everest.jobhandler.JobImpl,
@@ -26,9 +29,10 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     
-    Locale uiLocale = (Locale) session
-                .getAttribute(WebAppConstants.UILOCALE);
-    ArrayList<JobImpl> jobList = (ArrayList<JobImpl>)sessionMgr.getAttribute("jobList");
+    Locale uiLocale = (Locale) session.getAttribute(WebAppConstants.UILOCALE);
+    Map<String, ReportJobInfo> map = (Map<String, ReportJobInfo>)sessionMgr.getAttribute("reportJobInfos");
+    List<ReportJobInfo> jobInfos = new ArrayList<ReportJobInfo>(map.values());
+    Collections.sort(jobInfos,new ReportJobInfoComparator(Locale.getDefault()));
     ArrayList<Project> projectList = (ArrayList<Project>)sessionMgr.getAttribute("projectList");
     ArrayList<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)sessionMgr.getAttribute("targetLocales");
     
@@ -37,15 +41,14 @@
     String creationStartOptions = JobSearchConstants.CREATION_START_OPTIONS;
     String creationEnd = JobSearchConstants.CREATION_END;
     String creationEndOptions = JobSearchConstants.CREATION_END_OPTIONS;
-    
+    String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
+        + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
 <!--  This JSP is: /envoy/administration/reports/fileListReportWebForm.jsp-->
 <head>
 <title><%= EMEA%> <%=bundle.getString("file_list_report_web_form")%></title>
-</head>
-<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
-bgcolor="LIGHTGREY">
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
 <SCRIPT LANGUAGE="JAVASCRIPT">
 // If user selected "now", then blank out the preceeding numeric field.
 function checkNow(field, text)
@@ -62,6 +65,7 @@ function isInteger(value)
 
 function validateForm()
 {
+    /* Canceled Date Range Option, GBS-2259
     if ((-1 != searchForm.<%=creationStartOptions%>.value) &&
         (searchForm.<%=creationStart%>.value == ""))
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
@@ -73,6 +77,15 @@ function validateForm()
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
     if (!isInteger(searchForm.<%=creationEnd%>.value))
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+    */
+    if(searchForm.reportOnJobId.checked)
+    {
+        var jobIDArr =  searchForm.jobIds.value.split(",");
+        if(!validateIDS(jobIDArr, null))
+        {
+           return ('<%=bundle.getString("lb_invalid_jobid")%>');
+        }
+    }
     return "";
 }
 
@@ -88,20 +101,12 @@ function submitForm()
     searchForm.submit();
 }
 
-function contains(array, item)
-{
-  for(var i=0;i<array.length;i++)
-  {
-    if(array[i]=="*"||array[i]==item)
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
 function filterJob()
 {
+   if(searchForm.reportOnJobId.checked)
+   {
+	   return;   
+   }
    searchForm.jobNameList.options.length=0;
    
    //selected job status
@@ -138,31 +143,23 @@ function filterJob()
    }
    
    <%
-     Iterator it = jobList.iterator();
+     Iterator<ReportJobInfo> it = jobInfos.iterator();
      while (it.hasNext())
      {
-          Job j = (Job) it.next();
+         ReportJobInfo j = it.next();
           %>
           if(contains(currSelectValueProject, "<%=j.getProjectId()%>"))
           {
-            if(contains(currSelectValueJobStatus, "<%=j.getState()%>"))
+            if(contains(currSelectValueJobStatus, "<%=j.getJobState()%>"))
             {
                var isLocaleFlag = "false";
                <%
-               Collection c = j.getWorkflows();
-               Iterator wfIter = c.iterator();
-               while (wfIter.hasNext())
+               List<String> jobLocales = j.getTargetLocales();
+               for(int i=0;i<jobLocales.size();i++)
                {
-                   Workflow w = (Workflow) wfIter.next();
-                   String state = w.getState();
-                   if(Workflow.CANCELLED.equals(state))
-                   {
-                      continue;
-                   }
-                   // skip certain workflow whose target locale is not selected
-                   String trgLocale = w.getTargetLocale().toString();
+                   String locale = jobLocales.get(i);
                    %>
-                   if(contains(currSelectValueTargetLocale,"<%=trgLocale%>"))
+                   if(contains(currSelectValueTargetLocale,"<%=locale%>"))
                    {
                       isLocaleFlag = "true";
                    }
@@ -171,7 +168,7 @@ function filterJob()
                 %>
                 if(isLocaleFlag=="true")
                 {
-                   var varItem = new Option("<%=j.getJobName()%>", "<%=j.getId()%>");
+                   var varItem = new Option("<%=j.getJobName()%>", "<%=j.getJobId()%>");
 		           varItem.setAttribute("title","<%=j.getJobName()%>");
                    searchForm.jobNameList.options.add(varItem);
                 }
@@ -190,7 +187,36 @@ function filterJob()
    }
 }
 
+// Select JobIds or Job Name. 
+function setDisableTRWrapper(trid)
+{
+	if(trid == "idTRJobIds")
+	{
+		filterJob();
+		setDisableTR("idTRJobIds", true);
+		setDisableTR("idTRJobNames", false);
+		setDisableTR("idTRProject", false);
+		setDisableTR("idTRJobStatus", false);
+	}
+	else if(trid == "idTRJobNames")
+	{
+		searchForm.submitButton.disabled=false;
+		setDisableTR("idTRJobIds", false);
+		setDisableTR("idTRJobNames", true);
+		setDisableTR("idTRProject", true);
+		setDisableTR("idTRJobStatus", true);
+	}
+}
+
+function doOnload()
+{
+	// Set the jobIds as default check. 
+	setDisableTRWrapper("idTRJobNames");
+}
 </script>
+</head>
+<body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
+bgcolor="LIGHTGREY" onLoad="doOnload()">
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
 </TABLE><BR>
@@ -199,23 +225,35 @@ function filterJob()
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("select_the_appropriate_job")%>
-</SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
-<form name="searchForm" method="post" action="/globalsight/envoy/administration/reports/fileListXlsReport.jsp">
+<form name="searchForm" method="post" action="<%=formAction%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.DETAILED_WORDCOUNTS_REPORT%>">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
 
 <tr>
-<td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
+<td class="standardText"><%=bundle.getString("lb_report_on")%></td>
 <td class="standardText" VALIGN="BOTTOM">
-<select id = "jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px">
+<table cellspacing=0>
+<tr id="idTRJobIds">
+<td>
+<input type="radio" id="reportOnJobId" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%>
+</td>
+<td><input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%></td>
+</tr>
+<tr id="idTRJobNames">
+<td>
+<input type="radio" id="reportOnJobName" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:</td>
+<td>
+<select id = "jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;" disabled>
 <%
-         Iterator iterJob = jobList.iterator();
-         while (iterJob.hasNext())
+         
+         Iterator<ReportJobInfo> iterator = jobInfos.iterator();
+         while(iterator.hasNext())
          {
-             Job j = (Job) iterJob.next();
+             ReportJobInfo j = iterator.next();
 %>
 <option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></OPTION>
 <%
@@ -224,11 +262,14 @@ function filterJob()
 </select>
 </td>
 </tr>
+</table>
+</td>
+</tr>
 
-<tr>
+<tr id="idTRProject">
 <td class="standardText"><%=bundle.getString("lb_project")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select id="projectNameList" name="projectNameList" MULTIPLE size=4 onChange="filterJob()">
+<select id="projectNameList" name="projectNameList" MULTIPLE size=4 onChange="filterJob()" disabled>
 <option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
          Iterator iterProject = projectList.iterator();
@@ -244,10 +285,10 @@ function filterJob()
 </td>
 </tr>
 
-<tr>
+<tr id="idTRJobStatus">
 <td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
-<select id="jobStatus" name="jobStatus" multiple="true" size=4 onChange="filterJob()">
+<select id="jobStatus" name="jobStatus" multiple="true" size=4 onChange="filterJob()" disabled>
 <option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
 <option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
@@ -270,7 +311,7 @@ function filterJob()
          {
              GlobalSightLocale gsLocale = (GlobalSightLocale) iterLocale.next();
 %>
-<option VALUE="<%=gsLocale.toString()%>"><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
+<option VALUE="<%=gsLocale.getId()%>"><%=gsLocale.getDisplayName(uiLocale)%></OPTION>
 <%
          }
 %>
@@ -278,12 +319,13 @@ function filterJob()
 </td>
 </tr>
 
-<tr>
+<!-- Canceled Date Range Option, GBS-2259-->
+<tr style="display:none">
 <td class="standardText" colspan=2>
 <%=bundle.getString("lb_creation_date_range")%>:
 </td>
 </tr>
-<tr>
+<tr style="display:none">
 <td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
 <%=bundle.getString("lb_starts")%>:
 <input type="text" name="<%=creationStart%>" size="3" maxlength="9">
@@ -306,7 +348,8 @@ function filterJob()
 </select>
 </td>
 </tr>
-
+<!-- Finished Date Range Option-->
+ 
 <tr>
 <td class="standardText"><%=bundle.getString("date_display_format")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">

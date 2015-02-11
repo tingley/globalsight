@@ -82,12 +82,12 @@
     {
         ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(
           UserConstants.MODIFY_USER_WRAPPER);
-        userName = wrapper.getUserId();
+        userName = wrapper.getUserName();
     } else
     {
         CreateUserWrapper wrapper = (CreateUserWrapper)sessionMgr.getAttribute(
           UserConstants.CREATE_USER_WRAPPER);
-        userName = wrapper.getUserId();
+        userName = wrapper.getUserName();
     }
 %>
 

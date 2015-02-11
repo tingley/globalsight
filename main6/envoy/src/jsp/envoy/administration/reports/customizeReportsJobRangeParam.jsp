@@ -96,7 +96,8 @@ function submitForm()
 <BR><BR>
 <TABLE WIDTH="80%">
 <TR><TD>
-<SPAN CLASS="smallText"><%=bundle.getString("lb_customize_reports_params_tip1")%></SPAN>
+<SPAN CLASS="smallText">
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
 <form name="searchForm" method="post">

@@ -16,63 +16,42 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.io.IOException;
-
-
-// globalsight
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
 
-public class TaskSearchHandlerHelper 
+public class TaskSearchHandlerHelper
 {
     /**
-     * Return the job search cookie for this user.  First look in the session.
-     * If not there, look in the filesystem.
-     * There are two search types, one for the mini search, and one for the
-     * advanced search.  Determine which to get by the LAST_JOB_SEARCH_TYPE
-     * in the session.  Default is advanced search.
+     * Return the job search cookie for this user. First look in the session. If
+     * not there, look in the filesystem. There are two search types, one for
+     * the mini search, and one for the advanced search. Determine which to get
+     * by the LAST_JOB_SEARCH_TYPE in the session. Default is advanced search.
      */
     static public Cookie getTaskSearchCookie(HttpSession session,
-                                 HttpServletRequest request)
+            HttpServletRequest request)
     {
-        SessionManager sessionMgr = (SessionManager)
-                session.getAttribute(WebAppConstants.SESSION_MANAGER);
-        String searchType = (String)session.getAttribute(
-                            JobSearchConstants.LAST_TASK_SEARCH_TYPE);
-        String userName = (String)session.getAttribute(WebAppConstants.USER_NAME);
-        User user = null;
-        try
-        {
-            user = UserHandlerHelper.getUser(userName);
-        }
-        catch (EnvoyServletException e)
-        {
-            return null;
-        }
-        String cookieName = searchType + user.getUserId().hashCode();
+        SessionManager sessionMgr = (SessionManager) session
+                .getAttribute(WebAppConstants.SESSION_MANAGER);
+        String searchType = (String) session
+                .getAttribute(JobSearchConstants.LAST_TASK_SEARCH_TYPE);
+        String userName = (String) session
+                .getAttribute(WebAppConstants.USER_NAME);
+        String cookieName = searchType + userName.hashCode();
         Cookie jobSearchCookie = (Cookie) sessionMgr.getAttribute(cookieName);
         if (jobSearchCookie != null)
-            return  jobSearchCookie;
+            return jobSearchCookie;
 
-        Cookie[] cookies = (Cookie[])request.getCookies();
+        Cookie[] cookies = (Cookie[]) request.getCookies();
         if (cookies != null)
         {
-            for (int i = 0; i < cookies.length; i ++)
+            for (int i = 0; i < cookies.length; i++)
             {
-                Cookie cookie = (Cookie)cookies[i];
+                Cookie cookie = (Cookie) cookies[i];
                 if (cookie.getName().equals(cookieName))
                 {
                     return cookie;

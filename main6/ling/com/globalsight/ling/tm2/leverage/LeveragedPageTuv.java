@@ -16,18 +16,16 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.PageTmTuv;
+import com.globalsight.util.GlobalSightLocale;
 
 /**
- * LeveragedPageTuv is a class that represents a Tuv of leveraged
- * Page Tm segment.
+ * LeveragedPageTuv is a class that represents a Tuv of leveraged Page Tm
+ * segment.
  */
 
-public class LeveragedPageTuv
-    extends PageTmTuv
-    implements LeveragedTuv
+public class LeveragedPageTuv extends PageTmTuv implements LeveragedTuv
 {
     private MatchState m_state = null;
     private float m_score = 0.0f;
@@ -36,70 +34,70 @@ public class LeveragedPageTuv
 
     /**
      * Constructor.
-     * @param p_id id
-     * @param p_segment segment string
-     * @param p_locale GlobalSightLocale
+     * 
+     * @param p_id
+     *            id
+     * @param p_segment
+     *            segment string
+     * @param p_locale
+     *            GlobalSightLocale
      */
-    public LeveragedPageTuv(long p_id,
-        String p_segment, GlobalSightLocale p_locale)
+    public LeveragedPageTuv(long p_id, String p_segment,
+            GlobalSightLocale p_locale)
     {
         super(p_id, p_segment, p_locale);
     }
 
-
     public BaseTmTuv getSourceTuv()
     {
-        GlobalSightLocale source = ((LeveragedTu)getTu()).getSourceLocale();
+        GlobalSightLocale source = ((LeveragedTu) getTu()).getSourceLocale();
         return getTu().getFirstTuv(source);
     }
-    
 
     public MatchState getMatchState()
     {
-        return m_state == null
-            ? ((LeveragedTu)getTu()).getMatchState() : m_state;
+        return m_state == null ? ((LeveragedTu) getTu()).getMatchState()
+                : m_state;
     }
-    
-    
+
     public void setMatchState(MatchState p_state)
     {
         m_state = p_state;
     }
-    
-    
+
     public float getScore()
     {
-        return m_score == 0.0 ? ((LeveragedTu)getTu()).getScore() : m_score;
+        return m_score == 0.0 ? ((LeveragedTu) getTu()).getScore() : m_score;
     }
-    
-    
+
     public void setScore(float p_score)
     {
         m_score = p_score;
     }
-    
+
     public int getOrder()
     {
         return m_order;
     }
-    
-    
+
     public void setOrder(int p_order)
     {
         m_order = p_order;
     }
 
-
-    public String getOrgSid()
+    public String getOrgSid(String companyId)
     {
         return orgSid;
     }
-
 
     public void setOrgSid(String orgSid)
     {
         this.orgSid = orgSid;
     }
-    
 
+    @Override
+    public String getOrgSid()
+    {
+        return getOrgSid(null);
+    }
 }

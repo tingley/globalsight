@@ -232,7 +232,7 @@ public class ParamTmMatchesPair extends ParamObjectPair
             p_workflow.getSubLevMatchWordCount();
         p_workflowData.setTmNewWordsWordCount(tmNewWordsWordCount);
 
-        p_workflowData.setTmExactMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow.getSegmentTmWordCount() : p_workflow.getNoUseExactMatchWordCount());
+        p_workflowData.setTmExactMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow.getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount());
         p_workflowData.setTmInContextMatchWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? p_workflow.getInContextMatchWordCount() : p_workflow.getNoUseInContextMatchWordCount());
 
         long tmTotalWordCount = 

@@ -119,7 +119,7 @@
     {
         isActive = wrapper.getUser().isActive();
     }
-    String userName = wrapper.getUserId();
+    String userName = wrapper.getUserName();
     FieldSecurity hash = (FieldSecurity) sessionMgr.getAttribute("securitiesHash");
 %>
 <HTML>

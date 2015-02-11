@@ -1,0 +1,2 @@
+<bpt i="1" type="w:t" isTranslate="true" innerTextNodeIndex="0," movable="no">&lt;w:r&gt;&lt;w:t&gt;</bpt>Document footer: This is a sample document for testing purpose.<ept i="1">&lt;/w:t&gt;&lt;/w:r&gt;</ept>
+

@@ -92,6 +92,11 @@ if(!ie)
     	}
     };    
 
+   if(!moz){ //XML object is only exist in firefox, for chrome using XML as a namespace.
+	var XML;
+	if(!XML) XML = {};
+   }
+
    XML.getDataIsland = function(id)
    {
      	var dom = document.implementation.createDocument("","",null);
@@ -162,7 +167,7 @@ if(!ie)
     
 }
 
-if (moz)
+if (!ie)
 {
 	//refer to ieemu.js
 	emulateHTMLModel();

@@ -19,25 +19,30 @@ package com.globalsight.util;
 
 import java.util.Date;
 
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+
 /**
- * <p>SessionInfo collects user-related information to make it
- * accessible to lower terminology layers.</p>
+ * <p>
+ * SessionInfo collects user-related information to make it accessible to lower
+ * terminology layers.
+ * </p>
  */
 public class SessionInfo
 {
     //
     // Private Member Variables
     //
-    private String m_userName = null;
+    private String m_userName = null; // actually user id
     private String m_userRole = null;
-    private Date   m_timestamp = new Date();
+    private Date m_timestamp = new Date();
 
     private String sourceLan = "";
     private String targetLan = "";
+
     //
     // Constructors
     //
-    public SessionInfo (String p_user, String p_role)
+    public SessionInfo(String p_user, String p_role)
     {
         m_userName = p_user;
         m_userRole = p_role;
@@ -46,6 +51,11 @@ public class SessionInfo
     public String getUserName()
     {
         return m_userName;
+    }
+
+    public String getUserDisplayName()
+    {
+        return UserUtil.getUserNameById(m_userName);
     }
 
     public String getUserRole()
@@ -68,18 +78,22 @@ public class SessionInfo
     {
         return m_timestamp;
     }
+
     public String getSourceLan()
     {
         return sourceLan;
     }
+
     public void setSourceLan(String sourceLan)
     {
         this.sourceLan = sourceLan;
     }
+
     public String getTargetLan()
     {
         return targetLan;
     }
+
     public void setTargetLan(String targetLan)
     {
         this.targetLan = targetLan;

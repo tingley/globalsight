@@ -27,7 +27,7 @@ public interface User
     // the action, but the user is the system.
     // i.e. cancelling a job can be done by a user or the system
     // when done by the system this user id is passed in
-    public static final String SYSTEM_USER_ID = "GlobalSightSystem";
+    public static final String SYSTEM_USER_ID = "1";
 
     // the anonymous vendor viewer user id
     // this is needed to check against with duplicate logins.
@@ -182,9 +182,14 @@ public interface User
      * storage (LDAP) and shouldn't be changed back and forth.
      */
     public void setType(int p_type);
-    
+
     /*
      * Get the data with the format "username (firstname lastname)" for email
      */
     public String getSpecialNameForEmail();
+    
+    public String getProjectNames();
+    public void setProjectNames(String projectN);
+    public String getPermissiongNames();
+    public void setPermissiongNames(String permisssingN);
 }

@@ -140,4 +140,16 @@ public interface Tm
       */
      public boolean getIsRemoteTm();
      
+     public int getConvertRate();
+     
+     public void setConvertRate(int convertRate);
+     
+     public long getLastTUId();
+     
+     public void setLastTUId(long lastTUId);
+     
+     public long getConvertedTM3Id();
+     
+     public void setConvertedTM3Id(long convertedTm3Id);
+     
 }

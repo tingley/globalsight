@@ -242,8 +242,7 @@ public class Segmentation
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            CATEGORY.error("There is a Exception while doing segmentation :" + e.getMessage());
+            CATEGORY.error("There is a Exception while doing segmentation", e);
             throw new Exception(e.getMessage());
         }
 

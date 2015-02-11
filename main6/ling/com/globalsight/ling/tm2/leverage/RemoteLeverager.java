@@ -1,3 +1,19 @@
+/**
+ *  Copyright 2009 Welocalize, Inc. 
+ *  
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  
+ *  You may obtain a copy of the License at 
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *  
+ */
 package com.globalsight.ling.tm2.leverage;
 
 import java.rmi.RemoteException;
@@ -10,6 +26,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 
 import com.globalsight.everest.gsedition.GSEdition;
 import com.globalsight.everest.gsedition.GSEditionManagerLocal;
@@ -23,9 +40,7 @@ import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm.LeveragingLocales;
 import com.globalsight.ling.tm2.BaseTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
-import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm2.leverage.Leverager;
+import com.globalsight.ling.tm2.TmUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.webservices.WebServiceException;
@@ -56,7 +71,8 @@ public class RemoteLeverager
             Collection loSegments = new ArrayList();
 
             Iterator itOriginalSegment = p_leverageDataCenter
-                    .getOriginalSeparatedSegments().iterator();
+                    .getOriginalSeparatedSegments(p_sourcePage.getCompanyId())
+                    .iterator();
             while (itOriginalSegment.hasNext())
             {
                 BaseTmTuv originalSegment = (BaseTmTuv) itOriginalSegment
@@ -102,7 +118,7 @@ public class RemoteLeverager
         }
         catch (Exception e)
         {
-            c_logger.error(e);
+            c_logger.error(e.getMessage(), e);
         }
 
     }
@@ -140,14 +156,14 @@ public class RemoteLeverager
         while (allTrgLocalesIter.hasNext())
         {
             StringBuffer levLocaleSB = new StringBuffer();
-            GlobalSightLocale trgLocale = 
-                (GlobalSightLocale) allTrgLocalesIter.next();
+            GlobalSightLocale trgLocale = (GlobalSightLocale) allTrgLocalesIter
+                    .next();
             Iterator levLocalesIter = levLocales
                     .getLeveragingLocales(trgLocale).iterator();
             while (levLocalesIter.hasNext())
             {
-                long levLocaleId = 
-                    ((GlobalSightLocale) levLocalesIter.next()).getId();
+                long levLocaleId = ((GlobalSightLocale) levLocalesIter.next())
+                        .getId();
                 if (levLocaleSB.length() == 0)
                 {
                     levLocaleSB.append(levLocaleId);
@@ -157,8 +173,8 @@ public class RemoteLeverager
                     levLocaleSB.append(",").append(levLocaleId);
                 }
             }
-            trgLocal2LevLocalesMap.put(
-                    trgLocale.getId(), levLocaleSB.toString());
+            trgLocal2LevLocalesMap.put(trgLocale.getId(),
+                    levLocaleSB.toString());
         }
 
         // leverage from remote tm one by one
@@ -193,15 +209,16 @@ public class RemoteLeverager
                 String realAccessToken = null;
                 try
                 {
-                    String fullAccessToken = clientAmbassador.login(gsEdition
-                            .getUserName(), gsEdition.getPassword());
+                    String fullAccessToken = clientAmbassador.login(
+                            gsEdition.getUserName(), gsEdition.getPassword());
                     realAccessToken = WebServiceClientHelper
                             .getRealAccessToken(fullAccessToken);
                 }
                 catch (Exception e)
                 {
                     c_logger.debug(
-                            "Web service login() failure,can't get access token", e);
+                            "Web service login() failure,can't get access token",
+                            e);
                 }
 
                 // remote tm profile id
@@ -217,10 +234,10 @@ public class RemoteLeverager
                     int count = 0;
                     while (segmentIter.hasNext())
                     {
-                        BaseTmTuv originalSegment = 
-                            (BaseTmTuv) segmentIter.next();
-                        String segmentStrNoTopTag = 
-                            originalSegment.getSegmentNoTopTag();
+                        BaseTmTuv originalSegment = (BaseTmTuv) segmentIter
+                                .next();
+                        String segmentStrNoTopTag = originalSegment
+                                .getSegmentNoTopTag();
                         long sourceTuvId = originalSegment.getId();
                         segmentMap.put(sourceTuvId, segmentStrNoTopTag);
                         count++;
@@ -260,94 +277,116 @@ public class RemoteLeverager
             LeverageOptions p_leverageOptions) throws LocaleManagerException,
             RemoteException, GeneralException
     {
-        // For one remote tm
-        Iterator iter1 = null;
-        if (remoteLevResultMap != null && remoteLevResultMap.size() > 0)
+        Session session = TmUtil.getStableSession();
+        try
         {
-            iter1 = remoteLevResultMap.entrySet().iterator();
-        }
-        while (iter1 != null && iter1.hasNext())
-        {
-            Map.Entry entry1 = (Map.Entry) iter1.next();
-            HashMap originalTuvId2MatchesMap = (HashMap) entry1.getValue();
-
-            // For one original tuv
-            Iterator iter2 = null;
-            if (originalTuvId2MatchesMap != null
-                    && originalTuvId2MatchesMap.size() > 0)
+            // For one remote tm
+            Iterator iter1 = null;
+            if (remoteLevResultMap != null && remoteLevResultMap.size() > 0)
             {
-                iter2 = originalTuvId2MatchesMap.entrySet().iterator();
+                iter1 = remoteLevResultMap.entrySet().iterator();
             }
-            while (iter2 != null && iter2.hasNext())
+            while (iter1 != null && iter1.hasNext())
             {
-                Map.Entry entry2 = (Map.Entry) iter2.next();
-                long originalTuvId = ((Long) entry2.getKey()).longValue();// originalTuvId
-                HashMap localesMatchesMap = (HashMap) entry2.getValue();
+                Map.Entry entry1 = (Map.Entry) iter1.next();
+                HashMap originalTuvId2MatchesMap = (HashMap) entry1.getValue();
 
-                // for one target locale
-                Iterator iter3 = null;
-                if (localesMatchesMap != null && localesMatchesMap.size() > 0)
+                // For one original tuv
+                Iterator iter2 = null;
+                if (originalTuvId2MatchesMap != null
+                        && originalTuvId2MatchesMap.size() > 0)
                 {
-                    iter3 = localesMatchesMap.entrySet().iterator();
+                    iter2 = originalTuvId2MatchesMap.entrySet().iterator();
                 }
-                while (iter3 != null && iter3.hasNext())
+                while (iter2 != null && iter2.hasNext())
                 {
-                    Map.Entry entry3 = (Map.Entry) iter3.next();
-                    long localeId = ((Long) entry3.getKey()).longValue();
-                    GlobalSightLocale gsl = ServerProxy.getLocaleManager()
-                            .getLocaleById(localeId);
-                    Vector matchedVector = (Vector) entry3.getValue();
-                    if (matchedVector != null && matchedVector.size() > 0)
-                    {
-                        Collection c = new ArrayList();
-                        Iterator iter4 = matchedVector.iterator();
-                        while (iter4.hasNext())
-                        {
-                            HashMap matchInfoMap = (HashMap) iter4.next();
-                            String subId = (String) matchInfoMap.get("subId");
-                            String matchedSegment = 
-                                (String) matchInfoMap.get("matchedSegment");
-                            String matchType =
-                                (String) matchInfoMap.get("matchType");
-                            String tmSourceStr = 
-                                (String) matchInfoMap.get("tmSourceStr");
-                            int orderNum = 
-                                ((Integer) matchInfoMap.get("orderNum")).intValue();
-                            float score = 
-                                ((Float) matchInfoMap.get("score")).floatValue();
+                    Map.Entry entry2 = (Map.Entry) iter2.next();
+                    long originalTuvId = ((Long) entry2.getKey()).longValue();// originalTuvId
+                    HashMap localesMatchesMap = (HashMap) entry2.getValue();
 
-                            LeverageMatch lm = new LeverageMatch();
-                            lm.setSourcePageId(p_sourcePage.getIdAsLong());
-                            lm.setOriginalSourceTuvId(originalTuvId);
-                            lm.setSubId(subId);
-                            lm.setMatchedText(matchedSegment);
-                            lm.setMatchedOriginalSource(tmSourceStr);
-                            lm.setMatchedClob(null);
-                            lm.setTargetLocale(gsl);
-                            lm.setMatchType(matchType);
-                            // Remote TM matches "order num" starts with 101.
-                            lm.setOrderNum((short) (TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM - 1 + orderNum));
-                            lm.setScoreNum(score);
-                            lm.setMatchedTuvId(-1);// there is no matched tuv id
-                            // on local db
-                            // Map projectTMIdTmIndexMap =
-                            // p_leverageOptions.getTmIndexsToLeverageFrom();
-                            // int projectTmIndex = (Integer)
-                            // projectTMIdTmIndexMap.get(new
-                            // Long(remoteProjectTmIdOnLocal));
-                            lm.setProjectTmIndex(Leverager.REMOTE_TM_PRIORITY);
-                            // save 0 as its tm id,can't save remote tm id here
-                            // though we can get it.
-                            lm.setTmId(0);
-                            lm.setTmProfileId(p_leverageOptions.getTmProfileId());
-                            lm.setMtName(null);
-                            c.add(lm);
+                    // for one target locale
+                    Iterator iter3 = null;
+                    if (localesMatchesMap != null
+                            && localesMatchesMap.size() > 0)
+                    {
+                        iter3 = localesMatchesMap.entrySet().iterator();
+                    }
+                    while (iter3 != null && iter3.hasNext())
+                    {
+                        Map.Entry entry3 = (Map.Entry) iter3.next();
+                        long localeId = ((Long) entry3.getKey()).longValue();
+                        GlobalSightLocale gsl = ServerProxy.getLocaleManager()
+                                .getLocaleById(localeId);
+                        Vector matchedVector = (Vector) entry3.getValue();
+                        if (matchedVector != null && matchedVector.size() > 0)
+                        {
+                            Collection<LeverageMatch> c = new ArrayList<LeverageMatch>();
+                            Iterator iter4 = matchedVector.iterator();
+                            while (iter4.hasNext())
+                            {
+                                HashMap matchInfoMap = (HashMap) iter4.next();
+                                String subId = (String) matchInfoMap
+                                        .get("subId");
+                                String matchedSegment = (String) matchInfoMap
+                                        .get("matchedSegment");
+                                String matchType = (String) matchInfoMap
+                                        .get("matchType");
+                                String tmSourceStr = (String) matchInfoMap
+                                        .get("tmSourceStr");
+                                int orderNum = ((Integer) matchInfoMap
+                                        .get("orderNum")).intValue();
+                                float score = ((Float) matchInfoMap
+                                        .get("score")).floatValue();
+
+                                LeverageMatch lm = new LeverageMatch();
+                                lm.setSourcePageId(p_sourcePage.getIdAsLong());
+                                lm.setOriginalSourceTuvId(originalTuvId);
+                                lm.setSubId(subId);
+                                lm.setMatchedText(matchedSegment);
+                                lm.setMatchedOriginalSource(tmSourceStr);
+                                lm.setMatchedClob(null);
+                                lm.setTargetLocale(gsl);
+                                lm.setMatchType(matchType);
+                                // Remote TM matches "order num" starts with
+                                // 101.
+                                lm.setOrderNum((short) (TmCoreManager.LM_ORDER_NUM_START_REMOTE_TM - 1 + orderNum));
+                                lm.setScoreNum(score);
+                                lm.setMatchedTuvId(-1);// there is no matched
+                                                       // tuv id
+                                // on local db
+                                // Map projectTMIdTmIndexMap =
+                                // p_leverageOptions.getTmIndexsToLeverageFrom();
+                                // int projectTmIndex = (Integer)
+                                // projectTMIdTmIndexMap.get(new
+                                // Long(remoteProjectTmIdOnLocal));
+                                lm.setProjectTmIndex(Leverager.REMOTE_TM_PRIORITY);
+                                // save 0 as its tm id,can't save remote tm id
+                                // here
+                                // though we can get it.
+                                lm.setTmId(0);
+                                lm.setTmProfileId(p_leverageOptions
+                                        .getTmProfileId());
+                                lm.setMtName(null);
+                                c.add(lm);
+                            }
+                            // save to leverage_match
+                            LingServerProxy.getLeverageMatchLingManager()
+                                    .saveLeveragedMatches(c,
+                                            session.connection());
                         }
-                        // save to leverage_match
-                        LingServerProxy.getLeverageMatchLingManager()
-                                .saveLeveragedMatches(c);
                     }
                 }
+            }
+        }
+        catch (Exception e)
+        {
+            c_logger.error("Error when save remote TM leveraging results", e);
+        }
+        finally
+        {
+            if (session != null)
+            {
+                TmUtil.closeStableSession(session);
             }
         }
     }

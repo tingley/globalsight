@@ -16,11 +16,16 @@
  */
 package com.globalsight.everest.foundation;
 
-public class UserRoleImpl
-    extends RoleImpl
-    implements UserRole
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+
+public class UserRoleImpl extends RoleImpl implements UserRole
 {
-    private String m_user = null;
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private String m_userId = null;
+    private String m_userName = null;
     private String m_cost = null;
     private String m_rate = null;
 
@@ -30,12 +35,22 @@ public class UserRoleImpl
 
     public String getUser()
     {
-        return m_user;
+        return m_userId;
     }
 
-    public void setUser(String p_user)
+    public void setUser(String p_userId)
     {
-        m_user = p_user;
+        m_userId = p_userId;
+    }
+
+    public String getUserName()
+    {
+        return m_userName;
+    }
+
+    public void setUserName(String p_userName)
+    {
+        m_userName = p_userName;
     }
 
     public String getCost()
@@ -60,42 +75,38 @@ public class UserRoleImpl
 
     public String getName()
     {
-        String roleName = super.getName();
+        StringBuilder name = new StringBuilder();
 
-        if (roleName == null || roleName.length() <= 0)
-        {
-            StringBuffer name = new StringBuffer();
+        name.append(getActivity().getId());
+        name.append(" ");
+        name.append(getActivity().getName());
+        name.append(" ");
+        name.append(getSourceLocale());
+        name.append(" ");
+        name.append(getTargetLocale());
+        name.append(" ");
+        name.append(m_userId != null ? m_userId : UserUtil
+                .getUserIdByName(m_userName));
 
-            name.append(getActivity().getId());  name.append(" ");
-            name.append(getActivity().getName()); name.append(" ");
-            name.append(getSourceLocale()); name.append(" ");
-            name.append(getTargetLocale());  name.append(" ");
-            name.append(m_user);
-
-            roleName = name.toString();
-            setName(roleName);
-        }
-
-        return roleName;
+        return name.toString();
     }
 
     public String toString()
     {
-        return super.toString() +
-            " m_user=" + (m_user != null ? m_user.toString() : "null") +
-            " m_rate=" + (m_rate != null ? m_rate.toString() : "null") +
-            " m_cost=" + (m_cost != null ? m_cost.toString() : "null");
+        return super.toString() + " m_user="
+                + (m_userId != null ? m_userId.toString() : "null")
+                + " m_rate=" + (m_rate != null ? m_rate.toString() : "null")
+                + " m_cost=" + (m_cost != null ? m_cost.toString() : "null");
     }
 
     /**
-     * Compare if the objects are equal.
-     * First compare the super class "Role" and then check just
-     * the "rate" object too since it is just one for a
-     * user role.
+     * Compare if the objects are equal. First compare the super class "Role"
+     * and then check just the "rate" object too since it is just one for a user
+     * role.
      */
     public boolean equals(Object o)
     {
-        UserRole ur = (UserRole)o;
+        UserRole ur = (UserRole) o;
         boolean theSame = super.equals(ur);
         if (theSame)
         {
@@ -108,8 +119,8 @@ public class UserRoleImpl
             }
             else
             {
-                if ((getRate() == null && ur.getRate() != null) ||
-                    (getRate() != null && ur.getRate() == null))
+                if ((getRate() == null && ur.getRate() != null)
+                        || (getRate() != null && ur.getRate() == null))
                 {
                     theSame = false;
                 }

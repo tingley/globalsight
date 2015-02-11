@@ -28,7 +28,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.log.ActivityLog;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -45,23 +48,31 @@ public class HibernateFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain) throws IOException, ServletException
     {
-        // Hack to log entry and return of JSPs.  This could be in its own
-        // filter.  Only log JSPs because other activities we care about have
+        // Hack to log entry and return of JSPs. This could be in its own
+        // filter. Only log JSPs because other activities we care about have
         // their own entry points.
         ActivityLog.Start activityStart = null;
-        String servletPath = ((HttpServletRequest) request).getServletPath();
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String servletPath = httpRequest.getServletPath();
         if (servletPath.endsWith(".jsp"))
         {
-            Map<Object,Object> activityArgs = new HashMap<Object,Object>();
+            Map<Object, Object> activityArgs = new HashMap<Object, Object>();
             activityArgs.put("jsp", servletPath);
-            activityStart = ActivityLog.start(
-                HibernateFilter.class, "doFilter", activityArgs);
+            HttpSession session = httpRequest.getSession(false);
+            activityArgs.put(
+                    "user",
+                    session == null ? null : UserUtil
+                            .getUserNameById((String) session
+                                    .getAttribute(WebAppConstants.USER_NAME)));
+            activityStart = ActivityLog.start(HibernateFilter.class,
+                    "doFilter", activityArgs);
         }
         try
         {
             chain.doFilter(request, response);
         }
-        catch (IllegalStateException e) {
+        catch (IllegalStateException e)
+        {
             // TODO: handle exception
         }
         finally

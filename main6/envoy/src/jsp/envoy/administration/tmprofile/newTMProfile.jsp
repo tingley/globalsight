@@ -1,3 +1,4 @@
+<%@page import="com.globalsight.cxe.entity.customAttribute.TMAttributeCons"%>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
     contentType="text/html; charset=UTF-8"
@@ -218,16 +219,28 @@
    String lbCancel = bundle.getString("lb_cancel");
    String lbSave = bundle.getString("lb_save");
 
+   String tmpAvailableAtts = (String)request.getAttribute(WebAppConstants.TMP_AVAILABLE_ATTS);
+   String tmpAtts = (String)request.getAttribute(WebAppConstants.TMP_TMP_ATTS);
 %>
 <HTML>
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <TITLE><%= newTitle %></TITLE>
+<link rel="stylesheet" type="text/css" href="/globalsight/envoy/tm/management/tm.css"/>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
+<script SRC="/globalsight/includes/dojo.js"></script>
+<SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
+<!-- for jQuery -->
+<link rel="stylesheet" type="text/css" href="/globalsight/includes/jquery-ui-custom.css"/>
+<script src="/globalsight/jquery/jquery-1.6.4.js" type="text/javascript"></script>
+<script src="/globalsight/includes/jquery-ui-custom.min.js" type="text/javascript"></script>
+<script src="/globalsight/includes/Array.js" type="text/javascript"></script>
+<script src="/globalsight/includes/filter/StringBuffer.js" type="text/javascript"></script>
+<script src="/globalsight/envoy/administration/tmprofile/TMPAttribute.js" type="text/javascript"></script>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT language="JavaScript">
 var needWarning = false;
@@ -241,6 +254,36 @@ function Result(message, errorFlag, element)
     this.message = message;
     this.error   = errorFlag;
     this.element = element;
+}
+
+var strAvailableAttnames = "<%=tmpAvailableAtts %>";
+var strTMPAtts = "<%=tmpAtts %>";
+
+var arrayAvailableAttnames = new Array();
+var arrayTMPAtts = new Array();
+var msgAlertDigit = "<%=lbpenalty%>" + "<%= bundle.getString("jsmsg_numeric") %>";
+
+if (strAvailableAttnames != null)
+{
+	arrayAvailableAttnames = strAvailableAttnames.split(",");
+}
+
+if (strTMPAtts != null)
+{
+	var temparray = strTMPAtts.split(",");
+	for (var i = 0; i < temparray.length; i++)
+	{
+		var ttt = temparray[i].split(":");
+		var tmpAtt = new Object();
+		tmpAtt.itemid = newId();
+		tmpAtt.attributename = ttt[0];
+		tmpAtt.operator = ttt[1];
+		tmpAtt.valueType = ttt[2];
+		tmpAtt.valueData = ttt[3];
+		tmpAtt.penalty = ttt[4];
+		
+		arrayTMPAtts[arrayTMPAtts.length] = tmpAtt;
+	}
 }
 
 function checkRefTms(refTms,selectTm){
@@ -334,6 +377,9 @@ function submitForm(formAction)
 			  return false;
 	      }
 		  
+		  // attributes
+		  setTMPAttributes();
+		  
           basicTMProfileForm.submit();
          }
          else
@@ -356,11 +402,11 @@ function checkIsVaildPercent(percent){
     var submit = false;
 	var i_percent = parseInt(percent);
 	if(i_percent > 100 || i_percent < 0){
-		alert("<%=bundle.getString("msg_tm_leverage_number") %>");
+		alert("<%=bundle.getString("msg_tm_number_scope_0_100") %>");
 		submit = false;
 	}else{
 		submit = true;
-	}	
+	}
 	return submit;
 }
 
@@ -880,10 +926,16 @@ function checkLeverageMatchOption(/*Radio Object*/ obj){
 	obj.checked = true;
 }
 
+function doOnLoad()
+{
+	loadGuides();
+	initAttbutesUI();
+}
+
 </SCRIPT>
 </HEAD>
 <BODY LEFTMARGIN="0" RIGHTMARGIN="0" TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0"
-    ONLOAD="loadGuides()">
+    ONLOAD="doOnLoad()">
    <%@ include file="/envoy/common/header.jspIncl" %>
 
    <%@ include file="/envoy/common/navigation.jspIncl" %>
@@ -1210,9 +1262,38 @@ function checkLeverageMatchOption(/*Radio Object*/ obj){
                                     <%=lbpenalty%>: <INPUT NAME="<%=multMatchesPenaltyReimport%>" SIZE="1" MAXLENGTH="3" VALUE="1">%</TD>
                         </TR>
                     </TABLE>
+                    <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>" >
+                    <BR><BR>
+                    <b>TU Attributes Match Penalties</b><a id="tuvAttSub" name="tuvAttSub">&nbsp;</a>
+                    <div id="divAtts" class="standardText" style="width:100%">
+                    </div>
+                    <br />
+                    <span CLASS="standardText">
+		<select id="attname">
+		</select>
+		</span>
+		<span CLASS="standardText">
+		<select id="operator">
+		<option value="<%=TMAttributeCons.OP_EQUAL %>">equal</option>
+		<option value="<%=TMAttributeCons.OP_NOT_EQUAL %>">not equal</option>
+		<option value="<%=TMAttributeCons.OP_MATCH %>">match</option>
+		</select>
+		</span>
+		<span CLASS="standardText">
+		<select id="valueType" onchange="onValueTypeChange()">
+		<option value="<%=TMAttributeCons.VALUE_FROM_JOBATT %>">Value from Job Attribute of same name</option>
+		<option value="<%=TMAttributeCons.VALUE_INPUT %>">Input Value</option>
+		</select>
+		</span>
+		<span id="inputValueField" CLASS="standardText" style="display:none">
+		<input type="text" id="valueData" size="8" maxlength="20" value="" />
+		</span>
+		<input type="BUTTON" id="addRow" value="Add" onclick="doAddAttribute()"/>
+		</amb:permission>
                     </TD>
             </TR>
         </TABLE>
+        <input type="hidden" name="tmpAttributes" id="tmpAttributes" value="" />
         <P>
         <INPUT TYPE="button" NAME="<%=lbCancel%>" VALUE="<%=lbCancel%>" ONCLICK="submitForm('cancel')">
         <INPUT TYPE="button" NAME="<%=lbSave%>" VALUE="<%=lbSave%>" ONCLICK="submitForm('save')">

@@ -27,14 +27,43 @@ import org.w3c.dom.NodeList;
 import com.globalsight.ling.docproc.ExtractorException;
 import com.globalsight.ling.docproc.extractor.xml.Rule;
 import com.globalsight.ling.docproc.extractor.xml.XPathAPI;
+import com.globalsight.ling.docproc.extractor.xml.XPathAPIJdk;
 
 public abstract class XmlRuleItem
 {
+    private boolean m_useJdkPath = false;
     public abstract String getName();
     
     public boolean accept(String name)
     {
         return getName() == null || getName().equals(name);
+    }
+    
+    public void setUseJdkXPath(boolean useJdkPath)
+    {
+        m_useJdkPath = useJdkPath;
+    }
+    
+    public boolean getUseJdkXPath()
+    {
+        return m_useJdkPath;
+    }
+    
+    protected NodeList selectNodeList(Document toBeExtracted, String xpath) throws Exception
+    {
+        NodeList affectedNodes = null;
+        if (getUseJdkXPath())
+        {
+            affectedNodes = XPathAPIJdk.selectNodeList(toBeExtracted
+                .getDocumentElement(), xpath);
+        }
+        else
+        {
+            affectedNodes = XPathAPI.selectNodeList(toBeExtracted
+                    .getDocumentElement(), xpath);
+        }
+        
+        return affectedNodes;
     }
     
     /**

@@ -64,6 +64,17 @@ public class TaskDescriptorModifier
 
         TASKS_BY_NAME_AND_JOB_ID_SQL = sb.toString();
     }
+    
+    public static String ACTIVE_TASKS_BY_JOB_ID_SQL = null;
+    static
+    {
+        StringBuffer sb = new StringBuffer();
+        sb.append("SELECT ti.* FROM " + TABLE_NAME + " ti, WORKFLOW w");
+        sb.append(" WHERE ti.WORKFLOW_ID = w.IFLOW_INSTANCE_ID");
+        sb.append(" AND w.JOB_ID = :").append(JOB_ID_ARG);
+        sb.append(" AND ti.STATE = \'ACTIVE\'");
+        ACTIVE_TASKS_BY_JOB_ID_SQL = sb.toString();
+    }
 
     public static String CURRENT_TASKS_BY_WORKFLOW_ID_SQL = null;
     static
@@ -81,5 +92,5 @@ public class TaskDescriptorModifier
                 + "\')");
         CURRENT_TASKS_BY_WORKFLOW_ID_SQL = sb.toString();
     }
-
+    
 }

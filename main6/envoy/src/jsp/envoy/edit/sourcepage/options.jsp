@@ -181,7 +181,7 @@ function init()
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_PTAGHILITE%>" value="mlah!">
 <INPUT type="hidden" name="<%=UserParamNames.EDITOR_SHOW_MT%>" value="<%=showMt%>">
 <TABLE>
-  <THEAD><COL width="70%"><COL width="30%"></THEAD>
+  <COL width="70%"><COL width="30%">
   <TBODY>
   <TR>
     <TD><SPAN class="standardText"><%=lb_autowhite%></SPAN></TD>

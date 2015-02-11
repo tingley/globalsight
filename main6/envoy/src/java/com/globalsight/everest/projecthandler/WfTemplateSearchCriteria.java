@@ -74,24 +74,14 @@ public class WfTemplateSearchCriteria
                     wfTemplateName(keys[i], criteria);
                     break;
 
-                // workflow template name
-                case WfTemplateSearchParameters.PROJECT_MANAGER_ID:
-                    pmUserName(keys[i], criteria);
-                    break;
-
-                // project id
-                case WfTemplateSearchParameters.PROJECT_ID:
+                // project name
+                case WfTemplateSearchParameters.PROJECT:
                     wfTemplateProject(keys[i], criteria);
                     break;
 
-                // Source locale
-                case WfTemplateSearchParameters.SOURCE_LOCALE:
-                    sourceLocaleExpression(keys[i], criteria);
-                    break;
-
-                // target locale
-                case WfTemplateSearchParameters.TARGET_LOCALE:
-                    targetLocaleExpression(keys[i], criteria);
+                //Company Name
+                case WfTemplateSearchParameters.COMPANY_NAME:
+                    companyNameExpression(keys[i], criteria);
                     break;
 
                 default:
@@ -124,90 +114,16 @@ public class WfTemplateSearchCriteria
         hql.append(" and w.companyId = " + currentId.trim());
     }
 
-    /*
-     * Prepare the search expression based on the project id
-     */
-    private void pmUserName(Object p_key, Map criteria)
+    private void companyNameExpression(Object p_key, Map criteria)
     {
-        String userName = (String) criteria.get(p_key);
-        if (userName == null || userName.trim().length() == 0)
+        String companyName = (String) criteria.get(p_key);
+        if (companyName == null || companyName.trim().length() == 0)
         {
             return;
         }
-
-        String condition = (String) criteria.get(new Integer(
-                WfTemplateSearchParameters.PM_ID_CONDITION));
-
-        userName = dealWithCondition(userName, condition);
-        if (m_isCaseSensitive)
-        {
-            hql.append(" and lower(w.project.managerUserId) like :userName");
-        }
-        else
-        {
-            hql.append(" and w.project.managerUserId like :userName");
-        }
-
-        map.put("userName", userName);
-    }
-
-    /**
-     * Prepare the search expression based on the job's source locale
-     */
-    private void sourceLocaleExpression(Object p_key, Map criteria)
-    {
-        GlobalSightLocale srcLocale = (GlobalSightLocale) criteria.get(p_key);
-        if (srcLocale == null)
-        {
-            return;
-        }
-
-        hql.append(" and w.sourceLocale.id = :sId");
-        map.put("sId", srcLocale.getIdAsLong());
-    }
-
-    /**
-     * Prepare the search expression based on the job's workflowtemplate's
-     * target locales
-     */
-    private void targetLocaleExpression(Object p_key, Map criteria)
-    {
-        GlobalSightLocale trgLocale = (GlobalSightLocale) criteria.get(p_key);
-        if (trgLocale == null)
-        {
-            return;
-        }
-
-        hql.append(" and w.targetLocale.id = :tId");
-        map.put("tId", trgLocale.getIdAsLong());
-    }
-
-    private String dealWithCondition(String s, String condition)
-    {
-        if (!m_isCaseSensitive)
-        {
-            s = s.toLowerCase();
-        }
-
-        s = s.trim();
-
-        if (SearchCriteriaParameters.BEGINS_WITH.equals(condition))
-        {
-            s += "%";
-        }
-        // select values greater than p_firstValue
-        else if (SearchCriteriaParameters.ENDS_WITH.equals(condition))
-        {
-            s = "%" + s;
-        }
-        // select values between p_firstValue and p_secondValue
-        else if (SearchCriteriaParameters.CONTAINS.equals(condition))
-        {
-            s = "%" + s + "%";
-
-        }
-
-        return s;
+        companyName = "%"+companyName+"%";
+        hql.append(" and w.companyId in (select c.id from Company c where c.name like :cId)");
+        map.put("cId", companyName);
     }
 
     /*
@@ -221,10 +137,7 @@ public class WfTemplateSearchCriteria
             return;
         }
 
-        String condition = (String) criteria.get(new Integer(
-                WfTemplateSearchParameters.WF_NAME_CONDITION));
-
-        name = dealWithCondition(name, condition);
+        name = "%" + name + "%";
         if (m_isCaseSensitive)
         {
             hql.append(" and lower(w.name) like :name");
@@ -242,9 +155,15 @@ public class WfTemplateSearchCriteria
      */
     private void wfTemplateProject(Object p_key, Map criteria)
     {
-        Long projectId = Long.valueOf((String) criteria.get(p_key));
-        hql.append(" and w.project.id = :pId");
-        map.put("pId", projectId);
+        String projectName = (String) criteria.get(p_key);
+        if (projectName == null || projectName.trim().length() == 0)
+        {
+            return;
+        }
+
+        projectName = "%" + projectName + "%";
+        hql.append(" and w.project.name like :pro");
+        map.put("pro", projectName);
     }
 
 }

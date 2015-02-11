@@ -43,7 +43,7 @@ objectclass: top
 companyname: %%system4_super_company_name%%
 o: %%ldap_base%%
 uid: %%system4_admin_username%%
-cn: GlobalSight Admininistrator
+cn: %%system4_admin_username%%
 givenname: GlobalSight
 sn: Admininistrator
 defaultuilocale: en_US
@@ -100,7 +100,7 @@ objectclass: person
 objectclass: top
 o: %%ldap_base%%
 uid: %%ldap_username%%
-cn: LDAP Connection User
+cn: %%ldap_username%%
 givenname: LDAP Connection
 sn: User
 userPassword: %%ldap_user_password%%

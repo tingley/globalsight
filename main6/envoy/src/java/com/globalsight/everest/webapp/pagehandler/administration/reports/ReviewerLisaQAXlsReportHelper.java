@@ -16,11 +16,8 @@
  */
 package com.globalsight.everest.webapp.pagehandler.administration.reports;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +31,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import jxl.SheetSettings;
 import jxl.Workbook;
 import jxl.WorkbookSettings;
 import jxl.format.Alignment;
@@ -55,6 +51,7 @@ import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueHistory;
 import com.globalsight.everest.comment.IssueOptions;
 import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.SegmentRepetitions;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -65,10 +62,7 @@ import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.tuv.TaskTuv;
 import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.company.Select;
@@ -77,7 +71,6 @@ import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
-import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.terminology.ITermbase;
 import com.globalsight.terminology.ITermbaseManager;
 import com.globalsight.terminology.termleverager.TermLeverageManager;
@@ -87,9 +80,13 @@ import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecord;
 import com.globalsight.terminology.termleverager.TermLeverageResult.MatchRecordList;
 import com.globalsight.terminology.termleverager.TermLeverageResult.TargetTerm;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 
+/**
+ * Now, this helper is only used for creating Implemented Comments Check Report (ICC)
+ */
 public class ReviewerLisaQAXlsReportHelper
 {
     private HttpServletRequest request = null;
@@ -108,25 +105,17 @@ public class ReviewerLisaQAXlsReportHelper
 
     private WritableCellFormat headerFormat = null;
 
-    private int m_reportType = COMMENTS_ANALYSIS;
+//    private int m_reportType = IMPLEMENTED_COMMENTS_CHECK_REPORT;
 
     private static final String DEFAULT_DATE_FORMAT = "MM/dd/yy hh:mm:ss a z";
 
-    public static final int LANGUAGE_SIGN_OFF = 0;
-
-    public static final int COMMENTS_ANALYSIS = 1;
-
-    public static final int TRANSLATIONS_EDIT_REPORT = 2;
+//    public static final int TRANSLATIONS_EDIT_REPORT = 2;
+    public static final int IMPLEMENTED_COMMENTS_CHECK_REPORT = 3;
 
     public static final int SEGMENT_START_ROW = 7;
-
     public static final int SEGMENT_HEADER_ROW = 6;
-
     public static final int LANGUAGE_HEADER_ROW = 3;
-
     public static final int LANGUAGE_INFO_ROW = 4;
-
-    private boolean isLSOExt = false;
 
     private WritableCellFormat hightLightFormat = null;
     private WritableCellFormat hightLightRightFormat = null;
@@ -143,21 +132,22 @@ public class ReviewerLisaQAXlsReportHelper
 //        failureCategories.add(Issue.CATEGORY_SPELLING.replaceAll(",", ""));
 //    }
 
-    private List<String> getFailureCategoriesList()
+    private List<String> getFailureCategoriesList(String companyId)
     {
         List<String> result = new ArrayList<String>();
         
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        String currentCompanyId = companyId;
         List failureCategories = IssueOptions.getAllCategories(bundle, currentCompanyId);
         for (int i = 0; i < failureCategories.size(); i++)
         {
             Select aCategory = (Select) failureCategories.get(i);
             String cat = aCategory.getValue();
-            result.add(cat);
+            result.add(cat.replace(",", " "));
         }
         return result;
     }
+    
     /**
      * Constructor. Create a helper to generate the report
      * 
@@ -177,12 +167,6 @@ public class ReviewerLisaQAXlsReportHelper
                 .getAttribute(WebAppConstants.UILOCALE));   */
         sessionMgr = (SessionManager) session
                 .getAttribute(WebAppConstants.SESSION_MANAGER);
-        m_reportType = p_reportType;
-
-        // For Implemented Comments Check
-        String isLSOExtStr = (String) p_request.getParameter("isLSOExt");
-        isLSOExt = isLSOExtStr == null ? false : new Boolean(isLSOExtStr)
-                .booleanValue();
 
         String companyName = UserUtil.getCurrentCompanyName(request);
         CompanyThreadLocal.getInstance().setValue(companyName);
@@ -198,8 +182,7 @@ public class ReviewerLisaQAXlsReportHelper
     {
         WorkbookSettings settings = new WorkbookSettings();
         settings.setSuppressWarnings(true);
-        m_workbook = Workbook.createWorkbook(response.getOutputStream(),
-                settings);
+        m_workbook = Workbook.createWorkbook(response.getOutputStream(), settings);
         String dateFormat = request.getParameter(WebAppConstants.DATE_FORMAT);
         if (dateFormat == null)
         {
@@ -211,31 +194,7 @@ public class ReviewerLisaQAXlsReportHelper
         m_workbook.close();
     }
 
-    /**
-     * Add header to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void addHeader(WritableSheet p_sheet) throws Exception
-    {
-        // add title
-        addTitle(p_sheet);
-        // add job header
-        addLanguageHeader(p_sheet);
-        // add segment header
-        addSegmentHeader(p_sheet);
-    }
-
-    /**
-     * Add segment header to the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @throws Exception
-     */
-    private void addSegmentHeader(WritableSheet p_sheet) throws Exception
+    private void addSegmentHeaderICC(WritableSheet p_sheet) throws Exception
     {
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         int col = 0;
@@ -247,17 +206,8 @@ public class ReviewerLisaQAXlsReportHelper
                 bundle.getString("lb_segment_id"), getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 20);
 
-		//Fix for GBS-1484
-        if(m_reportType==LANGUAGE_SIGN_OFF)
-        {
-        	p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_page_name"), getHeaderFormat()));
-        }
-        else
-        {
-        	p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_targetpage_id"), getHeaderFormat()));
-        }
+        p_sheet.addCell(new Label(col++, row, bundle.getString("lb_page_name"),
+                getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 20);
 
         p_sheet.addCell(new Label(col++, row, bundle
@@ -269,35 +219,9 @@ public class ReviewerLisaQAXlsReportHelper
                 getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 40);
 
-        switch (m_reportType)
-        {
-        case LANGUAGE_SIGN_OFF:
-            p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_comment_free"), getHeaderFormat()));
-            p_sheet.setColumnView(col - 1, 40);
-            break;
-        case COMMENTS_ANALYSIS:
-            p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_character_count"), getHeaderFormat()));
-            p_sheet.setColumnView(col - 1, 30);
-            p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_comments"), getHeaderFormat()));
-            p_sheet.setColumnView(col - 1, 40);
-            break;
-        case TRANSLATIONS_EDIT_REPORT:
-            p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_target_segment_with_compact_tags"),
-                    getHeaderFormat()));
-            p_sheet.setColumnView(col - 1, 40);
-
-            p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_required_translation"), getHeaderFormat()));
-            p_sheet.setColumnView(col - 1, 40);
-            
-            p_sheet.addCell(new Label(col++, row, bundle
-                    .getString("lb_comments"), getHeaderFormat()));
-            break;
-        }
+        p_sheet.addCell(new Label(col++, row, bundle
+                .getString("lb_comment_free"), getHeaderFormat()));
+        p_sheet.setColumnView(col - 1, 40);
 
         p_sheet.addCell(new Label(col++, row, bundle
                 .getString("lb_category_failure"), getHeaderFormat()));
@@ -311,15 +235,6 @@ public class ReviewerLisaQAXlsReportHelper
         p_sheet.addCell(new Label(col++, row, bundle
                 .getString("lb_glossary_target"), getHeaderFormat()));
         p_sheet.setColumnView(col - 1, 30);
-
-        if (m_reportType == COMMENTS_ANALYSIS)
-        {
-            p_sheet
-                    .addCell(new Label(col++, row, bundle
-                            .getString("lb_previous_segment_report"),
-                            getHeaderFormat()));
-            p_sheet.setColumnView(col - 1, 40);
-        }
     }
 
     /**
@@ -385,26 +300,9 @@ public class ReviewerLisaQAXlsReportHelper
         WritableCellFormat titleFormat = new WritableCellFormat(titleFont);
         titleFormat.setWrap(false);
         titleFormat.setShrinkToFit(false);
-        switch (m_reportType)
-        {
-        case LANGUAGE_SIGN_OFF:
-            if (isLSOExt)
-                p_sheet.addCell(new Label(0, 0, bundle
+        p_sheet.addCell(new Label(0, 0, bundle
                         .getString("implemented_comments_check_report"),
                         titleFormat));
-            else
-                p_sheet.addCell(new Label(0, 0, bundle
-                        .getString("review_reviewers_comments"), titleFormat));
-            break;
-        case COMMENTS_ANALYSIS:
-            p_sheet.addCell(new Label(0, 0,
-                    bundle.getString("review_comments"), titleFormat));
-            break;
-        case TRANSLATIONS_EDIT_REPORT:
-            p_sheet.addCell(new Label(0, 0, bundle
-                    .getString("lb_translation_edit_report"), titleFormat));
-            break;
-        }
         p_sheet.setColumnView(0, 40);
     }
 
@@ -415,9 +313,12 @@ public class ReviewerLisaQAXlsReportHelper
      */
     private void createReport(String p_dateFormat) throws Exception
     {
+        // Create Report Template
         WritableSheet sheet = getSheet();
+        
+        // Insert Data into Report
         writeLanguageInfo(sheet);
-        writeSegmentInfo(sheet, p_dateFormat);
+        writeSegmentInfoICC(sheet, p_dateFormat);
     }
 
     /**
@@ -429,31 +330,17 @@ public class ReviewerLisaQAXlsReportHelper
     {
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
         WritableSheet sheet = null;
-        switch (m_reportType)
-        {
-        case LANGUAGE_SIGN_OFF:
-            if (isLSOExt)
-            {
-                sheet = m_workbook.createSheet(bundle.getString("lb_icc"), 0);
-            }
-            else
-            {
-                sheet = m_workbook.createSheet(bundle.getString("lb_lso"), 0);
-                SheetSettings ss = sheet.getSettings();
-                ss.setProtected(true);
-            }
-            break;
-        case COMMENTS_ANALYSIS:
-            sheet = m_workbook.createSheet(bundle.getString("lb_car"), 0);
-            break;
-        case TRANSLATIONS_EDIT_REPORT:
-            sheet = m_workbook.createSheet(bundle.getString("lb_ter"), 0);
-            SheetSettings ss = sheet.getSettings();
-            ss.setProtected(true);
-            break;
-        }
+        
+        // Create Sheet
+        sheet = m_workbook.createSheet(bundle.getString("lb_icc"), 0);
 
-        addHeader(sheet);
+        // Add Title
+        addTitle(sheet); 
+        
+        // Add Locale Pair Header and Segment Header
+        addLanguageHeader(sheet);
+        addSegmentHeaderICC(sheet);
+        
         return sheet;
     }
 
@@ -468,22 +355,27 @@ public class ReviewerLisaQAXlsReportHelper
     {
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
+        long jobId = 0;
 
         if (request.getParameter(WebAppConstants.JOB_ID) != null
                 && !"*".equals(request.getParameter(WebAppConstants.JOB_ID)))
         {
             // Request from main reports entrance.
-            writeLanguageInfo(p_sheet, request
-                    .getParameter(WebAppConstants.JOB_ID), EditUtil
-                    .utf8ToUnicode(request
-                            .getParameter(WebAppConstants.TARGET_LANGUAGE)),
+            jobId = Long.valueOf(request.getParameter(WebAppConstants.JOB_ID));
+            writeLanguageInfo(p_sheet, jobId, 
+                    EditUtil.utf8ToUnicode(request.getParameter(WebAppConstants.TARGET_LANGUAGE)),
                     request.getParameter(WebAppConstants.DATE_FORMAT));
         }
         else if (sessionMgr.getAttribute(WebAppConstants.JOB_ID) != null)
         {
             // Request from pop up editor or work offline page.
-            writeLanguageInfo(p_sheet, (String) sessionMgr
-                    .getAttribute(WebAppConstants.JOB_ID), (String) sessionMgr
+            Object jobIdObject = sessionMgr.getAttribute(WebAppConstants.JOB_ID);
+            if (jobIdObject instanceof String) {
+                jobId = Long.parseLong((String)jobIdObject);
+            } else if (jobIdObject instanceof Long) {
+                jobId = (Long) jobIdObject;
+            }
+            writeLanguageInfo(p_sheet, jobId , (String) sessionMgr
                     .getAttribute(WebAppConstants.TARGETVIEW_LOCALE),
                     DEFAULT_DATE_FORMAT);
         }
@@ -499,43 +391,21 @@ public class ReviewerLisaQAXlsReportHelper
      * Populates a term leverage options object.
      */
     private TermLeverageOptions getTermLeverageOptions(Locale p_sourceLocale,
-            Locale p_targetLocale) throws Exception
+            Locale p_targetLocale, String p_termbaseName, String p_companyId) throws Exception
     {
         TermLeverageOptions options = null;
 
         Locale sourceLocale = p_sourceLocale;
         Locale targetLocale = p_targetLocale;
-        String termbaseName = null;
-        String companyId = null;
-        if (request.getParameter(WebAppConstants.JOB_ID) != null
-                && !"*".equals(request.getParameter(WebAppConstants.JOB_ID)))
-        {
-            // Request from main reports entrance.
-            Job job = ServerProxy.getJobHandler().getJobById(
-                    Long
-                            .parseLong(request
-                                    .getParameter(WebAppConstants.JOB_ID)));
-            termbaseName = job.getL10nProfile().getProject().getTermbaseName();
-            companyId = job.getCompanyId();
-        }
-        else if (sessionMgr.getAttribute(WebAppConstants.JOB_ID) != null)
-        {
-            // Request from pop up editor or work offline page.
-            Job job = ServerProxy.getJobHandler().getJobById(
-                    Long.parseLong((String) sessionMgr
-                            .getAttribute(WebAppConstants.JOB_ID)));
-            termbaseName = job.getL10nProfile().getProject().getTermbaseName();
-            companyId = job.getCompanyId();
-        }
 
         try
         {
             ITermbaseManager manager = ServerProxy.getTermbaseManager();
             long termbaseId;
-            if (companyId != null) {
-                termbaseId = manager.getTermbaseId(termbaseName, companyId);    
+            if (p_companyId != null) {
+                termbaseId = manager.getTermbaseId(p_termbaseName, p_companyId);    
             } else {
-                termbaseId = manager.getTermbaseId(termbaseName);
+                termbaseId = manager.getTermbaseId(p_termbaseName);
             }
 
             // If termbase does not exist, return null options.
@@ -545,7 +415,7 @@ public class ReviewerLisaQAXlsReportHelper
             }
 
             options = new TermLeverageOptions();
-            options.addTermBase(termbaseName);
+            options.addTermBase(p_termbaseName);
             options.setLoadTargetTerms(true);
             options.setSaveToDatabase(false);
 
@@ -553,11 +423,11 @@ public class ReviewerLisaQAXlsReportHelper
             options.setFuzzyThreshold(0);
 
             ITermbase termbase = null;
-            if (companyId != null) {
-                termbase = manager.connect(termbaseName, ITermbase.SYSTEM_USER,
-                        "", companyId);
+            if (p_companyId != null) {
+                termbase = manager.connect(p_termbaseName, ITermbase.SYSTEM_USER,
+                        "", p_companyId);
             } else {
-                termbase = manager.connect(termbaseName,ITermbase.SYSTEM_USER, "");
+                termbase = manager.connect(p_termbaseName,ITermbase.SYSTEM_USER, "");
             }
 
             // add source locale and lang names
@@ -603,11 +473,10 @@ public class ReviewerLisaQAXlsReportHelper
      *            the date format
      * @throws Exception
      */
-    private void writeLanguageInfo(WritableSheet p_sheet, String p_jobId,
+    private void writeLanguageInfo(WritableSheet p_sheet, long p_jobId,
             String p_targetLang, String p_dateFormat) throws Exception
     {
-        Job job = ServerProxy.getJobHandler().getJobById(
-                Long.parseLong(p_jobId));
+        Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
         int col = 0;
         int row = LANGUAGE_INFO_ROW;
 
@@ -617,8 +486,7 @@ public class ReviewerLisaQAXlsReportHelper
         p_sheet.setColumnView(col - 1, 30);
 
         // Target Language
-        p_sheet
-                .addCell(new Label(col++, row, p_targetLang, getContentFormat()));
+        p_sheet.addCell(new Label(col++, row, p_targetLang, getContentFormat()));
         p_sheet.setColumnView(col - 1, 30);
 
     }
@@ -704,115 +572,94 @@ public class ReviewerLisaQAXlsReportHelper
         return rtlContentFormat;
     }
 
-    private WritableCellFeatures getSelectFeatures() throws Exception
-    {
-        WritableCellFeatures features = new WritableCellFeatures();
-        features.setDataValidationList(getFailureCategoriesList());
-        return features;
-    }
-
     /**
-     * Write segment information into each row of the sheet
+     * Get category failures
      * 
-     * @param p_sheet
-     *            the sheet
+     * @return
      * @throws Exception
      */
-    private void writeSegmentInfo(WritableSheet p_sheet, String p_dateFormat)
+    private WritableCellFeatures getSelectFeatures(String companyId) throws Exception
+    {
+        WritableCellFeatures features = new WritableCellFeatures();
+        features.setDataValidationList(getFailureCategoriesList(companyId));
+        return features;
+    }
+    
+    /**
+     * Get category status
+     */
+    private WritableCellFeatures getSelectFeaturesCommentStatus(String comment)
             throws Exception
     {
-        if (m_reportType == COMMENTS_ANALYSIS)
+        List<String> status = new ArrayList<String>();
+        if ("".equals(comment))
         {
-            if (request.getParameter(WebAppConstants.JOB_ID) != null
-                    && !"*"
-                            .equals(request
-                                    .getParameter(WebAppConstants.JOB_ID)))
-            {
-                // request from main reports entrance
-                writeCommentsAnalysisSegmentInfo(
-                        p_sheet,
-                        request.getParameter(WebAppConstants.JOB_ID),
-                        EditUtil.utf8ToUnicode(request
-                                .getParameter(WebAppConstants.TARGET_LANGUAGE)),
-                        "", p_dateFormat);
-            }
-            else if (sessionMgr.getAttribute(WebAppConstants.JOB_ID) != null)
-            {
-                // request from pop up editor
-                writeCommentsAnalysisSegmentInfo(
-                        p_sheet,
-                        (String) sessionMgr
-                                .getAttribute(WebAppConstants.JOB_ID),
-                        (String) sessionMgr
-                                .getAttribute(WebAppConstants.TARGETVIEW_LOCALE),
-                        (String) sessionMgr
-                                .getAttribute(WebAppConstants.SOURCE_PAGE_ID),
-                        p_dateFormat);
-            }
-            else
-            {
-                // If no job exists, just set the cell blank
-                writeCommentsAnalysisBlank(p_sheet);
-
-            }
+            status.add(Issue.STATUS_QUERY);
         }
         else
         {
-            if (request.getParameter(WebAppConstants.JOB_ID) != null
-                    && !"*"
-                            .equals(request
-                                    .getParameter(WebAppConstants.JOB_ID)))
-            {
-                // request from main reports entrance
-                writeLanguageSignOffSegmentInfo(
-                        p_sheet,
-                        request.getParameter(WebAppConstants.JOB_ID),
-                        EditUtil.utf8ToUnicode(request
-                                .getParameter(WebAppConstants.TARGET_LANGUAGE)),
-                        "");
-            }
-            else if (sessionMgr.getAttribute(WebAppConstants.JOB_ID) != null)
-            {
-                // request from pop up editor
-                writeLanguageSignOffSegmentInfo(
-                        p_sheet,
-                        (String) sessionMgr
-                                .getAttribute(WebAppConstants.JOB_ID),
-                        (String) sessionMgr
-                                .getAttribute(WebAppConstants.TARGETVIEW_LOCALE),
-                        "");
+            status.addAll(IssueOptions.getAllStatus());
+        }
 
-            }
-            else
-            {
-                // If no job exists, just set the cell blank
-                writeLanguageSignOffBlank(p_sheet);
-            }
+        WritableCellFeatures features = new WritableCellFeatures();
+        features.setDataValidationList(status);
+        return features;
+    }
+
+    private List<Long> getAllTLIDS() throws Exception
+    {
+        List<Long> result = new ArrayList<Long>();
+        for(Iterator it = ServerProxy.getLocaleManager().getAllTargetLocales().iterator();it.hasNext();)
+        {
+            GlobalSightLocale gsl = (GlobalSightLocale) it.next();
+            result.add(gsl.getId());
+        }
+        return result;
+    }
+        
+    /**
+     * Write segment information into each row of the sheet 
+     * for Implemented Comments Check Report.
+     * 
+     * @param p_sheet
+     *            the sheet
+     * @param p_dateFormat
+     *            data format
+     * @throws Exception
+     */
+    private void writeSegmentInfoICC(WritableSheet p_sheet, String p_dateFormat)
+            throws Exception
+    {
+        int row = SEGMENT_START_ROW;
+        if (request.getParameter(WebAppConstants.JOB_ID) != null
+                && !"*".equals(request.getParameter(WebAppConstants.JOB_ID)))
+        {
+            // request from main reports entrance
+            long jobId = Long.valueOf(request.getParameter(WebAppConstants.JOB_ID));
+            String targetLang = request.getParameter(WebAppConstants.TARGET_LANGUAGE);
+            writeSegmentInfoICC(p_sheet, jobId, targetLang, "", row);
+        }
+        else
+        {
+            // If no job exists, just set the cell blank
+            writeBlank(p_sheet, row, 10);
         }
 
     }
 
     /**
-     * Write segment information of Language Sign-off report into each row of
-     * the sheet
+     * For Implemented Comments Check Report,
+     * Write segment information into each row of the sheet.
      * 
-     * @param p_sheet
-     *            the sheet
-     * @param p_jobId
-     *            the job id
-     * @param p_targetLang
-     *            the displayed target language
-     * @param p_srcPageId
-     *            the source page id
-     * @throws Exception
+     * @see writeSegmentInfoRCR(WritableSheet, long, long, String, int)
      */
-    private void writeLanguageSignOffSegmentInfo(WritableSheet p_sheet,
-            String p_jobId, String p_targetLang, String p_srcPageId)
+    private int writeSegmentInfoICC(WritableSheet p_sheet,
+            long p_jobId, String p_targetLang, String p_srcPageId, int p_row)
             throws Exception
     {
         ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-        Job job = ServerProxy.getJobHandler().getJobById(
-                Long.parseLong(p_jobId));
+        Job job = ServerProxy.getJobHandler().getJobById(p_jobId);
+        String companyId = job.getCompanyId();
         Collection wfs = job.getWorkflows();
         Iterator it = wfs.iterator();
         Vector targetPages = new Vector();
@@ -826,13 +673,12 @@ public class ReviewerLisaQAXlsReportHelper
 
             if (Workflow.PENDING.equals(workflow.getState())
                     || Workflow.CANCELLED.equals(workflow.getState())
-                    || Workflow.EXPORT_FAILED.equals(workflow.getState())
+//                    || Workflow.EXPORT_FAILED.equals(workflow.getState())
                     || Workflow.IMPORT_FAILED.equals(workflow.getState()))
             {
                 continue;
             }
-            if (p_targetLang
-                    .equals(workflow.getTargetLocale().getDisplayName()))
+            if (p_targetLang.equals(workflow.getTargetLocale().getDisplayName()))
             {
                 targetPages = workflow.getTargetPages();
                 tmp = workflow.getJob().getL10nProfile()
@@ -846,14 +692,15 @@ public class ReviewerLisaQAXlsReportHelper
 
         if (targetPages.isEmpty())
         {
-            // If no corresponding target page exists, set the cell blank
-            writeLanguageSignOffBlank(p_sheet);
+            // If no corresponding target page exists 
+            // and the row is the initial row, then set the cell blank
+            if (SEGMENT_START_ROW == p_row)
+            {
+                writeBlank(p_sheet, SEGMENT_START_ROW, 10);
+            }
         }
         else
         {
-            int row = SEGMENT_START_ROW;
-            long jobId = Long.parseLong(p_jobId);
-
             LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
                     .getLeverageMatchLingManager();
             TermLeverageManager termLeverageManager = ServerProxy
@@ -911,19 +758,21 @@ public class ReviewerLisaQAXlsReportHelper
                 boolean m_rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
                 
                 TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                        sourcePageLocale, targetPageLocale);
+                        sourcePageLocale, targetPageLocale, 
+                        job.getL10nProfile().getProject().getTermbaseName(), 
+                        job.getCompanyId());
 
                 TermLeverageResult termLeverageResult = null;
                 if (termLeverageOptions != null)
                 {
                     termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions, sourcePage.getCompanyId());
+                            sourceTuvs, termLeverageOptions, companyId);
                 }
                 // Find segment all comments belong to this target page
                 List issues = null;
                 issues = commentManager.getIssues(Issue.TYPE_SEGMENT, String
                         .valueOf(targetPage.getId())
-                        + "_");
+                        + "\\_");
 
                 for (int j = 0; j < targetTuvs.size(); j++)
                 {
@@ -933,7 +782,7 @@ public class ReviewerLisaQAXlsReportHelper
                     String targetLanguage = targetTuv.getGlobalSightLocale()
                             .getLanguage();
 
-                    category = sourceTuv.getTu().getTuType();
+                    category = sourceTuv.getTu(companyId).getTuType();
                     if (excludItems != null && excludItems.contains(category))
                     {
                         continue;
@@ -950,7 +799,7 @@ public class ReviewerLisaQAXlsReportHelper
                         {
                             Issue issue = (Issue) issues.get(m);
                             String logicKey = CommentHelper.makeLogicalKey(
-                                    targetPage.getId(), targetTuv.getTu()
+                                    targetPage.getId(), targetTuv.getTu(companyId)
                                             .getId(), targetTuv.getId(), 0);
 
                             if (logicKey.equals(issue.getLogicalKey()))
@@ -980,8 +829,7 @@ public class ReviewerLisaQAXlsReportHelper
                     sid = sourceTuv.getSid();
                     targetSegmentString = targetTuv.getGxmlElement()
                             .getTextValue();
-                    Date targetSegmentModifiedDate = targetTuv
-                            .getLastModified();
+                    Date targetSegmentModifiedDate = targetTuv.getLastModified();
 
                     String matches = "";
                     Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
@@ -1021,14 +869,12 @@ public class ReviewerLisaQAXlsReportHelper
                     {
                         matches = bundle.getString("lb_no_match_report");
                     }
-                    if (sourceTuv.getTu().isRepeated()) {
+                    if (sourceTuv.getTu(companyId).isRepeated()) {
                         matches += "\r\n"
-                                + bundle
-                                        .getString("jobinfo.tradosmatches.invoice.repeated");
-                    } else if (sourceTuv.getTu().getRepetitionOfId() != 0) {
+                                + bundle.getString("jobinfo.tradosmatches.invoice.repeated");
+                    } else if (sourceTuv.getTu(companyId).getRepetitionOfId() != 0) {
                         matches += "\r\n"
-                                + bundle
-                                        .getString("jobinfo.tradosmatches.invoice.repetition");
+                                + bundle.getString("jobinfo.tradosmatches.invoice.repetition");
                     }
 
                     MatchRecordList matchRecordList = null;
@@ -1072,13 +918,11 @@ public class ReviewerLisaQAXlsReportHelper
                         sourceTerm = matchRecord.getMatchedSourceTerm();
                         if (sourceSegmentString.indexOf(sourceTerm) != -1)
                         {
-                            List targets = matchRecord.getSourceTerm()
-                                    .getTargetTerms();
+                            List targets = matchRecord.getSourceTerm().getTargetTerms();
                             {
                                 for (int ti = 0; ti < targets.size(); ti++)
                                 {
-                                    TargetTerm tt = (TargetTerm) targets
-                                            .get(ti);
+                                    TargetTerm tt = (TargetTerm) targets.get(ti);
                                     String targetTermLocale = tt.getLocale();
                                     // Get the target term by language
                                     if (targetLanguage.equals(targetTermLocale))
@@ -1088,34 +932,29 @@ public class ReviewerLisaQAXlsReportHelper
                                         targetTerms = targetTerm;
                                         break;
                                     }
-
                                 }
                             }
-
                         }
-
                     }
 
                     // For Implemented Comments Check Report (LSO Extension)
-                    if (isLSOExt && lastComment.length() == 0)
+                    if (lastComment.length() == 0)
                     {
                         continue;
                     }
 
                     WritableCellFormat format = getContentFormat();
                     // Set color format for target segment changed
-                    if (isLSOExt
-                            && targetSegmentModifiedDate
-                                    .before(issueCreatedDate))
+                    if (targetSegmentModifiedDate.before(issueCreatedDate))
                     {
                         format = redFormat();
                     }
 
                     // Job id
-                    p_sheet.addCell(new Number(col++, row, jobId, format));
+                    p_sheet.addCell(new Number(col++, p_row, p_jobId, format));
                     p_sheet.setColumnView(col - 1, 20);
                     // Segment id
-                    p_sheet.addCell(new Number(col++, row, sourceTuv.getTu()
+                    p_sheet.addCell(new Number(col++, p_row, sourceTuv.getTu(companyId)
                             .getId(), format));
                     p_sheet.setColumnView(col - 1, 20);
 
@@ -1126,22 +965,13 @@ public class ReviewerLisaQAXlsReportHelper
                     boolean temp = pathNames[0].contains(")");
                     if(temp)
                     {
-                    	String[] firstNames = pathNames[0].split("\\)");
+                        String[] firstNames = pathNames[0].split("\\)");
                         String detailName = firstNames[0];
                         Name = Name+detailName+")";
                     }
-                    	
+                        
                     // TargetPage id
-                    if(m_reportType==LANGUAGE_SIGN_OFF)
-                    {
-                    	p_sheet.addCell(new Label(col++, row, Name,
-                                format));
-                    }
-                    else
-                    {
-                    	p_sheet.addCell(new Number(col++, row, targetPage.getId(),
-                                format));
-                    }
+                    p_sheet.addCell(new Label(col++, p_row, Name, format));
                     p_sheet.setColumnView(col - 1, 20);
 
                     // Source segment
@@ -1151,7 +981,7 @@ public class ReviewerLisaQAXlsReportHelper
                             .toRtlString(sourceSegmentString)
                             : sourceSegmentString;
                     
-                    p_sheet.addCell(new Label(col++, row, srcContent,
+                    p_sheet.addCell(new Label(col++, p_row, srcContent,
                             sourceFormat));
                     p_sheet.setColumnView(col - 1, 40);
 
@@ -1161,77 +991,34 @@ public class ReviewerLisaQAXlsReportHelper
                     String content = m_rtlTargetLocale ? EditUtil
                             .toRtlString(targetSegmentString) : targetSegmentString;
 
-                    p_sheet.addCell(new Label(col++, row, content,
+                    p_sheet.addCell(new Label(col++, p_row, content,
                             targetFormat));
                     p_sheet.setColumnView(col - 1, 40);
 
-                    p_sheet.addCell(new Label(col++, row, sid, format));
+                    p_sheet.addCell(new Label(col++, p_row, sid, format));
                     p_sheet.setColumnView(col - 1, 40);
 
-                    if (m_reportType == TRANSLATIONS_EDIT_REPORT)
+                    WritableCellFormat commentFormat = m_rtlTargetLocale ? unlockedRightFormat() : unlockedFormat();
+                    // Set color format for target segment changed
+                    if (targetSegmentModifiedDate.before(issueCreatedDate))
                     {
-                        // Target segment with compact tags
-                        pData.setAddables(targetTuv.getDataType());
-                        TmxPseudo.tmx2Pseudo(targetTuv.getGxmlExcludeTopTags(),
-                                pData);
-                        pTagSourceString = pData.getPTagSourceString();
-                        String sContent = pTagSourceString;
-                        if (sContent.equalsIgnoreCase(targetSegmentString))
-                        {
-                            sContent = "";
-                        }
-                        else if (m_rtlTargetLocale)
-                        {
-                            sContent = EditUtil.toRtlString(sContent);
-                        }
-                        
-                        p_sheet.addCell(new Label(col++, row, sContent, targetFormat));
-                        p_sheet.setColumnView(col - 1, 40);
-
-                        WritableCellFormat requiredTranslationFormat = m_rtlTargetLocale ? unlockedRightFormat()
-                                : unlockedFormat();
-                        // Required translation
-                        p_sheet.addCell(new Label(col++, row, "",
-                                requiredTranslationFormat));
-                        p_sheet.setColumnView(col - 1, 40);
-
-                        p_sheet.addCell(new Label(col++, row, lastComment,
-                                format));
-                        p_sheet.setColumnView(col - 1, 40);
+                        commentFormat = m_rtlTargetLocale ? redRightFormat() : redFormat();
                     }
-                    else
+
+                    if (m_rtlTargetLocale)
                     {
-                        // Comment (free hand text)
-                        WritableCellFormat commentFormat = m_rtlTargetLocale ? unlockedRightFormat()
-                                : unlockedFormat();
-                        // Set color format for target segment changed
-                        if (isLSOExt
-                                && targetSegmentModifiedDate
-                                        .before(issueCreatedDate))
-                        {
-                            commentFormat = m_rtlTargetLocale ? redRightFormat()
-                                    : redFormat();
-                        }
-
-                        if (m_rtlTargetLocale)
-                        {
-                            lastComment = EditUtil.toRtlString(lastComment);
-                        }
-                        
-                        p_sheet.addCell(new Label(col++, row, lastComment,
-                                commentFormat));
-                        p_sheet.setColumnView(col - 1, 40);
+                        lastComment = EditUtil.toRtlString(lastComment);
                     }
+
+                    p_sheet.addCell(new Label(col++, p_row, lastComment,
+                            commentFormat));
+                    p_sheet.setColumnView(col - 1, 40);
 
                     // Category failure
-                    WritableCellFormat cfFormat = format;
-                    if (m_reportType != TRANSLATIONS_EDIT_REPORT)
-                        cfFormat = unlockedFormat();
+                    WritableCellFormat cfFormat = unlockedFormat();
 
                     // Set color format for target segment changed
-                    if (isLSOExt
-                            && targetSegmentModifiedDate
-                                    .before(issueCreatedDate))
+                    if (targetSegmentModifiedDate.before(issueCreatedDate))
                     {
                         cfFormat = redFormat();
                     }
@@ -1243,519 +1030,34 @@ public class ReviewerLisaQAXlsReportHelper
 //                    int index = failureCategories.indexOf(failure);
 //                    if (index != -1)
 //                    {
-                        dropdown = new Label(col++, row, failure, cfFormat);
-                        dropdown.setCellFeatures(getSelectFeatures());
+                        dropdown = new Label(col++, p_row, failure, cfFormat);
+                        dropdown.setCellFeatures(getSelectFeatures(companyId));
 //                    }
 //                    else
 //                    {
-//                        dropdown = new Label(col++, row, failure, cfFormat);
+//                        dropdown = new Label(col++, p_row, failure, cfFormat);
 //                        dropdown.setCellFeatures(getSelectFeatures());
 //                    }
                     p_sheet.addCell(dropdown);
                     p_sheet.setColumnView(col - 1, 30);
 
                     // TM match
-                    p_sheet.addCell(new Label(col++, row, matches, format));
+                    p_sheet.addCell(new Label(col++, p_row, matches, format));
                     p_sheet.setColumnView(col - 1, 30);
 
                     // Glossary source
-                    p_sheet.addCell(new Label(col++, row, sourceTerms, format));
+                    p_sheet.addCell(new Label(col++, p_row, sourceTerms, format));
                     p_sheet.setColumnView(col - 1, 30);
 
                     // Glossary target
-                    p_sheet.addCell(new Label(col++, row, targetTerms, format));
+                    p_sheet.addCell(new Label(col++, p_row, targetTerms, format));
                     p_sheet.setColumnView(col - 1, 30);
-                    row++;
+                    p_row++;
                 }
             }
         }
-    }
-
-    /**
-     * Write segment information into each row of the sheet
-     * 
-     * @param p_sheet
-     *            the sheet
-     * @param p_jobId
-     *            the job id
-     * @param p_targetLang
-     *            the displayed target language
-     * @param p_srcPageId
-     *            the source page id
-     * @throws Exception
-     */
-    private void writeCommentsAnalysisSegmentInfo(WritableSheet p_sheet,
-            String p_jobId, String p_targetLang, String p_srcPageId,
-            String p_dateFormat) throws Exception
-    {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(p_dateFormat);
-        ResourceBundle bundle = PageHandler.getBundle(request.getSession());
-        Job job = ServerProxy.getJobHandler().getJobById(
-                Long.parseLong(p_jobId));
-        Collection wfs = job.getWorkflows();
-        Iterator it = wfs.iterator();
-        Vector targetPages = new Vector();
-        // SimpleDateFormat dateFormat = new SimpleDateFormat(p_dateFormat);
-
-        TranslationMemoryProfile tmp = null;
-        List excludItems = null;
-
-        while (it.hasNext())
-        {
-            Workflow workflow = (Workflow) it.next();
-
-            if (Workflow.PENDING.equals(workflow.getState())
-                    || Workflow.CANCELLED.equals(workflow.getState())
-                    || Workflow.EXPORT_FAILED.equals(workflow.getState())
-                    || Workflow.IMPORT_FAILED.equals(workflow.getState()))
-            {
-                continue;
-            }
-            if (p_targetLang
-                    .equals(workflow.getTargetLocale().getDisplayName()))
-            {
-                targetPages = workflow.getTargetPages();
-                tmp = workflow.getJob().getL10nProfile()
-                        .getTranslationMemoryProfile();
-                if (tmp != null)
-                {
-                    excludItems = new ArrayList(tmp.getJobExcludeTuTypes());
-                }
-
-            }
-        }
-
-        if (targetPages.isEmpty())
-        {
-            // If no corresponding target page exists, set the cell blank
-            writeCommentsAnalysisBlank(p_sheet);
-        }
-        else
-        {
-            int row = SEGMENT_START_ROW;
-            long jobId = Long.parseLong(p_jobId);
-            LeverageMatchLingManager leverageMatchLingManager = LingServerProxy
-                    .getLeverageMatchLingManager();
-            TermLeverageManager termLeverageManager = ServerProxy
-                    .getTermLeverageManager();
-            TuvManager tuvManager = ServerProxy.getTuvManager();
-
-            ArrayList allSourceTuvs = new ArrayList();
-            for (int i = 0; i < targetPages.size(); i++)
-            {
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
-                SourcePage sourcePage = targetPage.getSourcePage();
-                List sourceTuvs = getPageTuvs(sourcePage);
-                allSourceTuvs.addAll(sourceTuvs);
-            }
-            SegmentRepetitions segmentRepetitions = new SegmentRepetitions(
-                    allSourceTuvs);
-
-            String sourceSegmentString = null;
-            String targetSegmentString = null;
-            String sid = null;
-
-            for (int i = 0; i < targetPages.size(); i++)
-            {
-                TargetPage targetPage = (TargetPage) targetPages.get(i);
-                SourcePage sourcePage = targetPage.getSourcePage();
-
-                if (!"".equals(p_srcPageId)
-                        && !p_srcPageId.equals(String.valueOf(sourcePage
-                                .getId())))
-                {
-                    // ignore the source pages not equal to the one
-                    // if the request comes from pop up editor
-                    continue;
-                }
-                List targetTuvs = getPageTuvs(targetPage);
-                List sourceTuvs = getPageTuvs(sourcePage);
-
-                // Leverage TM
-                Map exactMatches = leverageMatchLingManager.getExactMatches(
-                        sourcePage.getIdAsLong(), new Long(targetPage
-                                .getLocaleId()));
-                Map leverageMatcheMap = leverageMatchLingManager
-                        .getFuzzyMatches(sourcePage.getIdAsLong(), new Long(
-                                targetPage.getLocaleId()));
-
-                // Leverage Term
-                Locale sourcePageLocale = sourcePage.getGlobalSightLocale()
-                        .getLocale();
-                Locale targetPageLocale = targetPage.getGlobalSightLocale()
-                        .getLocale();
-                TermLeverageOptions termLeverageOptions = getTermLeverageOptions(
-                        sourcePageLocale, targetPageLocale);
-
-                TermLeverageResult termLeverageResult = null;
-                if (termLeverageOptions != null)
-                {
-                    termLeverageResult = termLeverageManager.leverageTerms(
-                            sourceTuvs, termLeverageOptions, sourcePage.getCompanyId());
-                }
-
-                // Find segment comments
-                List issues = null;
-                CommentManager commentManager = ServerProxy.getCommentManager();
-                issues = commentManager.getIssues(Issue.TYPE_SEGMENT, String
-                        .valueOf(targetPage.getId())
-                        + "_");
-
-                boolean rtlSourceLocale = EditUtil.isRTLLocale(sourcePageLocale.toString());
-                boolean rtlTargetLocale = EditUtil.isRTLLocale(targetPageLocale.toString());
-                
-                String category = null;
-                for (int j = 0; j < targetTuvs.size(); j++)
-                {
-                    int col = 0;
-                    Tuv targetTuv = (Tuv) targetTuvs.get(j);
-                    String targetLanguage = targetTuv.getGlobalSightLocale()
-                            .getLanguage();
-                    Tuv sourceTuv = (Tuv) sourceTuvs.get(j);
-
-                    sourceSegmentString = sourceTuv.getGxmlElement()
-                            .getTextValue();
-                    targetSegmentString = targetTuv.getGxmlElement()
-                            .getTextValue();
-                    sid = sourceTuv.getSid();
-
-                    category = sourceTuv.getTu().getTuType();
-                    if (excludItems != null && excludItems.contains(category))
-                    {
-                        continue;
-                    }
-
-                    String matches = "";
-                    Set leverageMatches = (Set) leverageMatcheMap.get(sourceTuv
-                            .getIdAsLong());
-
-                    if (exactMatches.get(sourceTuv.getIdAsLong()) != null)
-                    {
-                        matches = StringUtil.formatPCT(100);
-                    }
-                    else if (leverageMatches != null)
-                    {
-                        int count = 0;
-                        for (Iterator ite = leverageMatches.iterator(); ite
-                                .hasNext();)
-                        {
-                            LeverageMatch leverageMatch = (LeverageMatch) ite
-                                    .next();
-                            if ((leverageMatches.size() > 1))
-                            {
-                                matches = matches
-                                        + (++count)
-                                        + ", "
-                                        + StringUtil.formatPCT(
-                                             leverageMatch.getScoreNum())
-                                        + "\r\n";
-                            }
-                            else
-                            {
-                                matches = matches
-                                        + StringUtil.formatPCT(
-                                             leverageMatch.getScoreNum());
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        matches = bundle.getString("lb_no_match_report");
-                    }
-
-                    if (segmentRepetitions.getIdenticalTuvs(sourceTuv) != null)
-                    {
-                        matches = matches + "\r\n" + bundle.getString("jobinfo.tradosmatches.invoice.repetition");
-                    }
-
-                    MatchRecordList matchRecordList = null;
-                    String sourceTerms = "";
-                    String targetTerms = "";
-
-                    if (termLeverageResult != null)
-                    {
-                        matchRecordList = termLeverageResult
-                                .getMatchesForTuv(sourceTuv);
-                    }
-
-                    if (matchRecordList != null && matchRecordList.size() != 0)
-                    {
-                        String sourceTerm = null;
-                        String targetTerm = null;
-                        int maxScore = 0;
-                        int score = 0;
-                        int flag = 0;
-                        if (matchRecordList.size() > 1)
-                        {
-                            for (int ni = 0; ni < matchRecordList.size(); ni++)
-                            {
-                                MatchRecord mr = (MatchRecord) matchRecordList
-                                        .get(ni);
-                                score = mr.getScore();
-                                if (sourceSegmentString.indexOf(mr
-                                        .getMatchedSourceTerm()) < 0)
-                                {
-                                    continue;
-                                }
-                                if (maxScore < score)
-                                {
-                                    maxScore = score;
-                                    flag = ni;
-                                }
-                            }
-                        }
-                        MatchRecord matchRecord = (MatchRecord) matchRecordList
-                                .get(flag);
-                        sourceTerm = matchRecord.getMatchedSourceTerm();
-                        if (!(sourceSegmentString.indexOf(sourceTerm) < 0))
-                        {
-                            List targets = matchRecord.getSourceTerm()
-                                    .getTargetTerms();
-                            {
-                                for (int ti = 0; ti < targets.size(); ti++)
-                                {
-                                    TargetTerm tt = (TargetTerm) targets
-                                            .get(ti);
-                                    String targetTermLocale = tt.getLocale();
-                                    // Get the target term by language
-                                    if (targetLanguage.equals(targetTermLocale))
-                                    {
-                                        targetTerm = tt.getMatchedTargetTerm();
-                                        sourceTerms = sourceTerm;
-                                        targetTerms = targetTerm;
-                                        break;
-                                    }
-
-                                }
-                            }
-
-                        }
-
-                    }
-
-                    List issueHistories = new ArrayList();
-                    String failure = "";
-                    if (issues != null)
-                    {
-                        for (int m = 0; m < issues.size(); m++)
-                        {
-                            Issue issue = (Issue) issues.get(m);
-                            if (targetTuv.getId() == issue.getLevelObjectId())
-                            {
-                                issueHistories = issue.getHistory();
-                                failure = issue.getCategory();
-//                                if (Issue.CATEGORY_SPELLING
-//                                        .equalsIgnoreCase(failure))
-//                                {
-//                                    failure = failure.replaceAll(",", "");
-//                                }
-                                break;
-                            }
-                        }
-                    }
-
-                    String comments = "";
-                    for (int k = 0; k < issueHistories.size(); k++)
-                    {
-                        IssueHistory issueHistory = (IssueHistory) issueHistories
-                                .get(k);
-                        String date = dateFormat.format(issueHistory
-                                .dateReportedAsDate());
-                        comments = comments + "[" + date + "     "
-                                + issueHistory.reportedBy() + "]:\r\n"
-                                + issueHistory.getComment();
-                        if (k != issueHistories.size() - 1)
-                        {
-                            comments = comments + "\r\n";
-                        }
-                    }
-
-                    List previousTaskTuvs = new ArrayList();
-                    previousTaskTuvs = tuvManager.getPreviousTaskTuvs(targetTuv
-                            .getId(), 10);
-                    String previousSegments = "";
-                    String previousSegment = null;
-                    List previous = new ArrayList();
-                    if (previousTaskTuvs.size() > 0)
-                    {
-                        Collections.sort(previousTaskTuvs, new Comparator()
-                        {
-                            public int compare(Object p_taskTuvA,
-                                    Object p_taskTuvB)
-                            {
-                                TaskTuv a = (TaskTuv) p_taskTuvA;
-                                TaskTuv b = (TaskTuv) p_taskTuvB;
-                                return a.getTask().getCompletedDate()
-                                        .compareTo(
-                                                b.getTask().getCompletedDate());
-                            }
-                        });
-
-                        int len = previousTaskTuvs.size() - 2;
-                        int lastReviewerCount = 0;
-
-                        while ((len >= 0)
-                                && (((TaskTuv) previousTaskTuvs.get(len))
-                                        .getTask().getType() == Task.TYPE_REVIEW))
-                        {
-                            // Review only task does not change segments
-                            lastReviewerCount++;
-                            len--;
-                        }
-
-                        int beforeLastReviewerCount = previousTaskTuvs.size()
-                                - lastReviewerCount - 1;
-
-                        if (beforeLastReviewerCount == 1)
-                        {
-                            TaskTuv taskTuv = (TaskTuv) previousTaskTuvs.get(0);
-                            String previousSeg = taskTuv.getTuv()
-                                    .getGxmlElement().getTextValue();
-                            if (!previousSeg.equals(targetSegmentString))
-                            {
-                                previousSegments = previousSegments
-                                        + previousSeg;
-                            }
-                        }
-                        else
-                        {
-                            for (int k = 0; k <= beforeLastReviewerCount; k++)
-                            {
-                                TaskTuv taskTuv = (TaskTuv) previousTaskTuvs
-                                        .get(k);
-                                previousSegment = taskTuv.getTuv()
-                                        .getGxmlElement().getTextValue();
-
-                                if (!previous.contains(previousSegment))
-                                {
-                                    previous.add(previousSegment);
-                                }
-
-                            }
-                            String lastInPrevious = (String) previous
-                                    .get(previous.size() - 1);
-                            if (lastInPrevious.equals(targetSegmentString))
-                            {
-                                previous.remove(previous.size() - 1);
-                            }
-
-                            for (int pi = 0; pi < previous.size(); pi++)
-                            {
-                                previousSegment = (String) previous.get(pi);
-                                if (previous.size() > 1)
-                                {
-                                    previousSegments = previousSegments + "{"
-                                            + previousSegment + "}\r\n";
-                                }
-                                else
-                                {
-                                    previousSegments = previousSegments
-                                            + previousSegment;
-                                }
-                            }
-                        }
-                    }
-
-                    // Job id
-                    p_sheet.addCell(new Number(col++, row, jobId,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 20);
-
-                    // Segment id
-                    p_sheet.addCell(new Number(col++, row, sourceTuv.getTu()
-                            .getId(), getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 20);
-
-                    // TargetPage id
-                    p_sheet.addCell(new Number(col++, row, targetPage.getId(),
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 20);
-
-
-                    WritableCellFormat sourceFormat = rtlSourceLocale ? getRtlContentFormat()
-                            : getContentFormat();
-                    
-                    String srcContent = rtlSourceLocale ? EditUtil
-                            .toRtlString(sourceSegmentString) : sourceSegmentString;
-                            
-                    // Source segment
-                    p_sheet.addCell(new Label(col++, row, srcContent,
-                            sourceFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    WritableCellFormat targetFormat = rtlTargetLocale ? getRtlContentFormat()
-                            : getContentFormat();
-                    String content = rtlTargetLocale ? EditUtil
-                            .toRtlString(targetSegmentString) : targetSegmentString;
-                            
-                    // Target segment
-                    p_sheet.addCell(new Label(col++, row, content,
-                            targetFormat));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    // Sid
-                    p_sheet.addCell(new Label(col++, row, sid,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 40);
-                            
-                    // Character count
-                    p_sheet.addCell(new Label(col++, row, String
-                            .valueOf(targetSegmentString.length()),
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    WritableCellFormat commentFormat = rtlTargetLocale ? getRtlContentFormat()
-                            : getContentFormat();
-                    String commentContent = rtlTargetLocale ? EditUtil
-                            .toRtlString(comments) : comments;
-                            
-                    // Comments
-                    p_sheet.addCell(new Label(col++, row, commentContent,
-                            commentFormat));
-                    p_sheet.setColumnView(col - 1, 50);
-
-                    // Category failure
-                    Label dropdown = null;
-//                    List<String> failureCategories = getFailureCategoriesList();
-//                    int index = failureCategories.indexOf(failure);
-//                    if (index != -1)
-//                    {
-                        dropdown = new Label(col++, row, failure, getContentFormat());
-                        dropdown.setCellFeatures(getSelectFeatures());
-//                    }
-//                    else
-//                    {
-//                        dropdown = new Label(col++, row, failure, getContentFormat());
-//                        dropdown.setCellFeatures(getSelectFeatures());
-//                    }
-                    p_sheet.addCell(dropdown);
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // TM match
-                    p_sheet.addCell(new Label(col++, row, matches,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // Glossary source
-                    p_sheet.addCell(new Label(col++, row, sourceTerms,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // Glossary target
-                    p_sheet.addCell(new Label(col++, row, targetTerms,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 30);
-
-                    // Previous segment
-                    p_sheet.addCell(new Label(col++, row, previousSegments,
-                            getContentFormat()));
-                    p_sheet.setColumnView(col - 1, 40);
-
-                    row++;
-                }
-            }
-        }
+        
+        return p_row;
     }
 
     private WritableCellFormat redRightFormat() throws WriteException
@@ -1805,45 +1107,18 @@ public class ReviewerLisaQAXlsReportHelper
      * 
      * @param p_sheet
      *            the sheet
+     * @param p_row
+     *            the row position
+     * @param p_colLen
+     *            the blank column length
      * @throws Exception
      */
-    private void writeCommentsAnalysisBlank(WritableSheet p_sheet)
+    private void writeBlank(WritableSheet p_sheet, int p_row, int p_colLen)
             throws Exception
-    {
-        int col = 0;
-        int row = 7;
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-    }
-
-    private void writeLanguageSignOffBlank(WritableSheet p_sheet)
-            throws Exception
-    {
-        int col = 0;
-        int row = 7;
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        p_sheet.addCell(new Label(col++, row, ""));
-        if (m_reportType == TRANSLATIONS_EDIT_REPORT)
+    {    
+        for (int col = 0; col < p_colLen; col++)
         {
-            p_sheet.addCell(new Label(col++, row, ""));
+            p_sheet.addCell(new Label(col++, p_row, ""));
         }
     }
 
@@ -1871,5 +1146,25 @@ public class ReviewerLisaQAXlsReportHelper
     {
         return new ArrayList(ServerProxy.getTuvManager()
                 .getTargetTuvsForStatistics(p_targetPage));
+    }
+    
+    /**
+     * Check the job data for report, for example "company name".
+     * If the job data is correct, then return true.
+     */
+    protected boolean checkJob(Job p_job)
+    {
+        if (p_job == null)
+            return false;
+        
+        String companyName = UserUtil.getCurrentCompanyName(request);
+        if (CompanyWrapper.isSuperCompanyName(companyName))
+            return true;
+
+        String companyId = CompanyWrapper.getCompanyIdByName(companyName);
+        if (companyId != null && companyId.equals(p_job.getCompanyId()))
+            return true;
+
+        return false;
     }
 }

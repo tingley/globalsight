@@ -27,14 +27,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.globalsight.cxe.entity.fileextension.FileExtensionImpl;
-import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
+import com.globalsight.cxe.entity.filterconfiguration.FilterConfiguration;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.servlet.EnvoyServletException;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.cxe.entity.filterconfiguration.FilterConfiguration;
 
 public class FilterConfigurationMainHandler extends PageHandler
 {
@@ -67,7 +65,8 @@ public class FilterConfigurationMainHandler extends PageHandler
                              "MS Office PowerPoint Filter",
                              "MS Office 2010 Filter",
                              "Portable Object Filter",
-                             "Internal Text Filter"};
+                             "Internal Text Filter", 
+                             "Frame Maker 9 Filter"};
         
         String hql2 = "select f.name from FilterConfiguration f where f.companyId=:companyId";
         String currentId = CompanyThreadLocal.getInstance().getValue();
@@ -147,6 +146,12 @@ public class FilterConfigurationMainHandler extends PageHandler
                     fc.setKnownFormatId("|6|");
                     fc.setFilterTableName("base_filter");
                     fc.setFilterDescription("The filter to handle internal text.");
+                }
+                else if (i == 13) 
+                {
+                    fc.setKnownFormatId("|49|50|");
+                    fc.setFilterTableName("frame_maker_filter");
+                    fc.setFilterDescription("The filter to handle Frame Maker 9 files.");
                 }
                 
                 exCol.add(fc);

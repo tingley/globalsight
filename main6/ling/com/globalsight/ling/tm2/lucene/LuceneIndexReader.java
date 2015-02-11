@@ -16,22 +16,21 @@
  */
 package com.globalsight.ling.tm2.lucene;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.ling.tm2.indexer.Token;
-
 import java.io.File;
-import java.util.List;
-import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiReader;
-import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.index.TermDocs;
+
+import com.globalsight.ling.tm2.indexer.Token;
+import com.globalsight.util.GlobalSightLocale;
 
 
 /**
@@ -101,9 +100,8 @@ public class LuceneIndexReader
      * Returns List of c.g.l.tm2.index.Token objects matching a
      * specified word. If TM index doesn't exist, null is returned.
      */
-    public List getGsTokensByTerm(
-        String p_term, boolean p_isMultilingualLeveraging)
-        throws Exception
+    public List getGsTokensByTerm(String p_term, boolean lookupTarget)
+            throws Exception
     {
         if(m_indexReader == null)
         {
@@ -124,7 +122,7 @@ public class LuceneIndexReader
             boolean isSourceLocale = tuvDocument.isSourceLocale();
             int freq = termDocs.freq();
 
-            if(isSourceLocale || p_isMultilingualLeveraging)
+            if (isSourceLocale || lookupTarget)
             {
                 Token token = new Token(
                     p_term, tuvDocument.getTuvId(),

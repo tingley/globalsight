@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
 import com.globalsight.util.GlobalSightLocale;
 
 /**
@@ -54,6 +55,7 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
     // than one Tuvs for a locale and Set guarantees that all
     // Tuvs in the Set are unique
     private Map m_tuvs;
+    private Collection<ProjectTmTuTProp> m_props;
 
     /**
      * Default constructor. It can be accessed only from its subclasses.
@@ -66,6 +68,7 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
         m_type = null;
         m_translatable = true;
         m_tuvs = new HashMap();
+        m_props = new ArrayList<ProjectTmTuTProp>();
     }
 
     /**
@@ -91,6 +94,7 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
         m_type = p_type;
         m_translatable = p_translatable;
         m_tuvs = new HashMap();
+        m_props = new ArrayList<ProjectTmTuTProp>();
     }
 
     public long getId()
@@ -227,6 +231,47 @@ public abstract class AbstractTmTu implements BaseTmTu, Cloneable
                 m_tuvs.remove(p_tuv.getLocale());
             }
         }
+    }
+
+    public void addProp(ProjectTmTuTProp p_p)
+    {
+        boolean added = false;
+        for (ProjectTmTuTProp p : m_props)
+        {
+            if (p_p.getPropType().equals(p.getPropType()))
+            {
+                p.setPropValue(p_p.getPropValue());
+                added = true;
+            }
+        }
+
+        if (!added)
+            m_props.add(p_p);
+    }
+
+    public void removeProp(String p_pType)
+    {
+        ProjectTmTuTProp delObj = null;
+        for (ProjectTmTuTProp p : m_props)
+        {
+            if (p_pType.equals(p.getPropType()))
+            {
+                delObj = p;
+            }
+        }
+        
+        if (delObj != null)
+            m_props.remove(delObj);
+    }
+    
+    public Collection<ProjectTmTuTProp> getProps()
+    {
+        return m_props;
+    }
+    
+    public void setProps(Collection<ProjectTmTuTProp> props)
+    {
+        m_props = props;
     }
 
     /**

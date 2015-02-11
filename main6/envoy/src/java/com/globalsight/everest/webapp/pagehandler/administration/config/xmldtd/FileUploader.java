@@ -26,10 +26,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
 
-import javazoom.upload.parsing.CfuFileItem;
-import javazoom.upload.parsing.CfuFileItemFactory;
-
-import org.apache.commons.fileupload.FileUpload;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.globalsight.util.ProcessStatus;
 import com.globalsight.util.StringUtil;
@@ -75,11 +74,11 @@ public class FileUploader
     {
         log.info("Uploading files...");
 
-        CfuFileItemFactory factory = new CfuFileItemFactory();
-        factory.setListeners(listeners);
-        
-        FileUpload upload = new FileUpload(factory);
-        List<CfuFileItem> fileItems = upload.parseRequest(request);
+        DiskFileItemFactory factory = new DiskFileItemFactory();
+        factory.setSizeThreshold(1024000);
+        ServletFileUpload upload = new ServletFileUpload(factory);
+        @SuppressWarnings("unchecked")
+        List<DiskFileItem> fileItems = upload.parseRequest(request);
         outFile = saveTmpFile(fileItems);
 
         log.info("Uploading files finished.");
@@ -97,14 +96,14 @@ public class FileUploader
         return fields.get(p_fieldName);
     }
 
-    private File saveTmpFile(List<CfuFileItem> fileItems) throws Exception
+    private File saveTmpFile(List<DiskFileItem> fileItems) throws Exception
     {
 
         File file = File.createTempFile("GSDTDUpload", null);
 
         // Set overall request size constraint
         long uploadTotalSize = 0;
-        for (CfuFileItem item : fileItems)
+        for (DiskFileItem item : fileItems)
         {
             if (!item.isFormField())
             {
@@ -119,7 +118,7 @@ public class FileUploader
         
         log.debug("File size: " + uploadTotalSize);
 
-        for (CfuFileItem item : fileItems)
+        for (DiskFileItem item : fileItems)
         {
             if (!item.isFormField())
             {

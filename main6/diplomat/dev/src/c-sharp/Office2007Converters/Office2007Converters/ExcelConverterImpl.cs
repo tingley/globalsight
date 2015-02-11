@@ -103,6 +103,11 @@ namespace GlobalSight.Office2007Converters
 			return m_fileExtensionSearchPattern;
 		}
 
+        public string GetTestFileToWatch()
+        {
+            return "xlsx*.test";
+        }
+
 		/// <summary>
 		/// Quits the Excel Application.
 		/// </summary>

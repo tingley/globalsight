@@ -41,7 +41,7 @@ public class StatisticsPersistenceCommand extends PersistenceCommand
         ", repetition_word_count = ? , total_word_count = ? " + 
         ", sub_lev_match_word_count = ?, sub_lev_repetition_word_count = ? "+
         ", timestamp = ? , in_context_match_word_count = ? " +
-        ", no_use_ic_match_word_count = ?, no_use_exact_match_word_count = ?, is_default_context_match = ? " +
+        ", no_use_ic_match_word_count = ?, total_exact_match_word_count = ?, is_default_context_match = ? " +
         " where id = ? ";
 
     private PreparedStatement m_ps;
@@ -101,7 +101,7 @@ public class StatisticsPersistenceCommand extends PersistenceCommand
             m_ps.setDate(12, new Date(System.currentTimeMillis()));
             m_ps.setLong(13, pwc.getInContextWordCount());
             m_ps.setLong(14, pwc.getNoUseInContextMatchWordCount());
-            m_ps.setLong(15, pwc.getNoUseExactMatchWordCount());
+            m_ps.setLong(15, pwc.getTotalExactMatchWordCount());
             m_ps.setBoolean(16, tp.getIsDefaultContextMatch());
             m_ps.setLong(17, tp.getId());
 

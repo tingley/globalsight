@@ -39,6 +39,7 @@ public interface Task extends WorkObject
     public static final String CREATE_DATE = "m_createDate";
     public static final String TASK_COMMENTS = "m_taskComments";
     public static final String COMPANY_ID = "m_companyId";
+    public static final String IS_UPLOADING = "m_isUploading";//for gbs-1939
     // public static final String RATE = "m_rate";
     public static final String EXPENSE_RATE = "m_expenseRate";
     public static final String REVENUE_RATE = "m_revenueRate";
@@ -59,15 +60,13 @@ public interface Task extends WorkObject
     public static final int STATE_DISPATCHED_TO_TRANSLATION = WorkflowConstants.TASK_DISPATCHED_TO_TRANSLATION; // DISPATCHED_TO_TRANSLATION
     public static final int STATE_IN_TRANSLATION = WorkflowConstants.TASK_IN_TRANSLATION; // IN_TRANSLATION
     public static final int STATE_TRANSLATION_COMPLETED = WorkflowConstants.TASK_TRANSLATION_COMPLETED; // TRANSLATION_COMPLETED
-    public static final int STATE_REDEAY_DISPATCH_GSEDTION = WorkflowConstants.TASK_READEAY_DISPATCH_GSEDTION; // ready for dispatch to GS Edition creating job    
+    public static final int STATE_REDEAY_DISPATCH_GSEDTION = WorkflowConstants.TASK_READEAY_DISPATCH_GSEDTION;
     public static final int STATE_COMPLETED = WorkflowConstants.TASK_COMPLETED; // COMPLETED
     public static final int STATE_DEACTIVE = WorkflowConstants.TASK_DEACTIVE; // DEACTIVE
     public static final int STATE_REJECTED = WorkflowConstants.TASK_DECLINED;
-    public static final int STATE_ALL = WorkflowConstants.TASK_ALL_STATES;// All
-                                                                            // status
-    public static final int STATE_SKIP = WorkflowConstants.TASK_ALL_STATES;// All
-                                                                            // status
-    
+    public static final int STATE_ALL = WorkflowConstants.TASK_ALL_STATES;
+    public static final int STATE_SKIP = WorkflowConstants.TASK_ALL_STATES;
+
     public static final String STATE_ACTIVE_STR = "ACTIVE"; // ACTIVE
     public static final String STATE_ACCEPTED_STR = "ACCEPTED"; // ACCEPTED
     public static final String STATE_DISPATCHED_TO_TRANSLATION_STR = "DISPATCHED_TO_TRANSLATION"; // DISPATCHED_TO_TRANSLATION
@@ -80,8 +79,7 @@ public interface Task extends WorkObject
     public static final String STATE_INTERIM_TRIGGERED = "TRIGGERED"; // TRIGGERED
 
     // used if it can't determine what the task's state is
-    public static final int STATE_NOT_KNOWN = 0; // -1 is used by iflow as
-                                                    // COMPLETE
+    public static final int STATE_NOT_KNOWN = 0;
 
     // Secondary Target File Creation States
     public static final String COMPLETED = "COMPLETED";
@@ -151,8 +149,8 @@ public interface Task extends WorkObject
     /**
      * Set the accepted date to be this particular date.
      * 
-     * @param p_acceptedDate -
-     *            The date for the task to be accepted by.
+     * @param p_acceptedDate
+     *            - The date for the task to be accepted by.
      */
     public void setAcceptedDate(Date p_acceptedDate);
 
@@ -173,8 +171,8 @@ public interface Task extends WorkObject
     /**
      * Set the completed date to be this particular date.
      * 
-     * @param p_completedDate -
-     *            The date for the task to be completed by.
+     * @param p_completedDate
+     *            - The date for the task to be completed by.
      */
     public void setCompletedDate(Date p_completedDate);
 
@@ -228,24 +226,24 @@ public interface Task extends WorkObject
     /**
      * Add this task comment to the collection.
      * 
-     * @param p_taskComment -
-     *            The comment to be added.
+     * @param p_taskComment
+     *            - The comment to be added.
      */
     public void addTaskComment(Comment p_taskComment);
 
     /**
      * Remove this task comment from the collection.
      * 
-     * @param p_taskComment -
-     *            The comment remove.
+     * @param p_taskComment
+     *            - The comment remove.
      */
     public void removeTaskComment(Comment p_taskComment);
 
     /**
      * Set the task comments to be this value.
      * 
-     * @param p_taskComments -
-     *            The task comments to be set.
+     * @param p_taskComments
+     *            - The task comments to be set.
      */
     public void setTaskComments(List p_taskComments);
 
@@ -348,6 +346,9 @@ public interface Task extends WorkObject
      * @return String
      */
     public String getTaskName();
+
+    // we may need to update the task name
+    public void setTaskName(String p_taskName);
 
     /**
      * To get the name of the Activity associated the task.
@@ -501,8 +502,8 @@ public interface Task extends WorkObject
     /**
      * Set the acceptor for this task.
      * 
-     * @param p_user.
-     *            The user who accepted this task.
+     * @param p_user
+     *            . The user who accepted this task.
      */
     public void setAcceptor(String p_user);
 
@@ -529,8 +530,8 @@ public interface Task extends WorkObject
      * is only set if there are any associated secondary target files with this
      * task.
      * 
-     * @param p_stfCreationState -
-     *            The state to be set.
+     * @param p_stfCreationState
+     *            - The state to be set.
      */
     void setStfCreationState(String p_stfCreationState);
 
@@ -551,16 +552,16 @@ public interface Task extends WorkObject
     /**
      * Set the estimated acceptance date for this task to be the specified date.
      * 
-     * @param p_estimatedAcceptanceDate -
-     *            The date to be set.
+     * @param p_estimatedAcceptanceDate
+     *            - The date to be set.
      */
     void setEstimatedAcceptanceDate(Date p_estimatedAcceptanceDate);
 
     /**
      * Set the estimated completion time for this task to be the specified date.
      * 
-     * @param p_estimatedCompletionDate -
-     *            The date to be set.
+     * @param p_estimatedCompletionDate
+     *            - The date to be set.
      */
     void setEstimatedCompletionDate(Date p_estimatedCompletionDate);
 
@@ -605,15 +606,32 @@ public interface Task extends WorkObject
     public boolean reassignable();
 
     /**
-     * Gets the duration of the task.<p>
+     * Gets the duration of the task.
+     * <p>
      * 
      * If the task has not been accepted, the duration is "--". If the task has
      * been accepted, the duration equals to the complete date minus the accept
      * date. When the task has not been completed, the duration equasl to the
-     * current date minus the accept date. <p>
+     * current date minus the accept date.
+     * <p>
      * 
      * 
      * @return A string like "*d *h *m" if has duration or "--".
      */
     public String getActualDuration();
+    
+    //for GBS-1939
+    /**
+     * Get state of the uploading this activity belong to.
+     * 
+     * @return The uploading state.
+     */
+    public char getIsUploading();
+    /**
+     * Set state of the uploading this activity belong to.
+     * 
+     * @return The uploading state.
+     */
+    public void setIsUploading(char p_isUploading);
+
 }

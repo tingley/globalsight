@@ -16,6 +16,7 @@ import org.apache.axis.message.RPCParam;
 
 import com.globalsight.BuildVersion;
 import com.globalsight.util.ServerUtil;
+import com.globalsight.webservices.AbstractWebService;
 
 /**
  * A helper class for logging activity within GlobalSight.  The goal is to
@@ -43,7 +44,12 @@ public class ActivityLog {
      * and method of the caller.  The args contain information about the
      * activity.  The keys and values will be converted to strings with
      * toString.  Be sure they are machine-readable and unambiguous.  Values
-     * may be null.
+     * may be null.  For a given method, the args should always use the same
+     * keys, to simplify automated processing.  (Think of them as keyword
+     * arguments.)  If you feel you need dynamically named args, enhance this
+     * code to allow values to have complex types instead.  For the same
+     * reasons, try not to overload a named arg with context-dependent meaning;
+     * instead, use differently named args.
      *
      * This method returns a {@link Start} object that is used to log the end
      * of the activity.  You must log an end for every start, even if there is
@@ -160,11 +166,35 @@ public class ActivityLog {
                     ctx.getService().getServiceDescription();
                 activityArgs.put("method",
                     serv.getImplClass().getName() + "." + rpc.getMethodName());
+
+                // Ambassador encodes the access token in various way.  Try
+                // them all.  If the user isn't logged for some call, find out
+                // how the access token is passed for that call and add it.
+                String accessToken = null;
+                RPCParam accessTokenParam = rpc.getParam("p_accessToken");
+                if (accessTokenParam == null) {
+                    accessTokenParam = rpc.getParam("accessToken");
+                }
+                if (accessTokenParam != null) {
+                    accessToken = (String) accessTokenParam.getObjectValue();
+                } else {
+                    RPCParam argsParam = rpc.getParam("args");
+                    if (argsParam == null) {
+                        argsParam = rpc.getParam("p_args");
+                    }
+                    if (argsParam != null) {
+                        Map args = (Map) argsParam.getObjectValue();
+                        accessToken = (String) args.get("accessToken");
+                    }
+                }
+                activityArgs.put("user", accessToken == null ? null :
+                    AbstractWebService.getUsernameFromSession(accessToken));
+
                 // This is too much information to log, but it could be useful
                 // selectively.
                 //for (Object o : rpc.getParams()) {
                 //    RPCParam param = (RPCParam) o;
-                //    activityArgs.put(param.getName(), param.getValue());
+                //    activityArgs.put(param.getName(), param.getObjectValue());
                 //}
                 ctx.setProperty(
                     AxisRequestHandler.class.getName() + ".start",

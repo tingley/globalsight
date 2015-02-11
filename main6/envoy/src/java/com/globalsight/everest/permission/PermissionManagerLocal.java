@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
-
+import org.hibernate.Hibernate;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 
@@ -37,6 +37,7 @@ import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.database.PreparedStatementBatch;
 
 /**
@@ -55,9 +56,9 @@ public class PermissionManagerLocal implements PermissionManager
             + " USER_ID from PERMISSIONGROUP_USER pgu, PERMISSIONGROUP pg where"
             + " pgu.PERMISSIONGROUP_ID=pg.ID and pg.PERMISSION_SET like ?";
 
-	private static final String SQL_SELECT_USERS_BY_PERM_NAME = "select distinct "
-        + " USER_ID from PERMISSIONGROUP_USER pgu, PERMISSIONGROUP pg where"
-        + " pgu.PERMISSIONGROUP_ID=pg.ID and pg.NAME = ?";
+    private static final String SQL_SELECT_USERS_BY_PERM_NAME = "select distinct "
+            + " USER_ID from PERMISSIONGROUP_USER pgu, PERMISSIONGROUP pg where"
+            + " pgu.PERMISSIONGROUP_ID=pg.ID and pg.NAME = ?";
 
     private static final String SQL_INSERT_PERMISSIONGROUP_USER = "insert into "
             + " PERMISSIONGROUP_USER values(?,?)";
@@ -158,8 +159,8 @@ public class PermissionManagerLocal implements PermissionManager
      * @return a vector of the PermissionGroup objects
      */
     @SuppressWarnings("unchecked")
-    public Collection<PermissionGroup> getAllPermissionGroups() throws PermissionException,
-            RemoteException
+    public Collection<PermissionGroup> getAllPermissionGroups()
+            throws PermissionException, RemoteException
     {
         String hql = " from PermissionGroupImpl p ";
         Map<String, String> map = null;
@@ -184,6 +185,33 @@ public class PermissionManagerLocal implements PermissionManager
             throw new PermissionException(e);
         }
     }
+    @SuppressWarnings("unchecked")
+    public Collection<PermissionGroup> getPermissionGroupsBycondition(String condition)
+            throws PermissionException, RemoteException
+    {
+        String hql = "select p from PermissionGroupImpl p ,Company c where c.id=p.companyId";
+        String currentCompanyId = CompanyThreadLocal.getInstance().getValue();
+        
+
+        Session session = HibernateUtil.getSession();
+
+        if (!StringUtil.isEmpty(condition)){
+            hql +=  condition;
+        }
+        if (!CompanyWrapper.SUPER_COMPANY_ID.equals(currentCompanyId))
+        {
+            hql += " and p.companyId ="+currentCompanyId;
+        }
+        try
+        {
+            s_logger.debug("Getting all permission groups from DB");
+            return (Collection<PermissionGroup>) session.createQuery(hql).list();
+        }
+        catch (Exception e)
+        {
+            throw new PermissionException(e);
+        }
+    }
 
     /**
      * * Get a list of all existing PermissionGroup objects in the database with
@@ -192,8 +220,8 @@ public class PermissionManagerLocal implements PermissionManager
      * @return a Collection of the PermissionGroup objects
      */
     @SuppressWarnings("unchecked")
-    public Collection<PermissionGroup> getAllPermissionGroupsByCompanyId(String p_companyId)
-            throws PermissionException, RemoteException
+    public Collection<PermissionGroup> getAllPermissionGroupsByCompanyId(
+            String p_companyId) throws PermissionException, RemoteException
     {
         String hql = " from PermissionGroupImpl p "
                 + " where p.companyId = :COMPANY_ID order by p.name ";
@@ -267,12 +295,12 @@ public class PermissionManagerLocal implements PermissionManager
      * @return Collection of PermissionGroups
      */
     @SuppressWarnings("unchecked")
-    public Collection<PermissionGroup> getAllPermissionGroupsForUser(String p_userId)
-            throws PermissionException, RemoteException
+    public Collection<PermissionGroup> getAllPermissionGroupsForUser(
+            String p_userId) throws PermissionException, RemoteException
     {
         String sql = "select p.* from permissiongroup p, "
                 + " permissiongroup_user pu where p.id = pu.permissiongroup_id "
-                + " and pu.user_id like :USER_ID_ARG ";
+                + " and pu.user_id = :USER_ID_ARG ";
 
         Session session = HibernateUtil.getSession();
         SQLQuery query = session.createSQLQuery(sql);
@@ -288,6 +316,34 @@ public class PermissionManagerLocal implements PermissionManager
             throw new PermissionException(e);
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    public Collection<Object[]> getAlltableNameForUser(String tableName) throws RemoteException
+    {
+        String sql = "";
+        if(tableName=="permissiongroup"){
+            sql="SELECT  peru.USER_ID uid, per.NAME pname  FROM permissiongroup per, permissiongroup_user peru WHERE per.ID=peru.PERMISSIONGROUP_ID";
+            
+        }else if(tableName=="project"){
+            sql="SELECT  peru.USER_ID uid, per.PROJECT_NAME pname  FROM project per, project_user peru WHERE per.PROJECT_SEQ=peru.PROJECT_ID";
+            
+        }
+
+        Session session = HibernateUtil.getSession();
+        SQLQuery query = session.createSQLQuery(sql).addScalar("uid", Hibernate.STRING).addScalar("pname", Hibernate.STRING);
+        Collection<Object[]> l= query.list();
+        
+        try
+        {
+            return  l;
+        }
+           
+        catch (Exception e)
+        {
+            throw new PermissionException(e);
+        }
+    }
+
 
     /**
      * Queries all permissiongroup names for this user.
@@ -364,12 +420,15 @@ public class PermissionManagerLocal implements PermissionManager
         return users;
     }
 
-	/**
-	 * Queries all usernames for a given permission group name
-	 * @param permGroupName -- the name of the permission group
-	 * @return Collection of String
-	 */
-	public Collection<String> getAllUsersForPermissionGroup(String permGroupName) {
+    /**
+     * Queries all usernames for a given permission group name
+     * 
+     * @param permGroupName
+     *            -- the name of the permission group
+     * @return Collection of String
+     */
+    public Collection<String> getAllUsersForPermissionGroup(String permGroupName)
+    {
         Connection c = null;
         ResultSet rs = null;
         PreparedStatement ps = null;
@@ -405,7 +464,7 @@ public class PermissionManagerLocal implements PermissionManager
         }
 
         return users;
-	}
+    }
 
     /**
      * Queries for all users with a specific permission. This query removes the

@@ -10,7 +10,7 @@ public class OfficeXmlTagHelperTest
 {
 
     /**
-     * Test the merge function for pptx
+     * Test the merge function for PPTX
      */
     @Test
     public void testMergePptxTagsWithEmpty()
@@ -232,6 +232,87 @@ public class OfficeXmlTagHelperTest
 
         System.out.println(merged);
         String expected = "<a:r><a:rPr lang=\"en-US\" altLang=\"zh-CN\" sz=\"2000\" smtClean=\"0\"><a:solidFill><a:srgbClr val=\"FF0000\"/></a:solidFill><a:ea typeface=\"宋体\" pitchFamily=\"2\" charset=\"-122\"/></a:rPr><a:t>uk</a:t></a:r>";
+        Assert.assertEquals(expected, merged);
+    }
+    
+    /**
+     * Test the merge function for DOCX
+     */
+    @Test
+    public void testMergeDocxTags()
+    {
+        int filetype = OfficeXmlHelper.OFFICE_DOCX;
+        String f1 = "<w:r w:rsidR=\"00DC53C3\"><w:tab/><w:t>Shipping Costs</w:t></w:r>";
+        String f2 = "<w:r w:rsidR=\"00880973\"><w:t xml:space=\"preserve\"> Scenarios</w:t></w:r>";
+
+        String merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        String expected = "<w:r w:rsidR=\"00DC53C3\"><w:tab/><w:t xml:space=\"preserve\">Shipping Costs Scenarios</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+
+        f1 = "<w:r w:rsidR=\"00DC53C3\"><w:t>5.3.3</w:t></w:r>";
+        f2 = merged;
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r w:rsidR=\"00DC53C3\"><w:t>5.3.3</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+    }
+    
+    /**
+     * Test the merge function for DOCX with style
+     */
+    @Test
+    public void testMergeDocxTagsWithStyle()
+    {
+        int filetype = OfficeXmlHelper.OFFICE_DOCX;
+        String f1 = "<w:r><w:t xml:space=\"preserve\">This text should be translated, except for this </w:t></w:r>";
+        String f2 = "<w:r w:rsidR=\"00B25FB0\" w:rsidRPr=\"0053397B\"><w:rPr><w:rStyle w:val=\"tw4winInternal\"/></w:rPr><w:t>tw4winInternal</w:t></w:r>";
+
+        String merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        String expected = "<w:r><w:t xml:space=\"preserve\">This text should be translated, except for this </w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+
+        f1 = "<w:r w:rsidR=\"00B25FB0\" w:rsidRPr=\"0053397B\"><w:rPr><w:rStyle w:val=\"tw4winInternal\"/></w:rPr><w:t>tw4winInternal</w:t></w:r>";
+        f2 = "<w:r><w:t xml:space=\"preserve\"> statement.</w:t></w:r>";
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r w:rsidR=\"00B25FB0\" w:rsidRPr=\"0053397B\"><w:rPr><w:rStyle w:val=\"tw4winInternal\"/></w:rPr><w:t>tw4winInternal</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+        
+        f1 = "<w:r w:rsidRPr=\"00882CE5\"><w:rPr><w:rStyle w:val=\"1Char\"/><w:rFonts w:hint=\"eastAsia\"/></w:rPr><w:t>style1</w:t></w:r>";
+        f2 = "<w:r w:rsidRPr=\"00882CE5\"><w:rPr><w:rStyle w:val=\"2Char\"/><w:rFonts w:hint=\"eastAsia\"/></w:rPr><w:t>style2</w:t></w:r>";
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r w:rsidRPr=\"00882CE5\"><w:rPr><w:rStyle w:val=\"1Char\"/><w:rFonts w:hint=\"eastAsia\"/></w:rPr><w:t>style1</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+        
+        f1 = "<w:r w:rsidR=\"001648B2\" w:rsidRPr=\"001648B2\"><w:rPr><w:vertAlign w:val=\"superscript\"/></w:rPr><w:t>U</w:t></w:r>";
+        f2 = "<w:r w:rsidR=\"001648B2\" w:rsidRPr=\"001648B2\"><w:rPr><w:rFonts w:hint=\"eastAsia\"/><w:vertAlign w:val=\"superscript\"/></w:rPr><w:t>p</w:t></w:r>";
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r w:rsidR=\"001648B2\" w:rsidRPr=\"001648B2\"><w:rPr><w:rFonts w:hint=\"eastAsia\"/><w:vertAlign w:val=\"superscript\"/></w:rPr><w:t>Up</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+        
+        f1 = "<w:r><w:rPr><w:vertAlign w:val=\"superscript\"/></w:rPr><w:t>up</w:t></w:r>";
+        f2 = "<w:r><w:rPr><w:vertAlign w:val=\"subscript\"/></w:rPr><w:t>down</w:t></w:r>";
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r><w:rPr><w:vertAlign w:val=\"superscript\"/></w:rPr><w:t>up</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+        
+        f1 = "<w:r w:rsidRPr=\"0024750C\"><w:rPr><w:u w:val=\"single\"/></w:rPr><w:t>U</w:t></w:r>";
+        f2 = "<w:r w:rsidRPr=\"0024750C\"><w:rPr><w:rFonts w:hint=\"eastAsia\"/><w:u w:val=\"single\"/></w:rPr><w:t>u</w:t></w:r>";
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r w:rsidRPr=\"0024750C\"><w:rPr><w:rFonts w:hint=\"eastAsia\"/><w:u w:val=\"single\"/></w:rPr><w:t>Uu</w:t></w:r>";
+        Assert.assertEquals(expected, merged);
+        
+        f1 = "<w:r><w:t>before </w:t></w:r>";
+        f2 = "<w:r><w:rPr><w:vertAlign w:val=\"superscript\"/></w:rPr><w:t>up</w:t></w:r>";
+        merged = OfficeXmlTagHelper.getMergedTags(filetype, f1, f2);
+        System.out.println(merged);
+        expected = "<w:r><w:t>before </w:t></w:r>";
         Assert.assertEquals(expected, merged);
     }
 

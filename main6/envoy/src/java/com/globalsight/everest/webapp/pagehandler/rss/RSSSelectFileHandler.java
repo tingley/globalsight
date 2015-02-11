@@ -68,6 +68,7 @@ import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.RuntimeCache;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.webservices.attribute.AddJobAttributeThread;
 
@@ -199,7 +200,7 @@ public class RSSSelectFileHandler extends PageHandler {
 //            return new File(config
 //                    .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR));
 //        } catch (Exception e) {
-//            CATEGORY.error(e);
+//            CATEGORY.error(e.getMessage(), e);
 //            throw new RuntimeException(e.getMessage());
 //        }
 //    }
@@ -366,14 +367,20 @@ public class RSSSelectFileHandler extends PageHandler {
                 .getParameter(JOB_NAME));
         
         String uuid = (String) sessionMgr.getAttribute("uuid");
+        Map<String, JobAttribute> jobAttributes = (Map<String, JobAttribute>) sessionMgr
+                .getAttribute(SetAttributeHandler.JOB_ATTRIBUTES);
+        if (jobAttributes != null && uuid != null)
+        {
+            List<JobAttribute> jobAtts = new ArrayList<JobAttribute>();
+            jobAtts.addAll(jobAttributes.values());
+            RuntimeCache.addJobAtttibutesCache(uuid, jobAtts);
+        }
         
         // 3. send off to be imported
 //        sendToCxe(mappedFiles, jobName, user.getUserId());
         sendToCxe(mappedFiles, jobName, uuid, user.getUserId(), targetLocalesList, jobType);
         
         // 4.
-        Map<String, JobAttribute> jobAttributes = (Map<String, JobAttribute>) sessionMgr
-                .getAttribute(SetAttributeHandler.JOB_ATTRIBUTES);
         if (jobAttributes != null)
         {
             String companyId = CompanyThreadLocal.getInstance().getValue();

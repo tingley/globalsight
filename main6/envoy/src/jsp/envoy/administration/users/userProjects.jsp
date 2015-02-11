@@ -67,13 +67,13 @@ if (edit)
     ModifyUserWrapper wrapper = (ModifyUserWrapper)sessionMgr.getAttribute(
       UserConstants.MODIFY_USER_WRAPPER);
     companyName = wrapper.getCompanyName(); 
-    userName = wrapper.getUserId();
+    userName = wrapper.getUserName();
 } else
 {
     CreateUserWrapper wrapper = (CreateUserWrapper)sessionMgr.getAttribute(
       UserConstants.CREATE_USER_WRAPPER);
     companyName = wrapper.getCompanyName();
-    userName = wrapper.getUserId();
+    userName = wrapper.getUserName();
 }
 
 String saveUrl = save.getPageURL()+"&action=" +
@@ -156,7 +156,7 @@ if (addedProjects != null && addedProjects.size() > 0)
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <SCRIPT LANGUAGE="JavaScript">
-var needWarning = true;
+var needWarning = false;
 var objectName = "";
 var guideNode = "projects";
 <% if (vendor) { %>
@@ -258,7 +258,6 @@ function addAll()
 
     if (projectForm.allProjects.checked)
     {
-        to.options.length = 0;
         // move all available projects to added projects
         for (var i = 0; i < from.length; i++)
         {
@@ -282,7 +281,14 @@ function addAll()
 
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+
         }
+		//for GBS-1995,by fan
+		//set left list is empty
+		for (var i = 0; i < from.length; )
+		{
+			from.options[i] = null;
+		}
     }
 }
 
@@ -322,6 +328,11 @@ function addProject()
 
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+            
+		    //for GBS-1995,by fan
+		    //set the selected element of left list is empty
+		    from.options[i] = null;
+            i--;
         }
     }
 }
@@ -334,6 +345,7 @@ function removeProject()
         return;
     }
 
+    var from = projectForm.from;
     var to = projectForm.to;
 
     if (to.selectedIndex == -1)
@@ -371,6 +383,12 @@ function removeProject()
             }
 
             projectForm.toField.value = result_string;
+
+		    //for GBS-1995,by fan
+		    //add selected element to left list
+		    var len = from.options.length;
+            from.options[len] = new Option(to.options[i].text, to.options[i].value);
+
             to.options[i] = null;
             i--;
         }
@@ -502,7 +520,8 @@ function setProjects()
     %>
              if (selectedCompanyName == "<%= projectCompany %>")
              {
-                 from.options[fromIndex] = new Option("<%= project.getName()%>","<%= project.getId()%>");
+            	 //for GBS-1995,by fan, default set the left list is empty
+                 from.options[fromIndex] = null;
                  fromIndex ++;
 
                  // set projects in "to" selection
@@ -520,6 +539,12 @@ function setProjects()
     %>
 
 
+}
+
+//adjust select tag width, by fan 
+function changeSelectWidth(selected){
+	if(selected.options[selected.selectedIndex].text.length*7 >= 220)  selected.style.width=selected.options[selected.selectedIndex].text.length*7 + 'px';
+	else selected.style.width=200;
 }
 
 </SCRIPT>
@@ -647,7 +672,7 @@ function setProjects()
     </tr>
     <tr>
       <td width="20%">
-	<select name="from" multiple class="standardText" size=15>
+	<select name="from" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">
 
 	</select>
       </td>
@@ -669,7 +694,7 @@ function setProjects()
 	</table>
       </td>
       <td>
-	<select name="to" multiple class="standardText" size=15>
+	<select name="to" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)" >
 
 	</select>
       </td>
@@ -682,16 +707,28 @@ function setProjects()
     </tr>
     <tr>
       <td width="20%">
-	<select name="from" multiple class="standardText" size=15>
+	<select name="from" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">
 <%
 	  if (availableProjects != null)
 	  {
 	    for (int i = 0; i < availableProjects.size(); i++)
 	    {
-	      Project project = (Project)availableProjects.get(i);
-%>
-	  <option value="<%=project.getId()%>"><%=project.getName()%></option>
-<%
+			Project project = (Project)availableProjects.get(i);
+			//for GBS-1995,by fan
+			//don't display the element in the left list ,if the the element is existed in the right list.
+
+			boolean isExist = false;  //if the project is existed in the right list, return true.
+			for (int j = 0; j < addedProjects.size(); j++)
+			{
+				Project addedProject = (Project)addedProjects.get(j);
+				if(addedProject.getName().equals(project.getName())) isExist = true;
+			}
+			if(!isExist)
+			{
+		%>
+				<option value="<%=project.getId()%>"><%=project.getName()%></option>
+		<%
+			}
 	    }
 	  }
 %>
@@ -715,7 +752,7 @@ function setProjects()
 	</table>
       </td>
       <td>
-	<select name="to" multiple class="standardText" size=15>
+	<select name="to" multiple class="standardText" size=15 style="width:200px" onchange="changeSelectWidth(this)">
 <%
         if (addedProjects != null && addedProjects.size() != 0)
 	{

@@ -10,7 +10,7 @@
             com.globalsight.everest.webapp.pagehandler.PageHandler,
             com.globalsight.everest.util.comparator.DefinedAttributeComparator,
             com.globalsight.everest.permission.PermissionSet,
-            com.globalsight.everest.servlet.util.ServerProxy,java.util.*"
+            com.globalsight.everest.company.CompanyWrapper,java.util.*"
     session="true"
 %>
 <%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
@@ -170,6 +170,20 @@ function setButtonState()
         }
     }
 }
+
+//for GBS-2599,by fan
+function handleSelectAll() {
+	if (attributeForm && attributeForm.selectAll) {
+		if (attributeForm.selectAll.checked) {
+			checkAllWithName('attributeForm', 'selectAttributeIds'); 
+			setButtonState();
+	    }
+	    else {
+			clearAll('attributeForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 
 <style type="text/css">
@@ -202,7 +216,7 @@ function setButtonState()
        dataClass="com.globalsight.cxe.entity.customAttribute.Attribute"
        pageUrl="self"
        emptyTableMsg="msg_attribute_none" >
-        <amb:column label="">
+        <amb:column label="checkbox">
          <%isSuperAttribute = CompanyWrapper.SUPER_COMPANY_ID.equals(attribute.getCompanyId());
            if (!(isSuperAttribute && !isSuperAdmin)){%>
           <input type="checkbox" name="selectAttributeIds" value="<%=attribute.getId()%>" onclick="setButtonState()">
@@ -233,6 +247,18 @@ function setButtonState()
                     </A> 
                </amb:permission>   
           <%}%>  
+        </amb:column>
+        
+        <amb:column label="lb_internal_name" sortBy="<%=DefinedAttributeComparator.INTERNAL_NAME%>">
+            <%
+            if (isSuperAttribute) {%>
+            <div class="superAttribute">
+            <%} %>
+            <%=attribute.getName()%>
+            <%if (isSuperAttribute) {%>
+            </div>
+            <%} %>
+             
         </amb:column>
 
         <amb:column label="lb_type" sortBy="<%=DefinedAttributeComparator.TYPE%>">
@@ -265,7 +291,7 @@ function setButtonState()
             if (isSuperAttribute) {%>
             <div class="superAttribute">
             <%} %>
-            <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(attribute.getCompanyId())).getCompanyName()%>
+            <%=CompanyWrapper.getCompanyNameById(attribute.getCompanyId())%>
             <%if (isSuperAttribute) {%>
             </div>
             <%} %>
@@ -273,12 +299,13 @@ function setButtonState()
         <%} %>
       </amb:table>
       
-      <DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
+      <!--for gbs-2599
+	  DIV ID="CheckAllLayer" style="float: left; margin-left:10px;">
         <A CLASS="standardHREF"
            HREF="javascript:checkAllWithName('attributeForm', 'selectAttributeIds'); setButtonState()"><%=bundle.getString("lb_check_all")%></A> |
         <A CLASS="standardHREF"
            HREF="javascript:clearAll('attributeForm'); setButtonState();"><%=bundle.getString("lb_clear_all")%></A>
-    </DIV>
+    </DIV-->
     </td>
   </tr>
   <tr>

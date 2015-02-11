@@ -1,25 +1,18 @@
 package com.globalsight.selenium.testcases.smoketest;
 
 import org.testng.Assert;
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.MyAccountFuncs;
 import com.globalsight.selenium.pages.JobEditors;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyActivities;
-import com.globalsight.selenium.properties.ConfigUtil;
+import com.globalsight.selenium.testcases.ConfigUtil;
 import com.globalsight.selenium.testcases.BaseTestCase;
 import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreateJobs;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.dataprepare.smoketest.job.CreatedJob;
 
 /*
  * TestCaseName: MyActivitiesJobEditorVerify.java 
@@ -30,133 +23,113 @@ import com.thoughtworks.selenium.Selenium;
  * 2011-6-22 First Version Jester
  */
 
-public class MyActivitiesJobEditorVerify extends BaseTestCase {
-	/*
-	 * Common Variables
-	 */
-	private Selenium selenium;
-	MyAccountFuncs iMyAccountFuncs = new MyAccountFuncs();
-	CreateJobs c = new CreateJobs();
-	@Test
-	public void verifyPopupEditor() {
-		selenium.click(MainFrame.MyActivities_MENU);
-		selenium.click(MainFrame.InProgress2_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+public class MyActivitiesJobEditorVerify extends BaseTestCase
+{
+    /*
+     * Common Variables
+     */
+    private MyAccountFuncs myAccountFuncs = new MyAccountFuncs();
+    private CreateJobs createJobs = new CreateJobs();
+    private String jobName = null;
 
-		selenium.click("link="+ConfigUtil.getDataInCase(c.getClassName(), "jobName1"));
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    public void verifyPopupEditor()
+    {
+        openMenuItemAndWait(selenium, MainFrame.MY_ACTIVITIES_MENU,
+                MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
 
-		// Open the MainEditor
-		selenium.click(MyActivities.TargetFiles_TABLE + "/tr/td[2]/div/a");
-		selenium.waitForPopUp(JobEditors.MainEditor_TAG, CommonFuncs.SHORT_WAIT);
-		selenium.selectWindow("name=" + JobEditors.MainEditor_TAG);
+        jobName = getDataInCase(createJobs.getClassName(), "jobName1");
+        jobName = CreatedJob.getCreatedJobName(jobName);
+        clickAndWait(selenium, "link=" + jobName);
 
-		// Open SegmentsEditor
-		selenium.selectFrame(JobEditors.RelativeTop_FRAME);
-		selenium.selectFrame(JobEditors.content_FRAME);
-		selenium.selectFrame(JobEditors.Target_FRAME);
-		selenium.selectFrame(JobEditors.content_FRAME);
-		selenium.click(JobEditors.Segments_TABLE + "/tr[2]/td[2]/a");
-		selenium.waitForPopUp(JobEditors.SegmentEditor_TAG,
-				CommonFuncs.SHORT_WAIT);
-		// edit the content.
-		selenium.selectWindow("name=" + JobEditors.SegmentEditor_TAG);
-		selenium.selectFrame(JobEditors.RelativeTop_FRAME);
-		selenium.selectFrame(JobEditors.Target_FRAME);
-		selenium.selectFrame(JobEditors.Edit_FRAME);
-		selenium.type(JobEditors.Edit_TextFiled,
-				ConfigUtil.getDataInCase(getClassName(), "STRINGPOPUP"));
+        // Open the MainEditor
+        selenium.click(MyActivities.TARGET_FILES_TABLE + "/tr/td[2]/a");
+        selenium.waitForPopUp(JobEditors.MAIN_EDITOR_TAG,
+                CommonFuncs.SHORT_WAIT);
+        selenium.selectWindow("name=" + JobEditors.MAIN_EDITOR_TAG);
 
-		// Close the SegmentsEditor
-		selenium.selectFrame(JobEditors.RelativeTop_FRAME);
-		selenium.selectFrame(JobEditors.Menu_WINDOW);
-		selenium.click(JobEditors.Close_LINK_Segment);
+        // Open SegmentsEditor
+        selenium.selectFrame(JobEditors.RELATIVE_TOP_FRAME);
+        selenium.selectFrame(JobEditors.CONTENT_FRAME);
+        selenium.selectFrame(JobEditors.TARGET_FRAME);
+        selenium.selectFrame(JobEditors.CONTENT_FRAME);
+        selenium.click(JobEditors.Segments_TABLE + "/tr[2]/td[2]/a");
+        selenium.waitForPopUp(JobEditors.SEGMENT_EDITOR_TAG,
+                CommonFuncs.SHORT_WAIT);
 
-		// Verify the change worked.
-		selenium.selectWindow("name=" + JobEditors.MainEditor_TAG);
-		selenium.selectFrame(JobEditors.RelativeTop_FRAME);
-		selenium.selectFrame(JobEditors.content_FRAME);
-		selenium.selectFrame(JobEditors.Target_FRAME);
-		selenium.selectFrame(JobEditors.content_FRAME);
-		Assert.assertEquals(
-				selenium.getText(JobEditors.Segments_TABLE + "/tr[2]/td[2]/a"),
-				ConfigUtil.getDataInCase(getClassName(), "STRINGPOPUPVERIFY"));
+        // edit the content.
+        selenium.selectWindow("name=" + JobEditors.SEGMENT_EDITOR_TAG);
+        selenium.selectFrame(JobEditors.RELATIVE_TOP_FRAME);
+        selenium.selectFrame(JobEditors.TARGET_FRAME);
+        selenium.selectFrame(JobEditors.EDITOR_FRAME);
+        selenium.type(JobEditors.EDIT_TEXT, getDataInCase("string"));
 
-		// Close the MainEditor
-		selenium.selectFrame(JobEditors.RelativeTop_FRAME);
-		selenium.selectFrame(JobEditors.Menu_WINDOW);
-		selenium.click(JobEditors.Close_LINK_Segment);
-		selenium.selectWindow(null);
-	}
+        // Close the SegmentsEditor
+        selenium.selectFrame(JobEditors.RELATIVE_TOP_FRAME);
+        selenium.selectFrame(JobEditors.MENU_WINDOW);
+        selenium.click(JobEditors.SEGMENT_CLOSE_LINK);
 
-	@Test
-	public void verifyInlineEditor() {
-		iMyAccountFuncs.changeDefaultEditor(selenium, "Inline");
+        // Verify the change worked.
+        selenium.selectWindow("name=" + JobEditors.MAIN_EDITOR_TAG);
+        selenium.selectFrame(JobEditors.RELATIVE_TOP_FRAME);
+        selenium.selectFrame(JobEditors.CONTENT_FRAME);
+        selenium.selectFrame(JobEditors.TARGET_FRAME);
+        selenium.selectFrame(JobEditors.CONTENT_FRAME);
+        Assert.assertEquals(
+                selenium.getText(JobEditors.Segments_TABLE + "/tr[2]/td[2]/a"),
+                ConfigUtil.getDataInCase(getClassName(), "verifyString"));
 
-		selenium.click(MainFrame.MyActivities_MENU);
-		selenium.click(MainFrame.InProgress2_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        // Close the MainEditor
+        selenium.selectFrame(JobEditors.RELATIVE_TOP_FRAME);
+        selenium.selectFrame(JobEditors.MENU_WINDOW);
+        selenium.click(JobEditors.SEGMENT_CLOSE_LINK);
+        selenium.selectWindow(null);
+    }
 
-		selenium.click("link="+ConfigUtil.getDataInCase(c.getClassName(), "jobName1"));
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+    @Test
+    public void verifyInlineEditor()
+    {
+        myAccountFuncs.changeDefaultEditor(selenium, "Inline");
 
-		// Open the MainEditor
-		selenium.click(MyActivities.TargetFiles_TABLE + "/tr/td[2]/div/a");
-		selenium.waitForPopUp(JobEditors.InlineEditor_TAG,
-				CommonFuncs.SHORT_WAIT);
-		selenium.selectWindow("name=" + JobEditors.InlineEditor_TAG);
+        openMenuItemAndWait(selenium, MainFrame.MY_ACTIVITIES_MENU,
+                MainFrame.MY_ACTIVITIES_INPROGRESS_SUBMENU);
+        
+        jobName = getDataInCase(createJobs.getClassName(), "jobName1");
+        jobName = CreatedJob.getCreatedJobName(jobName);
+        clickAndWait(selenium, "link=" + jobName);
 
-		selenium.click(JobEditors.Segments_TABLE_Inline + "/p[2]");
-		selenium.selectFrame(JobEditors.iEditor_FRAME);
-		selenium.type("//body",
-				ConfigUtil.getDataInCase(getClassName(), "STRINGINLINE"));
-		selenium.selectFrame(JobEditors.RelativeTop_FRAME);
-		selenium.click(JobEditors.SaveChanges_BUTTON);
-		Assert.assertEquals(
-				selenium.getText(JobEditors.Segments_TABLE_Inline + "/p[2]"),
-				ConfigUtil.getDataInCase(getClassName(), "STRINGINLINE"));
+        // Open the MainEditor
+        selenium.click(MyActivities.TARGET_FILES_TABLE + "/tr/td[2]/a");
+        selenium.waitForPopUp(JobEditors.INLINE_EDITOR_TAG,
+                CommonFuncs.SHORT_WAIT);
+        selenium.selectWindow("name=" + JobEditors.INLINE_EDITOR_TAG);
 
-		selenium.click(JobEditors.Close_BUTTON_Inline);
-		selenium.selectWindow(null);
+        selenium.click(JobEditors.INLINE_SEGMENT_TABLE + "/p[2]");
+        if (selenium.isAlertPresent()) {
+        	selenium.getAlert();
+        } else {
+	        selenium.selectFrame(JobEditors.INLINE_EDITOR_FRAME);
+	        selenium.type("//body", getDataInCase("stringLine"));
+	        selenium.selectFrame(JobEditors.RELATIVE_TOP_FRAME);
+	        selenium.click(JobEditors.CHANGE_SAVE_BUTTON);
+	        Assert.assertEquals(
+	                selenium.getText(JobEditors.INLINE_SEGMENT_TABLE + "/p[2]"),
+	                getDataInCase("stringLine"));
+        }
+        selenium.click(JobEditors.INLINE_CLOSE_BUTTON);
+        selenium.selectWindow(null);
 
-		iMyAccountFuncs.changeDefaultEditor(selenium, "Popup");
-	}
+        //myAccountFuncs.changeDefaultEditor(selenium, "Popup");
+    }
 
-	@BeforeMethod
-	public void beforeMethod() {
-		CommonFuncs.loginSystemWithAnyone(selenium);
+    @BeforeClass
+    public void beforeMethod()
+    {
+        CommonFuncs.loginSystemWithAnyone(selenium);
+    }
 
-	}
-
-	@AfterMethod
-	public void afterMethod() {
-		CommonFuncs.logoutSystem(selenium);
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
+    @AfterClass
+    public void afterMethod()
+    {
+        CommonFuncs.logoutSystem(selenium);
+    }
 }

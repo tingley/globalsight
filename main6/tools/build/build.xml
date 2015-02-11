@@ -623,7 +623,7 @@
         <pathelement path="${classpath}"/>
         <!-- classpath property doesn't have this because it's not needed for
              compiling. -->
-        <pathelement location="${mysqlJarLib}/mysql-connector-java-5.1.6-bin.jar" />
+        <pathelement location="${mysqlJarLib}/mysql-connector-java-5.1.18-bin.jar" />
         <pathelement location="${testclasses}"/>
     	<pathelement location="${jbossLibDir}/endorsed/xalan.jar" />
     </path>
@@ -634,6 +634,9 @@
          user.build.properties.  Note it's up to you to make sure your
          install is in sync with the source. -->
 
+    <!-- If they didn't set it in user.build.properties, set to a dummy
+         value so run.classpath.{bat.sh} don't get funny characters. -->
+    <property name="gs.home" value="gshome" />
     <path id="runwithinstall.classpath">
         <path refid="run.classpath" />
         <pathelement location="${gs.home}/lib/classes" />

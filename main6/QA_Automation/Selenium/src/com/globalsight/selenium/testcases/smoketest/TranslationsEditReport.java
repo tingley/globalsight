@@ -3,16 +3,14 @@ package com.globalsight.selenium.testcases.smoketest;
 import java.io.File;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.DownloadFileRead.FileRead;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.TranslationsEditReportWebForm;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
+import com.globalsight.selenium.testcases.ConfigUtil;
 
 /**
  * Translations Edit Report
@@ -21,28 +19,13 @@ import com.thoughtworks.selenium.Selenium;
  * 
  * @author leon
  */
-public class TranslationsEditReport
+public class TranslationsEditReport extends BaseTestCase
 {
-    private Selenium selenium;
-
-    @BeforeClass
-    public void beforeClass()
-    {
-        selenium = CommonFuncs.initSelenium();
-        CommonFuncs.loginSystemWithAdmin(selenium);
-    }
-
-    @AfterClass
-    public void afterClass()
-    {
-        selenium.stop();
-    }
-
     @Test
     public void generateReport()
     {
-        selenium.click(MainFrame.Reports_MENU);
-        selenium.click(MainFrame.MainReportsPage_SUBMENU);
+        selenium.click(MainFrame.REPORTS_MENU);
+        selenium.click(MainFrame.REPORTS_MAIN_SUBMENU);
         selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
         selenium.click(TranslationsEditReportWebForm.REPORT_LINK);
 

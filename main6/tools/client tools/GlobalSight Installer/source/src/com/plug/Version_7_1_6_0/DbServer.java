@@ -220,7 +220,7 @@ public class DbServer
         }
         catch (SQLException e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
 
         return id;

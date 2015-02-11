@@ -17,25 +17,13 @@
 
 package com.globalsight.everest.tuv;
 
-//
-// globalsight imports
-//
 import com.globalsight.everest.util.system.RemoteServer;
 import com.globalsight.everest.tuv.TuvEventObserver;
 import com.globalsight.everest.tuv.TuvEventObserverWLRemote;
 import com.globalsight.everest.tuv.TuvEventObserverLocal;
 import com.globalsight.everest.tuv.TuvException;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.util.system.SystemStartupException;
-import com.globalsight.everest.util.system.SystemShutdownException;
-
-//
-// Java imports
-//
 import java.util.Collection;
-import java.util.Map;
-import java.util.List;
 
 import java.rmi.RemoteException;
 
@@ -53,8 +41,9 @@ public final class TuvEventObserverWLImpl extends RemoteServer
 
     /**
      * Bind the remote server to the ServerRegistry.
-     * @throws SystemStartupException when a NamingException
-     * or other Exception occurs.
+     * 
+     * @throws SystemStartupException
+     *             when a NamingException or other Exception occurs.
      */
     public void init() throws SystemStartupException
     {
@@ -66,15 +55,19 @@ public final class TuvEventObserverWLImpl extends RemoteServer
     // 
 
     /**
-     * Notification that the target locale page of
-     * Tuvs has been exported.
-     * @param p_targetTuvs target locale page Tuvs.
-     * @throws TuvException when an error occurs.
+     * Notification that the target locale page of Tuvs has been exported.
+     * 
+     * @param p_targetTuvs
+     *            target locale page Tuvs.
+     * @param p_companyId
+     *               companyId these Tuvs belong to.
+     * @throws TuvException
+     *             when an error occurs.
      */
-    public void notifyPageExportedEvent(Collection p_targetTuvs)
-            throws TuvException, RemoteException
+    public void notifyPageExportedEvent(Collection p_targetTuvs,
+            Long p_companyId) throws TuvException, RemoteException
     {
-        m_tuvEventObserverLocal.notifyPageExportedEvent(p_targetTuvs);
+        m_tuvEventObserverLocal.notifyPageExportedEvent(p_targetTuvs, p_companyId);
     }
         
     /**
@@ -87,30 +80,39 @@ public final class TuvEventObserverWLImpl extends RemoteServer
      * @exception TuvException
      * @exception RemoteException
      */
-    public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs)
-            throws TuvException, RemoteException
+    public void notifyPageExportedForUpdateEvent(Collection p_targetTuvs,
+            Long p_companyId) throws TuvException, RemoteException
     {
-	m_tuvEventObserverLocal.notifyPageExportedForUpdateEvent(p_targetTuvs);
+        m_tuvEventObserverLocal.notifyPageExportedForUpdateEvent(p_targetTuvs,
+                p_companyId);
     }
 
     /**
-     * Notification that the job of source locale page
-     * Tuvs has been exported.
-     * @param p_sourceTuvs source locale page Tuvs.
-     * @throws TuvException when an error occurs.
+     * Notification that the job of source locale page Tuvs has been exported.
+     * 
+     * @param p_sourceTuvs
+     *            source locale page Tuvs.
+     * @param p_companyId
+     *               companyId these Tuvs belong to.
+     * @throws TuvException
+     *             when an error occurs.
      */
-    public void notifyJobExportedEvent(Collection p_sourceTuvs)
+    public void notifyJobExportedEvent(Collection p_sourceTuvs, Long p_companyId)
             throws TuvException, RemoteException
     {
-        m_tuvEventObserverLocal.notifyJobExportedEvent(p_sourceTuvs);
+        m_tuvEventObserverLocal.notifyJobExportedEvent(p_sourceTuvs, p_companyId);
     }
 
     /**
-     * Notification that the workflow task completed for
-     * this target locale page of Tuvs.
-     * @param p_targetTuvs target locale page Tuvs.
-     * @param p_taskId task identifier that completed.
-     * @throws TuvException when an error occurs.
+     * Notification that the workflow task completed for this target locale page
+     * of Tuvs.
+     * 
+     * @param p_targetTuvs
+     *            target locale page Tuvs.
+     * @param p_taskId
+     *            task identifier that completed.
+     * @throws TuvException
+     *             when an error occurs.
      */
     public void notifyTaskCompleteEvent(Collection p_targetTuvs,
             long p_taskId)
@@ -121,11 +123,15 @@ public final class TuvEventObserverWLImpl extends RemoteServer
     }
 
     /**
-     * Notification that the workflow last task completed for
-     * this target locale page of Tuvs.
-     * @param p_targetTuvs target locale page Tuvs.
-     * @param p_taskId task identifier that completed.
-     * @throws TuvException when an error occurs.
+     * Notification that the workflow last task completed for this target locale
+     * page of Tuvs.
+     * 
+     * @param p_targetTuvs
+     *            target locale page Tuvs.
+     * @param p_taskId
+     *            task identifier that completed.
+     * @throws TuvException
+     *             when an error occurs.
      */
     public void notifyLastTaskCompleteEvent(Collection p_targetTuvs,
             long p_taskId)
@@ -136,10 +142,13 @@ public final class TuvEventObserverWLImpl extends RemoteServer
     }
 
     /**
-     * Notification that the workflow of target locale page
-     * Tuvs has been cancelled.
-     * @param p_targetTuvs target locale page Tuvs.
-     * @throws TuvException when an error occurs.
+     * Notification that the workflow of target locale page Tuvs has been
+     * cancelled.
+     * 
+     * @param p_targetTuvs
+     *            target locale page Tuvs.
+     * @throws TuvException
+     *             when an error occurs.
      */
     public void notifyWorkflowCancelEvent(Collection p_targetTuvs)
             throws TuvException, RemoteException
@@ -147,12 +156,14 @@ public final class TuvEventObserverWLImpl extends RemoteServer
         m_tuvEventObserverLocal.notifyWorkflowCancelEvent(p_targetTuvs);
     }
 
-
     /**
-     * Notification that all the workflows of target locale page
-     * Tuvs have been cancelled.
-     * @param p_targetTuvs target locale page Tuvs.
-     * @throws TuvException when an error occurs.
+     * Notification that all the workflows of target locale page Tuvs have been
+     * cancelled.
+     * 
+     * @param p_targetTuvs
+     *            target locale page Tuvs.
+     * @throws TuvException
+     *             when an error occurs.
      */
     public void notifyAllWorkflowsCancelEvent(Collection p_targetTuvs)
             throws TuvException, RemoteException

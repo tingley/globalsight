@@ -49,6 +49,7 @@
     String teamsiteServersUrlGuide = LinkHelper.getWebActivityURL(request, "tsservers");
     String teamsiteBranchesUrlGuide = LinkHelper.getWebActivityURL(request, "teamsite");
     String workflowsUrlGuide = LinkHelper.getWebActivityURL(request, "templates");
+    String createJobGuide = LinkHelper.getWebActivityURL(request, "createJobs");
     String terminologyUrlGuide = LinkHelper.getWebActivityURL(request, "termbases");
     String tmUrlGuide = LinkHelper.getWebActivityURL(request, "tm");
     String tmProfileUrlGuide = LinkHelper.getWebActivityURL(request, "tmProfiles");
@@ -420,13 +421,13 @@
     <TD CLASS="wizardCell" ID="tm">
         <A ID="tmLink"
            CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=tmUrlGuide%>')" ><%= menuBundle.getString("lb_tm2") %></A>
+           HREF="javascript:loadUrl('<%=tmUrlGuide%>')" ><%= menuBundle.getString("lb_tm") %></A>
     </TD>
     <TD WIDTH=10></TD>
     <TD CLASS="wizardCell" ID="tmProfiles">
         <A ID="tmProfilesLink"
            CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=tmProfileUrlGuide%>')" ><%= menuBundle.getString("lb_tm_profiles_abbreviated") %></A>
+           HREF="javascript:loadUrl('<%=tmProfileUrlGuide%>')" ><%= menuBundle.getString("lb_tm_profiles") %></A>
     </TD>
     <TD WIDTH=10></TD>
     <TD CLASS="wizardCell" ID="terminology">
@@ -508,13 +509,18 @@
 <TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="filterConfigurationDotTop" HEIGHT=2 WIDTH=7></TD>
-
+<TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="fileProfilesDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="importDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
+<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
+    NAME="createJobDotTop" HEIGHT=2 WIDTH=7></TD>
+<TD WIDTH=10  HEIGHT=2></TD>
+<%}%>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_top.gif" 
     NAME="finishDotTop" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
@@ -545,6 +551,10 @@
 <TD ID="fileProfilesBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <TD ID="importBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="importBarSpacer" WIDTH=10 HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
+<TD ID="createJobBar" HEIGHT=3 ALIGN="CENTER"></TD>
+<TD ID="createJobBarSpacer" WIDTH=10 HEIGHT=2></TD>
+<%}%>
 <TD ID="finishBar" HEIGHT=3 ALIGN="CENTER"></TD>
 <TD ID="finishBarSpacer" WIDTH=10 HEIGHT=2></TD>
 <TD HEIGHT=2></TD>
@@ -574,12 +584,18 @@
 <TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="filterConfigurationDotBottom" HEIGHT=2 WIDTH=7></TD>
+<TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="fileProfilesDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="importDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
+<% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
+<TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
+    NAME="createJobDotBottom" HEIGHT=2 WIDTH=7></TD>
+<TD WIDTH=10  HEIGHT=2></TD>
+<%}%>
 <TD HEIGHT=2 ALIGN="CENTER"><IMG SRC="/globalsight/images/dot_gray_guide_bottom.gif" 
     NAME="finishDotBottom" HEIGHT=2 WIDTH=7></TD>
 <TD WIDTH=10  HEIGHT=2></TD>
@@ -606,7 +622,7 @@
     <TD CLASS="wizardCell" ID="locProfiles">
         <A ID="locProfilesLink"
            CLASS="wizardLinks" 
-           HREF="javascript:loadUrl('<%=locProfilesUrlGuide%>')" ><%= menuBundle.getString("lb_l10n_profiles") %></A> 
+           HREF="javascript:loadUrl('<%=locProfilesUrlGuide%>')" ><%= menuBundle.getString("lb_loc_profiles") %></A> 
     </TD>
     <TD WIDTH=10></TD>
     <TD CLASS="wizardCell" ID="xmlRules">
@@ -653,6 +669,14 @@
            HREF="javascript:loadUrl('<%=importUrlGuide%>')" ><%= menuBundle.getString("lb_import") %></A>
     </TD>
     <TD WIDTH=10></TD>
+    <% if (userPerms.getPermissionFor(Permission.CREATE_JOB)) { %>
+    <TD CLASS="wizardCell" ID="createJob">
+        <A ID="createJobLink"
+           CLASS="wizardLinks" 
+           HREF="javascript:loadUrl('<%=createJobGuide%>')" ><%= menuBundle.getString("lb_create_job") %></A>
+    </TD>
+    <TD WIDTH=10></TD>
+    <%}%>
     <TD CLASS="wizardCellStartFinish" ID="finish">
         <A ID="finishLink"
            CLASS="wizardLinks" 
@@ -876,6 +900,12 @@
         <A ID="importTeamSiteLink"
            CLASS="wizardLinks" 
            HREF="javascript:openHelpWindow('/globalsight/help/en_US/setupWizardTeamsiteImportHelp.html')" ><%= menuBundle.getString("lb_import") %></A>
+    </TD>
+    <TD WIDTH=10></TD>
+    <TD CLASS="wizardCell" NOWRAP ID="createJobSite">
+        <A ID="createJobSiteLink"
+           CLASS="wizardLinks" 
+           HREF="javascript:loadUrl('<%=createJobGuide%>')" ><%= menuBundle.getString("lb_create_job") %></A>
     </TD>
     <TD WIDTH=10></TD>
     <TD CLASS="wizardCellStartFinish" NOWRAP ID="finishTeamSite">

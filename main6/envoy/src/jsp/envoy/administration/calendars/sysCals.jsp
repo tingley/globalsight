@@ -11,13 +11,12 @@
                   com.globalsight.util.resourcebundle.ResourceBundleConstants,
                   com.globalsight.util.resourcebundle.SystemResourceBundle,
                   com.globalsight.everest.webapp.webnavigation.LinkHelper,
-                  com.globalsight.everest.servlet.util.ServerProxy,
+                  com.globalsight.everest.company.CompanyWrapper,
                   com.globalsight.everest.servlet.EnvoyServletException,
                   com.globalsight.everest.util.system.SystemConfigParamNames,
                   com.globalsight.everest.util.system.SystemConfiguration,
                   com.globalsight.util.GeneralException,
-                  com.globalsight.calendar.FluxCalendar,
-                  com.globalsight.everest.servlet.util.ServerProxy,
+                  com.globalsight.calendar.FluxCalendar,                 
                   java.text.MessageFormat,
                   java.util.Locale, 
                   java.util.ResourceBundle,
@@ -193,7 +192,7 @@ function submitForm(selectedButton)
             </amb:column>
             <% if (isSuperAdmin) { %>
             <amb:column label="lb_company_name" sortBy="<%=CalendarComparator.ASC_COMPANY%>">
-              <%=ServerProxy.getJobHandler().getCompanyById(Long.parseLong(cal.getCompanyId())).getCompanyName()%>
+              <%=CompanyWrapper.getCompanyNameById(cal.getCompanyId())%>
             </amb:column>
             <% } %>
           </amb:table>

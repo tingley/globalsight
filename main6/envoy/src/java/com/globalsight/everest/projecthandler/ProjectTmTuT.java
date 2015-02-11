@@ -36,6 +36,7 @@ public class ProjectTmTuT extends PersistentObject
     private GlobalSightLocale sourceLocale;
     private ProjectTM projectTm;
     private Set<ProjectTmTuvT> tuvs;
+    private Set<ProjectTmTuTProp> props;
     private String sid;
     
     // For GBS-676. There are some difference between globalsight and worldserver
@@ -125,6 +126,34 @@ public class ProjectTmTuT extends PersistentObject
     {
         this.tuvs = tuvs;
     }
+    
+    public Set<ProjectTmTuTProp> getProps()
+    {
+        return props;
+    }
+
+    public void addProp(ProjectTmTuTProp prop)
+    {
+        if (props == null)
+        {
+            props = new HashSet<ProjectTmTuTProp>();
+        }
+
+        props.add(prop);
+    }
+
+    public void removeProp(ProjectTmTuTProp prop)
+    {
+        if (props != null)
+        {
+            props.remove(prop);
+        }
+    }
+
+    public void setProps(Set<ProjectTmTuTProp> props)
+    {
+        this.props = props;
+    }
 
     public String convertToTmx()
     {
@@ -192,6 +221,15 @@ public class ProjectTmTuT extends PersistentObject
         {
             prop = new Tmx.Prop(Tmx.PROP_SOURCE_TM_NAME, temp);
             result.append(prop.asXML());
+        }
+        
+        // attribute properties
+        if (props != null)
+        {
+            for (ProjectTmTuTProp pr : props)
+            {
+                result.append(pr.convertToTmx());
+            }
         }
 
         ProjectTmTuvT sTuv = getSourceTuv();

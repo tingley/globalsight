@@ -34,6 +34,7 @@ import com.globalsight.util.edit.EditUtil;
  */
 public abstract class PersistentObject implements Serializable
 {
+    private static final long serialVersionUID = 1528686961151128501L;
     //
     // PUBLIC CONSTANTS -- FOR USE BY TOPLINK
     //
@@ -44,7 +45,7 @@ public abstract class PersistentObject implements Serializable
     public static final long INITIAL_ID = -1L;
 
     // constants used by subclasses
-    protected static final int CLOB_THRESHOLD = 4000;
+    public static final int CLOB_THRESHOLD = 65500;// 65535 ("text" length in mysql)
 
     //
     // PRIVATE CONSTANTS

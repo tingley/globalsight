@@ -28,13 +28,14 @@ import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.request.RequestImpl;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 
 
 public class PageImportQuery
 {
-    private PreparedStatement m_psSourcePage;
-    private PreparedStatement m_psSourcePage1;
-    private PreparedStatement m_psLGIds;
+    private PreparedStatement m_psSourcePage = null;
+    private PreparedStatement m_psSourcePage1 = null;
+    private PreparedStatement m_psLGIds = null;
     // get the latest version of a particular source page
     // that is an EXTRACTED file
     private static final String LATEST_SOURCE_PAGE_SQL =
@@ -64,7 +65,7 @@ public class PageImportQuery
         ResultSet rs = null;
         try
         {
-            connection = PersistenceService.getInstance().getConnection();
+            connection = DbUtil.getConnection();
             m_psSourcePage = 
                 connection.prepareStatement(LATEST_SOURCE_PAGE_SQL);
             m_psSourcePage.setString(1,p_request.getExternalPageId());
@@ -81,29 +82,14 @@ public class PageImportQuery
         }
         finally
         {
-            if (m_psSourcePage != null)
-            {
-                 try {m_psSourcePage.close();}
-                 catch(Exception e){}
-            }
-
-            if (rs != null)
-            {
-                 try {rs.close();}
-                 catch(Exception e){}
-            }
-            
-            try
-            {
-                PersistenceService.getInstance().returnConnection(connection);
-            }
-            catch (Exception e)
-            {
-
-            }
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(m_psSourcePage);
+        	DbUtil.silentReturnConnection(connection);
         }
+
         return sourcePage;
     }
+
     public SourcePage getSourcePageById(long p_id) 
     throws PersistenceException
     {
@@ -112,9 +98,8 @@ public class PageImportQuery
         ResultSet rs = null;
         try
         {
-            connection = PersistenceService.getInstance().getConnection();
-            m_psSourcePage1 = 
-                connection.prepareStatement(SOURCE_PAGE_BY_ID);
+            connection = DbUtil.getConnection();
+            m_psSourcePage1 = connection.prepareStatement(SOURCE_PAGE_BY_ID);
             m_psSourcePage1.setLong(1, p_id);
             rs = m_psSourcePage1.executeQuery();
             sourcePage = processResultSet(rs);
@@ -125,38 +110,23 @@ public class PageImportQuery
         }
         finally
         {
-            if (m_psSourcePage1 != null)
-            {
-                 try {m_psSourcePage1.close();}
-                 catch(Exception e){}
-            }
-
-            if (rs != null)
-            {
-                 try {rs.close();}
-                 catch(Exception e){}
-            }
-
-            try
-            {
-                PersistenceService.getInstance().returnConnection(connection);
-            }
-            catch (Exception e)
-            {
-            }
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(m_psSourcePage1);
+        	DbUtil.silentReturnConnection(connection);
         }
+
         return sourcePage;
     }
 
-    public List getLeverageGroupIds(long p_sourcePageId)
-    throws PersistenceException
+	public List<Long> getLeverageGroupIds(long p_sourcePageId)
+			throws PersistenceException
     {
         Connection connection = null;
         ResultSet rs = null;
-        ArrayList list = null;
+        ArrayList<Long> list = null;
         try
         {
-            connection = PersistenceService.getInstance().getConnection();
+            connection = DbUtil.getConnection();
             m_psLGIds = connection.prepareStatement(LEVERAGE_GROUP_IDS);
             m_psLGIds.setLong(1,p_sourcePageId);
             rs = m_psLGIds.executeQuery();
@@ -166,7 +136,7 @@ public class PageImportQuery
                 i++;
                 if (i == 1)
                 {
-                    list = new ArrayList();
+                    list = new ArrayList<Long>();
                 }
                 long lgId = rs.getLong(1);
                 list.add(new Long(lgId));
@@ -178,34 +148,15 @@ public class PageImportQuery
         }
         finally
         {
-            if (m_psLGIds != null)
-            {
-                try {
-                    m_psLGIds.close();
-                }
-                catch (Exception e) {}
-            }
-
-            if (rs != null)
-            {
-                 try {rs.close();}
-                 catch(Exception e){}
-            }
-
-            try
-            {
-                PersistenceService.getInstance().returnConnection(connection);
-            }
-            catch (Exception e)
-            {
-            }
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(m_psLGIds);
+        	DbUtil.silentReturnConnection(connection);
         }
+
         return list;
     }
 
-    private SourcePage processResultSet(ResultSet  p_resultSet)
-
-    throws Exception
+	private SourcePage processResultSet(ResultSet p_resultSet) throws Exception
     {
         ResultSet rs = p_resultSet;
         SourcePage sourcePage = null;

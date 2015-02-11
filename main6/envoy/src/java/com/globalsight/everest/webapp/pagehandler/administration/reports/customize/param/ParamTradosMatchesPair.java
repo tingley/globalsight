@@ -259,7 +259,7 @@ public class ParamTradosMatchesPair extends ParamObjectPair
                 p_workflow.getThresholdNoMatchWordCount());
 
         p_workflowData.setTrados100WordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? 
-                p_workflow.getSegmentTmWordCount() : p_workflow.getNoUseExactMatchWordCount());
+                p_workflow.getSegmentTmWordCount() : p_workflow.getTotalExactMatchWordCount());
         
         p_workflowData.setTradosInContextWordCount((PageHandler.isInContextMatch(p_workflow.getJob(), tmProfile)) ? 
                 p_workflow.getInContextMatchWordCount() : p_workflow.getNoUseInContextMatchWordCount());

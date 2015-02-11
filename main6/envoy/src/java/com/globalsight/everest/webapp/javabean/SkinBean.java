@@ -15,16 +15,21 @@
  *  
  */
 package com.globalsight.everest.webapp.javabean;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import org.apache.log4j.Logger;
-import com.globalsight.everest.util.system.SystemConfiguration;
+
+import com.globalsight.util.resourcebundle.SystemResourceBundle;
 
 /**
- * Bean to provide skin values for colors, images, and fonts
+ * Bean to provide skin values, such as logo, colors, images, and fonts.
+ * The skin values is stored in /properties/skin.properties.
  */
 public class SkinBean
 {
     public static Logger s_category = Logger.getLogger("Skin");
-    private SystemConfiguration m_skinProperties = null;
+    private ResourceBundle m_skinProperties = null;
 
 
     /**
@@ -32,8 +37,10 @@ public class SkinBean
      */
     public SkinBean()
     {
-        try {
-            m_skinProperties = SystemConfiguration.getInstance("/properties/skin.properties");
+        try 
+        {
+            m_skinProperties = SystemResourceBundle.getInstance().getResourceBundle(
+                    "properties/skin", Locale.ROOT);
         }
         catch (Exception e)
         {
@@ -54,8 +61,9 @@ public class SkinBean
         String v = "";
         if (m_skinProperties != null)
         {
-            try {
-                v = m_skinProperties.getStringParameter(p_propertyName);
+            try 
+            {
+                v = m_skinProperties.getString(p_propertyName);
             }
             catch (Exception e)
             {

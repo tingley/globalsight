@@ -160,7 +160,7 @@ class TmStatisticsHelper {
                 }
                 catch (Throwable ignore) 
                 {
-                    CATEGORY.error(ignore.getMessage());
+                    CATEGORY.error(ignore.getMessage(), ignore);
                 }
 
                 SqlUtil.fireConnection(conn);

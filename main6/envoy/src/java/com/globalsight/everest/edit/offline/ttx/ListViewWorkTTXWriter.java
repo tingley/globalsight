@@ -193,7 +193,7 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         }
         catch (DiplomatBasicParserException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
 
         trgSegment = p_osd.getDisplayTargetTextWithNewLineBreaks(String
@@ -204,7 +204,7 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         }
         catch (DiplomatBasicParserException e)
         {
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
 
         // Write "TuId" before Tu

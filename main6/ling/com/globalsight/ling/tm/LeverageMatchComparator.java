@@ -60,7 +60,7 @@ public class LeverageMatchComparator
         catch(LingManagerException e)
         {
             
-            CATEGORY.error(e, e);
+            CATEGORY.error(e.getMessage(), e);
         }
         
         int sourceTargetCompare = one.compareTo(two);

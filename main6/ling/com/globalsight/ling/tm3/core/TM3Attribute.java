@@ -91,12 +91,12 @@ public class TM3Attribute {
         this.affectsIdentity = affectsIdentity;
     }
     
-    TM3Tm getTm() {
+    public TM3Tm getTm() {
         return tm;
     }
     
     // called by DefaultManager to attach a "declaration" to a TM
-    void setTm(BaseTm tm) {
+    public void setTm(BaseTm tm) {
         this.tm = tm;
     }
     

@@ -73,17 +73,17 @@ public class CustomFormParser
         }
         catch (org.xml.sax.SAXNotRecognizedException e)
         {
-            c_logger.error(e.getMessage());
+            c_logger.error(e.getMessage(), e);
             return null;
         }
         catch (org.xml.sax.SAXException e1)
         {
-            c_logger.error(e1.getMessage());
+            c_logger.error(e1.getMessage(), e1);
             return null;
         }
         catch (java.io.IOException e2)
         {
-            c_logger.error(e2.getMessage());
+            c_logger.error(e2.getMessage(), e2);
             return null;
         }
     }

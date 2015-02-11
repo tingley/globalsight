@@ -17,21 +17,11 @@
 
 package com.globalsight.everest.tuv;
 
-//
-// globalsight imports
-//
-import com.globalsight.everest.tuv.TuvException;
 import com.globalsight.everest.tuv.TuvEventObserver;
-
-//
-// Java imports
-//
-import java.util.Collection;
-
 import java.rmi.Remote;
 
 
-public interface TuvEventObserverWLRemote
-        extends Remote, TuvEventObserver
+public interface TuvEventObserverWLRemote extends Remote, TuvEventObserver
 {
+    
 }

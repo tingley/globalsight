@@ -35,12 +35,12 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
 import javax.jms.JMSException;
 import javax.naming.NamingException;
-import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -99,7 +99,7 @@ import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
 import com.globalsight.everest.jobhandler.JobException;
 import com.globalsight.everest.jobhandler.JobImpl;
-import com.globalsight.everest.jobhandler.jobcreation.JobAdditionEngine;
+import com.globalsight.everest.jobhandler.jobcreation.JobCreationMonitor;
 import com.globalsight.everest.page.DataSourceType;
 import com.globalsight.everest.page.Page;
 import com.globalsight.everest.page.PageState;
@@ -113,7 +113,9 @@ import com.globalsight.everest.page.pageexport.ExportEventObserverHelper;
 import com.globalsight.everest.page.pageexport.ExportParameters;
 import com.globalsight.everest.permission.Permission;
 import com.globalsight.everest.permission.PermissionSet;
-import com.globalsight.everest.persistence.tuv.TaskTuvDescriptorModifier;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvIndexUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
 import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.projecthandler.WorkflowTemplateInfo;
@@ -140,6 +142,8 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.TaskInfoBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -199,6 +203,10 @@ public class WorkflowManagerLocal implements WorkflowManager
 
     private static final String WF_LOCALIZED = Workflow.LOCALIZED;
 
+    private static final String WF_EXPORTING = Workflow.EXPORTING;
+
+    private static final String WF_SKIPPING = Workflow.SKIPPING;
+
     private static final String WF_EXPORTED = Workflow.EXPORTED;
 
     private static final String WF_ARCHIVED = Workflow.ARCHIVED;
@@ -225,9 +233,11 @@ public class WorkflowManagerLocal implements WorkflowManager
 
     public static final int LOCALIZED_STATE = 3;
 
+    public static final int EXPORTING_STATE = 4;
+
     public static final String[] ORDERED_STATES =
-    { WF_IMPORT_FAILED, WF_READY, WF_DISPATCHED, WF_LOCALIZED, WF_EXPORTED,
-            WF_ARCHIVED };
+    { WF_IMPORT_FAILED, WF_READY, WF_DISPATCHED, WF_LOCALIZED, WF_EXPORTING,
+            WF_SKIPPING, WF_EXPORTED, WF_ARCHIVED };
 
     private static final Logger s_logger = Logger
             .getLogger(WorkflowManagerLocal.class.getName());
@@ -261,8 +271,8 @@ public class WorkflowManagerLocal implements WorkflowManager
      * Get a list of workflow objects based on a particular workflow id.
      * <p>
      * 
-     * @param p_workflowId -
-     *            The id of the workflow.
+     * @param p_workflowId
+     *            - The id of the workflow.
      * @return A vector of only ONE workflow (always a vector is returned since
      *         TOPLink is unaware of querying for one or more objects.)
      * @exception JobException
@@ -277,10 +287,10 @@ public class WorkflowManagerLocal implements WorkflowManager
         try
         {
             wf = HibernateUtil.get(WorkflowImpl.class, p_workflowId);
-
         }
         catch (Exception e)
         {
+        	s_logger.error(e);
             String[] args = new String[1];
             args[0] = new Long(p_workflowId).toString();
             throw new WorkflowManagerException(
@@ -292,12 +302,12 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * Get a list of workflow objects based on a particular workflow id.  Also
+     * Get a list of workflow objects based on a particular workflow id. Also
      * ensures that the workflow has a pointer to its WorkflowInstance.
      * <p>
      * 
-     * @param p_workflowId -
-     *            The id of the workflow.
+     * @param p_workflowId
+     *            - The id of the workflow.
      * @exception JobException
      *                Component related exception.
      * @exception java.rmi.RemoteException
@@ -329,10 +339,11 @@ public class WorkflowManagerLocal implements WorkflowManager
     /**
      * @see WorkflowManager.cancel(String, Workflow)
      */
-    public void cancel(String p_idOfUserRequestingCancel,
-            Workflow p_workflow) throws RemoteException,
-            WorkflowManagerException
+    public void cancel(String p_idOfUserRequestingCancel, Workflow p_workflow)
+            throws RemoteException, WorkflowManagerException
     {
+        String nameOfUserRequestingCancel = UserUtil
+                .getUserNameById(p_idOfUserRequestingCancel);
         if (allowedToCancelWorkflows(p_idOfUserRequestingCancel))
         {
             validateStateOfPages(p_workflow);
@@ -343,8 +354,8 @@ public class WorkflowManagerLocal implements WorkflowManager
 
             try
             {
-                wf = (Workflow) session.get(WorkflowImpl.class, p_workflow
-                        .getIdAsLong());
+                wf = (Workflow) session.get(WorkflowImpl.class,
+                        p_workflow.getIdAsLong());
                 boolean isDispatched = WF_DISPATCHED.equals(wf.getState());
                 String oldWorkflowState = wf.getState();
                 wf.setState(WF_CANCELLED);
@@ -367,7 +378,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                 s_logger.info("Workflow " + p_workflow.getId()
                         + " was cancelled by user "
-                        + p_idOfUserRequestingCancel);
+                        + nameOfUserRequestingCancel);
             }
             catch (Exception we)
             {
@@ -382,10 +393,10 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         else
         {
-            s_logger.error("The user " + p_idOfUserRequestingCancel
+            s_logger.error("The user " + nameOfUserRequestingCancel
                     + " doesn't have the permission to cancel the workflow.");
             String[] args =
-            { Long.toString(p_workflow.getId()), p_idOfUserRequestingCancel };
+            { Long.toString(p_workflow.getId()), nameOfUserRequestingCancel };
             throw new WorkflowManagerException(
                     WorkflowManagerException.MSG_FAILED_TO_CANCEL_USER_NOT_ALLOWED,
                     args, null);
@@ -420,20 +431,19 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             job.setState(oldState);
             HibernateUtil.saveOrUpdate(job);
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         catch (NamingException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
     }
 
     /**
      * @see WorkflowManager.cancel(String, Job, String)
      */
-    public void cancel(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state) throws RemoteException,
-            WorkflowManagerException
+    public void cancel(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state) throws RemoteException, WorkflowManagerException
     {
         if (p_state == null)
         {
@@ -441,6 +451,8 @@ public class WorkflowManagerLocal implements WorkflowManager
             return;
         }
 
+        String nameOfUserRequestingCancel = UserUtil
+                .getUserNameById(p_idOfUserRequestingCancel);
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
         if (allowedToCancelJobs(p_idOfUserRequestingCancel))
@@ -485,22 +497,21 @@ public class WorkflowManagerLocal implements WorkflowManager
                             updatePageState(session, wfClone.getTargetPages(),
                                     PG_NOT_LOCALIZED);
                             // also update the secondary target files (if any)
-                            updateSecondaryTargetFileState(session, wfClone
-                                    .getSecondaryTargetFiles(),
+                            updateSecondaryTargetFileState(session,
+                                    wfClone.getSecondaryTargetFiles(),
                                     SecondaryTargetFileState.CANCELLED);
                         }
                         if (updateIFlow)
                         {
 
                             Map activeTasks = getWFServer()
-                                    .getActiveTasksForWorkflow(
-                                            wf.getId());
+                                    .getActiveTasksForWorkflow(wf.getId());
                             if (activeTasks != null)
                             {
                                 tasks = activeTasks.values().toArray();
                                 taskList.add(tasks);
-                                updateTaskState(session, tasks, wfClone
-                                        .getTasks(), Task.STATE_DEACTIVE);
+                                updateTaskState(session, tasks,
+                                        wfClone.getTasks(), Task.STATE_DEACTIVE);
 
                                 removeReservedTimes(tasks);
                             }
@@ -523,8 +534,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     .toString());
                             emailInfo.setCompanyId(p_job.getCompanyId());
 
-                            suspendWorkflow(wfClone.getId(),
-                                    emailInfo);
+                            suspendWorkflow(wfClone.getId(), emailInfo);
                         }
                         wfs.add(wfClone);
                         session.saveOrUpdate(wfClone);
@@ -566,7 +576,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                 s_logger.info("Job " + p_job.getId()
                         + " was cancelled by user "
-                        + p_idOfUserRequestingCancel);
+                        + nameOfUserRequestingCancel);
 
             }
             catch (Exception e)
@@ -582,11 +592,11 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         else
         {
-            s_logger.error("User " + p_idOfUserRequestingCancel
+            s_logger.error("User " + nameOfUserRequestingCancel
                     + " doesn't have permission to cancel job " + p_job.getId()
                     + " so the cancellation failed.");
             String[] args =
-            { Long.toString(p_job.getId()), p_idOfUserRequestingCancel };
+            { Long.toString(p_job.getId()), nameOfUserRequestingCancel };
             throw new WorkflowManagerException(
                     WorkflowManagerException.MSG_FAILED_TO_CANCEL_USER_NOT_ALLOWED,
                     args, null);
@@ -655,9 +665,9 @@ public class WorkflowManagerLocal implements WorkflowManager
     /**
      * @see WorkflowManager.cancel(String, Job, String, boolean)
      */
-    public void cancel(String p_idOfUserRequestingCancel,
-            Job p_job, String p_state, boolean p_reimport)
-            throws RemoteException, WorkflowManagerException
+    public void cancel(String p_idOfUserRequestingCancel, Job p_job,
+            String p_state, boolean p_reimport) throws RemoteException,
+            WorkflowManagerException
     {
         if (p_state == null)
         {
@@ -714,22 +724,21 @@ public class WorkflowManagerLocal implements WorkflowManager
                             updatePageState(session, wfClone.getTargetPages(),
                                     PG_NOT_LOCALIZED);
                             // also update the secondary target files (if any)
-                            updateSecondaryTargetFileState(session, wfClone
-                                    .getSecondaryTargetFiles(),
+                            updateSecondaryTargetFileState(session,
+                                    wfClone.getSecondaryTargetFiles(),
                                     SecondaryTargetFileState.CANCELLED);
                         }
                         if (updateIFlow)
                         {
 
                             Map activeTasks = getWFServer()
-                                    .getActiveTasksForWorkflow(
-                                            wf.getId());
+                                    .getActiveTasksForWorkflow(wf.getId());
                             if (activeTasks != null)
                             {
                                 tasks = activeTasks.values().toArray();
                                 taskList.add(tasks);
-                                updateTaskState(session, tasks, wfClone
-                                        .getTasks(), Task.STATE_DEACTIVE);
+                                updateTaskState(session, tasks,
+                                        wfClone.getTasks(), Task.STATE_DEACTIVE);
 
                                 removeReservedTimes(tasks);
                             }
@@ -752,8 +761,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     .toString());
                             emailInfo.setCompanyId(p_job.getCompanyId());
 
-                            suspendWorkflow(wfClone.getId(),
-                                    emailInfo);
+                            suspendWorkflow(wfClone.getId(), emailInfo);
                         }
                         wfs.add(wfClone);
                         session.saveOrUpdate(wfClone);
@@ -828,11 +836,11 @@ public class WorkflowManagerLocal implements WorkflowManager
      * 
      * @param String
      *            Workflow p_workflow
-     * @throws RemoteException,
-     *             WorkflowManagerException
+     * @throws RemoteException
+     *             , WorkflowManagerException
      */
-    public void archiveWorkflow(Workflow p_workflow)
-            throws RemoteException, WorkflowManagerException
+    public void archiveWorkflow(Workflow p_workflow) throws RemoteException,
+            WorkflowManagerException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
@@ -900,15 +908,15 @@ public class WorkflowManagerLocal implements WorkflowManager
      * 
      * @param String
      *            Workflow p_workflow
-     * @throws RemoteException,
-     *             WorkflowManagerException
+     * @throws RemoteException
+     *             , WorkflowManagerException
      */
-    public void dispatch(Workflow p_workflow)
-            throws RemoteException, WorkflowManagerException
+    public void dispatch(Workflow p_workflow) throws RemoteException,
+            WorkflowManagerException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
-        JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+        JbpmContext ctx = null;
 
         try
         {
@@ -921,103 +929,127 @@ public class WorkflowManagerLocal implements WorkflowManager
                     p_workflow.getIdAsLong());
 
             long taskId = -1;
-            
+
             if (WF_READY.equals(wfClone.getState())
                     || Workflow.PENDING.equals(wfClone.getState()))
             {
                 Job j = wfClone.getJob();
                 TaskEmailInfo emailInfo = createTaskEmailInfo(j, wfClone);
 
-                ArrayList returnValue = dispatchWorkflow(wfClone, session, 
-                                        new Date(),emailInfo);
-                
-                taskId = ((Long)(returnValue).get(0)).longValue();
+                ArrayList returnValue = dispatchWorkflow(wfClone, session,
+                        new Date(), emailInfo);
+
+                taskId = ((Long) (returnValue).get(0)).longValue();
 
                 // For sla issue
                 if (wfClone.isEstimatedTranslateCompletionDateOverrided())
                 {
-                    updateEstimatedTranslateCompletionDate(wfClone
-                            .getId(), wfClone
-                            .getEstimatedTranslateCompletionDate());
+                    updateEstimatedTranslateCompletionDate(wfClone.getId(),
+                            wfClone.getEstimatedTranslateCompletionDate());
                 }
 
                 possiblyUpdateJob(session, wfClone, WF_DISPATCHED);
                 session.saveOrUpdate(wfClone);
                 tx.commit();
 
-                if (((Boolean)returnValue.get(1)).booleanValue())
+                if (((Boolean) returnValue.get(1)).booleanValue())
                 {
-                    exportForStfCreation(new Long(taskId), wfClone, emailInfo
-                            .getProjectManagerId());
+                    exportForStfCreation(new Long(taskId), wfClone,
+                            emailInfo.getProjectManagerId());
                 }
-                
+
                 Task task = (Task) wfClone.getTasks().get(taskId);
-                
-                if(task != null ) {
+
+                if (task != null)
+                {
                     task.setProjectManagerName(emailInfo.getProjectManagerId());
                     Activity act = ServerProxy.getJobHandler().getActivity(
-                        task.getTaskName());
-                
-                    if(act.isType(Activity.TYPE_AUTOACTION)) {
-                        if(returnValue.get(2) != null) {
-                            downloadOfflineFiles(task, j, 
-                                (ArrayList)returnValue.get(2));
+                            task.getTaskName());
+
+                    if (act.isType(Activity.TYPE_AUTOACTION))
+                    {
+                        if (returnValue.get(2) != null)
+                        {
+                            downloadOfflineFiles(task, j,
+                                    (ArrayList) returnValue.get(2));
                         }
                     }
-                    else if(act.isType(Activity.TYPE_GSEDITION)) {
-                    //first automaticly  accept the task.
-                        Task taskClone = (Task) session.get(TaskImpl.class, new Long(taskId));
+                    else if (act.isType(Activity.TYPE_GSEDITION))
+                    {
+                        // first automaticly accept the task.
+                        Task taskClone = (Task) session.get(TaskImpl.class,
+                                new Long(taskId));
                         ArrayList profiles = j.getAllFileProfiles();
-                        
+
                         boolean isAllUnExtracted = true;
-                        //Check if all the files are un-extracted file,if they all are,
-                        //don't do any GS Edition distribute.
-                        //If the job have extracted file and also have un-extacted file,
-                        // just create GS Edition job on serverB for extracted file, and
+                        // Check if all the files are un-extracted file,if they
+                        // all are,
+                        // don't do any GS Edition distribute.
+                        // If the job have extracted file and also have
+                        // un-extacted file,
+                        // just create GS Edition job on serverB for extracted
+                        // file, and
                         // un-extracted file don't do any thing.
-                        for(int i = 0; i < profiles.size(); i++) {
-                            FileProfile fileProfile = (FileProfile)profiles.get(i);
-                            KnownFormatType format = 
-                                ServerProxy.getFileProfilePersistenceManager().
-                                    queryKnownFormatType(fileProfile.getKnownFormatTypeId());
-                            
-                            if (!format.getName().equals("Un-extracted")){
+                        for (int i = 0; i < profiles.size(); i++)
+                        {
+                            FileProfile fileProfile = (FileProfile) profiles
+                                    .get(i);
+                            KnownFormatType format = ServerProxy
+                                    .getFileProfilePersistenceManager()
+                                    .queryKnownFormatType(
+                                            fileProfile.getKnownFormatTypeId());
+
+                            if (!format.getName().equals("Un-extracted"))
+                            {
                                 isAllUnExtracted = false;
                             }
                         }
-                        
-                        if(!isAllUnExtracted) {
-                            ProcessInstance processInstance = ctx.getProcessInstance(wfClone.getId());
+
+                        if (!isAllUnExtracted)
+                        {
+                        	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+                            ProcessInstance processInstance = ctx
+                                    .getProcessInstance(wfClone.getId());
                             WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                                .getProcessInstance(processInstance);
-                            
-                            Node node = WorkflowJbpmUtil.getNodeById(processInstance
-                                    .getProcessDefinition(), taskClone.getId());
-                            WorkflowTaskInstance taskInstance = WorkflowJbpmUtil.getCurrentTaskInstance(
-                                    workflowInstance.getWorkflowInstanceTasks(), node.getName());
-                            
+                                    .getProcessInstance(processInstance);
+
+                            Node node = WorkflowJbpmUtil.getNodeById(
+                                    processInstance.getProcessDefinition(),
+                                    taskClone.getId());
+                            WorkflowTaskInstance taskInstance = WorkflowJbpmUtil
+                                    .getCurrentTaskInstance(workflowInstance
+                                            .getWorkflowInstanceTasks(), node
+                                            .getName());
+
                             String roles = taskInstance.getRolesAsString();
-                            String[] userIds = AssigneeFilter.getAssigneeList(roles
-                                    .split(","), emailInfo.getProjectIdAsLong()
-                                    .longValue());
-                            TaskHelper.acceptTaskForGSEdition(userIds[0], taskClone);
-                            
-                            //set the state to be STATE_REDEAY_DISPATCH_GSEDTION, if the
+                            String[] userIds = AssigneeFilter.getAssigneeList(
+                                    roles.split(","), emailInfo
+                                            .getProjectIdAsLong().longValue());
+                            TaskHelper.acceptTaskForGSEdition(userIds[0],
+                                    taskClone);
+
+                            // set the state to be
+                            // STATE_REDEAY_DISPATCH_GSEDTION, if the
                             // crete edition job fail, can know it failed.
-                            taskClone.setState(taskClone.STATE_REDEAY_DISPATCH_GSEDTION);
-                            
+                            taskClone
+                                    .setState(taskClone.STATE_REDEAY_DISPATCH_GSEDTION);
+
                             tx = session.beginTransaction();
                             session.saveOrUpdate(taskClone);
                             tx.commit();
-                        
-                            try {
+
+                            try
+                            {
                                 tx = session.beginTransaction();
                                 createGSEdtionJob(task, j);
-                                taskClone.setState(task.STATE_DISPATCHED_TO_TRANSLATION);
+                                taskClone
+                                        .setState(task.STATE_DISPATCHED_TO_TRANSLATION);
                                 session.saveOrUpdate(taskClone);
                                 tx.commit();
                             }
-                            catch(Exception e){}
+                            catch (Exception e)
+                            {
+                            }
                         }
                     }
                 }
@@ -1041,7 +1073,9 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         finally
         {
-            ctx.close();
+        	if (ctx != null) {
+                ctx.close();
+        	}
         }
     }
 
@@ -1053,8 +1087,7 @@ public class WorkflowManagerLocal implements WorkflowManager
      */
     private OfflinePageData getNextExtractedOfflinePage(String p_pageId,
             String p_pageName, boolean p_canUseUrl, TargetPage p_trgPage,
-            DownloadParams m_downloadParams)
-            throws AmbassadorDwUpException
+            DownloadParams m_downloadParams) throws AmbassadorDwUpException
     {
         try
         {
@@ -1068,7 +1101,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             throw new AmbassadorDwUpException(ex);
         }
     }
-    
+
     private MatchTypeStatistics getMatchesStatistics(String p_pageId,
             String p_pageName, boolean p_canUseUrl, TargetPage p_trgPage,
             DownloadParams m_downloadParams)
@@ -1085,17 +1118,20 @@ public class WorkflowManagerLocal implements WorkflowManager
             throw new AmbassadorDwUpException(ex);
         }
     }
-    
+
     private OfflinePageData updateOfflinePageData(OfflinePageData opd,
-            MatchTypeStatistics matchs, ArrayList splittedTuvs, DownloadParams m_downloadParams)
+            MatchTypeStatistics matchs, ArrayList splittedTuvs,
+            DownloadParams m_downloadParams)
     {
         Vector vector = opd.getSegmentList();
         Vector excludedTypes = m_downloadParams.getExcludedTypeNames();
+        String companyId = m_downloadParams.getJob() != null ? m_downloadParams
+                .getJob().getCompanyId() : CompanyWrapper.getCurrentCompanyId();
         for (int i = 0; i < vector.size(); i++)
         {
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
-            if (LeverageUtil.isIncontextMatch(i, splittedTuvs,
-                    null, matchs, new Vector()))
+            if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
+                    new Vector(), companyId))
             {
                 segment = (OfflineSegmentData) vector.get(i);
                 segment.setDisplayMatchType("Context Exact Match");
@@ -1105,8 +1141,8 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         for (int i = 0; i < splittedTuvs.size(); i++)
         {
-            if (LeverageUtil.isIncontextMatch(i, splittedTuvs,
-                    null, matchs, excludedTypes))
+            if (LeverageUtil.isIncontextMatch(i, splittedTuvs, null, matchs,
+                    excludedTypes, companyId))
             {
                 long id = ((SegmentTmTuv) splittedTuvs.get(i)).getId();
                 for (int j = 0; j < vector.size(); j++)
@@ -1126,45 +1162,53 @@ public class WorkflowManagerLocal implements WorkflowManager
         opd.setSegmentList(vector);
         return opd;
     }
-    
-    public List getPageData(Task task, Job p_job) {
+
+    public List getPageData(Task task, Job p_job)
+    {
         TargetPage trgPage = null;
-        String curTargetFname = null;
         List<OfflinePageData> datas = new ArrayList<OfflinePageData>();
-        
-        try {
+
+        try
+        {
             DownloadParams m_downloadParams = getDownloadParams(task, p_job);
             ListIterator m_PSF_Ids = m_downloadParams.getPageListIterator();
-            ListIterator m_PSF_Names = m_downloadParams.getPageNameListIterator();
-            ListIterator m_PSF_canUseUrl = m_downloadParams.getCanUseUrlListIterator();
-            
-            page_loop: while (m_PSF_Ids.hasNext())
+            ListIterator m_PSF_Names = m_downloadParams
+                    .getPageNameListIterator();
+            ListIterator m_PSF_canUseUrl = m_downloadParams
+                    .getCanUseUrlListIterator();
+
+            while (m_PSF_Ids.hasNext())
             {
                 Long srcPageId = (Long) m_PSF_Ids.next();
                 String srcPageName = (String) m_PSF_Names.next();
-                boolean srcCanUseUrl = ((Boolean) m_PSF_canUseUrl.next()).booleanValue();
-                
+                boolean srcCanUseUrl = ((Boolean) m_PSF_canUseUrl.next())
+                        .booleanValue();
+
                 trgPage = ServerProxy.getPageManager().getTargetPage(
                         srcPageId.longValue(),
                         m_downloadParams.getTargetLocale().getId());
-                
-                OfflinePageData OPD = getNextExtractedOfflinePage(srcPageId.toString(), 
-                        srcPageName, srcCanUseUrl, trgPage, m_downloadParams);
+
+                OfflinePageData OPD = getNextExtractedOfflinePage(
+                        srcPageId.toString(), srcPageName, srcCanUseUrl,
+                        trgPage, m_downloadParams);
                 // Add tmx file before formatting, because formating will
                 // cause
                 // native code missing.
-                MatchTypeStatistics matchs = getMatchesStatistics(srcPageId
-                        .toString(), srcPageName, srcCanUseUrl, trgPage, m_downloadParams);
+                MatchTypeStatistics matchs = getMatchesStatistics(
+                        srcPageId.toString(), srcPageName, srcCanUseUrl,
+                        trgPage, m_downloadParams);
                 Job job = trgPage.getSourcePage().getRequest().getJob();
-                
-                //For auto action job, the last page will not get the job,
-                //so use the job which was set in downloaParams.
-                if(job == null) {
-                    if(m_downloadParams.getJob() !=null) {
+
+                // For auto action job, the last page will not get the job,
+                // so use the job which was set in downloaParams.
+                if (job == null)
+                {
+                    if (m_downloadParams.getJob() != null)
+                    {
                         job = m_downloadParams.getJob();
                     }
                 }
-                
+
                 boolean isUseInContext = job.getL10nProfile()
                         .getTranslationMemoryProfile()
                         .getIsContextMatchLeveraging();
@@ -1176,19 +1220,19 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
                 catch (Exception e)
                 {
-                    s_logger.error(
-                            "Can not get the value of in context match", e);
+                    s_logger.error("Can not get the value of in context match",
+                            e);
                 }
-                
+
                 boolean isDefaultContextMatch = PageHandler
-                .isDefaultContextMatch(job);
-                ArrayList srcTuvs = StatisticsService.getSourceTuvs(trgPage
+                        .isDefaultContextMatch(job);
+                ArrayList<Tuv> srcTuvs = SegmentTuvUtil.getSourceTuvs(trgPage
                         .getSourcePage());
                 ArrayList splittedTuvs = null;
                 try
                 {
-                    splittedTuvs = StatisticsService.splitSourceTuvs(
-                            srcTuvs, trgPage.getGlobalSightLocale());
+                    splittedTuvs = StatisticsService.splitSourceTuvs(srcTuvs,
+                            trgPage.getGlobalSightLocale(), job.getCompanyId());
                 }
                 catch (Exception e)
                 {
@@ -1196,24 +1240,28 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
                 if (isInContextMatch)
                 {
-                    OPD = updateOfflinePageData(OPD, matchs, splittedTuvs,m_downloadParams);
+                    OPD = updateOfflinePageData(OPD, matchs, splittedTuvs,
+                            m_downloadParams);
                 }
                 else if (isDefaultContextMatch
                         && trgPage.getIsDefaultContextMatch())
                 {
                     OPD = updateDefaultContextOfflinePageDate(OPD, matchs);
                 }
-        
+
                 datas.add(OPD);
-                
+
                 formatOfflineSegments(OPD, m_downloadParams);
             }
         }
-        catch(Exception e) {}
-        
+        catch (Exception e)
+        {
+        }
+
         return datas;
     }
-    
+
+    @SuppressWarnings("unchecked")
     private OfflinePageData updateDefaultContextOfflinePageDate(
             OfflinePageData opd, MatchTypeStatistics matchs)
     {
@@ -1224,7 +1272,8 @@ public class WorkflowManagerLocal implements WorkflowManager
             OfflineSegmentData segment = (OfflineSegmentData) vector.get(i);
 
             if (segment.getMatchValue() == 100
-                    && segment.getTargetTuv().getState().getValue() == 6)
+                    && segment.getTargetTuv().getState().getValue() == TuvState.EXACT_MATCH_LOCALIZED
+                            .getValue())
             {
                 segment = (OfflineSegmentData) vector.get(i);
                 segment.setDisplayMatchType("Default Context Exact Match");
@@ -1232,10 +1281,10 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
         }
         opd.setSegmentList(vector);
-        
+
         return opd;
     }
-    
+
     /**
      * Wraps the code to convert segments to ptag segments.
      * 
@@ -1250,10 +1299,11 @@ public class WorkflowManagerLocal implements WorkflowManager
         PtagPageGenerator generator = new PtagPageGenerator();
         generator.convertAllGxmlToPtag(p_pageData, params);
     }
-     
-    public DownloadParams getDownloadParams(Task task, Job p_job) 
-        throws GeneralException, NamingException, IOException {
-        
+
+    public DownloadParams getDownloadParams(Task task, Job p_job)
+            throws GeneralException, NamingException, IOException
+    {
+
         SendDownloadFileHelper help = new SendDownloadFileHelper();
         int fileFormat = AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_XLF;
         int editorId = AmbassadorDwUpConstants.EDITOR_XLIFF;
@@ -1263,7 +1313,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         int resInsMode = AmbassadorDwUpConstants.MAKE_RES_ATNS;
         String displayExactMatch = OfflineConstants.DISPLAY_EXACT_MATCH_YES;
         String consolidate = "false";
-        
+
         List pageIdList = new ArrayList();
         List pageNameList = new ArrayList();
         List<Boolean> canUseUrlList = new ArrayList<Boolean>();
@@ -1273,18 +1323,19 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             SourcePage page = (SourcePage) it.next();
             long dataSourceId = page.getRequest().getDataSourceId();
-            FileProfile fp = 
-                ServerProxy.getFileProfilePersistenceManager().readFileProfile(dataSourceId);
-            KnownFormatType format = 
-                ServerProxy.getFileProfilePersistenceManager().
-                    queryKnownFormatType(fp.getKnownFormatTypeId());
-            
-            if (!format.getName().equals("Un-extracted")){
+            FileProfile fp = ServerProxy.getFileProfilePersistenceManager()
+                    .readFileProfile(dataSourceId);
+            KnownFormatType format = ServerProxy
+                    .getFileProfilePersistenceManager().queryKnownFormatType(
+                            fp.getKnownFormatTypeId());
+
+//            if (!format.getName().equals("Un-extracted"))
+//            {
                 pageIdList.add(new Long(page.getId()));
                 pageNameList.add(page.getExternalPageId());
-            }
+//            }
         }
-        
+
         if (pageIdList != null)
         {
             for (int i = 0; i < pageIdList.size(); i++)
@@ -1292,59 +1343,75 @@ public class WorkflowManagerLocal implements WorkflowManager
                 canUseUrlList.add(Boolean.FALSE);
             }
         }
-        
+
         long workflowId = task.getWorkflow().getId();
-        L10nProfile l10nProfile = task.getWorkflow().getJob()
-                .getL10nProfile();
+        L10nProfile l10nProfile = task.getWorkflow().getJob().getL10nProfile();
         int downloadEditAll = help.getEditAllState(
                 OfflineConstants.EDIT_EXACT_YES, l10nProfile);
         Vector excludeTypes = l10nProfile.getTranslationMemoryProfile()
                 .getJobExcludeTuTypes();
         List primarySourceFiles = help.getAllPSFList(task);
-        List stfList = help.getAllSTFList(task); 
+        List stfList = help.getAllSTFList(task);
         List supportFileList = help.getAllSupportFileList(task);
-        String uiLocale = task.getSourceLocale().getLanguage() + "_" + task.getSourceLocale().getCountry();
-        DownloadParams downloadParams = new DownloadParams(task.getJobName(), null,
-                "", Long.toString(workflowId), Long.toString(task.getId()),
-                pageIdList, pageNameList, canUseUrlList,
-                primarySourceFiles, stfList, editorId, platformId,
-                encoding, ptagFormat, uiLocale, task.getSourceLocale(),
-                task.getTargetLocale(), true, fileFormat, excludeTypes,
-                downloadEditAll, supportFileList, resInsMode, p_job.getUser());
-        
+        String uiLocale = task.getSourceLocale().getLanguage() + "_"
+                + task.getSourceLocale().getCountry();
+        DownloadParams downloadParams = new DownloadParams(task.getJobName(),
+                null, "", Long.toString(workflowId),
+                Long.toString(task.getId()), pageIdList, pageNameList,
+                canUseUrlList, primarySourceFiles, stfList, editorId,
+                platformId, encoding, ptagFormat, uiLocale,
+                task.getSourceLocale(), task.getTargetLocale(), true,
+                fileFormat, excludeTypes, downloadEditAll, supportFileList,
+                resInsMode, UserHandlerHelper.getUser(task.getAcceptor()));
+
+        // activity type
+        Activity act = new Activity();
+
+        try
+        {
+            act = ServerProxy.getJobHandler().getActivity(task.getTaskName());
+        }
+        catch (Exception e)
+        {
+        }
+
         downloadParams.setJob(p_job);
-        
-        downloadParams.setConsolidateTmxFiles("yes".equalsIgnoreCase(consolidate));
+        downloadParams.setActivityType(act.getDisplayName());
+
+        downloadParams.setConsolidateTmxFiles("yes"
+                .equalsIgnoreCase(consolidate));
         downloadParams.setDisplayExactMatch(displayExactMatch);
-        
+
         return downloadParams;
     }
-    
+
     public void downloadOfflineFiles(Task task, Job p_job, ArrayList p_nodeEmail)
-            throws GeneralException, NamingException, IOException {
+            throws GeneralException, NamingException, IOException
+    {
         DownloadParams downloadParams = getDownloadParams(task, p_job);
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
-        
+
         String directory = ExportUtil.getExportDirectory();
         String companyId = CompanyThreadLocal.getInstance().getValue();
-        String companyName = ServerProxy.getJobHandler().getCompanyById(
-                Long.parseLong(companyId)).getName();
-        
+        String companyName = ServerProxy.getJobHandler()
+                .getCompanyById(Long.parseLong(companyId)).getName();
+
         File filePath = new File(directory + companyName);
-        
-        if(!filePath.exists()) {
+
+        if (!filePath.exists())
+        {
             filePath.mkdir();
         }
-        
-        File temp = new File(directory + companyName + "\\\\", p_job.getJobName()  
-                             + "_" + task.getSourceLocale() + "_" 
-                             + task.getTargetLocale() + ".zip");
-        
+
+        File temp = new File(directory + companyName + "\\\\",
+                p_job.getJobName() + "_" + task.getSourceLocale() + "_"
+                        + task.getTargetLocale() + ".zip");
+
         JobPackageZipper zipper = new JobPackageZipper();
         zipper.createZipFile(temp);
         downloadParams.setZipper(zipper);
         downloadParams.setAutoActionNodeEmail(p_nodeEmail);
- 
+
         try
         {
             downloadParams.verify();
@@ -1353,265 +1420,336 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             throw new EnvoyServletException(e);
         }
-        
+
         OfflineEditManager odm = ServerProxy.getOfflineEditManager();
         OEMProcessStatus status = new OEMProcessStatus(downloadParams);
         odm.attachListener(status);
         odm.runProcessDownloadRequest(downloadParams);
-        
+
         zipper.closeZipFile();
     }
-    
+
     public void createGSEdtionJob(Task task, Job p_job) throws Exception
     {
         BufferedOutputStream bos = null;
         boolean isShortOfWorkflow = false;
         GSEditionActivityManagerLocal gsActivityManager = new GSEditionActivityManagerLocal();
 
-        try {
+        try
+        {
             Activity act = ServerProxy.getJobHandler().getActivity(
                     task.getTaskName());
-            
-            GSEditionActivity ga = 
-                gsActivityManager.getGSEditionActivityByID(Long.parseLong(act.getEditionActionID()));
-            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
-                    ga.getGsEdition().getHostName(), 
-                    ga.getGsEdition().getHostPort(), 
-                    ga.getGsEdition().getUserName(),
-                    ga.getGsEdition().getPassword(),
-                    ga.getGsEdition().getEnableHttps());
-                
-            String fullAccessToken = 
-                ambassador.login(ga.getGsEdition().getUserName(), ga.getGsEdition().getPassword());
-            String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-                        
-            String judge = ambassador.isSupportCurrentLocalePair(realAccessToken, 
-                            Long.toString(ga.getFileProfile()), 
-                            task.getSourceLocale().getLanguage() + "_" + task.getSourceLocale().getCountry(), 
-                            task.getTargetLocale().getLanguage() + "_" + task.getTargetLocale().getCountry());
 
-            if(judge != null && judge.equals("yes")) {
+            GSEditionActivity ga = gsActivityManager
+                    .getGSEditionActivityByID(Long.parseLong(act
+                            .getEditionActionID()));
+            Ambassador ambassador = WebServiceClientHelper.getClientAmbassador(
+                    ga.getGsEdition().getHostName(), ga.getGsEdition()
+                            .getHostPort(), ga.getGsEdition().getUserName(), ga
+                            .getGsEdition().getPassword(), ga.getGsEdition()
+                            .getEnableHttps());
+
+            String fullAccessToken = ambassador.login(ga.getGsEdition()
+                    .getUserName(), ga.getGsEdition().getPassword());
+            String realAccessToken = WebServiceClientHelper
+                    .getRealAccessToken(fullAccessToken);
+
+            String judge = ambassador.isSupportCurrentLocalePair(
+                    realAccessToken, Long.toString(ga.getFileProfile()), task
+                            .getSourceLocale().getLanguage()
+                            + "_"
+                            + task.getSourceLocale().getCountry(), task
+                            .getTargetLocale().getLanguage()
+                            + "_"
+                            + task.getTargetLocale().getCountry());
+
+            if (judge != null && judge.equals("yes"))
+            {
                 DownloadParams downloadParams = getDownloadParams(task, p_job);
                 List pageDataList = getPageData(task, p_job);
                 String directory = ExportUtil.getExportDirectory();
                 String companyId = CompanyThreadLocal.getInstance().getValue();
-                String companyName = ServerProxy.getJobHandler().getCompanyById(
-                        Long.parseLong(companyId)).getName();
-                String filepath = directory + companyName + File.separator 
-                + p_job.getJobName() + File.separator
-                + task.getTargetLocale() + File.separator;
-                
+                String companyName = ServerProxy.getJobHandler()
+                        .getCompanyById(Long.parseLong(companyId)).getName();
+                String filepath = directory + companyName + File.separator
+                        + p_job.getJobName() + File.separator
+                        + task.getTargetLocale() + File.separator;
+
                 File file_Path = new File(filepath);
-                
-                if(!file_Path.exists()) {
+
+                if (!file_Path.exists())
+                {
                     file_Path.mkdirs();
                 }
- 
+
                 HashMap args = new HashMap();
                 args.put("accessToken", realAccessToken);
                 args.put("jobName", task.getJobName());
-                String jobName =  ambassador.getUniqueJobName(args);
+                String jobName = ambassador.getUniqueJobName(args);
                 args.put("jobName", jobName);
-                
+
                 HashMap<String, Serializable> jobMap = new HashMap<String, Serializable>();
                 jobMap.put("accessToken", realAccessToken);
                 jobMap.put("jobName", jobName);
                 Vector<String> filePaths = new Vector<String>();
-                
+
                 Vector<String> fileProfileIds = new Vector<String>();
                 Vector<Serializable> targetLocales = new Vector<Serializable>();
                 HashMap segComments = new HashMap();
-                
-                //this for excel and ppt uploading source file to GS Edition server.
-                //The excel and ppt source file just only need be upload once.
+
+                // this for excel and ppt uploading source file to GS Edition
+                // server.
+                // The excel and ppt source file just only need be upload once.
                 boolean SourceFileUploadOnce = false;
-                
-                for(int i = 0; i < pageDataList.size(); i++) {
-                    OfflinePageData pagedata = (OfflinePageData)pageDataList.get(i);
-                    
-                    //Translate the original source file to the GS Edition server
-                    if(ga.getSourceFileReference() == 1 && !SourceFileUploadOnce) {
+
+                for (int i = 0; i < pageDataList.size(); i++)
+                {
+                    OfflinePageData pagedata = (OfflinePageData) pageDataList
+                            .get(i);
+
+                    // Translate the original source file to the GS Edition
+                    // server
+                    if (ga.getSourceFileReference() == 1
+                            && !SourceFileUploadOnce)
+                    {
                         HashMap<String, Object> sourceFileArgs = new HashMap<String, Object>();
                         sourceFileArgs.put("accessToken", realAccessToken);
                         sourceFileArgs.put("jobName", jobName);
                         sourceFileArgs.put("filePath", pagedata.getPageName());
-                        sourceFileArgs.put("targetLocale", task.getTargetLocale().toString());
-                        
+                        sourceFileArgs.put("targetLocale", task
+                                .getTargetLocale().toString());
+
                         String fullName = pagedata.getFullPageName();
                         String trueFileName = "";
-                        
-                        if(fullName.indexOf("(sheet") > -1 || fullName.indexOf("(tabstrip") > -1) {
-                            String preName = fullName.substring(0, fullName.indexOf("(sheet"));
-                            trueFileName = fullName.substring(fullName.indexOf("(sheet"));
-                            trueFileName = 
-                                preName + trueFileName.substring(trueFileName.indexOf(")") + 1, trueFileName.length());
+
+                        if (fullName.indexOf("(sheet") > -1
+                                || fullName.indexOf("(tabstrip") > -1)
+                        {
+                            String preName = fullName.substring(0,
+                                    fullName.indexOf("(sheet"));
+                            trueFileName = fullName.substring(fullName
+                                    .indexOf("(sheet"));
+                            trueFileName = preName
+                                    + trueFileName.substring(
+                                            trueFileName.indexOf(")") + 1,
+                                            trueFileName.length());
                             SourceFileUploadOnce = true;
                         }
-                        else if(fullName.indexOf("(slide") > -1) {
-                            String preName = fullName.substring(0, fullName.indexOf("(slide"));
-                            trueFileName = fullName.substring(fullName.indexOf("(slide"));
-                            trueFileName = 
-                                preName + trueFileName.substring(trueFileName.indexOf(")") + 1, trueFileName.length());
+                        else if (fullName.indexOf("(slide") > -1)
+                        {
+                            String preName = fullName.substring(0,
+                                    fullName.indexOf("(slide"));
+                            trueFileName = fullName.substring(fullName
+                                    .indexOf("(slide"));
+                            trueFileName = preName
+                                    + trueFileName.substring(
+                                            trueFileName.indexOf(")") + 1,
+                                            trueFileName.length());
                             SourceFileUploadOnce = true;
                         }
-                        else if(fullName.indexOf("(master") > -1) {
-                            String preName = fullName.substring(0, fullName.indexOf("(master"));
-                            trueFileName = fullName.substring(fullName.indexOf("(master"));
-                            trueFileName = 
-                                preName + trueFileName.substring(trueFileName.indexOf(")") + 1, trueFileName.length());
+                        else if (fullName.indexOf("(master") > -1)
+                        {
+                            String preName = fullName.substring(0,
+                                    fullName.indexOf("(master"));
+                            trueFileName = fullName.substring(fullName
+                                    .indexOf("(master"));
+                            trueFileName = preName
+                                    + trueFileName.substring(
+                                            trueFileName.indexOf(")") + 1,
+                                            trueFileName.length());
                             SourceFileUploadOnce = true;
                         }
-                        else {
+                        else
+                        {
                             trueFileName = fullName;
                         }
-                        
+
                         trueFileName = trueFileName.trim();
-                        File sourceFile = new File(AmbFileStoragePathUtils.getCxeDocDir(), trueFileName);
-                        byte[] bytesSource = new byte[(int)sourceFile.length()];
-                        FileInputStream inputSource = new FileInputStream(sourceFile);
-                        inputSource.read(bytesSource,0,bytesSource.length);
+                        File sourceFile = new File(
+                                AmbFileStoragePathUtils.getCxeDocDir(),
+                                trueFileName);
+                        byte[] bytesSource = new byte[(int) sourceFile.length()];
+                        FileInputStream inputSource = new FileInputStream(
+                                sourceFile);
+                        inputSource.read(bytesSource, 0, bytesSource.length);
                         inputSource.close();
-                        
+
                         sourceFileArgs.put("bytes", bytesSource);
                         ambassador.uploadOriginalSourceFile(sourceFileArgs);
                     }
 
-                    //Generate the xliff file of the job
+                    // Generate the xliff file of the job
                     String pagename = pagedata.getFullPageName();
-                    String pagePath = pagename.substring(0, pagename.lastIndexOf(File.separator));
-                    pagePath = pagePath.substring(pagePath.indexOf(task.getJobName()) + task.getJobName().length());
+                    String pagePath = pagename.substring(0,
+                            pagename.lastIndexOf(File.separator));
+                    pagePath = pagePath.substring(pagePath.indexOf(task
+                            .getJobName()) + task.getJobName().length());
                     file_Path = new File(filepath + pagePath);
-                    
-                    if(!file_Path.exists()) {
+
+                    if (!file_Path.exists())
+                    {
                         file_Path.mkdirs();
                     }
-                    
-                    if(pagename.indexOf("sheet") > -1 || pagename.indexOf("tabstrip") > -1 
-                            || pagename.indexOf("slide") > -1) {
-                        pagename =  
-                            pagename.substring(pagename.indexOf("(") + 1, pagename.indexOf(")")) 
-                            + pagedata.getPageName();
+
+                    if (pagename.indexOf("sheet") > -1
+                            || pagename.indexOf("tabstrip") > -1
+                            || pagename.indexOf("slide") > -1)
+                    {
+                        pagename = pagename.substring(
+                                pagename.indexOf("(") + 1,
+                                pagename.indexOf(")"))
+                                + pagedata.getPageName();
                     }
-                    else {
+                    else
+                    {
                         pagename = pagedata.getPageName();
                     }
 
-                    pagename = pagename.substring(0, pagename.lastIndexOf(".")) 
-                               + "_"
-                               + pagename.substring(pagename.lastIndexOf(".") + 1, pagename.length()) 
-                               + ".xlf";
-                    
+                    pagename = pagename.substring(0, pagename.lastIndexOf("."))
+                            + "_"
+                            + pagename.substring(pagename.lastIndexOf(".") + 1,
+                                    pagename.length()) + ".xlf";
+
                     File temp = new File(filepath + pagePath, pagename);
                     FileOutputStream fos = new FileOutputStream(temp);
                     bos = new BufferedOutputStream(fos, 4096);
                     ListViewWorkXLIFFWriter writer = new ListViewWorkXLIFFWriter();
-                    
+
                     writer.write(downloadParams, pagedata, bos,
-                       GlobalSightLocale.makeLocaleFromString(downloadParams.getUiLocale()));
-                    
-                    //Upload the xliff file to the remote GS Edition server.
-                    File xliffFile = new File(filepath + pagePath + File.separator + pagename);
+                            GlobalSightLocale
+                                    .makeLocaleFromString(downloadParams
+                                            .getUiLocale()));
+
+                    // Upload the xliff file to the remote GS Edition server.
+                    File xliffFile = new File(filepath + pagePath
+                            + File.separator + pagename);
                     FileInputStream is = new FileInputStream(xliffFile);
-                    byte[] bytes = new byte[(int)xliffFile.length()];
-                    is.read(bytes,0,bytes.length);
+                    byte[] bytes = new byte[(int) xliffFile.length()];
+                    is.read(bytes, 0, bytes.length);
                     is.close();
-                    
-                    String uplodaPath = task.getTargetLocale() + pagePath + File.separator + pagename;
+
+                    String uplodaPath = task.getTargetLocale() + pagePath
+                            + File.separator + pagename;
                     args.put("filePath", uplodaPath);
-                    args.put("fileProfileId", Long.toString(ga.getFileProfile()));
+                    args.put("fileProfileId",
+                            Long.toString(ga.getFileProfile()));
                     args.put("bytes", bytes);
                     ambassador.uploadFile(args);
-                    
-                    //create job on remote GS Edition server.
+
+                    // create job on remote GS Edition server.
                     filePaths.add(uplodaPath);
                     fileProfileIds.add(Long.toString(ga.getFileProfile()));
                     targetLocales.add(task.getTargetLocale().toString());
-                   
-                    segComments.putAll(pagedata.getTUVIssueMap());
+
+                    segComments.putAll(pagedata.getTUVIssueMap(p_job
+                            .getCompanyId()));
                 }
-                
+
                 jobMap.put("filePaths", filePaths);
                 jobMap.put("fileProfileIds", fileProfileIds);
                 jobMap.put("targetLocales", targetLocales);
                 jobMap.put("taskId", Long.toString(task.getId()));
-                //wsdlUrl
-                String capurl =  getSystemConfigValue(SystemConfigParamNames.CAP_LOGIN_URL);
-                String wsdlUrl = capurl + "/services/AmbassadorWebService?wsdl" + " ";
+                // wsdlUrl
+                String capurl = getSystemConfigValue(SystemConfigParamNames.CAP_LOGIN_URL);
+                String wsdlUrl = capurl + "/services/AmbassadorWebService?wsdl"
+                        + " ";
                 jobMap.put("wsdlUrl", wsdlUrl);
-                
+
                 UserManager userManager = ServerProxy.getUserManager();
-                User aUser = userManager.getUser(((TaskImpl)task).getProjectManagerId());
-                
+                User aUser = userManager.getUser(((TaskImpl) task)
+                        .getProjectManagerId());
+
                 jobMap.put("userName", aUser.getUserId());
                 jobMap.put("password", aUser.getPassword());
-                
-                if(task.getTaskComments() != null) {
-                    jobMap.put("jobComments", new Vector(task.getTaskComments()));
+
+                if (task.getTaskComments() != null)
+                {
+                    jobMap.put("jobComments",
+                            new Vector(task.getTaskComments()));
                 }
-                else {
+                else
+                {
                     jobMap.put("jobComments", new Vector());
                 }
-                
+
                 jobMap.put("segComments", segComments);
-                
+
                 ambassador.createEditionJob(jobMap);
             }
-            else {
+            else
+            {
                 UserManager userManager = ServerProxy.getUserManager();
-                User from = userManager.getUser(((TaskImpl)task).getProjectManagerId());
-                String userInfoXml = ambassador.getUserInfo(realAccessToken, ga.getGsEdition().getUserName());
-                
-                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                User from = userManager.getUser(((TaskImpl) task)
+                        .getProjectManagerId());
+                String userInfoXml = ambassador.getUserInfo(realAccessToken, ga
+                        .getGsEdition().getUserName());
+
+                DocumentBuilderFactory dbf = DocumentBuilderFactory
+                        .newInstance();
                 DocumentBuilder db = dbf.newDocumentBuilder();
-                ByteArrayInputStream stream = new ByteArrayInputStream(userInfoXml.getBytes());
+                ByteArrayInputStream stream = new ByteArrayInputStream(
+                        userInfoXml.getBytes());
                 org.w3c.dom.Document doc = db.parse(stream);
-                
+
                 NodeList useridNL = doc.getElementsByTagName("userid");
-                String userid = useridNL.item(0).getChildNodes().item(0).getNodeValue();
-                
+                String userid = useridNL.item(0).getChildNodes().item(0)
+                        .getNodeValue();
+
                 NodeList firstNameNL = doc.getElementsByTagName("firstName");
-                String firstName = firstNameNL.item(0).getChildNodes().item(0).getNodeValue();
-                
+                String firstName = firstNameNL.item(0).getChildNodes().item(0)
+                        .getNodeValue();
+
                 NodeList lastNameNL = doc.getElementsByTagName("lastName");
-                String lastName = lastNameNL.item(0).getChildNodes().item(0).getNodeValue();
-                
+                String lastName = lastNameNL.item(0).getChildNodes().item(0)
+                        .getNodeValue();
+
                 NodeList emailNL = doc.getElementsByTagName("email");
-                String mail = emailNL.item(0).getChildNodes().item(0).getNodeValue();
-                
-                NodeList defaultUILocaleNL = doc.getElementsByTagName("defaultUILocale");
-                String defaultUILocale = defaultUILocaleNL.item(0).getChildNodes().item(0).getNodeValue();
-                
-                String remoteUrl = "http://" + ga.getGsEdition().getHostName() + 
-                                   ":" + ga.getGsEdition().getHostPort() + 
-                                   "/globalsight";
-                
-                String[] args = {task.getSourceLocale().toString() 
-                                 + "_" + task.getTargetLocale().toString(),
-                                 ga.getFileProfileName(),
-                                 remoteUrl};
-                    
-                EmailInformation emailInfo = 
-                    new EmailInformation(userid, firstName + " " + lastName,
-                                         mail, defaultUILocale, 
-                                         ServerProxy.getCalendarManager().findUserTimeZone(from.getUserId()));
-                
-                ServerProxy.getMailer().sendMail(from.getUserId(), emailInfo, 
-                        WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_SUBJECT, 
-                        WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_MESSAGE, 
-                        args, p_job.getCompanyId());
+                String mail = emailNL.item(0).getChildNodes().item(0)
+                        .getNodeValue();
+
+                NodeList defaultUILocaleNL = doc
+                        .getElementsByTagName("defaultUILocale");
+                String defaultUILocale = defaultUILocaleNL.item(0)
+                        .getChildNodes().item(0).getNodeValue();
+
+                String remoteUrl = "http://" + ga.getGsEdition().getHostName()
+                        + ":" + ga.getGsEdition().getHostPort()
+                        + "/globalsight";
+
+                String[] args =
+                {
+                        task.getSourceLocale().toString() + "_"
+                                + task.getTargetLocale().toString(),
+                        ga.getFileProfileName(), remoteUrl };
+
+                EmailInformation emailInfo = new EmailInformation(userid,
+                        firstName + " " + lastName, mail, defaultUILocale,
+                        ServerProxy.getCalendarManager().findUserTimeZone(
+                                from.getUserId()));
+
+                ServerProxy
+                        .getMailer()
+                        .sendMail(
+                                from.getUserId(),
+                                emailInfo,
+                                WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_SUBJECT,
+                                WorkflowMailerConstants.SHORT_OF_WORKFLOW_GSEDITION_MESSAGE,
+                                args, p_job.getCompanyId());
                 isShortOfWorkflow = true;
                 throw new Exception();
             }
         }
         catch (Exception ex)
         {
-            if(isShortOfWorkflow) {
+            if (isShortOfWorkflow)
+            {
                 s_logger.warn("For the remote GS Edition server's file profile, its localization profile has no corresponding language workflow, so GS Edition job can not be created.");
             }
-            else {
+            else
+            {
                 s_logger.error("Create GS Edition job error:" + ex);
             }
-            
+
             throw new Exception();
         }
         finally
@@ -1622,51 +1760,56 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             catch (IOException e)
             {
-                s_logger.error(e);
-                e.printStackTrace();
+                s_logger.error(e.getMessage(), e);
             }
         }
     }
-    
+
     /*
-     * After the translator server complete the job, send back all the issue and 
+     * After the translator server complete the job, send back all the issue and
      * the issue history to GS Edition.
      */
-    public void sendBackIssuesForGSEdition(Task task, 
-                                           Job p_job, 
-                                           Ambassador ambassador, 
-                                           String p_accessToken)
+    public void sendBackIssuesForGSEdition(Task task, Job p_job,
+            Ambassador ambassador, String p_accessToken)
     {
         try
         {
             List pageDataList = getPageData(task, p_job);
-            
-            for(int i = 0; i < pageDataList.size(); i++) {
-                OfflinePageData pagedata = (OfflinePageData)pageDataList.get(i);
-                HashMap segComments = pagedata.getTUVIssueMap();
+
+            for (int i = 0; i < pageDataList.size(); i++)
+            {
+                OfflinePageData pagedata = (OfflinePageData) pageDataList
+                        .get(i);
+                HashMap segComments = pagedata.getTUVIssueMap(p_job
+                        .getCompanyId());
                 HashMap newSegComments = new HashMap();
                 Iterator iter = segComments.entrySet().iterator();
-                
-                while(iter.hasNext()) {
-                    Map.Entry me = (Map.Entry)iter.next();
-                    Long TUID = (Long)me.getKey();
-                    HashMap issueMap = (HashMap)me.getValue();
-                    IssueEditionRelation ir = getIssueEditionRelation((Long)issueMap.get("LevelObjectId"));
-                    issueMap.put("OriginalIssueHistoryId", ir.getOriginalIssueHistoryId());
+
+                while (iter.hasNext())
+                {
+                    Map.Entry me = (Map.Entry) iter.next();
+                    Long TUID = (Long) me.getKey();
+                    HashMap issueMap = (HashMap) me.getValue();
+                    IssueEditionRelation ir = getIssueEditionRelation((Long) issueMap
+                            .get("LevelObjectId"));
+                    issueMap.put("OriginalIssueHistoryId",
+                            ir.getOriginalIssueHistoryId());
                     long oldTUID = ir.getOriginalTuId();
-                    newSegComments.put(oldTUID, issueMap); 
+                    newSegComments.put(oldTUID, issueMap);
                 }
 
-                ambassador.sendSegmentCommentBack(p_accessToken, newSegComments);
+                ambassador
+                        .sendSegmentCommentBack(p_accessToken, newSegComments);
             }
         }
-        catch (Exception ex) {
-            s_logger.error(ex);
+        catch (Exception ex)
+        {
+            s_logger.error(ex.getMessage(), ex);
             throw new AmbassadorDwUpException(
-                   AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
+                    AmbassadorDwUpExceptionConstants.WRITER_IO_ERROR, ex);
         }
     }
-    
+
     // get a system configuration value for a given name.
     private String getSystemConfigValue(String p_paramName)
     {
@@ -1692,12 +1835,12 @@ public class WorkflowManagerLocal implements WorkflowManager
         JobImpl jobClone = null;
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
-        JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-        
+        JbpmContext ctx = null;
+
         try
         {
-            jobClone = (JobImpl) session.get(JobImpl.class, new Long(p_job
-                    .getId()));
+            jobClone = (JobImpl) session.get(JobImpl.class,
+                    new Long(p_job.getId()));
             Iterator it = jobClone.getWorkflows().iterator();
             // a Map containing task id as key and workflow as value.
             // This is used for possible creation of STF.
@@ -1713,96 +1856,126 @@ public class WorkflowManagerLocal implements WorkflowManager
                             WorkflowImpl.class, wf.getIdAsLong());
                     TaskEmailInfo emailInfo = createTaskEmailInfo(jobClone,
                             wfClone);
-                    
+
                     ArrayList returnValue = dispatchWorkflow(wfClone, session,
-                                            startDate, emailInfo);
-    
-                    long taskId = ((Long)returnValue.get(0)).longValue();
-                    
+                            startDate, emailInfo);
+
+                    long taskId = ((Long) returnValue.get(0)).longValue();
+
                     Task task = (Task) wfClone.getTasks().get(taskId);
 
                     // For sla issue
                     if (wfClone.isEstimatedTranslateCompletionDateOverrided())
                     {
-                        updateEstimatedTranslateCompletionDate(
-                                wfClone.getId(), wfClone
-                                        .getEstimatedTranslateCompletionDate());
+                        updateEstimatedTranslateCompletionDate(wfClone.getId(),
+                                wfClone.getEstimatedTranslateCompletionDate());
                     }
 
                     // prepare the map for possible creation of secondary target
                     // files
 
-                    if (((Boolean)returnValue.get(1)).booleanValue())
+                    if (((Boolean) returnValue.get(1)).booleanValue())
                     {
                         map.put(new Long(taskId), wfClone);
                     }
                     session.saveOrUpdate(wfClone);
-                    
-                    if(task != null ) {
-                        task.setProjectManagerName(emailInfo.getProjectManagerId());
+
+                    if (task != null)
+                    {
+                        task.setProjectManagerName(emailInfo
+                                .getProjectManagerId());
 
                         Activity act = ServerProxy.getJobHandler().getActivity(
-                            task.getTaskName());
-                    
-                        if(act.isType(Activity.TYPE_AUTOACTION)) {
-                            if(returnValue.get(2) != null) {
-                                downloadOfflineFiles(task, p_job, 
-                                    (ArrayList)returnValue.get(2));
+                                task.getTaskName());
+
+                        if (act.isType(Activity.TYPE_AUTOACTION))
+                        {
+                            if (returnValue.get(2) != null)
+                            {
+                                downloadOfflineFiles(task, p_job,
+                                        (ArrayList) returnValue.get(2));
                             }
                         }
-                        else if(act.isType(Activity.TYPE_GSEDITION)) {
-                          //first automaticly  accept the task.
-                            Task taskClone = (Task) session.get(TaskImpl.class, new Long(taskId));
+                        else if (act.isType(Activity.TYPE_GSEDITION))
+                        {
+                            // first automaticly accept the task.
+                            Task taskClone = (Task) session.get(TaskImpl.class,
+                                    new Long(taskId));
                             ArrayList profiles = p_job.getAllFileProfiles();
                             boolean isAllUnExtracted = true;
-                            //Check if all the files are un-extracted file,if they all are,
-                            //don't do any GS Edition distribute.
-                            //If the job have extracted file and also have un-extacted file,
-                            // just create GS Edition job on serverB for extracted file, and
+                            // Check if all the files are un-extracted file,if
+                            // they all are,
+                            // don't do any GS Edition distribute.
+                            // If the job have extracted file and also have
+                            // un-extacted file,
+                            // just create GS Edition job on serverB for
+                            // extracted file, and
                             // un-extracted file don't do any thing.
-                            for(int i = 0; i < profiles.size(); i++) {
-                                FileProfile fileProfile = (FileProfile)profiles.get(i);
-                                KnownFormatType format = 
-                                    ServerProxy.getFileProfilePersistenceManager().
-                                        queryKnownFormatType(fileProfile.getKnownFormatTypeId());
-                                
-                                if (!format.getName().equals("Un-extracted")){
+                            for (int i = 0; i < profiles.size(); i++)
+                            {
+                                FileProfile fileProfile = (FileProfile) profiles
+                                        .get(i);
+                                KnownFormatType format = ServerProxy
+                                        .getFileProfilePersistenceManager()
+                                        .queryKnownFormatType(
+                                                fileProfile
+                                                        .getKnownFormatTypeId());
+
+                                if (!format.getName().equals("Un-extracted"))
+                                {
                                     isAllUnExtracted = false;
                                 }
                             }
-                            
-                            if(!isAllUnExtracted) {
-                                ProcessInstance processInstance = ctx.getProcessInstance(wfClone.getId());
+
+                            if (!isAllUnExtracted)
+                            {
+                            	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+                                ProcessInstance processInstance = ctx
+                                        .getProcessInstance(wfClone.getId());
                                 WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                                    .getProcessInstance(processInstance);
-                                
-                                Node node = WorkflowJbpmUtil.getNodeById(processInstance
-                                        .getProcessDefinition(), taskClone.getId());
-                                WorkflowTaskInstance taskInstance = WorkflowJbpmUtil.getCurrentTaskInstance(
-                                        workflowInstance.getWorkflowInstanceTasks(), node.getName());
-                                
+                                        .getProcessInstance(processInstance);
+
+                                Node node = WorkflowJbpmUtil.getNodeById(
+                                        processInstance.getProcessDefinition(),
+                                        taskClone.getId());
+                                WorkflowTaskInstance taskInstance = WorkflowJbpmUtil
+                                        .getCurrentTaskInstance(
+                                                workflowInstance
+                                                        .getWorkflowInstanceTasks(),
+                                                node.getName());
+
                                 String roles = taskInstance.getRolesAsString();
-                                String[] userIds = AssigneeFilter.getAssigneeList(roles
-                                        .split(","), emailInfo.getProjectIdAsLong()
-                                        .longValue());
-                            
-                                if(userIds!=null && userIds.length > 0) {
-                                    TaskHelper.acceptTaskForGSEdition(userIds[0], taskClone);
-                                
-                                    //set the state to be STATE_REDEAY_DISPATCH_GSEDTION, if the
-                                    // crete edition job fail, can know it failed.
-                                    taskClone.setState(taskClone.STATE_REDEAY_DISPATCH_GSEDTION);
-                                    
-                                    Transaction tx1 = session.beginTransaction();
+                                String[] userIds = AssigneeFilter
+                                        .getAssigneeList(roles.split(","),
+                                                emailInfo.getProjectIdAsLong()
+                                                        .longValue());
+
+                                if (userIds != null && userIds.length > 0)
+                                {
+                                    TaskHelper.acceptTaskForGSEdition(
+                                            userIds[0], taskClone);
+
+                                    // set the state to be
+                                    // STATE_REDEAY_DISPATCH_GSEDTION, if the
+                                    // crete edition job fail, can know it
+                                    // failed.
+                                    taskClone
+                                            .setState(taskClone.STATE_REDEAY_DISPATCH_GSEDTION);
+
+                                    Transaction tx1 = session
+                                            .beginTransaction();
                                     session.saveOrUpdate(taskClone);
                                     tx1.commit();
-                                    
-                                    try{
+
+                                    try
+                                    {
                                         createGSEdtionJob(task, p_job);
-                                        taskClone.setState(task.STATE_DISPATCHED_TO_TRANSLATION);
+                                        taskClone
+                                                .setState(task.STATE_DISPATCHED_TO_TRANSLATION);
                                         session.saveOrUpdate(taskClone);
                                     }
-                                    catch(Exception e) {
+                                    catch (Exception e)
+                                    {
                                     }
                                 }
                             }
@@ -1810,7 +1983,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     }
                 }
             }
-            
+
             tx = session.beginTransaction();
             jobClone.setState(WF_DISPATCHED);
             updatePageState(session, jobClone.getSourcePages(), PG_ACTIVE_JOB);
@@ -1842,45 +2015,44 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         finally
         {
-            ctx.close();
+        	if (ctx != null) {
+                ctx.close(); 
+        	}
         }
 
         runJobCreationScript(p_job);
     }
 
-	/**
-	 * This method sets the percentage completion of a particular workflow
-	 * 
-	 * @param p_destinationArrow
-	 *            - The name of the outgoing arrow of a condition node (if the
-	 *            next node of this task is a condition node). This is used for
-	 *            making decision.
-	 * @param skipping
+    /**
+     * This method sets the percentage completion of a particular workflow
+     * 
+     * @param p_destinationArrow
+     *            - The name of the outgoing arrow of a condition node (if the
+     *            next node of this task is a condition node). This is used for
+     *            making decision.
+     * @param skipping
      *            Indicates this task is being skipped.
-     *            
-	 * @throws RemoteException
-	 *             , WorkflowManagerException
-	 */
-	public void setTaskCompletion(String p_userId,
-			Task p_task, String p_destinationArrow, String skipping)
-			throws RemoteException, WorkflowManagerException
+     * 
+     * @throws RemoteException
+     *             , WorkflowManagerException
+     */
+    public void setTaskCompletion(String p_userId, Task p_task,
+            String p_destinationArrow, String skipping) throws RemoteException,
+            WorkflowManagerException
     {
         if (s_logger.isDebugEnabled())
         {
             String s = "null task";
             if (p_task != null)
                 s = p_task.toString();
-            s_logger.debug("setTaskCompletion: " + " p_userId=" + p_userId
-                    + " p_task=" + s);
         }
 
         for (int i = 0; i < 3; i++)
         {
             try
             {
-				completeTask(p_userId, p_task, p_destinationArrow,
-						skipping);
-				break;
+                completeTask(p_userId, p_task, p_destinationArrow, skipping);
+                break;
             }
             catch (Exception e)
             {
@@ -1924,8 +2096,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                 if (!found)
                 {
                     estimatedDate = (wfTaskInfo.getState() == WorkflowConstants.STATE_COMPLETED) ? task
-                            .getCompletedDate()
-                            : task.getEstimatedCompletionDate();
+                            .getCompletedDate() : task
+                            .getEstimatedCompletionDate();
                 }
                 else
                 {
@@ -1936,7 +2108,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
             String[] args =
             { String.valueOf(p_taskId) };
             throw new WorkflowManagerException(
@@ -1979,8 +2151,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     TaskInfo ti = estimateDatesForDefaultPath(estimatedDate,
                             task, wfTaskInfo, true);
                     estimatedDate = (ti.getState() == WorkflowConstants.STATE_COMPLETED) ? ti
-                            .getCompletedDate()
-                            : ti.getCompleteByDate();
+                            .getCompletedDate() : ti.getCompleteByDate();
 
                     taskInfos.add(ti);
                 }
@@ -2053,17 +2224,18 @@ public class WorkflowManagerLocal implements WorkflowManager
     /**
      * This modifies an active workflow.
      * 
-     * @param p_sessionId -
-     *            Users login HTTPSession id
-     * @param p_wfInstance -
-     *            WorkflowInstance that has been modified.
-     * @param p_projectManagerId -
-     *            the ProjectManager userId.
-     * @param p_modifiedTasks -
-     *            A hashtable of the modified tasks. The key is the Task id and
-     *            the value is a TaskInfoBean that contains the modifications.
-     * @throws RemoteException,
-     *             WorkflowManagerException
+     * @param p_sessionId
+     *            - Users login HTTPSession id
+     * @param p_wfInstance
+     *            - WorkflowInstance that has been modified.
+     * @param p_projectManagerId
+     *            - the ProjectManager userId.
+     * @param p_modifiedTasks
+     *            - A hashtable of the modified tasks. The key is the Task id
+     *            and the value is a TaskInfoBean that contains the
+     *            modifications.
+     * @throws RemoteException
+     *             , WorkflowManagerException
      */
     public void modifyWorkflow(String p_sessionId,
             WorkflowInstance p_wfInstance, String p_projectManagerId,
@@ -2093,8 +2265,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                 workflow.setDispatchedDate(date);
                 updatePageState(session, workflow.getTargetPages(),
                         PG_ACTIVE_JOB);
-                updateSecondaryTargetFileState(session, workflow
-                        .getSecondaryTargetFiles(),
+                updateSecondaryTargetFileState(session,
+                        workflow.getSecondaryTargetFiles(),
                         SecondaryTargetFileState.ACTIVE_JOB);
                 possiblyUpdateJob(session, workflow, Workflow.EXPORT_FAILED);
             }
@@ -2160,9 +2332,9 @@ public class WorkflowManagerLocal implements WorkflowManager
      * @deprecated For sla report issue.
      * @see WorkflowManager.updatePlannedCompletionDate(String, long, Date)
      */
-    public void updatePlannedCompletionDate(
-            long p_workflowId, Date p_plannedCompletionDate)
-            throws WorkflowManagerException, RemoteException
+    public void updatePlannedCompletionDate(long p_workflowId,
+            Date p_plannedCompletionDate) throws WorkflowManagerException,
+            RemoteException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
@@ -2193,9 +2365,9 @@ public class WorkflowManagerLocal implements WorkflowManager
      * 
      * @see WorkflowManager.updateEstimatedCompletionDate(String, long, Date)
      */
-    public void updateEstimatedCompletionDate(
-            long p_workflowId, Date p_estimatedCompletionDate)
-            throws WorkflowManagerException, RemoteException
+    public void updateEstimatedCompletionDate(long p_workflowId,
+            Date p_estimatedCompletionDate) throws WorkflowManagerException,
+            RemoteException
     {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
@@ -2223,11 +2395,10 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /**
-     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long,
-     *      Date)
+     * @see WorkflowManager.updateEstimatedTranslateCompletionDate(long, Date)
      */
-    public void updateEstimatedTranslateCompletionDate(
-            long p_workflowId, Date p_estimatedTranslateCompletionDate)
+    public void updateEstimatedTranslateCompletionDate(long p_workflowId,
+            Date p_estimatedTranslateCompletionDate)
             throws WorkflowManagerException, RemoteException
     {
         Session session = HibernateUtil.getSession();
@@ -2237,40 +2408,41 @@ public class WorkflowManagerLocal implements WorkflowManager
             Workflow wf = (Workflow) session.get(WorkflowImpl.class, new Long(
                     p_workflowId));
             refreshWorkflowInstance(wf);
-            
+
             wf.setEstimatedTranslateCompletionDate(p_estimatedTranslateCompletionDate);
             wf.setEstimatedTranslateCompletionDateOverrided(true);
-            
-            if (Workflow.READY_TO_BE_DISPATCHED.equals(wf.getState()) && !wf.isEstimatedCompletionDateOverrided())
+
+            if (Workflow.READY_TO_BE_DISPATCHED.equals(wf.getState())
+                    && !wf.isEstimatedCompletionDateOverrided())
             {
                 List wfTaskInfos = ServerProxy.getWorkflowServer()
                         .timeDurationsInDefaultPath(null, wf.getId(), -1);
                 FluxCalendar defaultCalendar = ServerProxy.getCalendarManager()
                         .findDefaultCalendar(wf.getCompanyId());
-                
+
                 Hashtable tasks = wf.getTasks();
-                
+
                 long workflowDuration = 0l;
-                
-                for (int i =  wfTaskInfos.size() - 1; i >= 0; i--)
+
+                for (int i = wfTaskInfos.size() - 1; i >= 0; i--)
                 {
                     WfTaskInfo wfTaskInfo = (WfTaskInfo) wfTaskInfos.get(i);
                     TaskImpl task = (TaskImpl) tasks.get(new Long(wfTaskInfo
                             .getId()));
                     if (task == null)
                         continue;
-                    
+
                     Activity act = ServerProxy.getJobHandler().getActivity(
                             task.getTaskName());
-                    
+
                     if (Activity.isTranslateActivity(act.getType()))
                     {
                         break;
                     }
-                    
+
                     workflowDuration += wfTaskInfo.getTotalDuration();
                 }
-                
+
                 wf.setEstimatedCompletionDate(ServerProxy.getEventScheduler()
                         .determineDate(p_estimatedTranslateCompletionDate,
                                 defaultCalendar, workflowDuration));
@@ -2281,7 +2453,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 List taskInfos = getTaskInfosInDefaultPath(wf);
                 if (taskInfos != null)
                 {
-                    for (int i = taskInfos.size() - 1; i >= 0 ; i--)
+                    for (int i = taskInfos.size() - 1; i >= 0; i--)
                     {
                         TaskInfo taskInfo = (TaskInfo) taskInfos.get(i);
                         Task task = (Task) wf.getTasks().get(
@@ -2338,20 +2510,16 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             Workflow wf = (Workflow) session.get(WorkflowImpl.class, new Long(
                     p_workflowId));
-            List previousOnwers = wf.getWorkflowOwners();
             // first delete all the previous owners (EXCEPT FOR 'PM')
-            for (int h = 0; h < previousOnwers.size();)
+            for (Iterator it = wf.getWorkflowOwners().iterator(); it.hasNext();)
             {
-                WorkflowOwner owner = (WorkflowOwner) previousOnwers.get(h);
+                WorkflowOwner owner = (WorkflowOwner) it.next();
                 if (!Permission.GROUP_PROJECT_MANAGER.equals(owner
                         .getOwnerType()))
                 {
                     wf.removeWorkflowOwner(owner);
                     session.delete(owner);
-                }
-                else
-                {
-                    h++;
+                    it.remove();
                 }
             }
 
@@ -2379,10 +2547,11 @@ public class WorkflowManagerLocal implements WorkflowManager
     /**
      * Assign the new workflow owners.
      * 
-     * @param p_workflowId -
-     *            The id of the workflow that the new owners should be assigned.
-     * @param p_newWorkflowOwners -
-     *            A list of new workflow owners to be assigned.
+     * @param p_workflowId
+     *            - The id of the workflow that the new owners should be
+     *            assigned.
+     * @param p_newWorkflowOwners
+     *            - A list of new workflow owners to be assigned.
      */
     private void assignWorkflowInstanceOwners(long p_workflowId,
             List p_newWorkflowOwners) throws Exception
@@ -2570,13 +2739,10 @@ public class WorkflowManagerLocal implements WorkflowManager
                                 AmountOfWork newAow = rateClone
                                         .createAmountOfWork();
                                 // set the hour amount as estimated hours
-                                newAow
-                                        .setEstimatedAmount(Double
-                                                .parseDouble((hourAmount
-                                                        .length() == 0) ? "0"
-                                                        : hourAmount));
+                                newAow.setEstimatedAmount(Double.parseDouble((hourAmount
+                                        .length() == 0) ? "0" : hourAmount));
                                 cloneNewAow = newAow;
-//                                p_session.save(cloneNewAow);
+                                // p_session.save(cloneNewAow);
                             }
                             task.setAmountOfWork(cloneNewAow);
                         }
@@ -2617,13 +2783,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     AmountOfWork newAow = rateClone
                                             .createAmountOfWork();
                                     // set the hour amount as estimated hours
-                                    newAow
-                                            .setEstimatedAmount(Double
-                                                    .parseDouble((hourAmount
-                                                            .length() == 0) ? "0"
-                                                            : hourAmount));
+                                    newAow.setEstimatedAmount(Double
+                                            .parseDouble((hourAmount.length() == 0) ? "0"
+                                                    : hourAmount));
                                     cloneNewAow = newAow;
-//                                    p_session.save(cloneNewAow);
+                                    // p_session.save(cloneNewAow);
                                 }
                                 task.setAmountOfWork(cloneNewAow);
                             }
@@ -2635,8 +2799,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                     s_logger.debug("createTasks : " + " workflow="
                             + p_workflow.getId() + " WorkflowTaskInstance="
                             + WorkflowHelper.toDebugString(inst)
-                            + GlobalSightCategory.getLineContinuation() + " task="
-                            + task.toString());
+                            + GlobalSightCategory.getLineContinuation()
+                            + " task=" + task.toString());
                 }
 
                 // if a page based rate is assigned to one of the expenses
@@ -2646,11 +2810,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                     AmountOfWork pageAow = pageBasedRate.createAmountOfWork();
                     int numOfPages = task.getWorkflow().getJob().getPageCount();
                     pageAow.setEstimatedAmount(numOfPages);
-//                    p_session.save(pageAow);
+                    // p_session.save(pageAow);
                     task.setAmountOfWork(pageAow);
                 }
                 p_session.saveOrUpdate(task);
-                
+
                 for (Object ob : task.getWorkSet())
                 {
                     if (ob instanceof AmountOfWork)
@@ -2717,8 +2881,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                     s_logger.debug("modifyTasks : " + " workflow="
                             + p_workflow.getId() + " Task="
                             + WorkflowHelper.toDebugString(task)
-                            + GlobalSightCategory.getLineContinuation() + " task="
-                            + task.toString());
+                            + GlobalSightCategory.getLineContinuation()
+                            + " task=" + task.toString());
                 }
             }
         }
@@ -2745,8 +2909,8 @@ public class WorkflowManagerLocal implements WorkflowManager
     {
         // modify the rate - since it is the only thing on a task
         // that can be modified at this place
-        Task taskClone = (Task) p_session.get(TaskImpl.class, new Long(p_task
-                .getId()));
+        Task taskClone = (Task) p_session.get(TaskImpl.class,
+                new Long(p_task.getId()));
         Rate expenseRate = null;
         Rate oldExpenseRate = null;
         Rate revenueRate = null;
@@ -2762,6 +2926,14 @@ public class WorkflowManagerLocal implements WorkflowManager
         oldRevenueRate = p_task.getRevenueRate();
 
         taskClone.setRateSelectionCriteria(p_tib.getRateSelectionCriteria());
+        // update task name and type
+        String taskName = p_tib.getActivityName();
+        taskClone.setTaskName(taskName);
+        Activity activity = ServerProxy.getJobHandler().getActivity(taskName);
+        if (activity != null)
+        {
+            taskClone.setType(activity.getActivityType());
+        }
 
         if (expenseRate == null && revenueRate == null)
         {
@@ -2867,22 +3039,16 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     .createAmountOfWork();
                             if (isEstimatedAmount)
                             {
-                                newAow
-                                        .setEstimatedAmount(Double
-                                                .parseDouble((hourAmount
-                                                        .length() == 0) ? "0"
-                                                        : hourAmount));
+                                newAow.setEstimatedAmount(Double.parseDouble((hourAmount
+                                        .length() == 0) ? "0" : hourAmount));
                             }
                             else
                             {
-                                newAow
-                                        .setActualAmount(Double
-                                                .parseDouble((hourAmount
-                                                        .length() == 0) ? "0"
-                                                        : hourAmount));
+                                newAow.setActualAmount(Double.parseDouble((hourAmount
+                                        .length() == 0) ? "0" : hourAmount));
                             }
                             cloneNewAow = newAow;
-//                            p_session.save(cloneNewAow);
+                            // p_session.save(cloneNewAow);
                         }
                     }
                     taskClone.setAmountOfWork(cloneNewAow);
@@ -2993,24 +3159,18 @@ public class WorkflowManagerLocal implements WorkflowManager
                                     .createAmountOfWork();
                             if (isEstimatedAmount)
                             {
-                                newAow
-                                        .setEstimatedAmount(Double
-                                                .parseDouble((hourAmount
-                                                        .length() == 0) ? "0"
-                                                        : hourAmount));
+                                newAow.setEstimatedAmount(Double.parseDouble((hourAmount
+                                        .length() == 0) ? "0" : hourAmount));
                             }
                             else
                             {
-                                newAow
-                                        .setActualAmount(Double
-                                                .parseDouble((hourAmount
-                                                        .length() == 0) ? "0"
-                                                        : hourAmount));
+                                newAow.setActualAmount(Double.parseDouble((hourAmount
+                                        .length() == 0) ? "0" : hourAmount));
                             }
                             // cloneNewAow = (AmountOfWork) p_uow
                             // .registerNewObject(newAow);
                             cloneNewAow = newAow;
-//                            p_session.save(cloneNewAow);
+                            // p_session.save(cloneNewAow);
                         }
                     }
                     taskClone.setAmountOfWork(cloneNewAow);
@@ -3041,7 +3201,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             taskClone.setRevenueRate(null);
         }
         p_session.saveOrUpdate(taskClone);
-        
+
         if (taskClone instanceof TaskImpl)
         {
             TaskImpl task = (TaskImpl) taskClone;
@@ -3094,32 +3254,33 @@ public class WorkflowManagerLocal implements WorkflowManager
         return ServerProxy.getWorkflowServer();
     }
 
-    /* return a list of WfTaskInfo object.
-     * The arrayList value: first is task id, second is boolean value if 
-     * need create second target file.
+    /*
+     * return a list of WfTaskInfo object. The arrayList value: first is task
+     * id, second is boolean value if need create second target file.
      */
-    private ArrayList startWorkflow(Workflow p_workflow, DefaultPathTasks p_dpt,
-            TaskEmailInfo p_emailInfo, Session p_session) throws Exception
+    private ArrayList startWorkflow(Workflow p_workflow,
+            DefaultPathTasks p_dpt, TaskEmailInfo p_emailInfo, Session p_session)
+            throws Exception
     {
-        List<WfTaskInfo> wfTaskInfos =
-            getWFServer().startWorkflow(p_workflow.getId(), p_dpt, p_emailInfo);
+        List<WfTaskInfo> wfTaskInfos = getWFServer().startWorkflow(
+                p_workflow.getId(), p_dpt, p_emailInfo);
 
         // set the state of the first task(s) of workflow to ACTIVE.
         // The returned tasks are all cloned.
-        List<Task> nextTasks = updateTaskState(p_session, wfTaskInfos, p_workflow
-                .getTasks(), Task.STATE_ACTIVE);
+        List<Task> nextTasks = updateTaskState(p_session, wfTaskInfos,
+                p_workflow.getTasks(), Task.STATE_ACTIVE);
 
         return possiblyCreateSecondaryTargetFiles(wfTaskInfos, nextTasks,
                 p_workflow, p_emailInfo.getProjectManagerId());
     }
 
-    /* Create the secondary target files
-     * The arrayList value: first is task id, second is boolean value if 
-     * need create second target file.
+    /*
+     * Create the secondary target files The arrayList value: first is task id,
+     * second is boolean value if need create second target file.
      */
-    private ArrayList possiblyCreateSecondaryTargetFiles(List<WfTaskInfo> p_nextWfTaskInfos,
-            List<Task> p_nextTasksCloned, Workflow p_workflow, String p_userId)
-            throws Exception
+    private ArrayList possiblyCreateSecondaryTargetFiles(
+            List<WfTaskInfo> p_nextWfTaskInfos, List<Task> p_nextTasksCloned,
+            Workflow p_workflow, String p_userId) throws Exception
     {
         ArrayList array = new ArrayList();
         if (!WorkflowTypeConstants.TYPE_TRANSLATION.equals(p_workflow
@@ -3130,7 +3291,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             array.add(null);
             return array;
         }
-        List stfs = p_workflow.getSecondaryTargetFiles();
+        Set<SecondaryTargetFile> stfs = p_workflow.getSecondaryTargetFiles();
         List extractedFiles = p_workflow
                 .getTargetPages(PrimaryFile.EXTRACTED_FILE);
         // If the job doesn't have any extracted files in it then
@@ -3148,30 +3309,31 @@ public class WorkflowManagerLocal implements WorkflowManager
         long taskId = -1;
         boolean flag = false;
         ArrayList userEmails = new ArrayList();
-        //fix for GBS-1594
+        // fix for GBS-1594
         Boolean stfState = true;
         Hashtable tasks = p_workflow.getTasks();
-        Iterator it=tasks.keySet().iterator();
-        while(it.hasNext())
+        Iterator it = tasks.keySet().iterator();
+        while (it.hasNext())
         {
-         Task task = (Task) tasks.get(it.next());
-         if(Task.IN_PROGRESS.equals(task.getStfCreationState()))
-         {
-             stfState = false;
-             break;
-         };
+            Task task = (Task) tasks.get(it.next());
+            if (Task.IN_PROGRESS.equals(task.getStfCreationState()))
+            {
+                stfState = false;
+                break;
+            }
+            ;
         }
         for (int i = 0; (!flag && i < size); i++)
         {
-            WfTaskInfo wti = (WfTaskInfo) p_nextWfTaskInfos.get(i); 
-            String actionType = wti.getActionType(); 
+            WfTaskInfo wti = (WfTaskInfo) p_nextWfTaskInfos.get(i);
+            String actionType = wti.getActionType();
 
-            if (((SystemAction.CSTF.equals(actionType) && stfs.size() == 0)
-                    || SystemAction.RSTF.equals(actionType))&&stfState)
+            if (((SystemAction.CSTF.equals(actionType) && stfs.size() == 0) || SystemAction.RSTF
+                    .equals(actionType)) && stfState)
             {
-                flag = true;  
+                flag = true;
             }
-                
+
             taskId = wti.getId();
             userEmails = wti.userEmail;
         }
@@ -3179,16 +3341,16 @@ public class WorkflowManagerLocal implements WorkflowManager
         if (flag && taskId > 0)
         {
             // set the tasks creation of stf state to InProgress
-            
+
             updateStfCreationStateForTask(p_nextTasksCloned, taskId,
-                                          Task.IN_PROGRESS);
+                    Task.IN_PROGRESS);
 
         }
-        
+
         array.add(taskId);
         array.add(flag);
         array.add(userEmails);
-        
+
         return array;
     }
 
@@ -3218,15 +3380,15 @@ public class WorkflowManagerLocal implements WorkflowManager
         return type;
     }
 
-    private void suspendWorkflow(long workflowId,
-            TaskEmailInfo p_emailInfo) throws Exception
+    private void suspendWorkflow(long workflowId, TaskEmailInfo p_emailInfo)
+            throws Exception
     {
         getWFServer().suspendWorkflow(workflowId, p_emailInfo);
     }
 
     /**
-     * @param p_dispositionLists -
-     *            Map of List of WorkflowTaskInstances keyed by one of
+     * @param p_dispositionLists
+     *            - Map of List of WorkflowTaskInstances keyed by one of
      *            WorkflowConstant.IS_NEW or IS_DELETED.
      * @param p_modified
      *            Tasks Hashtable of modified tasks - keyed by taskid. Value is
@@ -3297,8 +3459,7 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /* Ensure that the given workflow has its i-flow instance set properly */
-    private void refreshWorkflowInstance(Workflow p_workflow)
-            throws Exception
+    private void refreshWorkflowInstance(Workflow p_workflow) throws Exception
     {
         if (p_workflow.getIflowInstance() == null)
         {
@@ -3332,13 +3493,11 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /* Change the state of each secondary target file. */
-    private void updateSecondaryTargetFileState(Session p_session, List p_stfs,
-            String p_state) throws Exception
+    private void updateSecondaryTargetFileState(Session p_session,
+            Set<SecondaryTargetFile> p_stfs, String p_state) throws Exception
     {
-        int size = p_stfs == null ? 0 : p_stfs.size();
-        for (int i = 0; i < size; i++)
+        for (SecondaryTargetFile stf : p_stfs)
         {
-            SecondaryTargetFile stf = (SecondaryTargetFile) p_stfs.get(i);
             stf.setState(p_state);
             p_session.update(stf);
         }
@@ -3366,8 +3525,9 @@ public class WorkflowManagerLocal implements WorkflowManager
      * Update the task state to the specified state. The return a list of cloned
      * tasks (with updated state) which will be used for more possible updates.
      */
-    private List<Task> updateTaskState(Session p_session, List<WfTaskInfo> p_nextWfTaskInfos,
-            Hashtable p_tasks, int p_state) throws Exception
+    private List<Task> updateTaskState(Session p_session,
+            List<WfTaskInfo> p_nextWfTaskInfos, Hashtable p_tasks, int p_state)
+            throws Exception
     {
         int size = p_nextWfTaskInfos.size();
         List<Task> tasks = new ArrayList<Task>(size);
@@ -3375,8 +3535,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             WfTaskInfo wfti = p_nextWfTaskInfos.get(i);
             Task task = (Task) p_tasks.get(new Long(wfti.getId()));
-            Task taskClone = (Task) p_session.get(TaskImpl.class, new Long(task
-                    .getId()));
+            Task taskClone = (Task) p_session.get(TaskImpl.class,
+                    new Long(task.getId()));
             taskClone.setState(p_state);
             tasks.add(taskClone);
             p_session.saveOrUpdate(taskClone);
@@ -3421,16 +3581,17 @@ public class WorkflowManagerLocal implements WorkflowManager
         int lowest = findLowestStateIndex(job.getWorkflows());
         if (jobStateIndex < lowest)
         {
-            // JobImpl jobClone = (JobImpl) p_uow.registerObject(job);
-            JobImpl jobClone = (JobImpl) p_session.get(JobImpl.class, job
-                    .getIdAsLong());
+            JobImpl jobClone = (JobImpl) p_session.get(JobImpl.class,
+                    job.getIdAsLong());
             jobClone.setState(ORDERED_STATES[lowest]);
             if (!Workflow.EXPORT_FAILED.equals(p_wfState)
                     && WorkflowTypeConstants.TYPE_TRANSLATION.equals(p_wf
                             .getWorkflowType()))
             {
-                updatePageState(p_session, jobClone.getSourcePages(),
-                        (lowest == LOCALIZED_STATE ? PG_LOCALIZED
+                updatePageState(
+                        p_session,
+                        jobClone.getSourcePages(),
+                        ((lowest == LOCALIZED_STATE || lowest == EXPORTING_STATE) ? PG_LOCALIZED
                                 : PG_ACTIVE_JOB));
             }
             p_session.saveOrUpdate(jobClone);
@@ -3464,7 +3625,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             {
                 String wfState = ((Workflow) it.next()).getState();
                 if (!wfState.equals(Workflow.CANCELLED)
-                        || !wfState.equals(Workflow.IMPORT_FAILED))
+                        && !wfState.equals(Workflow.IMPORT_FAILED))
                 {
                     workflowsHaveState &= wfState.equals(p_state);
                 }
@@ -3480,11 +3641,19 @@ public class WorkflowManagerLocal implements WorkflowManager
     private void createTaskTuvs(Workflow p_wf, Task p_task, String p_taskName,
             Session session) throws Exception
     {
+        List targetPages = p_wf.getTargetPages(PrimaryFile.EXTRACTED_FILE);
+        // Touch to load all TUs for pages to improve performance.
+        for (Iterator it = targetPages.iterator(); it.hasNext();)
+        {
+            TargetPage tp = (TargetPage) it.next();
+            SegmentTuUtil.getTusBySourcePageId(tp.getSourcePage().getId());
+        }
         // get the TUVs of all the pages associated with extracted files
-        Iterator tuvIt = getTuvsOfPages(
-                p_wf.getTargetPages(PrimaryFile.EXTRACTED_FILE)).iterator();
+        Iterator tuvIt = getTuvsOfPages(targetPages).iterator();
         Iterator prevIt = getPreviousTaskTuvs(p_task.getId()).iterator();
 
+        List<Tuv> tuvs = new ArrayList<Tuv>();
+        List<TaskTuv> taskTuvs = new ArrayList<TaskTuv>();
         while (tuvIt.hasNext())
         {
             TuvImpl tuv = (TuvImpl) tuvIt.next();
@@ -3497,15 +3666,23 @@ public class WorkflowManagerLocal implements WorkflowManager
             tuvClone.setTimestamp(new java.sql.Timestamp(System
                     .currentTimeMillis()));
             tuvClone.setLastModified(new Date());
-            session.save(tuvClone);
+            // set TuvId here to avoid "previousTuvId" = -1 below:
+            // taskTuv.setPreviousTuv(tuvClone);
+            SegmentTuTuvIndexUtil.setTuvId(tuvClone);
+            tuvs.add(tuvClone);
+
             TaskTuv taskTuv = new TaskTuv();
             taskTuv.setCurrentTuv(tuv);
             taskTuv.setPreviousTuv(tuvClone);
             taskTuv.setVersion(getVersion(previousTaskTuv));
             taskTuv.setTask(p_task);
             taskTuv.setTaskName(p_taskName);
-            session.save(taskTuv);
+            taskTuvs.add(taskTuv);
         }
+
+        SegmentTuvUtil
+                .saveTuvs(session.connection(), tuvs, p_wf.getCompanyId());
+        HibernateUtil.save(taskTuvs);
     }
 
     private TaskTuv getPreviousTaskTuvForThisTuv(long p_tuvId, Iterator p_it)
@@ -3548,7 +3725,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         HashMap<String, Long> map = new HashMap<String, Long>();
         map.put(TuvQueryConstants.TASK_ID_ARG, new Long(p_taskId));
         return HibernateUtil.searchWithSql(
-                TaskTuvDescriptorModifier.PREVIOUS_TASK_TUV_BY_TASK_ID, map,
+                TuvQueryConstants.PREVIOUS_TASK_TUV_BY_TASK_ID, map,
                 TaskTuv.class);
     }
 
@@ -3618,8 +3795,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                         + "    ");
                 restrictComments.append("Attached Files: ");
 
-                ArrayList reference = manager.getCommentReferences(String
-                        .valueOf(aComment.getId()),
+                ArrayList reference = manager.getCommentReferences(
+                        String.valueOf(aComment.getId()),
                         WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS,
                         true);
 
@@ -3636,9 +3813,9 @@ public class WorkflowManagerLocal implements WorkflowManager
                     if (filesize != 0)
                     {
                         filesize = (filesize % 1024 != 0) ? ((filesize / 1024) + 1)/*
-                                                                                     * round
-                                                                                     * up
-                                                                                     */
+                                                                                    * round
+                                                                                    * up
+                                                                                    */
                                 : filesize / 1024;
                     }
 
@@ -3654,10 +3831,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                     }
 
                     String fileName = file.getFilename();
-                    if (file
-                            .getFileAccess()
-                            .equals(
-                                    WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS))
+                    if (file.getFileAccess()
+                            .equals(WebAppConstants.COMMENT_REFERENCE_RESTRICTED_ACCESS))
                     {
                         fileName = fileName
                                 + "("
@@ -3713,13 +3888,15 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
         }
 
-        TaskEmailInfo emailInfo = new TaskEmailInfo(p_job.getL10nProfile()
-                .getProject().getProjectManagerId(), p_workflow
-                .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
+        TaskEmailInfo emailInfo = new TaskEmailInfo(
+                p_job.getL10nProfile().getProject().getProjectManagerId(),
+                p_workflow
+                        .getWorkflowOwnerIdsByType(Permission.GROUP_WORKFLOW_MANAGER),
                 wfti.notifyProjectManager(), p_job.getPriority(), comments
                         .toString());
         emailInfo.setJobName(p_job.getJobName());
-        emailInfo.setProjectIdAsLong(new Long(p_job.getL10nProfile().getProjectId()));
+        emailInfo.setProjectIdAsLong(new Long(p_job.getL10nProfile()
+                .getProjectId()));
         emailInfo.setWfIdAsLong(p_workflow.getIdAsLong());
         emailInfo.setSourceLocale(p_job.getSourceLocale().toString());
         emailInfo.setTargetLocale(p_workflow.getTargetLocale().toString());
@@ -3736,7 +3913,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         String projectName = p_job.getL10nProfile().getProject().getName();
         emailInfo.setProjectName(projectName);
         emailInfo.setCompanyId(p_job.getCompanyId());
-        
+
         return emailInfo;
     }
 
@@ -3909,7 +4086,8 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     private void completeTask(String p_userId, Task p_task,
-            String p_destinationArrow, String skipping) throws WorkflowManagerException
+            String p_destinationArrow, String skipping)
+            throws WorkflowManagerException
     {
         boolean isCompleted = false; // true if all workflows are complete
         boolean isManualImportFileSystemJob = true;
@@ -3924,7 +4102,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         if (p_task == null)
         {
             s_logger.error("Task is null in _setTaskCompletion() for user: "
-                    + p_userId);
+                    + UserUtil.getUserNameById(p_userId));
         }
         else
         {
@@ -3932,7 +4110,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
-        JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+        JbpmContext ctx = null;
 
         try
         {
@@ -3964,17 +4142,15 @@ public class WorkflowManagerLocal implements WorkflowManager
                 isManualImportFileSystemJob = false;
                 isDbJob = false;
             }
-            
-            ArrorInfo arrorInfo = new ArrorInfo(p_task.getId(), p_destinationArrow);
+
+            ArrorInfo arrorInfo = new ArrorInfo(p_task.getId(),
+                    p_destinationArrow);
 
             // -1 indicates that the default path would be from the
             // beginning of the workflow (form START node)
             List wfTaskInfos = getWFServer().timeDurationsInDefaultPath(
-                    wfClone.getId(),
-                    -1,
-                    arrorInfo,
-                    getWFServer()
-                            .getWorkflowInstanceById(wfClone.getId()));
+                    wfClone.getId(), -1, arrorInfo,
+                    getWFServer().getWorkflowInstanceById(wfClone.getId()));
             // if a condition node was just passed need to update
             // the duration since a different path may have been
             // taken than the default one
@@ -3994,7 +4170,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 s_logger.debug("Advancing task " + p_task.getTaskName()
                         + ", taskId " + taskId + ", wfId " + wfId + ", job "
                         + job.getJobName() + ", jobId " + jobId + ", user "
-                        + p_userId);
+                        + UserUtil.getUserNameById(p_userId));
             }
 
             WorkflowInstanceInfo wfInstInfo = getWFServer().advanceTask(
@@ -4005,11 +4181,10 @@ public class WorkflowManagerLocal implements WorkflowManager
             isCompleted = wfState == WorkflowConstants.STATE_COMPLETED;
             if (isCompleted)
             {
-                s_logger
-                        .debug("workflow state is completed for workflow instance "
-                                + wfInstInfo.getId());
+                s_logger.debug("workflow state is completed for workflow instance "
+                        + wfInstInfo.getId());
             }
-            
+
             // update the completion fraction
             updateCompletionFraction(wfClone, p_task, wfTaskInfos, isCompleted);
             long stfTaskId = -1;
@@ -4018,7 +4193,21 @@ public class WorkflowManagerLocal implements WorkflowManager
 
             if (isCompleted)
             {
-                wfClone.setState(WF_LOCALIZED);
+                if (isManualImportFileSystemJob)
+                {
+                    wfClone.setState(WF_LOCALIZED);
+                }
+                else
+                {
+                    if (skipping == null)
+                    {
+                        wfClone.setState(WF_LOCALIZED);
+                    }
+                    else
+                    {
+                        wfClone.setState(WF_EXPORTING);
+                    }
+                }
                 if (WorkflowTypeConstants.TYPE_DTP.equals(wfClone
                         .getWorkflowType()))
                 {
@@ -4029,40 +4218,49 @@ public class WorkflowManagerLocal implements WorkflowManager
                 {
                     updatePageState(session, wfClone.getTargetPages(),
                             PG_LOCALIZED);
-                    updateSecondaryTargetFileState(session, wfClone
-                            .getSecondaryTargetFiles(),
+                    updateSecondaryTargetFileState(session,
+                            wfClone.getSecondaryTargetFiles(),
                             SecondaryTargetFileState.LOCALIZED);
                 }
                 possiblyUpdateJob(session, wfClone, WF_LOCALIZED);
-                
-                JobEditionInfo je = getGSEditionJobByJobID(wfClone.getJob().getId());
-                //Session HibSession = HibernateUtil.getSession();
-                
-                if(je != null) {
-                    String wsdl = je.getUrl();
-                    Ambassador ambassador = 
-                        WebServiceClientHelper.getClientAmbassador(wsdl, 
-                                                                   je.getUserName(),
-                                                                   je.getPassword());
-                    String fullAccessToken = ambassador.login(je.getUserName(), je.getPassword());
-                    String realAccessToken = WebServiceClientHelper.getRealAccessToken(fullAccessToken);
-                    
-                    sendBackIssuesForGSEdition(task, job, ambassador, realAccessToken);
-                    ambassador.updateTaskState(realAccessToken, 
-                                               je.getOriginalTaskId(), 
-                                               Long.toString(Task.STATE_TRANSLATION_COMPLETED));
-                    
-                    
 
-                    if(je.getSendingBackStatus().equals("begin")) {
+                // Set up completed date of job
+                job.setCompletedDate(currentTime);
+                session.saveOrUpdate(job);
+
+                JobEditionInfo je = getGSEditionJobByJobID(wfClone.getJob()
+                        .getId());
+                // Session HibSession = HibernateUtil.getSession();
+
+                if (je != null)
+                {
+                    String wsdl = je.getUrl();
+                    Ambassador ambassador = WebServiceClientHelper
+                            .getClientAmbassador(wsdl, je.getUserName(),
+                                    je.getPassword());
+                    String fullAccessToken = ambassador.login(je.getUserName(),
+                            je.getPassword());
+                    String realAccessToken = WebServiceClientHelper
+                            .getRealAccessToken(fullAccessToken);
+
+                    sendBackIssuesForGSEdition(task, job, ambassador,
+                            realAccessToken);
+                    ambassador.updateTaskState(realAccessToken,
+                            je.getOriginalTaskId(),
+                            Long.toString(Task.STATE_TRANSLATION_COMPLETED));
+
+                    if (je.getSendingBackStatus().equals("begin"))
+                    {
                         je.setSendingBackStatus("sending_back_edition_issue");
                     }
-                    else if(je.getSendingBackStatus().equals("sending_back_edition_job")) {
+                    else if (je.getSendingBackStatus().equals(
+                            "sending_back_edition_job"))
+                    {
                         je.setSendingBackStatus("sending_back_edition_finished");
                     }
-                    
+
                     session.saveOrUpdate(je);
-                 }
+                }
             }
             else
             {
@@ -4077,26 +4275,29 @@ public class WorkflowManagerLocal implements WorkflowManager
                         wfClone.getTasks(), Task.STATE_ACTIVE);
                 // perform the creation of STF if necessary
                 ArrayList returnValue = possiblyCreateSecondaryTargetFiles(
-                    nextTaskInfos, nextTasks, wfClone, 
-                    emailInfo.getProjectManagerId());
-                
+                        nextTaskInfos, nextTasks, wfClone,
+                        emailInfo.getProjectManagerId());
+
                 if (isTranslationWorkflow)
                 {
-                    stfTaskId = ((Long)(returnValue.get(0))).longValue();
-                    createSTF = ((Boolean)returnValue.get(1)).booleanValue();
+                    stfTaskId = ((Long) (returnValue.get(0))).longValue();
+                    createSTF = ((Boolean) returnValue.get(1)).booleanValue();
                 }
-                
+
                 Activity act = ServerProxy.getJobHandler().getActivity(
-                               task.getTaskName());
-                
-                if(act.isType(Activity.TYPE_AUTOACTION)) {
-                    if(p_task != null) {
-                        downloadOfflineFiles(p_task, job, 
-                                             (ArrayList)returnValue.get(2));
+                        task.getTaskName());
+
+                // Auto-action
+                if (act.isType(Activity.TYPE_AUTOACTION))
+                {
+                    if (task != null)
+                    {
+                        downloadOfflineFiles(task, job,
+                                (ArrayList) returnValue.get(2));
                     }
                 }
-                
-                nextTaskId = ((Long)returnValue.get(0)).longValue();
+
+                nextTaskId = ((Long) returnValue.get(0)).longValue();
             }
 
             session.saveOrUpdate(task);
@@ -4112,46 +4313,60 @@ public class WorkflowManagerLocal implements WorkflowManager
             // now remove the reserved time from the user's calendar.
             // This does not need to be part of the same transaction
             removeReservedTime(task.getId(), p_userId);
-            
-            //For create GS Edition, after compelete activity, first change 
+
+            // For create GS Edition, after compelete activity, first change
             // the next activity state to be STATE_REDEAY_DISPATCH_GSEDTION,
             // then create new job on GS Edition server, if succeed, the next
-            //activity state will be changed to be STATE_DISPATCHED_TO_TRANSLATION.
-            //If fail, the state will be STATE_REDEAY_DISPATCH_GSEDTION, the JSP page
-            // will know the create job on GS Edition server failed, and can show the
-            //"Ready for dispatching to translation" to user for create the GS job again.
-            
-            if (!isCompleted && nextTaskId != -1) {
-                TaskImpl nextTask = (TaskImpl) wfClone.getTasks().get(nextTaskId);
-                Activity nextTaskActivity = ServerProxy.getJobHandler().getActivity(
-                        nextTask.getTaskName());
-                if(nextTaskActivity.isType(Activity.TYPE_GSEDITION)) {
-                    //first automaticly  accept the task.
-                    ProcessInstance processInstance = ctx.getProcessInstance(wfClone.getId());
+            // activity state will be changed to be
+            // STATE_DISPATCHED_TO_TRANSLATION.
+            // If fail, the state will be STATE_REDEAY_DISPATCH_GSEDTION, the
+            // JSP page
+            // will know the create job on GS Edition server failed, and can
+            // show the
+            // "Ready for dispatching to translation" to user for create the GS
+            // job again.
+
+            if (!isCompleted && nextTaskId != -1)
+            {
+                TaskImpl nextTask = (TaskImpl) wfClone.getTasks().get(
+                        nextTaskId);
+                Activity nextTaskActivity = ServerProxy.getJobHandler()
+                        .getActivity(nextTask.getTaskName());
+                if (nextTaskActivity.isType(Activity.TYPE_GSEDITION))
+                {
+                    // first automaticly accept the task.
+                	ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+                    ProcessInstance processInstance = ctx
+                            .getProcessInstance(wfClone.getId());
                     WorkflowInstance workflowInstance = WorkflowProcessAdapter
-                        .getProcessInstance(processInstance);
-                    
-                    Node node = WorkflowJbpmUtil.getNodeById(processInstance
-                            .getProcessDefinition(), nextTask.getId());
-                    WorkflowTaskInstance taskInstance = WorkflowJbpmUtil.getCurrentTaskInstance(
-                            workflowInstance.getWorkflowInstanceTasks(), node.getName());
-                    
+                            .getProcessInstance(processInstance);
+
+                    Node node = WorkflowJbpmUtil.getNodeById(
+                            processInstance.getProcessDefinition(),
+                            nextTask.getId());
+                    WorkflowTaskInstance taskInstance = WorkflowJbpmUtil
+                            .getCurrentTaskInstance(
+                                    workflowInstance.getWorkflowInstanceTasks(),
+                                    node.getName());
+
                     String roles = taskInstance.getRolesAsString();
                     String[] userIds = AssigneeFilter.getAssigneeList(roles
                             .split(","), emailInfo.getProjectIdAsLong()
                             .longValue());
-                    
-                    if(userIds!=null && userIds.length > 0) {
+
+                    if (userIds != null && userIds.length > 0)
+                    {
                         TaskHelper.acceptTaskForGSEdition(userIds[0], nextTask);
-                        
-                        //set the state to be STATE_REDEAY_DISPATCH_GSEDTION, if the
+
+                        // set the state to be STATE_REDEAY_DISPATCH_GSEDTION,
+                        // if the
                         // crete edition job fail, can know it failed.
                         nextTask.setState(nextTask.STATE_REDEAY_DISPATCH_GSEDTION);
-                        
+
                         tx = session.beginTransaction();
                         session.saveOrUpdate(nextTask);
                         tx.commit();
-                        
+
                         tx = session.beginTransaction();
                         createGSEdtionJob(nextTask, job);
                         nextTask.setState(nextTask.STATE_DISPATCHED_TO_TRANSLATION);
@@ -4161,11 +4376,12 @@ public class WorkflowManagerLocal implements WorkflowManager
                 }
             }
         }
-        catch(AmbassadorDwUpException e) {
+        catch (AmbassadorDwUpException e)
+        {
             s_logger.error("Failed to create job on GS Edtion", e);
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        catch (Exception e)
+        {
             tx.rollback();
             s_logger.error("Failed to complete task " + taskId + ", workflow "
                     + wfId + ", job " + jobId, e);
@@ -4183,7 +4399,9 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         finally
         {
-            ctx.close();
+        	if (ctx != null) {
+                ctx.close();
+        	}
             // despite errors above, if the job is complete, then attempt the
             // export
             // but re-check job state from TopLink instead of relying on the
@@ -4205,23 +4423,23 @@ public class WorkflowManagerLocal implements WorkflowManager
                     try
                     {
                         exportLocalizedWorkflow(wfClone.getId(),
-                                projectMgrUserId, isDbJob);
-                        
+                                projectMgrUserId, isDbJob, isCompleted);
+
                         // instance DTP Workflow
-                        JobAdditionEngine m_jobAdditionEngine = new JobAdditionEngine();
-                        List<Workflow> wfList = new ArrayList<Workflow>();
-                        wfList.add(wfClone);
-                        m_jobAdditionEngine.addDtpWorkflowToJob(
-                                wfList);
+                        // JobAdditionEngine m_jobAdditionEngine = new
+                        // JobAdditionEngine();
+                        // List<Workflow> wfList = new ArrayList<Workflow>();
+                        // wfList.add(wfClone);
+                        // m_jobAdditionEngine.addDtpWorkflowToJob(
+                        // wfList);
 
                     }
                     catch (Throwable t)
                     {
                         // log the error but don't let it affect job completion
-                        s_logger
-                                .error(
-                                        "Error trying to export for completed workflow.",
-                                        t);
+                        s_logger.error(
+                                "Error trying to export for completed workflow.",
+                                t);
                     }
                 }
                 else
@@ -4232,13 +4450,15 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
         }
     }
-    
+
     /**
      * Process the files if the source file is with XLZ file format
+     * 
      * @param p_wf
      * @author Vincent Yan, 2011/01/27
      */
-    private void processXLZFiles(Workflow p_wf) {
+    private void processXLZFiles(Workflow p_wf)
+    {
         if (p_wf == null || p_wf.getAllTargetPages().size() == 0)
             return;
 
@@ -4254,18 +4474,19 @@ public class WorkflowManagerLocal implements WorkflowManager
         try
         {
             Vector targetPages = p_wf.getAllTargetPages();
-            String baseDir = AmbFileStoragePathUtils.getCxeDocDirPath().concat(File.separator);
-            
+            String baseDir = AmbFileStoragePathUtils.getCxeDocDirPath().concat(
+                    File.separator);
+
             Job job = p_wf.getJob();
             String companyId = job.getCompanyId();
             String companyName = CompanyWrapper.getCompanyNameById(companyId);
-            
+
             if ("1".equals(CompanyWrapper.getCurrentCompanyId())
-                    && !"1".equals(job.getCompanyId())) 
+                    && !"1".equals(job.getCompanyId()))
             {
                 baseDir += companyName + File.separator;
             }
-            
+
             for (int i = 0; i < targetPages.size(); i++)
             {
                 tp = (TargetPage) targetPages.get(i);
@@ -4340,14 +4561,19 @@ public class WorkflowManagerLocal implements WorkflowManager
                     + e.toString());
         }
     }
-    
-    public void recreateGSEdtionJob(TaskImpl task) {
-        try {
-            Activity nextTaskActivity = ServerProxy.getJobHandler().getActivity(task.getTaskName());
+
+    public void recreateGSEdtionJob(TaskImpl task)
+    {
+        try
+        {
+            Activity nextTaskActivity = ServerProxy.getJobHandler()
+                    .getActivity(task.getTaskName());
             Session session = HibernateUtil.getSession();
-            Task taskClone = (Task) session.get(TaskImpl.class, new Long(task.getId()));
-            
-            if(nextTaskActivity.isType(Activity.TYPE_GSEDITION)) {
+            Task taskClone = (Task) session.get(TaskImpl.class,
+                    new Long(task.getId()));
+
+            if (nextTaskActivity.isType(Activity.TYPE_GSEDITION))
+            {
                 createGSEdtionJob(task, task.getWorkflow().getJob());
                 Transaction tx = session.beginTransaction();
                 taskClone.setState(task.STATE_DISPATCHED_TO_TRANSLATION);
@@ -4355,9 +4581,10 @@ public class WorkflowManagerLocal implements WorkflowManager
                 tx.commit();
             }
         }
-        catch(Exception e) {
+        catch (Exception e)
+        {
             s_logger.warn("Re-Create GS Edition job failed: " + task.getId()
-                    + ", workflow " + task.getWorkflow().getId() + ", job " 
+                    + ", workflow " + task.getWorkflow().getId() + ", job "
                     + task.getWorkflow().getJob().getId());
         }
     }
@@ -4372,17 +4599,17 @@ public class WorkflowManagerLocal implements WorkflowManager
         int subLevMatchCount = p_workflow.getSubLevMatchWordCount();
         int subLevRepCount = p_workflow.getSubLevRepetitionWordCount();
 
-//        WordcountForCosting wfc = new WordcountForCosting(levMatchThreshold,
-//                p_workflow.getLowFuzzyMatchWordCount(), p_workflow
-//                        .getMedFuzzyMatchWordCount(), p_workflow
-//                        .getMedHiFuzzyMatchWordCount(), p_workflow
-//                        .getHiFuzzyMatchWordCount(),
-//                (subLevMatchCount + subLevRepCount));
-//
-//        int totalFuzzy = wfc.updatedLowFuzzyMatchCount()
-//                + wfc.updatedMedFuzzyMatchCount()
-//                + wfc.updatedMedHiFuzzyMatchCount()
-//                + wfc.updatedHiFuzzyMatchCount();
+        // WordcountForCosting wfc = new WordcountForCosting(levMatchThreshold,
+        // p_workflow.getLowFuzzyMatchWordCount(), p_workflow
+        // .getMedFuzzyMatchWordCount(), p_workflow
+        // .getMedHiFuzzyMatchWordCount(), p_workflow
+        // .getHiFuzzyMatchWordCount(),
+        // (subLevMatchCount + subLevRepCount));
+        //
+        // int totalFuzzy = wfc.updatedLowFuzzyMatchCount()
+        // + wfc.updatedMedFuzzyMatchCount()
+        // + wfc.updatedMedHiFuzzyMatchCount()
+        // + wfc.updatedHiFuzzyMatchCount();
         int totalFuzzy = p_workflow.getThresholdHiFuzzyWordCount()
                 + p_workflow.getThresholdLowFuzzyWordCount()
                 + p_workflow.getThresholdMedFuzzyWordCount()
@@ -4394,16 +4621,16 @@ public class WorkflowManagerLocal implements WorkflowManager
                 + p_workflow.getMedFuzzyRepetitionWordCount();
 
         emailInfo.setWordCountDetails(p_job.getLeverageMatchThreshold(),
-                p_workflow.getThresholdNoMatchWordCount(), repetitionCount, totalFuzzy, p_workflow
-                        .getSegmentTmWordCount(), p_workflow
-                        .getTotalWordCount());
+                p_workflow.getThresholdNoMatchWordCount(), repetitionCount,
+                totalFuzzy, p_workflow.getSegmentTmWordCount(),
+                p_workflow.getTotalWordCount());
     }
 
     /**
      * Performs the export if the workflow is localized, otherwise does nothing.
      */
-    private void exportLocalizedWorkflow(long p_wfId,
-            String p_userId, boolean p_isDbJob) throws Exception
+    private void exportLocalizedWorkflow(long p_wfId, String p_userId,
+            boolean p_isDbJob, boolean isCompleted) throws Exception
     {
         if (s_logger.isDebugEnabled())
         {
@@ -4415,16 +4642,19 @@ public class WorkflowManagerLocal implements WorkflowManager
         {
             return;
         }
-        if (Workflow.LOCALIZED.equals(wf.getState()))
-        {
-            s_logger.debug("Workflow " + p_wfId
-                    + " is localized; exporting it.");
-        }
-        else
+        if (!isCompleted)
         {
             s_logger.debug("Workflow " + p_wfId
                     + " is not localized yet; not exporting it.");
             return;
+        }
+        if (Workflow.LOCALIZED.equals(wf.getState()))
+        {
+            s_logger.debug("Workflow " + p_wfId
+                    + " is localized; exporting it.");
+            // from GBS-2137, add "Exporting" state before export is done
+            JobCreationMonitor.updateWorkflowState(wf, Workflow.EXPORTING);
+            JobCreationMonitor.updateJobStateToExporting(wf.getJob());
         }
 
         // since at FileProfile level a flag is set to determine whether
@@ -4442,8 +4672,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         ExportParameters exportParams = shouldExportStf ? new ExportParameters(
                 wf, null, null, null, ExportConstants.NOT_SELECTED,
-                ExportConstants.EXPORT_STF)
-                : new ExportParameters(wf);
+                ExportConstants.EXPORT_STF) : new ExportParameters(wf);
 
         String exportEncoding = exportParams.getExportCodeset();
 
@@ -4463,7 +4692,8 @@ public class WorkflowManagerLocal implements WorkflowManager
         try
         {
             ExportParameters exportParams = new ExportParameters(p_workflow,
-                    null, null, null, ExportConstants.NO_UTF_BOM, ExportConstants.EXPORT_FOR_STF_CREATION);
+                    null, null, null, ExportConstants.NO_UTF_BOM,
+                    ExportConstants.EXPORT_FOR_STF_CREATION);
 
             performExport(p_workflow, p_userId, p_taskId, exportParams, false);
         }
@@ -4488,16 +4718,15 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         if (p_shouldExportStf)
         {
-            genericPages = p_workflow.getSecondaryTargetFiles();
-            int size = genericPages == null ? 0 : genericPages.size();
+            Set<SecondaryTargetFile> stfs = p_workflow
+                    .getSecondaryTargetFiles();
             // only perform export if there are stfs
-            if (size > 0)
+            if (stfs.size() > 0)
             {
                 doRegularExport = false;
-                for (int i = 0; i < size; i++)
+                for (SecondaryTargetFile stf : stfs)
                 {
-                    ids.add(((SecondaryTargetFile) genericPages.get(i))
-                            .getIdAsLong());
+                    ids.add(stf.getIdAsLong());
                 }
                 // register for export notification
                 long exportBatchId = createExportBatchId(exportParams,
@@ -4507,11 +4736,10 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             else
             {
-                s_logger
-                        .warn("The file profile says to export STFs as a default, yet there are no STFs\r\n"
-                                + "for this workflow either because an STF stage was bypassed in the path taken\r\n"
-                                + "through the workflow, or because of workflow modification and deletion of an STF\r\n"
-                                + "task. The primary target files will be exported instead.");
+                s_logger.warn("The file profile says to export STFs as a default, yet there are no STFs\r\n"
+                        + "for this workflow either because an STF stage was bypassed in the path taken\r\n"
+                        + "through the workflow, or because of workflow modification and deletion of an STF\r\n"
+                        + "task. The primary target files will be exported instead.");
                 doRegularExport = true;
                 // create new export params since the original export params
                 // were wrong
@@ -4549,8 +4777,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 {
                     org.w3c.dom.Element msCategory = parser
                             .getCategory(DocumentumOperator.DCTM_CATEGORY);
-                    s_logger
-                            .debug("Starting to export a documentum workflow......");
+                    s_logger.debug("Starting to export a documentum workflow......");
                     String srcObjId = parser.getCategoryDaValue(msCategory,
                             DocumentumOperator.DCTM_OBJECTID)[0];
                     String userId = parser.getCategoryDaValue(msCategory,
@@ -4561,8 +4788,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                             userId, srcObjId, null);
                     if (newObjId == null)
                     {
-                        s_logger
-                                .error("Failed to execute copy operation for DCTM Object");
+                        s_logger.error("Failed to execute copy operation for DCTM Object");
                         throw new Exception();
                     }
                     s_logger.debug("New DCTM file object Id :" + newObjId);
@@ -4628,8 +4854,8 @@ public class WorkflowManagerLocal implements WorkflowManager
             else
             {
                 ti = getTaskInfoForUser(acceptor, p_task, p_wfTaskInfo,
-                        WorkflowConstants.TASK_ACCEPTED, p_task
-                                .getEstimatedCompletionDate());
+                        WorkflowConstants.TASK_ACCEPTED,
+                        p_task.getEstimatedCompletionDate());
             }
         }
         else if (state == WorkflowConstants.STATE_COMPLETED)
@@ -4650,14 +4876,13 @@ public class WorkflowManagerLocal implements WorkflowManager
     }
 
     /*
-     * Start the workflow and set the appropriate attributes for dispatch.
-     * The arrayList value: first is task id, second is boolean value if 
-     * need create second target file.
+     * Start the workflow and set the appropriate attributes for dispatch. The
+     * arrayList value: first is task id, second is boolean value if need create
+     * second target file.
      */
     @SuppressWarnings("deprecation")
     private ArrayList dispatchWorkflow(Workflow p_wfClone, Session p_session,
-            Date p_startDate, TaskEmailInfo p_emailInfo)
-            throws Exception
+            Date p_startDate, TaskEmailInfo p_emailInfo) throws Exception
     {
         p_wfClone.setState(WF_DISPATCHED);
         p_wfClone.setDispatchedDate(p_startDate);
@@ -4675,7 +4900,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         DefaultPathTasks dpt = updateDefaultPathTasks(DISPATCH_ACTION,
                 p_startDate, wfTaskInfos, p_wfClone, -1, p_session);
         p_wfClone.setPlannedCompletionDate(p_wfClone
-            .getEstimatedCompletionDate());
+                .getEstimatedCompletionDate());
         updateCompletionFraction(p_wfClone, wfTaskInfos);
 
         // For sla report issue
@@ -4743,17 +4968,17 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         else
         {
-            s_logger.warn("User '" + p_userId
+            s_logger.warn("User '" + UserUtil.getUserNameById(p_userId)
                     + "' appears to have no email information.");
         }
 
         TaskInfo ti = new TaskInfo(p_wfTaskInfo.getId(),
-                p_wfTaskInfo.getName(), p_state, p_task
-                        .getEstimatedAcceptanceDate(), p_task
-                        .getEstimatedCompletionDate(),
-                p_task.getAcceptedDate(), p_completionDate, p_task.getType());
-        ti.addTaskAssignee(p_userId, userFullName, p_task
-                .getEstimatedCompletionDate());
+                p_wfTaskInfo.getName(), p_state,
+                p_task.getEstimatedAcceptanceDate(),
+                p_task.getEstimatedCompletionDate(), p_task.getAcceptedDate(),
+                p_completionDate, p_task.getType());
+        ti.addTaskAssignee(p_userId, userFullName,
+                p_task.getEstimatedCompletionDate());
         return ti;
     }
 
@@ -4768,17 +4993,17 @@ public class WorkflowManagerLocal implements WorkflowManager
         Project project = p_task.getWorkflow().getJob().getL10nProfile()
                 .getProject();
         UserManager um = ServerProxy.getUserManager();
-        String[] p_userIds = um.getUserNamesFromRoles(p_wfTaskInfo.getRoles(),
+        String[] p_userIds = um.getUserIdsFromRoles(p_wfTaskInfo.getRoles(),
                 project);
         List info = um.getEmailInformationForUsers(p_userIds);
         int size = 0;
         if (info != null)
             size = info.size();
         TaskInfo ti = new TaskInfo(p_wfTaskInfo.getId(),
-                p_wfTaskInfo.getName(), p_wfTaskInfo.getState(), p_task
-                        .getEstimatedAcceptanceDate(), p_task
-                        .getEstimatedCompletionDate(), null, p_task
-                        .getEstimatedCompletionDate(), p_task.getType());
+                p_wfTaskInfo.getName(), p_wfTaskInfo.getState(),
+                p_task.getEstimatedAcceptanceDate(),
+                p_task.getEstimatedCompletionDate(), null,
+                p_task.getEstimatedCompletionDate(), p_task.getType());
 
         for (int i = 0; i < size; i++)
         {
@@ -4788,9 +5013,7 @@ public class WorkflowManagerLocal implements WorkflowManager
 
             Date completeBy = ServerProxy.getEventScheduler().determineDate(
                     p_baseDate, cal, p_wfTaskInfo.getTotalDuration());
-            ti
-                    .addTaskAssignee(ei.getUserId(), ei.getUserFullName(),
-                            completeBy);
+            ti.addTaskAssignee(ei.getUserId(), ei.getUserFullName(), completeBy);
         }
         return ti;
     }
@@ -4862,16 +5085,16 @@ public class WorkflowManagerLocal implements WorkflowManager
      * p_completedTaskId means that only the task with the given id and the ones
      * after it will be updated.
      * 
-     * @param p_baseDate -
-     *            The based date used for finding dates based on durations.
-     * @param p_wfTaskInfos -
-     *            The tasks (as WfTaskInfo objects) in default path.
-     * @param p_wfClone -
-     *            The workflow that needs to be udpated.
-     * @param p_completedTaskId -
-     *            The id of the base task.
-     * @param p_uow -
-     *            Unit of work for persistance purposes.
+     * @param p_baseDate
+     *            - The based date used for finding dates based on durations.
+     * @param p_wfTaskInfos
+     *            - The tasks (as WfTaskInfo objects) in default path.
+     * @param p_wfClone
+     *            - The workflow that needs to be udpated.
+     * @param p_completedTaskId
+     *            - The id of the base task.
+     * @param p_uow
+     *            - Unit of work for persistance purposes.
      */
     private DefaultPathTasks updateDefaultPathTasks(int p_actionType,
             Date p_baseDate, List p_wfTaskInfos, Workflow p_wfClone,
@@ -4892,6 +5115,7 @@ public class WorkflowManagerLocal implements WorkflowManager
      * @param p_baseDate - The based date used for finding dates based on
      * durations. @param p_wfTaskInfos - The tasks (as WfTaskInfo objects) in
      * default path. @param p_wfClone - The workflow that needs to be udpated.
+     * 
      * @param p_completedTaskId - The id of the base task. @param
      * p_isActiveTaskReassigned - True if the active task is reassigned. @param
      * p_originalBaseDate - Either the completion date of previous task or
@@ -4934,11 +5158,11 @@ public class WorkflowManagerLocal implements WorkflowManager
                     Date acceptBy = ServerProxy.getEventScheduler()
                             .determineDate(estimatedDate, defaultCalendar,
                                     wfTaskInfo.getAcceptanceDuration());
-                    
+
                     task.setEstimatedAcceptanceDate(acceptBy);
 
                     long duration = wfTaskInfo.getTotalDuration();
-                    
+
                     if (firstTime)
                     {
                         firstTime = false;
@@ -4984,27 +5208,30 @@ public class WorkflowManagerLocal implements WorkflowManager
 
                     if (activeTaskAccepted && !p_isActiveTaskReassigned)
                     {
-                        addReservedTimeToUserCalendar(userCalendar,
+                        addReservedTimeToUserCalendar(
+                                userCalendar,
                                 buildReservedTimeName(wfTaskInfo.getName(),
-                                        task), ReservedTime.TYPE_ACTIVITY, task
-                                        .getAcceptedDate(), completeBy, task
-                                        .getIdAsLong(), p_session);
+                                        task), ReservedTime.TYPE_ACTIVITY,
+                                task.getAcceptedDate(), completeBy,
+                                task.getIdAsLong(), p_session);
                     }
 
                     estimatedDate = completeBy;
                     activeTaskAccepted = false; // reset it
-                    TaskInfo ti = new TaskInfo(task.getId(), task
-                        .getTaskName(), task.getState(), acceptBy,
-                        completeBy, null, null, task.getType());
-                    
-                    if(wfTaskInfo.getOverdueToPM() != 0) {
+                    TaskInfo ti = new TaskInfo(task.getId(),
+                            task.getTaskName(), task.getState(), acceptBy,
+                            completeBy, null, null, task.getType());
+
+                    if (wfTaskInfo.getOverdueToPM() != 0)
+                    {
                         ti.setOverdueToPM(wfTaskInfo.getOverdueToPM());
                     }
-                    
-                    if(wfTaskInfo.getOverdueToUser() != 0) {
+
+                    if (wfTaskInfo.getOverdueToUser() != 0)
+                    {
                         ti.setOverdueToUser(wfTaskInfo.getOverdueToUser());
                     }
-                    
+
                     dpt.addTaskInfo(ti);
                     p_session.saveOrUpdate(task);
                 }
@@ -5081,21 +5308,22 @@ public class WorkflowManagerLocal implements WorkflowManager
      * acceptance/completion times starting from the active node should be
      * updated.
      * 
-     * @param p_modifiedTasks -
-     *            A hashtable of the modified tasks. The key is the Task id and
-     *            the value is a TaskInfoBean (contians modified attributes).
-     * @param p_wfInstance -
-     *            The workflow instance that was modified.
-     * @param p_wfTaskInfos -
-     *            The list of tasks in the default path.
-     * @param p_uow -
-     *            Unit of work.
-     * @param p_wfClone -
-     *            A clones Workflow object (workflow to be modified).
-     * @param p_addedAndDeleted -
-     *            A map containing the added/deleted nodes.
-     * @param p_baseDate -
-     *            Current date that might be used as a base date.
+     * @param p_modifiedTasks
+     *            - A hashtable of the modified tasks. The key is the Task id
+     *            and the value is a TaskInfoBean (contians modified
+     *            attributes).
+     * @param p_wfInstance
+     *            - The workflow instance that was modified.
+     * @param p_wfTaskInfos
+     *            - The list of tasks in the default path.
+     * @param p_uow
+     *            - Unit of work.
+     * @param p_wfClone
+     *            - A clones Workflow object (workflow to be modified).
+     * @param p_addedAndDeleted
+     *            - A map containing the added/deleted nodes.
+     * @param p_baseDate
+     *            - Current date that might be used as a base date.
      */
     private void updateWorkflowChanges(Hashtable p_modifiedTasks,
             WorkflowInstance p_wfInstance, List p_wfTaskInfos,
@@ -5134,8 +5362,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             else
             {
-                s_logger
-                        .error("Not updating default path tasks because originalBaseDate is null.");
+                s_logger.error("Not updating default path tasks because originalBaseDate is null.");
             }
         }
     }
@@ -5177,8 +5404,7 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         catch (Exception e)
         {
-            s_logger
-                    .error("Could not remove corpus docs for job " + p_jobId, e);
+            s_logger.error("Could not remove corpus docs for job " + p_jobId, e);
         }
     }
 
@@ -5219,21 +5445,21 @@ public class WorkflowManagerLocal implements WorkflowManager
             TaskImpl p_taskClone, String p_type, Session p_session)
             throws Exception
     {
-        String[] usernames = ServerProxy.getUserManager()
-                .getUserNamesFromRoles(
-                        p_wfTaskInfo.getRoles(),
-                        p_taskClone.getWorkflow().getJob().getL10nProfile()
-                                .getProject());
-        for (int i = 0; i < usernames.length; i++)
+        String[] userIds = ServerProxy.getUserManager().getUserIdsFromRoles(
+                p_wfTaskInfo.getRoles(),
+                p_taskClone.getWorkflow().getJob().getL10nProfile()
+                        .getProject());
+        for (int i = 0; i < userIds.length; i++)
         {
             UserFluxCalendar cal = ServerProxy.getCalendarManager()
-                    .findUserCalendarByOwner(usernames[i]);
+                    .findUserCalendarByOwner(userIds[i]);
             Date completeBy = ServerProxy.getEventScheduler().determineDate(
                     p_baseDate, cal, p_wfTaskInfo.getTotalDuration());
 
-            addReservedTimeToUserCalendar(cal, buildReservedTimeName(
-                    p_wfTaskInfo.getName(), p_taskClone), p_type, p_baseDate,
-                    completeBy, p_taskClone.getIdAsLong(), p_session);
+            addReservedTimeToUserCalendar(cal,
+                    buildReservedTimeName(p_wfTaskInfo.getName(), p_taskClone),
+                    p_type, p_baseDate, completeBy, p_taskClone.getIdAsLong(),
+                    p_session);
         }
     }
 
@@ -5275,9 +5501,9 @@ public class WorkflowManagerLocal implements WorkflowManager
         Timestamp end = new Timestamp(tz);
         end.setDate(p_completeBy);
 
-        ReservedTime rt = new ReservedTime(p_name, p_type, start, start
-                .getHour(), start.getMinute(), end, end.getHour(), end
-                .getMinute(), null, p_taskId);
+        ReservedTime rt = new ReservedTime(p_name, p_type, start,
+                start.getHour(), start.getMinute(), end, end.getHour(),
+                end.getMinute(), null, p_taskId);
 
         // cloneCalendar.addReservedTime(rtClone);
         p_userCalendar.addReservedTime(rt);
@@ -5291,8 +5517,8 @@ public class WorkflowManagerLocal implements WorkflowManager
             bufferEnd.setDate(end.getDate());
             bufferEnd.add(Timestamp.HOUR, p_userCalendar.getActivityBuffer());
             ReservedTime buffer = new ReservedTime(p_name,
-                    ReservedTime.TYPE_BUFFER, end, end.getHour(), end
-                            .getMinute(), bufferEnd, bufferEnd.getHour(),
+                    ReservedTime.TYPE_BUFFER, end, end.getHour(),
+                    end.getMinute(), bufferEnd, bufferEnd.getHour(),
                     bufferEnd.getMinute(), null, p_taskId);
             p_session.save(buffer);
             p_userCalendar.addReservedTime(buffer);
@@ -5367,7 +5593,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                     // planned date
                     messageArguments[3] = ts.toString();
 
-                    ServerProxy.getMailer().sendMail((EmailInformation)null, emailInfo,
+                    ServerProxy.getMailer().sendMail((EmailInformation) null,
+                            emailInfo,
                             MailerConstants.ESTIMATED_EXCEEDS_PLANNED_DATE,
                             "estimatedExceedsPlanned", messageArguments,
                             companyIdStr);
@@ -5393,7 +5620,8 @@ public class WorkflowManagerLocal implements WorkflowManager
                     // planned date
                     messageArguments[3] = ts.toString();
 
-                    ServerProxy.getMailer().sendMail((EmailInformation)null, emailInfo,
+                    ServerProxy.getMailer().sendMail((EmailInformation) null,
+                            emailInfo,
                             MailerConstants.ESTIMATED_EXCEEDS_PLANNED_DATE,
                             "estimatedExceedsPlanned", messageArguments,
                             companyIdStr);
@@ -5401,10 +5629,9 @@ public class WorkflowManagerLocal implements WorkflowManager
             }
             catch (Exception e)
             {
-                s_logger
-                        .error(
-                                "Failed to notify Project Manager about workflow's estimated completion date exceeding planned date.",
-                                e);
+                s_logger.error(
+                        "Failed to notify Project Manager about workflow's estimated completion date exceeding planned date.",
+                        e);
             }
         }
     }
@@ -5424,8 +5651,10 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         catch (Exception e)
         {
-            s_logger.error("Failed to see if user " + p_userId
-                    + " has permission to cancel workflows.", e);
+            s_logger.error(
+                    "Failed to see if user "
+                            + UserUtil.getUserNameById(p_userId)
+                            + " has permission to cancel workflows.", e);
             allowedToCancel = false;
         }
         return allowedToCancel;
@@ -5448,8 +5677,10 @@ public class WorkflowManagerLocal implements WorkflowManager
         }
         catch (Exception e)
         {
-            s_logger.error("Failed to see if user " + p_userId
-                    + " has permission to cancel workflows.", e);
+            s_logger.error(
+                    "Failed to see if user "
+                            + UserUtil.getUserNameById(p_userId)
+                            + " has permission to cancel workflows.", e);
             allowedToCancel = false;
         }
         return allowedToCancel;
@@ -5508,7 +5739,7 @@ public class WorkflowManagerLocal implements WorkflowManager
     {
         return getLocalActivity(workflowIds, null);
     }
-    
+
     public List<SkipActivityVo> getLocalActivity(String[] workflowIds,
             Locale locale) throws WorkflowManagerException, RemoteException
     {
@@ -5548,60 +5779,64 @@ public class WorkflowManagerLocal implements WorkflowManager
     /*
      * (non-Javadoc)
      * 
-     * @see com.globalsight.everest.workflowmanager.WorkflowManager#setSkip(java.util.List)
+     * @see
+     * com.globalsight.everest.workflowmanager.WorkflowManager#setSkip(java.
+     * util.List)
      */
-    public void setSkip(List<Entry> list, String userId,
-            HttpServletRequest request) throws RemoteException,
-            WorkflowManagerException
+    public void setSkip(List<Entry> list, String userId)
+            throws RemoteException, WorkflowManagerException
     {
-        try {
+        try
+        {
             // For GSEdition skip, if current activity is GSEdition Activity,
             // then discard the remote server's job of the activity.
-            if(list != null && list.size() ==1) 
+            if (list != null && list.size() == 1)
             {
                 GSEditionActivityManagerLocal gsActivityManager = new GSEditionActivityManagerLocal();
-                Entry<String, String> entry = (Entry<String, String>)list.get(0);
+                Entry<String, String> entry = (Entry<String, String>) list
+                        .get(0);
                 String workflowId = entry.getKey();
-                Iterator it = ServerProxy.getTaskManager().getCurrentTasks(
-                        Long.parseLong(workflowId)).iterator();
+                Iterator it = ServerProxy.getTaskManager()
+                        .getCurrentTasks(Long.parseLong(workflowId)).iterator();
                 Task task = null;
-                
+
                 while (it.hasNext())
                 {
                     task = (Task) (it.next());
                     Activity act = ServerProxy.getJobHandler().getActivity(
                             task.getTaskName());
-                    
-                    if(act.getEditionActionID() != null) {
+
+                    if (act.getEditionActionID() != null)
+                    {
                         GSEditionActivity ga = gsActivityManager
                                 .getGSEditionActivityByID(Long.parseLong(act
                                         .getEditionActionID()));
-                        Ambassador ambassador = 
-                            WebServiceClientHelper.getClientAmbassador(
-                            ga.getGsEdition().getHostName(), 
-                            ga.getGsEdition().getHostPort(), 
-                            ga.getGsEdition().getUserName(),
-                            ga.getGsEdition().getPassword(),
-                            ga.getGsEdition().getEnableHttps());
-                            
+                        Ambassador ambassador = WebServiceClientHelper
+                                .getClientAmbassador(ga.getGsEdition()
+                                        .getHostName(), ga.getGsEdition()
+                                        .getHostPort(), ga.getGsEdition()
+                                        .getUserName(), ga.getGsEdition()
+                                        .getPassword(), ga.getGsEdition()
+                                        .getEnableHttps());
+
                         String fullAccessToken = ambassador.login(ga
                                 .getGsEdition().getUserName(), ga
                                 .getGsEdition().getPassword());
                         String realAccessToken = WebServiceClientHelper
                                 .getRealAccessToken(fullAccessToken);
-                        
-                        ambassador.discardJob(realAccessToken, 
-                                              ga.getGsEdition().getUserName(), 
-                                              Long.toString(task.getId()));
+
+                        ambassador.discardJob(realAccessToken, ga
+                                .getGsEdition().getUserName(), Long
+                                .toString(task.getId()));
                     }
                 }
             }
-            
+
             // Do skip activity
-            ServerProxy.getWorkflowServer().setSkipActivity(list, userId,
-                    request);
+            ServerProxy.getWorkflowServer().setSkipActivity(list, userId, true);
         }
-        catch(Exception e) {
+        catch (Exception e)
+        {
             s_logger.error("Skip activity error", e);
         }
     }
@@ -5623,31 +5858,34 @@ public class WorkflowManagerLocal implements WorkflowManager
 
         return list;
     }
-    
+
     /**
      * Change workflow priority.
      * 
      */
-    public void updatePriority (long p_workflowId, int p_priority)
-        throws WorkflowManagerException, RemoteException {
+    public void updatePriority(long p_workflowId, int p_priority)
+            throws WorkflowManagerException, RemoteException
+    {
         Session session = HibernateUtil.getSession();
         Transaction tx = session.beginTransaction();
-        
-        try {
+
+        try
+        {
             Workflow wf = (Workflow) session.get(WorkflowImpl.class, new Long(
                     p_workflowId));
             wf.setPriority(p_priority);
             session.saveOrUpdate(wf);
             tx.commit();
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             String[] args =
             { String.valueOf(p_workflowId) };
             throw new WorkflowManagerException(
                     WorkflowManagerException.MSG_FAILED_TO_UPDATE_PCD, args, e);
         }
     }
-    
+
     public static TaskInstance getCurrentTask(long wfid)
     {
         List<TaskInstance> tasks = getTaskHistoryByWorkflowId(wfid);
@@ -5655,16 +5893,16 @@ public class WorkflowManagerLocal implements WorkflowManager
         if (tasks.size() > 0)
         {
             task = tasks.get(tasks.size() - 1);
-            
+
             if (task.getEnd() != null)
             {
                 task = null;
             }
         }
-        
+
         return task;
     }
-    
+
     public static List<TaskInstance> getTaskHistoryByWorkflowId(long id)
     {
         JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
@@ -5677,7 +5915,7 @@ public class WorkflowManagerLocal implements WorkflowManager
             List<TaskInstance> tasks = query.list();
             if (tasks != null)
             {
-                for (int i = tasks.size() - 1; i >=0; i--)
+                for (int i = tasks.size() - 1; i >= 0; i--)
                 {
                     TaskInstance task = tasks.get(i);
                     String hql2 = "from JbpmVariable j where j.name='skip' and j.taskInstance.id = :tId";
@@ -5689,7 +5927,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                     }
                 }
             }
-            
+
             return tasks;
         }
         finally
@@ -5697,11 +5935,13 @@ public class WorkflowManagerLocal implements WorkflowManager
             ctx.close();
         }
     }
-    
-    public JobEditionInfo getGSEditionJobByJobID(long jobID) {
+
+    public JobEditionInfo getGSEditionJobByJobID(long jobID)
+    {
         JobEditionInfo je = new JobEditionInfo();
-        
-        try {
+
+        try
+        {
             String hql = "from JobEditionInfo a where a.jobId = :id";
             HashMap<String, String> map = new HashMap<String, String>();
             map.put("id", Long.toString(jobID));
@@ -5709,33 +5949,38 @@ public class WorkflowManagerLocal implements WorkflowManager
             Iterator i = servers.iterator();
             je = i.hasNext() ? (JobEditionInfo) i.next() : null;
         }
-        catch (Exception pe) {
-            s_logger.error("Persistence Exception when retrieving JobEditionInfo", pe);
+        catch (Exception pe)
+        {
+            s_logger.error(
+                    "Persistence Exception when retrieving JobEditionInfo", pe);
         }
-        
+
         return je;
     }
-    
-    private IssueEditionRelation getIssueEditionRelation(long tuvid) {
-        long oldTuID = -1;
+
+    private IssueEditionRelation getIssueEditionRelation(long tuvid)
+    {
         IssueEditionRelation ir = new IssueEditionRelation();
-        
-        try {
+
+        try
+        {
             String hql = "from IssueEditionRelation a where a.tuv.id = :tuvid";
-            HashMap map = new HashMap();
+            HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("tuvid", tuvid);
             Collection servers = HibernateUtil.search(hql, map);
             Iterator i = servers.iterator();
             ir = i.hasNext() ? (IssueEditionRelation) i.next() : null;
-            oldTuID = ir.getOriginalTuId();
         }
-        catch (Exception pe) {
-            s_logger.error("Persistence Exception when retrieving IssueEditionRelation", pe);
+        catch (Exception pe)
+        {
+            s_logger.error(
+                    "Persistence Exception when retrieving IssueEditionRelation",
+                    pe);
         }
-        
+
         return ir;
     }
-    
+
     /* Get email address of a user based on the user name */
     private EmailInformation getEmailInfo(String p_userName) throws Exception
     {

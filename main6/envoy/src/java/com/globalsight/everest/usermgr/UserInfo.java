@@ -20,21 +20,17 @@ package com.globalsight.everest.usermgr;
 //globalsight
 import com.globalsight.everest.foundation.User;
 
-//java
-import java.util.ArrayList;
-import java.util.Vector;
-
 /**
- *
- * The UserInfo class is a more light-weight object than the User
- * class.  It contains basic information about a user to be used
- * by the UI, reporting or API.
+ * 
+ * The UserInfo class is a more light-weight object than the User class. It
+ * contains basic information about a user to be used by the UI, reporting or
+ * API.
  */
-public class UserInfo
-    implements java.io.Serializable
+public class UserInfo implements java.io.Serializable
 {
     // basic user information
     private String m_userId = null;
+    private String m_userName = null;
     private String m_title = null;
     private String m_firstName = null;
     private String m_lastName = null;
@@ -50,31 +46,35 @@ public class UserInfo
      * Default Constructor
      */
     public UserInfo()
-    {}
-
-    /**
-     * Constructor to set initial values.
-     * @param p_userId - The user's id.
-     * @param p_firstName - The user's first name.
-     * @param p_lastName - The user's last name.
-     */
-    public UserInfo(String p_userId, String p_firstName, 
-                    String p_lastName, boolean p_isInAllProjects)
     {
-        this(p_userId, null, p_firstName, 
-             p_lastName, p_isInAllProjects);
     }
 
     /**
      * Constructor to set initial values.
+     * 
+     * @param p_userId
+     *            - The user's id.
+     * @param p_firstName
+     *            - The user's first name.
+     * @param p_lastName
+     *            - The user's last name.
+     */
+    public UserInfo(String p_userId, String p_firstName, String p_lastName,
+            boolean p_isInAllProjects)
+    {
+        this(p_userId, null, p_firstName, p_lastName, p_isInAllProjects);
+    }
+
+    /**
+     * Constructor to set initial values.
+     * 
      * @param p_userId
      * @param p_title
      * @param p_firstName
      * @param p_lastName
      */
-    public UserInfo(String p_userId, String p_title,
-                    String p_firstName, String p_lastName,
-                    boolean p_isInAllProjects)
+    public UserInfo(String p_userId, String p_title, String p_firstName,
+            String p_lastName, boolean p_isInAllProjects)
     {
         m_userId = p_userId;
         m_title = p_title;
@@ -86,9 +86,8 @@ public class UserInfo
     /**
      * Constructor to set initial values.
      */
-    public UserInfo(String p_userId, String p_title,
-                    String p_firstName, String p_lastName,
-                    boolean p_isInAllProjects, int p_state)
+    public UserInfo(String p_userId, String p_title, String p_firstName,
+            String p_lastName, boolean p_isInAllProjects, int p_state)
     {
         m_userId = p_userId;
         m_title = p_title;
@@ -97,13 +96,14 @@ public class UserInfo
         m_isInAllProjects = p_isInAllProjects;
         m_state = p_state;
     }
-    
-    /** 
+
+    /**
      * Create a user info from the information in the User object.
      */
     public UserInfo(User p_user)
     {
         m_userId = p_user.getUserId();
+        m_userName = p_user.getUserName();
         m_title = p_user.getTitle();
         m_firstName = p_user.getFirstName();
         m_lastName = p_user.getLastName();
@@ -115,7 +115,6 @@ public class UserInfo
         defaultUILocale = p_user.getDefaultUILocale();
     }
 
-
     public String getUserId()
     {
         return m_userId;
@@ -124,6 +123,16 @@ public class UserInfo
     public void setUserId(String p_userId)
     {
         m_userId = p_userId;
+    }
+
+    public String getUserName()
+    {
+        return m_userName;
+    }
+
+    public void setUserName(String p_userName)
+    {
+        m_userName = p_userName;
     }
 
     public String getTitle()
@@ -186,36 +195,36 @@ public class UserInfo
     {
         m_emailAddress = p_email;
     }
-    
+
     public String getCCEmailAddress()
     {
-    	return m_ccEmailAddress;
+        return m_ccEmailAddress;
     }
-    
+
     public void setCCEmailAddress(String p_ccEmail)
     {
-    	m_ccEmailAddress = p_ccEmail;
+        m_ccEmailAddress = p_ccEmail;
     }
-    
+
     public String getBCCEmailAdress()
     {
-    	return m_bccEmailAddress;
+        return m_bccEmailAddress;
     }
-    
+
     public void setBCCEmailAddress(String p_bccEmail)
     {
-    	m_bccEmailAddress = p_bccEmail;
+        m_bccEmailAddress = p_bccEmail;
     }
 
     /**
-     * Sets the value to specify if the user should be
-     * added to all projects (current and future) or not.
-     * 'true' means they should, 'false' means they shouldn'
-     *
-     * @param p_inAllProjects 'true' the user should be part of
-     *                        all current and future projects.
-     *                        'false' the user shouldn't be part of
-     *                        all future projects.
+     * Sets the value to specify if the user should be added to all projects
+     * (current and future) or not. 'true' means they should, 'false' means they
+     * shouldn'
+     * 
+     * @param p_inAllProjects
+     *            'true' the user should be part of all current and future
+     *            projects. 'false' the user shouldn't be part of all future
+     *            projects.
      */
     public void isInAllProjects(boolean p_inAllProjects)
     {
@@ -223,13 +232,11 @@ public class UserInfo
     }
 
     /**
-     * Get the value to whether the user is part of all projects
-     * and should be added to all new project that is created.
-     *
-     * @return 'true' - the user is part of all current and future
-     *                  projects.
-     *         'false - the user is not to be added to all
-     *                  future projects.
+     * Get the value to whether the user is part of all projects and should be
+     * added to all new project that is created.
+     * 
+     * @return 'true' - the user is part of all current and future projects.
+     *         'false - the user is not to be added to all future projects.
      */
     public boolean isInAllProjects()
     {
@@ -245,17 +252,17 @@ public class UserInfo
     {
         return m_state;
     }
-    
+
     public String toString()
     {
         return getFullName();
     }
-    
+
     public String getDefaultUILocale()
     {
         return defaultUILocale;
     }
-    
+
     public void setDefaultUILocale(String p_local)
     {
         defaultUILocale = p_local;

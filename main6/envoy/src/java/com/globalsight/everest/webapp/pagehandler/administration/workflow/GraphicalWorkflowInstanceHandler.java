@@ -374,10 +374,14 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
     private List<Object[]> getDataForRole(Long taskId, HttpSession session,
             String p_activityName, boolean p_isUser,
             SessionManager p_sessionMgr, GlobalSightLocale p_srcLocale,
-            GlobalSightLocale p_targetLocale) throws EnvoyServletException
+            GlobalSightLocale p_targetLocale) throws Exception
     {
         List<Object[]> userRoles = null;
         Workflow workflow = (Workflow) p_sessionMgr.getAttribute(WF_INSTANCE);
+        // reload the workflow object from database in case the session is
+        // closed when getting its attrbutes
+        workflow = ServerProxy.getWorkflowManager().getWorkflowByIdRefresh(
+                workflow.getId());
 
         if (p_isUser)
         {
@@ -444,7 +448,7 @@ public class GraphicalWorkflowInstanceHandler extends PageHandler implements
                     Object[] role = new Object[6];
                     role[0] = user.getFirstName();
                     role[1] = user.getLastName();
-                    role[2] = user.getUserId();
+                    role[2] = user.getUserName();
 
                     if (Modules.isCalendaringInstalled())
                     {

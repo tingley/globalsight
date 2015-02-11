@@ -251,7 +251,7 @@ public class DownloadHelper implements AmbassadorDwUpConstants
      * @return a new filename (minus the path - if present)
      */
     static public String makeUnextractedFileName(Long p_pageId, String path,
-            String p_suffix, DownloadParams p_downloadParams)
+            String p_suffix, DownloadParams p_downloadParams, String p_taskId)
     {
         StringBuffer uniqueName = new StringBuffer();
         File f = new File(path);
@@ -263,7 +263,7 @@ public class DownloadHelper implements AmbassadorDwUpConstants
         uniqueName.append(p_pageId.toString());
         uniqueName.append(p_suffix);
         uniqueName.append(FILE_NAME_BREAK);
-        uniqueName.append(p_downloadParams.getTaskID());
+        uniqueName.append(p_taskId);
 
         if (idx > 0)
         {
@@ -274,12 +274,12 @@ public class DownloadHelper implements AmbassadorDwUpConstants
     }
 
     static public String makeUnextractedFilePath(PrimaryFile p_pf,
-            Long p_fileId, DownloadParams p_downloadParams)
+            Long p_fileId, DownloadParams p_downloadParams, String p_taskId)
     {
         UnextractedFile uf = (UnextractedFile) p_pf;
         return makePTFParentPath(p_downloadParams)
                 + DownloadHelper.makeUnextractedFileName(p_fileId, uf
-                        .getStoragePath(), PRIMARY_SUFFIX, p_downloadParams);
+                        .getStoragePath(), PRIMARY_SUFFIX, p_downloadParams, p_taskId);
     }
 
     static public String makeSrcDocName(OfflinePageData p_OPD)

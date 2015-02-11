@@ -30,42 +30,40 @@ import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.persistence.PersistenceCommand;
 import com.globalsight.util.database.PreparedStatementBatch;
 
-public class DeleteTuPersistenceCommand
-    extends PersistenceCommand
+public class DeleteTuPersistenceCommand extends PersistenceCommand
 {
-    static private Logger s_logger =
-        Logger.getLogger(
-            "EditSourcePage" /*DeleteTuPersistenceCommand.class*/);
+    static private Logger s_logger = Logger
+            .getLogger(DeleteTuPersistenceCommand.class);
 
-    /* Too complicated for now to delete *all* garbage data.
-
-    static private final String s_deleteTuCommand =
-        "delete from translation_unit where id=?";
-
-    static private final String s_deleteTuvCommand =
-        "delete from translation_unit_variant where tu_id=?";
-
-    static private final String s_deleteLevMatchCommand =
-        "delete from leverage_match where original_source_tuv_id=? " +
-        "and target_locale_id=?";
-
-    static private final String s_deleteTaskTuvCommand =
-        "delete from task_tuv where ";
-
-    static private final String s_deleteTemplatePartCommand =
-        "delete from template_part where tu_id=?";
-    */
+    /*
+     * Too complicated for now to delete *all* garbage data.
+     * 
+     * static private final String s_deleteTuCommand =
+     * "delete from translation_unit where id=?";
+     * 
+     * static private final String s_deleteTuvCommand =
+     * "delete from translation_unit_variant where tu_id=?";
+     * 
+     * static private final String s_deleteLevMatchCommand =
+     * "delete from leverage_match where original_source_tuv_id=? " +
+     * "and target_locale_id=?";
+     * 
+     * static private final String s_deleteTaskTuvCommand =
+     * "delete from task_tuv where ";
+     * 
+     * static private final String s_deleteTemplatePartCommand =
+     * "delete from template_part where tu_id=?";
+     */
 
     // Mark the TUs as orphans instead of deleting them.
-    static private final String s_UPDATE_TU =
-        "update translation_unit set leverage_group_id=0 where id=?";
+    static private final String s_UPDATE_TU = "update translation_unit set leverage_group_id=0 where id=?";
     // Getting paranoid, set orphaned TUVs to OUT_OF_DATE.
-    static private final String s_UPDATE_TUV =
-        "update translation_unit_variant set state='OUT_OF_DATE' where id=?";
+    static private final String s_UPDATE_TUV = "update translation_unit_variant set state='OUT_OF_DATE' where id=?";
 
     private PreparedStatementBatch m_psBatch1 = null;
     private PreparedStatementBatch m_psBatch2 = null;
     private List m_tus;
+    private String m_companyId = null;
 
     //
     // Constructor
@@ -80,8 +78,13 @@ public class DeleteTuPersistenceCommand
     // Methods
     //
 
-    public void persistObjects(Connection p_connection)
-        throws PersistenceException
+    public void setCompanyId(String p_companyId)
+    {
+        m_companyId = p_companyId;
+    }
+
+    public void persistObjects(Connection p_connection, String p_companyId)
+            throws PersistenceException
     {
         try
         {
@@ -101,38 +104,35 @@ public class DeleteTuPersistenceCommand
     }
 
     public void createPreparedStatement(Connection p_connection)
-        throws Exception
+            throws Exception
     {
         m_psBatch1 = new PreparedStatementBatch(
-            PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-            p_connection, s_UPDATE_TU, true);
+                PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                s_UPDATE_TU, true);
         m_psBatch2 = new PreparedStatementBatch(
-            PreparedStatementBatch.DEFAULT_BATCH_SIZE,
-            p_connection, s_UPDATE_TUV, true);
+                PreparedStatementBatch.DEFAULT_BATCH_SIZE, p_connection,
+                s_UPDATE_TUV, true);
     }
 
-    public void setData()
-        throws Exception
+    public void setData() throws Exception
     {
         for (int i = 0, max = m_tus.size(); i < max; i++)
         {
-//            TuImplVo tu = (TuImplVo)m_tus.get(i);
-
-        	TuImpl tu = (TuImpl)m_tus.get(i);
+            TuImpl tu = (TuImpl) m_tus.get(i);
             PreparedStatement ps1 = m_psBatch1.getNextPreparedStatement();
             ps1.setLong(1, tu.getId());
             ps1.addBatch();
 
             if (s_logger.isDebugEnabled())
             {
-                System.err.println(s_UPDATE_TU.replaceFirst(
-                    "\\?", String.valueOf(tu.getId())));
+                System.err.println(s_UPDATE_TU.replaceFirst("\\?",
+                        String.valueOf(tu.getId())));
             }
 
-            for (Iterator it = tu.getTuvs().iterator(); it.hasNext(); )
+            for (Iterator it = tu.getTuvs(true, m_companyId).iterator(); it
+                    .hasNext();)
             {
-//                TuvImplVo tuv = (TuvImplVo)it.next();
-            	TuvImpl tuv = (TuvImpl)it.next();
+                TuvImpl tuv = (TuvImpl) it.next();
 
                 PreparedStatement ps2 = m_psBatch2.getNextPreparedStatement();
                 ps2.setLong(1, tuv.getId());
@@ -140,15 +140,14 @@ public class DeleteTuPersistenceCommand
 
                 if (s_logger.isDebugEnabled())
                 {
-                    System.err.println(s_UPDATE_TUV.replaceFirst(
-                        "\\?", String.valueOf(tuv.getId())));
+                    System.err.println(s_UPDATE_TUV.replaceFirst("\\?",
+                            String.valueOf(tuv.getId())));
                 }
             }
         }
     }
 
-    public void batchStatements()
-        throws Exception
+    public void batchStatements() throws Exception
     {
         m_psBatch1.executeBatches();
         m_psBatch2.executeBatches();

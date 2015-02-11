@@ -17,7 +17,7 @@
 
 package com.globalsight.terminology.userdata;
 
-import java.util.*;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -31,7 +31,6 @@ import com.globalsight.terminology.java.InputModel;
 import com.globalsight.terminology.util.PermissionHelper;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.SessionInfo;
-import com.globalsight.util.edit.EditUtil;
 
 /**
  * <p>
@@ -132,8 +131,8 @@ public class UserdataManager implements IUserdataManager,
         model.setValue(p_value);
         model.setIsDefault("N");
         com.globalsight.terminology.java.Termbase tb = HibernateUtil.get(
-                com.globalsight.terminology.java.Termbase.class, m_database
-                        .getId());
+                com.globalsight.terminology.java.Termbase.class,
+                m_database.getId());
         model.setTermbase(tb);
         try
         {
@@ -183,8 +182,7 @@ public class UserdataManager implements IUserdataManager,
     /**
      * Makes a system-wide object the default object.
      */
-    public void makeDefaultObject(long id)
-            throws TermbaseException
+    public void makeDefaultObject(long id) throws TermbaseException
     {
         InputModel model = HibernateUtil.get(InputModel.class, id);
 
@@ -225,7 +223,7 @@ public class UserdataManager implements IUserdataManager,
     {
         InputModel model = HibernateUtil.get(InputModel.class, id);
         String info = new String();
-        
+
         if (model.getIsDefault().equals("N"))
         {
             try
@@ -238,10 +236,11 @@ public class UserdataManager implements IUserdataManager,
                 throw new TermbaseException(e);
             }
         }
-        else {
+        else
+        {
             info = "isSetDefault";
         }
-        
+
         return info;
     }
 

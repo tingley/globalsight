@@ -208,7 +208,7 @@ public class JavaPropertiesFilter implements Filter
         }
         catch (JSONException e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         
         return "{}";
@@ -228,7 +228,7 @@ public class JavaPropertiesFilter implements Filter
                 }
                 catch (JSONException e)
                 {
-                    s_logger.error(e);
+                    s_logger.error(e.getMessage(), e);
                 }
             }
         }

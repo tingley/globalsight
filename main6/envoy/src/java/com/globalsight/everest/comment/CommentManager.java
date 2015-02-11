@@ -20,6 +20,7 @@ package com.globalsight.everest.comment;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.globalsight.everest.foundation.WorkObject;
@@ -58,12 +59,13 @@ public interface CommentManager
      *            The comment string
      * 
      * @return The newly created and saved Comment.
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment) throws RemoteException,
+            String p_creatorUserId, String p_comment) throws RemoteException,
             CommentException;
+
     /**
      * Save the comment attached to a WorkObject (job or task).
      * 
@@ -79,17 +81,18 @@ public interface CommentManager
      * @param p_comment
      *            The comment string
      * @param p_originalId
-     *            The original comment id if the comment is from another GS server.
+     *            The original comment id if the comment is from another GS
+     *            server.
      * @param p_originalWsdlUrl
      *            The original wsdlUrl this comment is from.
      * 
      * @return The newly created and saved Comment.
-     * @throws RemoteException, TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment, 
-            String p_originalId, String p_originalWsdlUrl) 
-            throws RemoteException, CommentException;
+            String p_creatorUserId, String p_comment, String p_originalId,
+            String p_originalWsdlUrl) throws RemoteException, CommentException;
 
     /**
      * Save the comment attached to a WorkObject (job or task). NOTE that the
@@ -107,11 +110,11 @@ public interface CommentManager
      *            created on.
      * 
      * @return The newly created and saved Comment.
-     * @throws RemoteException,
-     *             TaskException
+     * @throws RemoteException
+     *             , TaskException
      */
     public Comment saveComment(WorkObject p_wo, long p_id,
-            String p_creatorUserName, String p_comment, Date p_date)
+            String p_creatorUserId, String p_comment, Date p_date)
             throws RemoteException, CommentException;
 
     /**
@@ -127,10 +130,10 @@ public interface CommentManager
      * 
      * @return The newly updated comment.
      * 
-     * @throws RemoteException,
-     *             CommentException
+     * @throws RemoteException
+     *             , CommentException
      */
-    public Comment updateComment(long p_commentId, String p_modifierUserName,
+    public Comment updateComment(long p_commentId, String p_modifierUserId,
             String p_newCommentText) throws RemoteException, CommentException;
 
     /**
@@ -156,9 +159,9 @@ public interface CommentManager
     public ArrayList /* of CommentFile */getCommentReferences(
             String p_commentId, String p_access, boolean saved)
             throws RemoteException, CommentException;
-    
+
     public ArrayList getCommentReferences(String p_commentId, String p_access,
-			String companyId) throws RemoteException, CommentException;
+            String companyId) throws RemoteException, CommentException;
 
     /**
      * Gets all the task comments that are associated with the specific job and
@@ -221,11 +224,11 @@ public interface CommentManager
             String p_title, String p_priority, String p_status,
             String p_category, String p_creatorUserId, String p_comment,
             String p_logicalKey) throws RemoteException, CommentException;
-    
+
     public Issue addIssue(int p_levelObjectType, long p_levelObjectId,
             String p_title, String p_priority, String p_status,
             String p_category, String p_creatorUserId, String p_comment,
-            String p_logicalKey, boolean share, boolean overwrite) 
+            String p_logicalKey, boolean share, boolean overwrite)
             throws RemoteException, CommentException;
 
     /**
@@ -260,7 +263,7 @@ public interface CommentManager
             String p_priority, String p_status, String p_category,
             String p_reportedBy, String p_comment) throws RemoteException,
             CommentException;
-    
+
     public Issue replyToIssue(long p_issueId, String p_title,
             String p_priority, String p_status, String p_category,
             String p_reportedBy, String p_comment, boolean share,
@@ -298,7 +301,7 @@ public interface CommentManager
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
             String p_status, String p_category, String p_reportedBy,
             String p_comment) throws RemoteException, CommentException;
-    
+
     public Issue editIssue(long p_issueId, String p_title, String p_priority,
             String p_status, String p_category, String p_reportedBy,
             String p_comment, boolean share, boolean overwrite)
@@ -326,10 +329,10 @@ public interface CommentManager
      *            The logical key stores a hierarchy of keys that show the
      *            hierarchy for the issue on the This parameter can be a part of
      *            the key or the whole thing. For segments the logical key is
-     *            <target page id>_<tu id>_<tuv id>_<sub id> So could be
-     *            1001_ if looking for all the segment issues of target page
-     *            1001. Or could be 1001_3001_2120_ to get all the issues on the
-     *            specific segment.
+     *            <target page id>_<tu id>_<tuv id>_<sub id> So could be 1001_
+     *            if looking for all the segment issues of target page 1001. Or
+     *            could be 1001_3001_2120_ to get all the issues on the specific
+     *            segment.
      * 
      * @return Returns a list of Issue objects.
      */
@@ -345,14 +348,7 @@ public interface CommentManager
      * @param p_levelObjectType
      *            The type of object the issues should be associated with.
      * @see Issue for valid types, types start with the prefix TYPE_
-     * @param p_logicalKey
-     *            The logical key stores a hierarchy of keys that show the
-     *            hierarchy for the issue on the This parameter can be a part of
-     *            the key or the whole thing. For segments the logical key is
-     *            <target page id>_<tu id>_<tuv id>_<sub id> So could be
-     *            1001_ if looking for all the segment issues of target page
-     *            1001. Or could be 1001_3001_2120_ to get all the issues on the
-     *            specific segment.
+     * @param p_targetPageId
      * @param p_statusList
      *            A List of String objects that contain the status of issues to
      *            search for. If empty or NULL then search for all. Valid states
@@ -360,30 +356,44 @@ public interface CommentManager
      * 
      * @return The number of issues there are that fulfill the criteria.
      */
-    public int getIssueCount(int p_levelObjectType, String p_logicalKey,
-            List p_statusList) throws RemoteException, CommentException;
+	public int getIssueCount(int p_levelObjectType, Long p_targetPageId,
+			List<String> p_statusList) throws RemoteException, CommentException;
 
     /**
-     * Returns the number of issues associated with the type, matching the
-     * specified logical key or logical key prefix and with the statuses
-     * specified. If the status list is empty or NULL then search across all
-     * status.
-     * 
-     * @param p_levelObjectType
-     *            The type of object the issues should be associated with.
-     * @see Issue for valid types, types start with the prefix TYPE_
-     * @param p_logicalKeys
-     *            The logical key List stores many logical keys
-     * @param p_statusList
-     *            A List of String objects that contain the status of issues to
-     *            search for. If empty or NULL then search for all. Valid states
-     *            can be found in Issue with the prefix STATUS_*
-     * 
-     * @return The number of issues there are that fulfill the criteria.
-     */
-    public int getIssueCount(int p_levelObjectType, List p_logicalKeys,
-            List p_statusList) throws RemoteException, CommentException;
+	 * Returns the number of issues associated with the type, matching the
+	 * specified target page IDs and with the statuses specified. If the status
+	 * list is empty or NULL then search across all status.
+	 * 
+	 * @param p_levelObjectType
+	 *            The type of object the issues should be associated with.
+	 * @see Issue for valid types, types start with the prefix TYPE_
+	 * @param p_targetPageIds
+	 *            The target page IDs List to count issues from.
+	 * @param p_statusList
+	 *            A List of String objects that contain the status of issues to
+	 *            search for. If empty or NULL then search for all. Valid states
+	 *            can be found in Issue with the prefix STATUS_*
+	 * 
+	 * @return The number of issues there are that fulfill the criteria.
+	 */
+    public int getIssueCount(int p_levelObjectType, List<Long> p_targetPageIds,
+            List<String> p_statusList) throws RemoteException, CommentException;
 
+	/**
+	 * Returns the number of issues associated with the type, target page IDs
+	 * and statuses per page in a map.
+	 * 
+	 * @param p_levelObjectType
+	 * @param p_targetPageIds
+	 * @param p_statusList
+	 * @return HashMap<Long, Integer>:target page ID : count.
+	 * @throws RemoteException
+	 * @throws CommentException
+	 */
+	public HashMap<Long, Integer> getIssueCountPerTargetPage(
+			int p_levelObjectType, List<Long> p_targetPageIds,
+			List<String> p_statusList) throws RemoteException, CommentException;
+    
     /**
      * Delete the issues that are associated with the specified object type and
      * the ids. It will delete one or more issues of the same type.

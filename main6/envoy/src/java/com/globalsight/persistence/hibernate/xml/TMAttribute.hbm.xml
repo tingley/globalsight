@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.globalsight.cxe.entity.customAttribute.TMAttribute"
+		table="TM_ATTRIBUTE">
+		<id name="id" column="ID" type="long">
+			<generator class="native" />
+		</id>
+
+		<many-to-one name="tm" column="TM_ID"
+			class="com.globalsight.everest.projecthandler.ProjectTM" not-null="true" />
+		<property name="attributename" column="ATT_NAME" type="string"
+			not-null="true" unique="false" />
+		<property name="settype" column="SET_TYPE" type="string"
+			not-null="true" unique="false" />
+	</class>
+</hibernate-mapping>

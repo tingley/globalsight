@@ -5,17 +5,10 @@ import junit.framework.Assert;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.AfterSuite;
-
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.MyJobs;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /*
  * TestCaseName: MyJobsReadyVerify.java 
@@ -26,76 +19,50 @@ import com.thoughtworks.selenium.Selenium;
  * 2011-6-24 First Version Jester
  */
 
-public class MyJobsReadyVerify {
-	/*
-	 * Common Variables
-	 */
-	private Selenium selenium;
-	
-	
-	/*
-	 * Verify MyJobs-->Ready page, the button and link status. 
-	 * Author:Jester
-	 */
-  @Test
-  public void verifyJobsReady() {
-	  
-	  selenium.click(MainFrame.MyJobs_MENU);
-	  selenium.click(MainFrame.Ready_SUBMENU);
-	  selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-	  
-	  //Check the buttons or links are presented.  
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.CheckAll_LINK));
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.CheckAllPages_LINK));
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.ClearAll_LINK));
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.SearchReplace_BUTTON));
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.ChangeWorkflowManagers_BUTTON));
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.Discard_BUTTON));
-	  Assert.assertTrue(selenium.isElementPresent(MyJobs.Dispatch_BUTTON));
-	  
-	  
-	  selenium.click(MyJobs.CheckAll_LINK);
-	  selenium.click(MyJobs.ClearAll_LINK);
-	  
-	  //Check if the button Change Work flow Managers button is disabled. 
-	  Assert.assertFalse(selenium.isEditable(MyJobs.ChangeWorkflowManagers_BUTTON));
-	  
-	  
-  }
-  @BeforeMethod
-  public void beforeMethod() {
-	  CommonFuncs.loginSystemWithPM(selenium);
-  }
+public class MyJobsReadyVerify extends BaseTestCase
+{
+    /*
+     * Common Variables
+     */
 
-  @AfterMethod
-  public void afterMethod() {
-	  CommonFuncs.logoutSystem(selenium);
-  }
+    /*
+     * Verify MyJobs-->Ready page, the button and link status. Author:Jester
+     */
+    @Test
+    public void verifyJobsReady()
+    {
+        openMenuItemAndWait(selenium, MainFrame.MY_JOBS_MENU,
+                MainFrame.MY_JOBS_READY_SUBMENU);
 
-  @BeforeClass
-  public void beforeClass() {
-  }
+        // Check the buttons or links are presented.
+        Assert.assertTrue(selenium.isElementPresent(MyJobs.CHECK_ALL_LINK));
+        Assert.assertTrue(selenium
+                .isElementPresent(MyJobs.CHECK_ALL_PAGES_LINK));
+        Assert.assertTrue(selenium.isElementPresent(MyJobs.CLEAR_ALL_LINK));
+        Assert.assertTrue(selenium
+                .isElementPresent(MyJobs.SEARCH_AND_REPLACE_BUTTON));
+        Assert.assertTrue(selenium
+                .isElementPresent(MyJobs.CHANGE_WF_MANAGER_BUTTON));
+        Assert.assertTrue(selenium.isElementPresent(MyJobs.DISCARD_BUTTON));
+        Assert.assertTrue(selenium.isElementPresent(MyJobs.DISPATCH_BUTTON));
 
-  @AfterClass
-  public void afterClass() {
-  }
+        selenium.click(MyJobs.CHECK_ALL_LINK);
+        selenium.click(MyJobs.CLEAR_ALL_LINK);
 
-  @BeforeTest
-  public void beforeTest() {
-	  selenium=CommonFuncs.initSelenium();
-  }
+        // Check if the button Change Work flow Managers button is disabled.
+        Assert.assertFalse(selenium.isEditable(MyJobs.CHANGE_WF_MANAGER_BUTTON));
 
-  @AfterTest
-  public void afterTest() {
-	  CommonFuncs.endSelenium(selenium);
-  }
+    }
 
-  @BeforeSuite
-  public void beforeSuite() {
-  }
+    @BeforeMethod
+    public void beforeMethod()
+    {
+        CommonFuncs.loginSystemWithPM(selenium);
+    }
 
-  @AfterSuite
-  public void afterSuite() {
-  }
-
+    @AfterMethod
+    public void afterMethod()
+    {
+        CommonFuncs.logoutSystem(selenium);
+    }
 }

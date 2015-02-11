@@ -59,8 +59,8 @@ public class UserDependencyChecker extends DependencyChecker
     {
         if (p_object.getClass() != UserImpl.class)
         {
-            String args[] = { this.getClass().getName(),
-                    p_object.getClass().getName() };
+            String args[] =
+            { this.getClass().getName(), p_object.getClass().getName() };
             throw new DependencyCheckException(
                     DependencyCheckException.MSG_INVALID_OBJECT, args, null);
         }
@@ -108,11 +108,12 @@ public class UserDependencyChecker extends DependencyChecker
         {
             StringBuffer errorMessage = new StringBuffer(
                     "Failed to query for all projects dependent on Project Mgr user.");
-            errorMessage.append(p_user.getUserId());
+            errorMessage.append(p_user.getUserName());
 
             c_logger.error(errorMessage.toString(), pe);
 
-            String[] args = { p_user.getUserId() };
+            String[] args =
+            { p_user.getUserName() };
             throw new DependencyCheckException(
                     DependencyCheckException.FAILED_PROJECT_DEPENDENCIES_FOR_USER,
                     args, pe);
@@ -145,7 +146,7 @@ public class UserDependencyChecker extends DependencyChecker
                 String sql = WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_PROJECT_MANAGER_ID_SQL;
                 Map map = new HashMap();
                 map.put("projectManagerId", p_user.getUserId());
-                
+
                 workflows = new Vector(HibernateUtil.searchWithSql(sql, map,
                         WorkflowTemplateInfo.class));
             }
@@ -155,7 +156,7 @@ public class UserDependencyChecker extends DependencyChecker
                 String sql = WorkflowTemplateInfoDescriptorModifier.TEMPLATE_BY_WF_MGR_ID_SQL;
                 Map map = new HashMap();
                 map.put("workflowManagerId", p_user.getUserId());
-                
+
                 workflows = new Vector(HibernateUtil.searchWithSql(sql, map,
                         WorkflowTemplateInfo.class));
             }
@@ -164,11 +165,12 @@ public class UserDependencyChecker extends DependencyChecker
         {
             StringBuffer errorMessage = new StringBuffer(
                     "Failed to query for all workflows dependent on user.");
-            errorMessage.append(p_user.getUserId());
+            errorMessage.append(p_user.getUserName());
 
             c_logger.error(errorMessage.toString(), pe);
 
-            String[] args = { p_user.getUserId() };
+            String[] args =
+            { p_user.getUserName() };
             throw new DependencyCheckException(
                     DependencyCheckException.FAILED_WORKFLOW_DEPENDENCIES_FOR_USER,
                     args, pe);

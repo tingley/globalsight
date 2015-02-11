@@ -45,7 +45,7 @@ public class SetDefaultRoleUtil {
 			map.put("userId", p_userId);
 			roles = new ArrayList(HibernateUtil.search(hql, map));
 		} catch (Exception e) {
-			c_logger.error(e.toString());
+			c_logger.error(e.getMessage(), e);
 		}
 		return roles;
 	}
@@ -131,7 +131,7 @@ public class SetDefaultRoleUtil {
 			}
 			transaction.commit();
 		} catch (Exception e) {
-			c_logger.error(e);
+			c_logger.error(e.getMessage(), e);
 		}
 	}
 	
@@ -160,7 +160,7 @@ public class SetDefaultRoleUtil {
 			}
 			//HibernateUtil.saveOrUpdate(p_role);
 		} catch (Exception e) {
-			c_logger.error(e);
+			c_logger.error(e.getMessage(), e);
 		}
 	}
 	
@@ -312,7 +312,7 @@ public class SetDefaultRoleUtil {
 				}
 			}
 		} catch (Exception e) {
-			c_logger.error(e);
+			c_logger.error(e.getMessage(), e);
 		}
 	}
 	
@@ -340,7 +340,7 @@ public class SetDefaultRoleUtil {
 				HibernateUtil.delete(role);
 			}
 		} catch (Exception e) {
-			c_logger.error(e);
+			c_logger.error(e.getMessage(), e);
 		}
 	}
 }

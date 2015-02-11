@@ -172,6 +172,11 @@ function addUser()
 
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+
+			//for GBS-1995,by fan
+		    //set the selected element of left list is empty
+		    from.options[i] = null;
+            i--;
         }
     }
 
@@ -180,6 +185,7 @@ function addUser()
 
 function removeUser()
 {
+	var from = permForm.from;
     var to = permForm.to;
 
     if (to.selectedIndex == -1)
@@ -192,6 +198,12 @@ function removeUser()
     {
         if (to.options[i].selected)
         {
+
+			//for GBS-1995,by fan
+		    //add selected element to left list
+		    var len = from.options.length;
+            from.options[len] = new Option(to.options[i].text, to.options[i].value);
+
             to.options[i] = null;
             i--;
         }
@@ -225,6 +237,12 @@ function saveUserIds()
 
     permForm.toField.value = options_string;
 }
+
+//adjust select tag width, by fan 
+function changeSelectWidth(selected){
+	if(selected.options[selected.selectedIndex].text.length*7 >= 220)  selected.style.width=selected.options[selected.selectedIndex].text.length*7 + 'px';
+	else selected.style.width=200;
+}
 </script>
 </head>
 
@@ -248,16 +266,39 @@ function saveUserIds()
   </tr>
   <tr>
     <td>
-      <select name="from" multiple class="standardText" size=20>
+      <select name="from" multiple class="standardText" size=20 style="width:200px" onchange="changeSelectWidth(this)">
 <%
             if (allUsers != null)
             {
                 for (int i = 0; i < allUsers.size(); i++)
                 {
                     User user = (User)allUsers.elementAt(i);
-                    out.println("<option value=\"" + user.getUserId() + "\">" +
-                                 user.getUserName() + "</option>");
-                }
+
+					//for GBS-1995,by fan
+					//don't display the element in the left list ,if the the element is existed in the right list.
+					if (usersForPermGroup != null)
+					{
+						boolean isExist = false;  //if the user is existed in the right list, return true.
+						for (int j = 0; j < usersForPermGroup.size(); j++)
+						{
+							User addedUser= (User)usersForPermGroup.get(j);
+							if(addedUser.getUserName().equals(user.getUserName())) isExist = true;
+						}
+						if(!isExist)
+						{		
+%>
+							<option value="<%=user.getUserId()%>" ><%=user.getUserName()%></option>
+<%
+						}
+					}
+					else
+					{
+%>
+							<option value="<%=user.getUserId()%>" ><%=user.getUserName()%></option>
+<%
+					}
+				
+				}
             }
 %>
       </select>
@@ -280,7 +321,7 @@ function saveUserIds()
       </table>
     </td>
     <td>
-      <select name="to" multiple class="standardText" size=20>
+      <select name="to" multiple class="standardText" size=20 style="width:200px" onchange="changeSelectWidth(this)">
 <%
             if (usersForPermGroup != null)
             {

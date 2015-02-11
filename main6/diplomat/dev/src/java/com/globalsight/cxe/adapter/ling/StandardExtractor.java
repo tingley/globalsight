@@ -125,9 +125,15 @@ public class StandardExtractor
     // for open office
     private String m_office_unPara = null;
     private String m_office_unChar = null;
+    private String m_office_internalChar = null;
     private String m_xlsx_numStyleIds = null;
     private String m_xlsx_hiddenSharedSI = null;
     private String m_xlsx_sheetHiddenCell = null;
+    private String m_xlsx_unextractableCellStyles = null;
+    private String m_isHeaderFooterTranslate = null;
+    private String m_isToolTipsTranslate = null;
+    private String m_isHiddenTextTranslate = null;
+    private String m_isTableOfContentTranslate = null;
 
     // private static final String SQL_SELECT_RULE =
     // "SELECT RULE_TEXT FROM FILE_PROFILE, XML_RULE"
@@ -362,7 +368,7 @@ public class StandardExtractor
         if (m_ruleFile != null)
         {
             String styleRule = createRuleForStyles(m_office_unChar,
-                    m_office_unPara, m_formatType);
+                    m_office_unPara, m_office_internalChar, m_formatType);
 
             if (styleRule != null && !"".equals(styleRule))
             {
@@ -527,7 +533,8 @@ public class StandardExtractor
                                 || node.getSegment().contains(">");
                         String temp = node.getSegment();
                         List<String> internalTexts = new ArrayList<String>();
-                        temp = InternalTextHelper.protectInternalTexts(temp, internalTexts);
+                        temp = InternalTextHelper.protectInternalTexts(temp,
+                                internalTexts);
                         String segmentValue = xe.decodeStringBasic(temp);
                         // decode TWICE to make sure secondary parser can work
                         // as expected,
@@ -540,14 +547,15 @@ public class StandardExtractor
                             segmentValue = xe.decodeStringBasic(segmentValue);
                         }
 
-                        segmentValue = InternalTextHelper.restoreInternalTexts(segmentValue, internalTexts);
-                        
+                        segmentValue = InternalTextHelper.restoreInternalTexts(
+                                segmentValue, internalTexts);
+
                         if (inputFormatName != null
                                 && inputFormatName.equals("html"))
                         {
                             segmentValue = checkHtmlTags(segmentValue);
                         }
-                        
+
                         diplomat.setSourceString(segmentValue);
 
                         if (m_logger.isDebugEnabled())
@@ -870,7 +878,7 @@ public class StandardExtractor
     }
 
     private String createRuleForStyles(String unCharStyles,
-            String unParaStyles, String formatType)
+            String unParaStyles, String internalCharStyles, String formatType)
     {
         if (DiplomatAPI.FORMAT_OPENOFFICE_XML.equals(formatType))
         {
@@ -879,16 +887,23 @@ public class StandardExtractor
         else if (DiplomatAPI.FORMAT_OFFICE_XML.equals(formatType))
         {
             String styleRule = createRuleForOfficeStyles(unCharStyles,
-                    unParaStyles);
+                    unParaStyles, internalCharStyles);
             String numRule = createRuleForExcelNumber();
-            String cellRule = createRuleForExcelSheetCell();
-            String sharedRule = createRuleForExcelSharedXml();
+            String headerFooterRule = createRuleForHeaderFooter();
+            String toolTipsRule = createRuleForToolTips();
+            String hiddenTextRule = createRuleForHiddenText();
+            String unextractableExcelCellStyleTextRule = createRuleForUnextractableExcelCell();
+            String tableOfContentRule = createRuleForTableOfContent();
 
             StringBuffer result = new StringBuffer();
             result.append(styleRule != null ? styleRule : "");
             result.append(numRule != null ? numRule : "");
-            result.append(cellRule != null ? cellRule : "");
-            result.append(sharedRule != null ? sharedRule : "");
+            result.append(headerFooterRule != null ? headerFooterRule : "");
+            result.append(toolTipsRule != null ? toolTipsRule : "");
+            result.append(tableOfContentRule != null ? tableOfContentRule : "");
+            result.append(hiddenTextRule != null ? hiddenTextRule : "");
+            result.append(unextractableExcelCellStyleTextRule != null ? unextractableExcelCellStyleTextRule
+                    : "");
 
             return result.toString();
         }
@@ -899,12 +914,14 @@ public class StandardExtractor
     }
 
     private String createRuleForOfficeStyles(String unCharStyles,
-            String unParaStyles)
+            String unParaStyles, String internalCharStyles)
     {
         String styleRule = null;
 
         List<String> unchar = MSOffice2010Filter.toList(unCharStyles);
         List<String> unpara = MSOffice2010Filter.toList(unParaStyles);
+        List<String> internalChar = MSOffice2010Filter
+                .toList(internalCharStyles);
 
         boolean added = false;
         StringBuffer styleSB = new StringBuffer();
@@ -928,6 +945,17 @@ public class StandardExtractor
             styleSB.append("\r\n");
             styleSB.append("<dont-translate path='//w:p/w:pPr/w:pStyle[@w:val=\""
                     + style + "\"]/../..//*' />");
+            styleSB.append("\r\n");
+        }
+
+        for (String style : internalChar)
+        {
+            added = true;
+            styleSB.append("<internal path='//w:r/w:rPr/w:rStyle[@w:val=\""
+                    + style + "\"]/../..' />");
+            styleSB.append("\r\n");
+            styleSB.append("<internal path='//w:r/w:rPr/w:rStyle[@w:val=\""
+                    + style + "\"]/../../w:t' />");
             styleSB.append("\r\n");
         }
 
@@ -992,7 +1020,7 @@ public class StandardExtractor
         return styleRule;
     }
 
-    private String createRuleForExcelSheetCell()
+    private String createRuleForExcelHiddenSheetCell()
     {
         String styleRule = null;
         boolean added = false;
@@ -1024,7 +1052,7 @@ public class StandardExtractor
         return styleRule;
     }
 
-    private String createRuleForExcelSharedXml()
+    private String createRuleForExcelHiddenSharedXml()
     {
         String styleRule = null;
         boolean added = false;
@@ -1034,6 +1062,46 @@ public class StandardExtractor
         styleSB.append("\r\n");
 
         List<String> ids = MSOffice2010Filter.toList(m_xlsx_hiddenSharedSI);
+
+        for (String idstr : ids)
+        {
+            int id = Integer.parseInt(idstr) + 1;
+            added = true;
+            styleSB.append("<dont-translate path='//*[local-name()=\"si\"]["
+                    + id + "]' />");
+            styleSB.append("\r\n");
+            styleSB.append("<dont-translate path='//*[local-name()=\"si\"]["
+                    + id + "]//*' />");
+            styleSB.append("\r\n");
+        }
+
+        styleSB.append("</ruleset>");
+        styleSB.append("\r\n");
+
+        if (added)
+        {
+            styleRule = styleSB.toString();
+        }
+        return styleRule;
+    }
+
+    /**
+     * Creates rules for the texts with unextractable cell style in excel 2010
+     * documents.
+     * <p>
+     * for GBS-2618
+     */
+    private String createRuleForUnextractableExcelCell()
+    {
+        String styleRule = null;
+        boolean added = false;
+        StringBuffer styleSB = new StringBuffer();
+        styleSB.append("\r\n");
+        styleSB.append("<ruleset schema=\"sst\">");
+        styleSB.append("\r\n");
+
+        List<String> ids = MSOffice2010Filter
+                .toList(m_xlsx_unextractableCellStyles);
 
         for (String idstr : ids)
         {
@@ -1106,6 +1174,137 @@ public class StandardExtractor
             ooStyleRule = ooStyle.toString();
         }
         return ooStyleRule;
+    }
+
+    /**
+     * Creates rules for excel 2010 and ppt 2010 not to extract header and
+     * footer.
+     * <p>
+     * for GBS-2476
+     */
+    private String createRuleForHeaderFooter()
+    {
+        StringBuffer rule = new StringBuffer();
+        if (m_isHeaderFooterTranslate != null
+                && !Boolean.parseBoolean(m_isHeaderFooterTranslate))
+        {
+            // this is rule for excel header&footer
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"worksheet\">");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//*[local-name()=\"headerFooter\"]//*' inline=\"no\" priority=\"9\"/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+            // this is rule for ppt header&footer
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"p:sld\">");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//p:cNvPr[starts-with(@name,\"Footer\")]/ancestor::p:sp//a:r' inline=\"no\" priority=\"9\"/>");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//p:cNvPr[starts-with(@name,\"Footer\")]/ancestor::p:sp//a:r//*' inline=\"no\" priority=\"9\"/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+        }
+
+        return rule.toString();
+    }
+
+    /**
+     * Creates rules for docx 2010, excel 2010 and ppt 2010 to extract tool
+     * tips.
+     * <p>
+     * for GBS-2439
+     */
+    private String createRuleForToolTips()
+    {
+        StringBuffer rule = new StringBuffer();
+        if (m_isToolTipsTranslate != null
+                && Boolean.parseBoolean(m_isToolTipsTranslate))
+        {
+            // this is rule for docx tool tip
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"w:document\">");
+            rule.append("\r\n");
+            rule.append("<translate path='//wp:docPr/@descr'/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+            // this is rule for excel tool tip
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"xdr:wsDr\">");
+            rule.append("\r\n");
+            rule.append("<translate path='//xdr:cNvPr/@descr'/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+            // this is rule for ppt tool tip
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"p:sld\">");
+            rule.append("\r\n");
+            rule.append("<translate path='//p:cNvPr/@descr'/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+        }
+
+        return rule.toString();
+    }
+
+    /**
+     * Creates rules for docx 2010 and excel 2010 not to extract hidden text.
+     * <p>
+     * for GBS-2554
+     */
+    private String createRuleForHiddenText()
+    {
+        StringBuffer rule = new StringBuffer();
+        if (m_isHiddenTextTranslate != null
+                && !Boolean.parseBoolean(m_isHiddenTextTranslate))
+        {
+            // this is rule for docx hidden text
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"w:document\">");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//w:vanish/ancestor::w:r'/>");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//w:vanish/ancestor::w:r//*'/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+            // this is rule for excel hidden text
+            String ruleForExcelCell = createRuleForExcelHiddenSheetCell();
+            rule.append(ruleForExcelCell != null ? ruleForExcelCell : "");
+            String ruleForExcelSharedXml = createRuleForExcelHiddenSharedXml();
+            rule.append(ruleForExcelSharedXml != null ? ruleForExcelSharedXml
+                    : "");
+        }
+
+        return rule.toString();
+    }
+
+    /**
+     * Creates rules for docx 2010 not to extract table of content.
+     */
+    private String createRuleForTableOfContent()
+    {
+        StringBuffer rule = new StringBuffer();
+        if (m_isTableOfContentTranslate == null
+                || !Boolean.parseBoolean(m_isTableOfContentTranslate))
+        {
+            // this is rule for docx table of content
+            rule.append("\r\n");
+            rule.append("<ruleset schema=\"w:document\">");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//w:hyperlink[starts-with(@w:anchor, \"_Toc\")]/w:r'/>");
+            rule.append("\r\n");
+            rule.append("<dont-translate path='//w:hyperlink[starts-with(@w:anchor, \"_Toc\")]/w:r//*'/>");
+            rule.append("\r\n");
+            rule.append("</ruleset>");
+            rule.append("\r\n");
+        }
+        return rule.toString();
     }
 
     /**
@@ -1261,6 +1460,17 @@ public class StandardExtractor
                                     .getNodeValue() : "";
                         }
                     }
+                    if ("internalCharStyles".equals(aname))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node valueText = dv.getFirstChild();
+                            m_office_internalChar = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
+                        }
+                    }
                     if ("numStyleIds".equals(aname))
                     {
                         Element dv = (Element) e.getElementsByTagName("dv")
@@ -1292,6 +1502,61 @@ public class StandardExtractor
                             Node valueText = dv.getFirstChild();
                             m_xlsx_sheetHiddenCell = (valueText != null) ? valueText
                                     .getNodeValue() : "";
+                        }
+                    }
+                    if ("unextractableExcelCellStyles".equals(aname))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node valueText = dv.getFirstChild();
+                            m_xlsx_unextractableCellStyles = (valueText != null) ? valueText
+                                    .getNodeValue() : "";
+                        }
+                    }
+                    if ("isHeaderFooterTranslate".equals(aname))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node valueText = dv.getFirstChild();
+                            m_isHeaderFooterTranslate = (valueText != null) ? valueText
+                                    .getNodeValue() : null;
+                        }
+                    }
+                    if ("isToolTipsTranslate".equals(aname))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node valueText = dv.getFirstChild();
+                            m_isToolTipsTranslate = (valueText != null) ? valueText
+                                    .getNodeValue() : null;
+                        }
+                    }
+                    if ("isHiddenTextTranslate".equals(aname))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node valueText = dv.getFirstChild();
+                            m_isHiddenTextTranslate = (valueText != null) ? valueText
+                                    .getNodeValue() : null;
+                        }
+                    }
+                    if ("isTableOfContentTranslate".equals(aname))
+                    {
+                        Element dv = (Element) e.getElementsByTagName("dv")
+                                .item(0);
+                        if (dv != null)
+                        {
+                            Node valueText = dv.getFirstChild();
+                            m_isTableOfContentTranslate = (valueText != null) ? valueText
+                                    .getNodeValue() : null;
                         }
                     }
                 }

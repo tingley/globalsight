@@ -1,9 +1,12 @@
+<%@page import="com.globalsight.cxe.entity.customAttribute.TMAttributeCons"%>
+<%@ taglib uri="/WEB-INF/tlds/globalsight.tld" prefix="amb" %>
 <%@ page
     contentType="text/html; charset=UTF-8"
     errorPage="/envoy/common/error.jsp"
     import="java.util.*,com.globalsight.everest.webapp.webnavigation.LinkHelper,
         java.util.ResourceBundle,
         com.globalsight.util.edit.EditUtil,
+        com.globalsight.everest.permission.Permission,
         com.globalsight.everest.servlet.util.SessionManager,
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.WebAppConstants,
@@ -16,6 +19,7 @@
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="cancel" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+
 <%
 ResourceBundle bundle = PageHandler.getBundle(session);
 SessionManager sessionMgr = (SessionManager)session.getAttribute(
@@ -38,7 +42,7 @@ if (remoteFpIdNames != null && remoteFpIdNames.size() > 0 && modifyProjectTM != 
 {
 	modifyProjectTM.getRemoteTmProfileId();
 	Set allFpIds = remoteFpIdNames.keySet();
-	if (allFpIds.contains(modifyProjectTM.getRemoteTmProfileId())) 
+	if (allFpIds.contains(modifyProjectTM.getRemoteTmProfileId()))
 	{
 		modifiedFPStillExist = true;
 	}
@@ -46,6 +50,8 @@ if (remoteFpIdNames != null && remoteFpIdNames.size() > 0 && modifyProjectTM != 
 
 String str_tmid =
   (String)sessionMgr.getAttribute(WebAppConstants.TM_TM_ID);
+String tmAvailableAtts = (String)request.getAttribute(WebAppConstants.TM_AVAILABLE_ATTS);
+String tmTMAtts = (String)request.getAttribute(WebAppConstants.TM_TM_ATTS);
 
 String urlCancel = cancel.getPageURL();
 String urlOK     = ok.getPageURL();
@@ -57,7 +63,8 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 %>
 <HTML XMLNS:gs>
 <HEAD>
-<TITLE><%=bundle.getString("lb_manage_tm_definition")%></TITLE>
+<TITLE><%=bundle.getString("lb_tm")%></TITLE>
+<link rel="stylesheet" type="text/css" href="/globalsight/envoy/tm/management/tm.css"/>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
@@ -65,9 +72,16 @@ sessionMgr.removeElement(WebAppConstants.TM_ERROR);
 <script SRC="/globalsight/includes/Ajax.js"></script>
 <script SRC="/globalsight/includes/dojo.js"></script>
 <script SRC="/globalsight/includes/json2.js"></script>
+<script SRC="/globalsight/includes/json2.js"></script>
 <SCRIPT language="Javascript" SRC="/globalsight/includes/library.js"></SCRIPT>
 <SCRIPT language="Javascript" src="envoy/tm/management/protocol.js"></SCRIPT>
 <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
+<!-- for jQuery -->
+<link rel="stylesheet" type="text/css" href="/globalsight/includes/jquery-ui-custom.css"/>
+<script src="/globalsight/jquery/jquery-1.6.4.js" type="text/javascript"></script>
+<script src="/globalsight/includes/jquery-ui-custom.min.js" type="text/javascript"></script>
+<script src="/globalsight/includes/Array.js" type="text/javascript"></script>
+<script src="/globalsight/includes/filter/StringBuffer.js" type="text/javascript"></script>
 <SCRIPT LANGUAGE="JavaScript">
 var needWarning = false;
 var objectName = "tm";
@@ -79,6 +93,133 @@ var helpFile = "<%=bundle.getString("help_tm_create_modify")%>";
 var str_error = "<%=str_error == null ? "" : str_error%>";
 var tmid = "<%=str_tmid%>";
 var isModify = false;
+
+var strAvailableAttnames = "<%=tmAvailableAtts %>";
+var strTMAtts = "<%=tmTMAtts %>";
+
+var arrayAvailableAttnames = new Array();
+var arrayTMAtts = new Array();
+
+if (strAvailableAttnames != null)
+{
+	arrayAvailableAttnames = strAvailableAttnames.split(",");
+}
+
+if (strTMAtts != null)
+{
+	var temparray = strTMAtts.split(",");
+	for (var i = 0; i < temparray.length; i++)
+	{
+		var ttt = temparray[i].split(":");
+		var tmAtt = new Object();
+		tmAtt.attributename = ttt[0];
+		tmAtt.settype = ttt[1];
+
+		arrayTMAtts[arrayTMAtts.length] = tmAtt;
+	}
+}
+
+//alert(strAvailableAttnames + " = " + strTMAtts);
+
+function doAddAttribute()
+{
+	var attname = document.getElementById("attname").value;
+	var settype = document.getElementById("attsettype").value;
+
+	//alert(attname);
+
+	if (attname == "")
+	{
+		return;
+	}
+
+	arrayAvailableAttnames.removeData(attname);
+	var tmAtt = new Object();
+	tmAtt.attributename = attname;
+	tmAtt.settype = settype;
+	arrayTMAtts[arrayTMAtts.length] = tmAtt;
+
+	initAttbutesUI();
+}
+
+function removeTMAttribute(attName)
+{
+	for (var i = 0; i < arrayTMAtts.length; i++)
+	{
+		var tmatt = arrayTMAtts[i];
+
+		if (tmatt.attributename == attName)
+		{
+			arrayAvailableAttnames.appendUniqueObj(attName);
+			arrayTMAtts.splice(i, 1);
+			break;
+		}
+	}
+
+	initAttbutesUI();
+}
+
+function initAttbutesUI()
+{
+	var objAttnameSelect = document.getElementById("attname");
+	var divAtts = document.getElementById("divAtts");
+
+	if (objAttnameSelect && divAtts)
+	{
+	objAttnameSelect.options.length = 0;
+	for(var i = 0; i < arrayAvailableAttnames.length; i++)
+	{
+		var attname = arrayAvailableAttnames[i];
+		var varItem = new Option(attname, attname);
+		objAttnameSelect.options.add(varItem);
+	}
+
+	var ccc = new StringBuffer("<table style='width:100%'>");
+	ccc.append("<tr class='thead_tr'><td class='thead_td'>Attribute Internal Name</td><td class='thead_td'>Set during TM update</td><td class='thead_td'>Delete</td></tr>");
+	for(var i = 0; i < arrayTMAtts.length; i++)
+	{
+		var tmatt = arrayTMAtts[i];
+		if (tmatt.settype)
+		{
+			var backgroundColor = "#C7CEE0";
+			if(i % 2 == 0)
+			{
+				backgroundColor = "#DFE3EE";
+			}
+			ccc.append("<tr style='background-color:");
+			ccc.append(backgroundColor);
+			ccc.append("'><td class='standardText'>");
+			ccc.append(tmatt.attributename);
+			ccc.append("</td><td class='standardText'>");
+			ccc.append(getSetTypeStr(tmatt.settype));
+			ccc.append("</td><td class='standardText' align='center'><a href='#' onclick='removeTMAttribute(\"");
+			ccc.append(tmatt.attributename);
+			ccc.append("\")'>X</a></td></tr>");
+		}
+	}
+	ccc.append("</table>");
+
+	divAtts.innerHTML = ccc.toString();
+	}
+}
+
+function getSetTypeStr(setType)
+{
+	if ("<%=TMAttributeCons.SET_NOT %>" == setType)
+	{
+		return "Not set";
+	}
+
+	if ("<%=TMAttributeCons.SET_FROM_JOBATT %>" == setType)
+	{
+		return "From Job Attribute of same name";
+	}
+
+	if ("<%=TMAttributeCons.SET_FROM_WFATT %>" == setType)
+	{
+		return "From Workflow Attribute of same name";
+	}
+}
 
 function Result(message, errorFlag, element)
 {
@@ -126,6 +267,25 @@ function doOK()
         }
     }
 
+    // attibutes
+    var objtmAttributes = document.getElementById("tmAttributes");
+    var tmattstr = new StringBuffer("");
+    if (arrayTMAtts != null && arrayTMAtts.length > 0)
+    {
+    	for (var i = 0; i < arrayTMAtts.length; i++)
+    	{
+    		var tmatt = arrayTMAtts[i];
+    		if (tmatt.settype)
+    		{
+	    		tmattstr.append(tmatt.attributename);
+	    		tmattstr.append(":");
+	    		tmattstr.append(tmatt.settype);
+	    		tmattstr.append(",");
+    		}
+    	}
+    }
+    objtmAttributes.value = tmattstr.toString();
+
     var result = buildDefinition();
     if (result.error == 0)
     {
@@ -146,26 +306,22 @@ function doOK()
 }
 
 function validName() {
-    var name = Trim(form.<%=WebAppConstants.TM_TM_NAME%>.value);
-<%
-    ArrayList names = (ArrayList)request.getAttribute(WebAppConstants.TM_EXIST_NAMES);
-    if (names != null)
-    {
-        for (int i = 0; i < names.size(); i++)
-        {
-            String actname = (String)names.get(i);
-%>
-            if ("<%=actname%>".toLowerCase() == name.toLowerCase())
-            {
-                alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_tm_name"))%>");
-                return false;
-            }
-<%
-        }
-    }
-%>
+	if (!isModify) {
+	    var name = Trim(form.<%=WebAppConstants.TM_TM_NAME%>.value);
+	    var existNames = "<%=(String) sessionMgr.getAttribute(WebAppConstants.TM_EXIST_NAMES) %>";
 
-    return true;
+	    var lowerName = name.toLowerCase();
+	    existNames = existNames.toLowerCase();
+
+	    if (existNames.indexOf(lowerName + ",") != -1) {
+	        alert(name + " is exist. Please input another new translation memory name.");
+	        form.<%=WebAppConstants.TM_TM_NAME%>.focus();
+	        return false;
+	    }
+	    else
+	        return true;
+	} else 
+		return true;
 }
 
 function buildDefinition()
@@ -181,9 +337,9 @@ function buildDefinition()
 }
 
 function parseDefinition()
-{   
+{
     var dom;
-    //Mozilla compatibility  
+    //Mozilla compatibility
     var xmlStr = "<%=xmlDefinition%>";
 
     if(ie)
@@ -191,7 +347,7 @@ function parseDefinition()
       dom = oDefinition.XMLDocument;
     }
     else if(window.DOMParser)
-    { 
+    {
       var parser = new DOMParser();
       dom = parser.parseFromString(xmlStr,"text/xml");
     }
@@ -209,9 +365,11 @@ function parseDefinition()
       dom.selectSingleNode("/tm/domain").text;
     form.<%=WebAppConstants.TM_TM_ORGANIZATION%>.value =
       dom.selectSingleNode("/tm/organization").text;
-    form.<%=WebAppConstants.TM_TM_DESCRIPTION%>.value =
-      dom.selectSingleNode("/tm/description").text;
-    
+
+	//for bug GBS-2547,by fan
+	var desc = dom.selectSingleNode("/tm/description").text.replace(new RegExp("<br/>","gm"),"\n");
+    form.<%=WebAppConstants.TM_TM_DESCRIPTION%>.value = desc;
+
     var isRemoteTm = dom.selectSingleNode("/tm/isRemoteTm").text;
     var objIsRemoteTm = document.getElementById('idRemoteTm');
 	var divRemoteTmSetting = document.getElementById('idRemoteTmSetting');
@@ -225,12 +383,11 @@ function parseDefinition()
     	objIsRemoteTm.checked = false;
     	divRemoteTmSetting.style.display = 'none';
     }
-
 }
 
 function doOnLoad()
 {
-    // This loads the guides in guides.js and the 
+    // This loads the guides in guides.js and the
     loadGuides();
 
     if (str_error)
@@ -241,7 +398,7 @@ function doOnLoad()
     parseDefinition();
 
     var dom;
-    //Mozilla compatibility  
+    //Mozilla compatibility
     var xmlStr = "<%=xmlDefinition%>";
 
     if(ie)
@@ -249,16 +406,16 @@ function doOnLoad()
       dom = oDefinition.XMLDocument;
     }
     else if(window.DOMParser)
-    { 
+    {
       var parser = new DOMParser();
       dom = parser.parseFromString(xmlStr,"text/xml");
     }
-    
+
     var nameNode = dom.selectSingleNode("/tm/name");
     if (nameNode != null && nameNode.text != "")
     {
       isModify = true;
-      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tm_modify"))%>" + " " + nameNode.text;
+      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("lb_edit") + " " + bundle.getString("lb_tm"))%>" + " " + nameNode.text;
 
       // can't rename for now
       form.<%=WebAppConstants.TM_TM_NAME%>.disabled = true;
@@ -268,11 +425,13 @@ function doOnLoad()
     else
     {
       isModify = false;
-      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tm_define_new"))%>";
+      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("lb_new") + " " + bundle.getString("lb_tm"))%>";
 
       form.<%=WebAppConstants.TM_TM_NAME%>.select();
       form.<%=WebAppConstants.TM_TM_NAME%>.focus();
     }
+
+    initAttbutesUI();
 }
 
 function showOrHideEditions(object)
@@ -281,7 +440,7 @@ function showOrHideEditions(object)
     var divRemoteTmSetting = document.getElementById('idRemoteTmSetting');
     if (isChecked == true)
     {
-    	divRemoteTmSetting.style.display = 'block';        
+    	divRemoteTmSetting.style.display = 'block';
     }
     else
     {
@@ -295,8 +454,8 @@ function getTmProfiles()
     var remoteTmProfile = document.getElementById("idRemoteTmProfile");
     remoteTmProfile.options.length = 0;
     remoteTmProfile.disabled = true;
-    
-	var selectedGSEditionId = getSelectedGsEdition();        
+
+	var selectedGSEditionId = getSelectedGsEdition();
     if (selectedGSEditionId != -1)
     {
         var obj = {id:selectedGSEditionId};
@@ -342,16 +501,16 @@ function getSeletedRemoteTmProfile()
 	return selectedRemoteTmProfileIdName;
 }
 
-function getAllRemoteTmProfiles(data) 
+function getAllRemoteTmProfiles(data)
 {
     allRemoteTmProfiles = eval(data);
-    
+
     var remoteTmProfile = document.getElementById("idRemoteTmProfile");
     remoteTmProfile.options.length = 0;
 
     if (allRemoteTmProfiles != null)
     {
-        for(var i = 0; i < allRemoteTmProfiles.length; i++) 
+        for(var i = 0; i < allRemoteTmProfiles.length; i++)
         {
             var oOption = document.createElement("OPTION");
             //need save remote tm profile id and name both,so put them into 'value' together.
@@ -360,11 +519,12 @@ function getAllRemoteTmProfiles(data)
             remoteTmProfile.options.add(oOption);
         }
     }
-    
+
     remoteTmProfile.disabled = false;
 }
 
 </SCRIPT>
+
 </HEAD>
 <BODY onload="doOnLoad();" LEFTMARGIN="0" RIGHTMARGIN="0"
       TOPMARGIN="0" MARGINWIDTH="0" MARGINHEIGHT="0">
@@ -413,8 +573,35 @@ function getAllRemoteTmProfiles(data)
         <input type="checkbox" id="idRemoteTm" NAME="<%=WebAppConstants.TM_TM_REMOTE_TM%>" onclick="showOrHideEditions(this)"/>
     </TD>
   </TR>
- 
+  <amb:permission name="<%=Permission.TM_ENABLE_TM_ATTRIBUTES%>" >
+  <TR>
+    <TD CLASS="standardText" valign="top">TU Attributes:</TD>
+    <TD CLASS="standardText">
+        <div id="divAtts" style='width:100%'></div>
+        <br />
+        <span CLASS="standardText">(Only the attributes of Text and Choice List type are available.)</span>
+        <br />
+        <span CLASS="standardText">
+		<select id="attname" CLASS="standardText">
+		</select>
+		</span>
+		&nbsp;
+		<span CLASS="standardText">
+		<select id="attsettype" CLASS="standardText">
+		<option value="<%=TMAttributeCons.SET_NOT %>">Not set</option>
+		<option value="<%=TMAttributeCons.SET_FROM_JOBATT %>">From Job Attribute of same name</option>
+		<!-- <option value="<%=TMAttributeCons.SET_FROM_WFATT %>">From Workflow Attribute of same name</option> -->
+		</select>
+		</span>
+		&nbsp;
+		<INPUT TYPE="BUTTON" VALUE="Add" ID="addAttribute" onclick="doAddAttribute()" />
+    </TD>
+  </TR>
+ </amb:permission>
 </TABLE>
+
+
+
 
 <div id="idRemoteTmSetting" style="display:none;">
 <p>
@@ -426,13 +613,13 @@ function getAllRemoteTmProfiles(data)
                 <select id="idGsEdition" class="standardText" NAME="<%=WebAppConstants.TM_TM_GS_EDITON%>" onchange="getTmProfiles()">
                 <% if (allGSEditions != null && allGSEditions.size() > 0) { %>
                       <option value="-1"> </option>
-                <%    for (int i=0; i<allGSEditions.size(); i++) 
+                <%    for (int i=0; i<allGSEditions.size(); i++)
                       {
                 	       String selected = "";
                            GSEdition edition = (GSEdition) allGSEditions.get(i);
                            long modifyGSEditionId = -1;
                            if (modifyProjectTM != null) {
-                               modifyGSEditionId = modifyProjectTM.getGsEditionId();	
+                               modifyGSEditionId = modifyProjectTM.getGsEditionId();
                            }
                            if (modifyGSEditionId == edition.getId()) {
                         		  selected = "selected";
@@ -448,24 +635,24 @@ function getAllRemoteTmProfiles(data)
         <TR>
             <TD CLASS="standardText"><%=bundle.getString("lb_tm_remote_tm_profile")%></TD>
             <TD CLASS="standardText" align="left">
-            
+
                 <select id="idRemoteTmProfile" class="standardText" NAME="<%=WebAppConstants.TM_TM_REMOTE_TM_PROFILE%>" >
                 <%
-                    if (modifyProjectTM != null) 
+                    if (modifyProjectTM != null)
                     {
                         long modifyRemoteTmProfileId = -1;
                         String modifyRemoteTmProfileName = "";
                     	modifyRemoteTmProfileId = modifyProjectTM.getRemoteTmProfileId();
                     	modifyRemoteTmProfileName = modifyProjectTM.getRemoteTmProfileName();
-                        if (modifyRemoteTmProfileId != -1 && modifiedFPStillExist == true) 
+                        if (modifyRemoteTmProfileId != -1 && modifiedFPStillExist == true)
                         {
                 %>
                    	<option value="<%=modifyRemoteTmProfileId + "_" + modifyRemoteTmProfileName%>" selected><%=modifyRemoteTmProfileName%></option>
                 <%      }
-                        if (remoteFpIdNames != null && remoteFpIdNames.size()>0) 
+                        if (remoteFpIdNames != null && remoteFpIdNames.size()>0)
                         {
                         	Iterator fpIdNameIter = remoteFpIdNames.entrySet().iterator();
-                        	while (fpIdNameIter.hasNext()) 
+                        	while (fpIdNameIter.hasNext())
                         	{
                         		Map.Entry entry = (Map.Entry )fpIdNameIter.next();
                         		long id = ((Long)entry.getKey()).longValue();
@@ -480,7 +667,7 @@ function getAllRemoteTmProfiles(data)
                         }
                     } %>
                 </select>
-                
+
             </TD>
         </TR>
 	</TABLE>
@@ -488,6 +675,7 @@ function getAllRemoteTmProfiles(data)
 
 <% String tokenName = FormUtil.getTokenName(FormUtil.Forms.NEW_TRANSLATION_MEMORY); %>
 <input type="hidden" name="<%=tokenName%>" value="<%=request.getAttribute(tokenName)%>" />
+<input type="hidden" name="tmAttributes" id="tmAttributes" value="" />
 
 </FORM>
 

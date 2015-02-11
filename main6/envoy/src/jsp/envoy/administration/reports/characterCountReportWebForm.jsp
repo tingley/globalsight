@@ -1,17 +1,20 @@
 <%@ page contentType="text/html; charset=UTF-8"
          errorPage="/envoy/common/activityError.jsp"
-         import="java.util.*, com.globalsight.everest.servlet.util.SessionManager,
-                  com.globalsight.everest.webapp.WebAppConstants,
-                  com.globalsight.everest.workflowmanager.Workflow,
-                  com.globalsight.everest.webapp.javabean.NavigationBean,
-                  com.globalsight.everest.webapp.pagehandler.PageHandler,
-                  com.globalsight.everest.util.comparator.JobComparator,
-                  com.globalsight.everest.util.comparator.LocaleComparator,
-                  com.globalsight.everest.jobhandler.Job,
-                  com.globalsight.everest.servlet.util.ServerProxy,
-                  com.globalsight.util.GlobalSightLocale,
-                  java.util.Locale,
-                  java.util.ResourceBundle"
+         import="java.util.*, 
+         		 com.globalsight.everest.jobhandler.Job,
+         		 com.globalsight.everest.projecthandler.Project,
+				 com.globalsight.everest.servlet.util.ServerProxy,
+                 com.globalsight.everest.util.comparator.LocaleComparator,
+                 com.globalsight.everest.servlet.util.SessionManager,
+                 com.globalsight.everest.webapp.WebAppConstants,
+                 com.globalsight.everest.workflowmanager.Workflow,
+                 com.globalsight.everest.webapp.javabean.NavigationBean,
+                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportConstants,
+                 com.globalsight.everest.webapp.pagehandler.administration.reports.ReportJobInfo,
+                 com.globalsight.everest.webapp.pagehandler.PageHandler,
+                 com.globalsight.util.GlobalSightLocale,
+                 java.util.Locale,
+                 java.util.ResourceBundle"
           session="true"
 %>
 <%
@@ -21,28 +24,177 @@
     {
     	uiLocale = Locale.ENGLISH;
     }
-    
-    Vector stateList = new Vector();
-    stateList.add(Job.DISPATCHED);
-    stateList.add(Job.LOCALIZED);
-    stateList.add(Job.EXPORTED);
-    // get jobs by a state list
-    Collection jobs = ServerProxy.getJobHandler().getJobsByStateList(stateList);
-   	List jobList = null;
-   	if (jobs != null && !jobs.isEmpty())
-   	{
-	   	jobList = new ArrayList(jobs);
-	    Collections.sort(jobList, new JobComparator(JobComparator.NAME,uiLocale));
-    }
    	ResourceBundle bundle = PageHandler.getBundle(session);
+   	
+   	List<ReportJobInfo> jobList = (ArrayList<ReportJobInfo>)
+   	     sessionMgr.getAttribute(ReportConstants.REPORTJOBINFO_LIST);
+	List<Project> projectList = (ArrayList<Project>)
+	        sessionMgr.getAttribute(ReportConstants.PROJECT_LIST);
+	List<GlobalSightLocale> targetLocales = (ArrayList<GlobalSightLocale>)
+	        sessionMgr.getAttribute(ReportConstants.TARGETLOCALE_LIST);
+	String formAction = "/globalsight/ControlServlet?linkName=generateReports&pageName=JOBREPORTS"
+        + "&action=" + ReportConstants.GENERATE_REPORTS;
 %>
 <html>
-<!-- This JSP is: /envoy/administration/reports/LisaQACommentsAnalysisReportWebForm.jsp-->
+<!-- This JSP is: reports\characterCountReportWebForm.jsp-->
 <head>
 <title><%=bundle.getString("character_count_report_web_form")%></title>
+<script type="text/javascript" src="/globalsight/envoy/administration/reports/report.js"></script>
+<script type="text/javascript">
+// Set the ReportJobInfo datas to the JS(jobInfos) 
+var jobInfos = new Array();
+<%
+for(int i=0; i<jobList.size(); i++)  
+{
+    ReportJobInfo j = jobList.get(i);
+%>
+	jobInfos[<%=i%>] = new JobInfo(<%=j.getJobId()%>, "<%=j.getJobName()%>", 
+		<%=j.getProjectId()%>, "<%=j.getJobState()%>", "<%=j.getTargetLocalesStr()%>");
+<%
+}
+%>
+// Finished Set the ReportJobInfo datas to the JS.
+
+function setDisableTRWrapper(trid)
+{
+	if(trid == "idTRJobIds")
+	{
+		setDisableTR("idTRJobIds", true);
+		setDisableTR("idTRJobNames", false);
+		setDisableTR("idTRProject", false);
+		setDisableTR("idTRJobStatus", false);
+		filterJob();
+	}
+	else if(trid == "idTRJobNames")
+	{
+		setDisableTR("idTRJobIds", false);
+		setDisableTR("idTRJobNames", true);
+		setDisableTR("idTRProject", true);
+		setDisableTR("idTRJobStatus", true);
+	}	
+}
+
+function doSubmit()
+{
+	var jobIDArr = new Array();
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		var jobIDText = document.getElementById("jobIds").value;
+		jobIDText = jobIDText.replace(/(^\s*)|(\s*$)/g, "");	
+		if(jobIDText.substr(0, 1) == "," || jobIDText.substr(jobIDText.length-1, jobIDText.length) == ",")
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			return;
+		}
+		jobIDArr = jobIDText.split(",");
+		if(!validateIDS(jobIDArr, jobInfos))
+		{
+			alert('<%=bundle.getString("lb_invalid_jobid")%>');
+			return;
+		}
+	}
+	else
+	{
+		var selObj = document.getElementById("jobNameList");
+		for (i=0; i<selObj.options.length; i++) 
+		{
+			if (selObj.options[i].selected) 
+			{
+				jobIDArr.push(selObj.options[i].value);
+			}
+		}
+		
+		if(!validateIDS(jobIDArr, jobInfos))
+	    {
+			alert('<%=bundle.getString("msg_invalid_jobName")%>');
+			return;
+	    }
+	}
+
+	if(isContainValidTargetLocale(jobIDArr, getSelValueArr("targetLocalesList"), jobInfos))
+	{
+		alert("<%=bundle.getString("msg_invalid_targetLocales")%>");
+		return;
+	}
+	
+	document.getElementById("inputJobIDS").value = jobIDArr.toString();
+	CharacterCountForm.submit();
+}
+
+function filterJob()
+{
+	if(document.getElementsByName("reportOn")[0].checked)
+	{
+		return;
+	}
+	
+	var jobNameList = document.getElementById("jobNameList");
+	var projectNameList = document.getElementById("projectNameList");
+	var jobStatus = document.getElementById("jobStatus");
+	var targetLocalesList = document.getElementById("targetLocalesList");
+	
+	// selected project 
+	var currSelectValueProject = new Array();
+	for(i=0;i<projectNameList.length;i++)
+	{
+		var op= projectNameList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueProject.push(op.value);
+		}
+	}
+	   
+	// selected job status 
+	var currSelectValueJobStatus = new Array();
+	for(i=0;i<jobStatus.length;i++)
+	{
+		var op= jobStatus.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueJobStatus.push(op.value);
+		}
+	} 
+	   
+	// selected target locales 
+	var currSelectValueTargetLocale = new Array();
+	for(i=0;i<targetLocalesList.length;i++)
+	{
+		var op= targetLocalesList.options[i];
+		if(op.selected)
+		{
+	    	currSelectValueTargetLocale.push(op.value);
+		}
+	}
+	
+	jobNameList.options.length=0;
+	
+	// Insert jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		if(contains(currSelectValueProject, jobInfos[i].projectId)
+			&& contains(currSelectValueJobStatus, jobInfos[i].jobStatus)
+			&& containsArray(currSelectValueTargetLocale, jobInfos[i].targetLocals))
+		{
+			addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+		}
+	}
+}
+
+function doOnload()
+{
+	// Initial jobNameList select options 
+	for(var i=0; i<jobInfos.length; i++)
+	{
+		addOption("jobNameList", jobInfos[i].jobName, jobInfos[i].jobId);
+	}
+	
+	// Set the jobIds as default check. 
+	setDisableTRWrapper("idTRJobNames");
+}
+</script>
 </head>
 <body leftmargin="0" rightrmargin="0" topmargin="0" marginwidth="0" marginheight="0"
-bgcolor="LIGHTGREY">
+bgcolor="LIGHTGREY" onLoad="doOnload()">
 <TABLE WIDTH="100%" BGCOLOR="WHITE">
 <TR><TD ALIGN="CENTER"><IMG SRC="/globalsight/images/logo_header.gif"></TD></TR>
 </TABLE><BR>
@@ -51,34 +203,84 @@ bgcolor="LIGHTGREY">
 <TABLE WIDTH="80%">
 <TR><TD>
 <SPAN CLASS="smallText">
-<%=bundle.getString("optionally_select_a_job")%>
-</SPAN>
+<%=bundle.getString("optionally_submit_generate")%> <%=bundle.getString("hold_the_shift")%></SPAN>
 </TD></TR></TABLE>
 
-<form id="CharacterCountForm" name="CharacterCountForm" method="post" action="/globalsight/envoy/administration/reports/characterCountReport.jsp">
+<form id="CharacterCountForm" name="CharacterCountForm" method="post" action="<%=formAction%>">
+<input type="hidden" name="<%=ReportConstants.REPORT_TYPE%>" value="<%=ReportConstants.CHARACTER_COUNT_REPORT%>">
+<input type="hidden" id="inputJobIDS" name="inputJobIDS">
 
 <table border="0" cellspacing="2" cellpadding="2" class="standardText">
 <tr>
-<td class="standardText"><%=bundle.getString("lb_job_name")%>:</td>
+<td class="standardText"><%=bundle.getString("lb_report_on")%></td>
 <td class="standardText" VALIGN="BOTTOM">
-<select name="jobId" size="6" style="width:300px">
-<%  
-	if (jobList == null)
-	{
-%>
-	<option VALUE="*"><%=bundle.getString("no_job")%></option>
-<% 	
-	}
-	else
-	{
-		Iterator iter = jobList.iterator();
-        while (iter.hasNext())
-        {
-            Job j = (Job) iter.next();
-%>
-	<option title="<%=j.getJobName()%>" VALUE="<%=j.getJobId()%>"><%=j.getJobName()%></option>
+<table cellspacing=0>
+<tr id="idTRJobIds">
+<td>
+<input type="radio" name="reportOn" checked onclick="setDisableTRWrapper('idTRJobNames');" value="jobIds"/><%=bundle.getString("lb_job_ids")%>
+</td>
+<td>
+<input type="text" id="jobIds" name="jobIds" value=""><%=bundle.getString("lb_job_ids_description")%>
+</td>
+</tr>
+<tr id="idTRJobNames">
+<td>
+<input type="radio" name="reportOn" onclick="setDisableTRWrapper('idTRJobIds');" value="jobNames"/><%=bundle.getString("lb_job_name")%>:
+</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select id="jobNameList" name="jobNameList" MULTIPLE size="6" style="width:300px;min-height:90px;">
+</select>
+</td>
+</tr>
+</table></td>
+</tr>
+
+<tr id="idTRProject">
+<td class="standardText"><%=bundle.getString("lb_project")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select id="projectNameList" name="projectNameList" MULTIPLE size="4" onChange="filterJob()">
+<option VALUE="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
 <%
-         }
+	Iterator<Project> iterProject = projectList.iterator();
+	while (iterProject.hasNext())
+	{
+		Project p = iterProject.next();
+%>
+		<option VALUE="<%=p.getId()%>"><%=p.getName()%></OPTION>
+<%
+    }
+%>
+</select>
+</td>
+</tr>
+
+<tr id="idTRJobStatus">
+<td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select id="jobStatus" name="jobStatus" MULTIPLE size="4" onChange="filterJob()">
+<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option VALUE="<%=Job.READY_TO_BE_DISPATCHED%>"><%=bundle.getString("lb_ready")%></OPTION>
+<option VALUE="<%=Job.DISPATCHED%>"><%=bundle.getString("lb_inprogress")%></OPTION>
+<option VALUE="<%=Job.LOCALIZED%>"><%=bundle.getString("lb_localized")%></OPTION>
+<option VALUE="<%=Job.EXPORTED%>"><%=bundle.getString("lb_exported")%></OPTION>
+<option VALUE="<%=Job.EXPORT_FAIL%>"><%=bundle.getString("lb_exported_failed")%></OPTION>
+<option VALUE="<%=Job.ARCHIVED%>"><%=bundle.getString("lb_archived")%></OPTION>
+</select>
+</tr>
+
+<tr>
+<td class="standardText"><%=bundle.getString("lb_target_locales")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="targetLocalesList" id="targetLocalesList" MULTIPLE size="4" onChange="filterJob()">
+<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+	Iterator<GlobalSightLocale> it = targetLocales.iterator();
+	while (it.hasNext())
+	{
+		GlobalSightLocale gsl = it.next();
+%>
+		<option VALUE="<%=gsl.getId()%>"><%=gsl.getDisplayName(uiLocale)%></option>
+<%
 	}
 %>
 </select>
@@ -86,35 +288,7 @@ bgcolor="LIGHTGREY">
 </tr>
 
 <tr>
-<td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
-<td class="standardText" VALIGN="BOTTOM">
-<select name="targetLang">
-<%
-	if (jobList == null)
-	{
-%>
-	<option VALUE="*">NO JOB</option>
-<%
-	}
-	else
-	{
-		Vector targetLocales = ServerProxy.getLocaleManager().getAllTargetLocales();
-		int sortColumn = 1;
-        LocaleComparator localeComparator = new LocaleComparator(sortColumn, uiLocale);
-        Collections.sort(targetLocales, localeComparator);
-        Iterator it = targetLocales.iterator();
-		while (it.hasNext())
-		{
-		 	GlobalSightLocale gsl = (GlobalSightLocale) it.next();
-            %><option VALUE="<%=gsl.getDisplayName()%>"><%=gsl.getDisplayName(uiLocale)%></option><%
-		}
-	}
-%>
-</select>
-</td>
-</tr>
-<tr>
-<td><input type="submit" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>"></td>
+<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="doSubmit();"></td>
 <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
 </tr>
 </table>

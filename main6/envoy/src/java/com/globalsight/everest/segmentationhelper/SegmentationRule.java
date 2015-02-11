@@ -172,9 +172,8 @@ public class SegmentationRule implements Serializable
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            CATEGORY.error("Exception in getRulesBylanguageCode(String p_languageCode)"
-                    + e.getMessage());
+            CATEGORY.error("Exception in getRulesBylanguageCode(String p_languageCode)",
+                    e);
             throw new Exception(e.getMessage());
         }
         return rules;
@@ -245,8 +244,7 @@ public class SegmentationRule implements Serializable
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            CATEGORY.error("Exception while getting rule by locale string :" + e.getMessage());
+            CATEGORY.error("Exception while getting rule by locale string", e);
             throw new Exception(e.getMessage());
         }
         return rules;

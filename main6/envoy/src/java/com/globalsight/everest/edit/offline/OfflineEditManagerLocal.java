@@ -31,7 +31,6 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-
 import org.apache.regexp.RE;
 import org.apache.regexp.RECompiler;
 import org.apache.regexp.REProgram;
@@ -45,6 +44,7 @@ import org.hibernate.Transaction;
 
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.company.MultiCompanySupportedThread;
 import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.edit.offline.download.DownLoadApi;
@@ -59,12 +59,18 @@ import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.page.PageManager;
 import com.globalsight.everest.page.TargetPage;
+import com.globalsight.everest.permission.Permission;
+import com.globalsight.everest.permission.PermissionSet;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
 import com.globalsight.everest.tuv.TuImpl;
 import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.everest.util.jms.JmsHelper;
+import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
+import com.globalsight.everest.webapp.pagehandler.administration.reports.generator.Cancelable;
+import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -85,6 +91,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
+import com.globalsight.util.file.XliffFileUtil;
 import com.globalsight.util.progress.IProcessStatusListener;
 import com.globalsight.util.resourcebundle.ResourceBundleConstants;
 import com.globalsight.util.resourcebundle.SystemResourceBundle;
@@ -95,7 +102,7 @@ import com.globalsight.util.zip.ZipIt;
  * 
  * @see OfflineEditManager
  */
-public class OfflineEditManagerLocal implements OfflineEditManager
+public class OfflineEditManagerLocal implements OfflineEditManager, Cancelable
 {
     static private final Logger s_category = Logger
             .getLogger(OfflineEditManagerLocal.class);
@@ -107,8 +114,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager
     static private final REProgram RE_OFFLINE_TEXT_FILE_SIGNATURE = createProgram("(.*)"
             + "(" + AmbassadorDwUpConstants.SIGNATURE + ")" + "(.*)");
 
+    static private final REProgram RE_OFFLINE_TEXT_FILE_SIGNATURE2 = createProgram("(.*)"
+            + "(GlobalSight Download File)" + "(.*)");
+
     /** Regex that identifies any RTF file. */
     static private final REProgram RE_RTF1_FILE_SIGNATURE = createProgram("^\\{\\\\rtf1");
+
+    private UploadApi api = null;
+    private boolean cancel = false;
 
     static private REProgram createProgram(String p_pattern)
     {
@@ -193,7 +206,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         super();
     }
 
-        /****** START: PROCESS DOWNLOAD REQUEST ******/
+    /****** START: PROCESS DOWNLOAD REQUEST ******/
     public void processDownloadRequest(final DownloadParams p_params)
             throws OfflineEditorManagerException, RemoteException
     {
@@ -214,9 +227,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
                     try
                     {
-                        m_status.speakRed(m_status.getTotalFiles(), e
-                                .getMessage(), m_resource
-                                .getString("msg_dnld_abort"));
+                        m_status.speakRed(m_status.getTotalFiles(),
+                                e.getMessage(),
+                                m_resource.getString("msg_dnld_abort"));
                     }
                     catch (Throwable ex)
                     {
@@ -256,31 +269,24 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 // MAKE PACKAGES
                 if (p_params.isSupportFilesOnlyDownload())
                 {
-                    m_status
-                            .speak(
-                                    0,
-                                    m_resource
-                                            .getString("msg_dnld_create_support_files_package"));
+                    m_status.speak(0, m_resource
+                            .getString("msg_dnld_create_support_files_package"));
 
                     downloadApi.makeSupportFilesOnlyPackage(p_params, m_status);
                 }
                 else if (p_params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TXT)
                 {
-                    m_status
-                            .speak(
-                                    0,
-                                    m_resource
-                                            .getString("msg_dnld_create_text_list_view_package"));
+                    m_status.speak(
+                            0,
+                            m_resource
+                                    .getString("msg_dnld_create_text_list_view_package"));
 
                     downloadApi.makeTxtPackage(p_params, m_status);
                 }
                 else if (p_params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_RTF_PARAVIEW_ONE)
                 {
-                    m_status
-                            .speak(
-                                    0,
-                                    m_resource
-                                            .getString("msg_dnld_create_rtf_para_view_package"));
+                    m_status.speak(0, m_resource
+                            .getString("msg_dnld_create_rtf_para_view_package"));
 
                     downloadApi.makeEmbeddedWordClientPackage(p_params,
                             m_status);
@@ -292,26 +298,34 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     // set in p_params.
                     if (p_params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_RTF)
                     {
-                        m_status
-                                .speak(
-                                        0,
-                                        m_resource
-                                                .getString("msg_dnld_create_rtf_list_view_package"));
+                        downloadApi.setConvertLF(true);
+                        m_status.speak(
+                                0,
+                                m_resource
+                                        .getString("msg_dnld_create_rtf_list_view_package"));
                     }
                     else if (p_params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF)
                     {
-                        m_status
-                                .speak(
-                                        0,
-                                        m_resource
-                                                .getString("msg_dnld_create_rtf_trados_list_view_package"));
+                        downloadApi.setConvertLF(true);
+                        m_status.speak(
+                                0,
+                                m_resource
+                                        .getString("msg_dnld_create_rtf_trados_list_view_package"));
+                    }
+                    else if (p_params.getFileFormatId() == AmbassadorDwUpConstants.DOWNLOAD_FILE_FORMAT_TRADOSRTF_OPTIMIZED)
+                    {
+                        downloadApi.setConvertLF(true);
+                        m_status.speak(
+                                0,
+                                m_resource
+                                        .getString("msg_dnld_create_rtf_trados_list_view_optimized_package"));
                     }
 
                     downloadApi.makeRtfPackage(p_params, m_status);
                 }
 
-                m_status.speak(m_status.getTotalFiles(), m_resource
-                        .getString("msg_dnld_package_done"));
+                m_status.speak(m_status.getTotalFiles(),
+                        m_resource.getString("msg_dnld_package_done"));
             }
             else
             {
@@ -331,18 +345,18 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         }
         catch (Exception ex)
         {
+            s_category.error("Download internal error. ", ex);
             throw new OfflineEditorManagerException(
                     OfflineEditorManagerException.MSG_INTERNAL_ERROR, null, ex);
         }
     }
+
     /****** END: PROCESS DOWNLOAD REQUEST ******/
-    
-    
+
     /****** START: PROCESS UPLOAD PAGE ******/
-    public void processUploadPage(final File p_tmpFile,
-            final User p_user, final Task p_task,
-            final String p_fileName) throws AmbassadorDwUpException,
-            RemoteException
+    public void processUploadPage(final File p_tmpFile, final User p_user,
+            final Task p_task, final String p_fileName)
+            throws AmbassadorDwUpException, RemoteException
     {
         // Note: Currently ther is only one thread encompassing the
         // entire upload process - used to enable process status
@@ -353,8 +367,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             {
                 try
                 {
-                    runProcessUploadPage(p_tmpFile, p_user,
-                            p_task, p_fileName);
+                    runProcessUploadPage(p_tmpFile, p_user, p_task, p_fileName);
                 }
                 catch (Throwable e)
                 {
@@ -383,8 +396,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
                                 m_status.setResults(aeMessage + "<BR>");
                                 m_status.speakRed(m_status.getTotalFiles(),
-                                        aeMessage, m_resource
-                                                .getString("msg_upld_abort"));
+                                        aeMessage,
+                                        m_resource.getString("msg_upld_abort"));
                             }
                             else
                             {
@@ -406,16 +419,16 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                                 errorMsg = errorMsg.replace("\r", "<BR />");
                                 m_status.setResults(errorMsg + "<BR />");
                                 m_status.speakRed(m_status.getTotalFiles(),
-                                        errorMsg, m_resource
-                                                .getString("msg_upld_abort"));
+                                        errorMsg,
+                                        m_resource.getString("msg_upld_abort"));
                             }
                         }
                         else
                         {
                             m_status.setResults(e.toString() + "<BR>");
-                            m_status.speakRed(m_status.getTotalFiles(), e
-                                    .getMessage(), m_resource
-                                    .getString("msg_upld_abort"));
+                            m_status.speakRed(m_status.getTotalFiles(),
+                                    e.getMessage(),
+                                    m_resource.getString("msg_upld_abort"));
                         }
 
                     }
@@ -439,9 +452,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager
      * 
      * @see OfflineEditManager interface
      */
-    public void runProcessUploadPage(File p_tmpFile,
-            User p_user, Task p_task, String p_fileName)
-            throws AmbassadorDwUpException
+    public void runProcessUploadPage(File p_tmpFile, User p_user, Task p_task,
+            String p_fileName) throws AmbassadorDwUpException
     {
         if (p_fileName != null && p_fileName.endsWith(".zip"))
         {
@@ -459,8 +471,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 for (Iterator it = files.iterator(); it.hasNext();)
                 {
                     File file = new File(zipDir, (String) it.next());
-                    TargetPage page = processUploadSingleFile(file,
-                            p_user, p_task, file.getName());
+                    TargetPage page = processUploadSingleFile(file, p_user,
+                            p_task, file.getName());
                     if (page != null)
                     {
                         pages.add(page);
@@ -480,14 +492,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         {
             // Direct to upload single file content when the file type is not
             // zip.
-            TargetPage page = processUploadSingleFile(p_tmpFile,
-                    p_user, p_task, p_fileName);
+            TargetPage page = processUploadSingleFile(p_tmpFile, p_user,
+                    p_task, p_fileName);
 
             XmlDtdManager.validateTargetPage(page,
                     XmlDtdManager.OFF_LINE_IMPORT);
         }
     }
-    
+
     /**
      * Upload single file.
      * 
@@ -498,23 +510,47 @@ public class OfflineEditManagerLocal implements OfflineEditManager
      * @param p_fileName
      *            need to upload file, the file type can not be zip.
      */
-    private TargetPage processUploadSingleFile(File p_tmpFile,
-            User p_user, Task p_task, String p_fileName)
+    private TargetPage processUploadSingleFile(File p_tmpFile, User p_user,
+            Task p_task, String p_fileName)
     {
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
                 .getDefaultUILocale()));
 
         String fileName = m_resource.getString("lb_upload_file") + p_fileName;
+        // Fix for GBS-2191
+        PermissionSet ps = null;
+        try
+        {
+            ps = Permission.getPermissionManager().getPermissionSetForUser(
+                    p_user.getUserId());
+        }
+        catch (Exception e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        long taskId = p_task == null ? -1 : p_task.getId();
+        
+        p_task = TaskHelper.getTask(taskId);
 
+        // if user have the permission, he could upload any files within
+        // activity
+        if (ps.getPermissionFor(Permission.ACTIVITIES_OFFLINEUPLOAD_FROMANYACTIVITY))
+        {
+            taskId = -1;
+        }
         try
         {
             String errorString = null;
 
-            L10nProfile l10nProfile = p_task.getWorkflow().getJob()
-                    .getL10nProfile();
-            List excludedTus = l10nProfile.getTranslationMemoryProfile()
-                    .getJobExcludeTuTypes();
-
+            List excludedTus = null;
+            if (p_task != null)
+            {
+                L10nProfile l10nProfile = p_task.getWorkflow().getJob()
+                        .getL10nProfile();
+                excludedTus = l10nProfile.getTranslationMemoryProfile()
+                        .getJobExcludeTuTypes();
+            }
             DetectionResult detect = determineUploadFormat(p_tmpFile, p_user);
 
             int processedCounter = m_status.getCounter() + 1;
@@ -524,52 +560,52 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             {
                 case UPLOAD_TYPE_GS_UNICODE_TEXT:
                 {
-                    errorString = api.processPage(detect.m_reader,
-                            p_user, p_task.getId(), p_fileName, excludedTus,
+                    errorString = api.processPage(detect.m_reader, p_user,
+                            taskId, p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
                     // Note: final error message is set in the
                     // UploadProgress.jsp
                     // where color formatting can be controlled
                     m_status.speak(processedCounter, fileName);
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_format_unicode_txt"));
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_errchk_in_progress"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_format_unicode_txt"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_errchk_in_progress"));
                     m_status.setResults(errorString);
                     break;
                 }
 
                 case UPLOAD_TYPE_XLF:
                 {
-                    errorString = api.processPage(detect.m_reader,
-                            p_user, p_task.getId(), p_fileName, excludedTus,
+                    errorString = api.processPage(detect.m_reader, p_user,
+                            taskId, p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
                     // Note: final error message is set in the
                     // UploadProgress.jsp
                     // where color formatting can be controlled
                     m_status.speak(processedCounter, fileName);
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_format_unicode_txt"));
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_errchk_in_progress"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_format_unicode_txt"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_errchk_in_progress"));
                     m_status.setResults(errorString);
                     break;
                 }
 
                 case UPLOAD_TYPE_TTX:
                 {
-                    errorString = api.processPage(detect.m_reader,
-                            p_user, p_task.getId(), p_fileName, excludedTus,
+                    errorString = api.processPage(detect.m_reader, p_user,
+                            taskId, p_fileName, excludedTus,
                             JmsHelper.JMS_UPLOAD_QUEUE);
                     // Note: final error message is set in the
                     // UploadProgress.jsp
                     // where color formatting can be controlled
 
                     m_status.speak(processedCounter, fileName);
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_format_unicode_txt"));
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_errchk_in_progress"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_format_unicode_txt"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_errchk_in_progress"));
                     m_status.setResults(errorString);
                     break;
                 }
@@ -577,14 +613,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 case UPLOAD_TYPE_GS_PARAVIEW_1:
                 {
                     errorString = api.process_GS_PARAVIEW_1(detect.m_rtfDoc,
-                            p_user, p_task.getId(), p_fileName,
-                            excludedTus, JmsHelper.JMS_UPLOAD_QUEUE);
+                            p_user, taskId, p_fileName, excludedTus,
+                            JmsHelper.JMS_UPLOAD_QUEUE);
 
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter, m_resource
                             .getString("msg_upld_format_rtf_paraview"));
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_errchk_in_progress"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_errchk_in_progress"));
                     m_status.setResults(errorString);
                     break;
                 }
@@ -592,23 +628,22 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 case UPLOAD_TYPE_GS_WRAPPED_UNICODE_TEXT:
                 {
                     errorString = api.process_GS_WRAPPED_UNICODE_TEXT(
-                            detect.m_rtfDoc, p_user, p_task
-                                    .getId(), p_fileName, excludedTus,
-                            JmsHelper.JMS_UPLOAD_QUEUE);
+                            detect.m_rtfDoc, p_user, taskId, p_fileName,
+                            excludedTus, JmsHelper.JMS_UPLOAD_QUEUE);
 
                     m_status.speak(processedCounter, fileName);
                     m_status.speak(processedCounter, m_resource
                             .getString("msg_upld_format_rtf_listview"));
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_errchk_in_progress"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_errchk_in_progress"));
                     m_status.setResults(errorString);
                     break;
                 }
 
                 case UPLOAD_TYPE_DETECTION_ERROR:
                     m_status.speak(processedCounter, fileName);
-                    m_status.speak(processedCounter, m_resource
-                            .getString("msg_upld_format_unknown"));
+                    m_status.speak(processedCounter,
+                            m_resource.getString("msg_upld_format_unknown"));
                     // intentional fall through
                     // the discovery process failed to execute normally
                 case UPLOAD_TYPE_UNKNOWN_UNICODE_TEXT:
@@ -627,16 +662,11 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                         m_status.speak(processedCounter, fileName);
                         m_status.speak(processedCounter, m_resource
                                 .getString("msg_upld_format_unextracted"));
-                        m_status
-                                .speak(
-                                        processedCounter,
-                                        m_resource
-                                                .getString("msg_upld_reading_unextracted_file"));
+                        m_status.speak(processedCounter, m_resource
+                                .getString("msg_upld_reading_unextracted_file"));
 
-                        errorString = api
-                                .doUnextractedFileUpload(p_tmpFile,
-                                        p_user, p_task.getId(),
-                                        p_fileName);
+                        errorString = api.doUnextractedFileUpload(p_tmpFile,
+                                p_user, taskId, p_fileName);
                         m_status.setResults(errorString);
                     }
                     catch (Exception ex)
@@ -663,35 +693,53 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             OfflinePageData data = api.getUploadPageData();
             if (data != null)
             {
+                String pageId = data.getPageId();
+                if (!data.isConsolated() && pageId != null 
+                        && pageId.contains(","))
+                {
+                    data.setConsolated(true);
+                }
+                
+                if (data.isConsolated() 
+                        && (pageId == null || pageId.length() == 0))
+                {
+                    data.setConsolated(false);
+                }
+                
                 if (data.isConsolated())
                 {
                     // multiple file to one xliff
-                    String pageId = data.getPageId();
                     String[] pageIds = pageId.split(",");
-                    return getTargetPage(Long.parseLong(pageIds[0]), data
-                            .getTargetLocaleName());
+                    return getTargetPage(Long.parseLong(pageIds[0]),
+                            data.getTargetLocaleName());
                 }
                 else
-                    return getTargetPage(Long.parseLong(data.getPageId()), data
-                            .getTargetLocaleName());
+                {
+                    if (pageId != null && pageId.length() > 0)
+                    {
+                        return getTargetPage(Long.parseLong(pageId),
+                                data.getTargetLocaleName());
+                    }
+                }
             }
 
             return null;
         }
         catch (Exception ex)
         {
+            s_category.error("processUploadSingleFile error", ex);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
         }
     }
+
     /****** END: PROCESS UPLOAD PAGE ******/
-    
-    
+
     /****** START: PROCESS UPLOAD REPORT PAGE ******/
     public void processUploadReportPage(final File p_tmpFile,
-            final User p_user, final Task p_task,
-            final String p_fileName, final String p_reportName)
-            throws AmbassadorDwUpException, RemoteException
+            final User p_user, final Task p_task, final String p_fileName,
+            final String p_reportName) throws AmbassadorDwUpException,
+            RemoteException
     {
         // Note: Currently ther is only one thread encompassing the
         // entire upload process - used to enable process status
@@ -702,8 +750,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             {
                 try
                 {
-                    runProcessUploadReportPage(p_tmpFile, p_user,
-                            p_task, p_fileName, p_reportName);
+                    runProcessUploadReportPage(p_tmpFile, p_user, p_task,
+                            p_fileName, p_reportName);
                 }
                 catch (Throwable e)
                 {
@@ -712,9 +760,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     try
                     {
                         m_status.setResults(e.toString() + "<BR>");
-                        m_status.speakRed(m_status.getTotalFiles(), e
-                                .getMessage(), m_resource
-                                .getString("msg_upld_abort"));
+                        m_status.speakRed(m_status.getTotalFiles(),
+                                e.getMessage(),
+                                m_resource.getString("msg_upld_abort"));
                     }
                     catch (Throwable ex)
                     {
@@ -740,8 +788,8 @@ public class OfflineEditManagerLocal implements OfflineEditManager
      * 
      * @see OfflineEditManager interface
      */
-    public void runProcessUploadReportPage(File p_tmpFile,
-            User p_user, Task p_task, String p_fileName, String p_reportName)
+    public void runProcessUploadReportPage(File p_tmpFile, User p_user,
+            Task p_task, String p_fileName, String p_reportName)
             throws AmbassadorDwUpException
     {
         setUILocaleResources(GlobalSightLocale.makeLocaleFromString(p_user
@@ -754,14 +802,20 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             String errorString = null;
             m_status.speak(0, fileName);
             m_status.speak(0, m_resource.getString("msg_upld_format_xls"));
-            m_status.speak(0, m_resource
-                    .getString("msg_upld_errchk_in_progress"));
+            m_status.speak(0,
+                    m_resource.getString("msg_upld_errchk_in_progress"));
 
-            UploadApi api = new UploadApi();
+            if (p_reportName.equals(WebAppConstants.TRANSLATION_EDIT)
+                    || WebAppConstants.LANGUAGE_SIGN_OFF.equals(p_reportName))
+            {
+                m_status.setUseProcess(true);
+            }
 
-            errorString = api.processReport(p_tmpFile, p_user,
-                    p_task.getId(), p_fileName, JmsHelper.JMS_UPLOAD_QUEUE,
-                    p_reportName);
+            api = new UploadApi();
+            api.setStatus(m_status);
+
+            errorString = api.processReport(p_tmpFile, p_user, p_task,
+                    p_fileName, JmsHelper.JMS_UPLOAD_QUEUE, p_reportName);
 
             OfflineEditHelper.deleteFile(p_tmpFile);
 
@@ -775,6 +829,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     AmbassadorDwUpExceptionConstants.GENERAL_IO_READ_ERROR, ex);
         }
     }
+
     /****** END: PROCESS UPLOAD REPORT PAGE ******/
 
     private TargetPage getTargetPage(long p_sourcePageId,
@@ -792,7 +847,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         }
         catch (Exception ex)
         {
-            s_category.error(ex);
+            s_category.error(ex.getMessage(), ex);
             throw new UploadPageSaverException(ex);
         }
     }
@@ -885,7 +940,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     catch (Exception de)
                     {
                         s_category.error("xlf parse error");
-                        s_category.error(de.getMessage());
+                        s_category.error(de.getMessage(), de);
                         isXlfOrTtxException = true;
                         throw de;
                     }
@@ -909,7 +964,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     catch (Exception de)
                     {
                         s_category.error("ttx parse error");
-                        s_category.error(de.getMessage());
+                        s_category.error(de.getMessage(), de);
                         isXlfOrTtxException = true;
                         throw de;
                     }
@@ -1004,7 +1059,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
             {
                 throw ex;
             }
-            
+
             if (!isExHandled)
             {
                 // throw ex;
@@ -1036,17 +1091,17 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         }
         catch (Exception e)
         {
-            s_category.error(e);
+            s_category.error(e.getMessage(), e);
             throw new AmbassadorDwUpException(
                     AmbassadorDwUpExceptionConstants.INVALID_FILE_FORMAT, e);
         }
-        
+
         // Only when the source file is XLF, need re-wrap the off-line
         // down-loaded XLIFF file.
-        String sourceFileType = getSourceFileType(doc);
+        String sourceFileType = XliffFileUtil.getSourceFileType(doc);
         if (sourceFileType != null
-                && ("xlf".equalsIgnoreCase(sourceFileType) 
-                        || "xliff".equalsIgnoreCase(sourceFileType) ) )
+                && ("xlf".equalsIgnoreCase(sourceFileType) || "xliff"
+                        .equalsIgnoreCase(sourceFileType)))
         {
             reWrapXliff(doc);
         }
@@ -1159,7 +1214,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         {
             if (s_category.isDebugEnabled())
             {
-                s_category.error(e.getMessage());
+                s_category.error(e.getMessage(), e);
             }
         }
 
@@ -1290,8 +1345,15 @@ public class OfflineEditManagerLocal implements OfflineEditManager
      */
     private void addComment(Document doc, User p_user)
     {
+        String companyId = null;
+        String taskId = XliffFileUtil.getTaskId(doc);
+        if (taskId != null)
+        {
+            Task task = TaskHelper.getTask(Long.parseLong(taskId));
+            companyId = task != null ? task.getCompanyId() : CompanyWrapper
+                    .getCurrentCompanyId();
+        }
         TargetPage tPage = null;
-
         XmlEntities entity = new XmlEntities();
 
         Element root = doc.getRootElement();
@@ -1330,52 +1392,65 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                 textContent = entity.decodeString(textContent, null);
 
                 String tuId = foo.attributeValue("id");
-                TuImpl tu = HibernateUtil.get(TuImpl.class, Long
-                        .parseLong(tuId));
-                for (Object ob : tu.getTuvs())
+                try
                 {
-                    TuvImpl tuv = (TuvImpl) ob;
-                    if (tPage == null)
-                    {
-                        tPage = tuv.getTargetPage();
-                    }
+                    TuImpl tu = SegmentTuUtil.getTuById(Long.parseLong(tuId),
+                            companyId);
 
-                    if (tuv.getGlobalSightLocale().toString().equalsIgnoreCase(
-                            target))
+                    for (Object ob : tu.getTuvs(true, companyId))
                     {
-                        String title = String.valueOf(tu.getId());
-                        String priority = "Medium";
-                        String status = "open";
-                        String category = "Type01";
-
-                        IssueImpl issue = tuv.getComment();
-                        if (issue == null)
+                        TuvImpl tuv = (TuvImpl) ob;
+                        // These TUs should be from the same page, so get target
+                        // page once.
+                        if (tPage == null)
                         {
-                            String key = CommentHelper.makeLogicalKey(tPage
-                                    .getId(), tu.getId(), tuv.getId(), 0);
-                            issue = new IssueImpl(Issue.TYPE_SEGMENT, tuv
-                                    .getId(), title, priority, status,
-                                    category, p_user.getUserId(), textContent,
-                                    key);
-                            issue.setShare(false);
-                            issue.setOverwrite(false);
-                        }
-                        else
-                        {
-                            issue.setTitle(title);
-                            issue.setPriority(priority);
-                            issue.setStatus(status);
-                            issue.setCategory(category);
-                            issue.addHistory(p_user.getUserId(), textContent);
-                            issue.setShare(false);
-                            issue.setOverwrite(false);
+                            tPage = tuv.getTargetPage(companyId);
+                            SegmentTuUtil.getTusByLeverageGroupId(tPage
+                                    .getSourcePage().getId());
                         }
 
-                        HibernateUtil.saveOrUpdate(issue);
-                        break;
+                        if (tuv.getGlobalSightLocale().toString()
+                                .equalsIgnoreCase(target))
+                        {
+                            String title = String.valueOf(tu.getId());
+                            String priority = "Medium";
+                            String status = "open";
+                            String category = "Type01";
+
+                            IssueImpl issue = tuv.getComment();
+                            if (issue == null)
+                            {
+                                String key = CommentHelper.makeLogicalKey(
+                                        tPage.getId(), tu.getId(), tuv.getId(),
+                                        0);
+                                issue = new IssueImpl(Issue.TYPE_SEGMENT,
+                                        tuv.getId(), title, priority, status,
+                                        category, p_user.getUserId(),
+                                        textContent, key);
+                                issue.setShare(false);
+                                issue.setOverwrite(false);
+                            }
+                            else
+                            {
+                                issue.setTitle(title);
+                                issue.setPriority(priority);
+                                issue.setStatus(status);
+                                issue.setCategory(category);
+                                issue.addHistory(p_user.getUserId(),
+                                        textContent);
+                                issue.setShare(false);
+                                issue.setOverwrite(false);
+                            }
+
+                            HibernateUtil.saveOrUpdate(issue);
+                            break;
+                        }
                     }
                 }
-
+                catch (Exception e)
+                {
+                    s_category.error("Failed to add comments", e);
+                }
             }
         }
     }
@@ -1413,7 +1488,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     if (obj instanceof RtfText)
                     {
                         // check only the first instance of text
-                        RE matcher = new RE(RE_OFFLINE_TEXT_FILE_SIGNATURE);
+                        RE matcher = new RE(RE_OFFLINE_TEXT_FILE_SIGNATURE2);
                         return matcher.match(obj.getData());
                     }
                 }
@@ -1440,28 +1515,14 @@ public class OfflineEditManagerLocal implements OfflineEditManager
         m_resource = srb.getResourceBundle(
                 ResourceBundleConstants.LOCALE_RESOURCE_NAME, p_locale);
     }
-    
-    private String getSourceFileType(Document p_doc)
+
+    @Override
+    public void cancel()
     {
-        String result = null;
-        try
+        cancel = true;
+        if (api != null)
         {
-            Element root = p_doc.getRootElement();
-            Element noteElement = root.element(XliffConstants.FILE).element(
-                    XliffConstants.HEADER).element(XliffConstants.NOTE);
-            String notes = noteElement.getText();
-            int index = notes.indexOf("Document Format");
-            notes = notes.substring(index);
-            notes = notes.substring(0, notes.indexOf("#")).trim();
-            notes = notes.substring(notes.indexOf(":")+1).trim();
-            result = notes;
+            api.cancel();
         }
-        catch (Exception ex)
-        {
-            
-        }
-        
-        return result;
     }
-    
 }

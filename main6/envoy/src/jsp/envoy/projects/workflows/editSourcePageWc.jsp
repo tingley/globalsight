@@ -193,7 +193,6 @@
     
 <TABLE CELLSPACING="0" CELLPADDING="3" BORDER="0" 
     STYLE="table-layout: fixed; width: 600">
-    <TBODY>
     <COL WIDTH=380>   <!-- Pages -->
     <COL WIDTH=106 >  <!-- Source Word Count -->
     <COL WIDTH=100 >  <! -- Word Count Override -->

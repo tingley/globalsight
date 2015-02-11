@@ -25,8 +25,8 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.persistence.PersistenceException;
-import com.globalsight.everest.persistence.PersistenceService;
 import com.globalsight.everest.tuv.TaskTuv;
+import com.globalsight.ling.tm2.persistence.DbUtil;
 
 public class PageExportQuery
 {
@@ -48,7 +48,7 @@ public class PageExportQuery
         List taskTuvList = null;
         try
         {
-            connection = PersistenceService.getInstance().getConnection();
+            connection = DbUtil.getConnection();
             m_ps = connection.prepareStatement(m_selectTaskTuv);
             m_ps.setLong(1, p_workflowId);
             rs = m_ps.executeQuery();
@@ -61,32 +61,11 @@ public class PageExportQuery
         }
         finally
         {
-            try
-            {
-                if (m_ps != null)
-                {
-                    rs.close();
-                    m_ps.close();
-                }
-            }
-            catch (Exception e)
-            {
-            }
-            try
-            {
-                if (connection != null)
-                {
-                    c_logger
-                            .debug("Returning connection to the connection pool in PageExportQuery");
-                    PersistenceService.getInstance().returnConnection(
-                            connection);
-                }
-            }
-            catch (Exception e)
-            {
-                c_logger.error("Error returning connection to the pool" + e);
-            }
+        	DbUtil.silentClose(rs);
+        	DbUtil.silentClose(m_ps);
+        	DbUtil.silentReturnConnection(connection);
         }
+
         return taskTuvList;
     }
 

@@ -18,16 +18,27 @@ package com.globalsight.util;
 
 /**
  * Entry is used to store the key-value pair data. <br>
- * It typcial usage is to store the <code>Entry</code> to a collection to
- * represent a group key-valur pairs. e.g options in jsp page.
+ * It typical usage is to store the <code>Entry</code> to a collection to
+ * represent a group key-value pairs. e.g options in jsp page.
  * 
  */
 public class Entry<K, V>
 {
-
     private K key;
 
     private V value;
+
+    private String help;
+
+    public String getHelp()
+    {
+        return help;
+    }
+
+    public void setHelp(String help)
+    {
+        this.help = help;
+    }
 
     public Entry(K key, V value)
     {

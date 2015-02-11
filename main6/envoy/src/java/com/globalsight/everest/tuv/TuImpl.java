@@ -28,16 +28,18 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.docproc.extractor.xliff.Extractor;
-import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 
 public final class TuImpl extends PersistentObject implements Tu, Serializable
 {
+    static private final Logger logger = Logger.getLogger(TuImpl.class);
 
     private static final long serialVersionUID = 1L;
     public static final String M_TU_ID = PersistentObject.M_ID;
@@ -47,40 +49,38 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     public static final String M_LOCALIZABLE_TYPE = "m_localizableType";
     public static final String M_LEVERAGE_GROUP = "m_leverageGroup";
     public static final String M_TUVS = "m_tuvs";
-    private static Logger c_category = 
-        Logger.getLogger(TuvImpl.class);
+
+    public static String TRANSLATION_MT = "mt";
+    public static final String FROM_WORLDSERVER = "worldserver";
+
+    private static Logger c_category = Logger.getLogger(TuvImpl.class);
 
     private long m_tmId;
     private String m_dataType = "unknown";
     private String m_tuType = TuType.UNSPECIFIED.getName();
     // Must be 'T' or 'L'. The 'U' stands for unknown.
     private char m_localizableType = 'U';
-    // backpointer used for topLink
-    private LeverageGroup m_leverageGroup;
-    private Map m_tuvs = new HashMap();
-
     private String m_sourceTmName = null;
-    
     private String xliff_target = null;
     private String xliff_target_language = null;
-    
     private String passoloState = null;
-    
     private String xliffTranslationType = null;
     private boolean xliffLocked = false;
     private String iwsScore = null;
-    
-    private Long m_repetitionOfId  = new Long(0);
+    private Long m_repetitionOfId = new Long(0);
     private boolean m_repeated = false;
-    
-    public static String TRANSLATION_MT = "mt";
-    
-    private Set removedTags = null;
+
+    private LeverageGroup m_leverageGroup;
+    private long leverageGroupId = 0;
+
+    // LocaleId : Tuv
+    private Map<Long, Tuv> m_tuvs = new HashMap<Long, Tuv>();
+    private Set<RemovedTag> removedTags = new HashSet<RemovedTag>();
     private RemovedPrefixTag prefixTag = null;
     private RemovedSuffixTag suffixTag = null;
+
     private String generateFrom = null;
     private String sourceContent = null;
-    public static final String FROM_WORLDSERVER = "worldserver";
 
     /**
      * TU orders range from 1 - n. The default value is 0.
@@ -94,8 +94,10 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     private long m_pid = 0;
 
     /**
-     * Used by TopLink
+     * Xliff attribute of "translation-unit" tag.
      */
+    private String translate = null;
+
     public TuImpl()
     {
     }
@@ -105,13 +107,49 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         m_dataType = tu.getDataType();
         m_tuType = tu.getTuType();
         m_localizableType = tu.getLocalizableType();
+        leverageGroupId = tu.getLeverageGroupId();
         m_leverageGroup = tu.getLeverageGroup();
+        if (m_leverageGroup != null && leverageGroupId <= 0)
+        {
+            leverageGroupId = m_leverageGroup.getLeverageGroupId();
+        }
         m_tuvs = tu.getTuvMap();
         m_sourceTmName = tu.getSourceTmName();
         m_order = tu.getOrder();
         m_pid = tu.getPid();
         m_repeated = tu.isRepeated();
         m_repetitionOfId = tu.getRepetitionOfId();
+    }
+
+    public TuImpl(TuImpl tu)
+    {
+        m_order = tu.getOrder();
+        m_tmId = tu.getTmId();
+        m_dataType = tu.getDataType();
+        m_tuType = tu.getTuType();
+
+        m_localizableType = tu.getLocalizableType();
+        leverageGroupId = tu.getLeverageGroupId();
+        m_leverageGroup = tu.getLeverageGroup();
+        if (m_leverageGroup != null && leverageGroupId <= 0)
+        {
+            leverageGroupId = m_leverageGroup.getLeverageGroupId();
+        }
+        m_pid = tu.getPid();
+        m_sourceTmName = tu.getSourceTmName();
+        xliffTranslationType = tu.getXliffTranslationType();
+
+        this.xliffLocked = tu.isXliffLocked();
+        this.iwsScore = tu.getIwsScore();
+        this.xliff_target = tu.getXliffTarget();
+        this.xliff_target_language = tu.getXliffTargetLanguage();
+        this.generateFrom = tu.getGenerateFrom();
+
+        this.sourceContent = tu.getSourceContent();
+        this.passoloState = tu.getPassoloState();
+        this.translate = tu.getTranslate();
+        this.m_repetitionOfId = tu.getRepetitionOfId();
+        this.m_repeated = tu.isRepeated();
     }
 
     //
@@ -168,11 +206,33 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     /**
      * Get a tuv based on the specified locale id.
      */
-    public Tuv getTuv(long p_localeId)
+    public Tuv getTuv(long p_localeId, String companyId)
     {
+        return getTuv(p_localeId, true, companyId);
+    }
+
+    /**
+     * Get a tuv based on the specified locale id.
+     * 
+     * While creating job, need not loadTuvs(), parameter
+     * "p_needLoadTuvsManually" should be false.
+     */
+    public Tuv getTuv(long p_localeId, boolean p_needLoadTuvsManually,
+            String companyId)
+    {
+        Tuv tuv = (Tuv) m_tuvs.get(new Long(p_localeId));
+        if (tuv != null && "OUT_OF_DATE".equals(tuv.getState().getName()))
+        {
+            tuv = null;
+            m_tuvs.remove(new Long(p_localeId));
+        }
+        if (tuv == null && p_needLoadTuvsManually)
+        {
+            loadTuvs(companyId);
+        }
+
         return (Tuv) m_tuvs.get(new Long(p_localeId));
     }
-    
 
     /**
      * Get a collection of all Tuvs. This is a combination of tuvs that belong
@@ -180,46 +240,26 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * 
      * @return A collection of Tuvs of this Tu.
      */
-    public Collection getTuvs()
+    public Collection getTuvs(boolean p_needLoadTuvsManually, String companyId)
     {
+        if (p_needLoadTuvsManually)
+        {
+            // Load TUVs to avoid TUVs loaded partially.
+            loadTuvs(companyId);
+        }
+
         return m_tuvs.values();
     }
-    
-    /**
-     * Get a current tuv based on the specified locale id.
-     */
-    public Tuv getCurrentTuv(long p_localeId)
+
+    public Map getTuvAsSet(boolean p_needLoadTuvsManually, String companyId)
     {
-        List currentTuvs = getCurrentTuvs();
-        Iterator it = currentTuvs.iterator();
-        while (it.hasNext())
+        if (p_needLoadTuvsManually)
         {
-            Tuv tuv = (Tuv) it.next();
-            if (tuv.getGlobalSightLocale().getId() == p_localeId)
-            {
-                return tuv;
-            }
+            // Load TUVs to avoid TUVs loaded partially.
+            loadTuvs(companyId);
         }
-        return null;
-    }
-    
-    /**
-     * Get a collection of all current Tuvs. This is a combination of tuvs that belong
-     * to a source page and target page(s).
-     * 
-     * note: based on current implementation, new tuvs are "OUT_OF_DATE" state which 
-     * is not useful, then query the tuvs who are not "OUT_OF_DATE" state. 
-     * Old method getTuvs() have potential issue. Recommend to use this new method 
-     * to query the tuvs
-     * 
-     * @return A collection of Tuvs of this Tu.
-     */
-    public List getCurrentTuvs()
-    {
-        String hql = "from TuvImpl t where t.tu.id = :tuId and t.m_state != 'OUT_OF_DATE'";
-        Map map = new HashMap();
-        map.put("tuId", getTuId());
-        return HibernateUtil.search(hql, map);
+
+        return m_tuvs;
     }
 
     /**
@@ -247,19 +287,62 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     }
 
     /**
-     * Get Leverage group id.
+     * Get the LeverageGroup associated with this Tu.
      */
-    public long getLeverageGroupId()
+    public LeverageGroup getLeverageGroup()
     {
-        return m_leverageGroup.getLeverageGroupId();
+        if (m_leverageGroup == null && leverageGroupId > 0)
+        {
+            loadLeverageGroup();
+        }
+
+        return m_leverageGroup;
+    }
+
+    private void loadLeverageGroup()
+    {
+        try
+        {
+            SourcePage sp = ServerProxy.getPageManager()
+                    .getSourcePageByLeverageGroupId(leverageGroupId);
+            Iterator lgIter = sp.getExtractedFile().getLeverageGroups()
+                    .iterator();
+            while (lgIter.hasNext())
+            {
+                LeverageGroup lg = (LeverageGroup) lgIter.next();
+                if (lg.getLeverageGroupId() == this.leverageGroupId)
+                {
+                    this.m_leverageGroup = lg;
+                    break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+        }
+
     }
 
     /**
-     * Set the leverage group that this tu belongs to.
+     * Set the leverage group that this TU belongs to.
      */
     public void setLeverageGroup(LeverageGroup p_leverageGroup)
     {
         m_leverageGroup = p_leverageGroup;
+        if (m_leverageGroup != null)
+        {
+            leverageGroupId = m_leverageGroup.getLeverageGroupId();
+        }
+    }
+
+    public void setLeverageGroupId(long p_leverageGroupId)
+    {
+        this.leverageGroupId = p_leverageGroupId;
+    }
+
+    public long getLeverageGroupId()
+    {
+        return this.leverageGroupId;
     }
 
     /**
@@ -280,24 +363,9 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         m_sourceTmName = p_sourceTmName;
     }
 
-    //
-    // TuLing interface method
-    //
-
-    /**
-     * @see com.globalsight.ling.tm.TuLing#isLocalizable()
-     */
     public boolean isLocalizable()
     {
         return m_localizableType == 'L' ? true : false;
-    }
-
-    /**
-     * Get the LeverageGroup associated with this Tu.
-     */
-    public LeverageGroup getLeverageGroup()
-    {
-        return m_leverageGroup;
     }
 
     /**
@@ -355,21 +423,13 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         m_tuType = type;
     }
 
-    public Map getTuvAsSet()
+    private GxmlElement getGxmlElement(String p_string)
     {
-        return m_tuvs;
-    }
-
-    public void setTuvAsSet(Map tuvs)
-    {
-        m_tuvs = tuvs;
-    }
-    
-    private GxmlElement getGxmlElement(String p_string) {
         GxmlFragmentReader reader = null;
         GxmlElement m_gxmlElement = null;
-        
-        if(p_string != null) { 
+
+        if (p_string != null)
+        {
             try
             {
                 reader = GxmlFragmentReaderPool.instance()
@@ -380,8 +440,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
             catch (Exception e)
             {
                 c_category.error("Error in TuImpl: " + toString(), e);
-                throw new RuntimeException("Error in TuImpl: "
-                        + GeneralException.getStackTraceString(e));
+                throw new RuntimeException("Error in TuImpl: ", e);
             }
             finally
             {
@@ -392,27 +451,32 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
 
         return m_gxmlElement;
     }
-    
-    public GxmlElement getXliffTargetGxml() {
+
+    public GxmlElement getXliffTargetGxml()
+    {
         return getGxmlElement(xliff_target);
     }
-    
-    public String getXliffTarget() {
+
+    public String getXliffTarget()
+    {
         return this.xliff_target;
     }
-    
-    public void setXliffTarget(String p_target) {
+
+    public void setXliffTarget(String p_target)
+    {
         this.xliff_target = p_target;
     }
-    
-    public String getXliffTargetLanguage() {
+
+    public String getXliffTargetLanguage()
+    {
         return this.xliff_target_language;
     }
-    
-    public void setXliffTargetLanguage(String p_lan) {
+
+    public void setXliffTargetLanguage(String p_lan)
+    {
         this.xliff_target_language = p_lan;
     }
-    
+
     public String getXliffTMAttributes()
     {
         String result = "", temp;
@@ -424,9 +488,9 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
         }
 
         result = result.trim();
-        if(result.endsWith(","))
+        if (result.endsWith(","))
         {
-            result = result.substring(0, result.length()-1);
+            result = result.substring(0, result.length() - 1);
         }
         if (result.length() > 0)
         {
@@ -435,7 +499,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
 
         return result;
     }
-    
+
     public String getXliffTranslationType()
     {
         return xliffTranslationType;
@@ -445,11 +509,11 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.xliffTranslationType = xliffTranslationType;
     }
-    
+
     public boolean isXliffTranslationMT()
     {
         // "mt" is the original data.
-        if (Extractor.IWS_TRANSLATION_MT.equals(xliffTranslationType) 
+        if (Extractor.IWS_TRANSLATION_MT.equals(xliffTranslationType)
                 || "mt".equals(xliffTranslationType))
         {
             return true;
@@ -459,7 +523,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
             return false;
         }
     }
-    
+
     public boolean isXliffLocked()
     {
         return xliffLocked;
@@ -469,7 +533,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.xliffLocked = xliffLocked;
     }
-    
+
     public String getIwsScore()
     {
         return iwsScore;
@@ -479,7 +543,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.iwsScore = p_str;
     }
-    
+
     /**
      * Adds one <code>RemovedTag</code> to the tu.
      * 
@@ -490,9 +554,9 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         if (removedTags == null)
         {
-            removedTags = new HashSet();
+            removedTags = new HashSet<RemovedTag>();
         }
-        
+
         removedTags.add(tag);
     }
 
@@ -502,7 +566,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
      * @param removedTags
      *            the removedTags to set
      */
-    public void setRemovedTags(Set removedTags)
+    public void setRemovedTags(Set<RemovedTag> removedTags)
     {
         this.removedTags = removedTags;
     }
@@ -526,7 +590,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         return removedTags != null && removedTags.size() > 0;
     }
-    
+
     /**
      * Gets the first <code>RemovedTag</code> if has.
      * 
@@ -536,12 +600,12 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         if (hasRemovedTags())
         {
-            for (RemovedTag tag : (Set<RemovedTag>)removedTags)
+            for (RemovedTag tag : (Set<RemovedTag>) removedTags)
             {
                 return tag;
             }
         }
-        
+
         return null;
     }
 
@@ -564,7 +628,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.prefixTag = prefixTag;
     }
-    
+
     public RemovedSuffixTag getSuffixTag()
     {
         return suffixTag;
@@ -574,12 +638,12 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.suffixTag = suffixTag;
     }
-    
+
     public String getGenerateFrom()
     {
         return generateFrom;
     }
-    
+
     public void setGenerateFrom(String p_generator)
     {
         generateFrom = p_generator;
@@ -604,7 +668,7 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.passoloState = passoloState;
     }
-    
+
     public boolean isRepeated()
     {
         return m_repeated;
@@ -634,5 +698,32 @@ public final class TuImpl extends PersistentObject implements Tu, Serializable
     {
         this.m_repetitionOfId = repetitionOfIdAsLong;
     }
-    
+
+    public String getTranslate()
+    {
+        return translate;
+    }
+
+    public void setTranslate(String translate)
+    {
+        this.translate = translate;
+    }
+
+    private void loadTuvs(String companyId)
+    {
+        try
+        {
+            List<TuvImpl> tuvList = SegmentTuvUtil.getTuvsByTuId(getId(),
+                    companyId);
+            for (TuvImpl tuv : tuvList)
+            {
+                m_tuvs.put(tuv.getLocaleId(), tuv);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
 }

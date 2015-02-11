@@ -112,7 +112,13 @@ public class TmxTagGenerator
     public static final int C_TAB = 43;
     public static final int C_FORMFEED = 44;
     public static final int C_BR = 45;
-
+    public static final int OFFICE_SUPERSCRIPT = 46;
+    public static final int OFFICE_HYPERLINK = 47;
+    public static final int OFFICE_BOLD = 48;
+    public static final int OFFICE_COLOR = 49;
+    public static final int OFFICE_ITALIC = 50;
+    public static final int OFFICE_UNDERLINE = 51;
+    
     // specific for html
     private static final String[] m_InlineTypes =
     { "x-unknown", "bold", "italic", "x-strike", "x-sub", "x-super", "ulined",
@@ -130,7 +136,8 @@ public class TmxTagGenerator
             "em", "x-em", "c-bold", "c-x-bold", "c-strong", "c-x-strong",
             "c-italic", "c-x-italic", "c-ulined", "c-x-ulined", "c-link",
             "c-strike", "c-sub", "c-super", "c-font", "c-em", "c-x-em", "c-lb",
-            "c-tab", "c-formfeed", "c-br" };
+            "c-tab", "c-formfeed", "c-br", "superscript","hyperlink", "office-bold",
+            "color", "office-italic", "office-underline"};
 
     public TmxTagGenerator()
     {

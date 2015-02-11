@@ -11,152 +11,109 @@ package com.globalsight.selenium.testcases.smoketest;
  */
 
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.CompanyFuncs;
 import com.globalsight.selenium.pages.MainFrame;
 import com.globalsight.selenium.pages.Users;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
-public class CreateCompany {
-	/*
-	 * Common variables initialization.
-	 */
-	private Selenium selenium;
-	private CompanyFuncs iCompanyFuncs = new CompanyFuncs();
-	String testCaseName = getClass().getName();
+public class CreateCompany extends BaseTestCase
+{
+    /*
+     * Common variables initialization.
+     */
+    private CompanyFuncs companyFuncs = new CompanyFuncs();
 
-	/*
-	 * Sign in with superAdmin and create a new company. Verify the company can
-	 * be created.
-	 */
-	@Test
-	public void createSuperAdminCompany() throws Exception {
-		CommonFuncs.loginSystemWithSuperAdmin(selenium);
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.Companies_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
-		iCompanyFuncs.newCompany(selenium, testCaseName);
-		
-		selenium.click(MainFrame.LogOut_LINK);
-	}
+    /*
+     * Sign in with superAdmin and create a new company. Verify the company can
+     * be created.
+     */
+    @Test
+    public void createSuperAdminCompany() throws Exception
+    {
+        CommonFuncs.logoutSystem(selenium);
+        CommonFuncs.loginSystemWithSuperAdmin(selenium);
 
-	/*
-	 * Verify three users for the company are available.
-	 */
-	@Test (dependsOnMethods={"createSuperAdminCompany"})
-	public void verfiySuperAmdinUsers() {
-		CommonFuncs.loginSystemWithSuperAdmin(selenium);
-		
-		selenium.click(MainFrame.Setup_MENU);
-		selenium.click(MainFrame.Users_SUBMENU);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.COMPANIES_SUBMENU);
 
-		// Do a search with the companyname in the Users page.
-		selenium.select(Users.NameTypeOption_SELECT,
-				ConfigUtil.getDataInCase(testCaseName, "NAMETYPEOPTION"));
-		selenium.select(Users.NameOption_SELECT,
-				ConfigUtil.getDataInCase(testCaseName, "NAMEOPTION"));
-		selenium.type(Users.UserNameSearch_TEXT_FIELD,
-				ConfigUtil.getConfigData("COMPANY_NAME"));
-		selenium.click(Users.Search_BUTTON);
-		selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        companyFuncs.newCompany(selenium, testCaseName);
 
-		// Check if all the three users name are present in the search result.
-		Assert.assertEquals(selenium
-				.isElementPresent("//input[@name='radioBtn' and @value='"
-						+ ConfigUtil.getConfigData("admin_login_name")
-						+ "']"), true);
-		Assert.assertEquals(selenium
-				.isElementPresent("//input[@name='radioBtn' and @value='"
-						+ ConfigUtil.getConfigData("anyone_login_name")
-						+ "']"), true);
-		Assert.assertEquals(selenium
-				.isElementPresent("//input[@name='radioBtn' and @value='"
-						+ ConfigUtil.getConfigData("pm_login_name")
-						+ "']"), true);
-		selenium.click(MainFrame.LogOut_LINK);
-	}
-	
+        CommonFuncs.logoutSystem(selenium);
+    }
+
+    /*
+     * Verify three users for the company are available.
+     */
+    @Test(dependsOnMethods =
+    { "createSuperAdminCompany" })
+    public void verfiySuperAmdinUsers()
+    {
+        CommonFuncs.loginSystemWithSuperAdmin(selenium);
+
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.USERS_SUBMENU);
+
+        // Do a search with the companyname in the Users page.
+        selenium.select(Users.USER_SEARCH_NAME_TYPE_SELECT,
+                getDataInCase("nameTypeOption"));
+        selenium.select(Users.USER_SEARCH_NAME_OPTION_SELECT, getDataInCase("nameOption"));
+        selenium.type(Users.USER_SEARCH_NAME_TEXT,
+                ConfigUtil.getConfigData("company"));
+        clickAndWait(selenium, Users.SEARCH_VALUE_BUTTON);
+
+        // Check if all the three users name are present in the search result.
+        Assert.assertEquals(selenium
+                .isElementPresent("//input[@name='radioBtn' and @value='"
+                        + ConfigUtil.getConfigData("adminName") + "']"),
+                true);
+        Assert.assertEquals(
+                selenium.isElementPresent("//input[@name='radioBtn' and @value='"
+                        + ConfigUtil.getConfigData("anyoneName") + "']"),
+                true);
+        Assert.assertEquals(selenium
+                .isElementPresent("//input[@name='radioBtn' and @value='"
+                        + ConfigUtil.getConfigData("pmName") + "']"),
+                true);
+        CommonFuncs.logoutSystem(selenium);
+    }
+
     /**
      * Log in with an administrator account and then log out.
      */
-	@Test //(dependsOnMethods={"verfiySuperAmdinUsers"})
+    @Test
+    // (dependsOnMethods={"verfiySuperAmdinUsers"})
     public void AdminLogin()
     {
         CommonFuncs.loginSystemWithAdmin(selenium);
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.Home_LINK),
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.HOME_LINK),
                 true);
     }
-    
+
     /**
      * Log in with a PM account and then log out.
      */
-	@Test //(dependsOnMethods={"verfiySuperAmdinUsers"})
+    @Test
+    // (dependsOnMethods={"verfiySuperAmdinUsers"})
     public void PMLogin()
     {
-    	CommonFuncs.loginSystemWithPM(selenium);
-    	Assert.assertEquals(selenium.isElementPresent(MainFrame.Home_LINK),
-    			true);
+        CommonFuncs.loginSystemWithPM(selenium);
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.HOME_LINK),
+                true);
     }
 
     /**
      * Log in with a common user account and then log out.
      */
-	@Test //(dependsOnMethods={"verfiySuperAmdinUsers"})
+    @Test
+    // (dependsOnMethods={"verfiySuperAmdinUsers"})
     public void AnyOneLogin()
     {
         CommonFuncs.loginSystemWithAnyone(selenium);
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.Home_LINK),
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.HOME_LINK),
                 true);
     }
-
-
-
-	@BeforeMethod
-	public void beforeMethod() {
-	
-	}
-
-	@AfterMethod
-	public void afterMethod() {
-		
-	}
-
-	@BeforeClass
-	public void beforeClass() {
-	}
-
-	@AfterClass
-	public void afterClass() {
-	}
-
-	@BeforeTest
-	public void beforeTest() {
-		selenium = CommonFuncs.initSelenium();
-	}
-
-	@AfterTest
-	public void afterTest() {
-		CommonFuncs.endSelenium(selenium);
-	}
-
-	@BeforeSuite
-	public void beforeSuite() {
-	}
-
-	@AfterSuite
-	public void afterSuite() {
-	}
-
 }

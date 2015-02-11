@@ -37,10 +37,18 @@
           <ref name="dont-count"/>
 		  <ref name="sid"/>
 		  <ref name="internal"/>
+		  <ref name="comment"/>
         </choice>
       </oneOrMore>
     </element>
   </define>
+ 
+  <c:c> Specify an element that is comment tag</c:c>
+  <define name="comment">
+    <element name="comment">
+      <ref name="path"/>        <c:c> Mandatory attribute </c:c>      
+    </element>
+  </define> 
 
   <c:c> Specify an element that is internal text</c:c>
   <define name="internal">
@@ -74,6 +82,9 @@
       <optional>
         <ref name="erasable"/>
       </optional>
+      <optional>
+        <ref name="priority"/>
+      </optional>
     </element>
   </define>      
 
@@ -85,7 +96,9 @@
       <optional>
         <ref name="inline"/>
       </optional>
-      
+      <optional>
+        <ref name="priority"/>
+      </optional>
     </element>
   </define>
   
@@ -189,7 +202,12 @@
       </choice>
     </attribute>
   </define>
-
+  
+  <c:c> priority: priority or not </c:c>
+  <define name="priority">
+    <attribute name="priority">
+    </attribute>
+  </define>
 
   <c:c> Erasable: erasable tag or not </c:c>
   <define name="erasable">

@@ -59,6 +59,16 @@
     boolean leverageExactOnly = ((Boolean)request.getAttribute(WebAppConstants.LEVERAGE_EXACT_ONLY)).booleanValue();
     boolean isInContextMatch = ((Boolean)request.getAttribute(WebAppConstants.IS_IN_CONTEXT_MATCH));
     boolean isDefaultContextMatch = (Boolean)request.getAttribute(WebAppConstants.IS_DEFAULT_CONTEXT_MATCH);
+    
+    int threshold = 75;
+    try
+    {
+        threshold = (Integer) sessionMgr
+                .getAttribute(WordCountHandler.LMT);
+    }
+    catch (NumberFormatException e)
+    {
+    }
 %>
 
 <%!
@@ -139,12 +149,12 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         <amb:column label="lb_leverage_match_option" width="50px">
 	      <% 
 	      if(isInContextMatch){
-			  	out.print("Leverage in context matches");
+			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
 		      }else{
 		    	  if(isDefaultContextMatch){
-		    		  out.print("Default");
+		    		  out.print(bundle.getString("lb_default"));
 		    	  }else{
-		    		  out.print("100% match only");
+		    		  out.print(bundle.getString("lb_100_match_only"));
 		    	  }
 		      } 
 	      %>
@@ -158,66 +168,81 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts")%>";
         <%}else if(isDefaultContextMatch){ %>
             <amb:column label="lb_100" width="50px"
                  sortBy="<%=TaskComparator.DEFAULT_CONTEXT_EXACT%>">
-                <%= task.getWorkflow().getNoUseExactMatchWordCount() - task.getWorkflow().getContextMatchWordCount()%>
+                <%=task.getWorkflow().getTotalExactMatchWordCount() - task.getWorkflow().getContextMatchWordCount()%>
             </amb:column>
-        <%} else {%>
+        <%
+            } else {
+        %>
             <amb:column label="lb_100" width="50px"
-                 sortBy="<%=TaskComparator.NO_USE_EXACT%>">
-                <%= task.getWorkflow().getNoUseExactMatchWordCount() %>
+                 sortBy="<%=TaskComparator.TOTAL_EXACT%>">
+                <%=task.getWorkflow().getTotalExactMatchWordCount()%>
             </amb:column>
-		<%} %>
+		<%
+		    }
+		%>
         <amb:column label="lb_95" width="50px"
              sortBy="<%=TaskComparator.BAND1%>">
-            <%= task.getWorkflow().getHiFuzzyMatchWordCount() %>
+            <%=task.getWorkflow().getHiFuzzyMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_85" width="50px"
              sortBy="<%=TaskComparator.BAND2%>">
-            <%= task.getWorkflow().getMedHiFuzzyMatchWordCount() %>
+            <%=task.getWorkflow().getMedHiFuzzyMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_75" width="50px"
              sortBy="<%=TaskComparator.BAND3%>">
-            <%= task.getWorkflow().getMedFuzzyMatchWordCount() %>
+            <%=task.getWorkflow().getMedFuzzyMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_50" width="50px"
              sortBy="<%=TaskComparator.BAND4%>">
-            <%= task.getWorkflow().getSubLevMatchWordCount() %>
+            <%=task.getWorkflow().getSubLevMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_no_match" width="50px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
-            <%= task.getWorkflow().getNoMatchWordCount() %>
+            <%=task.getWorkflow().getNoMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=TaskComparator.REPETITIONS%>">
-            <%= task.getWorkflow().getRepetitionWordCount() + 
+            <%=task.getWorkflow().getRepetitionWordCount() + 
             task.getWorkflow().getHiFuzzyRepetitionWordCount() + 
             task.getWorkflow().getMedHiFuzzyRepetitionWordCount() + 
             task.getWorkflow().getMedFuzzyRepetitionWordCount() + 
             task.getWorkflow().getSubLevRepetitionWordCount()%>
         </amb:column>
-        <%if(isInContextMatch){ %>
+        <%
+            if(isInContextMatch){
+        %>
 	        <amb:column label="lb_in_context_tm" width="50px"
 		      sortBy="<%=TaskComparator.IN_CONTEXT%>">
-		      <%= task.getWorkflow().getInContextMatchWordCount() %>
+		      <%=task.getWorkflow().getInContextMatchWordCount()%>
 		     </amb:column>
-	     <%}else{ %>
-			<%if(isDefaultContextMatch){ %>
+	     <%
+	         }else{
+	     %>
+			<%
+			    if(isDefaultContextMatch){
+			%>
 		        <amb:column label="lb_context_tm" width="50px"
 		             sortBy="<%=TaskComparator.CONTEXT%>">
-		            <%= task.getWorkflow().getContextMatchWordCount() %>
+		            <%=task.getWorkflow().getContextMatchWordCount()%>
 		        </amb:column>
-			<%} %>
-	     <%} %>
+			<%
+			    }
+			%>
+	     <%
+	         }
+	     %>
         
         <amb:column label="lb_total" width="50px"
              sortBy="<%=TaskComparator.WC_TOTAL%>">
-            <%= task.getWorkflow().getTotalWordCount() %>
+            <%=task.getWorkflow().getTotalWordCount()%>
         </amb:column>
       </amb:table>
     </td>
   </tr>
 </TABLE>
 <BR><BR><BR>
-<%}
+<%
+    }
 if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
    noWordCountPermission = false;
 %>
@@ -238,71 +263,75 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
              dataClass="com.globalsight.everest.taskmanager.Task"
              pageUrl="self" emptyTableMsg="">
         <%
-        String lmt = null;
-        int totalFuzzy = 0;
-        Workflow wf = null;
-        int threshold = 0;
-        
-        if (task != null)
-        {
-           wf = task.getWorkflow();
-           threshold = wf.getJob().getLeverageMatchThreshold();
-           lmt = wf.getJob().getLeverageMatchThreshold()+"%";
-           
-           if (isDell)
-           {
+            String lmt = null;
+                int totalFuzzy = 0;
+                Workflow wf = null;
+                
+                if (task != null)
+                {
+                   wf = task.getWorkflow();
+                   lmt = wf.getJob().getLeverageMatchThreshold()+"%";
+                   
+                   if (isDell)
+                   {
               totalFuzzy = wf.getThresholdHiFuzzyWordCount() + 
                            wf.getThresholdMedHiFuzzyWordCount() + 
                            wf.getThresholdMedFuzzyWordCount() + 
                            wf.getThresholdLowFuzzyWordCount();
-           }
-        }
+                   }
+                }
         %>
         <amb:column label="lb_job_id" width="50px"
              sortBy="<%=TaskComparator.JOB_ID%>">
-            <%= wf == null ? 0 : wf.getJob().getJobId() %>
+            <%=wf == null ? 0 : wf.getJob().getJobId()%>
         </amb:column>
         <amb:column label="lb_job_name" width="150px"
              sortBy="<%=TaskComparator.JOB_NAME%>">
-            <%= task.getJobName() %>
+            <%=task.getJobName()%>
         </amb:column>
         <amb:column label="lb_leverage_match_threshold" width="80px"
              sortBy="<%=TaskComparator.LMT%>">
-            <%= lmt %>
+            <%=lmt%>
         </amb:column>
         <amb:column label="lb_activity" width="100px"
              sortBy="<%=TaskComparator.ACTIVITY%>">
-            <%= task.getTaskDisplayName() %>
+            <%=task.getTaskDisplayName()%>
         </amb:column>
         <amb:column label="lb_leverage_match_option" width="50px">
-	      <% 
-	      if(isInContextMatch){
-			  	out.print("Leverage in context matches");
-		      }else{
-		    	  if(isDefaultContextMatch){
-		    		  out.print("Default");
-		    	  }else{
-		    		  out.print("100% match only");
-		    	  }
-		      } 
+	      <%
+	          if(isInContextMatch){
+	      			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
+	      		      }else{
+	      		    	  if(isDefaultContextMatch){
+	      		    		  out.print(bundle.getString("lb_default"));
+	      		    	  }else{
+	      		    		  out.print(bundle.getString("lb_100_match_only"));
+	      		    	  }
+	      		      }
 	      %>
 	    </amb:column>
       
         
-        <%if(isInContextMatch){ %>
+        <%
+                          if(isInContextMatch){
+                      %>
 	        <amb:column label="lb_100" width="50px"
 	             sortBy="<%=TaskComparator.EXACT%>">
-	            <%= wf == null ? 0 : wf.getSegmentTmWordCount() %>
+	            <%=wf == null ? 0 : wf.getSegmentTmWordCount()%>
 	        </amb:column>
-        <%}else if(isDefaultContextMatch){ %>
+        <%
+            }else if(isDefaultContextMatch){
+        %>
             <amb:column label="lb_100" width="50px"
                  sortBy="<%=TaskComparator.DEFAULT_CONTEXT_EXACT%>">
-                <%= wf == null ? 0 :(wf.getNoUseExactMatchWordCount() - wf.getContextMatchWordCount())%>
+                <%=wf == null ? 0 :(wf.getTotalExactMatchWordCount() - wf.getContextMatchWordCount())%>
             </amb:column>
-        <%} else {%>
+        <%
+            } else {
+        %>
 	        <amb:column label="lb_100" width="50px"
-	             sortBy="<%=TaskComparator.NO_USE_EXACT%>">
-	            <%= wf == null ? 0 : wf.getNoUseExactMatchWordCount() %>
+	             sortBy="<%=TaskComparator.TOTAL_EXACT%>">
+	            <%=wf == null ? 0 : wf.getTotalExactMatchWordCount()%>
 	        </amb:column>
         <%} %>
         <%if (isDell) {%>
@@ -335,7 +364,7 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
         
         <amb:column label="lb_no_match" width="50px"
              sortBy="<%=TaskComparator.NO_MATCH%>">
-            <%= wf == null ? 0 : wf.getNoMatchWordCount() + wf.getSubLevMatchWordCount()%>
+            <%= wf == null ? 0 : wf.getThresholdNoMatchWordCount()%>
         </amb:column>
         <amb:column label="lb_repetition_word_cnt" width="50px"
              sortBy="<%=TaskComparator.REPETITIONS%>">

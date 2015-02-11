@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -40,6 +39,7 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.usermgr.UserManager;
 import com.globalsight.everest.webapp.pagehandler.administration.calendars.CalendarHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
@@ -76,16 +76,16 @@ public class VendorManagementEventHandler
 
             switch (p_event.getEventType())
             {
-            case UpdatedDataEvent.CREATE_EVENT:
-            case UpdatedDataEvent.UPDATE_EVENT:
-                createAndUpdateEvent(p_vendor, p_event);
-                break;
+                case UpdatedDataEvent.CREATE_EVENT:
+                case UpdatedDataEvent.UPDATE_EVENT:
+                    createAndUpdateEvent(p_vendor, p_event);
+                    break;
 
-            case UpdatedDataEvent.DELETE_EVENT:
-                deleteEvent(p_vendor, p_event);
-                break;
-            default:
-                // nothing
+                case UpdatedDataEvent.DELETE_EVENT:
+                    deleteEvent(p_vendor, p_event);
+                    break;
+                default:
+                    // nothing
             }
         }
         finally
@@ -157,12 +157,15 @@ public class VendorManagementEventHandler
                     }
                     catch (Exception e)
                     {
-                        c_logger
-                                .error("Failed to deactivate the user when vendor "
-                                        + p_vendor.getCustomVendorId()
-                                        + " was not APPROVED.");
-                        String args[] = { p_vendor.getUserId(),
-                                p_vendor.getCustomVendorId() };
+                        c_logger.error("Failed to deactivate the user when vendor "
+                                + UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId())
+                                + " was not APPROVED.");
+                        String args[] =
+                        {
+                                UserUtil.getUserNameById(p_vendor.getUserId()),
+                                UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId()) };
                         throw new VendorException(
                                 VendorException.MSG_FAILED_TO_DEACTIVATE_USER,
                                 args, e);
@@ -192,12 +195,15 @@ public class VendorManagementEventHandler
                     }
                     catch (Exception e)
                     {
-                        c_logger
-                                .error("Failed to activate the user when vendor "
-                                        + p_vendor.getCustomVendorId()
-                                        + " was APPROVED.");
-                        String args[] = { p_vendor.getUserId(),
-                                p_vendor.getCustomVendorId() };
+                        c_logger.error("Failed to activate the user when vendor "
+                                + UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId())
+                                + " was APPROVED.");
+                        String args[] =
+                        {
+                                UserUtil.getUserNameById(p_vendor.getUserId()),
+                                UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId()) };
                         throw new VendorException(
                                 VendorException.MSG_FAILED_TO_ACTIVATE_USER,
                                 args, e);
@@ -228,12 +234,15 @@ public class VendorManagementEventHandler
                     }
                     catch (Exception e)
                     {
-                        c_logger
-                                .error("Failed to deactivate the user when vendor "
-                                        + p_vendor.getCustomVendorId()
-                                        + " was changed to not be a GlobalSight user.");
-                        String args[] = { p_vendor.getUserId(),
-                                p_vendor.getCustomVendorId() };
+                        c_logger.error("Failed to deactivate the user when vendor "
+                                + UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId())
+                                + " was changed to not be a GlobalSight user.");
+                        String args[] =
+                        {
+                                UserUtil.getUserNameById(p_vendor.getUserId()),
+                                UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId()) };
                         throw new VendorException(
                                 VendorException.MSG_FAILED_TO_DEACTIVATE_USER,
                                 args, e);
@@ -264,12 +273,16 @@ public class VendorManagementEventHandler
             }
             catch (Exception e)
             {
-                c_logger.error("Failed to remove user " + p_vendor.getUserId()
-                        + " that is associated with vendor "
-                        + p_vendor.getCustomVendorId()
-                        + " that has been removed.", e);
-                String args[] = { p_vendor.getUserId(),
-                        p_vendor.getCustomVendorId() };
+                c_logger.error(
+                        "Failed to remove user "
+                                + UserUtil.getUserNameById(p_vendor.getUserId())
+                                + " that is associated with vendor "
+                                + UserUtil.getUserNameById(p_vendor
+                                        .getCustomVendorId())
+                                + " that has been removed.", e);
+                String args[] =
+                { UserUtil.getUserNameById(p_vendor.getUserId()),
+                        UserUtil.getUserNameById(p_vendor.getCustomVendorId()) };
                 throw new VendorException(
                         VendorException.MSG_FAILED_TO_REMOVE_USER, args, e);
             }
@@ -306,8 +319,9 @@ public class VendorManagementEventHandler
         catch (Exception e)
         {
             c_logger.error("Failed to add a user.", e);
-            String args[] = { p_vendor.getUserId(),
-                    p_vendor.getCustomVendorId() };
+            String args[] =
+            { UserUtil.getUserNameById(p_vendor.getUserId()),
+                    UserUtil.getUserNameById(p_vendor.getCustomVendorId()) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_CREATE_USER, args, e);
         }
@@ -338,8 +352,9 @@ public class VendorManagementEventHandler
         catch (Exception e)
         {
             c_logger.error("Failed to modify a user.", e);
-            String args[] = { p_vendor.getUserId(),
-                    p_vendor.getCustomVendorId() };
+            String args[] =
+            { UserUtil.getUserNameById(p_vendor.getUserId()),
+                    UserUtil.getUserNameById(p_vendor.getCustomVendorId()) };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_MODIFY_USER, args, e);
         }
@@ -430,8 +445,7 @@ public class VendorManagementEventHandler
      */
     void setNewUserValues(User p_modUser, Vendor p_vendor) throws Exception
     {
-
-        p_modUser.setUserId(p_vendor.getUserId());
+        p_modUser.setUserName(p_vendor.getUserId());
         p_modUser.setPassword(p_vendor.getPassword());
 
         setUserValues(p_modUser, p_vendor);
@@ -467,8 +481,8 @@ public class VendorManagementEventHandler
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            Vendor cloneV = (Vendor) session.get(Vendor.class, p_vendor
-                    .getIdAsLong());
+            Vendor cloneV = (Vendor) session.get(Vendor.class,
+                    p_vendor.getIdAsLong());
             cloneV.setUser(p_user);
             session.update(cloneV);
             transaction.commit();
@@ -479,9 +493,10 @@ public class VendorManagementEventHandler
             {
                 transaction.rollback();
             }
-            c_logger.error("Failed to associated user " + p_user.getUserId()
+            c_logger.error("Failed to associated user " + p_user.getUserName()
                     + " with vendor " + p_vendor.getCustomVendorId(), e);
-            String args[] = { p_user.getUserId(), p_vendor.getCustomVendorId() };
+            String args[] =
+            { p_user.getUserName(), p_vendor.getCustomVendorId() };
             throw new VendorException(
                     VendorException.MSG_FAILED_TO_ASSOCIATE_USER, args, e);
         }
@@ -489,7 +504,7 @@ public class VendorManagementEventHandler
         {
             if (session != null)
             {
-                //session.close();
+                // session.close();
             }
         }
     }

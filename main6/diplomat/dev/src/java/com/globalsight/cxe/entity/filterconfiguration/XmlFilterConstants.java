@@ -41,8 +41,11 @@ public interface XmlFilterConstants
     public static final String NODE_ENTITIES = "entities";
     public static final String NODE_PROCESS_INS = "processIns";
     public static final String NODE_INTERNAL_TAG = "internalTag";
+    public static final String NODE_SRCCMT_XMLCOMMENT = "srcCmtXmlComment";
+    public static final String NODE_SRCCMT_XMLTAG = "srcCmtXmlTag";
 
-    public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</" + NODE_ROOT + ">";
+    public static final String nullConfigXml = "<" + NODE_ROOT + ">" + "</"
+            + NODE_ROOT + ">";
 
     // xml filter config values
     public static final int PH_CONSOLIDATE_DONOT = 1;
@@ -54,19 +57,20 @@ public interface XmlFilterConstants
 
     public static final int NON_ASCII_AS_CHARACTER = 1;
     public static final int NON_ASCII_AS_ENTITY = 2;
-    
+
     public static final int WHITESPACE_HANDLE_COLLAPSE = 1;
     public static final int WHITESPACE_HANDLE_PRESERVE = 2;
-    
+
+    public static final int EMPTY_TAG_FORMAT_PRESERVE = 0;
     public static final int EMPTY_TAG_FORMAT_OPEN = 1;
     public static final int EMPTY_TAG_FORMAT_CLOSE = 2;
-    
+
     public static final int ENTITY_TEXT = 0;
     public static final int ENTITY_PLACEHOLDER = 1;
-    
+
     public static final int ENTITY_SAVE_AS_ENTITY = 0;
     public static final int ENTITY_SAVE_AS_CHAR = 1;
-    
+
     public static final int PI_MARKUP = 0;
     public static final int PI_MARKUP_EMB = 1;
     public static final int PI_REMOVE = 2;

@@ -36,6 +36,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlRepairer;
 import com.globalsight.cxe.adapter.openoffice.OpenOfficeHelper;
 import com.globalsight.cxe.engine.util.FileUtils;
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
@@ -51,6 +53,7 @@ import com.globalsight.diplomat.util.XmlUtil;
 import com.globalsight.diplomat.util.database.ConnectionPool;
 import com.globalsight.diplomat.util.database.ConnectionPoolException;
 import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.projecthandler.exporter.ExportUtil;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.TranscoderException;
 import com.globalsight.ling.docproc.DiplomatAPI;
@@ -59,6 +62,10 @@ import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.paginated.PaginatedMerger;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.SegmentUtil;
 
 /**
@@ -85,6 +92,7 @@ public class StandardMerger implements IFormatNames
     private String m_formatType = null;
     private SystemConfiguration m_config = null;
     private String m_fileProfile = null;
+    private boolean m_isPreview = false;
 
     private static final String CONFIG_FILE = "/properties/LingAdapter.properties";
 
@@ -146,8 +154,20 @@ public class StandardMerger implements IFormatNames
             throw new LingAdapterException("CxeInternal", m_errorArgs, e);
         }
     }
+    
+    public String getPreviewContent()  throws LingAdapterException
+    {
+        m_isPreview = true;
+        return getMergeContent();
+    }
 
     public String getContent() throws LingAdapterException
+    {
+        m_isPreview = false;
+        return getMergeContent();
+    }
+    
+    private String getMergeContent() throws LingAdapterException
     {
         parseEventFlowXml();
         try
@@ -157,6 +177,8 @@ public class StandardMerger implements IFormatNames
             // of GXML and return a filename or inputstream to the content
             // because this might be too big to hold in memory
             String gxml = readGxml();
+            gxml = ExportUtil.replaceWhitespace(gxml, m_targetLocale);
+            
             m_logger.info("Merging: " + m_fileName + ", size: "
                     + m_cxeMessage.getMessageData().getSize());
             byte[] mergeResult = null;
@@ -170,6 +192,25 @@ public class StandardMerger implements IFormatNames
             Logger.writeDebugFile("lam_merge.txt", mergeResult);
 
             String s = new String(mergeResult, m_targetEncoding);
+            
+            /**
+             * GBS-2134, Vincent Yan, 2011/11/28
+             * Add changing of return method to target file according with the same 
+             * as source file
+             */
+            File cxeBaseDir = AmbFileStoragePathUtils.getCxeDocDir();
+            File sourceFile = new File(cxeBaseDir, m_fileName);
+            boolean isWindowsReturnMethod = FileUtil.isWindowsReturnMethod(sourceFile.getAbsolutePath());
+            if (s.indexOf("\r\n") != -1) {
+                //Merge result content is in Windows return method
+                if (!isWindowsReturnMethod)
+                    s = s.replace("\r\n", "\n");
+            } else {
+                //Merge result content is in Unix return method
+                int len = s.indexOf("\n");
+                if (isWindowsReturnMethod)
+                    s = s.replace("\n", "\r\n");
+            }
             
             if (FORMAT_XML.equals(m_formatType) 
                     && filterId != -1 
@@ -285,6 +326,10 @@ public class StandardMerger implements IFormatNames
         {
             p_mergeResult = fixOpenOfficeXml(p_mergeResult);
         }
+        if (isOfficeXml())
+        {
+            p_mergeResult = fixOfficeXml(p_mergeResult);
+        }
         if (isRestoreInvalidUnicodeChar())
         {
             p_mergeResult = SegmentUtil.restoreInvalidUnicodeChar(p_mergeResult);
@@ -352,6 +397,20 @@ public class StandardMerger implements IFormatNames
         
         return p_content;
     }
+    
+    /**
+     * Fix issues in office xml, office 2010 files
+     */
+    private String fixOfficeXml(String p_content) throws Exception
+    {
+        boolean isRtlLocale = EditUtil.isRTLLocale(m_targetLocale);
+        if (isRtlLocale)
+        {
+            return OfficeXmlRepairer.fixRtlLocale(p_content);
+        }
+
+        return p_content;
+    }
 
     /**
      * Check if this position is in xml cdata
@@ -390,6 +449,7 @@ public class StandardMerger implements IFormatNames
             diplomat.setFilterTableName(filterTableName);
             diplomat.setTargetLocale(m_targetLocale);
             diplomat.setCxeMessage(m_cxeMessage);
+            diplomat.setPreview(m_isPreview);
             mergeResult = diplomat
                     .merge(p_gxml, m_targetEncoding, m_keepGsTags);
         }
@@ -787,7 +847,7 @@ public class StandardMerger implements IFormatNames
             m_errorArgs[0] = m_fileName;
             
             // get relSafeName for open office xml
-            nl = isOpenOfficeXml() ? elem.getElementsByTagName("da") : null;
+            nl = (isOpenOfficeXml() || isOfficeXml()) ? elem.getElementsByTagName("da") : null;
             if (nl != null && nl.getLength() > 0)
             {
                 for(int  i = 0, nllen = nl.getLength(); i < nllen; i++)
@@ -824,6 +884,11 @@ public class StandardMerger implements IFormatNames
     private boolean isPowerPointHtml()
     {
         return FORMAT_POWERPOINT_HTML.equals(m_formatType);
+    }
+    
+    private boolean isOfficeXml()
+    {
+        return FORMAT_OFFICE_XML.equals(m_formatType);
     }
     
     private boolean isOpenOfficeXml()

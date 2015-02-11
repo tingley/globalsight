@@ -183,7 +183,7 @@ public class ProxyDialog extends JDialog
 		}
 		catch (Exception e)
 		{
-			log.error(e.toString());
+			log.error(e.getMessage(), e);
 			e.printStackTrace();
 		}
 	}
@@ -228,7 +228,7 @@ public class ProxyDialog extends JDialog
 					e.toString(),
 					"Set Proxy", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace();
-			log.error(e.toString());
+			log.error(e.getMessage(), e);
 		}
 	}
 

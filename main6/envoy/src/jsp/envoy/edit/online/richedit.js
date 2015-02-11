@@ -663,7 +663,7 @@ function getEvent(){     //同时兼容ie和ff的写法
 }
 function getPTag(ptag)
 {
-    return "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=false>" +
+    return "<SPAN DIR=ltr class=ptag UNSELECTABLE=on CONTENTEDITABLE=true>" +
         ptag + "</SPAN>";
 }
 

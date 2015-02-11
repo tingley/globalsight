@@ -43,6 +43,7 @@ namespace GlobalSight.AdobeConverter
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.folderBrowserDialog2 = new System.Windows.Forms.FolderBrowserDialog();
             this.label2 = new System.Windows.Forms.Label();
+            this.cbAutoStart = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBox1
@@ -71,7 +72,7 @@ namespace GlobalSight.AdobeConverter
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(94, 171);
+            this.button1.Location = new System.Drawing.Point(157, 171);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(67, 25);
             this.button1.TabIndex = 4;
@@ -81,7 +82,7 @@ namespace GlobalSight.AdobeConverter
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(225, 171);
+            this.button2.Location = new System.Drawing.Point(272, 171);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(67, 25);
             this.button2.TabIndex = 5;
@@ -136,7 +137,7 @@ namespace GlobalSight.AdobeConverter
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(104, 24);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(144, 20);
+            this.label1.Size = new System.Drawing.Size(183, 20);
             this.label1.TabIndex = 10;
             this.label1.Text = "Adobe CS4 Converter";
             // 
@@ -154,15 +155,26 @@ namespace GlobalSight.AdobeConverter
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label2.Location = new System.Drawing.Point(254, 27);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(85, 15);
+            this.label2.Size = new System.Drawing.Size(0, 15);
             this.label2.TabIndex = 11;
-            this.label2.Text = "";
+            // 
+            // cbAutoStart
+            // 
+            this.cbAutoStart.AutoSize = true;
+            this.cbAutoStart.Location = new System.Drawing.Point(35, 176);
+            this.cbAutoStart.Name = "cbAutoStart";
+            this.cbAutoStart.Size = new System.Drawing.Size(84, 16);
+            this.cbAutoStart.TabIndex = 12;
+            this.cbAutoStart.Text = "Auto Start";
+            this.cbAutoStart.UseVisualStyleBackColor = true;
+            this.cbAutoStart.CheckedChanged += new System.EventHandler(this.cbAutoStart_CheckedChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(430, 241);
+            this.Controls.Add(this.cbAutoStart);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button4);
@@ -177,7 +189,7 @@ namespace GlobalSight.AdobeConverter
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe CS4 Converter - Version: 8.2";
+            this.Text = "Adobe CS4 Converter - Version: 8.2.3";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.ResumeLayout(false);
@@ -202,6 +214,7 @@ namespace GlobalSight.AdobeConverter
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog2;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox cbAutoStart;
     }
 }
 

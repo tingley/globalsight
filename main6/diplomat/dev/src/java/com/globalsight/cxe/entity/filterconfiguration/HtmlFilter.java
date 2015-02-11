@@ -491,7 +491,7 @@ public class HtmlFilter implements Filter
                 }
                 catch (InternalTagException e)
                 {
-                    s_logger.warn(e);
+                    s_logger.warn(e.getMessage(), e);
                 }
             }
         }

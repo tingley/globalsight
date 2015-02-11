@@ -37,4 +37,7 @@ public interface UIConstants
     public static final int EDITMODE_DEFAULT = 1;
     public static final int EDITMODE_EDIT_ALL = 2;
     public static final int EDITMODE_READ_ONLY = 3;
+    
+    public static final String COLOR_REPEATED = "#575757";
+    public static final String COLOR_REPETITION = "#FF0000";
 }

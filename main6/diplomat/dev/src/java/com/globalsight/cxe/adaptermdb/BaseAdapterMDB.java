@@ -16,7 +16,10 @@
  */
 package com.globalsight.cxe.adaptermdb;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.ejb.EJBException;
@@ -37,6 +40,7 @@ import org.apache.log4j.Logger;
 
 import com.globalsight.cxe.adapter.AdapterResult;
 import com.globalsight.cxe.adapter.BaseAdapter;
+import com.globalsight.cxe.adapter.cap.CapAdapter;
 import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.company.CompanyThreadLocal;
@@ -206,7 +210,19 @@ public abstract class BaseAdapterMDB
             if (AmbassadorServer.isSystem4Accessible())
             {
                 ObjectMessage jmsMessage = (ObjectMessage) msg;
-                CxeMessage cxeMessage = (CxeMessage) jmsMessage.getObject();
+                Serializable ob = jmsMessage.getObject();
+                
+                CxeMessage cxeMessage = null;
+                AdapterResult ars = null;
+                if (ob instanceof CxeMessage)
+                {
+                	cxeMessage = (CxeMessage) ob;
+                }
+                else
+                {
+                	ars = (AdapterResult) ob;
+                	cxeMessage = ars.getMsgs().get(0);
+                }
 
                 m_logger.debug("Handling msg " +
                     cxeMessage.getMessageType().getName());
@@ -218,6 +234,7 @@ public abstract class BaseAdapterMDB
                 Map<Object,Object> activityArgs = new HashMap<Object,Object>();
                 activityArgs.put("adapter", m_adapter.getClass().getName());
                 activityArgs.put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+                activityArgs.put("messageType", cxeMessage.getMessageType());
                 activityStart = ActivityLog.start(
                     BaseAdapterMDB.class, "onMessage", activityArgs);
 
@@ -225,22 +242,113 @@ public abstract class BaseAdapterMDB
                 m_adapter.loadConfiguration();
                 m_adapter.loadProcessors();
                 
-                CxeMessage preProcessedMsg = m_adapter.runPreProcessor(cxeMessage);
-                preProcessedMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-                
-                AdapterResult results[] = m_adapter.handleMessage(preProcessedMsg);
-                for (int i = 0; results != null && i < results.length; i++)
+                if (ars != null)
                 {
-                    CxeMessage newCxeMessage = results[i].cxeMessage;
-                    newCxeMessage.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-                    
-                    CxeMessage postProcessedMsg =
-                        m_adapter.runPostProcessor(newCxeMessage);
-                    postProcessedMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
-
-                    publishToJMS(postProcessedMsg);
-                    outgoingMessagesPublished = true;
+					if (m_adapter instanceof CapAdapter
+							&& CxeMessageType.GXML_CREATED_EVENT == cxeMessage
+									.getMessageType().getValue()) {
+						CapAdapter adapter = (CapAdapter) m_adapter;
+						adapter.handleMessage(ars);
+					}
+                	else
+                	{
+		            	List<CxeMessage> msgs = new ArrayList<CxeMessage>();
+		            	for (CxeMessage m : ars.getMsgs())
+		            	{
+		            		CxeMessage preProcessedMsg = m_adapter.runPreProcessor(m);
+		                    preProcessedMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+		                    
+		                    AdapterResult results[] = m_adapter.handleMessage(preProcessedMsg);
+		                	for (int i = 0; results != null && i < results.length; i++)
+		                    {
+		                		CxeMessage cm = results[i].cxeMessage;
+		                		if (cm != null)
+		                		{
+		                			msgs.add(cm);
+		                		}
+		                		else
+		                		{
+		                			msgs.addAll(results[i].getMsgs());
+		                		}
+		                    }
+		            	}
+		            	
+		            	if (msgs.size() > 0)
+		            	{
+		            		Map<String, AdapterResult> jmsArs = new HashMap<String, AdapterResult>();
+		            		
+		                	for (CxeMessage m : msgs)
+		                	{
+		                		m.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+		                        
+								CxeMessage pMsg = m_adapter.runPostProcessor(m);
+								pMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+								
+								 CxeMessageType eventName = pMsg.getMessageType();
+						         String jmsTopicName = EventTopicMap.getJmsTopicName(eventName);
+						         
+						         AdapterResult ar = jmsArs.get(jmsTopicName);
+						         if (ar == null)
+						         {
+						        	 ar = new AdapterResult();
+						        	 jmsArs.put(jmsTopicName, ar);
+						         }
+								
+						         ar.addMsg(pMsg);
+		                	}
+		                	
+		                	for (AdapterResult ar : jmsArs.values())
+		                	{
+		                		publishToJMS(ar);
+		                	}
+		                	 
+		                	outgoingMessagesPublished = true;
+		            	}
+                	}
                 }
+                else
+                {
+                	CxeMessage preProcessedMsg = m_adapter.runPreProcessor(cxeMessage);
+                    preProcessedMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+                    
+                    AdapterResult results[] = m_adapter.handleMessage(preProcessedMsg);
+                    
+                    for (int i = 0; results != null && i < results.length; i++)
+                    {
+                        CxeMessage newCxeMessage = results[i].cxeMessage;
+                        if (newCxeMessage != null)
+                        {
+                        	newCxeMessage.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+                            
+                            CxeMessage postProcessedMsg =
+                                m_adapter.runPostProcessor(newCxeMessage);
+                            postProcessedMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+
+                            publishToJMS(postProcessedMsg);
+                            outgoingMessagesPublished = true;
+                        }
+                        else
+                        {
+                        	List<CxeMessage> msgs = results[i].getMsgs();
+                        	AdapterResult newResult = new AdapterResult();
+                        	
+                        	for (CxeMessage m : msgs)
+                        	{
+                        		m.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+                                
+    							CxeMessage pMsg = m_adapter.runPostProcessor(m);
+    							pMsg.getParameters().put(CompanyWrapper.CURRENT_COMPANY_ID, companyId);
+    							
+    							newResult.addMsg(pMsg);
+                        	}
+                        	
+                        	 publishToJMS(newResult);
+                        	 outgoingMessagesPublished = true;
+                        }
+                    }
+                }
+                
+                
 
                 cxeMessage.free();
 
@@ -324,6 +432,73 @@ public abstract class BaseAdapterMDB
                 // message so it can be filtered by the export
                 // servlet's message selector
                 String sessionId = (String) p_cxeMessage.getParameters().get(
+                    "SessionId");
+
+                m_logger.info("Sending a dynamic preview event for sessionId " +
+                    sessionId);
+
+                if (sessionId != null && sessionId.length() > 1)
+                {
+                    om.setStringProperty("SESSIONID",sessionId);
+                }
+            }
+
+            sender.publish(om);
+        }
+        finally
+        {
+            if (session != null)
+            {
+                try
+                {
+                    session.close();
+                }
+                catch (Exception ex){}
+            }
+        }
+    }
+    
+    /**
+     * Publishes the given CxeMessage to JMS
+     *
+     * @param p_jmsTopicName the topic name to use
+     * @param p_cxeMessage a CxeMessage object to publish
+     * @exception Exception
+     */
+    private void publishToJMS(AdapterResult ars)
+        throws Exception
+    {
+        TopicSession session = null;
+
+        try
+        {
+        	 List<CxeMessage> msgs = ars.getMsgs();
+        	 CxeMessage msg = msgs.get(0);
+            CxeMessageType eventName = msg.getMessageType();
+            String jmsTopicName = EventTopicMap.getJmsTopicName(eventName);
+
+            m_logger.debug("Publishing event " + eventName +
+                " to topic " + jmsTopicName);
+
+            Topic topic = (Topic) m_cachedTopics.get(jmsTopicName);
+            if (topic == null)
+            {
+                topic = (Topic) m_initialContext.lookup(jmsTopicName);
+                m_cachedTopics.put(jmsTopicName,topic);
+            }
+            
+            //the topic connection pools the sessions already
+            session = m_topicConnection.createTopicSession(false,
+                Session.CLIENT_ACKNOWLEDGE);
+            TopicPublisher sender = session.createPublisher(topic);
+            ObjectMessage om = session.createObjectMessage(ars);
+
+            if (eventName.getValue() == CxeMessageType.DYNAMIC_PREVIEW_EVENT)
+            {
+                // Add the sessionId as a property to the object
+                // message so it can be filtered by the export
+                // servlet's message selector
+                String sessionId = (String) msg.getParameters().get(
                     "SessionId");
 
                 m_logger.info("Sending a dynamic preview event for sessionId " +

@@ -116,7 +116,7 @@ public class Plug_7_1_8_0 implements Plug
             }
             catch (Exception e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
                 UI ui = UIFactory.getUI();
                 ui.confirmContinue("Failed to copy " + name);
             }
@@ -129,7 +129,7 @@ public class Plug_7_1_8_0 implements Plug
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                     UI ui = UIFactory.getUI();
                     ui.confirmContinue("Failed to copy " + name + " for company " + company);
                 }

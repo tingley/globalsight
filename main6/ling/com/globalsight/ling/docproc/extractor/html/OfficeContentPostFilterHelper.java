@@ -1260,10 +1260,14 @@ public class OfficeContentPostFilterHelper
         HtmlEntities converter = new HtmlEntities();
         while (newHtml.indexOf(start) > -1)
         {
-            // SKELETON_OFFICE_CONTENT_END must exist if
-            // SKELETON_OFFICE_CONTENT_START exists
             int startIndex = newHtml.indexOf(start);
             int endIndex = newHtml.indexOf(end);
+            if (endIndex < 0)
+            {
+                newHtml = newHtml.substring(0, startIndex)
+                        + newHtml.substring(startIndex + start.length());
+                continue;
+            }
             String encoded = converter.encodeStringBasic(newHtml.substring(
                     startIndex + start.length(), endIndex));
             newHtml = newHtml.substring(0, startIndex) + encoded
@@ -1277,6 +1281,7 @@ public class OfficeContentPostFilterHelper
     {
         return IFormatNames.FORMAT_WORD_HTML.equals(mainFormat)
                 || IFormatNames.FORMAT_EXCEL_HTML.equals(mainFormat)
-                || IFormatNames.FORMAT_POWERPOINT_HTML.equals(mainFormat);
+                || IFormatNames.FORMAT_POWERPOINT_HTML.equals(mainFormat)
+                || IFormatNames.FORMAT_OFFICE_XML.equals(mainFormat);
     }
 }

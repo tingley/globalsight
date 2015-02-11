@@ -17,24 +17,21 @@
 
 package com.globalsight.everest.edit;
 
-import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.GxmlNames;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
-
 import java.util.Vector;
 
+import org.apache.log4j.Logger;
+
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlNames;
+
 /**
- * A set of helper methods used by the online and offline editors to
- * determine when a segment should be presented as protected.
+ * A set of helper methods used by the online and offline editors to determine
+ * when a segment should be presented as protected.
  */
 public class SegmentProtectionManager
 {
-    static private final Logger CATEGORY =
-        Logger.getLogger(
-            SegmentProtectionManager.class);
+    static private final Logger CATEGORY = Logger
+            .getLogger(SegmentProtectionManager.class);
 
     /** This class can not be instantiated. */
     private SegmentProtectionManager()
@@ -42,30 +39,20 @@ public class SegmentProtectionManager
     }
 
     /**
-     * Determines if a tuvs state is a protected state.
-     * @deprecated use the com.globalsight.edit.EditHelper class instead
+     * <p>
+     * Determines if a subflow element is to be excluded from translation
+     * because of its item type.
+     * </p>
+     * 
+     * @param p_element
+     *            a GxmlElement that represents a translatable, localizable, or
+     *            SUB.
+     * @param p_tuType
+     *            the item type stored on TU level in case the type was not
+     *            specified for the GxmlElement.
      */
-    static public boolean isTuvInProtectedState(Tuv p_tuv)
-    {
-        // Revised: 10-17-01 bb
-        // We now protect all exact matches instead of just
-        // LeverageGroupExactMatches.
-
-        // return p_tuv.isLeverageGroupExactMatchLocalized();
-        return p_tuv.isExactMatchLocalized();
-    }
-
-    /**
-     * <p>Determines if a subflow element is to be excluded from
-     * translation because of its item type.</p>
-     *
-     * @param p_element a GxmlElement that represents a translatable,
-     * localizable, or SUB.
-     * @param p_tuType the item type stored on TU level in case the
-     * type was not specified for the GxmlElement.
-     */
-    static public boolean isTuvExcluded(GxmlElement p_element,
-        String p_tuType, Vector p_excludedItemTypes)
+    static public boolean isTuvExcluded(GxmlElement p_element, String p_tuType,
+            Vector p_excludedItemTypes)
     {
         String type = p_element.getAttribute(GxmlNames.SUB_TYPE);
 
@@ -78,7 +65,7 @@ public class SegmentProtectionManager
         {
             for (int i = 0; i < p_excludedItemTypes.size(); i++)
             {
-                if (((String)p_excludedItemTypes.get(i)).equals(type))
+                if (((String) p_excludedItemTypes.get(i)).equals(type))
                 {
                     return true;
                 }
@@ -87,19 +74,20 @@ public class SegmentProtectionManager
 
         return false;
     }
-    
+
     static public boolean isPreserveWhiteSpace(GxmlElement p_element)
     {
-        String preserveWS = p_element.getAttribute(GxmlNames.SEGMENT_PRESERVEWS);
+        String preserveWS = p_element
+                .getAttribute(GxmlNames.SEGMENT_PRESERVEWS);
         return "yes".equals(preserveWS);
     }
-    
-    static public String handlePreserveWhiteSpace(GxmlElement p_element, CharSequence segment,
-            String dir, String cssclass)
+
+    static public String handlePreserveWhiteSpace(GxmlElement p_element,
+            CharSequence segment, String dir, String cssclass)
     {
         boolean isPreserve = isPreserveWhiteSpace(p_element);
         StringBuffer sb = new StringBuffer();
-        
+
         if (isPreserve)
         {
             sb.append("<pre style='display: inline' ");
@@ -113,7 +101,7 @@ public class SegmentProtectionManager
             {
                 sb.append(" class='").append(cssclass).append("'");
             }
-            
+
             sb.append(">");
         }
         sb.append(segment);
@@ -121,7 +109,7 @@ public class SegmentProtectionManager
         {
             sb.append("</pre>");
         }
-        
+
         return sb.toString();
     }
 }

@@ -63,6 +63,7 @@ namespace GlobalSight.Office2007Converters
                     }
                 }
                 this.textBox1.Text = dir;
+                this.cbAutoStartAll.Checked = AppConfig.AutoStartAll;
             }
             catch { }
         }
@@ -77,7 +78,7 @@ namespace GlobalSight.Office2007Converters
 
         private void bWordStart_Click(object sender, EventArgs e)
         {
-            startWord();
+            startWord(null);
 
             setAllButtonStatus();
         }
@@ -99,7 +100,7 @@ namespace GlobalSight.Office2007Converters
         private void bExcelStart_Click(object sender, EventArgs e)
         {
 
-            startExcel();
+            startExcel(null);
 
             setAllButtonStatus();
         }
@@ -113,7 +114,7 @@ namespace GlobalSight.Office2007Converters
 
         private void bPptStart_Click(object sender, EventArgs e)
         {
-            startPpt();
+            startPpt(null);
 
             setAllButtonStatus();
         }
@@ -125,7 +126,7 @@ namespace GlobalSight.Office2007Converters
             setAllButtonStatus();
         }
 
-        private void startWord()
+        private void startWord(List<String> paras)
         {
             String dir = this.textBox1.Text.Trim();
 
@@ -147,17 +148,27 @@ namespace GlobalSight.Office2007Converters
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Word 2007 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
+                        MessageBox.Show(this, "Word 2007 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Word 2007 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    if (paras == null || paras.Count == 0)
+                    {
+                        if (paras != null)
+                            paras.Add("alerted");
+                        MessageBox.Show(this, "Word 2007 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please set the directory first");
+                if (paras == null || paras.Count == 0)
+                {
+                    if (paras != null)
+                        paras.Add("alerted");
+                    MessageBox.Show(this, "Please set the directory first");
+                }
             }
         }
 
@@ -169,7 +180,7 @@ namespace GlobalSight.Office2007Converters
             this.bWordStart.Enabled = true;
         }
 
-        private void startExcel()
+        private void startExcel(List<String> paras)
         {
             String dir = this.textBox1.Text.Trim();
 
@@ -191,17 +202,27 @@ namespace GlobalSight.Office2007Converters
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Excel 2007 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
+                        MessageBox.Show(this, "Excel 2007 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
                     }
                 }
                 else
                 {
-                    MessageBox.Show("Excel 2007 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    if (paras == null || paras.Count == 0)
+                    {
+                        if (paras != null)
+                            paras.Add("alerted");
+                        MessageBox.Show(this, "Excel 2007 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please set the directory first");
+                if (paras == null || paras.Count == 0)
+                {
+                    if (paras != null)
+                        paras.Add("alerted");
+                    MessageBox.Show(this, "Please set the directory first");
+                }
             }
         }
 
@@ -213,7 +234,7 @@ namespace GlobalSight.Office2007Converters
             this.bExcelStop.Enabled = false;
         }
 
-        private void startPpt()
+        private void startPpt(List<String> paras)
         {
             String dir = this.textBox1.Text.Trim();
 
@@ -235,17 +256,27 @@ namespace GlobalSight.Office2007Converters
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("PowerPoint 2007 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
+                        MessageBox.Show(this, "PowerPoint 2007 Converter can't be started. Exception: \r\n\r\n" + ex.ToString());
                     }
                 }
                 else
                 {
-                    MessageBox.Show("PowerPoint 2007 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    if (paras == null || paras.Count == 0)
+                    {
+                        if (paras != null)
+                            paras.Add("alerted");
+                        MessageBox.Show(this, "PowerPoint 2007 Converter can't be started because of directory (" + dir + ") does not exists!");
+                    }
                 }
             }
             else
             {
-                MessageBox.Show("Please set the directory first");
+                if (paras == null || paras.Count == 0)
+                {
+                    if (paras != null)
+                        paras.Add("alerted");
+                    MessageBox.Show(this, "Please set the directory first");
+                }
             }
         }
 
@@ -259,21 +290,27 @@ namespace GlobalSight.Office2007Converters
 
         private void bAllStart_Click(object sender, EventArgs e)
         {
+            startAllConverters();
+        }
+
+        private void startAllConverters()
+        {
+            List<String> paras = new List<string>();
+
             if (!isWordStart)
             {
-                startWord();
+                startWord(paras);
             }
 
             if (!isExcelStart)
             {
-                startExcel();
+                startExcel(paras);
             }
 
             if (!isPptStart)
             {
-                startPpt();
+                startPpt(paras);
             }
-            
 
             setAllButtonStatus();
         }
@@ -289,7 +326,40 @@ namespace GlobalSight.Office2007Converters
         {
             DialogResult result = MessageBox.Show(this, "Exit Converters?", "Confirm Exit", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
 
-            e.Cancel = result == DialogResult.Cancel;
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+            }
+            else
+            {
+                stopConverters();
+
+                setAllButtonStatus();
+            }
+        }
+
+        private void cbAutoStartAll_CheckedChanged(object sender, EventArgs e)
+        {
+            AppConfig.AutoStartAll = cbAutoStartAll.Checked;
+        }
+
+        public void autoStartAll()
+        {
+            this.cbAutoStartAll.Checked = AppConfig.AutoStartAll;
+            string dir = AppConfig.GetAppConfig("Dir");
+            if (dir == null || "".Equals(dir.Trim()))
+            {
+                return;
+            }
+
+            String oriText = this.cbAutoStartAll.Text;
+            this.cbAutoStartAll.Text = "Auto Starting...";
+            this.cbAutoStartAll.Enabled = false;
+
+            startAllConverters();
+
+            this.cbAutoStartAll.Text = oriText;
+            this.cbAutoStartAll.Enabled = true;
         }
     }
 }

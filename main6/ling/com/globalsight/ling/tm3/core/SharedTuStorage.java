@@ -4,9 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -112,8 +110,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
               .append(sb)
               .append(") AS result, ")
               .append(getStorage().getTuvTableName() + " AS targetTuv ")
-              .append("WHERE ")
-              .append("targetTuv.tuId = result.tuId AND ")
+              .append("WHERE targetTuv.tuId = result.tuId AND ")
               .append("targetTuv.localeId IN")
               .append(SQLUtil.longGroup(targetLocaleIds));
         }
@@ -129,9 +126,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
         }
         sb.append(" FROM ")
           .append(getStorage().getTuTableName())
-          .append(" WHERE id IN")
+          .append(" WHERE tmId = ? ").addValue(tmId)
+          .append("AND id IN")
           .append(SQLUtil.longGroup(ids))
-          .append(" AND tmId = ? ").addValue(tmId)
           .append("ORDER BY id");
         if (locking) {
             sb.append(" FOR UPDATE");
@@ -255,22 +252,25 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
     @Override
     void saveInlineAttributes(long tuId, Map<TM3Attribute, Object> attributes)
                         throws SQLException {
-        if (attributes.isEmpty()) {
+        if (attributes.isEmpty())
+        {
             return;
         }
-        StatementBuilder sb = new StatementBuilder("UPDATE ")
-          .append(getStorage().getTuTableName())
-          .append(" SET ");
+        StatementBuilder sb = new StatementBuilder("UPDATE ").append(
+                getStorage().getTuTableName()).append(" SET ");
         boolean first = true;
-        for (Map.Entry<TM3Attribute, Object> e : attributes.entrySet()) {
-            if (! first) {
+        for (Map.Entry<TM3Attribute, Object> e : attributes.entrySet())
+        {
+            if (!first)
+            {
                 sb.append(", ");
-                first = true;
-            };
-            sb.append(e.getKey().getColumnName() + " = ?")
-              .addValue(e.getValue());
+            }
+            sb.append(e.getKey().getColumnName() + " = ? ").addValue(
+                    e.getValue());
+            first = false;
         }
-        sb.append(" WHERE id = ?").addValue(tuId);
+
+        sb.append(" WHERE id = ? ").addValue(tuId);
         SQLUtil.exec(getConnection(), sb);
     }
 
@@ -345,9 +345,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id ")
-              .append("AND event.time >= ? AND event.time <= ?")
+              .append("WHERE tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ?")
               .addValues(start, end);
         }
         else {
@@ -366,8 +366,8 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT COUNT(tuv.id) FROM ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id ")
+              .append("WHERE tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
               .append("AND event.time >= ? AND event.time <= ?")
               .addValues(start, end);
         }
@@ -387,9 +387,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
               .append(getStorage().getTuTableName()).append(" as tu, ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tu.tmId = ? ").addValue(tmId)
-              .append("AND tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
-              .append("AND event.time >= ? AND event.time <= ?")
+              .append("WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
+              .append("AND tu.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ?")
               .addValues(start, end);
         }
         else {
@@ -408,9 +408,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT COUNT(DISTINCT tuv.tuId) FROM ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id ")
-              .append("AND event.time >= ? AND event.time <= ? ")
+              .append("WHERE tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end)
               .append("AND tuv.localeId = ?").addValue(locale.getId());
         }
@@ -431,9 +431,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT COUNT(tuv.id) FROM ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND AND tuv.lastEventId = event.id ")
-              .append("AND event.time >= ? AND event.time <= ? ")
+              .append("WHERE tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end)
               .append("AND localeId = ?").addValue(locale.getId());
         }
@@ -475,9 +475,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ");
               getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
-              sb.append("WHERE tu.tmId = ? ").addValue(tmId)
-                .append("AND tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
-                .append("AND event.time >= ? AND event.time <= ? ")
+              sb.append("WHERE tu.id = tuv.tuId AND tuv.lastEventId = event.id ")
+                .append("AND tu.tmId = ? ").addValue(tmId)
+                .append(" AND event.time >= ? AND event.time <= ? ")
                 .addValues(start, end);
         }
         else {
@@ -506,9 +506,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
               .append(getStorage().getTuTableName()).append(" as tu, ")
               .append("TM3_EVENTS as event ");
             getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
-            sb.append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id ")
-              .append("AND event.time >= ? AND event.time <= ? ")
+            sb.append("WHERE tuv.tuid=tu.id AND tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end);
         }
         else {
@@ -516,7 +516,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append(getStorage().getTuTableName()).append(" as tu ");
             getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
-            sb.append(" WHERE tuv.tmId = ?").addValue(tmId);
+            sb.append(" WHERE tuv.tuid=tu.id AND tuv.tmId = ?").addValue(tmId);
         }
         for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet()) {
             sb.append(" AND tu.").append(e.getKey().getColumnName())
@@ -534,8 +534,9 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT DISTINCT tuId FROM ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id AND event.time >= ? AND event.time <= ? ")
+              .append("WHERE tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end)
               .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
               .addValues(startId, count);
@@ -557,10 +558,10 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT DISTINCT tuId FROM ")
               .append(getStorage().getTuvTableName()).append(" as tuv, ")
               .append("TM3_EVENTS as event ")
-              .append("WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id ")
+              .append("WHERE tuv.lastEventId = event.id AND tuv.tmId = ? ")
+              .addValue(tmId)
               .append("AND tuv.localeId = ?").addValue(locale.getId())
-              .append("AND event.time >= ? AND event.time <= ? ")
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end)
               .append("AND tuId > ? ORDER BY tuId ASC LIMIT ?")
               .addValues(startId, count);
@@ -569,7 +570,7 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             sb.append("SELECT DISTINCT tuId FROM ")
               .append(getStorage().getTuvTableName())
               .append(" WHERE tmId = ? ").addValue(tmId)
-              .append("AND localeId = ? AND tuId > ? ORDER BY id ASC LIMIT ?")
+              .append(" AND localeId = ? AND tuId > ? ORDER BY tuId ASC LIMIT ?")
               .addValues(locale.getId(), startId, count);
         }
         return getTu(SQLUtil.execIdsQuery(getConnection(), sb), false);
@@ -588,19 +589,18 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
               .append(getStorage().getTuTableName()).append(" as tu, ")
               .append("TM3_EVENTS as event ");
             getStorage().attributeJoinFilter(sb, "tuv.tuId", customAttrs);
-            sb.append(" WHERE tuv.tmId = ? ").addValue(tmId)
-              .append("AND tuv.lastEventId = event.id ")
-              .append("AND event.time >= ? AND event.time <= ? ")
+            sb.append(" WHERE tuv.tuid=tu.id AND tuv.lastEventId = event.id ")
+              .append("AND tuv.tmId = ? ").addValue(tmId)
+              .append(" AND event.time >= ? AND event.time <= ? ")
               .addValues(start, end)
-              .append("AND tuv.tuId > ?")
-              .addValues(startId);
+              .append("AND tuv.tuId > ?").addValues(startId);
         }
         else {
             sb.append("SELECT DISTINCT tu.id FROM ")
               .append(getStorage().getTuTableName()).append(" as tu ");
             getStorage().attributeJoinFilter(sb, "tu.id", customAttrs);
             sb.append(" WHERE tu.tmId = ? ").addValue(tmId) 
-              .append("AND tu.id > ?")
+              .append(" AND tu.id > ?")
               .addValues(startId);
         }
         for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet()) {

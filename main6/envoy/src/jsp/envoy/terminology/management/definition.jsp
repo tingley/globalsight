@@ -80,6 +80,7 @@
 <SCRIPT src="envoy/terminology/management/objects_js.jsp"></SCRIPT>
 <SCRIPT src="envoy/terminology/management/definition_js.jsp"></SCRIPT>
 <script language="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></script>
+<script type="text/javascript" src="/globalsight/jquery/jquery-1.6.4.js"></script>
 <SCRIPT>
 var needWarning = true;
 var objectName = "Termbase";
@@ -449,8 +450,6 @@ function buildDefinition()
 
 function parseDefinition()
 {
-    //var dom = oDefinition.XMLDocument;
-    
     var dom;
     var xmlStr = document.getElementById("ttt").value;
 
@@ -465,61 +464,31 @@ function parseDefinition()
     }
     
     var nodes, node;
-    
-    if(window.navigator.userAgent.indexOf("Firefox")>0) {   
-        idName.value = dom.selectSingleNode("/definition/name").textContent;
-        idDescription.value = dom.selectSingleNode("/definition/description").textContent;
-    } else {
-        idName.value = dom.selectSingleNode("/definition/name").text;
-        idDescription.value = dom.selectSingleNode("/definition/description").text;
-    }
-
+	idName.value = $(dom).find("name").first().text();
+	idDescription.value = $(dom).find("description").text();
     nodes = dom.selectNodes("/definition/languages/language");
-    for (var i = 0; i < nodes.length; i++)
-    {
-        if(window.navigator.userAgent.indexOf("Firefox")>0) {
-            node = nodes[i];
-            var name = node.selectSingleNode("name").textContent;
-            var locale = node.selectSingleNode("locale").textContent;
-            var hasterms = node.selectSingleNode("hasterms").textContent;
-        } else {
-            node = nodes.item(i);
-            var name = node.selectSingleNode("name").text;
-            var locale = node.selectSingleNode("locale").text;
-            var hasterms = node.selectSingleNode("hasterms").text;
-        }
-        
-        
+
+	$(nodes).each(function(){
+		var name = $(this).find("name").text();
+		var locale = $(this).find("locale").text();
+		var hasterms = $(this).find("hasterms").text();
         hasterms = (hasterms == "true" ? true : false);
         var exists = true;
-
         aLanguages.push(new Language(name, locale, hasterms, exists));
-    }
+	})
     showLanguages();
 
     nodes = dom.selectNodes("/definition/fields/field");
-    for (var i = 0; i < nodes.length; i++)
-    {
-        if(window.navigator.userAgent.indexOf("Firefox")>0) {
-            node = nodes[i];
-            var name = node.selectSingleNode("name").textContent;
-            var type = node.selectSingleNode("type").textContent;
-            var system =
-               (node.selectSingleNode("system").textContent == "true" ? true : false);
-            var values = node.selectSingleNode("values").textContent;
-        } else {
-            node = nodes.item(i);
-            var name = node.selectSingleNode("name").text;
-            var type = node.selectSingleNode("type").text;
-            var system =
-               (node.selectSingleNode("system").text == "true" ? true : false);
-            var values = node.selectSingleNode("values").text;
-        }
-    
-        var format = getFieldFormatByType(type);
 
+	$(nodes).each(function(){
+		var name = $(this).find("name").text();
+		var type = $(this).find("type").text();
+		var system = ($(this).find("system").text() == "true" ? true : false);
+		var values = $(this).find("values").text();
+
+        var format = getFieldFormatByType(type);
         aFields.push(new Field(name, type, format, system, values));
-    }
+	})
     showFields();
 }
 
@@ -543,23 +512,14 @@ function doOnLoad()
       dom = parser.parseFromString(xmlStr,"text/xml");
     }
 
-    var nameNode = dom.selectSingleNode(
-      "/definition/name");
+    var nameNode = dom.selectSingleNode("/definition/name");
      
     var toModify = false; 
-    if(window.navigator.userAgent.indexOf("MSIE")>0)
-    {
-      toModify =  (nameNode != null && nameNode.text != "");
-    }
-    else
-    {
-     toModify = (nameNode != null && nameNode.textContent != "");
-    } 
-      
+	toModify =  (nameNode != null && $(nameNode).text() != "");
     if (toModify)
     {
       isModify = true;
-      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_modify"))%>" + " " + nameNode.text;
+      idHeading.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_modify"))%>" + " " + $(nameNode).text();
       idStep1.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_modify_name_desc"))%>";
       idStep2.innerHTML = "<%=EditUtil.toJavascript(bundle.getString("jsmsg_tb_modify_lang"))%>";
       idStep3.innerHTML = "Modify Fields";

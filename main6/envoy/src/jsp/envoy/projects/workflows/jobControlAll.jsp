@@ -145,6 +145,19 @@ function submitForm(buttonClicked)
     // no buttons for this page for now
 }
 
+//for GBS-2599
+function handleSelectAll() {
+	if (JobForm && JobForm.selectAll) {
+		if (JobForm.selectAll.checked) {
+			checkAll('JobForm');
+			setButtonState();
+	    }
+	    else {
+			clearAll('JobForm'); 
+			setButtonState();
+	    }
+	}
+}
 </SCRIPT>
 </HEAD>
 
@@ -203,7 +216,6 @@ is defined in header.jspIncl which must be included in the body.
 
 <!-- Data Table  -->             
 <TABLE BORDER="0" CELLPADDING="4" CELLSPACING="0" CLASS="list">
-<TBODY>
 <COL> <!-- Radio button -->
 <COL> <!-- Priority -->
 <COL> <!-- Job ID -->
@@ -215,7 +227,7 @@ is defined in header.jspIncl which must be included in the body.
 <COL> <!-- Job Status -->
 
 <TR CLASS="tableHeadingBasic" VALIGN="BOTTOM">
-	<TD CLASS="headerCell"></TD>
+	<TD CLASS="headerCell"><input type="checkbox" onclick="handleSelectAll()" name="selectAll"/></TD>
 	<TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=allStatusURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.PRIORITY%>"><IMG SRC="/globalsight/images/exclamation_point_white.gif" HEIGHT=12 WIDTH=7 BORDER=0 ALT="<%=bundle.getString("lb_priority")%>"></A><%=jobPrioritySortArrow%></TD>
 	<TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=allStatusURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_ID%>"><%=bundle.getString("lb_job_id")%></A><%=jobIdSortArrow%></TD>
 	<TD CLASS="headerCell"><A CLASS="sortHREFWhite" HREF="<%=allStatusURL + "&" + JobManagementHandler.SORT_PARAM + "=" + JobComparator.JOB_NAME%>"><%=bundle.getString("lb_job_name")%></A><%=jobNameSortArrow%></TD>

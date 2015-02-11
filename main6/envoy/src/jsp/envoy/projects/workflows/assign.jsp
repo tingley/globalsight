@@ -436,9 +436,9 @@ function disable(name, isDisable)
 										}
 									}
 									String fullname = userInfo.getFirstName() + " " 
-										+ userInfo.getLastName() + " ("+ userInfo.getUserId() + ")";
+										+ userInfo.getLastName() + " ("+ userInfo.getUserName() + ")";
 									out.println("<option userId = \"" + userInfo.getUserId() +  "\"  value=\"" + userInfo.getUserId() + "," 
-										+ userInfo.getFullName() + "\" " + selected + " >" + fullname + "</option>");
+										+ userInfo.getUserName() + "\" " + selected + " >" + fullname + "</option>");
 								}%>
 							</select>
 			            </td>
@@ -477,7 +477,7 @@ for (Task task: keys)
 		for(UserInfo user: users)
 		{
 		%>
-			<div id="t_<%=task.getId()%>_<%=user.getUserId()%>"/>
+			<div id="t_<%=task.getId()%>_<%=user.getUserName()%>"/>
 		<% 
 		}		
 	}

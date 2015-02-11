@@ -17,34 +17,44 @@
 
 package com.globalsight.everest.tm.exporter;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
-
-import com.globalsight.everest.tm.Tm;
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.company.CompanyWrapper;
-import com.globalsight.everest.tm.exporter.ExportUtil;
-import com.globalsight.everest.tm.util.Tmx;
-
-import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
-
-import com.globalsight.exporter.ExportOptions;
-import com.globalsight.exporter.IWriter;
-
-import com.globalsight.machineTranslation.MachineTranslator;
-import com.globalsight.util.edit.EditUtil;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.SessionInfo;
-import com.globalsight.util.UTC;
-
-import com.globalsight.util.XmlParser;
-
-import org.dom4j.*;
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Node;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
-import java.util.*;
-import java.io.*;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.projecthandler.ProjectTmTuTProp;
+import com.globalsight.everest.tm.Tm;
+import com.globalsight.everest.tm.util.Tmx;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
+import com.globalsight.exporter.ExportOptions;
+import com.globalsight.exporter.IWriter;
+import com.globalsight.ling.tm2.SegmentTmTu;
+import com.globalsight.ling.tm2.SegmentTmTuv;
+import com.globalsight.machineTranslation.MachineTranslator;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SessionInfo;
+import com.globalsight.util.UTC;
+import com.globalsight.util.XmlParser;
+import com.globalsight.util.edit.EditUtil;
 
 /**
  * Writes TU entries to a TMX file as directed by the conversion settings in the
@@ -56,8 +66,7 @@ import java.io.*;
  */
 public class TmxWriter implements IWriter
 {
-    private static final Logger CATEGORY = Logger
-            .getLogger(TmxWriter.class);
+    private static final Logger CATEGORY = Logger.getLogger(TmxWriter.class);
 
     // TMX levels determine how much information gets output,
     // and in which form.
@@ -197,7 +206,6 @@ public class TmxWriter implements IWriter
     /**
      * Writes a single entry to the export file.
      * 
-     * @see Entry
      */
     public void write(Object p_entry, SessionInfo p_session) throws IOException
     {
@@ -470,6 +478,30 @@ public class TmxWriter implements IWriter
             result.append(prop.asXML());
         }
 
+        // add tu attributes
+        List<ProjectTmTuTProp> props = ProjectTmTuTProp
+                .getTuProps(p_tu.getId());
+        if (props != null)
+        {
+            for (ProjectTmTuTProp pp : props)
+            {
+                result.append(pp.convertToTmx());
+            }
+        }
+
+        // add TU attributes from TM3 convert
+        if (props == null || props.size() == 0)
+        {
+            Collection<ProjectTmTuTProp> tuProps = p_tu.getProps();
+            if (tuProps != null)
+            {
+                for (ProjectTmTuTProp pp : tuProps)
+                {
+                    result.append(pp.convertToTmx());
+                }
+            }
+        }
+
         // Add all TUVs.
 
         Collection locales = p_tu.getAllTuvLocales();
@@ -479,6 +511,10 @@ public class TmxWriter implements IWriter
             doFilter = true;
         }
         String filterLang = m_options.getSelectLanguage();
+        if ("in_ID".equalsIgnoreCase(filterLang))
+        {
+            filterLang = "id_ID";
+        }
         String sourceLang = p_tu.getSourceLocale().toString();
 
         // Convert iw_IL to he_IL because changes in ISO 639.
@@ -591,7 +627,8 @@ public class TmxWriter implements IWriter
 
             result.append(Tmx.CREATIONID);
             result.append("=\"");
-            result.append(EditUtil.encodeXmlEntities(temp));
+            result.append(EditUtil.encodeXmlEntities(UserUtil
+                    .getUserNameById(temp)));
             result.append("\" ");
         }
 
@@ -613,7 +650,8 @@ public class TmxWriter implements IWriter
         {
             result.append(Tmx.CHANGEID);
             result.append("=\"");
-            result.append(EditUtil.encodeXmlEntities(temp));
+            result.append(EditUtil.encodeXmlEntities(UserUtil
+                    .getUserNameById(temp)));
             result.append("\" ");
         }
 
@@ -1099,7 +1137,10 @@ public class TmxWriter implements IWriter
                     + "']");
 
             bpt.addAttribute("i", p_i);
-            ept.addAttribute("i", p_i);
+            if (ept != null)
+            {
+                ept.addAttribute("i", p_i);
+            }
         }
     }
 
@@ -1134,6 +1175,10 @@ public class TmxWriter implements IWriter
             doFilter = true;
         }
         String filterLang = m_options.getSelectLanguage();
+        if ("in_ID".equalsIgnoreCase(filterLang))
+        {
+            filterLang = "id_ID";
+        }
         String sourceLang = p_tu.getSourceLocale().getLocale().toString();
 
         // Convert iw_IL to he_IL because changes in ISO 639.

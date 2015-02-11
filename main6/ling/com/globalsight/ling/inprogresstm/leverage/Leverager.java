@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.Tuv;
 import com.globalsight.ling.inprogresstm.DynamicLeverageResults;
@@ -35,22 +36,19 @@ import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.util.GlobalSightLocale;
 
-
-
 /**
  * Leverager is responsible for leveraging segments
  */
-
 public class Leverager
 {
-    private static final Logger c_logger = 
-        Logger.getLogger(Leverager.class.getName());
-    
+    private static final Logger c_logger = Logger.getLogger(Leverager.class
+            .getName());
+
     /**
      * Every "Leverager" object shares one DB connection.
      */
     private Connection connection = null;
-    
+
     public Leverager(Connection p_connection)
     {
         connection = p_connection;
@@ -86,9 +84,10 @@ public class Leverager
         return createDynamicLeverageResults(leverageMatches, p_sourceSegment,
                 p_targetLocale, p_jobId);
     }
-    
+
     /**
      * A common logic to leverage translatable segment from in-progress TM.
+     * 
      * @return LeverageMatches
      */
     public LeverageMatches leverageTranslatableSegment(
@@ -147,14 +146,15 @@ public class Leverager
         LeverageMatches leverageMatches = leverageLocalizableSegment(
                 p_sourceSegment, p_sourceLocale, p_targetLocale,
                 p_leverageOptions, p_jobIdsToLevFrom, p_tmIds);
-        
+
         // create DynamicLeverageResults
         return createDynamicLeverageResults(leverageMatches, p_sourceSegment,
-            p_targetLocale, p_jobId);
+                p_targetLocale, p_jobId);
     }
 
     /**
      * A common logic to leverage localizable segment from in-progress TM.
+     * 
      * @return LeverageMatches
      */
     public LeverageMatches leverageLocalizableSegment(
@@ -196,69 +196,75 @@ public class Leverager
 
         return leverageMatches;
     }
-    
+
     /**
      * Create DynamicLeverageResults from LeverageMatches object.
      */
     private DynamicLeverageResults createDynamicLeverageResults(
-        LeverageMatches p_leverageMatches, BaseTmTuv p_sourceSegment,
-        GlobalSightLocale p_targetLocale, long p_currentJobId)
+            LeverageMatches p_leverageMatches, BaseTmTuv p_sourceSegment,
+            GlobalSightLocale p_targetLocale, long p_currentJobId)
     {
+        String companyId = null;
+        try
+        {
+            Job job = ServerProxy.getJobHandler().getJobById(p_currentJobId);
+            companyId = job.getCompanyId();
+        }
+        catch (Exception e)
+        {
+            c_logger.error(e.getMessage(), e);
+        }
         GlobalSightLocale sourceLocale = p_sourceSegment.getLocale();
-//        LeverageOptions options = p_leverageMatches.getLeverageOptions();
-        DynamicLeverageResults dynamicLeverageResults
-            = new DynamicLeverageResults(p_sourceSegment.getSegment(),
-                sourceLocale, p_targetLocale,
+        // LeverageOptions options = p_leverageMatches.getLeverageOptions();
+        DynamicLeverageResults dynamicLeverageResults = new DynamicLeverageResults(
+                p_sourceSegment.getSegment(), sourceLocale, p_targetLocale,
                 p_sourceSegment.isTranslatable());
         // populate DynamicLeverageResults
-        for(Iterator it = p_leverageMatches.matchIterator(p_targetLocale);
-            it.hasNext();)
+        for (Iterator it = p_leverageMatches.matchIterator(p_targetLocale,
+                companyId); it.hasNext();)
         {
-            // These results came from the IP TM.  This means that their TMID 
-            // is not a TMID but rather a JOB_ID.  Therefore we need a way 
+            // These results came from the IP TM. This means that their TMID
+            // is not a TMID but rather a JOB_ID. Therefore we need a way
             // to distinguish them so we don't try to pass their bogus
-            LeveragedInProgressTuv trgTuv = (LeveragedInProgressTuv)it.next();
+            LeveragedInProgressTuv trgTuv = (LeveragedInProgressTuv) it.next();
             BaseTmTuv srcTuv = trgTuv.getTu().getFirstTuv(sourceLocale);
             // here the "tmId" should be the jobId
             long leveragedJobId = trgTuv.getTu().getTmId();
-            int matchCategory = (p_currentJobId == leveragedJobId
-                ? DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB
-                : DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB);
+            int matchCategory = (p_currentJobId == leveragedJobId ? DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB
+                    : DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB);
 
-            String jobName = "";
             long jobDataTuId = trgTuv.getJobDataTuId();
             GlobalSightLocale locale = trgTuv.getLocale();
             Tuv tuv = null;
+            Job job = null;
             try
             {
-                tuv = ServerProxy.getTuvManager().getTuForSegmentEditor(
-                        jobDataTuId)
-                        .getTuv(locale.getId());
-                jobName = ServerProxy.getJobHandler()
-                        .getJobById(leveragedJobId).getJobName();
+                job = ServerProxy.getJobHandler().getJobById(leveragedJobId);
+                tuv = ServerProxy.getTuvManager()
+                        .getTuForSegmentEditor(jobDataTuId, companyId)
+                        .getTuv(locale.getId(), companyId);
             }
             catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                c_logger.error(e.getMessage(), e);
             }
-            
-            TuvBasicInfo matchedTuvBasicInfo = new TuvBasicInfo(trgTuv
-                    .getSegment(), null, String.valueOf(trgTuv
-                    .getExactMatchKey()), locale, tuv.getCreatedDate(), tuv
-                    .getCreatedUser(), tuv.getLastModified(), tuv
-                    .getLastModifiedUser(), null, tuv.getSid());
+
+            TuvBasicInfo matchedTuvBasicInfo = new TuvBasicInfo(
+                    trgTuv.getSegment(), null, String.valueOf(trgTuv
+                            .getExactMatchKey()), locale, tuv.getCreatedDate(),
+                    tuv.getCreatedUser(), tuv.getLastModified(),
+                    tuv.getLastModifiedUser(), null, tuv.getSid());
 
             DynamicLeveragedSegment leveragedSegment = new DynamicLeveragedSegment(
                     srcTuv.getSegment(), trgTuv.getSegment(), sourceLocale,
                     trgTuv.getLocale(), trgTuv.getMatchState(),
-                    trgTuv.getScore(), matchCategory, leveragedJobId, trgTuv.getId());
+                    trgTuv.getScore(), matchCategory, leveragedJobId,
+                    trgTuv.getId());
             // For "in-progress" leverage,the projectTmIndex should be "-7".
-            int projectTmIndex = 
-                com.globalsight.ling.tm2.leverage.Leverager.IN_PROGRESS_TM_PRIORITY;
+            int projectTmIndex = com.globalsight.ling.tm2.leverage.Leverager.IN_PROGRESS_TM_PRIORITY;
             leveragedSegment.setTmIndex(projectTmIndex);
             leveragedSegment.setMatchedTuvBasicInfo(matchedTuvBasicInfo);
-            leveragedSegment.setMatchedTuvJobName(jobName);
+            leveragedSegment.setMatchedTuvJobName(job.getJobName());
             dynamicLeverageResults.add(leveragedSegment);
         }
 

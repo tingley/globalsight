@@ -157,7 +157,7 @@ public abstract class DbUtil
         return URL;
     }
 
-    private Connection getConnection() throws SQLException
+    public Connection getConnection() throws SQLException
     {
         Connection conn = DriverManager.getConnection(getUrl(), getUser(),
                 getPassword());
@@ -176,7 +176,7 @@ public abstract class DbUtil
         st.close();
         conn.close();
     }
-    
+
     public void update(String sql) throws SQLException
     {
         Connection conn = getConnection();
@@ -231,7 +231,7 @@ public abstract class DbUtil
             closeConn(conn);
         }
     }
-    
+
     public List<ArrayList> query(String sql) throws SQLException
     {
         Connection conn = getConnection();
@@ -263,11 +263,11 @@ public abstract class DbUtil
         }
         return list;
     }
-    
+
     public List query(String sql, ResultHander hander) throws SQLException
     {
         List list = new ArrayList();
-        
+
         Connection conn = getConnection();
         ResultSet rs = null;
         Statement st = null;
@@ -289,7 +289,7 @@ public abstract class DbUtil
         }
     }
 
-    private void closeConn(Connection conn)
+    public void closeConn(Connection conn)
     {
         if (conn != null)
         {
@@ -299,12 +299,12 @@ public abstract class DbUtil
             }
             catch (SQLException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
 
-    private void closeStatement(Statement st)
+    public void closeStatement(Statement st)
     {
         if (st != null)
         {
@@ -314,12 +314,12 @@ public abstract class DbUtil
             }
             catch (SQLException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }
 
-    private void closeResultSet(ResultSet rs)
+    public void closeResultSet(ResultSet rs)
     {
         if (rs != null)
         {
@@ -329,7 +329,7 @@ public abstract class DbUtil
             }
             catch (SQLException e)
             {
-                log.error(e);
+                log.error(e.getMessage(), e);
             }
         }
     }

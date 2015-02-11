@@ -16,28 +16,22 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.log4j.Logger;
 
 import com.globalsight.everest.tm.Tm;
-import com.globalsight.ling.tm2.SegmentTmTu;
-import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.indexer.Token;
-import com.globalsight.ling.tm2.persistence.DbUtil;
-import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.ling.tm2.lucene.LuceneIndexReader;
-
-import com.globalsight.util.SoftReferenceCache;
 import com.globalsight.util.CacheDataRetriever;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Arrays;
-import java.sql.Connection;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.SoftReferenceCache;
 
 
 /**
@@ -60,19 +54,19 @@ class FuzzyMatcher
     private SoftReferenceCache m_tokenListCache;
     
     // constructor
-    public FuzzyMatcher(GlobalSightLocale p_sourceLocale,
-        Collection<Tm> p_tms, boolean p_isMultiLingLeveraging)
-        throws Exception
+    public FuzzyMatcher(GlobalSightLocale p_sourceLocale, Collection<Tm> p_tms,
+            boolean lookupTarget) throws Exception
     {
         m_sourceLocale = p_sourceLocale;
         List<Long> tmIds = new ArrayList<Long>();
-        for (Tm tm : p_tms) {
+        for (Tm tm : p_tms)
+        {
             tmIds.add(tm.getId());
         }
         m_indexReader = new LuceneIndexReader(tmIds, p_sourceLocale);
 
-        m_tokenListCache = new SoftReferenceCache(
-            new TokenListGetter(p_isMultiLingLeveraging));
+        m_tokenListCache = new SoftReferenceCache(new TokenListGetter(
+                lookupTarget));
     }
     
 
@@ -431,23 +425,20 @@ class FuzzyMatcher
     }
     
                     
-    private class TokenListGetter
-        implements CacheDataRetriever
+    private class TokenListGetter implements CacheDataRetriever
     {
-        private boolean m_isMultilingualLeveraging;
-        
-        private TokenListGetter(boolean p_isMultilingualLeveraging)
+        private boolean lookupTarget;
+
+        private TokenListGetter(boolean lookupTarget)
         {
-            m_isMultilingualLeveraging = p_isMultilingualLeveraging;
-        }
-        
-        public Object getData(Object p_key)
-            throws Exception
-        {
-            return m_indexReader.getGsTokensByTerm(
-                (String)p_key, m_isMultilingualLeveraging);
+            this.lookupTarget = lookupTarget;
         }
 
+        public Object getData(Object p_key) throws Exception
+        {
+            return m_indexReader
+                    .getGsTokensByTerm((String) p_key, lookupTarget);
+        }
 
     }
     

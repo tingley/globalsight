@@ -142,7 +142,7 @@ public class JobControlExportedHandler
                                     ((NavigationBean)beanMap.get(DETAILS_BEAN)).getPageURL(),
                                     ((NavigationBean)beanMap.get(PLANNED_COMPLETION_DATE_BEAN)).getPageURL(),
                                     getExpJobListing(p_request),
-                                    jobStates, false));
+                                    jobStates, false, true));
         p_request.setAttribute(JOB_LIST_START_PARAM, 
                                p_request.getParameter(JOB_LIST_START_PARAM));
         p_request.setAttribute(PAGING_SCRIPTLET, 

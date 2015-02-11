@@ -105,7 +105,7 @@ public class LocalePairDependencyChecker extends DependencyChecker
             message.append("/");
             message.append(trg);
 
-            c_logger.error(message.toString());
+            c_logger.error(message.toString(), e);
 
             String args[] =
             { src, trg };
@@ -152,7 +152,7 @@ public class LocalePairDependencyChecker extends DependencyChecker
             message.append("/");
             message.append(trg);
 
-            c_logger.error(message.toString());
+            c_logger.error(message.toString(), e);
 
             String args[] =
             { src, trg };

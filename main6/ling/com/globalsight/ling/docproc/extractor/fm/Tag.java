@@ -78,4 +78,24 @@ public class Tag
     public static final String CONDITIONAL = "Conditional";
     public static final String CONDITIONAL_END = "> # end of Conditional";
     public static final String UNCONDITIONAL = "<Unconditional";
+    
+    public static final String NOTES_HEAD = "<Notes";
+    public static final String NOTES_END = "> # end of Notes";
+    public static final String NOTES_REF = "<FNote";
+    public static final String NOTES = "Notes";
+    
+    public static final String TEXTFLOW_HEAD = "<TextFlow";
+    public static final String TEXTFLOW_END = "> # end of TextFlow";
+    public static final String PGFTAG_CALLOUT = "<PgfTag `CA Callout'>";
+    
+    public static final String PGF_HEAD = "<Pgf";
+    public static final String PGF_END = "> # end of Pgf";
+    public static final String PGFTAG_HEAD = "<PgfTag";
+    
+    public static final String PGF_CATALOG_HEAD = "<PgfCatalog";
+    public static final String PGF_CATALOG_END = "> # end of PgfCatalog";
+    
+    public static final String FCOLOR_HEAD = "<FColor ";
+    
+    public static final String MTYPENAME_HYPERTEXT = "Hypertext";
 }

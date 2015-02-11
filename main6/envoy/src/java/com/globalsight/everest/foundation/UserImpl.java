@@ -67,6 +67,30 @@ public class UserImpl extends PersistentObject implements User, Serializable
     // future projects
     private boolean m_isInAllProjects = false;
 
+    public String getProjectNames()
+    {
+        return projectNames;
+    }
+
+    public void setProjectNames(String projectNames)
+    {
+        this.projectNames = projectNames == null ? "" : projectNames;
+    }
+
+    public String getPermissiongNames()
+    {
+        return permissiongNames;
+    }
+
+    public void setPermissiongNames(String permissiongNames)
+    {
+        this.permissiongNames = permissiongNames == null ? ""
+                : permissiongNames;
+    }
+
+    private String projectNames = "";
+    private String permissiongNames = "";
+
     public UserImpl()
     {
     }
@@ -111,24 +135,12 @@ public class UserImpl extends PersistentObject implements User, Serializable
 
     public String getUserName()
     {
-        if (m_userName == null || m_userName.length() < 1)
-        {
-            m_userName = getFullName();
-        }
-
         return m_userName;
     }
 
     public void setUserName(String p_userName)
     {
-        if (p_userName == null || p_userName.length() < 1)
-        {
-            m_userName = getFullName();
-        }
-        else
-        {
-            m_userName = p_userName;
-        }
+        m_userName = p_userName;
     }
 
     public String getFirstName()
@@ -139,9 +151,6 @@ public class UserImpl extends PersistentObject implements User, Serializable
     public void setFirstName(String p_firstName)
     {
         m_firstName = p_firstName;
-
-        // Populate the full name too since the first name has changed.
-        setUserName(getFullName());
     }
 
     public String getLastName()
@@ -152,9 +161,6 @@ public class UserImpl extends PersistentObject implements User, Serializable
     public void setLastName(String p_lastName)
     {
         m_lastName = p_lastName;
-
-        // Populate the full name too since the last name has changed.
-        setUserName(getFullName());
     }
 
     public String getPassword()
@@ -356,19 +362,19 @@ public class UserImpl extends PersistentObject implements User, Serializable
     {
         this.isPasswordSet = passwordSet;
     }
-    
+
     public String getSpecialNameForEmail()
     {
-    	StringBuffer sb = new StringBuffer();
-    	
-    	if (m_userId != null)
-    	{
-    		sb.append(m_userId);
-            sb.append(" ");
-    	}
+        StringBuffer sb = new StringBuffer();
 
-    	sb.append("(");
-    	
+        if (m_userName != null)
+        {
+            sb.append(m_userName);
+            sb.append(" ");
+        }
+
+        sb.append("(");
+
         if (m_firstName != null)
         {
             sb.append(m_firstName);
@@ -379,9 +385,9 @@ public class UserImpl extends PersistentObject implements User, Serializable
         {
             sb.append(m_lastName);
         }
-        
+
         sb.append(")");
-        
+
         return sb.toString();
     }
 }

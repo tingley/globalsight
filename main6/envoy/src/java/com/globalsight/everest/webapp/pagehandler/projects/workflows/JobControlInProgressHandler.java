@@ -16,34 +16,28 @@
  */
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import com.globalsight.everest.costing.Currency;
-import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.Job;
-import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.servlet.util.SessionManager;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.workflowmanager.Workflow;
 import java.io.IOException;
+import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.StringTokenizer;
-import java.util.Vector;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.rmi.RemoteException;
+
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.jobhandler.Job;
+import com.globalsight.everest.servlet.EnvoyServletException;
+import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.javabean.NavigationBean;
+import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class JobControlInProgressHandler extends JobManagementHandler
 {
@@ -75,8 +69,8 @@ public class JobControlInProgressHandler extends JobManagementHandler
     {
         HashMap beanMap = invokeJobControlPage(p_thePageDescriptor, p_request,
                 BASE_BEAN);
-        p_request.setAttribute("searchType", p_request
-                .getParameter("searchType"));
+        p_request.setAttribute("searchType",
+                p_request.getParameter("searchType"));
 
         // since an instance of a page handler is used by different clients,
         // this instance variable needs to be set only once. There's no need
@@ -89,21 +83,26 @@ public class JobControlInProgressHandler extends JobManagementHandler
         }
 
         performAppropriateOperation(p_request);
-        p_request.setAttribute(JOB_SCRIPTLET, getJobText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(MODIFY_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(DETAILS_BEAN)).getPageURL(),
-                ((NavigationBean) beanMap.get(PLANNED_COMPLETION_DATE_BEAN))
-                        .getPageURL(), getExpJobListing(p_request),
-                Job.DISPATCHED, true, true));
+        p_request.setAttribute(
+                JOB_SCRIPTLET,
+                getJobText(p_request, ((NavigationBean) beanMap.get(BASE_BEAN))
+                        .getPageURL(), ((NavigationBean) beanMap
+                        .get(MODIFY_BEAN)).getPageURL(),
+                        ((NavigationBean) beanMap.get(DETAILS_BEAN))
+                                .getPageURL(), ((NavigationBean) beanMap
+                                .get(PLANNED_COMPLETION_DATE_BEAN))
+                                .getPageURL(), getExpJobListing(p_request),
+                        Job.DISPATCHED, true, true));
 
         p_request.setAttribute(EXPORT_URL_PARAM, m_exportUrl);
         p_request.setAttribute(JOB_ID, JOB_ID);
-        p_request.setAttribute(JOB_LIST_START_PARAM, p_request
-                .getParameter(JOB_LIST_START_PARAM));
-        p_request.setAttribute(PAGING_SCRIPTLET, getPagingText(p_request,
-                ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
-                Job.DISPATCHED));
+        p_request.setAttribute(JOB_LIST_START_PARAM,
+                p_request.getParameter(JOB_LIST_START_PARAM));
+        p_request.setAttribute(
+                PAGING_SCRIPTLET,
+                getPagingText(p_request,
+                        ((NavigationBean) beanMap.get(BASE_BEAN)).getPageURL(),
+                        Job.DISPATCHED));
 
         // Set the EXPORT_INIT_PARAM in the sessionMgr so we can bring
         // the user back here after they Export
@@ -176,13 +175,13 @@ public class JobControlInProgressHandler extends JobManagementHandler
         else if (action != null && action.equals("save"))
         {
             // save the results from a search/replace
-            SearchHandlerHelper.replace((List) sessionMgr
-                    .getAttribute("tuvInfos"));
+            SearchHandlerHelper.replace(
+                    (List) sessionMgr.getAttribute("tuvInfos"),
+                    (String) sessionMgr.getAttribute(COMPANY_ID));
         }
         else if (action != null && action.equals(PLANNED_COMP_DATE))
         {
-            WorkflowHandlerHelper.updatePlannedCompletionDates(
-                    p_request);
+            WorkflowHandlerHelper.updatePlannedCompletionDates(p_request);
         }
         else
         {

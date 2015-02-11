@@ -1,58 +1,74 @@
 ######################System configuration######################
+## If autoGenerateJobName is true, it means that job name will be generated
+## with specified job name appending with time stamp as suffix. And the job creation
+## must be run. If false, the specified job name is as the full job name.
+autoGenerateJobName = false
 
-######GlobalSight Server############
-SERVER_URL = http://<Server IP>:<port>
+## GlobalSight server IP address, including port 
+serverUrl = <GlobalSight server IP address>
 
 ######SELENIUM Server###############
-SELENIUM_HOST = <SELENIUM Server IP>
-SELENIUM_PORT = <SELENIUM Server Port>
+seleniumHost = <Selenium server IP address>
+seleniumPort = <Port of Selenium server>
 
 ######Base_Path:save the test files, the directory is in SELENIUM Server######
-Base_Path = \\\\<SELENIUM Server IP>\\GlobalSight Automation Files\\TestFiles\\
+Base_Path = \\\\<seleniumHost>\\GlobalSightAutomationFiles\\TestFiles\\
 
 ######Base_Path_Result:save the result files from GlobalSight(i.e. TB export files), the directory is in SELENIUM Server########
-Base_Path_Result = \\\\<SELENIUM Server IP>\\GlobalSight Automation Files\\ResultFiles\\
+Base_Path_Result = \\\\<seleniumHost>\\GlobalSightAutomationFiles\\ResultFiles\\
+
+Compare_Path = \\\\<seleniumHost>\\GlobalSightAutomationFiles\\CompareReport\\
 
 ######BROWSER:Browser type to run automation######
-BROWSER = *firefox
+browser = *firefox
 
 ######CVS Server############
-CVSServer_HOST=<CVS Server IP>
-
+CVSServer_HOST=<IP address of CVS server>
 
 ###################Common Data###################################
+shortWait = 10000
+middleWait = 60000
+longWait = 1200000
+delayBetweenOperations = 1000
 
-SHORT_WAIT = 30000
-MID_WAIT = 120000
-LONG_WAIT = 1200000
-DELAY_BETWEEN_OPERATIONS = 1000
+## check times, it uses middleWait as time range to check
+## default is 50, it means that the check will be repeated 50 times
+checkTimes = 30
 
-LOGIN_URL=/globalsight/ControlServlet?activityName=login
+loginUrl = /globalsight/ControlServlet?activityName=login
 
-COMPANY_NAME=74
-admin = 74admin 74admin
-pm = gs74pm gs74pm
-anyone = 74anyone 74anyone
-SUPERADMIN_LOGIN_NAME = superadmin
-superadmin_password = password
+company = <Company Name>
+admin = <Company Name>admin <Company Name>admin
+pm = gs<Company Name>pm gs<Company Name>pm
+anyone = <Company Name>anyone <Company Name>anyone
+superAdminName = superadmin
+superAdminPassword = password
 
-admin_login_name=74admin
-admin_password=password
+adminName = <Company Name>admin
+adminPassword = password
 
-pm_login_name = gs74pm
-pm_password = password
-anyone_login_name =74anyone
-anyone_password = password
+pmName = gs<Company Name>pm
+pmPassword = password
+anyoneName =<Company Name>anyone
+anyonePassword = password
 
-reviewer_login_name=welocalizereviewer
-reviewer_password=password
+reviewerName = reviewer
+reviewerPassword = password
 
-TARGET_LOCALES = fr_FR,de_DE
+targetLocales = fr_FR,de_DE
 
 en_US=English (United States) [en_US]
 fr_FR=French (France) [fr_FR]
 
-CVSServerRepositoryName=CVSTest
-CVSServerUserName=jessie
-CVSServerUSerPassword=password
-Sandbox=sandBox
+CVSServerRepositoryName=<CVS repository name>
+CVSServerUserName=<CVS username>
+CVSServerUSerPassword=<password>
+sandbox=<SandBox>
+
+ISO_8859_1=ISO-8859-1
+UTF_8=UTF-8
+
+databaseUrl=jdbc:mysql://<IP of Database server>/globalsight?useUnicode=true&characterEncoding=UTF-8
+databaseUser=<Database username>
+databasePassword=<Password>
+

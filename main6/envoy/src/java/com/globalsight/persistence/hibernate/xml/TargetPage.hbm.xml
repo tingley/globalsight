@@ -53,8 +53,8 @@
             <property name="noUseInContextMatchWordCount" length="10"
                 column="NO_USE_IC_MATCH_WORD_COUNT" type="int"
                 not-null="false" unique="false" />
-            <property name="noUseExactMatchWordCount" length="10"
-                column="NO_USE_EXACT_MATCH_WORD_COUNT" type="int"
+            <property name="totalExactMatchWordCount" length="10"
+                column="TOTAL_EXACT_MATCH_WORD_COUNT" type="int"
                 not-null="false" unique="false" />
             <property name="hiFuzzyWordCount" length="10"
                 column="FUZZY_HI_WORD_COUNT" type="int" not-null="false"
@@ -123,10 +123,10 @@
             not-null="false" unique="false" />
         <many-to-one name="sourcePage" column="SOURCE_PAGE_ID"
             class="com.globalsight.everest.page.SourcePage"
-            not-null="true" />
+            not-null="true" lazy="false"/>
         <many-to-one name="workflowInstance"
             column="WORKFLOW_IFLOW_INSTANCE_ID"
             class="com.globalsight.everest.workflowmanager.WorkflowImpl"
-            not-null="false" />
+            not-null="false" lazy="false"/>
     </class>
 </hibernate-mapping>

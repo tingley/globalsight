@@ -122,6 +122,7 @@ public class ConnectionPool
             try
             {
                 p_statement.close();
+                p_statement = null;
             }
             catch (Exception e)
             {
@@ -140,6 +141,7 @@ public class ConnectionPool
             try
             {
                 p_resultSet.close();
+                p_resultSet = null;
             }
             catch (Exception e)
             {
@@ -222,6 +224,7 @@ public class ConnectionPool
                            pool.m_unallocatedConns.size() + " Used pool is " + 
                            pool.m_allocatedConns.size());
         }
+        
         c = pool._getConnection();
         if (CATEGORY.isDebugEnabled())
         {
@@ -744,6 +747,10 @@ public class ConnectionPool
         }
         else
         {
+        	CATEGORY.info("Soft connection limit (" + MAX_CONNECTIONS +
+                ") has been exceeded." +
+                "  Update the number of database connections in " +
+                PROPERTIES + ".properties.");
             // No more connections can be allocated. This is the soft
             // limit, the database server will have its own hard limit.
             throw new ConnectionPoolException(

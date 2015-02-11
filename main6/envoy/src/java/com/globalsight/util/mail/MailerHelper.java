@@ -16,6 +16,7 @@
  */
 package com.globalsight.util.mail;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +31,7 @@ import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.workflow.TaskEmailInfo;
+import com.globalsight.util.GlobalSightLocale;
 
 // Mail Help Class
 public class MailerHelper
@@ -44,19 +46,20 @@ public class MailerHelper
      */
     public static String getHTMLContext(String p_message)
     {
-        String result = "<html><head>" 
-                      + "<meta http-equiv=\"Content-Type\" " 
-                      +     "content=\"text/html; charset=UTF-8\">"
-                      + "<style type=\"text/css\">" 
-                      + "body {font-family: Arial, Helvetica, sans-serif; " 
-                      +     "font-size: 10pt; line-height: 15pt;}" 
-                      + ".classBold{font-weight:bold; font-size: 10.5pt;}" 
-                      + "</style>"
-                      + "</head><body>";
-        result += p_message.replace("\r\n", "<br/>").replace("\n", "<br/>");
-        result += "</body></html>";    
-    
-        return result;
+        StringBuffer result = new StringBuffer();
+        result.append("<html><head>")
+              .append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">")
+              .append("<style type=\"text/css\">")
+              .append("body {font-family: Arial, Helvetica, sans-serif; font-size: 10pt; line-height: 15pt;}")
+              .append(".classBold{font-weight:bold; font-size: 10.5pt;}")
+              .append("table { border-collapse: collapse; }")
+              .append("table, th, td {border: 1px solid black; padding:3px;}")
+              .append("</style>")
+              .append("</head><body>")
+              .append(p_message.replace("\r\n", "<br/>").replace("\n", "<br/>"))
+              .append("</body></html>");
+
+        return result.toString();
     }
     
     /**
@@ -279,5 +282,16 @@ public class MailerHelper
         {
             return "globalsight@domain.com";
         }
+    }
+    
+    public static String getLocalePair(GlobalSightLocale p_srcLocale,
+            GlobalSightLocale p_trgLocale, Locale p_uiLocale)
+    {
+        StringBuffer result = new StringBuffer();
+        result.append(p_srcLocale.getDisplayName(p_uiLocale));
+        result.append(" / ");
+        result.append(p_trgLocale.getDisplayName(p_uiLocale));
+
+        return result.toString();
     }
 }

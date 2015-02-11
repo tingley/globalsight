@@ -1274,4 +1274,12 @@ public class WordHtmlToTmx
 
         a.convertHtmlToTmx(argv[0]);
     }
+
+    @Override
+    public void handleSpecialChar(
+            com.globalsight.ling.docproc.extractor.html.HtmlObjects.Text t)
+    {
+        // TODO Auto-generated method stub
+        
+    }
 }

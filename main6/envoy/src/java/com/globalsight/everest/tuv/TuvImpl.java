@@ -32,16 +32,19 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.comment.IssueEditionRelation;
 import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.SegmentTuUtil;
+import com.globalsight.everest.persistence.tuv.SegmentTuvUtil;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
+import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
 import com.globalsight.ling.tm.LeverageMatchType;
-import com.globalsight.ling.tm.TuLing;
 import com.globalsight.ling.tm.TuvLing;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.GeneralException;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.edit.GxmlUtil;
@@ -59,14 +62,13 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    private static Logger c_category = Logger
-            .getLogger(TuvImpl.class);
+    private static Logger c_category = Logger.getLogger(TuvImpl.class);
 
     // TOPLink query names
     public static final String M_STATE = "m_state";
     public static final String M_GLOBAL_SIGHT_LOCALE = "m_globalSightLocale";
     public static final String M_TUV_ID = PersistentObject.M_ID;
-    static final String M_SOURCE_PAGE = "m_sourcePage";
+    public static final String M_SOURCE_PAGE = "m_sourcePage";
     public static final String M_TU = "m_tu";
     public static final String M_ORDER = "m_order";
     public static final String M_EXACT_MATCH_KEY = "m_exactMatchKey";
@@ -75,8 +77,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * TUV orders range from 1 - n. The default value is 0.
      */
     private long m_order = 0;
-    private GlobalSightLocale m_globalSightLocale = null;
-    private Tu m_tu = null;
 
     private Date m_lastModified = new Date();
     private String m_segmentClob = null;
@@ -88,7 +88,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private long m_exactMatchKey = 0;
     private String m_state = setState(TuvState.NOT_LOCALIZED);
     private String m_mergeState = NOT_MERGED;
-    private SourcePage m_sourcePage = null;
 
     private List m_subflowParents = null;
     private Boolean m_dummySubflowParentsLock = new Boolean(true);
@@ -99,8 +98,12 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private String m_lastModifiedUser = null;
     private String m_updatedByProject = null;
     private String sid = null;
-    private Set xliff_alt = null;
-    private Set issue_edition_relation = null;
+
+    private Tu m_tu = null;
+    private long tuId = 0;
+    private GlobalSightLocale m_globalSightLocale = null;
+    private Set<XliffAlt> xliff_alt = new HashSet<XliffAlt>();
+    private Set<IssueEditionRelation> issue_edition_relation = new HashSet<IssueEditionRelation>();
 
     /**
      * Holds the LeverageMatchType.
@@ -117,6 +120,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     {
         m_globalSightLocale = p_locale;
         m_tu = p_tu;
+        if (m_tu != null)
+        {
+            tuId = m_tu.getId();
+        }
     }
 
     /**
@@ -135,8 +142,13 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         m_exactMatchKey = p_other.m_exactMatchKey;
         m_state = p_other.m_state;
         m_mergeState = p_other.m_mergeState;
-        m_sourcePage = p_other.m_sourcePage;
+        // m_sourcePage = p_other.m_sourcePage;
+        tuId = p_other.tuId;
         m_tu = p_other.m_tu;
+        if (m_tu != null)
+        {
+            tuId = m_tu.getId();
+        }
         m_subflowParents = p_other.m_subflowParents;
         m_subflows = p_other.m_subflows;
         m_globalSightLocale = p_other.m_globalSightLocale;
@@ -150,6 +162,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         m_lastModifiedUser = p_other.m_lastModifiedUser;
         m_updatedByProject = p_other.m_updatedByProject;
         this.sid = p_other.sid;
+        this.srcComment = p_other.srcComment;
     }
 
     //
@@ -190,53 +203,59 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         catch (Throwable t)
         {
             c_category
-                    .info(
-                            "getGxmlExcludeTopTags(): TUV ID "
-                                    + getId()
-                                    + " has a segment string with the old format of an empty element.  It is being handled.  Segment string = `"
-                                    + getGxml() + "'.", t);
+                    .info("getGxmlExcludeTopTags(): TUV ID "
+                            + getId()
+                            + " has a segment string with the old format of an empty element.  It is being handled.  Segment string = `"
+                            + getGxml() + "'.", t);
 
             return getGxmlElement().toGxmlExcludeTopTags();
         }
     }
-    
+
     /*
-     * If xml attribute has "<" in it ,it will parse error. 
-     * This method replaces the attribute "<" into "&lt;"
+     * If xml attribute has "<" in it ,it will parse error. This method replaces
+     * the attribute "<" into "&lt;"
      */
-    public String encodeGxmlAttributeEntities(String segement) {
-        //this flag for recording the xml element begin.
+    public String encodeGxmlAttributeEntities(String segement)
+    {
+        // this flag for recording the xml element begin.
         boolean flagXML = false;
-        //this flag for recording the attribute begin, because if in "<  >", 
-        //and begin as double quote, it will be a attribute.
+        // this flag for recording the attribute begin, because if in "<  >",
+        // and begin as double quote, it will be a attribute.
         boolean flagQuote = false;
         StringBuffer sb = new StringBuffer();
-        
+
         for (int i = 0; i < segement.length(); i++)
         {
             char c = segement.charAt(i);
-            
-            if(!flagXML && !flagQuote && c == '<') {
+
+            if (!flagXML && !flagQuote && c == '<')
+            {
                 flagXML = true;
             }
-            else if(flagXML && !flagQuote && c == '"') {
+            else if (flagXML && !flagQuote && c == '"')
+            {
                 flagQuote = true;
             }
-            else  if(flagXML && !flagQuote && c == '>') {
+            else if (flagXML && !flagQuote && c == '>')
+            {
                 flagXML = false;
             }
-            else if(flagXML && flagQuote && c == '"') {
+            else if (flagXML && flagQuote && c == '"')
+            {
                 flagQuote = false;
             }
-            
-            if(flagXML && flagQuote && c == '<') {
+
+            if (flagXML && flagQuote && c == '<')
+            {
                 sb.append("&lt;");
             }
-            else {
+            else
+            {
                 sb.append(c);
             }
         }
-        
+
         return sb.toString();
     }
 
@@ -265,8 +284,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
                 c_category.error("Error in TuvImpl: " + toString(), e);
                 // Can't have Tuv in inconsistent state, throw runtime
                 // exception.
-                throw new RuntimeException("Error in TuvImpl: "
-                        + GeneralException.getStackTraceString(e));
+                throw new RuntimeException("Error in TuvImpl: ", e);
             }
             finally
             {
@@ -311,8 +329,9 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return Tuv DataType.
      */
-    public String getDataType()
+    public String getDataType(String companyId)
     {
+        loadTu(companyId);
         return m_tu == null ? null : m_tu.getDataType();
     }
 
@@ -324,6 +343,19 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     public long getLocaleId()
     {
         return m_globalSightLocale == null ? 0 : m_globalSightLocale.getId();
+    }
+
+    public void setLocaleId(long localeId)
+    {
+        try
+        {
+            m_globalSightLocale = ServerProxy.getLocaleManager().getLocaleById(
+                    localeId);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -423,13 +455,14 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 
     public List getSubflowsAsGxmlElements(boolean fromPage)
     {
-        if(m_subflows == null)
+        if (m_subflows == null)
         {
             m_subflows = getGxmlElement().getDescendantElements(
                     GxmlElement.SUB_TYPE, fromPage);
         }
         return m_subflows;
     }
+
     /**
      * Get a subflow element by subflowId.
      * 
@@ -522,7 +555,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      */
     public void setSubflowsGxml(Map p_map)
     {
-        if (p_map.size() == 0) { return; }
+        if (p_map.size() == 0)
+        {
+            return;
+        }
 
         Set keys = p_map.keySet();
         Iterator it = keys.iterator();
@@ -569,8 +605,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
 
             // Throw unchecked exception so clients don't have to
             // catch rare case.
-            throw new RuntimeException("Error in Tuv: "
-                    + GeneralException.getStackTraceString(e));
+            throw new RuntimeException("Error in Tuv: ", e);
         }
         finally
         {
@@ -610,8 +645,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
                     + toString(), e);
             // Throw unchecked exception so clients don't have to
             // catch rare case.
-            throw new RuntimeException("Error in Tuv: "
-                    + GeneralException.getStackTraceString(e));
+            throw new RuntimeException("Error in Tuv: ", e);
         }
         finally
         {
@@ -647,8 +681,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
             c_category.error("p_gxml=" + p_gxml + " " + toString(), e);
             // Throw unchecked exception so clients don't have to
             // catch rare case.
-            throw new RuntimeException("Error in Tuv: "
-                    + GeneralException.getStackTraceString(e));
+            throw new RuntimeException("Error in Tuv: ", e);
         }
         finally
         {
@@ -664,9 +697,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml)
+    public void setGxmlExcludeTopTagsIgnoreSubflows(String p_gxml,
+            String companyId)
     {
-        setGxmlIgnoreSubflows(addTopTags(p_gxml));
+        setGxmlIgnoreSubflows(addTopTags(p_gxml, companyId));
     }
 
     /**
@@ -708,9 +742,9 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * @param p_gxml
      *            Gxml String.
      */
-    public void setGxmlExcludeTopTags(String p_gxml)
+    public void setGxmlExcludeTopTags(String p_gxml, String companyId)
     {
-        setGxml(addTopTags(p_gxml));
+        setGxml(addTopTags(p_gxml, companyId));
     }
 
     /**
@@ -718,20 +752,35 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return The Tu that this tuv belongs to.
      */
-    public Tu getTu()
+    public Tu getTu(String companyId)
     {
+        loadTu(companyId);
         return m_tu;
     }
 
     /**
      * Set the Tu that this tuv belongs to.
      * 
-     * @param p_tu -
-     *            The Tu to be set.
+     * @param p_tu
+     *            - The Tu to be set.
      */
     public void setTu(Tu p_tu)
     {
         m_tu = p_tu;
+        if (p_tu != null & p_tu.getId() > 0)
+        {
+            this.tuId = p_tu.getId();
+        }
+    }
+
+    public void setTuId(long p_tuId)
+    {
+        this.tuId = p_tuId;
+    }
+
+    public long getTuId()
+    {
+        return this.tuId;
     }
 
     /**
@@ -752,24 +801,24 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
      *         EXACT_MATCH_LOCALIZED
      */
-    public boolean isExactMatchLocalized()
+    public boolean isExactMatchLocalized(String companyId)
     {
-        if ("Xliff".equals(getLastModifiedUser()))
+        if ("Xliff".equalsIgnoreCase(getLastModifiedUser()))
         {
-            TuImpl tu = (TuImpl)getTu(); 
+            TuImpl tu = (TuImpl) getTu(companyId);
             if (tu != null && tu.isXliffLocked())
             {
                 return true;
             }
         }
-        
+
         // For PO file, if the last modified user is not changed since job is
         // created, that indicates the target is from PO "msgstr".
         if ("PO".equalsIgnoreCase(getLastModifiedUser()))
         {
             return true;
         }
-        
+
         return (m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
                 .getName()) || m_state.equals(TuvState.EXACT_MATCH_LOCALIZED
                 .getName()));
@@ -851,9 +900,9 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return true if localizable, false if translatable
      */
-    public boolean isLocalizable()
+    public boolean isLocalizable(String companyId)
     {
-        Tu tu = getTu();
+        Tu tu = getTu(companyId);
         return (tu != null && tu.isLocalizable());
     }
 
@@ -867,22 +916,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     public GlobalSightLocale getGlobalSightLocale()
     {
         return m_globalSightLocale;
-    }
-
-    /**
-     * @see com.globalsight.ling.tm.TuvLing#getState()
-     */
-    // public long getState()
-    // {
-    // return stateName2StateId(m_state);
-    // }
-
-    /**
-     * @see com.globalsight.ling.tm.TuvLing#getLocType()
-     */
-    public long getLocType()
-    {
-        return m_tu.isLocalizable() ? LOCALIZABLE : TRANSLATABLE;
     }
 
     /**
@@ -902,14 +935,6 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     }
 
     /**
-     * @see com.globalsight.ling.tm.TuvLing#getTuLing()
-     */
-    public TuLing getTuLing()
-    {
-        return m_tu;
-    }
-
-    /**
      * @see com.globalsight.ling.tm.TuvLing#isCompleted()
      */
     public boolean isCompleted()
@@ -918,7 +943,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
                 || m_state.equals(TuvState.EXACT_MATCH_LOCALIZED.getName())
                 || m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED
                         .getName())
-                || m_state.equals(TuvState.ALIGNMENT_LOCALIZED.getName())) { return true; }
+                || m_state.equals(TuvState.ALIGNMENT_LOCALIZED.getName()))
+        {
+            return true;
+        }
 
         return false;
     }
@@ -956,8 +984,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * 
      * @return a string representation of the object.
      */
-    public String toString()
+    public String toString(String companyId)
     {
+        loadTu(companyId);
+
         StringBuffer sb = new StringBuffer();
         sb.append(super.toString());
         sb.append(", (m_segmentString=");
@@ -1023,10 +1053,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * @param p_sourcePage
      *            SourcePage.
      */
-    public void setSourcePage(SourcePage p_sourcePage)
-    {
-        m_sourcePage = p_sourcePage;
-    }
+    // public void setSourcePage(SourcePage p_sourcePage)
+    // {
+    // m_sourcePage = p_sourcePage;
+    // }
 
     public String setState(TuvState p_state)
     {
@@ -1172,7 +1202,10 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     private static GxmlElement replaceSubs(Collection p_subs,
             GxmlElement p_gxmlElement)
     {
-        if (p_subs == null || p_subs.isEmpty()) { return p_gxmlElement; }
+        if (p_subs == null || p_subs.isEmpty())
+        {
+            return p_gxmlElement;
+        }
 
         Collection orderedList = p_subs;
         if (p_subs.size() > 1)
@@ -1201,7 +1234,7 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
                                 + ((id == null || id.length() <= 0) ? "null"
                                         : id) + " in "
                                 + p_gxmlElement.toString());
-                c_category.error(re, re);
+                c_category.error(re.getMessage(), re);
                 throw re;
             }
 
@@ -1247,11 +1280,11 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
      * them. @param a Gxml string that is missing the top level tags. @return a
      * Gxml string with top level tags.
      */
-    private String addTopTags(String p_gxml)
+    private String addTopTags(String p_gxml, String companyId)
     {
         String elementName = GxmlNames.SEGMENT;
 
-        if (getTu().isLocalizable())
+        if (getTu(companyId).isLocalizable())
         {
             elementName = GxmlNames.LOCALIZABLE;
         }
@@ -1331,39 +1364,54 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
     {
         this.sid = sid;
     }
-    
+
     /**
      * Gets referenced target page.
      * 
      * @return TargetPage
      */
-    public TargetPage getTargetPage()
+    public TargetPage getTargetPage(String companyId)
     {
-        String sql = " select tp.* from TRANSLATION_UNIT_VARIANT tuv, "
-                + "TRANSLATION_UNIT tu,TARGET_PAGE_LEVERAGE_GROUP tplg, "
-                + "WORKFLOW w, TARGET_PAGE tp where tuv.id = ? "
-                + "and tuv.TU_ID = tu.id "
-                + "and tu.LEVERAGE_GROUP_ID = tplg.LG_ID "
-                + "and tplg.TP_ID = tp.id "
-                + "and tp.WORKFLOW_IFLOW_INSTANCE_ID = w.IFLOW_INSTANCE_ID "
-                + "and tuv.STATE != 'OUT_OF_DATE' "
-                + "and w.TARGET_LOCALE_ID = tuv.LOCALE_ID";
+        String sql = "SELECT tp.* FROM "
+                + TuvQueryConstants.TUV_TABLE_PLACEHOLDER
+                + " tuv, "
+                + TuvQueryConstants.TU_TABLE_PLACEHOLDER
+                + " tu, "
+                + "target_page_leverage_group tplg, target_page tp, workflow w "
+                + "WHERE w.target_locale_id = tuv.locale_id "
+                + "AND tp.workflow_iflow_instance_id = w.iflow_instance_id "
+                + "AND tplg.tp_id = tp.id "
+                + "AND tu.leverage_group_id = tplg.lg_id "
+                + "AND tuv.tu_id = tu.id " + "AND tuv.ID = ? ";
 
-        List<TargetPage> tPages = HibernateUtil.searchWithSql(TargetPage.class,
-                sql, getId());
-        if (tPages.size() == 0)
+        try
         {
-            return null;
+            sql = sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                    SegmentTuTuvCacheManager.getTuvTableName(companyId));
+            sql = sql.replace(TuvQueryConstants.TU_TABLE_PLACEHOLDER,
+                    SegmentTuTuvCacheManager.getTuTableName(companyId));
+
+            List<TargetPage> tPages = HibernateUtil.searchWithSql(
+                    TargetPage.class, sql, getId());
+            if (tPages.size() > 0)
+            {
+                return tPages.get(0);
+            }
+        }
+        catch (Exception e)
+        {
+            c_category.error(e.getMessage(), e);
         }
 
-        return tPages.get(0);
+        return null;
     }
-    
+
     /**
      * Gets referenced comment.
      * 
      * @return IssueImpl
      */
+    @SuppressWarnings("unchecked")
     public IssueImpl getComment()
     {
         String hql = "from IssueImpl i where "
@@ -1376,35 +1424,76 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
         IssueImpl issue = (IssueImpl) HibernateUtil.getFirst(hql, map);
         return issue;
     }
-    
+
     public void addXliffAlt(XliffAlt alt)
     {
         if (alt == null)
             return;
-        
-        alt.setTuv(this);
-        
-        if (xliff_alt == null)
-        {
-            xliff_alt = new HashSet();
-        }
-        
+
         xliff_alt.add(alt);
+        alt.setTuv(this);
     }
-    
-    public Set getXliffAlt() {
-        return this.xliff_alt;
+
+    /**
+     * @param p_loadDataFromDB
+     *            -- if current Tuv has been persisted in DB,this should be
+     *            true;if it is creating job, false.
+     */
+    public Set<XliffAlt> getXliffAlt(boolean p_loadDataFromDB)
+    {
+        if (p_loadDataFromDB)
+        {
+            // Ensure xliffAlt data is loaded if current Tuv has.
+            SegmentTuvUtil.loadXliffAlt(this);
+        }
+
+        return xliff_alt;
     }
-    
-    public void setXliffAlt(Set p_alt) {
+
+    @SuppressWarnings("unchecked")
+    public void setXliffAlt(Set p_alt)
+    {
         this.xliff_alt = p_alt;
     }
-    
-    public Set getIssueEditionRelation() {
+
+    public Set<IssueEditionRelation> getIssueEditionRelation()
+    {
         return this.issue_edition_relation;
     }
-    
-    public void setIssueEditionRelation(Set p_issue_edition) {
+
+    public void setIssueEditionRelation(
+            Set<IssueEditionRelation> p_issue_edition)
+    {
         this.issue_edition_relation = p_issue_edition;
+    }
+
+    private String srcComment = null;
+
+    public String getSrcComment()
+    {
+        return srcComment;
+    }
+
+    public void setSrcComment(String srcComment)
+    {
+        this.srcComment = srcComment;
+    }
+
+    private void loadTu(String companyId)
+    {
+        if (m_tu == null && tuId > 0)
+        {
+            try
+            {
+                // Ideally this should not be executed for ever.If this
+                // happens,system should load all TUs of current page in advance
+                // to avoid looping Tuvs.
+                m_tu = SegmentTuUtil.getTuById(tuId, companyId);
+            }
+            catch (Exception e)
+            {
+                c_category.error(e.getMessage(), e);
+            }
+        }
     }
 }

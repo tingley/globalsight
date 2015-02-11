@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2">
+<file original="Welocalize_Company.txt"  source-language="en_US"  target-language="de_DE"  datatype="plaintext">
+<header>
+<note>
+# GlobalSight Download File
+# User name:3veritestTrn
+# Accept time:08/21/2009 17:00:00
+# Encoding:UTF-8
+# Document Format:plaintext
+# Placeholder Format:PTAG-COMPACT
+# Source Locale:en_US
+# Target Locale:de_DE
+# Page ID:19405
+# Workflow ID:2996
+# Task ID:28541
+# Exact Match word count:125
+# Fuzzy Match word count:160
+# No Match word count:58
+# Edit all:No
+</note>
+</header>
+<body>
+<trans-unit id="2875881" translate="yes" state="new">
+<source>Sample Document</source>
+<target>Sample Document</target>
+</trans-unit>
+<trans-unit id="2875882" translate="yes" state="needs-review-translation">
+<source>Welocalize Welocalize - About Us 1 1</source>
+<target>Welocalize Welocalize - About Us 1 1</target>
+<alt-trans match-quality="80">
+<source>Welocalize Welocalize - About Us 1 1</source>
+<target>Welocalize - Über uns</target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875883" translate="yes" state="new">
+<source>Testing</source>
+<target>Testing</target>
+</trans-unit>
+<trans-unit id="2875884" translate="yes" state="new">
+<source>Testing</source>
+<target>Testing</target>
+</trans-unit>
+<trans-unit id="2875885" translate="yes" state="new">
+<source>Hehe we are chinese.</source>
+<target>Hehe we are chinese.</target>
+</trans-unit>
+<trans-unit id="2875886" translate="yes" state="needs-review-translation">
+<source>Welocalize founded in 1997, and is a privately held,  and is a privately held,venture backed company 2 2. </source>
+<target>Welocalize founded in 1997, and is a privately held,  and is a privately held,venture backed company 2 2. </target>
+<alt-trans match-quality="89">
+<source>Welocalize founded in 1997, and is a privately held,  and is a privately held,venture backed company 2 2. </source>
+<target>Welocalize wurde 1997 gegründet und ist ein durch Investitionskapital gestütztes privates Unternehmen. </target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875887" translate="yes" state="needs-review-translation">
+<source>We Welocalize have over 400 staff members in 12 offices located in the USA, USA, Ireland, Germany, The Netherlands, China Ireland, Germany, The Netherlands, China and Japan 3 3. </source>
+<target>We Welocalize have over 400 staff members in 12 offices located in the USA, USA, Ireland, Germany, The Netherlands, China Ireland, Germany, The Netherlands, China and Japan 3 3. </target>
+<alt-trans match-quality="80">
+<source>We Welocalize have over 400 staff members in 12 offices located in the USA, USA, Ireland, Germany, The Netherlands, China Ireland, Germany, The Netherlands, China and Japan 3 3. </source>
+<target>Wir beschäftigen mehr als 400 Mitarbeiter in unseren zwölf Niederlassungen in den USA, Irland, Deutschland, den Niederlanden, China und Japan. </target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875888" translate="yes" state="needs-review-translation">
+<source>Welocalize For the past eight years running, Deloitte &amp; Touche has ranked Welocalize as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. </source>
+<target>Welocalize For the past eight years running, Deloitte &amp; Touche has ranked Welocalize as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. </target>
+<alt-trans match-quality="95">
+<source>Welocalize For the past eight years running, Deloitte &amp; Touche has ranked Welocalize as one of the fastest growing technology companies in North America in their annual Maryland Technology Fast 50 ranking ing. </source>
+<target>In den vergangenen sieben Jahren wurde Welocalize von Deloitte &amp; Touche in deren jährlichem Ranking (Maryland Technology Fast 50) ununterbrochen als eines der am schnellsten wachsenden Unternehmen in Nordamerika geführt. </target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875889" translate="yes" state="needs-review-translation">
+<source>In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC 500 list of fastest growing private companies in the US companies in the companies in the US 5.</source>
+<target>In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC 500 list of fastest growing private companies in the US companies in the companies in the US 5.</target>
+<alt-trans match-quality="91">
+<source>In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC 500 list of fastest growing private companies in the US companies in the companies in the US 5.</source>
+<target>In den Jahren 2005, 2006, 2007 und 2008 hat sich Welocalize durchgehend einen Platz auf der INC. 500-Liste der am schnellsten wachsenden Privatunternehmen der USA erarbeitet.</target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875890" translate="yes" state="new">
+<source>In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC list of fastest growing private companies 500 list of fastest growing private companies list of fastest growing private companies in the US companies in the companies in the US 5.</source>
+<target>In 2005, 2006, 2007 and 2008 Welocalize earned a place on the INC list of fastest growing private companies 500 list of fastest growing private companies list of fastest growing private companies in the US companies in the companies in the US 5.</target>
+</trans-unit>
+<trans-unit id="2875891" translate="no" state="translate">
+<source>Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications. </source>
+<target>Unser Leistungsangebot umfasst unter anderem Globalization Consulting, die Übersetzung, Lokalisierung und das Testen von Software-, Multimedia- und Schulungsmaterialien und -systemen sowie mobilen Anwendungen. </target>
+<alt-trans match-quality="100">
+<source>Our services include globalization consulting, translation, localization, and testing solutions for business materials and systems including software, multimedia, learning services, and mobile applications. </source>
+<target>Unser Leistungsangebot umfasst unter anderem Globalization Consulting, die Übersetzung, Lokalisierung und das Testen von Software-, Multimedia- und Schulungsmaterialien und -systemen sowie mobilen Anwendungen. </target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875892" translate="no" state="final">
+<source>Welocalize specializes in the Enterprise Applications, eLearning, Life Sciences, and Media &amp; Telecommunications industries.</source>
+<target>Unser Schwerpunkt liegt hierbei auf den Bereichen Unternehmensanwendungen, e-Learning, Life Sciences sowie Multimedia &amp; Telekommunikation.</target>
+<alt-trans match-quality="100">
+<source>Welocalize specializes in the Enterprise Applications, eLearning, Life Sciences, and Media &amp; Telecommunications industries.</source>
+<target>Unser Schwerpunkt liegt hierbei auf den Bereichen Unternehmensanwendungen, e-Learning, Life Sciences sowie Multimedia &amp; Telekommunikation.</target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875893" translate="no" state="final">
+<source>We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results. </source>
+<target>In Zusammenarbeit mit unseren Kunden entwickeln wir für deren weltweite Expansion einen Rahmenplan und eine Methodik, die messbare und vorhersehbare Ergebnisse liefern. </target>
+<alt-trans match-quality="100">
+<source>We work with our clients to create a framework and methodology for expanding globally that produce scalable, predictable results. </source>
+<target>In Zusammenarbeit mit unseren Kunden entwickeln wir für deren weltweite Expansion einen Rahmenplan und eine Methodik, die messbare und vorhersehbare Ergebnisse liefern. </target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875894" translate="no" state="final">
+<source>With the integration of our product and service family into the development environment, our clients are able to achieve much faster international time-to-market.</source>
+<target>Durch die Integration unserer Produkt- und Leistungsangebote in den Entwicklungsprozess können unsere Kunden internationale Märkte viel schneller erobern.</target>
+<alt-trans match-quality="100">
+<source>With the integration of our product and service family into the development environment, our clients are able to achieve much faster international time-to-market.</source>
+<target>Durch die Integration unserer Produkt- und Leistungsangebote in den Entwicklungsprozess können unsere Kunden internationale Märkte viel schneller erobern.</target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875895" translate="no" state="translate">
+<source>Welocalize also offers the unique, open-source Translation Management System - GlobalSight.</source>
+<target>Welocalize bietet darüber hinaus das einzigartige Open-Source-Translation-Management-System GlobalSight an.</target>
+<alt-trans match-quality="100">
+<source>Welocalize also offers the unique, open-source Translation Management System - GlobalSight.</source>
+<target>Welocalize bietet darüber hinaus das einzigartige Open-Source-Translation-Management-System GlobalSight an.</target>
+</alt-trans>
+</trans-unit>
+<trans-unit id="2875896" translate="yes" state="new">
+<source>About GlobalSight:</source>
+<target>About GlobalSight:</target>
+</trans-unit>
+<trans-unit id="2875897" translate="yes" state="new">
+<source>GlobalSight is a collaborative, open source initiative to develop a flexible and sustainable Translation Management System (TMS) that leverages the best ideas and addresses the true needs of the industry.  </source>
+<target>GlobalSight is a collaborative, open source initiative to develop a flexible and sustainable Translation Management System (TMS) that leverages the best ideas and addresses the true needs of the industry.  </target>
+</trans-unit>
+<trans-unit id="2875898" translate="yes" state="new">
+<source>GlobalSight embraces an ecosystem of enterprise clients, translators, language service providers, technology suppliers, universities, research institutions and individuals alike!</source>
+<target>GlobalSight embraces an ecosystem of enterprise clients, translators, language service providers, technology suppliers, universities, research institutions and individuals alike!</target>
+</trans-unit>
+</body>
+</file>
+</xliff>

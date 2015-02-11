@@ -366,7 +366,7 @@ public class TmReportReplet extends GlobalSightReplet
             singleRowDataList.add(isInContextMatch);
             //NO_USE_IC_MATCH_WORD_COUNT
             singleRowDataList.add(new Integer(rs.getInt(2)));
-            //NO_USE_EXACT_MATCH_WORD_COUNT
+            //TOTAL_EXACT_MATCH_WORD_COUNT
             singleRowDataList.add(new Integer(rs.getInt(3)));
             
             allRowsDataList.add(singleRowDataList);
@@ -379,7 +379,7 @@ public class TmReportReplet extends GlobalSightReplet
         m_jobSelect.append("SELECT");
         m_jobSelect.append(" job.id as \"JobId\",");
         m_jobSelect.append(" target_page.NO_USE_IC_MATCH_WORD_COUNT as \"").append("NOUSEINCONTEXT").append("\",");
-        m_jobSelect.append(" target_page.NO_USE_EXACT_MATCH_WORD_COUNT as \"").append("NOUSEEXACT").append("\" ");
+        m_jobSelect.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"").append("NOUSEEXACT").append("\" ");
     }
     
     private void makeJobQuery(){
@@ -436,7 +436,7 @@ public class TmReportReplet extends GlobalSightReplet
         String contexttm = this.commonBundle.getString("lb_context_tm");
         String exact = this.commonBundle.getString("lb_100");
         m_select.append(" target_page.EXACT_CONTEXT_WORD_COUNT as \"").append(contexttm).append("\",");
-        m_select.append(" target_page.NO_USE_EXACT_MATCH_WORD_COUNT as \"").append(exact).append("\",");
+        m_select.append(" target_page.TOTAL_EXACT_MATCH_WORD_COUNT as \"").append(exact).append("\",");
 //      String inContexttm = this.commonBundle.getString("lb_in_context_tm");
 //      m_select.append(" target_page.IN_CONTEXT_MATCH_WORD_COUNT as \"").append(inContexttm).append("\",");
         String nomatchrep = this.commonBundle.getString("lb_no_match_repetition");

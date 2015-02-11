@@ -1,0 +1,66 @@
+/*--------------------------------------------------|
+| dTree 2.05 | www.destroydrop.com/javascript/tree/ |
+|---------------------------------------------------|
+| Copyright (c) 2002-2003 Geir Landr?              |
+|--------------------------------------------------*/
+
+.dtree {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size:10pt;
+	white-space: nowrap;
+}
+.dtree img {
+	border: 0px;
+	vertical-align: top;
+}
+.dtree a {
+	color: #333;
+	text-decoration: none;
+}
+.dtree a.node, .dtree a.nodeSel {
+	white-space: nowrap;
+	padding: 1px 2px 1px 2px;
+}
+.dtree a.node:hover, .dtree a.nodeSel:hover {
+	color: #333;
+	text-decoration: underline;
+}
+.dtree a.nodeSel {
+	background-color: #c0d2ec;
+}
+.dtree .clip {
+	overflow: hidden;
+}
+.dtree .cx {
+	padding:0px; 
+	margin:0px;
+	width:16px;
+	height:12px;
+}
+.button_over {
+	border: 0px solid;
+	padding: 0px;
+	font-size: 12px; 
+	cursor: pointer; 
+	height:20px;
+	width:50px;
+	background-repeat:no-repeat;
+	background-color:#999999;
+	background-position:center;
+	-webkit-box-shadow:1px 1px 3px #292929;
+	-moz-box-shadow:1px 1px 3px #292929;
+	box-shadow:1px 1px 3px #292929;
+	margin-left:1px;
+}
+.button_out {
+	border: 0px solid;
+	padding: 0px;
+	font-size: 12px; 
+	cursor: pointer; 
+	height:20px;
+	width:50px;
+	background-repeat:no-repeat;
+	background-color:#738eb5;
+	background-position:center;
+	margin-left:1px;
+}

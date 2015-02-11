@@ -28,6 +28,8 @@ import com.globalsight.everest.page.SourcePage;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 import java.rmi.RemoteException;
 
 public final class TermLeverageManagerWLImpl extends RemoteServer implements
@@ -85,5 +87,13 @@ public final class TermLeverageManagerWLImpl extends RemoteServer implements
     {
         return m_termLeverageManagerLocal.getTermMatchesForSegment(p_srcTuvId,
                 p_subId, p_targetPageLocale);
+    }
+    
+    public Map<Long, Set<TermLeverageMatch>> getTermMatchesForPages(
+            Set<SourcePage> p_sourcePages, GlobalSightLocale p_targetPageLocale)
+            throws GeneralException, RemoteException
+    {
+        return m_termLeverageManagerLocal.getTermMatchesForPages(p_sourcePages,
+                p_targetPageLocale);
     }
 }

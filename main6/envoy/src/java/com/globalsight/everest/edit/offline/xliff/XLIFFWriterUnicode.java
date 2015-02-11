@@ -78,8 +78,8 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
     protected abstract void writeXlfDocHeader(DownloadParams p_downloadParams)
             throws IOException, AmbassadorDwUpException;
 
-    protected abstract void writeXlfDocBody(boolean isTmx, boolean editAll)
-            throws AmbassadorDwUpException;
+    protected abstract void writeXlfDocBody(boolean isTmx, boolean editAll,
+            DownloadParams p_downloadParams) throws AmbassadorDwUpException;
 
     protected void setOfflinePageData(OfflinePageData p_page, Locale p_uiLocale)
     {
@@ -141,7 +141,7 @@ public abstract class XLIFFWriterUnicode extends XLIFFUnicode implements
         setDefaults();
         writeXlfHeader();
         writeXlfDocHeader(p_downloadParams);
-        writeXlfDocBody(isTmx, editAll);
+        writeXlfDocBody(isTmx, editAll, p_downloadParams);
         writeXlfEnd();
     }
 

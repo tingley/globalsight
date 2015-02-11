@@ -68,7 +68,8 @@ public class UploadFilesDialog extends JDialog
     public void show()
     {
         startAmimate();
-        if (isInstallParameters) commitJob();
+        if (isInstallParameters)
+            commitJob();
         super.show();
     }
 
@@ -240,7 +241,7 @@ public class UploadFilesDialog extends JDialog
                 List fileList = new ArrayList();
                 Enumeration files = m_files.elements();
                 double totalFileSize = 0;
-                while (files != null && files.hasMoreElements() )
+                while (files != null && files.hasMoreElements())
                 {
                     File file = (File) files.nextElement();
                     totalFileSize += file.length();
@@ -259,18 +260,26 @@ public class UploadFilesDialog extends JDialog
                 // copy job name
                 String tempjobName = m_jobName;
 
-                //create job via "max file size"
-                if ( m_jobCreateOption != null && m_jobCreateOption.equals(Constants.JOB_CREATE_OPTION_MAX_FILE_SIZE))
+                // create job via "max file size"
+                if (m_jobCreateOption != null
+                        && m_jobCreateOption
+                                .equals(Constants.JOB_CREATE_OPTION_MAX_FILE_SIZE))
                 {
-                    //get maxJobFileSize in bytes
+                    // get maxJobFileSize in bytes
                     double maxJobFileSizeInBytes = totalFileSize + 1024;
                     boolean ifSortJob = true;
-                    try {
-                        maxJobFileSizeInBytes = ((new Double(m_jobFileNumOrSize)).doubleValue()+1)*1024;
-                        if (maxJobFileSizeInBytes > totalFileSize) {
+                    try
+                    {
+                        maxJobFileSizeInBytes = ((new Double(m_jobFileNumOrSize))
+                                .doubleValue() + 1) * 1024;
+                        if (maxJobFileSizeInBytes > totalFileSize)
+                        {
                             ifSortJob = false;
                         }
-                    } catch (Exception e) {}
+                    }
+                    catch (Exception e)
+                    {
+                    }
 
                     // commit job in loop
                     m_files.removeAllElements();
@@ -278,7 +287,7 @@ public class UploadFilesDialog extends JDialog
                     double totalSize = 0;
                     int jobNumber = 0;
 
-                    for (int k=0; k<fileList.size(); k++)
+                    for (int k = 0; k < fileList.size(); k++)
                     {
                         File file = (File) fileList.get(k);
                         m_files.addElement(file);
@@ -290,7 +299,8 @@ public class UploadFilesDialog extends JDialog
                         {
                             if (m_files.size() <= 1)
                             {
-                                if (ifSortJob) {
+                                if (ifSortJob)
+                                {
                                     jobNumber++;
                                     m_jobName = tempjobName + "_" + jobNumber;
                                 }
@@ -304,7 +314,8 @@ public class UploadFilesDialog extends JDialog
                             {
                                 m_files.removeElement(file);
                                 m_fps.removeElement(fp);
-                                if (ifSortJob) {
+                                if (ifSortJob)
+                                {
                                     jobNumber++;
                                     m_jobName = tempjobName + "_" + jobNumber;
                                 }
@@ -319,7 +330,8 @@ public class UploadFilesDialog extends JDialog
                     }
                     if (m_files.size() > 0)
                     {
-                        if (ifSortJob) {
+                        if (ifSortJob)
+                        {
                             jobNumber++;
                             m_jobName = tempjobName + "_" + jobNumber;
                         }
@@ -330,17 +342,22 @@ public class UploadFilesDialog extends JDialog
                 }
                 else
                 {
-                    //get maxJobFileNum
+                    // get maxJobFileNum
                     int maxJobFileNum = m_files.getSize();
                     boolean ifSortJob = true;
-                    try {
-                        maxJobFileNum = (new Integer(m_jobFileNumOrSize)).intValue();
+                    try
+                    {
+                        maxJobFileNum = (new Integer(m_jobFileNumOrSize))
+                                .intValue();
                         if (maxJobFileNum >= m_files.getSize())
                         {
                             maxJobFileNum = m_files.getSize();
                             ifSortJob = false;
                         }
-                    } catch (Exception e) {}
+                    }
+                    catch (Exception e)
+                    {
+                    }
 
                     // commit job in loop
                     m_files.removeAllElements();
@@ -348,16 +365,17 @@ public class UploadFilesDialog extends JDialog
                     int cnt = 0;
                     int jobNumber = 0;
 
-                    for (int k=0; k<fileList.size(); k++)
+                    for (int k = 0; k < fileList.size(); k++)
                     {
                         File file = (File) fileList.get(k);
                         FileProfile fp = (FileProfile) fpList.get(k);
                         m_files.addElement(file);
                         m_fps.addElement(fp);
                         cnt++;
-                        if ( cnt >= maxJobFileNum )
+                        if (cnt >= maxJobFileNum)
                         {
-                            if (ifSortJob) {
+                            if (ifSortJob)
+                            {
                                 jobNumber++;
                                 m_jobName = tempjobName + "_" + jobNumber;
                             }
@@ -367,8 +385,10 @@ public class UploadFilesDialog extends JDialog
                             cnt = 0;
                         }
                     }
-                    if (m_files.size() > 0) {
-                        if (ifSortJob) {
+                    if (m_files.size() > 0)
+                    {
+                        if (ifSortJob)
+                        {
                             jobNumber++;
                             m_jobName = tempjobName + "_" + jobNumber;
                         }
@@ -403,7 +423,7 @@ public class UploadFilesDialog extends JDialog
                 setHiddenAble(true);
             }
 
-            //Commit single job
+            // Commit single job
             private void commitSingleJob()
             {
                 // Reads parameters.
@@ -426,6 +446,7 @@ public class UploadFilesDialog extends JDialog
                 Vector fileProfileIds = new Vector();
                 Vector targetLocales = new Vector();
                 HashMap<String, String> moduleMappingIds = new HashMap<String, String>();
+                String jobId = null;
 
                 try
                 {
@@ -438,7 +459,8 @@ public class UploadFilesDialog extends JDialog
                         // Adds filePath.
                         File file = (File) e_fs.nextElement();
                         String path = file.getAbsolutePath();
-                        String filePath = path.substring(path.indexOf(File.separator) + 1);
+                        String filePath = path.substring(path
+                                .indexOf(File.separator) + 1);
                         filePaths.add(filePath);
 
                         // Adds FileProfile id.
@@ -452,14 +474,17 @@ public class UploadFilesDialog extends JDialog
 
                         // Upload the file to service.
                         startAddFileMsg(file.getAbsolutePath());
-                        createJobAction.uploadFile(file, jobName, fp.getId());
-                        endAddFileMsg(file.getAbsolutePath(), jobName, "successfully");
+                        jobId = createJobAction.uploadFile(file, jobName,
+                                fp.getId(), jobId, m_priority);
+                        endAddFileMsg(file.getAbsolutePath(), jobName,
+                                "successfully");
 
                         // Changes progress bar.
                         int oriV = jProgressBar.getValue();
                         int max = jProgressBar.getMaximum();
                         int newV = oriV + max / stepCount;
-                        if (newV > max) newV = max;
+                        if (newV > max)
+                            newV = max;
                         jProgressBar.setValue(newV);
                     }
 
@@ -471,7 +496,7 @@ public class UploadFilesDialog extends JDialog
                     // in CXE folder, And upload the attached file to the folder
                     // named with the job name in the same folder
                     boolean isAddCommentOk = true;
-                    if (comment.length() > 0 || m_attachFile.length() > 0 )
+                    if (comment.length() > 0 || m_attachFile.length() > 0)
                     {
                         try
                         {
@@ -479,9 +504,8 @@ public class UploadFilesDialog extends JDialog
                                     + jobName);
                             AddCommentAction commentAction = new AddCommentAction();
                             boolean result = commentAction
-                                    .executeWithThread(new String[] {
-                                            jobName, m_commentText,
-                                            m_attachFile });
+                                    .executeWithThread(new String[]
+                                    { jobName, m_commentText, m_attachFile });
                             commitFile = "Adding comment";
                             if (!result)
                             {
@@ -497,14 +521,14 @@ public class UploadFilesDialog extends JDialog
                             isJobCommentAddedOK = false;
 
                             addMsg("Added comment unsuccessfully.");
-                            log.error("Can not add comment to job "
-                                    + jobName + " with Exception " + e);
+                            log.error("Can not add comment to job " + jobName
+                                    + " with Exception " + e);
                         }
                     }
 
                     // Creates the job.
                     HashMap map = new HashMap();
-                    map.put("jobName", jobName);
+                    map.put("jobId", jobId);
                     map.put("comment", comment);
                     map.put("filePaths", filePaths);
                     map.put("fileProfileIds", fileProfileIds);
@@ -568,7 +592,8 @@ public class UploadFilesDialog extends JDialog
                 {
                     String targetLocale = importedTagetLocales[i];
                     sb.append(targetLocale);
-                    if (i != len - 1) sb.append(",");
+                    if (i != len - 1)
+                        sb.append(",");
                 }
 
                 return sb.toString();
@@ -693,7 +718,8 @@ public class UploadFilesDialog extends JDialog
 
                     jLabelMsg.setText(text);
 
-                    if (++i > size) i = 0;
+                    if (++i > size)
+                        i = 0;
 
                     try
                     {
@@ -711,7 +737,6 @@ public class UploadFilesDialog extends JDialog
         thread.start();
         m_amimate = thread;
     }
-
 
     private int getAttributeFileSize()
     {

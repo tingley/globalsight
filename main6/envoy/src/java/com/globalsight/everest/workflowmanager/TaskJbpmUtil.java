@@ -24,6 +24,7 @@ import org.jbpm.taskmgmt.exe.TaskInstance;
 
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.TaskImpl;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflow.WorkflowInstance;
 import com.globalsight.everest.workflow.WorkflowJbpmUtil;
@@ -47,7 +48,7 @@ public class TaskJbpmUtil
         }
         return displayName;
     }
-    
+
     public static String[] getActivityRole(WorkflowInstance wfi, TaskInstance t)
     {
         String taskName = WorkflowJbpmUtil.getActivityName(t.getName());
@@ -57,13 +58,14 @@ public class TaskJbpmUtil
             String name = wTask.getActivityName();
             if (name.equals(taskName))
             {
-                return wTask.getRoles();
+                return UserUtil.convertUserIdsToUserNamesInRoles(wTask
+                        .getRoles());
             }
         }
-        
+
         return null;
     }
-    
+
     public static String getActualDuration(TaskInstance t)
     {
         if (t.getStart() == null)
@@ -72,8 +74,8 @@ public class TaskJbpmUtil
         }
 
         long accetpDate = t.getStart().getTime();
-        long duration = t.getEnd() == null ? new Date().getTime()
-                - accetpDate : t.getEnd().getTime() - accetpDate;
+        long duration = t.getEnd() == null ? new Date().getTime() - accetpDate
+                : t.getEnd().getTime() - accetpDate;
 
         return DateHelper.daysHoursMinutes(duration, "d", "h", "m");
     }

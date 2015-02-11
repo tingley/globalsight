@@ -88,25 +88,6 @@ function submitForm(formAction)
     tbUsersForm.submit();
 }
 
-
-//
-// Return true if this TB is already assigned to the User
-//
-function userInList(id)
-{
-    var to = tbUsersForm.to;
-
-    for (var i = 0; i < to.length; i++)
-    {
-        if (to.options[i].value == id)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 var first = true;
 function addUser()
 {
@@ -120,15 +101,10 @@ function addUser()
         return;
     }
 
-    for (var i = 0; i < from.length; i++)
+    for (var i = from.length-1; i >= 0 ; i--)
     {
         if (from.options[i].selected)
         {
-            if (userInList(from.options[i].value))
-            {
-                continue;
-            }
-
             if (first == true)
             {
 <%
@@ -144,6 +120,8 @@ function addUser()
 
             var len = to.options.length;
             to.options[len] = new Option(from.options[i].text, from.options[i].value);
+            
+            from.options[i] = null;
         }
     }
 
@@ -152,6 +130,7 @@ function addUser()
 
 function removeUser()
 {
+	var from = tbUsersForm.from;
     var to = tbUsersForm.to;
 
     if (to.selectedIndex == -1)
@@ -160,12 +139,13 @@ function removeUser()
         return;
     }
 
-    for (var i = 0; i < to.length; i++)
+    for (var i = to.length-1; i >= 0; i--)
     {
         if (to.options[i].selected)
         {
+		    var len = from.options.length;
+            from.options[len] = new Option(to.options[i].text, to.options[i].value);
             to.options[i] = null;
-            i--;
         }
     }
 
@@ -227,8 +207,27 @@ function saveUserIds()
                 for (int i = 0; i < avaliableUsers.size(); i++)
                 {
                     User user = (User)avaliableUsers.elementAt(i);
-                    out.println("<option value=\"" + user.getUserId() + "\">" +
-                                 user.getUserId() + "</option>");
+					if (usersAdded != null)
+					{
+						boolean isExist = false;  //if the user is existed in the right list, return true.
+						for (int j = 0; j < usersAdded.size(); j++)
+						{
+						    User addedUser = (User)usersAdded.get(j);
+							if(addedUser.getUserId().equals(user.getUserId())) isExist = true;
+						}
+						if(!isExist)
+						{		
+%>
+							<option value="<%=user.getUserId()%>" ><%=user.getUserName()%></option>
+<%
+						}
+					}
+					else
+					{
+%>
+							<option value="<%=user.getUserId()%>" ><%=user.getUserName()%></option>
+<%
+					}
                 }
             }
 %>
@@ -260,7 +259,7 @@ function saveUserIds()
                 {
                     User user= (User)usersAdded.get(i);
                     out.println("<option value=\"" + user.getUserId() + "\">" +
-                                 user.getUserId() + "</option>");
+                                 user.getUserName() + "</option>");
                 }
             }
 %>

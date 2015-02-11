@@ -39,7 +39,7 @@
     TargetPage tp = null;
     Workflow wf = null;
     String jobName = null;
-    int lmt = 0;
+    int lmt = 75;
     if (targetPages.size() > 0)
     {
         tp = (TargetPage)targetPages.get(0);
@@ -196,55 +196,71 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
       <%}else if(isDefaultContextMatch){ %>
             <amb:column label="lb_100" width="50px"
                  sortBy="<%=TPWordCountComparator.DEFAULT_CONTEXT_EXACT%>">
-                <%= targetPage.getWordCount().getNoUseExactMatchWordCount() - targetPage.getWordCount().getContextMatchWordCount()%>
+                <%=targetPage.getWordCount().getTotalExactMatchWordCount() - targetPage.getWordCount().getContextMatchWordCount()%>
             </amb:column>
-        <%} else {%>
+        <%
+            } else {
+        %>
         <amb:column label="lb_100" width="50px"
-          sortBy="<%=TPWordCountComparator.NO_USE_EXACT%>">
-          <%= targetPage.getWordCount().getNoUseExactMatchWordCount() %>
+          sortBy="<%=TPWordCountComparator.TOTAL_EXACT%>">
+          <%=targetPage.getWordCount().getTotalExactMatchWordCount()%>
           </amb:column>
-		<%} %>
+		<%
+		    }
+		%>
       <amb:column label="lb_95" width="50px"
       sortBy="<%=TPWordCountComparator.BAND1%>">
-      <%= targetPage.getWordCount().getHiFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getHiFuzzyWordCount()%>
       </amb:column>
       <amb:column label="lb_85" width="50px"
       sortBy="<%=TPWordCountComparator.BAND2%>">
-      <%= targetPage.getWordCount().getMedHiFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getMedHiFuzzyWordCount()%>
       </amb:column>
       <amb:column label="lb_75" width="50px"
       sortBy="<%=TPWordCountComparator.BAND3%>">
-      <%= targetPage.getWordCount().getMedFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getMedFuzzyWordCount()%>
       </amb:column>
       <amb:column label="lb_50" width="50px"
       sortBy="<%=TPWordCountComparator.BAND4%>">
-      <%= targetPage.getWordCount().getLowFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getLowFuzzyWordCount()%>
       </amb:column>
       <amb:column label="lb_no_match" width="50px"
       sortBy="<%=TPWordCountComparator.NO_MATCH%>">
-      <%= targetPage.getWordCount().getUnmatchedWordCount() %>
+      <%=targetPage.getWordCount().getUnmatchedWordCount()%>
       </amb:column>
       <amb:column label="lb_repetition_word_cnt" width="70px"
        sortBy="<%=TPWordCountComparator.REPETITIONS%>">
-       <%= targetPage.getWordCount().getRepetitionWordCount() %>
+       <%=targetPage.getWordCount().getRepetitionWordCount()%>
       </amb:column>
       
-      <%if(isInContextMatch){ %>
+      <%
+                if(isInContextMatch){
+            %>
 	     <amb:column label="lb_in_context_tm" width="50px"
 	      sortBy="<%=TPWordCountComparator.IN_CONTEXT%>">
-	      <%= targetPage.getWordCount().getInContextWordCount() %>
+	      <%=targetPage.getWordCount().getInContextWordCount()%>
 	     </amb:column>
-	  <%}else{ %>
-	 	<%if(isDefaultContextMatch){ %>
+	  <%
+	      }else{
+	  %>
+	 	<%
+	 	    if(isDefaultContextMatch){
+	 	%>
 	        <amb:column label="lb_context_tm" width="50px"
 	             sortBy="<%=TPWordCountComparator.CONTEXT%>">
-	            <%= targetPage.getWordCount().getContextMatchWordCount() %>
+	            <%=targetPage.getWordCount().getContextMatchWordCount()%>
 	        </amb:column>
-		<%} %>
-	  <%} %>
+		<%
+		    }
+		%>
+	  <%
+	      }
+	  %>
 	 	
  
-	 <%if (n++ == targetPages.size()) {%>
+	 <%
+	 	 	     if (n++ == targetPages.size()) {
+	 	 	 %>
 	  <tr>
 		<td colspan="100" style="height:1px; background:#0C1476"></td>
 	  </tr>
@@ -254,30 +270,38 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
 	  </td>
 	  <td width="50px" class = standardText>
 	  	<%
-	      if(isInContextMatch){
-			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
-		      }else{
-		    	  if(isDefaultContextMatch){
-		    		  out.print(bundle.getString("lb_default"));
-		    	  }else{
-		    		  out.print(bundle.getString("lb_100_match_only"));
-		    	  }
-		      } 
+	  	    if(isInContextMatch){
+	  				  	out.print(bundle.getString("lb_leverage_in_context_matches"));
+	  			      }else{
+	  			    	  if(isDefaultContextMatch){
+	  			    		  out.print(bundle.getString("lb_default"));
+	  			    	  }else{
+	  			    		  out.print(bundle.getString("lb_100_match_only"));
+	  			    	  }
+	  			      }
 	  	%>
 	  </td>
-	  <%if(isInContextMatch) {%>
+	  <%
+	      if(isInContextMatch) {
+	  %>
 		  <td width="50px" class=standardText>
 		    <%=wf.getSegmentTmWordCount()%>
 		  </td>
-	  <%}else if(isDefaultContextMatch){ %>
+	  <%
+	      }else if(isDefaultContextMatch){
+	  %>
 		  <td width="50px" class=standardText>
-		    <%=wf.getNoUseExactMatchWordCount() - wf.getContextMatchWordCount()%>
+		    <%=wf.getTotalExactMatchWordCount() - wf.getContextMatchWordCount()%>
 		  </td>
-	  <%}else{ %>
+	  <%
+	      }else{
+	  %>
 		  <td width="50px" class=standardText>
-		    <%=wf.getNoUseExactMatchWordCount()%>
+		    <%=wf.getTotalExactMatchWordCount()%>
 		  </td>
-	  <%} %>
+	  <%
+	      }
+	  %>
 	  <td width="50px" class=standardText>
 	    <%=wf.getHiFuzzyMatchWordCount()%>
 	  </td>
@@ -299,19 +323,31 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
     	wf.getSubLevRepetitionWordCount()%>
 	  </td>
 	  
-	  <%if(isInContextMatch) {%>
+	  <%
+	  	      if(isInContextMatch) {
+	  	  %>
 		  <td width="50px" class=standardText>
 		    <%=wf.getInContextMatchWordCount()%> 
 		  </td>
-	  <%}else{ %>
-		  <%if(isDefaultContextMatch) {%>
+	  <%
+	      }else{
+	  %>
+		  <%
+		      if(isDefaultContextMatch) {
+		  %>
 		  	  <td width="50px" class=standardText>
 			    <%=wf.getContextMatchWordCount()%> 
 			  </td>
-		  <%} %>
-	  <%} %>
+		  <%
+		      }
+		  %>
+	  <%
+	      }
+	  %>
 	</tr>
-	<% } %>
+	<%
+	    }
+	%>
       </amb:table>
     </td>
   </tr>
@@ -319,7 +355,8 @@ var helpFile = "<%=bundle.getString("help_activity_wordcounts2")%>";
 
 <BR><BR><BR>
 <!-- Summary table -->
-<%}
+<%
+    }
 if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
    noWordCountPermission = false;
 %>
@@ -335,126 +372,156 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
   </tr>
   <tr>
     <td>
-    <% int m = 0; %>
+    <%
+        int m = 0;
+    %>
       <amb:table bean="targetPages" id="targetPage"
       key="<%=WordCountHandler.TP_KEY%>"
       dataClass="com.globalsight.everest.page.TargetPage" pageUrl="self"
       emptyTableMsg="">
       <%
-        int totalFuzzy = 0;
-        if (isDell)
-        {
-           totalFuzzy = targetPage.getWordCount().getThresholdHiFuzzyWordCount() + 
-           				targetPage.getWordCount().getThresholdMedHiFuzzyWordCount() +
-           				targetPage.getWordCount().getThresholdMedFuzzyWordCount() +
-           				targetPage.getWordCount().getThresholdLowFuzzyWordCount();
-        }
-        %>
+          int totalFuzzy = 0;
+            if (isDell)
+            {
+               totalFuzzy = targetPage.getWordCount().getThresholdHiFuzzyWordCount() + 
+               				targetPage.getWordCount().getThresholdMedHiFuzzyWordCount() +
+               				targetPage.getWordCount().getThresholdMedFuzzyWordCount() +
+               				targetPage.getWordCount().getThresholdLowFuzzyWordCount();
+            }
+      %>
         
       <amb:column label="lb_primary_target_file" width="250px"
       sortBy="<%=TPWordCountComparator.FILE_NAME%>">
       <%
-      boolean isExtracted =
-        targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
-      
-      if (isExtracted)
-      {
-        String pageName = getMainFileName(targetPage.getExternalPageId());
-        String subName = getSubFileName(targetPage.getExternalPageId());
+          boolean isExtracted =
+            targetPage.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE;
+          
+          if (isExtracted)
+          {
+            String pageName = getMainFileName(targetPage.getExternalPageId());
+            String subName = getSubFileName(targetPage.getExternalPageId());
 
-        if (subName != null)
-        {
-          pageName = pageName + " " + subName;
-        }
-        out.print(pageName);
-      }
-      else
-      {
-        UnextractedFile unextractedFile =
-          (UnextractedFile)targetPage.getPrimaryFile();
-        out.print(unextractedFile.getStoragePath());
-      }
+            if (subName != null)
+            {
+              pageName = pageName + " " + subName;
+            }
+            out.print(pageName);
+          }
+          else
+          {
+            UnextractedFile unextractedFile =
+              (UnextractedFile)targetPage.getPrimaryFile();
+            out.print(unextractedFile.getStoragePath());
+          }
       %>
       </amb:column>
       <amb:column label="lb_leverage_match_option" width="50px">
-      <% 
-      if(isInContextMatch){
-		  	out.print(bundle.getString("lb_leverage_in_context_matches"));
-	      }else{
-	    	  if(isDefaultContextMatch){
-	    		  out.print(bundle.getString("lb_default"));
-	    	  }else{
-	    		  out.print(bundle.getString("lb_100_match_only"));
-	    	  }
-	      } 
+      <%
+          if(isInContextMatch){
+            		  	out.print(bundle.getString("lb_leverage_in_context_matches"));
+            	      }else{
+            	    	  if(isDefaultContextMatch){
+            	    		  out.print(bundle.getString("lb_default"));
+            	    	  }else{
+            	    		  out.print(bundle.getString("lb_100_match_only"));
+            	    	  }
+            	      }
       %>
       </amb:column>
       
-      <%if(isInContextMatch){  %>
+      <%
+                if(isInContextMatch){
+            %>
           <amb:column label="lb_100" width="50px"
               sortBy="<%=TPWordCountComparator.EXACT%>">
-              <%= targetPage.getWordCount().getSegmentTmWordCount() %>
+              <%=targetPage.getWordCount().getSegmentTmWordCount()%>
           </amb:column>
-      <%}else if(isDefaultContextMatch){ %>
+      <%
+          }else if(isDefaultContextMatch){
+      %>
           <amb:column label="lb_100" width="50px"
               sortBy="<%=TPWordCountComparator.DEFAULT_CONTEXT_EXACT%>">
-              <%= targetPage.getWordCount().getNoUseExactMatchWordCount() - targetPage.getWordCount().getContextMatchWordCount()%>
+              <%=targetPage.getWordCount().getTotalExactMatchWordCount() - targetPage.getWordCount().getContextMatchWordCount()%>
           </amb:column>
-       <%}else{ %>
+       <%
+           }else{
+       %>
           <amb:column label="lb_100" width="50px"
-              sortBy="<%=TPWordCountComparator.NO_USE_EXACT%>">
-              <%= targetPage.getWordCount().getNoUseExactMatchWordCount() %>
+              sortBy="<%=TPWordCountComparator.TOTAL_EXACT%>">
+              <%=targetPage.getWordCount().getTotalExactMatchWordCount()%>
           </amb:column>
-       <%} %>
+       <%
+           }
+       %>
       
-      <%if (isDell) {%>
+      <%
+                if (isDell) {
+            %>
         <amb:column label="lb_fuzzy_match" width="80px"
              sortBy="<%=TPWordCountComparator.TOTAL_FUZZY%>">
-            <%= totalFuzzy %>
+            <%=totalFuzzy%>
         </amb:column>
-        <%}
-        else{%>
+        <%
+            }
+                else{
+        %>
       <amb:column label="lb_95" width="50px"
       sortBy="<%=TPWordCountComparator.BAND1%>">
-      <%= targetPage.getWordCount().getThresholdHiFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getThresholdHiFuzzyWordCount()%>
       </amb:column>
       <amb:column label="lb_85" width="50px"
       sortBy="<%=TPWordCountComparator.BAND2%>">
-      <%= targetPage.getWordCount().getThresholdMedHiFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getThresholdMedHiFuzzyWordCount()%>
       </amb:column>
       <amb:column label="lb_75" width="50px"
       sortBy="<%=TPWordCountComparator.BAND3%>">
-      <%= targetPage.getWordCount().getThresholdMedFuzzyWordCount() %>
+      <%=targetPage.getWordCount().getThresholdMedFuzzyWordCount()%>
       </amb:column>
-      <%}%>
-        <%if (lmt < 75) {%>
+      <%
+          }
+      %>
+        <%
+            if (lmt < 75) {
+        %>
         <amb:column label="lb_74_and_below" width="50px"
              sortBy="<%=TPWordCountComparator.BAND4%>">
-            <%= targetPage.getWordCount().getThresholdLowFuzzyWordCount() %>
+            <%=targetPage.getWordCount().getThresholdLowFuzzyWordCount()%>
         </amb:column>
-        <%}%>
+        <%
+            }
+        %>
       <amb:column label="lb_no_match" width="50px"
       sortBy="<%=TPWordCountComparator.NO_MATCH%>">
-      <%= targetPage.getWordCount().getThresholdNoMatchWordCount() %>
+      <%=targetPage.getWordCount().getThresholdNoMatchWordCount()%>
       </amb:column>
       <amb:column label="lb_repetition_word_cnt" width="70px"
        sortBy="<%=TPWordCountComparator.REPETITIONS%>">
-       <%= targetPage.getWordCount().getRepetitionWordCount()%>
+       <%=targetPage.getWordCount().getRepetitionWordCount()%>
       </amb:column>
-      <% if (isInContextMatch) { %>
+      <%
+          if (isInContextMatch) {
+      %>
 	      <amb:column label="lb_in_context_tm" width="50px"
 	       sortBy="<%=TPWordCountComparator.IN_CONTEXT%>">
-	       <%= targetPage.getWordCount().getInContextWordCount() %>
+	       <%=targetPage.getWordCount().getInContextWordCount()%>
 	      </amb:column>
-      <% } %>
-	 	<%if(isDefaultContextMatch){ %>
+      <%
+          }
+      %>
+	 	<%
+	 	    if(isDefaultContextMatch){
+	 	%>
 	        <amb:column label="lb_context_tm" width="50px"
 	             sortBy="<%=TPWordCountComparator.CONTEXT%>">
-	            <%= targetPage.getWordCount().getContextMatchWordCount() %>
+	            <%=targetPage.getWordCount().getContextMatchWordCount()%>
 	        </amb:column>
-		<%} %>
+		<%
+		    }
+		%>
       
-      <%if (m++ == targetPages.size()) {%>
+      <%
+                if (m++ == targetPages.size()) {
+            %>
 	  <tr>
 		<td colspan="100" style="height:1px; background:#0C1476"></td>
 	  </tr>
@@ -463,40 +530,46 @@ if (userPerms.getPermissionFor(Permission.ACTIVITIES_SUMMARY_STATISTICS)){
 	    <%=bundle.getString("lb_totals_from_all_pages")%>:
 	  </td>
       <%
-        int fuzzy = 0;
-        if (isDell)
-        {
-           fuzzy = wf.getThresholdHiFuzzyWordCount() +
-                   wf.getThresholdMedHiFuzzyWordCount() + 
-                   wf.getThresholdMedFuzzyWordCount() + 
-                   wf.getThresholdLowFuzzyWordCount();
-        }
-        %>
+          int fuzzy = 0;
+              if (isDell)
+              {
+                 fuzzy = wf.getThresholdHiFuzzyWordCount() +
+                 wf.getThresholdMedHiFuzzyWordCount() + 
+                 wf.getThresholdMedFuzzyWordCount() + 
+                 wf.getThresholdLowFuzzyWordCount();
+              }
+      %>
         <td width="50px" class = standardText>
 	  	<%
-	      if(isInContextMatch){
-			  	out.print(bundle.getString("lb_leverage_in_context_matches"));
-		      }else{
-		    	  if(isDefaultContextMatch){
-		    		  out.print(bundle.getString("lb_default"));
-		    	  }else{
-		    		  out.print(bundle.getString("lb_100_match_only"));
-		    	  }
-		      } 
-		%>
+	  	    if(isInContextMatch){
+	  				  	out.print(bundle.getString("lb_leverage_in_context_matches"));
+	  			      }else{
+	  			    	  if(isDefaultContextMatch){
+	  			    		  out.print(bundle.getString("lb_default"));
+	  			    	  }else{
+	  			    		  out.print(bundle.getString("lb_100_match_only"));
+	  			    	  }
+	  			      }
+	  	%>
 	  	</td>
 	  
-        <%if(isInContextMatch){  %>
+        <%
+	              if(isInContextMatch){
+	          %>
 		  <td width="50px" class=standardText>
 		    <%=wf.getSegmentTmWordCount()%>
 		  </td>
-	  <%}else if(isDefaultContextMatch){ %>
+	  <%
+	      }else if(isDefaultContextMatch){
+	  %>
 		  <td width="50px" class=standardText>
-		    <%=wf.getNoUseExactMatchWordCount() - wf.getContextMatchWordCount()%>
+		    <%=wf.getTotalExactMatchWordCount() - wf.getContextMatchWordCount()%>
 		  </td>
-	  <%}else{ %>
+	  <%
+	      }else{
+	  %>
 		  <td width="50px" class=standardText>
-		    <%=wf.getNoUseExactMatchWordCount()%>
+		    <%=wf.getTotalExactMatchWordCount()%>
 		  </td>
 	  <%} %>
       <%if (isDell) {%>

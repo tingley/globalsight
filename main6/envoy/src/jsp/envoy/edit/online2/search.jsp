@@ -6,6 +6,7 @@
         com.globalsight.everest.webapp.pagehandler.PageHandler,
         com.globalsight.everest.webapp.WebAppConstants,
         com.globalsight.everest.servlet.util.SessionManager,
+        com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil,
         java.util.*"
     session="true"
 %>
@@ -335,7 +336,7 @@ function showHelp()
   <table border="0" cellspacing="0" width="100%" class="text">
     <tr>
         <td class="title" width="100px"><%=bundle.getString("lb_searched_by")%>:</td>
-        <td ><INPUT type=radio name="searchType" id="searchType" value="0" CHECKED onClick="selectType();">User ID&nbsp;&nbsp;
+        <td ><INPUT type=radio name="searchType" id="searchType" value="0" CHECKED onClick="selectType();">User Name&nbsp;&nbsp;
              <INPUT type=radio name="searchType" id="searchType" value="1" onClick="selectType();">SID &nbsp;&nbsp;
              <input type="button" id="submit" value="<%=bundle.getString("lb_search")%>" onClick="Search()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
              <input type="button" id="submit" value="<%=bundle.getString("lb_reset_to_normal")%>" onClick="Reset()">
@@ -363,7 +364,7 @@ function showHelp()
             %>
                 <td width="30%">
                     <INPUT TYPE="radio" name="userIdRadio"  ID="userIdRadio" value="<%=userList.get(i)%>">
-                    <%=userList.get(i)%>
+                    <%=UserUtil.getUserNameById((String) userList.get(i))%>
                 </td>
             <%
                     if((i + 1) % 3 == 0) {

@@ -48,6 +48,7 @@ public class MapOfTableNameAndSpecialFilter
                 new POFilter());
         TABLENAME_FILTER.put(FilterConstants.BASE_TABLENAME, 
                 new BaseFilter());
+        TABLENAME_FILTER.put(FilterConstants.FM_TABLENAME, new FMFilter());
     }
 
     public static Filter getFilterInstance(String tableName)

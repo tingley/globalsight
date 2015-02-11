@@ -165,11 +165,17 @@ public class TradosFmTmxToGxml
         }
     }
 
-    public static String getStackTraceString(Throwable p_throwable)
+    public void info(String p_message, Throwable t)
     {
-        CharArrayWriter outBuffer = new CharArrayWriter();
-        p_throwable.printStackTrace(new java.io.PrintWriter(outBuffer));
-        return outBuffer.toString();
+        if (m_logger != null)
+        {
+            m_logger.info(p_message, t);
+        }
+        else
+        {
+            System.err.println(p_message);
+            t.printStackTrace(System.err);
+        }
     }
 
     // *************************************************
@@ -233,8 +239,7 @@ public class TradosFmTmxToGxml
         }
         catch (Throwable ex)
         {
-            info("Segment could not be converted: " + ex.getMessage() + "\n" +
-                p_element.asXML() + "\n" + getStackTraceString(ex));
+            info("Segment could not be converted:\n" + p_element.asXML(), ex);
 
             throw ex;
         }

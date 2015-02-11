@@ -15,6 +15,7 @@
             java.io.IOException,
             com.globalsight.ling.common.URLDecoder,
             com.globalsight.ling.common.URLEncoder,
+            com.globalsight.util.edit.EditUtil,
             java.util.ArrayList,
             java.util.Collections,
             java.util.Enumeration,
@@ -40,7 +41,7 @@
     ResourceBundle bundle = PageHandler.getBundle(session);
     SessionManager sessionMgr = (SessionManager)session.getAttribute(WebAppConstants.SESSION_MANAGER);
     String moduleLink="/globalsight/ControlServlet?activityName=";
-    String title= bundle.getString("lb_select_files");
+    String title= bundle.getString("lb_import");
     String selfURL = self.getPageURL();
     String fileProfileURL = selectFileProfile.getPageURL();
     Boolean batch = (Boolean)sessionMgr.getAttribute(SelectFileHandler.BATCH_CONDITION);
@@ -130,7 +131,7 @@
             	//To ignore CVS folders
             	tmp = curDoc.getAbsolutePath();
             	tmp = tmp.substring(tmp.lastIndexOf(File.separator) + 1);
-            	if (!cvsSandBoxs.contains(tmp))
+            	if (!cvsSandBoxs.contains(tmp) && !tmp.endsWith(".sub"))
             	    folderList.add(curDoc);
             }
         }
@@ -187,10 +188,11 @@
 
         String fileNameValue =
             URLEncoder.encode(SelectFileHandler.getRelativePath(SelectFileHandler.getCXEBaseDir(), p_document), "UTF-8");
-        // Escape the backslashes for javascript
+     	// Escape Javascript special characters, such as "\", "'".
         String fileNameValueEscaped =
             replace(SelectFileHandler.getRelativePath(SelectFileHandler.getCXEBaseDir(), p_document),
                     "\\", "\\\\");
+        fileNameValueEscaped = fileNameValueEscaped.replace("\'", "\\'");
         String displayNameValue =
             SelectFileHandler.getRelativePath(p_document.getParentFile(), p_document);
 
@@ -240,12 +242,14 @@ String replace(String s, String one, String another)
 }
 %>
 <HTML>
+<!-- /envoy/src/jsp/envoy/administration/import/selectFile.jsp -->
 <HEAD>
 <META HTTP-EQUIV="content-type" CONTENT="text/html;charset=UTF-8">
 <TITLE><%= title %></TITLE>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/setStyleSheet.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/radioButtons.js"></SCRIPT>
 <SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/includes/utilityScripts.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="/globalsight/jquery/jquery-1.6.4.js"></SCRIPT>
 <%@ include file="/envoy/wizards/guidesJavascript.jspIncl" %>
 <%@ include file="/envoy/common/warning.jspIncl" %>
 <%@ include file="/envoy/common/constants.jspIncl" %>
@@ -324,6 +328,28 @@ function navigateDirectories (folder)
    navigateDirectoriesForm.<%=SelectFileHandler.FOLDER_SELECTED%>.value = encodeURIComponent(folder);
    navigateDirectoriesForm.submit();
 }
+
+//for GBS-2599
+$(document).ready(function(){
+	$("#selectAll_1").click(function(){
+		$("form[name='availableFilesForm'] :checkbox[name!='selectAll_1']").each(function(){
+			if($("#selectAll_1").attr("checked")){
+				$(this).attr("checked",true);
+			}else{
+				$(this).attr("checked",false);
+			}
+		});      
+	});
+	$("#selectAll_2").click(function(){
+		$("form[name='selectedFilesForm'] :checkbox[name!='selectAll_2']").each(function(){
+			if($("#selectAll_2").attr("checked")){
+				$(this).attr("checked",true);
+			}else{
+				$(this).attr("checked",false);
+			}
+		});      
+	});
+});
 </script>
 <STYLE type="text/css">
 .importList {
@@ -332,7 +358,7 @@ function navigateDirectories (folder)
 	height: 300px;
 	overflow-y: auto;
 	overflow-x: auto;
-        border: solid silver 1px;
+    border: solid silver 1px;
 	padding: 0px;
 }
 </STYLE>
@@ -383,13 +409,12 @@ if (folderSelected != null)
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 100px; LEFT: 0px;">
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH=320>
-  <TBODY>
-    <COL WIDTH=21>   <!-- Checkbox -->
-    <COL WIDTH=22>   <!-- Folder/File icon -->
-    <COL WIDTH=259>  <!-- File -->
-    <COL WIDTH=18>   <!-- Up Folder (for header) -->
+    <COL WIDTH="21px"/>   <!-- Checkbox -->
+    <COL WIDTH="22px"/>   <!-- Folder/File icon -->
+    <COL WIDTH="259px"/>  <!-- File -->
+    <COL WIDTH="18px"/>   <!-- Up Folder (for header) -->
     <TR CLASS="tableHeadingBasic" VALIGN="TOP">
-      <TD>&nbsp;</TD>
+      <TD><input type="checkbox" id="selectAll_1" name="selectAll_1"/></TD>
       <TD><IMG SRC="/globalsight/images/folderopen.gif" HEIGHT=13 WIDTH=16 VSPACE=3></TD>
       <TD STYLE="word-wrap: break-word; padding-top: 2px"><%=folderSelectedAbs%></TD>
       <TD ALIGN="RIGHT"><%
@@ -403,7 +428,11 @@ if (folderSelected != null)
                 if (atTop)
                     out.print("&nbsp;");
                 else
-                    out.print("<A HREF=\"javascript:navigateDirectories('" + replace(parentDirName, "\\", "\\\\") + "')\"><IMG SRC=\"/globalsight/images/folderback.gif\" BORDER=\"0\" HEIGHT=13 WIDTH=15 VSPACE=3 HSPACE=1></A>");
+                {
+                    String tempParDir = replace(parentDirName, "\\", "\\\\");
+                    tempParDir = EditUtil.toJavascript(tempParDir);
+                    out.print("<A HREF=\"javascript:navigateDirectories('" +tempParDir+ "')\"><IMG SRC=\"/globalsight/images/folderback.gif\" BORDER=\"0\" HEIGHT=13 WIDTH=15 VSPACE=3 HSPACE=1></A>");
+                }
         %>
       </TD>
     </TR>
@@ -414,14 +443,15 @@ prepareFolderListing(request, sessionMgr, selfURL, baseDir, folderSelected, out)
 </DIV>
 </FORM>
 
-<DIV ID="AvailableCheckAllLayer"
+<!--for gbs-2599
+DIV ID="AvailableCheckAllLayer"
   STYLE="POSITION: ABSOLUTE; Z-INDEX: 8; TOP: 400px; LEFT: 0px;"
   CLASS=standardText>
   <A CLASS="standardHREF" HREF="#"
   ONCLICK="checkAll('availableFilesForm')"><%=bundle.getString("lb_check_all")%></A> |
   <A CLASS="standardHREF" HREF="#"
   ONCLICK="clearAll('availableFilesForm')"><%=bundle.getString("lb_clear_all")%></A>
-</DIV>
+</DIV-->
 <!-- End Availabe Files -->
 
 <!-- Add/Remove buttons -->
@@ -434,7 +464,7 @@ prepareFolderListing(request, sessionMgr, selfURL, baseDir, folderSelected, out)
 <!-- Selected Files -->
 <FORM NAME="selectedFilesForm" ACTION="<%=selfURL%>" METHOD="POST">
 <!-- This is the directory you are in.  -->
-<INPUT NAME="<%=SelectFileHandler.FOLDER_SELECTED%>" VALUE="<%=folderSelected%>" TYPE="HIDDEN">
+<INPUT NAME="<%=SelectFileHandler.FOLDER_SELECTED%>" VALUE="<%=curFolder%>" TYPE="HIDDEN">
 <!-- This is action (Add/Remove) that you are performing on
   -- the file list. -->
 <INPUT NAME="fileAction" VALUE="remove" TYPE="HIDDEN">
@@ -448,12 +478,11 @@ prepareFolderListing(request, sessionMgr, selfURL, baseDir, folderSelected, out)
 
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CLASS="standardText"
   STYLE="table-layout: fixed;" WIDTH=320>
-  <TBODY>
-    <COL WIDTH=21>   <!-- Checkbox -->
-    <COL WIDTH=22>   <!-- File icon -->
-    <COL WIDTH=277>  <!-- File -->
+    <COL WIDTH="21px"/>   <!-- Checkbox -->
+    <COL WIDTH="22px"/>   <!-- File icon -->
+    <COL WIDTH="277px"/>  <!-- File -->
     <TR CLASS="tableHeadingBasic">
-      <TD>&nbsp;</TD>
+      <TD><input type="checkbox" id="selectAll_2" name="selectAll_2"/></TD>
       <TD><IMG SRC="/globalsight/images/file.gif" HEIGHT=15 WIDTH=13 VSPACE=2></TD>
       <TD><%=bundle.getString("lb_file")%></TD>
     </TR>
@@ -495,13 +524,14 @@ prepareFolderListing(request, sessionMgr, selfURL, baseDir, folderSelected, out)
 <!-- End Selected Files -->
 </FORM>
 
-<DIV ID="ImportCheckAllLayer" CLASS="standardText"
+<!--for gbs-2599
+DIV ID="ImportCheckAllLayer" CLASS="standardText"
  STYLE="POSITION: ABSOLUTE; Z-INDEX: 7; TOP: 400px; LEFT: 420px;">
 <A CLASS="standardHREF" HREF="#"
  onclick="checkAll('selectedFilesForm')"><%=bundle.getString("lb_check_all")%></A> |
 <A CLASS="standardHREF" HREF="#"
  onclick="clearAll('selectedFilesForm')"><%=bundle.getString("lb_clear_all")%></A>
-</DIV>
+</DIV-->
 
 <!-- Import Button-->
 <DIV ALIGN="RIGHT" STYLE="POSITION: ABSOLUTE; Z-INDEX: 7; TOP: 415px; LEFT: 420px; WIDTH: 338">

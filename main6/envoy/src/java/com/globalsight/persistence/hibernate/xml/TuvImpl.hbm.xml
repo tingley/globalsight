@@ -51,6 +51,9 @@
 
 		<property name="sid" length="255" column="SID" type="string"
 			not-null="false" unique="false" />
+
+		<property name="srcComment" column="SRC_COMMENT" type="string"
+			not-null="false" unique="false" />
             
     <set name="xliffAlt" table="xliff_alt" inverse="true" cascade="save-update">
        <key column="TUV_ID"/>

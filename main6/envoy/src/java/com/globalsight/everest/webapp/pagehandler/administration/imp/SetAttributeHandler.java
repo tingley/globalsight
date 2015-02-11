@@ -105,7 +105,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -229,7 +229,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -274,7 +274,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -316,7 +316,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -358,7 +358,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -450,7 +450,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toObjectJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -494,7 +494,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toObjectJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -559,7 +559,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {
@@ -623,7 +623,7 @@ public class SetAttributeHandler extends PageActionHandler
             String s = "({\"error\" : " + JsonUtil.toJson(e.getMessage())
                     + "})";
             out.write(s.getBytes("UTF-8"));
-            logger.error(e);
+            logger.error(e.getMessage(), e);
         }
         finally
         {

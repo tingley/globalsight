@@ -100,6 +100,7 @@ var objectName = "";
 var guideNode = "projects";
 var helpFile = "<%=bundle.getString("help_project_schedule_importtest")%>";
 var isFirefox = window.navigator.userAgent.indexOf("Firefox")>0;
+var isChrome = window.navigator.userAgent.indexOf("Chrome")>0;
 
 </SCRIPT>
 <SCRIPT language="Javascript1.2">
@@ -135,7 +136,7 @@ function showProgress(entryCount, percentage, message)
 
   idProgressBar.style.pixelWidth = Math.round((percentage / 100) * WIDTH);
   idProgressBar.style.width = Math.round((percentage / 100) * WIDTH);
-  if(isFirefox)
+  if(isFirefox || isChrome)
   {
     idProgressBar.style.minHeight = '15px';
 	idProgressBar.innerHTML='&nbsp';    

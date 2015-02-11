@@ -42,6 +42,7 @@ namespace GlobalSight.AdobeConverter
             this.label1 = new System.Windows.Forms.Label();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.folderBrowserDialog2 = new System.Windows.Forms.FolderBrowserDialog();
+            this.cbAutoStart = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
@@ -49,9 +50,9 @@ namespace GlobalSight.AdobeConverter
             // 
             this.checkBox1.AutoSize = true;
             this.checkBox1.ForeColor = System.Drawing.Color.OrangeRed;
-            this.checkBox1.Location = new System.Drawing.Point(12, 70);
+            this.checkBox1.Location = new System.Drawing.Point(12, 65);
             this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(140, 17);
+            this.checkBox1.Size = new System.Drawing.Size(156, 16);
             this.checkBox1.TabIndex = 0;
             this.checkBox1.Text = "InDesign Converter CS5";
             this.checkBox1.UseVisualStyleBackColor = true;
@@ -61,9 +62,9 @@ namespace GlobalSight.AdobeConverter
             // 
             this.checkBox2.AutoSize = true;
             this.checkBox2.ForeColor = System.Drawing.Color.OrangeRed;
-            this.checkBox2.Location = new System.Drawing.Point(11, 120);
+            this.checkBox2.Location = new System.Drawing.Point(11, 111);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(140, 17);
+            this.checkBox2.Size = new System.Drawing.Size(174, 16);
             this.checkBox2.TabIndex = 1;
             this.checkBox2.Text = "Illustrator Converter CS2";
             this.checkBox2.UseVisualStyleBackColor = true;
@@ -71,9 +72,9 @@ namespace GlobalSight.AdobeConverter
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(94, 185);
+            this.button1.Location = new System.Drawing.Point(172, 171);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(67, 27);
+            this.button1.Size = new System.Drawing.Size(67, 25);
             this.button1.TabIndex = 4;
             this.button1.Text = "Start";
             this.button1.UseVisualStyleBackColor = true;
@@ -81,9 +82,9 @@ namespace GlobalSight.AdobeConverter
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(225, 185);
+            this.button2.Location = new System.Drawing.Point(335, 171);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(67, 27);
+            this.button2.Size = new System.Drawing.Size(67, 25);
             this.button2.TabIndex = 5;
             this.button2.Text = "Stop";
             this.button2.UseVisualStyleBackColor = true;
@@ -98,23 +99,23 @@ namespace GlobalSight.AdobeConverter
             // 
             // textBox_dir_indesign
             // 
-            this.textBox_dir_indesign.Location = new System.Drawing.Point(190, 68);
+            this.textBox_dir_indesign.Location = new System.Drawing.Point(205, 65);
             this.textBox_dir_indesign.Name = "textBox_dir_indesign";
-            this.textBox_dir_indesign.Size = new System.Drawing.Size(164, 20);
+            this.textBox_dir_indesign.Size = new System.Drawing.Size(164, 21);
             this.textBox_dir_indesign.TabIndex = 6;
             // 
             // textBox_dir_illustrator
             // 
-            this.textBox_dir_illustrator.Location = new System.Drawing.Point(190, 118);
+            this.textBox_dir_illustrator.Location = new System.Drawing.Point(205, 109);
             this.textBox_dir_illustrator.Name = "textBox_dir_illustrator";
-            this.textBox_dir_illustrator.Size = new System.Drawing.Size(164, 20);
+            this.textBox_dir_illustrator.Size = new System.Drawing.Size(164, 21);
             this.textBox_dir_illustrator.TabIndex = 7;
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(360, 68);
+            this.button3.Location = new System.Drawing.Point(375, 65);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(58, 23);
+            this.button3.Size = new System.Drawing.Size(58, 21);
             this.button3.TabIndex = 8;
             this.button3.Text = "Browse...";
             this.button3.UseVisualStyleBackColor = true;
@@ -122,9 +123,9 @@ namespace GlobalSight.AdobeConverter
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(360, 118);
+            this.button4.Location = new System.Drawing.Point(375, 111);
             this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(58, 23);
+            this.button4.Size = new System.Drawing.Size(58, 21);
             this.button4.TabIndex = 9;
             this.button4.Text = "Browse...";
             this.button4.UseVisualStyleBackColor = true;
@@ -134,9 +135,9 @@ namespace GlobalSight.AdobeConverter
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(104, 26);
+            this.label1.Location = new System.Drawing.Point(126, 23);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(144, 20);
+            this.label1.Size = new System.Drawing.Size(183, 20);
             this.label1.TabIndex = 10;
             this.label1.Text = "Adobe CS5 Converter";
             // 
@@ -148,23 +149,34 @@ namespace GlobalSight.AdobeConverter
             // 
             this.folderBrowserDialog2.Description = "Select Illustrator Converter Watching Folder";
             // 
+            // cbAutoStart
+            // 
+            this.cbAutoStart.AutoSize = true;
+            this.cbAutoStart.Location = new System.Drawing.Point(32, 176);
+            this.cbAutoStart.Name = "cbAutoStart";
+            this.cbAutoStart.Size = new System.Drawing.Size(84, 16);
+            this.cbAutoStart.TabIndex = 12;
+            this.cbAutoStart.Text = "Auto Start";
+            this.cbAutoStart.UseVisualStyleBackColor = true;
+            this.cbAutoStart.CheckedChanged += new System.EventHandler(this.cbAutoStart_CheckedChanged);
+            // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(254, 29);
+            this.label2.ForeColor = System.Drawing.Color.DimGray;
+            this.label2.Location = new System.Drawing.Point(26, 84);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(85, 15);
-            this.label2.TabIndex = 11;
-            this.label2.Text = "";
-            this.label2.Click += new System.EventHandler(this.label2_Click);
+            this.label2.Size = new System.Drawing.Size(173, 12);
+            this.label2.TabIndex = 13;
+            this.label2.Text = "(also used for IDML preview)";
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(430, 261);
+            this.ClientSize = new System.Drawing.Size(463, 241);
             this.Controls.Add(this.label2);
+            this.Controls.Add(this.cbAutoStart);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.button3);
@@ -178,7 +190,7 @@ namespace GlobalSight.AdobeConverter
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.ShowInTaskbar = false;
-            this.Text = "Adobe CS5 Converter - Version: 8.2";
+            this.Text = "Adobe CS5 Converter - Version: 8.2.3";
             this.SizeChanged += new System.EventHandler(this.Form1_SizeChanged);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.ResumeLayout(false);
@@ -202,6 +214,7 @@ namespace GlobalSight.AdobeConverter
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog2;
+        private System.Windows.Forms.CheckBox cbAutoStart;
         private System.Windows.Forms.Label label2;
     }
 }

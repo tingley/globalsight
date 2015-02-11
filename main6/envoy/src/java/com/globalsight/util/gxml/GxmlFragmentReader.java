@@ -152,7 +152,7 @@ public class GxmlFragmentReader
         catch (Exception e)
         {
             CATEGORY.error("Unexpected error in element " + name, e);
-            throw new SAXException(GeneralException.getStackTraceString(e));
+            throw new SAXException(e);
         }
     }
 
@@ -197,7 +197,7 @@ public class GxmlFragmentReader
         catch (Exception e)
         {
             CATEGORY.error("Unexpected error in element " + name, e);
-            throw new SAXException(GeneralException.getStackTraceString(e));
+            throw new SAXException(e);
         }
     }
 
@@ -244,8 +244,7 @@ public class GxmlFragmentReader
         }
         catch (Exception e)
         {
-            CATEGORY.error(e);
-            e.printStackTrace();
+            CATEGORY.error(e.getMessage(), e);
         }
     }
     */

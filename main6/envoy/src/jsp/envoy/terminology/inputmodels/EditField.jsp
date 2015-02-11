@@ -284,10 +284,8 @@ function doLoad()
 <%=bundle.getString("lb_edit") %> <span id="idLevel"></span> - <%=bundle.getString("lb_term_input_model_edit_level_field") %></SPAN>
 <BR><BR>
 <TABLE CELLPADDING=2 CELLSPACING=2 BORDER=0 CLASS="standardText">
-  <THEAD>
-    <COL WIDTH="25%">
-    <COL WIDTH="75%">
-  </THEAD>
+  <COL WIDTH="25%">
+  <COL WIDTH="75%">
   <TBODY>
   <TR>
     <TD>

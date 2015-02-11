@@ -29,7 +29,6 @@ import java.util.Vector;
 import javax.naming.NamingException;
 
 import org.apache.log4j.Logger;
-
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -110,10 +109,9 @@ public class CostingEngineLocal implements CostingEngine
             }
             catch (PersistenceException pe)
             {
-                c_logger
-                        .error(
-                                "PersistenceException while retrieving iso currencies.",
-                                pe);
+                c_logger.error(
+                        "PersistenceException while retrieving iso currencies.",
+                        pe);
                 throw new CostingException(
                         CostingException.MSG_FAILED_TO_RETRIEVE_ISO_CURRENCIES,
                         null, pe);
@@ -148,10 +146,8 @@ public class CostingEngineLocal implements CostingEngine
         }
         catch (PersistenceException pe)
         {
-            c_logger
-                    .error(
-                            "PersistenceException while retrieving iso currencies.",
-                            pe);
+            c_logger.error(
+                    "PersistenceException while retrieving iso currencies.", pe);
             throw new CostingException(
                     CostingException.MSG_FAILED_TO_RETRIEVE_ISO_CURRENCIES,
                     null, pe);
@@ -206,8 +202,8 @@ public class CostingEngineLocal implements CostingEngine
         {
             session = HibernateUtil.getSession();
             transaction = session.beginTransaction();
-            Currency oldCurr = getCurrency(p_currency.getIsoCode(), p_currency
-                    .getCompanyId());
+            Currency oldCurr = getCurrency(p_currency.getIsoCode(),
+                    p_currency.getCompanyId());
 
             if (oldCurr != null)
             {
@@ -390,8 +386,8 @@ public class CostingEngineLocal implements CostingEngine
                     // subtract)
                     // should be changed to use BigDecimal for the actual
                     // calculation.
-                    float newConversion = BigDecimalHelper.multiply(cur
-                            .getConversionFactor(), newConversionOldPivot);
+                    float newConversion = BigDecimalHelper.multiply(
+                            cur.getConversionFactor(), newConversionOldPivot);
                     cur.setConversionFactor(newConversion);
                     session.update(cur);
                 }
@@ -514,8 +510,7 @@ public class CostingEngineLocal implements CostingEngine
         }
         catch (GeneralException ge)
         {
-            c_logger
-                    .error("Failed to retrieve and set the pivot currency.", ge);
+            c_logger.error("Failed to retrieve and set the pivot currency.", ge);
             throw new CostingException(
                     CostingException.MSG_FAILED_TO_GET_PIVOT_CURRENCY, null, ge);
         }
@@ -651,26 +646,7 @@ public class CostingEngineLocal implements CostingEngine
             rateClone.setName(p_rate.getName());
             // set the type and rate values in case they have changed
             rateClone.setRateType(p_rate.getRateType());
-            if (rateClone.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY)) {
-                rateClone.setInContextMatchRate(p_rate.getInContextMatchRate());
-                rateClone.setContextMatchRate(p_rate.getContextMatchRate());
-                rateClone.setSegmentTmRate(p_rate.getSegmentTmRate());
-                rateClone.setLowFuzzyMatchRate(p_rate.getLowFuzzyMatchRate());
-                rateClone.setMedFuzzyMatchRate(p_rate.getMedFuzzyMatchRate());
-                rateClone.setMedHiFuzzyMatchRate(p_rate.getMedHiFuzzyMatchRate());
-                rateClone.setHiFuzzyMatchRate(p_rate.getHiFuzzyMatchRate());
-                rateClone.setNoMatchRate(p_rate.getNoMatchRate());
-                rateClone.setRepetitionRate(p_rate.getRepetitionRate());
-
-                rateClone.setInContextMatchRatePer(p_rate.getInContextMatchRatePer());
-                rateClone.setContextMatchRatePer(p_rate.getContextMatchRatePer());
-                rateClone.setSegmentTmRatePer(p_rate.getSegmentTmRatePer());
-                rateClone.setLowFuzzyMatchRatePer(p_rate.getLowFuzzyMatchRatePer());
-                rateClone.setMedFuzzyMatchRatePer(p_rate.getMedFuzzyMatchRatePer());
-                rateClone.setMedHiFuzzyMatchRatePer(p_rate.getMedHiFuzzyMatchRatePer());
-                rateClone.setHiFuzzyMatchRatePer(p_rate.getHiFuzzyMatchRatePer());
-                rateClone.setRepetitionRatePer(p_rate.getRepetitionRatePer());
-            } else if (rateClone.getRateType().equals(Rate.UnitOfWork.WORD_COUNT))
+            if (rateClone.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY))
             {
                 rateClone.setInContextMatchRate(p_rate.getInContextMatchRate());
                 rateClone.setContextMatchRate(p_rate.getContextMatchRate());
@@ -681,8 +657,35 @@ public class CostingEngineLocal implements CostingEngine
                         .getMedHiFuzzyMatchRate());
                 rateClone.setHiFuzzyMatchRate(p_rate.getHiFuzzyMatchRate());
                 rateClone.setNoMatchRate(p_rate.getNoMatchRate());
-                rateClone.setRepetitionRate(p_rate
-                        .getRepetitionRate());
+                rateClone.setRepetitionRate(p_rate.getRepetitionRate());
+
+                rateClone.setInContextMatchRatePer(p_rate
+                        .getInContextMatchRatePer());
+                rateClone.setContextMatchRatePer(p_rate
+                        .getContextMatchRatePer());
+                rateClone.setSegmentTmRatePer(p_rate.getSegmentTmRatePer());
+                rateClone.setLowFuzzyMatchRatePer(p_rate
+                        .getLowFuzzyMatchRatePer());
+                rateClone.setMedFuzzyMatchRatePer(p_rate
+                        .getMedFuzzyMatchRatePer());
+                rateClone.setMedHiFuzzyMatchRatePer(p_rate
+                        .getMedHiFuzzyMatchRatePer());
+                rateClone.setHiFuzzyMatchRatePer(p_rate
+                        .getHiFuzzyMatchRatePer());
+                rateClone.setRepetitionRatePer(p_rate.getRepetitionRatePer());
+            }
+            else if (rateClone.getRateType().equals(Rate.UnitOfWork.WORD_COUNT))
+            {
+                rateClone.setInContextMatchRate(p_rate.getInContextMatchRate());
+                rateClone.setContextMatchRate(p_rate.getContextMatchRate());
+                rateClone.setSegmentTmRate(p_rate.getSegmentTmRate());
+                rateClone.setLowFuzzyMatchRate(p_rate.getLowFuzzyMatchRate());
+                rateClone.setMedFuzzyMatchRate(p_rate.getMedFuzzyMatchRate());
+                rateClone.setMedHiFuzzyMatchRate(p_rate
+                        .getMedHiFuzzyMatchRate());
+                rateClone.setHiFuzzyMatchRate(p_rate.getHiFuzzyMatchRate());
+                rateClone.setNoMatchRate(p_rate.getNoMatchRate());
+                rateClone.setRepetitionRate(p_rate.getRepetitionRate());
             }
             else
             {
@@ -764,36 +767,44 @@ public class CostingEngineLocal implements CostingEngine
         }
         catch (Exception pe)
         {
-            c_logger
-                    .error(
-                            "Persistence Exception while querying or all active rates.",
-                            pe);
+            c_logger.error(
+                    "Persistence Exception while querying or all active rates.",
+                    pe);
             throw new CostingException(
                     CostingException.MSG_FAILED_TO_RETRIEVE_RATES, null, pe);
         }
         return rates;
     }
 
-    public void removeRate(long p_id) {
-    	Session session = null;
-    	Transaction transaction = null;
-    	try {
-    		session = HibernateUtil.getSession();
-    		transaction = session.beginTransaction();
-			Rate rate = getRate(p_id);
-			if (rate != null) {
-				rate.setIsActive(false);
-				session.save(rate);
-			}
-			transaction.commit();
-		} catch (Exception e) {
-			try {
-				transaction.rollback();
-				c_logger.error(e);
-			} catch (Exception e2) {
-			}
-		}
+    public void removeRate(long p_id)
+    {
+        Session session = null;
+        Transaction transaction = null;
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+            Rate rate = getRate(p_id);
+            if (rate != null)
+            {
+                rate.setIsActive(false);
+                session.save(rate);
+            }
+            transaction.commit();
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                transaction.rollback();
+                c_logger.error(e.getMessage(), e);
+            }
+            catch (Exception e2)
+            {
+            }
+        }
     }
+
     /**
      * @see CostingEngine.getRate(long)
      */
@@ -953,8 +964,9 @@ public class CostingEngineLocal implements CostingEngine
             {
                 rates = new Hashtable();
             }
-            allRates.put(((GlobalSightLocale) targetLocales.get(i))
-                    .getIdAsLong(), rates);
+            allRates.put(
+                    ((GlobalSightLocale) targetLocales.get(i)).getIdAsLong(),
+                    rates);
         }
         return allRates;
     }
@@ -1024,10 +1036,9 @@ public class CostingEngineLocal implements CostingEngine
         }
         catch (Exception pe)
         {
-            c_logger
-                    .error("Failed to add surcharge "
-                            + p_newSurcharge.getName() + " to the cost "
-                            + p_costId, pe);
+            c_logger.error(
+                    "Failed to add surcharge " + p_newSurcharge.getName()
+                            + " to the cost " + p_costId, pe);
             String args[] =
             { p_newSurcharge.getName(), Long.toString(p_costId) };
             throw new CostingException(
@@ -1053,9 +1064,10 @@ public class CostingEngineLocal implements CostingEngine
         }
         catch (Exception pe)
         {
-            c_logger.error("Failed to modifiy surcharge "
-                    + p_modifiedSurcharge.getName() + " to the cost "
-                    + p_costId, pe);
+            c_logger.error(
+                    "Failed to modifiy surcharge "
+                            + p_modifiedSurcharge.getName() + " to the cost "
+                            + p_costId, pe);
             String args[] =
             { p_modifiedSurcharge.getName(), Long.toString(p_costId) };
             throw new CostingException(
@@ -1348,9 +1360,8 @@ public class CostingEngineLocal implements CostingEngine
                     else
                     // if NULL then the unit of work isn't valid
                     {
-                        c_logger
-                                .error("Failed to set an estimated amount of work because the type "
-                                        + p_unitOfWork + " is invalid.");
+                        c_logger.error("Failed to set an estimated amount of work because the type "
+                                + p_unitOfWork + " is invalid.");
                         String[] args =
                         { Integer.toString(p_unitOfWork) };
                         throw new CostingException(
@@ -1467,9 +1478,8 @@ public class CostingEngineLocal implements CostingEngine
                     else
                     // if NULL then the unit of work isn't valid
                     {
-                        c_logger
-                                .error("Failed to set an actual amount of work because the type "
-                                        + p_unitOfWork + " is invalid.");
+                        c_logger.error("Failed to set an actual amount of work because the type "
+                                + p_unitOfWork + " is invalid.");
                         String[] args =
                         { Integer.toString(p_unitOfWork) };
                         throw new CostingException(
@@ -1502,6 +1512,16 @@ public class CostingEngineLocal implements CostingEngine
     }
 
     /**
+     * @see CostingEngine.calculateCost(Job, boolean, int)
+     */
+    public Cost calculateCost(Job p_job, boolean p_recalculate, int p_costType)
+            throws RemoteException, CostingException
+    {
+        return calculateCost(p_job, getPivotCurrency(), p_recalculate,
+                p_costType);
+    }
+
+    /**
      * @see CostingEngine.calculateCost(long, Currency, boolean, int)
      */
     public void calculateCost(long p_jobId, Currency p_currency,
@@ -1529,50 +1549,35 @@ public class CostingEngineLocal implements CostingEngine
         Cost totalCost = null;
         Session session = HibernateUtil.getSession();
         Transaction tx = HibernateUtil.getTransaction();
-//        boolean useTransaction = false;
-//        if (!tx.isActive())
-//        {
-//            tx.begin();
-//            useTransaction = true;
-//        }
 
         try
         {
             // verify that this job should have a cost.
             // and it isn't in the cancelled or import failed state.
-            // tbd - check if costing turned on at system level??
+            // TBD: - check if costing turned on at system level??
             if (!p_job.getState().equals(Job.CANCELLED)
                     && !p_job.getState().equals(Job.IMPORTFAILED))
             {
-                // create the unit of work - transaction
-                // UnitOfWork uow = PersistenceService.getInstance()
-                // .acquireUnitOfWork();
                 boolean completeJob = (p_job.getState().equals(Job.EXPORTED)
                         || p_job.getState().equals(Job.ARCHIVED) || p_job
                         .getState().equals(Job.EXPORT_FAIL));
                 boolean recalculateWorkflows = p_recalculate;
                 totalCost = calculateCost(p_job, p_currency, p_recalculate,
                         session, p_costType, completeJob, recalculateWorkflows);
-                // commit the entire transaction
-//                if (useTransaction)
-//                {
-//                    tx.commit();
-//                }
-                
             }
             else if (p_job.getState().equals(Job.IMPORTFAILED))
             {
-                totalCost = new Cost(p_job, Cost.ZERO_COST, Cost.ZERO_COST, Cost.ZERO_COST,
-                        p_currency, p_costType);
+                totalCost = new Cost(p_job, Cost.ZERO_COST, Cost.ZERO_COST,
+                        Cost.ZERO_COST, p_currency, p_costType);
             }
-            
+
             HibernateUtil.commit(tx);
         }
         catch (Exception e)
         {
             HibernateUtil.rollback(tx);
-            c_logger.error("Failed to calculate the cost for job "
-                    + p_job.getId(), e);
+            c_logger.error(
+                    "Failed to calculate the cost for job " + p_job.getId(), e);
             String args[] =
             { Long.toString(p_job.getId()) };
             throw new CostingException(
@@ -1602,26 +1607,22 @@ public class CostingEngineLocal implements CostingEngine
         {
             // verify that this job should have a cost.
             // and it isn't in the cancelled or import failed state.
-            // tbd - check if costing turned on at system level??
+            // TBD: - check if costing turned on at system level??
             if (!p_job.getState().equals(Job.CANCELLED)
                     && !p_job.getState().equals(Job.IMPORTFAILED))
             {
-                // create the unit of work - transaction
-                // UnitOfWork uow = PersistenceService.getInstance()
-                // .acquireUnitOfWork();
                 boolean completeJob = false; // pretend it's not complete
                 boolean recalculateJob = true;
                 boolean recalculateWorkflows = false;
                 totalCost = calculateCost(p_job, p_currency, recalculateJob,
                         session, p_costType, completeJob, recalculateWorkflows);
-                // commit the entire transaction
-                // uow.commit();
+
                 tx.commit();
             }
             else if (p_job.getState().equals(Job.IMPORTFAILED))
             {
-                totalCost = new Cost(p_job, Cost.ZERO_COST, Cost.ZERO_COST, Cost.ZERO_COST,
-                        p_currency, p_costType);
+                totalCost = new Cost(p_job, Cost.ZERO_COST, Cost.ZERO_COST,
+                        Cost.ZERO_COST, p_currency, p_costType);
             }
         }
         catch (Exception e)
@@ -1644,16 +1645,6 @@ public class CostingEngineLocal implements CostingEngine
             }
         }
         return totalCost;
-    }
-
-    /**
-     * @see CostingEngine.calculateCost(Job, boolean, int)
-     */
-    public Cost calculateCost(Job p_job, boolean p_recalculate, int p_costType)
-            throws RemoteException, CostingException
-    {
-        return calculateCost(p_job, getPivotCurrency(), p_recalculate,
-                p_costType);
     }
 
     /**
@@ -1805,19 +1796,18 @@ public class CostingEngineLocal implements CostingEngine
         // get the cost for the job
         Cost totalCost = getCost(p_job, p_costType);
         totalCost = (Cost) p_session.get(Cost.class, totalCost.getIdAsLong());
-        p_currency = (Currency) p_session.get(Currency.class, p_currency
-                .getIdAsLong());
 
+        p_currency = (Currency) p_session.get(
+                Currency.class, p_currency.getIdAsLong());
         totalCost = totalCost.convert(p_currency);
-        boolean completeJob = p_isJobComplete;
+
         totalCost.isUseInContext = PageHandler.isInContextMatch(p_job);
         totalCost.isDefaultInContext = PageHandler.isDefaultContextMatch(p_job);
 
         // if the cost should be recalculated
-        if (p_recalculateJob && !completeJob)
+        if (p_recalculateJob && !p_isJobComplete)
         {
-            // clear out the estimated and actual
-            // costs to start re-calculating
+            // clear out the estimated and actual costs to start re-calculating.
             totalCost.setEstimatedCost(Cost.ZERO_COST);
             totalCost.setNoUseEstimatedCost(Cost.ZERO_COST);
             totalCost.setDefaultContextEstimatedCost(Cost.ZERO_COST);
@@ -1835,14 +1825,19 @@ public class CostingEngineLocal implements CostingEngine
                     Cost workflowCost = calculateCost(w, p_currency,
                             p_recalculateWorkflows, p_session, p_costType,
                             false);
+
+                    // record every workflow's costWordCount,
+                    // and when need them in the workflow calculate cost,
+                    // don't calculate them again.
+                    totalCost.addworkflowCost(w.getId(), workflowCost);
+
                     totalCost = totalCost.add(workflowCost);
-//                    totalCost.isUseInContext = p_job.getL10nProfile()
-//                            .getTranslationMemoryProfile()
-//                            .getIsContextMatchLeveraging();
-                    totalCost.isUseInContext = PageHandler.isInContextMatch(p_job);
-                    totalCost.isDefaultInContext = PageHandler.isDefaultContextMatch(p_job);
-                    CostByWordCount workflowCostByWordCount = workflowCost
-                            .getCostByWordCount();
+                    totalCost.isUseInContext =
+                            PageHandler.isInContextMatch(p_job);
+                    totalCost.isDefaultInContext =
+                            PageHandler.isDefaultContextMatch(p_job);
+                    CostByWordCount workflowCostByWordCount = 
+                            workflowCost.getCostByWordCount();
                     if (workflowCostByWordCount != null)
                     {
                         hasWordCountCostBreakdown = true;
@@ -1877,7 +1872,18 @@ public class CostingEngineLocal implements CostingEngine
                 }
             }
         }
-        // else the cost is fine.
+        else
+        {
+            // else :: the cost is fine, only load workflow cost for usage.
+            for (Iterator wfIter = p_job.getWorkflows().iterator(); wfIter
+                    .hasNext();) 
+            {
+                Workflow wf = (Workflow) wfIter.next();
+                Cost wfCost = getCost(wf, p_costType);
+                totalCost.addworkflowCost(wf.getId(), wfCost);
+            }
+        }
+
         p_session.saveOrUpdate(totalCost);
         return totalCost;
     }
@@ -1893,14 +1899,16 @@ public class CostingEngineLocal implements CostingEngine
         {
             // get the cost
             Cost totalCost = getCost(p_workflow, p_costType);
-            totalCost = (Cost) p_session.get(Cost.class, totalCost
-                    .getIdAsLong());
-            p_currency = (Currency) p_session.get(Currency.class, p_currency
-                    .getIdAsLong());
+            totalCost = (Cost) p_session.get(Cost.class,
+                    totalCost.getIdAsLong());
+            p_currency = (Currency) p_session.get(Currency.class,
+                    p_currency.getIdAsLong());
 
             totalCost = totalCost.convert(p_currency);
-            totalCost.isDefaultInContext = PageHandler.isDefaultContextMatch(p_workflow.getJob());
-            totalCost.isUseInContext = PageHandler.isInContextMatch(p_workflow.getJob());
+            totalCost.isDefaultInContext = PageHandler
+                    .isDefaultContextMatch(p_workflow.getJob());
+            totalCost.isUseInContext = PageHandler.isInContextMatch(p_workflow
+                    .getJob());
 
             boolean completeWorkflow = (p_workflow.getState().equals(
                     Workflow.EXPORTED)
@@ -1940,14 +1948,17 @@ public class CostingEngineLocal implements CostingEngine
                         Cost taskCost = calculateCost(t, p_currency,
                                 p_recalculate, p_session, p_costType,
                                 p_recalcFinishedWorkflow);
+
                         CostByWordCount taskCostByWordCount = taskCost
                                 .getCostByWordCount();
-
-//                        totalCost.isUseInContext = p_workflow.getJob()
-//                                .getL10nProfile().getTranslationMemoryProfile()
-//                                .getIsContextMatchLeveraging();
-                        totalCost.isUseInContext = PageHandler.isInContextMatch(p_workflow.getJob());
-                        totalCost.isDefaultInContext = PageHandler.isDefaultContextMatch(p_workflow.getJob());
+                        totalCost.addTaskCost(t.getId(), taskCost);
+                        // totalCost.isUseInContext = p_workflow.getJob()
+                        // .getL10nProfile().getTranslationMemoryProfile()
+                        // .getIsContextMatchLeveraging();
+                        totalCost.isUseInContext = PageHandler
+                                .isInContextMatch(p_workflow.getJob());
+                        totalCost.isDefaultInContext = PageHandler
+                                .isDefaultContextMatch(p_workflow.getJob());
                         totalCost = totalCost.add(taskCost);
                         if (taskCostByWordCount != null)
                         {
@@ -2017,8 +2028,8 @@ public class CostingEngineLocal implements CostingEngine
     {
         try
         {
-            Task t = (TaskImpl) p_session.get(TaskImpl.class, new Long(p_task
-                    .getId()));
+            Task t = (TaskImpl) p_session.get(TaskImpl.class,
+                    new Long(p_task.getId()));
             Cost cost = getCost(t, p_costType);
             cost = (Cost) p_session.get(Cost.class, cost.getIdAsLong());
             boolean addToActualCost = false;
@@ -2098,8 +2109,8 @@ public class CostingEngineLocal implements CostingEngine
                 {
                     if (r.getRateType().equals(Rate.UnitOfWork.HOURLY))
                     {
-                        cost = calculateByHour(cost, r, t
-                                .getAmountOfWork(Rate.UnitOfWork.HOURLY),
+                        cost = calculateByHour(cost, r,
+                                t.getAmountOfWork(Rate.UnitOfWork.HOURLY),
                                 addToActualCost);
                     }
                     else if (r.getRateType().equals(Rate.UnitOfWork.PAGE_COUNT))
@@ -2111,14 +2122,16 @@ public class CostingEngineLocal implements CostingEngine
                                 t.getWorkflow().getJob().getId(),
                                 Rate.UnitOfWork.PAGE_COUNT.intValue(),
                                 p_costType);
-                        cost = calculateByPageCount(cost, r, t
-                                .getAmountOfWork(Rate.UnitOfWork.PAGE_COUNT),
+                        cost = calculateByPageCount(cost, r,
+                                t.getAmountOfWork(Rate.UnitOfWork.PAGE_COUNT),
                                 (int) defaultNumOfPages, addToActualCost);
                     }
-                    else if (r.getRateType().equals(Rate.UnitOfWork.WORD_COUNT) || r.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY))
+                    else if (r.getRateType().equals(Rate.UnitOfWork.WORD_COUNT)
+                            || r.getRateType().equals(
+                                    Rate.UnitOfWork.WORD_COUNT_BY))
                     {
-                        cost = calculateByWordCount(p_session, cost, r, t
-                                .getWorkflow(), addToActualCost);
+                        cost = calculateByWordCount(p_session, cost, r,
+                                t.getWorkflow(), addToActualCost);
                     }
                     else if (r.getRateType().equals(Rate.UnitOfWork.FIXED))
                     {
@@ -2134,7 +2147,8 @@ public class CostingEngineLocal implements CostingEngine
                 // else - no rate - this is OK
                 cost.calculateFinalCost();
             }
-            cost.isDefaultInContext = PageHandler.isDefaultContextMatch(wf.getJob());
+            cost.isDefaultInContext = PageHandler.isDefaultContextMatch(wf
+                    .getJob());
             cost.isUseInContext = PageHandler.isInContextMatch(wf.getJob());
             // else cost is fine
             p_session.saveOrUpdate(cost);
@@ -2223,8 +2237,10 @@ public class CostingEngineLocal implements CostingEngine
         Currency rateCurrency = p_rate.getCurrency();
         Currency costCurrency = p_cost.getCurrency();
 
-        boolean isUseInContext = PageHandler.isInContextMatch(p_workflow.getJob());
-        boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(p_workflow.getJob());
+        boolean isUseInContext = PageHandler.isInContextMatch(p_workflow
+                .getJob());
+        boolean isDefaultContextMatch = PageHandler
+                .isDefaultContextMatch(p_workflow.getJob());
         if (p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT)
                 || p_rate.getRateType().equals(Rate.UnitOfWork.WORD_COUNT_BY))
         {
@@ -2232,7 +2248,8 @@ public class CostingEngineLocal implements CostingEngine
             // Note: the adjusted workflow word counts (which include cross-file
             // repetition anaylisis) are stored on the workflow.
             // These adjusted word counts are what we want to cost off of.
-            int subLevRepetitionCount = p_workflow.getSubLevRepetitionWordCount();
+            int subLevRepetitionCount = p_workflow
+                    .getSubLevRepetitionWordCount();
             // The no match category
             int repetitionCount = p_workflow.getRepetitionWordCount()
                     + subLevRepetitionCount
@@ -2243,25 +2260,28 @@ public class CostingEngineLocal implements CostingEngine
             int inContextMatchCount = p_workflow.getInContextMatchWordCount();
             int noUseInContextMatchCount = p_workflow
                     .getNoUseInContextMatchWordCount();
-            int noUseExactMatchCount = p_workflow.getNoUseExactMatchWordCount();
+            int totalExactMatchWordCount = p_workflow
+                    .getTotalExactMatchWordCount();
             // The exact match category
             int contextMatchCount = p_workflow.getContextMatchWordCount();
             int segmentTmMatchCount = p_workflow.getSegmentTmWordCount();
-            
-            int defaultContextSegmentTmMatchCount = noUseExactMatchCount - contextMatchCount;
-            
+
+            int defaultContextSegmentTmMatchCount = totalExactMatchWordCount
+                    - contextMatchCount;
+
             int lowFuzzyMatchCount = p_workflow.getThresholdLowFuzzyWordCount();
             int medFuzzyMatchCount = p_workflow.getThresholdMedFuzzyWordCount();
-            int medHiFuzzyMatchCount = p_workflow.getThresholdMedHiFuzzyWordCount();
+            int medHiFuzzyMatchCount = p_workflow
+                    .getThresholdMedHiFuzzyWordCount();
             int hiFuzzyMatchCount = p_workflow.getThresholdHiFuzzyWordCount();
             int noMatchCount = p_workflow.getThresholdNoMatchWordCount();
 
             // The areas where calculations are done (multiply, add, subtract)
             // should be changed to use BigDecimal for the actual calculation.
-            float noMatchCost = BigDecimalHelper.multiply(noMatchCount, p_rate
-                    .getNoMatchRate());
-            float repetitionCost = BigDecimalHelper.multiply(
-                    repetitionCount, p_rate.getRepetitionRate());
+            float noMatchCost = BigDecimalHelper.multiply(noMatchCount,
+                    p_rate.getNoMatchRate());
+            float repetitionCost = BigDecimalHelper.multiply(repetitionCount,
+                    p_rate.getRepetitionRate());
             // Fuzzy Match Categories
             float lowFuzzyMatchCost = BigDecimalHelper.multiply(
                     lowFuzzyMatchCount, p_rate.getLowFuzzyMatchRate());
@@ -2275,15 +2295,16 @@ public class CostingEngineLocal implements CostingEngine
                     inContextMatchCount, p_rate.getInContextMatchRate());
             float noUseInContextMatchCost = BigDecimalHelper.multiply(
                     noUseInContextMatchCount, p_rate.getInContextMatchRate());
-            float noUseExactMatchCost = BigDecimalHelper.multiply(
-                    noUseExactMatchCount, p_rate.getSegmentTmRate());
+            float totalExactMatchCost = BigDecimalHelper.multiply(
+                    totalExactMatchWordCount, p_rate.getSegmentTmRate());
             // Exact Match
             float contextMatchCost = BigDecimalHelper.multiply(
                     contextMatchCount, p_rate.getContextMatchRate());
             float segmentTmMatchCost = BigDecimalHelper.multiply(
                     segmentTmMatchCount, p_rate.getSegmentTmRate());
             float defaultContextSegmentTmMatchCost = BigDecimalHelper.multiply(
-                    defaultContextSegmentTmMatchCount, p_rate.getSegmentTmRate());
+                    defaultContextSegmentTmMatchCount,
+                    p_rate.getSegmentTmRate());
             // convert all the costs to the cost currency
             noMatchCost = Cost.convert(noMatchCost, rateCurrency, costCurrency);
             repetitionCost = Cost.convert(repetitionCost, rateCurrency,
@@ -2300,7 +2321,7 @@ public class CostingEngineLocal implements CostingEngine
                     costCurrency);
             noUseInContextMatchCost = Cost.convert(noUseInContextMatchCost,
                     rateCurrency, rateCurrency);
-            noUseExactMatchCost = Cost.convert(noUseExactMatchCost,
+            totalExactMatchCost = Cost.convert(totalExactMatchCost,
                     rateCurrency, rateCurrency);
             contextMatchCost = Cost.convert(contextMatchCost, rateCurrency,
                     costCurrency);
@@ -2309,45 +2330,42 @@ public class CostingEngineLocal implements CostingEngine
 
             // The areas where calculations are done (multiply, add, subtract)
             // should be changed to use BigDecimal for the actual calculation.
-            //Leverage In-Context Match
+            // Leverage In-Context Match
             float[] param =
             { noMatchCost, repetitionCost, lowFuzzyMatchCost,
                     medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
-//                    inContextMatchCost, contextMatchCost, segmentTmMatchCost };
+                    // inContextMatchCost, contextMatchCost, segmentTmMatchCost
+                    // };
                     inContextMatchCost, segmentTmMatchCost };
             float amount = BigDecimalHelper.add(param);
-            //Leverage 100% Match
+            // Leverage 100% Match
             float[] noUseParam =
             { noMatchCost, repetitionCost, lowFuzzyMatchCost,
                     medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
-//                    noUseInContextMatchCost, contextMatchCost,
-                    noUseInContextMatchCost,
-                    noUseExactMatchCost };
+                    // noUseInContextMatchCost, contextMatchCost,
+                    noUseInContextMatchCost, totalExactMatchCost };
             float noUseAmount = BigDecimalHelper.add(noUseParam);
-            //Leverage Default Match
-            float[] defaultContextParam = 
-            {
-                 noMatchCost, repetitionCost, lowFuzzyMatchCost,
-                 medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
-                 contextMatchCost, defaultContextSegmentTmMatchCost
-            };
-            float defaultContextAmount = BigDecimalHelper.add(defaultContextParam);
-            
-            
+            // Leverage Default Match
+            float[] defaultContextParam =
+            { noMatchCost, repetitionCost, lowFuzzyMatchCost,
+                    medFuzzyMatchCost, medHiFuzzyMatchCost, hiFuzzyMatchCost,
+                    contextMatchCost, defaultContextSegmentTmMatchCost };
+            float defaultContextAmount = BigDecimalHelper
+                    .add(defaultContextParam);
+
             p_cost.setEstimatedCost(amount);
             p_cost.setNoUseEstimatedCost(noUseAmount);
             p_cost.setDefaultContextEstimatedCost(defaultContextAmount);
-            
+
             CostByWordCount wordCountCost = p_cost.getCostByWordCount();
             if (wordCountCost == null)
             {
-                wordCountCost = new CostByWordCount(p_cost,
-                        repetitionCost, contextMatchCost,
-                        inContextMatchCost, segmentTmMatchCost,
-                        lowFuzzyMatchCost, medFuzzyMatchCost,
-                        medHiFuzzyMatchCost, hiFuzzyMatchCost, noMatchCost,
-                        noUseInContextMatchCost, noUseExactMatchCost, 
-                        defaultContextSegmentTmMatchCost);
+                wordCountCost = new CostByWordCount(p_cost, repetitionCost,
+                        contextMatchCost, inContextMatchCost,
+                        segmentTmMatchCost, lowFuzzyMatchCost,
+                        medFuzzyMatchCost, medHiFuzzyMatchCost,
+                        hiFuzzyMatchCost, noMatchCost, noUseInContextMatchCost,
+                        totalExactMatchCost, defaultContextSegmentTmMatchCost);
                 p_cost.setCostByWordCount(wordCountCost);
                 p_session.save(wordCountCost);
             }
@@ -2360,14 +2378,15 @@ public class CostingEngineLocal implements CostingEngine
                 wordCountCost_temp.setInContextMatchCost(inContextMatchCost);
                 wordCountCost_temp
                         .setNoUseInContextMatchCost(noUseInContextMatchCost);
-                wordCountCost_temp.setNoUseExactMatchCost(noUseExactMatchCost);
+                wordCountCost_temp.setNoUseExactMatchCost(totalExactMatchCost);
                 wordCountCost_temp.setSegmentTmMatchCost(segmentTmMatchCost);
                 wordCountCost_temp.setLowFuzzyMatchCost(lowFuzzyMatchCost);
                 wordCountCost_temp.setMedFuzzyMatchCost(medFuzzyMatchCost);
                 wordCountCost_temp.setMedHiFuzzyMatchCost(medHiFuzzyMatchCost);
                 wordCountCost_temp.setHiFuzzyMatchCost(hiFuzzyMatchCost);
                 wordCountCost_temp.setNoMatchCost(noMatchCost);
-                wordCountCost_temp.setDefaultContextExactMatchCost(defaultContextSegmentTmMatchCost);
+                wordCountCost_temp
+                        .setDefaultContextExactMatchCost(defaultContextSegmentTmMatchCost);
                 p_session.saveOrUpdate(wordCountCost_temp);
                 p_cost.setCostByWordCount(wordCountCost_temp);
             }
@@ -2375,7 +2394,9 @@ public class CostingEngineLocal implements CostingEngine
             p_cost.isDefaultInContext = isDefaultContextMatch;
             if (addToActualCost)
             {
-                p_cost.setActualCost((isUseInContext) ? amount : (isDefaultContextMatch) ? defaultContextAmount : noUseAmount);
+                p_cost.setActualCost((isUseInContext) ? amount
+                        : (isDefaultContextMatch) ? defaultContextAmount
+                                : noUseAmount);
             }
         }
         return p_cost;
@@ -2395,7 +2416,8 @@ public class CostingEngineLocal implements CostingEngine
                     rateCurrency, costCurrency));
             p_cost.setNoUseEstimatedCost(Cost.convert(p_rate.getUnitRate(),
                     rateCurrency, costCurrency));
-            p_cost.setDefaultContextEstimatedCost(Cost.convert(p_rate.getUnitRate(), rateCurrency, costCurrency));
+            p_cost.setDefaultContextEstimatedCost(Cost.convert(
+                    p_rate.getUnitRate(), rateCurrency, costCurrency));
             if (addToActualCost)
             {
                 p_cost.setActualCost(Cost.convert(p_rate.getUnitRate(),
@@ -2437,9 +2459,8 @@ public class CostingEngineLocal implements CostingEngine
             }
             else
             {
-                c_logger
-                        .error("Failed to retrieve cost associated with an object because "
-                                + " the object is not a valid costable type.");
+                c_logger.error("Failed to retrieve cost associated with an object because "
+                        + " the object is not a valid costable type.");
                 // not supported
                 throw new CostingException(
                         CostingException.MSG_INVALID_OBJ_TYPE, null, null);
@@ -2462,8 +2483,8 @@ public class CostingEngineLocal implements CostingEngine
                 String companyId = CompanyThreadLocal.getInstance().getValue();
                 Currency privot = (Currency) Currency.getPivotCurrencies().get(
                         companyId);
-                c = new Cost(p_obj, Cost.ZERO_COST, Cost.ZERO_COST, Cost.ZERO_COST, privot,
-                        p_costType);
+                c = new Cost(p_obj, Cost.ZERO_COST, Cost.ZERO_COST,
+                        Cost.ZERO_COST, privot, p_costType);
                 HibernateUtil.save(c);
             }
         }

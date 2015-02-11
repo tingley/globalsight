@@ -20,26 +20,26 @@ public class JobDetails {
     public static final String UPLOADDIALOG_BUTTON = "dijit_form_Button_2";
     public static final String DELETEFILES_BUTTON = "//input[@name='remove Files']";
 
-	public static final String Workflows_TABLE="//form[@id='workflowForm']/table/tbody/tr[2]/td/table/tbody";
+	public static final String WORKFLOWS_TABLE="//form[@id='workflowForm']/table/tbody/tr[2]/td/table/tbody";
 	public static final String Reassign_BUTTON="ReAssign";
-	public static final String Discard_BUTTON="Discard";
+	public static final String DISCARD_BUTTON="Discard";
 	public static final String ViewError_BUTTON="ViewError";
-	public static final String DetailedWordCounts_BUTTON="WordCount";
+	public static final String DETAILED_WORD_COUNTS_BUTTON="WordCount";
 	public static final String RateVendor_BUTTON="Rate";
 	public static final String Archive_BUTTON="Archive";
 	public static final String Details_BUTTON="Details";
-	public static final String Export_BUTTON="Export";
+	public static final String EXPORT_BUTTON="Export";
 	public static final String Add_BUTTON="Add";
 	public static final String Edit_BUTTON="Edit";
-	public static final String Dispatch_BUTTON="Dispatch";
+	public static final String DISPATCH_BUTTON="Dispatch";
 	public static final String Download="Download";
 	public static final String Previous="Previous";
 	
 	//job tables
-	public static final String DetailedStatistics_TABLE="//div[@id='contentLayer']/form/p[1]/table/tbody/tr[2]/td/table/tbody";
+	public static final String DETAILED_STATISTICS_TABLE="//div[@id='contentLayer']/form/p[1]/table/tbody/tr[2]/td/table/tbody";
 	public static final String SummaryStatistics_TABLE="//div[@id='contentLayer']/form/p[2]/table/tbody/tr[2]/td/table/tbody";
 	public static final String BacktoJobDetails_BUTTON="//input[@value='Back to Job Details']";
 	
 	//Export the job.
-	public static final String Export_BUTTON_EXPORT="Export";
+	public static final String EXPORT_EXECUTE_BUTTON="Export";
 }

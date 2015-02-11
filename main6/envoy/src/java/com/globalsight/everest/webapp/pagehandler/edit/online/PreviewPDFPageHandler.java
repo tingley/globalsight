@@ -17,24 +17,23 @@
 package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.HashMap;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.ResourceBundle;
+import java.util.Vector;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -43,18 +42,25 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-
 import org.apache.log4j.Priority;
 
-import com.globalsight.everest.company.CompanyThreadLocal;
-import com.globalsight.everest.foundation.L10nProfile;
-import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.cxe.adapter.adobe.AdobeConfiguration;
+import com.globalsight.cxe.adapter.idml.IdmlConverter;
+import com.globalsight.cxe.adapter.idml.IdmlHelper;
 import com.globalsight.cxe.adapter.quarkframe.FrameHelper;
+import com.globalsight.cxe.engine.eventflow.DiplomatAttribute;
+import com.globalsight.cxe.engine.eventflow.EventFlow;
 import com.globalsight.cxe.engine.util.FileCopier;
 import com.globalsight.cxe.engine.util.FileUtils;
-import com.globalsight.everest.page.TargetPage;
+import com.globalsight.cxe.message.CxeMessageType;
+import com.globalsight.everest.company.CompanyThreadLocal;
+import com.globalsight.everest.company.CompanyWrapper;
+import com.globalsight.everest.foundation.L10nProfile;
+import com.globalsight.everest.foundation.User;
+import com.globalsight.everest.foundation.UserImpl;
+import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.page.pageexport.ExportConstants;
 import com.globalsight.everest.page.pageexport.ExportHelper;
 import com.globalsight.everest.servlet.EnvoyServletException;
@@ -66,15 +72,13 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.ling.docproc.merger.fm.FontMappingHelper;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.GlobalSightLocale;
-import com.globalsight.util.FileUtil;
-import com.globalsight.util.file.FileWaiter;
 import com.globalsight.everest.workflowmanager.Workflow;
-import com.globalsight.cxe.message.CxeMessageType;
-import com.globalsight.cxe.message.FileMessageData;
-import com.globalsight.cxe.message.MessageDataFactory;
+import com.globalsight.ling.docproc.merger.fm.FontMappingHelper;
+import com.globalsight.ling.docproc.merger.fm.IDMLFontMappingHelper;
+import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
+import com.globalsight.util.GlobalSightLocale;
+import com.globalsight.util.file.FileWaiter;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Rectangle;
@@ -82,13 +86,6 @@ import com.lowagie.text.pdf.PdfCopy;
 import com.lowagie.text.pdf.PdfImportedPage;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfWriter;
-
-import com.globalsight.cxe.engine.eventflow.EventFlow;
-import com.globalsight.cxe.entity.fileprofile.FileProfile;
-import com.globalsight.cxe.entity.filterconfiguration.Filter;
-import com.globalsight.cxe.entity.filterconfiguration.FilterConstants;
-import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
-import com.globalsight.cxe.entity.filterconfiguration.InddFilter;
 
 public class PreviewPDFPageHandler extends PageHandler
 {
@@ -100,6 +97,7 @@ public class PreviewPDFPageHandler extends PageHandler
     private static final String ADOBE_INDD = "indd";
     private static final String ADOBE_INX = "inx";
     private static final String ADOBE_FM = "FM";
+    private static final String ADOBE_IDML = "idml";
     
     private static final String PDF_SUFFIX = ".pdf";
     private static final String XML_SUFFIX = ".xml";
@@ -108,6 +106,7 @@ public class PreviewPDFPageHandler extends PageHandler
     private static final String INX_SUFFIX = ".inx";
     private static final String FM_SUFFIX = ".fm";
     private static final String MIF_SUFFIX = ".mif";
+    private static final String IDML_SUFFIX = ".idml";
     private static final String STATUS_SUFFIX = ".status";
 
     private static final String COMMAND_STATUS_SUFFIX = ".pv_status";
@@ -120,8 +119,10 @@ public class PreviewPDFPageHandler extends PageHandler
     private static final int ADOBE_CS2 = 0;
     private static final int ADOBE_CS3 = 1;
     private static final int ADOBE_CS4 = 2;
-    private static final int ADOBE_CS5 = 3;    
+    private static final int ADOBE_CS5 = 3;
     private static final int ADOBE_FM9 = 4;
+    private static final int ADOBE_CS5_5 = 5;
+    private static final int ADOBE_TYPE_IDML = 6;
     
     private static SystemConfiguration m_sc = SystemConfiguration.getInstance();
 
@@ -145,6 +146,9 @@ public class PreviewPDFPageHandler extends PageHandler
     private Job m_job = null;
     // this company_id is of the job, not for the user.
     private String m_company_id = "";
+    
+    private String m_relSafeName = null;;
+    private String m_safeBaseFileName = null;
 
     public void invokePageHandler(WebPageDescriptor p_pageDescriptor,
             HttpServletRequest p_request, HttpServletResponse p_response,
@@ -155,9 +159,26 @@ public class PreviewPDFPageHandler extends PageHandler
         sessionMgr = (SessionManager) session.getAttribute(SESSION_MANAGER);
 
         determineConversionParameters();
+        long jobId;
+        Object jobIdO = sessionMgr.getAttribute(WebAppConstants.JOB_ID);
+        if (jobIdO instanceof Long)
+        {
+            jobId = (Long) jobIdO;
+        }
+        else
+        {
+            jobId = Long.valueOf((String) jobIdO);
+        }
+        
+        Object userobj = sessionMgr.getAttribute(WebAppConstants.USER);
+        UserImpl user = null;
+        if (userobj != null)
+        {
+            user = (UserImpl) userobj;
+        }
+        String userid = user == null ? null : user.getUserId();
 
-        String jobId = (String) sessionMgr.getAttribute(WebAppConstants.JOB_ID);
-        m_job = getJobById(Long.valueOf(jobId).longValue());
+        m_job = getJobById(jobId);
         if (m_job != null)
         {
             m_company_id = m_job.getCompanyId();
@@ -170,7 +191,8 @@ public class PreviewPDFPageHandler extends PageHandler
         }
         String action = p_request.getParameter("action") == null ? ""
                 : (String) p_request.getParameter("action");
-        File pdfFile = getPreviewPdf(p_request);
+        File pdfFile = getPreviewPdf(p_request, userid, action);
+        File oldPdfFile = getOldPreviewPdf(p_request);
         EditorState state = (EditorState)sessionMgr.getAttribute(WebAppConstants.EDITORSTATE);
         long srcPageId = state.getSourcePageId().longValue();
         long targetPageId = state.getTargetPageId().longValue();
@@ -199,7 +221,7 @@ public class PreviewPDFPageHandler extends PageHandler
                 }
                 else if (action.equals("previewTar"))
                 {                
-                    mifFile = getTargetFile(targetPageId);
+                    mifFile = getTargetFile(targetPageId, userid, state);
                     int index = Math.max(pageName.indexOf("/"),
                             pageName.indexOf("\\"));
                     targetLocale = pageName.substring(0, index);
@@ -299,10 +321,87 @@ public class PreviewPDFPageHandler extends PageHandler
                 }
                 catch (Exception e)
                 {
-                    CATEGORY.error(e);
+                    CATEGORY.error(e.getMessage(), e);
                     super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
                 }
             }
+        }
+        else if (m_versionType == ADOBE_TYPE_IDML)
+        {
+        	try
+        	{
+            	IdmlConverter converter = new IdmlConverter();
+            	
+                if (!pdfFile.exists())
+                {
+                    File idmlFile = null;
+                    String currentLocale = null;
+                    String pageName = p_request.getParameter("file");
+                    if (action.equals("previewSrc"))
+                    {
+                        currentLocale = m_job.getSourceLocale().toString();
+                        idmlFile = getSourceFile(srcPageId);
+                        converter.convertToPdf(idmlFile, pdfFile, currentLocale);
+                    }
+                    else if (action.equals("previewTar"))
+                    {
+                    	String targetPageName = p_request.getParameter("file");
+                        int index = Math.max(targetPageName.indexOf("/"),
+                                targetPageName.indexOf("\\"));
+                        targetLocale = targetPageName.substring(0, index);
+                        if (LOCALE_PRE_CONVERTED.equals(targetLocale))
+                        {
+                            targetPageName = targetPageName.replaceFirst(targetLocale,
+                                    LOCALE_POST_CONVERTED);
+                            targetLocale = LOCALE_POST_CONVERTED;
+                        }
+                        converterDir = getConvertDir() + "/" + targetLocale;
+                        new File(converterDir).mkdirs();
+
+                        String xmlFilePath = converterDir + File.separator + m_relSafeName;
+                        File zipDir = getZipDir(new File(xmlFilePath), m_safeBaseFileName);
+                        // write xml file
+                        writeXMLFileToConvertDir(p_request, xmlFilePath,
+                                targetPageName);
+                        IdmlHelper.split(zipDir.getAbsolutePath());
+                        IDMLFontMappingHelper.processIDMLFont(zipDir.getAbsolutePath(), targetLocale);
+                        String idmlPath = converter.convertXmlToIdml(m_safeBaseFileName, zipDir.getAbsolutePath());
+                        IDMLFontMappingHelper.restoreIDMLFont(zipDir.getAbsolutePath());
+                        converter.convertToPdf(new File(idmlPath), pdfFile, targetLocale);
+                    }
+                }
+        		
+        	}
+        	 catch (Exception e)
+             {
+        		 ResourceBundle rb = PageHandler.getBundle(p_request.getSession());
+        		 
+                 CATEGORY.error(e.getMessage(), e);
+                 String msg = e.getMessage();
+                 String error = "Read PDF Data Error!";
+                 if ("idml converter is not started".equals(msg))
+                 {
+                	 error = rb.getString("lb_filter_msg_convert_start_idml");
+                 }
+                 
+                 StringBuffer sb = new StringBuffer();
+                 sb.append("<%@ page contentType=\"text/html; charset=UTF-8\" errorPage=\"error.jsp\" session=\"true\"%>");
+                 sb.append("<HTML>");
+                 sb.append("<HEAD>");
+                 sb.append("<SCRIPT LANGUAGE=\"JavaScript\" SRC=\"/globalsight/includes/setStyleSheet.js\"></SCRIPT>");
+                 sb.append("</HEAD>");
+                 sb.append("<BODY>");
+                 sb.append("<DIVSTYLE=\" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;\">");
+                 sb.append("<DIV STYLE=\" POSITION: ABSOLUTE; Z-INDEX: 9; TOP: 108px; LEFT: 20px; RIGHT: 20px;\">");
+                 sb.append("<SPAN CLASS=\"headingError\">" + error + "</SPAN>");
+                 sb.append("</DIV>");
+                 sb.append("</BODY>");
+                 sb.append("</HTML>");
+                 p_response.getWriter().write(sb.toString());
+                 return;
+//                 super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
+             }
+        	 
         }
         else
         {
@@ -337,15 +436,16 @@ public class PreviewPDFPageHandler extends PageHandler
                         new File(converterDir).mkdirs();
 
                         String targetPageFolder = pdfFile.getParent();
+                        String statusPageFolder = oldPdfFile.getParent();
                         File f = new File(targetPageFolder);
                         if (!f.exists())
                         {
                             f.mkdirs();
-                            copyFilesToNewTargetLocale(p_request, targetPageName, targetPageFolder);
+                            copyFilesToNewTargetLocale(p_request, targetPageName, targetPageFolder, statusPageFolder);
                         }
-                        String oriXmlFileName = getConvertedFileName(targetPageName);
+                        String oriXmlFileName = getConvertedFileName(targetLocale, targetPageName);
 
-                        backupInddFile(newFileNameMap, converterDir, oriXmlFileName);
+                        backupInddFile(newFileNameMap, getConvertDir(), targetLocale, oriXmlFileName);
                         // back up the indd and xmp file
                         String xmlFilePath = converterDir + File.separator
                                 + (String) newFileNameMap.get(XML_SUFFIX);
@@ -355,14 +455,14 @@ public class PreviewPDFPageHandler extends PageHandler
                         // write command file
                         writeCommandFile(xmlFilePath);
                         // 5 wait for Adobe Converter to convert
-                        pdfFile = readTargetPdfFile(xmlFilePath, targetPageName);
+                        pdfFile = readTargetPdfFile(xmlFilePath, targetPageName, userid);
 
                     }
                 }
             }
             catch (Exception e)
             {
-                CATEGORY.error(e);
+                CATEGORY.error(e.getMessage(), e);
                 super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
             }
             finally
@@ -418,8 +518,35 @@ public class PreviewPDFPageHandler extends PageHandler
             super.invokePageHandler(p_pageDescriptor, p_request, p_response, p_context);
         }
     }
+    
+    private File getZipDir(File file, String safeBaseFileName)
+    {
+        // avoid dead circle
+        if (file == null || file.getPath().length() < 20)
+        {
+            return file;
+        }
 
-    public File setCopyOnlyPermission(File p_file) throws DocumentException,
+        if (file.getName().startsWith(safeBaseFileName))
+        {
+            return file;
+        }
+        else
+        {
+            File parent = file.getParentFile();
+            // check if can not get parent file
+            if (parent.getPath().equals(file.getPath()))
+            {
+                return file;
+            }
+            else
+            {
+                return getZipDir(parent, safeBaseFileName);
+            }
+        }
+    }
+
+    public static File setCopyOnlyPermission(File p_file) throws DocumentException,
             IOException
     {
         PdfReader reader = new PdfReader(p_file.getAbsolutePath());
@@ -432,7 +559,7 @@ public class PreviewPDFPageHandler extends PageHandler
         Document document = new Document(new Rectangle(width, height));
         PdfCopy writer = new PdfCopy(document, new FileOutputStream(outPutFile));
         writer.setEncryption(PdfWriter.STRENGTH40BITS, null, null,
-                PdfWriter.ALLOW_COPY);
+                PdfWriter.ALLOW_COPY | PdfWriter.ALLOW_PRINTING);
         try
         {
             document.open();
@@ -455,7 +582,7 @@ public class PreviewPDFPageHandler extends PageHandler
             }
             else
             {
-                CATEGORY.error(e.toString());
+                CATEGORY.error(e.getMessage(), e);
             }
         }
 
@@ -485,14 +612,33 @@ public class PreviewPDFPageHandler extends PageHandler
 
     }
     
-    private File getTargetFile(long targetPageId)
+    private File getTargetIdmlFile(long targetPageId)
     {           
         File targetFile = null;
         
         try 
         {
             ExportHelper helper = new ExportHelper();
-            targetFile = helper.getTargetXmlPage(targetPageId, CxeMessageType.MIF_LOCALIZED_EVENT);
+            targetFile = helper.getTargetXmlPage(targetPageId, CxeMessageType.IDML_LOCALIZED_EVENT, true);
+        }
+        catch(Exception e)
+        {
+            CATEGORY.error("get target file error: " + e.getMessage());
+        }
+        
+        return targetFile;
+    }
+    
+    private File getTargetFile(long targetPageId, String uid, EditorState state)
+    {           
+        File targetFile = null;
+        
+        try 
+        {
+            ExportHelper helper = new ExportHelper();
+            helper.setUserId(uid);
+            helper.setEditorState(state);
+            targetFile = helper.getTargetXmlPage(targetPageId, CxeMessageType.MIF_LOCALIZED_EVENT, true);
         }
         catch(Exception e)
         {
@@ -511,25 +657,64 @@ public class PreviewPDFPageHandler extends PageHandler
      * @throws Exception 
      */
     private void copyFilesToNewTargetLocale(HttpServletRequest p_request,
-            String p_targetPageName, String p_targetPageFolder) throws Exception
+            String p_targetPageName, String p_targetPageFolder, String p_statusFolder) throws Exception
     {
+        String existedLocale = null;
+        File previewDir = AmbFileStoragePathUtils.getPdfPreviewDir(m_company_id);
         L10nProfile lp = m_job.getL10nProfile();
-        GlobalSightLocale[] existedLocales = lp.getTargetLocales();
-        String existedLocale = existedLocales[0].toString();
-        if (LOCALE_PRE_CONVERTED.equals(existedLocale))
-            existedLocale = LOCALE_POST_CONVERTED;
-        String existedTpFolder = p_targetPageFolder.replaceFirst(targetLocale,
+        GlobalSightLocale[] targetLocales = lp.getTargetLocales();
+        String prefix = FileUtils.getPrefix(p_targetPageName);
+        String tarName = null;
+        for (GlobalSightLocale globalSightLocale : targetLocales)
+        {
+            existedLocale = globalSightLocale.toString();
+            if (LOCALE_PRE_CONVERTED.equals(existedLocale))
+                existedLocale = LOCALE_POST_CONVERTED;
+            
+            String existedFolder = prefix.replaceFirst(targetLocale,
+                    existedLocale);
+            tarName = previewDir + File.separator + existedFolder + STATUS_SUFFIX;
+            
+            if (new File(tarName).exists())
+            {
+                break;
+            }
+                
+            tarName = tarName.replace("\\", "/");
+            if (new File(tarName).exists())
+            {
+                break;
+            }
+            
+            tarName = null;
+        }
+        
+        // do not copy if the target locale is same as existed locale
+        if (existedLocale.equalsIgnoreCase(targetLocale))
+        {
+            return;
+        }
+        
+        String existedTpFolder = p_statusFolder.replaceFirst(targetLocale,
                 existedLocale);
         File file = new File(existedTpFolder);
         File[] files = file.listFiles();
-        for (int i = 0; i < files.length; i++)
+        if (files != null)
         {
-            File f = files[i];
-            if (STATUS_SUFFIX.equalsIgnoreCase(f.getAbsolutePath().substring(
-                    f.getAbsolutePath().lastIndexOf("."))))
-                FileCopier.copy(f, p_targetPageFolder);
+            for (int i = 0; i < files.length; i++)
+            {
+                File f = files[i];
+                if (STATUS_SUFFIX.equalsIgnoreCase(f.getAbsolutePath().substring(
+                        f.getAbsolutePath().lastIndexOf("."))))
+                    FileCopier.copy(f, p_targetPageFolder);
+            }
         }
-        copyAdobeFiles(existedLocale, getConvertedFileName(p_targetPageName));
+        
+        GlobalSightLocale srcGSLocale = lp.getSourceLocale();
+        String srcLocale = srcGSLocale.toString();
+        if (LOCALE_PRE_CONVERTED.equals(srcLocale))
+            srcLocale = LOCALE_POST_CONVERTED;
+        copyAdobeFiles(srcLocale, getConvertedFileName(targetLocale, p_targetPageName));
     }
 
     private void copyAdobeFiles(String p_existedLocale,
@@ -559,22 +744,47 @@ public class PreviewPDFPageHandler extends PageHandler
      * @param p_targetPageName
      * @return
      */
-    private String getConvertedFileName(String p_targetPageName)
+    private String getConvertedFileName(String targetLocale, String p_targetPageName)
     {
-        String tarName = AmbFileStoragePathUtils.getPdfPreviewDir(m_company_id)
-                + File.separator + FileUtils.getPrefix(p_targetPageName)
-                + STATUS_SUFFIX;
-        if (!new File(tarName).exists())
+        File previewDir = AmbFileStoragePathUtils.getPdfPreviewDir(m_company_id);
+        String prefix = FileUtils.getPrefix(p_targetPageName);
+        String tarName = null;
+        
+        L10nProfile lp = m_job.getL10nProfile();
+        GlobalSightLocale[] targetLocales = lp.getTargetLocales();
+        for (GlobalSightLocale globalSightLocale : targetLocales)
         {
-            tarName = tarName.replace("\\", "/");
-            if (!new File(tarName).exists())
+            String existedLocale = globalSightLocale.toString();
+            if (LOCALE_PRE_CONVERTED.equals(existedLocale))
+                existedLocale = LOCALE_POST_CONVERTED;
+            
+            String existedFolder = prefix.replaceFirst(targetLocale,
+                    existedLocale);
+            tarName = previewDir + File.separator + existedFolder + STATUS_SUFFIX;
+            
+            if (new File(tarName).exists())
             {
-                CATEGORY.error(tarName + " does not exist");
-                throw new EnvoyServletException(
-                        EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
-                        tarName + " does not exist");
+                break;
             }
+                
+            tarName = tarName.replace("\\", "/");
+            if (new File(tarName).exists())
+            {
+                break;
+            }
+            
+            tarName = null;
         }
+        
+        if (tarName == null)
+        {
+            tarName = previewDir + File.separator + prefix + STATUS_SUFFIX;
+            
+            CATEGORY.error(tarName + " does not exist");
+            throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
+                    tarName + " does not exist");
+        }
+        
         BufferedReader br;
         String convertedFileName = "";
         try
@@ -602,25 +812,95 @@ public class PreviewPDFPageHandler extends PageHandler
      * @param p_conDir
      * @param p_xmlFileName
      */
-    private void backupInddFile(Map fileMap, String p_conDir, String p_xmlFileName)
+    private void backupInddFile(Map fileMap, String p_conDir, String targetLocale, String p_xmlFileName)
     {
         String fileNameWithoutSuffix = FileUtils.getPrefix(p_xmlFileName);
-        String oriInddFileName = p_conDir + File.separator
-                + fileNameWithoutSuffix + m_inDesignFileSuffix;
-        String oriXmpFileName = p_conDir + File.separator
-                + fileNameWithoutSuffix + XMP_SUFFIX;
         String currentTime = String.valueOf(System.currentTimeMillis());
         String targetInddName = currentTime + "_" + fileNameWithoutSuffix
                 + m_inDesignFileSuffix;
         String targetXmpName = currentTime + "_" + fileNameWithoutSuffix
                 + XMP_SUFFIX;
         String targetXmlName = currentTime + "_" + p_xmlFileName;
+        
+        L10nProfile lp = m_job.getL10nProfile();
+        File oriInddFile = null;
+        File oriXmpFile = null;
+        
+        // get from target locale first
+        String oriInddFileName = p_conDir + targetLocale + File.separator
+                + fileNameWithoutSuffix + m_inDesignFileSuffix;
+        String oriXmpFileName = p_conDir + targetLocale + File.separator
+                + fileNameWithoutSuffix + XMP_SUFFIX;
+        oriInddFile = new File(oriInddFileName);
+        oriXmpFile = new File(oriXmpFileName);
+        if (!oriInddFile.exists() || !oriXmpFile.exists())
+        {
+            oriInddFile = null;
+            oriXmpFile = null;
+        }
+        
+        // get from source locale then
+        if (oriInddFile == null || oriXmpFile == null)
+        {
+            String srcLocale = lp.getSourceLocale().toString();
+            oriInddFileName = p_conDir + srcLocale + File.separator
+                    + fileNameWithoutSuffix + m_inDesignFileSuffix;
+            oriXmpFileName = p_conDir + srcLocale + File.separator
+                    + fileNameWithoutSuffix + XMP_SUFFIX;
+            oriInddFile = new File(oriInddFileName);
+            oriXmpFile = new File(oriXmpFileName);
+            
+            if (!oriInddFile.exists() || !oriXmpFile.exists())
+            {
+                oriInddFile = null;
+                oriXmpFile = null;
+            }
+        }
+        
+        // get from other target locales
+        if (oriInddFile == null || oriXmpFile == null)
+        {
+            GlobalSightLocale[] targetLocales = lp.getTargetLocales();
+            for (GlobalSightLocale globalSightLocale : targetLocales)
+            {
+                String existedLocale = globalSightLocale.toString();
+                if (LOCALE_PRE_CONVERTED.equals(existedLocale))
+                    existedLocale = LOCALE_POST_CONVERTED;
+                
+                oriInddFileName = p_conDir + existedLocale + File.separator
+                        + fileNameWithoutSuffix + m_inDesignFileSuffix;
+                oriXmpFileName = p_conDir + existedLocale + File.separator
+                        + fileNameWithoutSuffix + XMP_SUFFIX;
+                
+                oriInddFile = new File(oriInddFileName);
+                oriXmpFile = new File(oriXmpFileName);
+                
+                if (oriInddFile.exists() && oriXmpFile.exists())
+                {
+                    break;
+                }
+                else
+                {
+                    oriInddFile = null;
+                    oriXmpFile = null;
+                }
+            }
+        }
+        
+        if (oriInddFile == null || oriXmpFile == null)
+        {
+            oriInddFileName = p_conDir + targetLocale + File.separator
+                    + fileNameWithoutSuffix + m_inDesignFileSuffix;
+            CATEGORY.error("Cannot find original indd and xmp file: " + oriInddFileName);
+            throw new EnvoyServletException(EnvoyServletException.MSG_FAILED_TO_PREVIEW_PDF,
+                    "Cannot find original indd and xmp file: " + oriInddFileName);
+        }
 
         // back up indd file
-        FileCopier.copyFile(new File(oriInddFileName), new File(p_conDir),
+        FileCopier.copyFile(oriInddFile, new File(p_conDir + targetLocale),
                 targetInddName);
         // back up xml file
-        FileCopier.copyFile(new File(oriXmpFileName), new File(p_conDir),
+        FileCopier.copyFile(oriXmpFile, new File(p_conDir + targetLocale),
                 targetXmpName);
 
         fileMap.put(m_inDesignFileSuffix, targetInddName);
@@ -636,7 +916,7 @@ public class PreviewPDFPageHandler extends PageHandler
      * @param p_targetPageName
      * @return
      */
-    private File readTargetPdfFile(String p_xmlFileName, String p_targetPageName)
+    private File readTargetPdfFile(String p_xmlFileName, String p_targetPageName, String userid)
     {
         String statusFileName = FileUtils.getPrefix(p_xmlFileName)
                 + COMMAND_STATUS_SUFFIX;
@@ -665,6 +945,7 @@ public class PreviewPDFPageHandler extends PageHandler
             }
             else
             {
+                tarDir.append(File.separator).append(userid);
                 tarDir.append(File.separator).append(targetLocale);
                 String splitChar = p_targetPageName.lastIndexOf("/") > 0 ? "/"
                         : "\\\\";
@@ -765,6 +1046,10 @@ public class PreviewPDFPageHandler extends PageHandler
         String formatType = eventFlow.getDiplomatAttribute("formatType")
                 .getValue().trim();
         String displayNameLower = eventFlow.getDisplayName().toLowerCase();
+        DiplomatAttribute m_relSafeNameDA = eventFlow
+                .getDiplomatAttribute("relSafeName");
+        m_relSafeName = m_relSafeNameDA != null ? m_relSafeNameDA.getValue() : null;
+        m_safeBaseFileName = eventFlow.getDiplomatAttribute("safeBaseFileName").getValue();
         
         if ("mif".equals(formatType))
         {
@@ -778,6 +1063,10 @@ public class PreviewPDFPageHandler extends PageHandler
         {
             m_versionType = ADOBE_CS5;
         }
+        else if ("indd_cs5.5".equals(formatType)) 
+        {
+            m_versionType = ADOBE_CS5_5;
+        }
         else
         {
             m_versionType = (formatType.equals("indd") || formatType.equals("inx")) ? ADOBE_CS2
@@ -789,6 +1078,13 @@ public class PreviewPDFPageHandler extends PageHandler
             m_conversionType = ADOBE_FM;
             m_inDesignFileSuffix = FM_SUFFIX;
             return;
+        }
+        else if (displayNameLower.endsWith("idml"))
+        {
+        	 m_conversionType = ADOBE_IDML;
+             m_inDesignFileSuffix = IDML_SUFFIX;
+             m_versionType = ADOBE_TYPE_IDML;
+             return;
         }
         else
         {
@@ -849,6 +1145,15 @@ public class PreviewPDFPageHandler extends PageHandler
                 convDir = new StringBuffer(
                         m_sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5));
             }
+            else if (m_versionType == ADOBE_CS5_5) 
+            {
+                convDir = new StringBuffer(
+                        m_sc.getStringParameter(SystemConfigParamNames.ADOBE_CONV_DIR_CS5_5));
+            }
+            else if (m_versionType == ADOBE_TYPE_IDML)
+            {
+            	return IdmlHelper.getConversionDir();
+            }
             else
             {
                 // These (formatType are "indd_cs3" and "inx_cs3") are adobe
@@ -890,12 +1195,10 @@ public class PreviewPDFPageHandler extends PageHandler
             sourcePageName = sourceLocale + p_tarFileName.substring(index);
         }
 
-        List workflows = new ArrayList(m_job.getWorkflows());
         long tpgId = 0;
 
-        for (int i = 0; i < workflows.size(); i++)
+        for (Workflow wf : m_job.getWorkflows())
         {
-            Workflow wf = (Workflow) workflows.get(i);
             if (targetLocale.equals(wf.getTargetLocale().toString()))
             {
                 boolean isBreak = false;
@@ -927,7 +1230,7 @@ public class PreviewPDFPageHandler extends PageHandler
                         "No target page found");
             }
             String xml = ex.exportForPdfPreview(tpgId, "UTF-8", false);
-            String processed = FontMappingHelper.processInddXml(targetLocale, xml);
+            String processed = (m_versionType == ADOBE_TYPE_IDML) ? xml : FontMappingHelper.processInddXml(targetLocale, xml);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
                     new FileOutputStream(p_xmlFilePath.toString()),
                     ExportConstants.UTF8), processed.length());
@@ -976,7 +1279,7 @@ public class PreviewPDFPageHandler extends PageHandler
      * @param p_pdfFile
      * @param p_response
      */
-    private void writeOutFile(File p_pdfFile, HttpServletResponse p_response,
+    public static void writeOutFile(File p_pdfFile, HttpServletResponse p_response,
             String p_action)
     {
         BufferedInputStream bis = null;
@@ -997,6 +1300,20 @@ public class PreviewPDFPageHandler extends PageHandler
             throw new EnvoyServletException(e);
         }
     }
+    
+    private File getOldPreviewPdf(HttpServletRequest p_request)
+    {
+        String filePath = p_request.getParameter("file");
+        int index = filePath.lastIndexOf(".");
+        String pdfPath = filePath.substring(0, index) + PDF_SUFFIX;
+        StringBuffer pdfFullPath = new StringBuffer(AmbFileStoragePathUtils
+                .getPdfPreviewDir(m_company_id).getAbsolutePath());
+        pdfFullPath.append(File.separator);
+        pdfFullPath.append(pdfPath);
+
+        File pdfFile = new File(pdfFullPath.toString());
+        return pdfFile;
+    }
 
     /**
      * Returns the previewed pdf file
@@ -1004,13 +1321,20 @@ public class PreviewPDFPageHandler extends PageHandler
      * @param p_request
      * @return
      */
-    private File getPreviewPdf(HttpServletRequest p_request)
+    private File getPreviewPdf(HttpServletRequest p_request, String userid, String action)
     {
         String filePath = p_request.getParameter("file");
         int index = filePath.lastIndexOf(".");
         String pdfPath = filePath.substring(0, index) + PDF_SUFFIX;
         StringBuffer pdfFullPath = new StringBuffer(AmbFileStoragePathUtils
                 .getPdfPreviewDir(m_company_id).getAbsolutePath());
+        
+        if ("previewTar".equals(action))
+        {
+            pdfFullPath.append(File.separator);
+            pdfFullPath.append(userid);
+        }
+        
         pdfFullPath.append(File.separator);
         pdfFullPath.append(pdfPath);
 
@@ -1063,6 +1387,12 @@ public class PreviewPDFPageHandler extends PageHandler
         }
         return Long.parseLong(maxWaitTime) * AdobeConfiguration.MINUTE;
     }
+    
+    public static void deleteOldPdfByUser(String userid)
+    {
+        DeleteOldPdfThread t = new DeleteOldPdfThread(userid, CATEGORY);
+        t.run();
+    }
 
     public static void deleteOldPdf(long p_targetPageId, long p_targetLocaleId)
     {
@@ -1075,7 +1405,8 @@ public class PreviewPDFPageHandler extends PageHandler
             String fileSuffix = filename.substring(filename.lastIndexOf("."));
             if (INDD_SUFFIX.equalsIgnoreCase(fileSuffix)
                     || INX_SUFFIX.equalsIgnoreCase(fileSuffix)
-                    || FM_SUFFIX.equalsIgnoreCase(fileSuffix))
+                    || FM_SUFFIX.equalsIgnoreCase(fileSuffix)
+                    || IDML_SUFFIX.equalsIgnoreCase(fileSuffix))
             {
                 String targetLocale = ServerProxy.getLocaleManager()
                         .getLocaleById(p_targetLocaleId).getLocale().toString();
@@ -1083,10 +1414,32 @@ public class PreviewPDFPageHandler extends PageHandler
                         + filename.substring(filename.indexOf(File.separator));
                 String targetPdfFileName = FileUtils.getPrefix(targetFileName)
                         + PDF_SUFFIX;
-                String fullTargetPdfFileName = AmbFileStoragePathUtils
-                        .getPdfPreviewDir(company_id)
-                        + File.separator + targetPdfFileName;
+                File previewDir = AmbFileStoragePathUtils.getPdfPreviewDir(company_id);
+                String fullTargetPdfFileName = previewDir + File.separator + targetPdfFileName;
                 FileUtils.deleteSilently(fullTargetPdfFileName);
+                
+                File[] files = previewDir.listFiles(new FileFilter()
+                {
+                    @Override
+                    public boolean accept(File arg0)
+                    {
+                        if (arg0.isDirectory())
+                        {
+                            return true;
+                        }
+                        
+                        return false;
+                    }
+                });
+                
+                if (files != null)
+                {
+                    for (File file : files)
+                    {
+                        String userPreviewFile = file + File.separator + targetPdfFileName;
+                        FileUtils.deleteSilently(userPreviewFile);
+                    }
+                }
             }
         }
         catch (Exception e)

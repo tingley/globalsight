@@ -36,6 +36,7 @@ public class DefinedAttributeComparator extends StringComparator
     public static final int ASC_COMPANY = 3;
     public static final int TYPE = 4;
     public static final int REQUIRED = 5;
+    public static final int INTERNAL_NAME = 6;
 
     /**
      * Creates a XmlRuleFileComparator with the given type and locale. If the
@@ -93,6 +94,11 @@ public class DefinedAttributeComparator extends StringComparator
         case REQUIRED:
             aValue = Boolean.toString(a.isRequired());
             bValue = Boolean.toString(b.isRequired());
+            rv = this.compareStrings(aValue, bValue);
+            break;
+        case INTERNAL_NAME:
+            aValue = a.getName();
+            bValue = b.getName();
             rv = this.compareStrings(aValue, bValue);
             break;
         }

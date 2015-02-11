@@ -226,7 +226,7 @@ public class ChangeWorkflowManagerHandler extends PageHandler
                 continue;
             } 
             
-            List wfOwners = wf.getWorkflowOwnerIds();
+            List<String> wfOwners = wf.getWorkflowOwnerIds();
             //remove the PM from the list of workflow owners so that cannot be changed
             String thePM = p_job.getL10nProfile().getProject().getProjectManagerId();
             wfOwners.remove(thePM);

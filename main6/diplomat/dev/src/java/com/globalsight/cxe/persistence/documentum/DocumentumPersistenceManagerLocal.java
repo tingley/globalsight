@@ -54,7 +54,7 @@ public class DocumentumPersistenceManagerLocal implements
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
             String[] args =
             { p_documentumUserInfo.getDocumentumUserId() };
             throw new DocumentumPersistenceManagerException(
@@ -106,7 +106,7 @@ public class DocumentumPersistenceManagerLocal implements
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
             String[] args =
             { Long.toString(userId) };
             throw new DocumentumPersistenceManagerException(

@@ -26,16 +26,12 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
-
 import jxl.Workbook;
 import jxl.WorkbookSettings;
-import jxl.format.Alignment;
 import jxl.format.UnderlineStyle;
 import jxl.write.Formula;
 import jxl.write.Label;
@@ -45,9 +41,9 @@ import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
 import com.globalsight.cxe.entity.customAttribute.Attribute;
@@ -57,13 +53,13 @@ import com.globalsight.cxe.entity.customAttribute.JobAttribute;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.jobhandler.JobImpl;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserUtil;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 
 public class JobAttributeReportHelper
 {
-    private static Logger s_logger = Logger
-            .getLogger("Reports");
+    private static Logger s_logger = Logger.getLogger("Reports");
     private static SimpleDateFormat simpleDateFormat = new SimpleDateFormat(
             DateCondition.FORMAT);
 
@@ -121,7 +117,7 @@ public class JobAttributeReportHelper
                 }
                 catch (ParseException e)
                 {
-                    s_logger.error(e);
+                    s_logger.error(e.getMessage(), e);
                 }
             }
         }
@@ -138,7 +134,7 @@ public class JobAttributeReportHelper
                 }
                 catch (ParseException e)
                 {
-                    s_logger.error(e);
+                    s_logger.error(e.getMessage(), e);
                 }
             }
         }
@@ -200,9 +196,9 @@ public class JobAttributeReportHelper
         String orderItem = request.getParameter("orderItem");
         if (orderItem != null && orderItem.length() > 0)
         {
-            AttributeClone clone = HibernateUtil.get(AttributeClone.class, Long
-                    .parseLong(orderItem));
-            
+            AttributeClone clone = HibernateUtil.get(AttributeClone.class,
+                    Long.parseLong(orderItem));
+
             AttributeItem item = new AttributeItem(clone);
             if (attriutes.contains(item))
             {
@@ -250,7 +246,7 @@ public class JobAttributeReportHelper
                 jobAttributes.remove(i);
                 continue;
             }
-            
+
             boolean found = false;
             for (Workflow w : job.getWorkflows())
             {
@@ -281,10 +277,12 @@ public class JobAttributeReportHelper
             {
                 if (orderAttribute != null)
                 {
-                    JobAttribute jobAtt1 = getJobAttributeValue(orderAttribute
-                            .getName(), o1, orderAttribute.isFromSuper());
-                    JobAttribute jobAtt2 = getJobAttributeValue(orderAttribute
-                            .getName(), o2, orderAttribute.isFromSuper());
+                    JobAttribute jobAtt1 = getJobAttributeValue(
+                            orderAttribute.getName(), o1,
+                            orderAttribute.isFromSuper());
+                    JobAttribute jobAtt2 = getJobAttributeValue(
+                            orderAttribute.getName(), o2,
+                            orderAttribute.isFromSuper());
 
                     if (jobAtt2 == null)
                         return -1;
@@ -303,7 +301,7 @@ public class JobAttributeReportHelper
                     {
                         return 1;
                     }
-                    
+
                     if (ob1 instanceof Integer)
                     {
                         Integer int1 = (Integer) ob1;
@@ -313,7 +311,7 @@ public class JobAttributeReportHelper
                             return int1.compareTo(int2) * order;
                         }
                     }
-                    
+
                     if (ob1 instanceof Float)
                     {
                         Float f1 = (Float) ob1;
@@ -382,8 +380,9 @@ public class JobAttributeReportHelper
                 WritableFont.BOLD, false, UnderlineStyle.NO_UNDERLINE,
                 jxl.format.Colour.ORANGE);
         WritableCellFormat headerFormat = new WritableCellFormat(headerFont);
-        WritableCellFormat headerFormatSuper = new WritableCellFormat(headerFontSuper);
-        
+        WritableCellFormat headerFormatSuper = new WritableCellFormat(
+                headerFontSuper);
+
         headerFormat.setWrap(true);
         headerFormat.setBackground(jxl.format.Colour.GRAY_25);
         headerFormat.setShrinkToFit(false);
@@ -395,7 +394,7 @@ public class JobAttributeReportHelper
                 jxl.format.BorderLineStyle.THIN);
         headerFormat.setBorder(jxl.format.Border.RIGHT,
                 jxl.format.BorderLineStyle.THIN);
-        
+
         headerFormatSuper.setWrap(true);
         headerFormatSuper.setBackground(jxl.format.Colour.GRAY_25);
         headerFormatSuper.setShrinkToFit(false);
@@ -447,7 +446,8 @@ public class JobAttributeReportHelper
             sheet.addCell(new Number(col++, row, job.getWorkflows().size()));
 
             // Submitter
-            sheet.addCell(new Label(col++, row, job.getCreateUserId(), format));
+            sheet.addCell(new Label(col++, row, UserUtil.getUserNameById(job
+                    .getCreateUserId()), format));
 
             // Project
             sheet.addCell(new Label(col++, row, job.getL10nProfile()

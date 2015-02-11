@@ -66,7 +66,7 @@ public class SegmentTagsAligner
         catch (RESyntaxException e)
         {
             // SNH (Should Never Happen)
-            CATEGORY.error(e, e);
+            CATEGORY.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage());
         }
 

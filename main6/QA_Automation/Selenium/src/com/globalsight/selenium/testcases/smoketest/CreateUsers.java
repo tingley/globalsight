@@ -1,52 +1,46 @@
 package com.globalsight.selenium.testcases.smoketest;
 
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.UsersFuncs;
 import com.globalsight.selenium.pages.MainFrame;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.ConfigUtil;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
-public class CreateUsers
+public class CreateUsers extends BaseTestCase
 {
     /*
      * Common variables initialization.
      */
-    private Selenium selenium;
-    private UsersFuncs iUsersFuncs = new UsersFuncs();
-    String testCaseName = getClass().getName();
+    private UsersFuncs usersFuncs = new UsersFuncs();
 
     @Test
     public void createUsers() throws Exception
     {
-        String user1, user2;
-        selenium.click(MainFrame.Setup_MENU);
-        selenium.click(MainFrame.Users_SUBMENU);
-        selenium.waitForPageToLoad(CommonFuncs.SHORT_WAIT);
+        openMenuItemAndWait(selenium, MainFrame.SETUP_MENU,
+                MainFrame.USERS_SUBMENU);
 
-        user1 = iUsersFuncs.newUsers(selenium,
-                ConfigUtil.getDataInCase(testCaseName, "USER1"));
-        user2 = iUsersFuncs.newUsers(selenium,
-                ConfigUtil.getDataInCase(testCaseName, "USER2"));
-     
+        String user1, user2;
+
+        user1 = usersFuncs.newUsers(selenium, getProperty("user.user1"));
+        user2 = usersFuncs.newUsers(selenium, getProperty("user.user2"));
+
+        CommonFuncs.logoutSystem(selenium);
+
         CommonFuncs.login(selenium, user1,
-                ConfigUtil.getConfigData("anyone_password"));
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.LogOut_LINK),
+                ConfigUtil.getConfigData("anyonePassword"));
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.LOG_OUT_LINK),
                 true);
-        selenium.click(MainFrame.LogOut_LINK);
+
+        CommonFuncs.logoutSystem(selenium);
 
         CommonFuncs.login(selenium, user2,
-                ConfigUtil.getConfigData("anyone_password"));
-        Assert.assertEquals(selenium.isElementPresent(MainFrame.LogOut_LINK),
+                ConfigUtil.getConfigData("anyonePassword"));
+        Assert.assertEquals(selenium.isElementPresent(MainFrame.LOG_OUT_LINK),
                 true);
-        // selenium.click(MainFrame.LogOut_LINK);
-
+        CommonFuncs.loginSystemWithAdmin(selenium);
         /*
          * CommonFuncs.login(selenium, user3,
          * ConfigUtil.getConfigData("anyone_password"));
@@ -59,29 +53,4 @@ public class CreateUsers
          * true);
          */
     }
-
-    @BeforeMethod
-    public void beforeMethod()
-    {
-        CommonFuncs.loginSystemWithAdmin(selenium);
-    }
-
-    @AfterMethod
-    public void afterMethod()
-    {
-        CommonFuncs.logoutSystem(selenium);
-    }
-
-    @BeforeTest
-    public void beforeTest()
-    {
-        selenium = CommonFuncs.initSelenium();
-    }
-
-    @AfterTest
-    public void afterTest()
-    {
-        CommonFuncs.endSelenium(selenium);
-    }
-
 }

@@ -72,7 +72,7 @@ public class PropertyUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -84,7 +84,7 @@ public class PropertyUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -123,7 +123,7 @@ public class PropertyUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -135,7 +135,7 @@ public class PropertyUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
@@ -164,7 +164,7 @@ public class PropertyUtil
         }
         catch (Exception e)
         {
-            log.error(e);
+            log.error(e.getMessage(), e);
         }
         finally
         {
@@ -176,7 +176,7 @@ public class PropertyUtil
                 }
                 catch (IOException e)
                 {
-                    log.error(e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }

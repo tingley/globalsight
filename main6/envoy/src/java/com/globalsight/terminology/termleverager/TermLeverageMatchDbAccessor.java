@@ -28,6 +28,10 @@ import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
+import com.globalsight.everest.page.SourcePage;
+import com.globalsight.everest.persistence.tuv.SegmentTuTuvCacheManager;
+import com.globalsight.everest.persistence.tuv.TuvQueryConstants;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.terminology.util.SqlUtil;
 import com.globalsight.util.GeneralException;
 import com.globalsight.util.database.PreparedStatementBatch;
@@ -74,8 +78,9 @@ class TermLeverageMatchDbAccessor
         + "src_term.cid, src_term.term, tgt_term.cid, tgt_term.term, "
         + "tlm.source_tuv_id, src_term.xml "
         + "FROM term_leverage_match tlm, tb_term src_term, tb_term tgt_term, "
-        + "source_page_leverage_group splg, translation_unit tu, "
-        + "translation_unit_variant tuv "
+        + "source_page_leverage_group splg, "
+        + TuvQueryConstants.TU_TABLE_PLACEHOLDER + " tu, "
+        + TuvQueryConstants.TUV_TABLE_PLACEHOLDER + " tuv "
         + "WHERE splg.sp_id = ? AND splg.lg_id = tu.leverage_group_id "
         + "AND tu.id = tuv.tu_id AND tuv.locale_id = ? "
         + "AND tuv.id = tlm.source_tuv_id AND tlm.target_page_locale = ? "
@@ -375,7 +380,16 @@ class TermLeverageMatchDbAccessor
 
         try
         {
-            stmt = p_conn.prepareStatement(SELECT_PAGE_MATCH_SQL);
+            SourcePage sp = HibernateUtil.get(SourcePage.class, p_sourcePageId);
+            String tuTableName = SegmentTuTuvCacheManager.getTuTableName(sp
+                    .getCompanyId());
+            String tuvTableName = SegmentTuTuvCacheManager.getTuvTableName(sp
+                    .getCompanyId());
+            String sql = SELECT_PAGE_MATCH_SQL.replace(
+                    TuvQueryConstants.TU_TABLE_PLACEHOLDER, tuTableName);
+            sql = sql.replace(TuvQueryConstants.TUV_TABLE_PLACEHOLDER,
+                    tuvTableName);
+            stmt = p_conn.prepareStatement(sql);
             stmt.setLong(1, p_sourcePageId);
             stmt.setLong(2, p_sourcePageLocaleId);
             stmt.setString(3, Util.fixLocale(p_targetPageLocale));

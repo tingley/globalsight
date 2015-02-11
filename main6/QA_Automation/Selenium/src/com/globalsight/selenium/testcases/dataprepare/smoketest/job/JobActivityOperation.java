@@ -1,13 +1,10 @@
 package com.globalsight.selenium.testcases.dataprepare.smoketest.job;
 
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.globalsight.selenium.functions.CommonFuncs;
 import com.globalsight.selenium.functions.JobActivityOperationFuncs;
-import com.globalsight.selenium.properties.ConfigUtil;
-import com.thoughtworks.selenium.Selenium;
+import com.globalsight.selenium.testcases.BaseTestCase;
 
 /**
  * Dispatch job or accept activity as need
@@ -15,22 +12,9 @@ import com.thoughtworks.selenium.Selenium;
  * @author leon
  * 
  */
-public class JobActivityOperation
+public class JobActivityOperation extends BaseTestCase
 {
     private JobActivityOperationFuncs jobActivityOperationFuncs = new JobActivityOperationFuncs();
-    private Selenium selenium;
-
-    @BeforeClass
-    public void beforeClass()
-    {
-        selenium = CommonFuncs.initSelenium();
-    }
-
-    @AfterClass
-    public void afterClass()
-    {
-        selenium.stop();
-    }
 
     @Test
     public void jobDispatch()
@@ -40,34 +24,29 @@ public class JobActivityOperation
         while (i > -1)
         {
             i++;
-            String jobName = ConfigUtil.getDataInCase(getClass().getName(),
-                    "jobToDispatch" + i);
+            String jobName = getDataInCase("jobToDispatch" + i);
             if (jobName == null)
-            {
                 break;
-            }
-            String[] workflows = ConfigUtil.getDataInCase(getClass().getName(),
-                    "jobToDispatchWorkflow" + i).split(",");
-            jobActivityOperationFuncs.dispatchJob(selenium,
-                    ConfigUtil.getConfigData("admin_login_name"), jobName,
-                    workflows);
+            
+			jobName = CreatedJob.getCreatedJobName(jobName);
+            String[] workflows = getDataInCase("jobToDispatchWorkflow" + i)
+                    .split(",");
+            jobActivityOperationFuncs.dispatchJob(selenium, jobName, workflows);
         }
 
         // Accept
+        CommonFuncs.loginSystemWithAnyone(selenium);
         i = 0;
         while (i > -1)
         {
             i++;
-            String activityName = ConfigUtil.getDataInCase(
-                    getClass().getName(), "activityToAccept" + i);
+
+            String activityName = getDataInCase("activityToAccept" + i);
             if (activityName == null)
-            {
                 break;
-            }
-            jobActivityOperationFuncs
-                    .acceptActivity(selenium,
-                            ConfigUtil.getConfigData("anyone_login_name"),
-                            activityName);
+            
+			activityName = CreatedJob.getCreatedJobName(activityName);
+            jobActivityOperationFuncs.acceptActivity(selenium, activityName);
         }
     }
 

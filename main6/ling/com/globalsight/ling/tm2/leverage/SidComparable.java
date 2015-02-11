@@ -16,8 +16,9 @@
  */
 package com.globalsight.ling.tm2.leverage;
 
-public interface SidComparable 
+public interface SidComparable
 {
-    public String getOrgSid();
+    public String getOrgSid(String companyId);
+
     public String getSid();
 }

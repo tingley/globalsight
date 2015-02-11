@@ -79,8 +79,7 @@ public class WFTaskPool extends TimerTask
 		{
 			CATEGORY.error("Gets WFTask failed. The args is ("
 					+ sessionId + ", " + userId + ", " + Task.STATE_ALL
-					+ "). Error:" + e.getMessage());
-			e.printStackTrace();
+					+ ")", e);
 		}
 	}
 	
@@ -127,8 +126,7 @@ public class WFTaskPool extends TimerTask
 					
 					CATEGORY.error("Gets WFTask failed. The args is ("
 							+ sessionId + ", " + userId + ", " + Task.STATE_ALL
-							+ "). Error:" + e.getMessage());
-					e.printStackTrace();
+							+ ")", e);
 				} 
 			}
 		}
@@ -195,9 +193,8 @@ public class WFTaskPool extends TimerTask
 		} 
 		catch (Exception e) 
 		{
-			CATEGORY.error("Link workflow tasks with task info failed with error: "
-							+ e.getMessage());
-			e.printStackTrace();
+			CATEGORY.error("Link workflow tasks with task info failed with error",
+							e);
 			return new ArrayList();
 		}
 

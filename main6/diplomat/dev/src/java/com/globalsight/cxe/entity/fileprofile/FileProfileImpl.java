@@ -67,7 +67,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
     private String m_description;
     private String m_companyId;
     private String m_code_set;
-    private Vector m_extensionIds;
+    private Set m_extensionIds;
     private boolean m_byDefaultExportStf = false;
     private String m_scriptOnImport;
     private String m_scriptOnExport;
@@ -116,7 +116,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_code_set = null;
         m_scriptOnImport = null;
         m_scriptOnExport = null;
-        m_extensionIds = new Vector();
+        m_extensionIds = new HashSet();
         filterId = 0;
     }
 
@@ -138,10 +138,11 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         m_scriptOnImport = o.getScriptOnImport();
         m_scriptOnExport = o.getScriptOnExport();
 
-        if (o.getFileExtensionIds() == null)
-            m_extensionIds = new Vector();
-        else
-            m_extensionIds = o.getFileExtensionIds();
+        m_extensionIds = new HashSet();
+        if (o.getFileExtensionIds() != null)
+        {
+        	m_extensionIds.addAll(o.getFileExtensionIds());
+        }
 
         m_byDefaultExportStf = o.byDefaultExportStf();
         filterId = o.getFilterId();
@@ -188,17 +189,14 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public Vector getFileExtensionIds()
     {
-        return m_extensionIds;
+    	Vector ids = new Vector();
+    	ids.addAll(m_extensionIds);
+        return ids;
     }
 
     public Set getExtensionIds()
     {
-        Set ids = null;
-        if (m_extensionIds != null)
-        {
-            ids = new HashSet(m_extensionIds);
-        }
-        return ids;
+        return m_extensionIds;
     }
 
     /**
@@ -347,36 +345,22 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
      */
     public void setFileExtensionIds(Vector p_extensionIds)
     {
-        if (p_extensionIds == null)
-            m_extensionIds = new Vector();
-        else
-        {
-            // clear out the current ones if there are any
-            // can't use method "clear" because it isn't Java 1.1 compliant
-            // for the applet
-            if (m_extensionIds.size() > 0)
-            {
-                m_extensionIds = new Vector();
-            }
-            // convert whatever type Number it is to a Long
-            int size = p_extensionIds.size();
-            for (int i = 0; i < size; i++)
-            {
-                Long extensionId = new Long(((Number) p_extensionIds
-                        .elementAt(i)).longValue());
-                m_extensionIds.addElement(extensionId);
-            }
-        }
+    	m_extensionIds = new HashSet();
+    	if (p_extensionIds != null)
+    	{
+    		 int size = p_extensionIds.size();
+             for (int i = 0; i < size; i++)
+             {
+                 Long extensionId = new Long(((Number) p_extensionIds
+                         .elementAt(i)).longValue());
+                 m_extensionIds.add(extensionId);
+             }
+    	}
     }
 
     public void setExtensionIds(Set p_extensionIds)
     {
-        Vector ids = null;
-        if (p_extensionIds != null)
-        {
-            ids = new Vector(p_extensionIds);
-        }
-        setFileExtensionIds(ids);
+    	m_extensionIds = p_extensionIds;
     }
 
     /**
@@ -815,7 +799,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     }
                 }
             } catch (Exception e) {
-                s_logger.error(e);
+                s_logger.error(e.getMessage(), e);
             }
         }
         
@@ -857,7 +841,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
         }
         catch (Exception e)
         {
-            s_logger.error(e);
+            s_logger.error(e.getMessage(), e);
         }
         
         return true;
@@ -890,7 +874,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
                     }
                 }
             } catch (Exception e) {
-                s_logger.error(e);
+                s_logger.error(e.getMessage(), e);
             }
         }
 
@@ -913,7 +897,7 @@ public class FileProfileImpl extends PersistentObject implements FileProfile
             }
             catch (Exception e)
             {
-                s_logger.error(e);
+                s_logger.error(e.getMessage(), e);
             }
         }
 

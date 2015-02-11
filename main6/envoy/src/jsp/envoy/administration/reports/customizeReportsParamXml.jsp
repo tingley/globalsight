@@ -46,22 +46,22 @@
 <category id="<%=Param.TRADOS_MATCHES%>" >
     <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS%>" >
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PER100%>" />
-        <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PER95%>" />
+        <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PER85%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PER75%>" />
-        <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PER1%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_NOMATCH%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_REPETITION%>" />
+        <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT%>" />
         <param id="<%=Param.TRADOS_MATCHES_WORD_COUNTS_TOTAL%>" />
     </param>
     <param id="<%=Param.TRADOS_MATCHES_INVOICE%>" >
         <param id="<%=Param.TRADOS_MATCHES_INVOICE_PER100%>" />
-        <param id="<%=Param.TRADOS_MATCHES_INVOICE_PERINCONTEXT%>" />
         <param id="<%=Param.TRADOS_MATCHES_INVOICE_PER95%>" />
+        <param id="<%=Param.TRADOS_MATCHES_INVOICE_PER85%>" />
         <param id="<%=Param.TRADOS_MATCHES_INVOICE_PER75%>" />
-        <param id="<%=Param.TRADOS_MATCHES_INVOICE_PER1%>" />
         <param id="<%=Param.TRADOS_MATCHES_INVOICE_NOMATCH%>" />
         <param id="<%=Param.TRADOS_MATCHES_INVOICE_REPETITION%>" />
+        <param id="<%=Param.TRADOS_MATCHES_INVOICE_PERINCONTEXT%>" />
         <param id="<%=Param.TRADOS_MATCHES_INVOICE_JOB_TOTAL%>" />
     </param>
 </category>

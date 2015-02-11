@@ -71,8 +71,9 @@ function doNext()
 
     if (result.message != null && result.message != "")
     {
-        showError(result);
+        alert(result.message);
         result.element.focus();
+        return;
     }
     else
     {
@@ -126,6 +127,7 @@ function doNext()
         }
         
         oForm.submit();
+        document.getElementById("nextButton").disabled = true;
     }
 }
 

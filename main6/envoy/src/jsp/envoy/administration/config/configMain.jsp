@@ -47,6 +47,8 @@ boolean isAllowTranslatorMt =
     Boolean.valueOf((String)request.getAttribute(
       SystemConfigParamNames.MT_SHOW_IN_EDITOR)).booleanValue();
 
+boolean isEnableMyJobsDaysRetrieved = false;
+
 boolean colorOverride =
     Boolean.valueOf((String)request.getAttribute(
       SystemConfigParamNames.HYPERLINK_COLOR_OVERRIDE)).booleanValue();
@@ -485,6 +487,7 @@ function setPerSurchargeTextInputValue(id,value)
       <INPUT TYPE="hidden" NAME="<%=SystemConfigParamNames.DEFAULT_PM_EMAIL%>" VALUE="<%=request.getAttribute(SystemConfigParamNames.DEFAULT_PM_EMAIL)%>">
     </TD>
   </TR>
+  <% if (isEnableMyJobsDaysRetrieved) { %>
   <TR VALIGN="TOP">
     <TD><SPAN CLASS="standardText"><%=bundle.getString("lb_myJobs_daysRetrieved")%>:</SPAN></TD>
     <TD><SPAN CLASS="standardText">
@@ -493,6 +496,7 @@ function setPerSurchargeTextInputValue(id,value)
       VALUE="<%=request.getAttribute(SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED)%>"></SPAN>
     </TD>
   </TR>
+  <% } %>
   
   <!--For "Enhancement of Overdue notification" issue
         SystemConfigParamNames.OVERDUE_PM_DAY = "overdue.pm.day";

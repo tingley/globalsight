@@ -27,7 +27,7 @@
                 unique="false" />
 
             <bag name="leverageGroupSet" cascade="save-update"
-                table="SOURCE_PAGE_LEVERAGE_GROUP" lazy="false">
+                table="SOURCE_PAGE_LEVERAGE_GROUP">
                 <key column="SP_ID" />
                 <many-to-many
                     class="com.globalsight.everest.tuv.LeverageGroupImpl"

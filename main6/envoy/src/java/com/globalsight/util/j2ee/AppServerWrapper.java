@@ -20,7 +20,6 @@ package com.globalsight.util.j2ee;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.InitialContext;
-import javax.jms.QueueConnection;
 import com.globalsight.everest.util.server.ServerRegistry;
 import com.globalsight.everest.util.server.ServerRegistryImpl;
 import com.globalsight.util.GeneralException;

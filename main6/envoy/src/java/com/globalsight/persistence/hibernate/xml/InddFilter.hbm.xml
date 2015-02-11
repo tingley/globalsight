@@ -18,5 +18,10 @@
 			type="yes_no" not-null="false" />
 		<property name="translateFileInfo" column="TRANSLATE_FILE_INFO"
 			type="yes_no" not-null="false" />
+		<property name="extractLineBreak" column="EXTRACT_LINE_BREAK"
+            type="yes_no" not-null="false" />
+        <property name="replaceNonbreakingSpace" column="REPLACE_NONBREAKING_SPACE"
+            type="yes_no" not-null="false" />
+            
 	</class>
 </hibernate-mapping>

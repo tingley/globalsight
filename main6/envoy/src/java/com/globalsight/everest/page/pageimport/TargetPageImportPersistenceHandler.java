@@ -77,6 +77,7 @@ import com.globalsight.ling.tm.LeverageSegment;
 import com.globalsight.ling.tm2.TmCoreManager;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
 import com.globalsight.ling.tm2.leverage.Leverager;
+import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tw.PseudoCodec;
 import com.globalsight.ling.tw.PseudoConstants;
 import com.globalsight.ling.tw.PseudoData;
@@ -402,12 +403,11 @@ public class TargetPageImportPersistenceHandler
         TermReplacer replacer = TermReplacer.getInstance(p_sourceLocale,
                 p_targetLocale);
 
-        // get threshold for current source page
+        // Get MT settings for current source page
         Request request = p_sourcePage.getRequest();
         L10nProfile l10nProfile = request.getL10nProfile();
         TranslationMemoryProfile tmProfile = l10nProfile
                 .getTranslationMemoryProfile();
-
         long tmProfileThreshold = tmProfile.getFuzzyMatchThreshold();
         long mtSensitivePenalty = 0;
         if (tmProfile.getIsMTSensitiveLeveraging())
@@ -415,7 +415,7 @@ public class TargetPageImportPersistenceHandler
             mtSensitivePenalty = tmProfile.getMtSensitivePenalty();
         }
         long mtThreshold = 100 - mtSensitivePenalty;
-
+        // Get mode
         int mode;
         if (tmProfile.isLatestMatchForReimport())
         {
@@ -445,7 +445,6 @@ public class TargetPageImportPersistenceHandler
         // To invoke MT, extra parameters must be transformed to MT engine for
         // "PROMT","MS_TRANSLATOR" or "ASIA_ONLINE"
         setExtraOptionsForMT(tmProfile, p_sourcePage);
-
         // This must be invoked after "setExtraOptionsForMT()" API invoking.
         boolean isLocalePairSupportedByMT = isLocalePairSupportedByMT(
                 p_sourceLocale, p_targetLocale);
@@ -454,14 +453,14 @@ public class TargetPageImportPersistenceHandler
         {
             s_logger.debug("Starting useLeveragedSegments() at " + new Date());
         }
-
+        
+        // ProjectTmIndex and lastModifiedUser for XLF and PO
         String targetLan = p_targetLocale.getLanguage().toLowerCase();
-
         int lm_projectTmIndex = Leverager.XLIFF_PRIORITY;
         String lastModifiedUser = IFormatNames.FORMAT_XLIFF_NAME;
 
-        ExtractedSourceFile esf = (ExtractedSourceFile) p_sourcePage
-                .getExtractedFile();
+        ExtractedSourceFile esf = 
+            (ExtractedSourceFile) p_sourcePage.getExtractedFile();
         String dataType = esf.getDataType();
         boolean isPO = IFormatNames.FORMAT_PO.equals(dataType);
         if (isPO)
@@ -476,31 +475,37 @@ public class TargetPageImportPersistenceHandler
             HashMap needHitMTTuTuvMap = new HashMap();
             // All Tuvs than need leverage by use TDA TM
             HashMap needHitTDAMap = new HashMap();
-            // recorder the tu which don't get leverage results from TDA TM
+            // record the tu which don't get leverage results from TDA TM
             HashMap notGetTdaMap = new HashMap();
 
+            /****** START :: Handle XLF/PO/Local TM matches ******/
             for (Iterator it = tus.iterator(); it.hasNext();)
             {
-                boolean tuvGotChanged = false; // true for exact matches and MT
+                // Flag for getting 100% match from local TM regardless if tag
+                // matching. If the tags are not same, this still is true.
+                boolean b_haveExactMatch = false;
+                // Flag for getting exact matches that tags matching.
+                boolean tuvGotChanged = false; 
                 TuImpl tu = (TuImpl) it.next();
                 Tuv tuv = (Tuv) p_sourceTuvMap.getTuv(tu);
                 Tuv newTuv = getTuvManager().cloneToTarget(tuv, p_targetLocale);
 
+                /****** XLIFF extra handling START ******/
                 String xliffLan = tu.getXliffTargetLanguage();
-
                 if (xliffLan != null)
                 {
                     xliffLan = xliffLan.toLowerCase();
                 }
-
-                if (isPO && xliffLan != null && xliffLan.length() == 2)
+                
+                if (isPO)
                 {
-                    xliffLan = xliffLan + "_" + p_targetLocale.getCountry();
+                    xliffLan = getPOTargetLanguage(xliffLan, 
+                                             p_sourceLocale, p_targetLocale);
                 }
 
                 XliffAlt maxScoreAlt = new XliffAlt();
                 double maxAltTransScore = 0;
-                
+                // For XLF "alt-trans"
                 if (tuv.getXliffAlt() != null && tuv.getXliffAlt().size() > 0)
                 {
                     String tempLan = p_targetLocale.getLanguage();
@@ -674,9 +679,13 @@ public class TargetPageImportPersistenceHandler
                             {
                                 lm.setMatchType("FUZZY_MATCH");
                             }
+                            else if (isPO)
+                            {
+                                lm.setMatchType(MatchState.PO_EXACT_MATCH.getName());
+                            }
                             else
                             {
-                                lm.setMatchType("XLIFF_EXACT_MATCH");
+                                lm.setMatchType(MatchState.XLIFF_EXACT_MATCH.getName());
                             }
 
                             lm.setMatchedTuvId(-1);
@@ -692,7 +701,6 @@ public class TargetPageImportPersistenceHandler
                             // If the translation_type is
                             // "machine_translation_mt",
                             // sets target same with source.
-
                             if ((tmScore >= tmProfileThreshold && tmScore < 100)
                                     || tu.isXliffTranslationMT())
                             {
@@ -702,15 +710,11 @@ public class TargetPageImportPersistenceHandler
                                 continue;
                             }
 
-                            // if target is not same with source,check
-                            // tags
-                            // in them
-                            // for "offline uploading".
+                            // if target is not same with source,check tags in
+                            // them for "offline uploading".
                             // if they have not same tags,target content
-                            // can't be
-                            // saved to target tuv
-                            // even it is different with source
-                            // content.(GBS-1211)
+                            // can't be saved to target tuv even it is different
+                            // with source content.(GBS-1211).
                             boolean hasSameTags = compareTags(src, trg);
 
                             if (tmScore == 100)
@@ -722,16 +726,25 @@ public class TargetPageImportPersistenceHandler
                                         newTuv.setGxml(tu.getXliffTarget());
                                     }
 
-                                    newTuv.setMatchType("XLIFF_EXACT_MATCH");
+                                    if (isPO)
+                                    {
+                                        newTuv.setMatchType(
+                                                MatchState.PO_EXACT_MATCH.getName());
+                                    }
+                                    else
+                                    {
+                                        newTuv.setMatchType(
+                                                MatchState.XLIFF_EXACT_MATCH.getName());
+                                    }
+
                                     newTuv.setLastModifiedUser(lastModifiedUser);
 
                                     // If lock_status="locked",set target
-                                    // TUV
-                                    // state to "EXACT_MATCH_LOCALIZED" to
+                                    // TUV state to "EXACT_MATCH_LOCALIZED" to
                                     // ensure it will be populated into
-                                    // storage
-                                    // TM when job is finished (GBS-1771)
-                                    if (tu.isXliffLocked())
+                                    // storage TM when job is finished
+                                    // (GBS-1771).
+                                    if (tu.isXliffLocked() || isPO)
                                     {
                                         newTuv.setState(TuvState.EXACT_MATCH_LOCALIZED);
                                     }
@@ -747,8 +760,8 @@ public class TargetPageImportPersistenceHandler
                                 }
                                 else if (!tu.hasXliffTMScoreStr())
                                 {
-                                    //1.source tag is diffrent with target tag
-                                    //2.is ordinary xliff file
+                                    //1.source tag is different with target tag
+                                    //2.is ordinary XLF file
                                     //3.target content has real content except tag
                                     tu.addTuv(newTuv);
                                     result.add(newTuv);
@@ -759,16 +772,14 @@ public class TargetPageImportPersistenceHandler
                         }
                     }
                 }
+                /****** XLIFF extra handling END ******/
 
                 // in ExtractedFileImporte we add the IssueEditionRelation to
-                // source tuv
-                // now we remove it from source tuv ,and add the
-                // IssueEditionRelation
-                // to target tuv.
+                // source tuv now we remove it from source tuv ,and add the
+                // IssueEditionRelation to target tuv.
                 if (((TuvImpl) tuv).getIssueEditionRelation() != null
                         && ((TuvImpl) tuv).getIssueEditionRelation().size() > 0)
                 {
-
                     Set ieSet = ((TuvImpl) tuv).getIssueEditionRelation();
                     ((TuvImpl) tuv).setIssueEditionRelation(null);
                     ((TuvImpl) newTuv).setIssueEditionRelation(ieSet);
@@ -783,20 +794,17 @@ public class TargetPageImportPersistenceHandler
                     }
                 }
 
-                boolean b_haveMatch = false;
-
                 if (exactMap != null && exactMap.size() > 0)
                 {
                     ArrayList<LeverageSegment> lss = exactMap.get(tuv
                             .getIdAsLong());
-
                     if (lss != null && lss.size() > 0)
                     {
                         for (LeverageSegment segment : lss)
                         {
+                            b_haveExactMatch = true;
                             if (canBeModified(newTuv, segment))
                             {
-                                b_haveMatch = true;
                                 newTuv = modifyTUV(newTuv, segment);
                                 tuvGotChanged = true;
                                 break;
@@ -815,26 +823,29 @@ public class TargetPageImportPersistenceHandler
                                 .getExactMatches(p_sourcePage.getIdAsLong(),
                                         p_targetLocale.getIdAsLong());
                         // Found an exact match that can be leveraged?
-                        if (ls != null && canBeModified(newTuv, ls))
+                        if (ls != null)
                         {
-                            b_haveMatch = true;
-
-                            // CvdL: LeverageSegment match type is a string
-                            // from LeverageMatchType (not LeveragedTu).
-                            newTuv = modifyTUV(newTuv, ls);
-
-                            tuvGotChanged = true;
+                            b_haveExactMatch = true;
+                            if (canBeModified(newTuv, ls))
+                            {
+                                // CvdL: LeverageSegment match type is a string
+                                // from LeverageMatchType (not LeveragedTu).
+                                newTuv = modifyTUV(newTuv, ls);
+                                tuvGotChanged = true;
+                            }
                         }
                         else if (exactMatches.size() > 0)
                         {
                             LeverageSegment leverageSegment = (LeverageSegment) exactMatches
                                     .get(tuv.getIdAsLong());
-                            if (leverageSegment != null && ls != null
-                                    && canBeModified(newTuv, ls))
+                            if (leverageSegment != null && ls != null)
                             {
-                                b_haveMatch = true;
-                                newTuv = modifyTUV(newTuv, leverageSegment);
-                                tuvGotChanged = true;
+                                b_haveExactMatch = true;
+                                if (canBeModified(newTuv, ls))
+                                {
+                                    newTuv = modifyTUV(newTuv, leverageSegment);
+                                    tuvGotChanged = true;
+                                }
                             }
                         }
                     }
@@ -842,7 +853,7 @@ public class TargetPageImportPersistenceHandler
 
                 // If no exact match, try if there's term matches
                 // available, unless we're going to hit MT.
-                if (m_machineTranslator == null && !b_haveMatch
+                if (m_machineTranslator == null && !tuvGotChanged
                         && p_useLeveragedTerms && p_termMatches != null)
                 {
                     MatchRecordList matches = p_termMatches
@@ -855,9 +866,13 @@ public class TargetPageImportPersistenceHandler
                     }
                 }
 
-                // get max score_num for current tuv
+                // Get max score_num for current TUV
                 Set leverageMatches = null;
                 float maxScoreNum = 0;
+                if (b_haveExactMatch)
+                {
+                    maxScoreNum = 100;
+                }
                 if (fuzzyLeverageMatchesMap != null
                         && fuzzyLeverageMatchesMap.size() > 0)
                 {
@@ -869,8 +884,7 @@ public class TargetPageImportPersistenceHandler
                     Iterator lmIt = leverageMatches.iterator();
                     while (lmIt.hasNext())
                     {
-                        LeverageMatch leverageMatch = (LeverageMatch) lmIt
-                                .next();
+                        LeverageMatch leverageMatch = (LeverageMatch) lmIt.next();
                         float tmpScoreNum = leverageMatch.getScoreNum();
                         if (tmpScoreNum > maxScoreNum)
                         {
@@ -902,8 +916,8 @@ public class TargetPageImportPersistenceHandler
                 // @add by walter, for TDA feature
                 // TDA leverage when maxScoreNum < threshold in tm profile
                 boolean needHitTDA = false;
-                boolean isSupportByTDA = false;
 
+                boolean isSupportByTDA = false;
                 if ((tmProfile.getTdatm() != null)
                         && (tmProfile.getTdatm().getEnable() == 1))
                 {
@@ -943,9 +957,10 @@ public class TargetPageImportPersistenceHandler
                     tu.addTuv(newTuv);
                     result.add(newTuv);
                 }
-            }// iterator loop end
+            }
+            /****** END :: Handle XLF/PO/Local TM matches ******/
 
-            // begin to deal with the TDA results
+            /****** START :: Hit TDA to get matches if configured ******/
             if (needHitTDAMap != null && needHitTDAMap.size() > 0)
             {
                 TdaHelper tdaHelper = new TdaHelper();
@@ -1098,9 +1113,10 @@ public class TargetPageImportPersistenceHandler
 
                 }
             }
-
-            // if not hit MT, and not generate TDA result file, add all
-            // the tuv into result array.
+            /****** END :: Hit TDA to get matches if configured ******/
+            
+            // If not hit MT, and not generate TDA result file, add all
+            // the TUV into result array.
             if (needHitMTTuTuvMap == null || needHitMTTuTuvMap.size() == 0)
             {
                 Iterator it = notGetTdaMap.entrySet().iterator();
@@ -1113,6 +1129,7 @@ public class TargetPageImportPersistenceHandler
                     result.add(tuvValue);
                 }
             }
+            /****** START :: Hit MT to get matches if configured ******/
             else
             {
                 XmlEntities xe = new XmlEntities();
@@ -1352,6 +1369,7 @@ public class TargetPageImportPersistenceHandler
                 }
 
             }
+            /****** END :: Hit MT to get matches if configured ******/
         }
         catch (Exception e)
         {
@@ -1364,6 +1382,45 @@ public class TargetPageImportPersistenceHandler
         }
 
         return result;
+    }
+    
+    /**
+     * Gets PO Target Language, which will be used for creating target TUV.
+     * If p_language equals with sourceLocale, then set the targetLocale.
+     * 
+     * @param p_language
+     *            po target language, which comes from Extractor.
+     * @param p_sourceLocale
+     * @param p_targetLocale
+     * @return
+     */
+    private String getPOTargetLanguage(String p_language,
+            GlobalSightLocale p_sourceLocale, GlobalSightLocale p_targetLocale)
+    {
+        if (p_language == null)
+            return "";
+        
+        if (p_language.length() == 2)
+        {
+            if (p_language.equalsIgnoreCase(p_sourceLocale.getLanguage()))
+            {
+                p_language = p_targetLocale.toString();
+            }
+            else
+            {
+                p_language = p_language + "_" + p_targetLocale.getCountry();
+            }
+        }
+        else if (p_language.matches("zh-.."))
+        {
+            p_language = p_language.replace("-", "_");
+            if (p_language.equalsIgnoreCase(p_sourceLocale.toString()))
+            {
+                p_language = p_targetLocale.toString();
+            }
+        }
+
+        return p_language;
     }
 
     private float getTMScore(TuImpl tu)

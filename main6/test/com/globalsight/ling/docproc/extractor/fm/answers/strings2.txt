@@ -1,0 +1,23 @@
+Table [x1]:
+(Continued)
+(Sheet [x2] of [x3])
+page
+Table[x4] on page
+The quick brown fox jumped over the lazy dogs.
+Text in Japanese:
+ラドクリフ、マラソン五輪代表に1万m出場にも含み[x5].
+Text in the symbol font:
+A B C D E F G H I J K L M N O P Q R S T U V W X Y Z.
+Text containing currency symbols:
+The cost is 34¢.  
+The cost is ¥98.  
+The cost is £16.
+Text containing an embedded tab:
+This sentence has
+a tab in the middle.
+Text containing single curly quotes:
+This sentence contains ‘single curly’ quotes.
+Text containing double curly quotes:
+This sentence contains “double curly” quotes.
+Text containing single straight quotes:
+This sentence contains `single straight' quotes.

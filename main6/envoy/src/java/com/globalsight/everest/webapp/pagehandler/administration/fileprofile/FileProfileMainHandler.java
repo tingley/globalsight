@@ -60,6 +60,7 @@ import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 import com.globalsight.util.FormUtil;
 import com.globalsight.util.GeneralException;
 
@@ -320,18 +321,15 @@ public class FileProfileMainHandler extends PageHandler
         String xslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + fp.getId();
         String newXslPath = AmbFileStoragePathUtils.getXslDir().getPath() + "/" + newFp.getId();
         File xslFiles = new File(xslPath);
-        if (xslFiles.exists())
-        {
-            File newXslFile = new File(newXslPath);
-            xslFiles.renameTo(newXslFile);
-            if (!newXslFile.exists())
-            {
-                logger.error("Failed to rename XSL temporary path.");
-            }
-        }
         
         try
         {
+            if (xslFiles.exists())
+            {
+                File newXslFile = new File(newXslPath);
+                FileUtil.copyFolder(xslFiles, newXslFile);
+            }
+            
             updateXslPath(p_request, newFp);
         } 
         catch (Exception e)

@@ -1177,7 +1177,7 @@
 
                 ///fix: pendding on WorkflowServer getTask for state-completed 
                 // For "All Status" issue
-                if (thistaskState.equals(Task.COMPLETED)) 
+                if (thistaskState.equals(Task.COMPLETED)  || tsk.getState() == Task.STATE_REJECTED) 
                 {
                     out.println("<TD STYLE=\"width:210px; padding-left: 10px; word-wrap:break-word; word-break:break-all\" CLASS=standardText>" + 
                     "<SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"<DIV style=\'width:200px\'>\");}</SCRIPT><B>" 
@@ -1190,7 +1190,13 @@
                         pmAssigneeTable + "</SPAN><SCRIPT language=\"javascript\">if (navigator.userAgent.indexOf(\'Firefox\') >= 0){document.write(\"</DIV>\")}</SCRIPT></TD>");
                 }
 
-                out.println("<TD ALIGN=CENTER><SPAN CLASS=standardText><B><a class=standardHREF href=\"javascript:wordcountLink(\'radio"+ i +"\');\">" + totalWordCount + "</B></a></SPAN></TD>");
+                out.println("<TD ALIGN=CENTER><SPAN CLASS=standardText><B>");
+                if (tsk.getState() == Task.STATE_REJECTED) {
+                    out.println(totalWordCount);
+                } else {
+                    out.println("<a class=standardHREF href=\"javascript:wordcountLink(\'radio"+ i +"\');\">" + totalWordCount + "</a>");
+                }
+                out.println("</B></SPAN></TD>");
                 out.println("<TD STYLE=\"padding-left: 10px;\"><SPAN CLASS=standardText>"+ valueABorDBorCODate + "</SPAN></TD>"); 
                 if (state == stateAvailable) 
                 {

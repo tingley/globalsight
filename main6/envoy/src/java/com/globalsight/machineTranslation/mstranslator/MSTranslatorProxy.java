@@ -23,10 +23,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
-import org.datacontract.schemas.microsoft_mt_web_service.ArrayOfTranslateArrayResponse;
-import org.datacontract.schemas.microsoft_mt_web_service.ObjectFactory;
-import org.datacontract.schemas.microsoft_mt_web_service.TranslateArrayResponse;
-import org.datacontract.schemas.microsoft_mt_web_service.TranslateOptions;
+import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
+
+import org.datacontract.schemas._2004._07.microsoft_mt_web_service.ArrayOfTranslateArrayResponse;
+import org.datacontract.schemas._2004._07.microsoft_mt_web_service.TranslateArrayResponse;
+import org.datacontract.schemas._2004._07.microsoft_mt_web_service.TranslateOptions;
 import org.tempuri.LanguageService;
 import org.tempuri.SoapService;
 
@@ -37,7 +39,7 @@ import com.globalsight.machineTranslation.MachineTranslationException;
 import com.globalsight.machineTranslation.MachineTranslator;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.LanguagePair;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.TranslationRequest;
-import com.microsoft.schemas.serialization.arrays.ArrayOfstring;
+import com.microsoft.schemas._2003._10.serialization.arrays.ArrayOfstring;
 
 /**
  * Acts as a proxy to the translation Machine Translation Service: MS Translator.
@@ -321,6 +323,7 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
     	else if (msMtUrlFlag != null && msMtUrlFlag.equals(TMProfileConstants.MT_MS_URL_FLAG_PUBLIC)) {
     		String endpoint = (String) paramMap.get(MachineTranslator.MSMT_ENDPOINT);
     		String msAppId = (String) paramMap.get(MachineTranslator.MSMT_APPID);
+    		String msCategory = (String) paramMap.get(MachineTranslator.MSMT_CATEGORY);
     		
     		String exceptionMsg = null;
     		try {
@@ -335,7 +338,9 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
         		//try at most 3 times
         		while (needTranslateAgain && count < 3) {
 	    			count++;
-	    			result = service.translate(msAppId, p_string, sourceLang, targetLang);
+	    			result = service.translate(msAppId, p_string, sourceLang,
+                            targetLang, MachineTranslator.MSMT_CONTENT_TYPE,
+                            msCategory);
 	    			needTranslateAgain = false;
         		}
     		} catch (Exception ex) {
@@ -407,6 +412,8 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                     .get(MachineTranslator.MSMT_ENDPOINT);
             String msAppId = (String) paramMap
                     .get(MachineTranslator.MSMT_APPID);
+            String msCategory = (String) paramMap
+                    .get(MachineTranslator.MSMT_CATEGORY);
 
             ArrayOfTranslateArrayResponse result = null;
             try
@@ -421,6 +428,16 @@ public class MSTranslatorProxy extends AbstractTranslator implements MachineTran
                 int count = 0;
 
                 TranslateOptions options = new TranslateOptions();
+                JAXBElement<String> category = new JAXBElement<String>(
+                        new QName("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2",
+                                "category"), String.class, msCategory);
+                JAXBElement<String> contentType = new JAXBElement<String>(
+                        new QName("http://schemas.datacontract.org/2004/07/Microsoft.MT.Web.Service.V2",
+                                "contentType"), String.class,
+                        MachineTranslator.MSMT_CONTENT_TYPE);
+                options.setCategory(category);
+                options.setContentType(contentType);
+                
                 ArrayOfstring segmentsArray = new ArrayOfstring();
                 List segmentsList = Arrays.asList(p_segments);
                 segmentsArray.getString().addAll(segmentsList);

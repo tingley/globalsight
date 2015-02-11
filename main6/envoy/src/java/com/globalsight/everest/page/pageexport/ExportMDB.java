@@ -34,6 +34,8 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
  */
 public class ExportMDB extends GenericQueueMDB
 {
+    private static final long serialVersionUID = -3427740442035115271L;
+
     // for logging purposes
     private static GlobalSightCategory s_logger =
         (GlobalSightCategory) GlobalSightCategory.getLogger("EXPORT");

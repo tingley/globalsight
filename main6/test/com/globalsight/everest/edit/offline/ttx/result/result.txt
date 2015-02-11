@@ -1,0 +1,395 @@
+# GlobalSight Download File
+# Encoding: UTF-16LE
+# Document Format: word-html
+# Placeholder Format: PTAG-COMPACT
+# Source Locale: en-US
+# Target Locale: ru-RU
+# Page ID: 46
+# Workflow ID: 44
+# Task ID: 592
+# Exact Match word count: 0
+# Fuzzy Match word count: 0
+# Edit all: No
+
+# 4346
+[b][g3]JDLink[/g3][/b][b][g5]™ [g6]We[/g6]b [g7]Use[/g7]r [g8]Roles[/g8][/g5][/b]
+
+# 4347
+[b][g2]Busines[/g2][/b][b][g4]s [g5]Activity[/g5][/g4][/b]
+
+# 4348
+Admin
+
+# 4349
+Manager
+
+# 4350
+Subscriber
+
+# 4351
+[g1]Vie[/g1][g2]w[g3] A[/g3][g4]l[/g4]l[g5] Dashboa[/g5][g6]r[/g6][g7]d[/g7]s[g8] wit[/g8]h[g9] autho[/g9][g10]r[/g10][g11]ize[/g11]d[g12] equipment[/g12][/g2]
+
+# 4352
+ü
+
+# 4353
+ü
+
+# 4354
+ü
+
+# 4355
+[g1]Pin[/g1][g2]g[g3] [/g3][g4]Machine[/g4][/g2]
+
+# 4356
+ü
+
+# 4357
+ü
+
+# 4358
+ü
+
+# 4359
+[g1]Create[/g1][g2],[g3] [/g3][g4]Update[/g4],[g5] [/g5][g6]D[/g6][g7]elet[/g7]e[g8] [/g8][g9]Landma[/g9][g10]r[/g10][g11]ks[/g11][/g2]
+
+# 4360
+ü
+
+# 4361
+ü
+
+# 4362
+[g1]Vie[/g1][g2]w[g3] [/g3][g4]L[/g4][g5]a[/g5][g6]ndmarks[/g6][/g2]
+
+# 4363
+ü
+
+# 4364
+ü
+
+# 4365
+ü
+
+# 4366
+[g1]Create[/g1][g2],[g3] [/g3][g4]Update[/g4],[g5] [/g5][g6]D[/g6][g7]elet[/g7]e[g8] [/g8][g9]Landma[/g9][g10]r[/g10]k[g11] [/g11][g12]Catego[/g12][g13]r[/g13][g14]ies[/g14][/g2]
+
+# 4367
+ü
+
+# 4368
+ü
+
+# 4369
+[g1]Vie[/g1][g2]w[g3] [/g3][g4]L[/g4][g5]a[/g5][g6]ndmark[/g6]s[g7] [/g7][g8]Cat[/g8][g9]e[/g9][g10]gor[/g10][g11]i[/g11][g12]es[/g12][/g2]
+
+# 4370
+ü
+
+# 4371
+ü
+
+# 4372
+ü
+
+# 4373
+[g1]Create[/g1][g2],[g3] [/g3][g4]Upda[/g4][g5]t[/g5][g6]e[/g6],[g7] [/g7][g8]Delet[/g8]e[g9] [/g9][g10]E[/g10][g11]quipmen[/g11]t[g12] [/g12][g13]Gr[/g13][g14]o[/g14][g15]ups[/g15][/g2]
+
+# 4374
+ü
+
+# 4375
+ü
+
+# 4376
+[g1]Vie[/g1][g2]w[g3] Equipmen[/g3]t[g4] Groups[/g4][/g2]
+
+# 4377
+ü
+
+# 4378
+ü
+
+# 4379
+ü
+
+# 4380
+[g1]Create[/g1][g2],[g3] [/g3][g4]Updat[/g4][g5]e[/g5],[g6] [/g6][g7]Delet[/g7]e[g8] [/g8][g9]U[/g9][g10]s[/g10][g11]e[/g11]r[g12] [/g12][g13]Gr[/g13][g14]o[/g14][g15]ups[/g15][/g2]
+
+# 4381
+ü
+
+# 4382
+[g1]Create[/g1][g2],[g3] [/g3][g4]Updat[/g4][g5]e[/g5],[g6] [/g6][g7]Delet[/g7]e[g8] [/g8][g9]U[/g9][g10]s[/g10][g11]er[/g11]s[g12] [/g12][g13]o[/g13]f[g14] [/g14][g15]al[/g15]l[g16] [/g16][g17]Ro[/g17][g18]l[/g18][g19]es[/g19][/g2]
+
+# 4383
+ü
+
+# 4384
+[g1]Create[/g1][g2],[g3] [/g3][g4]Upda[/g4][g5]t[/g5][g6]e[/g6],[g7] [/g7][g8]Delet[/g8]e[g9] [/g9][g10]U[/g10][g11]ser[/g11]s[g12] [/g12][g13]o[/g13]f[g14] [/g14][g15]M[/g15][g16]a[/g16][g17]nage[/g17]r[g18] [/g18][g19]o[/g19]r[g20] [/g20][g21]Lo[/g21][g22]w[/g22][g23]er[/g23][/g2]
+
+# 4385
+ü
+
+# 4386
+View[g1] [/g1]Users[g2] [/g2][g3]a[/g3]nd[g4] [/g4]User[g5] [/g5]Groups
+
+# 4387
+ü
+
+# 4388
+ü
+
+# 4389
+ü
+
+# 4390
+[g1]Create[/g1][g2],[g3] [/g3][g4]Updat[/g4][g5]e[/g5],[g6] [/g6][g7]Delet[/g7]e[g8] [/g8][g10]G[/g10][g11]eofence[/g11]s[g12] [/g12][g13]an[/g13]d[g14] [/g14][g15]Curfe[/g15][g16]w[/g16]s[/g2]
+
+# 4391
+ü
+
+# 4392
+ü
+
+# 4393
+View[g1] [/g1]Geofences[g3] [/g3]and[g4] [/g4]Curfews
+
+# 4394
+ü
+
+# 4395
+ü
+
+# 4396
+ü
+
+# 4397
+[g1]Manuall[/g1][g2]y[g3] [/g3][g4]R[/g4][g5]egiste[/g5]r[g6] [/g6]a[g7] M[/g7][g8]a[/g8][g9]chine[/g9][/g2]
+
+# 4398
+ü
+
+# 4399
+ü
+
+# 4400
+ü
+
+# 4401
+[g1]Updat[/g1][g2]e[g3] [/g3][g4]Termina[/g4]l[g5] [/g5][g6]S[/g6][g7]ettings[/g7][/g2]
+
+# 4402
+ü
+
+# 4403
+ü
+
+# 4404
+View[g1] [/g1]Terminal[g2] [/g2]Settings
+
+# 4405
+ü
+
+# 4406
+ü
+
+# 4407
+ü
+
+# 4408
+View[g1] [/g1]Equipment[g2] [/g2]Details
+
+# 4409
+ü
+
+# 4410
+ü
+
+# 4411
+ü
+
+# 4412
+[g1]Create[/g1][g2],[g3] [/g3][g4]Upda[/g4][g5]t[/g5][g6]e[/g6],[g7] [/g7][g8]Delet[/g8]e[g9] [/g9][g10]Cu[/g10][g11]s[/g11][g12]to[/g12]m[g13] [/g13][g14]A[/g14][g15]l[/g15][g16]ert[/g16]s[g17] [/g17]&[g18] [/g18][g19]As[/g19][g20]s[/g20][g21]ignments[/g21][/g2]
+
+# 4413
+ü
+
+# 4414
+ü
+
+# 4415
+[g1]Create[/g1][g2],[g3] [/g3][g4]Update[/g4],[g5] [/g5][g6]D[/g6][g7]elet[/g7]e[g8] [/g8][g9]A[/g9][g10]l[/g10][g11]er[/g11]t[g12] [/g12][g13]Pref[/g13][g14]e[/g14][g15]rences[/g15][/g2]
+
+# 4416
+ü
+
+# 4417
+ü
+
+# 4418
+Create,[g1] [/g1]Update[g2] [/g2]Analog[g3] [/g3]Sensors[g4] [/g4][g5]S[/g5]etup
+
+# 4419
+ü
+
+# 4420
+ü
+
+# 4421
+View[g1] [/g1]Analog[g2] [/g2]Sensor[g3] [/g3]Setup
+
+# 4422
+ü
+
+# 4423
+ü
+
+# 4424
+ü
+
+# 4425
+View[g1] [/g1]Alert[g2] [/g2]Preferences
+
+# 4426
+ü
+
+# 4427
+ü
+
+# 4428
+ü
+
+# 4429
+Get[g1] [/g1]Driving[g2] [/g2]Directions
+
+# 4430
+ü
+
+# 4431
+ü
+
+# 4432
+ü
+
+# 4433
+[g1]Updat[/g1][g2]e[g3] Maintenanc[/g3]e[g4] Hist[/g4][g5]o[/g5][g6]ry[/g6][/g2]
+
+# 4434
+ü
+
+# 4435
+ü
+
+# 4436
+View[g1] [/g1]Maintenance[g2] [/g2]History
+
+# 4437
+ü
+
+# 4438
+ü
+
+# 4439
+ü
+
+# 4440
+[g1]Create[/g1][g2],[g3] [/g3][g4]Updat[/g4][g5]e[/g5],[g6] [/g6][g7]Delete[/g7],[g8] [/g8][g9]M[/g9][g10]aintenanc[/g10]e[g11] [/g11][g12]Plan[/g12][/g2]
+
+# 4441
+ü
+
+# 4442
+ü
+
+# 4443
+[g1]Vie[/g1][g2]w[g3] [/g3][g4]Ma[/g4][g5]i[/g5][g6]ntenanc[/g6]e[g7] [/g7][g8]Plan[/g8][/g2]
+
+# 4444
+ü
+
+# 4445
+ü
+
+# 4446
+ü
+
+# 4447
+Update[g1] [/g1]Organizational[g2] [/g2]Preferences
+
+# 4448
+ü
+
+# 4449
+ü
+
+# 4450
+View[g1] [/g1]Organizational[g2] [/g2]Preferenc[g3]e[/g3]s
+
+# 4451
+ü
+
+# 4452
+ü
+
+# 4453
+ü
+
+# 4454
+[g1]View[/g1][g2],[g3] [/g3][g4]Upda[/g4][g5]t[/g5]e[g6] [/g6][g7]Use[/g7]r[g8] [/g8][g9]P[/g9][g10]r[/g10][g11]eferences[/g11][/g2]
+
+# 4455
+ü
+
+# 4456
+ü
+
+# 4457
+ü
+
+# 4458
+Login,[g1] [/g1]Reset[g2] [/g2]Pas[g3]s[/g3]word[g4] [/g4](Manage[g5] [/g5]Login[g6] [/g6]Credential[g7]s[/g7])
+
+# 4459
+ü
+
+# 4460
+ü
+
+# 4461
+ü
+
+# 4462
+Transfer[g1] [/g1]Termi[g2]n[/g2]als
+
+# 4463
+ü
+
+# 4464
+ü
+
+# 4465
+ü
+
+# 4466
+Grant[g1] [/g1]3rd[g2] [/g2]Party[g3] [/g3]Access
+
+# 4467
+ü
+
+# 4468
+[g1]Creat[/g1][g2]e[g3] [/g3][g4]Organiz[/g4][g5]a[/g5][g6]tiona[/g6]l[g7] [/g7][g8]a[/g8][g9]ccoun[/g9]t[g10] [/g10][g11](Deale[/g11]r[g12] [/g12][g13]Only)[/g13][/g2]
+
+# 4469
+ü
+
+# 4470
+ü
+
+# 4471
+ü
+
+# 4472
+Dealer/Customer
+
+# END GlobalSight Download File

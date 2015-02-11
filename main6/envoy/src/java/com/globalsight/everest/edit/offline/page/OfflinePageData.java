@@ -2292,12 +2292,15 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
             {
                 tmxLevel = getTmxLevel(p_params);
             }
-            TmxUtil.writeXmlHeader(p_outputStream, tmxLevel);
-            TmxUtil.writeTmxOpenTag(p_outputStream, tmxLevel);
-            TmxUtil.writeTmxHeader(m_sourceLocaleName, p_outputStream,
-                    p_tmxLevel);
+            // When offline download to get level 1 tmx,some element attributes
+            // are still using level 2 style,only segment contents are
+            // tag-stripped.When import such tmx files back system TM,they can't
+            // pass tmx11.dtd check. So here use tmx14.dtd.
+            TmxUtil.writeXmlHeader(p_outputStream, 2);
+            TmxUtil.writeTmxOpenTag(p_outputStream, 2);
+            TmxUtil.writeTmxHeader(m_sourceLocaleName, p_outputStream, p_tmxLevel);
             TmxUtil.writeBodyOpenTag(p_outputStream);
-            long srcLocaleId = -1;
+
             // segments
             for (ListIterator it = m_segmentList.listIterator(); it.hasNext();)
             {
@@ -2425,10 +2428,6 @@ public class OfflinePageData implements AmbassadorDwUpEventHandlerInterface,
                     Collections.sort(listAlt, new GeneralComparatorBySID());
                     Iterator matches = listAlt.iterator();
 
-                    if (osd.getSourceTuv() != null)
-                    {
-                        srcLocaleId = osd.getSourceTuv().getLocaleId();
-                    }
                     String sid = null;
 
                     if (matches.hasNext())

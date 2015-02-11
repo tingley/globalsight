@@ -423,6 +423,7 @@ public class BrowseCorpusMainHandler
         SessionManager sessionMgr =
             (SessionManager)session.getAttribute(SESSION_MANAGER);
         ArrayList tmNames = (ArrayList)p_request.getAttribute("tmNames");
+        ArrayList tmNamesSession = (ArrayList) session.getAttribute("tmNames");
         
         GlobalSightLocale sourceGSL =
             (GlobalSightLocale)p_request.getAttribute("sourceLocale");
@@ -515,6 +516,11 @@ public class BrowseCorpusMainHandler
                 {
                 	sessionMgr.setAttribute("tmIndex", tmIndexParams); // for refresh
                 }
+                
+                if(tmNamesSession != null)
+                {
+                    session.setAttribute("tmNames", tmNamesSession);
+                }
             }
             else 
             {
@@ -559,6 +565,7 @@ public class BrowseCorpusMainHandler
     {
     	if(searchtmNamesOverride == null)
     	{
+    	    p_request.getSession().setAttribute("tmNames", null);
     		return;
     	}
     	ArrayList noSearchTmNames = new ArrayList();

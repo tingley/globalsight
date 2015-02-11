@@ -185,6 +185,10 @@ public class EventTopicMap
         //idml
         fillMap(CxeMessageType.IDML_IMPORTED_EVENT, FOR_IDML_SOURCE_ADAPTER);
         fillMap(CxeMessageType.IDML_LOCALIZED_EVENT, FOR_IDML_TARGET_ADAPTER);
+        
+        // mif
+        fillMap(CxeMessageType.MIF_IMPORTED_EVENT, FOR_EXTRACTOR);
+        fillMap(CxeMessageType.MIF_LOCALIZED_EVENT, FOR_MERGER);
     }
 
     /**

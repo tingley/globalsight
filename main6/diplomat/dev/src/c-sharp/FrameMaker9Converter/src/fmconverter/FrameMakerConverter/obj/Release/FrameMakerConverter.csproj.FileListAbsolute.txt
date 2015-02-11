@@ -1,0 +1,10 @@
+C:\FMConv\src\fmconverter\FrameMakerConverter\bin\Release\FrameMakerConverter.exe.config
+C:\FMConv\src\fmconverter\FrameMakerConverter\bin\Release\FrameMakerConverter.exe
+C:\FMConv\src\fmconverter\FrameMakerConverter\bin\Release\FrameMakerConverter.pdb
+C:\FMConv\src\fmconverter\FrameMakerConverter\bin\Release\GlobalSight.Common.dll
+C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Release\ResolveAssemblyReference.cache
+C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Release\FrameMakerConverter.MainForm.resources
+C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Release\FrameMakerConverter.Properties.Resources.resources
+C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Release\FrameMakerConverter.csproj.GenerateResource.Cache
+C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Release\FrameMakerConverter.exe
+C:\FMConv\src\fmconverter\FrameMakerConverter\obj\Release\FrameMakerConverter.pdb

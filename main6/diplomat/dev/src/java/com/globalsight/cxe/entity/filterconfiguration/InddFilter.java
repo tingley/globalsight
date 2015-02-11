@@ -15,6 +15,8 @@ public class InddFilter implements Filter
     private boolean translateHiddenLayer = false;
     private boolean translateMasterLayer = true;
     private boolean translateFileInfo = false;
+    private boolean extractLineBreak = false;
+    private boolean replaceNonbreakingSpace = false;
 
     public boolean checkExists(String filterName, long companyId)
     {
@@ -49,7 +51,9 @@ public class InddFilter implements Filter
                 .append(",");
         sb.append("\"translateHiddenLayer\":").append(translateHiddenLayer).append(",");
         sb.append("\"translateMasterLayer\":").append(translateMasterLayer).append(",");
-        sb.append("\"translateFileInfo\":").append(translateFileInfo);
+        sb.append("\"translateFileInfo\":").append(translateFileInfo).append(",");
+        sb.append("\"extractLineBreak\":").append(extractLineBreak).append(",");
+        sb.append("\"replaceNonbreakingSpace\":").append(replaceNonbreakingSpace);
         sb.append("}");
         return sb.toString();
     }
@@ -127,5 +131,25 @@ public class InddFilter implements Filter
     public void setTranslateFileInfo(boolean translateFileInfo)
     {
         this.translateFileInfo = translateFileInfo;
+    }
+
+    public boolean getExtractLineBreak()
+    {
+        return extractLineBreak;
+    }
+
+    public void setExtractLineBreak(boolean extractLineBreak)
+    {
+        this.extractLineBreak = extractLineBreak;
+    }
+
+    public boolean isReplaceNonbreakingSpace()
+    {
+        return replaceNonbreakingSpace;
+    }
+
+    public void setReplaceNonbreakingSpace(boolean replaceNonbreakingSpace)
+    {
+        this.replaceNonbreakingSpace = replaceNonbreakingSpace;
     }
 }

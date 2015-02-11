@@ -42,6 +42,8 @@ public class Company extends PersistentObject
     private String m_ssoLogoutUrl;
     private String m_ssoWSEndpoint;
     private boolean m_enableSSOLogin = false;
+    private String sessionTime;
+    
     // Segment TM version - 2 for TM2, 3 for TM3
     private int m_tmVersion = TmVersion.TM2.getValue();
 
@@ -227,6 +229,16 @@ public class Company extends PersistentObject
         this.m_ssoLogoutUrl = ssoLogoutUrl;
     }
 
+    public String getSessionTime()
+    {
+        return sessionTime;
+    }
+
+    public void setSessionTime(String sessionTime)
+    {
+        this.sessionTime = sessionTime;
+    }
+    
     public String getSsoWSEndpoint()
     {
         return m_ssoWSEndpoint;

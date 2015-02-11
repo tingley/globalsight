@@ -1087,7 +1087,7 @@ public class UploadApi implements AmbassadorDwUpConstants
      * Loads the upload file into an OfflinePageData object.
      * 
      * @param p_reader
-     *            a stream opend on the upload file.
+     *            a stream opened on the upload file.
      * @param p_keepIssues
      *            when an OfflinePageData object is called *twice* to load data,
      *            this parameter allows to keep issues read in the first run

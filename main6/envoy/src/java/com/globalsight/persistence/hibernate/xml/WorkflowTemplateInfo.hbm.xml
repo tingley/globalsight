@@ -44,7 +44,7 @@
 			not-null="true" unique="false" />
 
 		<set name="leveragingLocalesSet" cascade="save-update"
-			inverse="true" lazy="false">
+			inverse="true">
 			<key column="WORKFLOW_INFO_ID" />
 			<one-to-many
 				class="com.globalsight.everest.foundation.LeverageLocales" />

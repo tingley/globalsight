@@ -392,6 +392,7 @@ public class FileSystemViewHandler extends PageHandler
             long projectID = Long.valueOf((String) p_sessionMgr.getAttribute(WebAppConstants.PROJECT_ID));
             
             String[] messageArguments = new String[9];
+            messageArguments[0] = DateHelper.getFormattedDateAndTimeFromUser(p_uploadDate,user);
             messageArguments[1] = (String)p_sessionMgr.getAttribute("jobName");
             messageArguments[2] = (String)p_sessionMgr.getAttribute("notes");
 
@@ -445,7 +446,6 @@ public class FileSystemViewHandler extends PageHandler
 
             String subject = MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_SUBJECT;
             String message = MailerConstants.DESKTOPICON_UPLOAD_COMPLETED_MESSAGE;
-            messageArguments[0] = DateHelper.getFormattedDateAndTimeFromUser(p_uploadDate,user);
             ServerProxy.getMailer().sendMailFromAdmin(user, messageArguments, subject, message);
             
             Project proj = ServerProxy.getProjectHandler().getProjectById(projectID);

@@ -16,6 +16,8 @@
             type="string" not-null="false" />
         <property name="valueTypeClass" length="128" column="valueType" 
             type="string" not-null="false" />
+        <property name="affectsIdentity" column="affectsIdentity"
+            type="yes_no" />
     </class>
 </hibernate-mapping>
 

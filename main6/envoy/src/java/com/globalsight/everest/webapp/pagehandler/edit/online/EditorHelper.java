@@ -33,6 +33,7 @@ import javax.servlet.http.HttpSession;
 
 import com.globalsight.config.UserParamNames;
 import com.globalsight.config.UserParameter;
+import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
 import com.globalsight.everest.edit.SegmentProtectionManager;
 import com.globalsight.everest.edit.SynchronizationManager;
@@ -1854,7 +1855,7 @@ public class EditorHelper implements EditorConstants
                 
                 // Use this tuv if it is not a locked exact match or
                 // the user has clicked Edit All.
-                if (!SegmentProtectionManager.isTuvInProtectedState(currentTuv ))
+                if (!EditHelper.isTuvInProtectedState(currentTuv ))
                 {
                     break;
                 }
@@ -2032,8 +2033,7 @@ public class EditorHelper implements EditorConstants
 
                 // Use this tuv if it is not a locked exact match or
                 // the user has clicked Edit All.
-                if (!SegmentProtectionManager.isTuvInProtectedState(
-                        currentTuv))
+                if (!EditHelper.isTuvInProtectedState(currentTuv))
                 {
                     break;
                 }

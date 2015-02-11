@@ -23,5 +23,6 @@ public class PlugManager
         plugClasses.add("7.1.8.2");
         plugClasses.add("7.1.8.5");
         plugClasses.add("8.0.0.0");
+        plugClasses.add("8.1.0.0");
     }
 }

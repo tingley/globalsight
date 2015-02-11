@@ -45,26 +45,18 @@ import com.globalsight.everest.foundation.SearchCriteriaParameters;
 import com.globalsight.everest.projecthandler.Project;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.taskmanager.Task;
-import com.globalsight.everest.util.system.SystemConfigParamNames;
-import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.CurrencyThreadLocal;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ProjectWorkflowData;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.ReviewerVendorPoReportDataAssembler;
 import com.globalsight.everest.webapp.pagehandler.administration.reports.util.XlsReportData;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
+import com.globalsight.everest.workflow.Activity;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.IntHolder;
-import com.globalsight.everest.company.CompanyWrapper;
 
 public class ReviewerVendorPoXlsReportHelper
 {
-    // for "Dell Reviewer PO Report older Issue" "Dell_Review";
-    // "reports.activity"
-    private static final String REPORTS_ACTIVITY = SystemConfiguration
-            .getInstance().getStringParameter(
-                    SystemConfigParamNames.REPORTS_ACTIVITY);
-
     private static GlobalSightCategory s_logger = (GlobalSightCategory) GlobalSightCategory
             .getLogger("Reports");
     private HttpServletRequest request = null;
@@ -85,11 +77,10 @@ public class ReviewerVendorPoXlsReportHelper
         ReviewerVendorPoReportDataAssembler reportDataAssembler = new ReviewerVendorPoReportDataAssembler(
                 p_request);
 
-        reportDataAssembler.setReviewActivtityName(REPORTS_ACTIVITY);
-
         reportDataAssembler.setProjectIdList();
         reportDataAssembler.setTargetLangList();
-
+        reportDataAssembler.setActivityNameList();
+        reportDataAssembler.setJobStateList();
         // set all the jobs that were originally imported with the wrong project
         // the users want to pretend that these jobs are in this project
         reportDataAssembler.setJobsInWrongProject();
@@ -189,11 +180,14 @@ public class ReviewerVendorPoXlsReportHelper
 
         paramsSheet.addCell(new Label(1, 1, bundle.getString("lb_from") + ":"));
         paramsSheet.addCell(new Label(1, 2, fromMsg));
+        paramsSheet.setColumnView(1, 20);
         paramsSheet
                 .addCell(new Label(2, 1, bundle.getString("lb_until") + ":"));
         paramsSheet.addCell(new Label(2, 2, untilMsg));
+        paramsSheet.setColumnView(2, 20);
 
         // add the target lang criteria
+        paramsSheet.setColumnView(3, 20);
         if (data.wantsAllTargetLangs)
         {
             paramsSheet.addCell(new Label(3, 1, bundle
@@ -211,7 +205,50 @@ public class ReviewerVendorPoXlsReportHelper
                 String lang = (String) iter.next();
                 paramsSheet.addCell(new Label(3, r++, lang));
             }
-            paramsSheet.setColumnView(3, 15);
+        }
+        paramsSheet.setColumnView(4, 20);
+        if (data.allJobStatus)
+        {
+            paramsSheet.addCell(new Label(4, 1, bundle
+                    .getString("lb_job_status")
+                    + ": " + bundle.getString("all")));
+        }
+        else
+        {
+            paramsSheet.addCell(new Label(4, 1, bundle
+                    .getString("lb_job_status")
+                    + ":"));
+            Iterator iter = data.jobStatusList.iterator();
+            int r = 2;
+            while (iter.hasNext())
+            {
+                String jobStatus = (String) iter.next();
+                paramsSheet.addCell(new Label(4, r, jobStatus));
+                r++;
+            }
+        }
+        paramsSheet.setColumnView(5, 30);
+        if (data.allActivities)
+        {
+            paramsSheet.addCell(new Label(5, 1, bundle
+                    .getString("lb_activity_name")
+                    + ": " + bundle.getString("all")));
+        }
+        else
+        {
+            paramsSheet.addCell(new Label(5, 1, bundle
+                    .getString("lb_activity_name")
+                    + ":"));
+            Iterator iter = data.activityNameList.iterator();
+            int r = 2;
+            while (iter.hasNext())
+            {
+                String activityName = (String) iter.next();
+                Activity activity = (Activity) ServerProxy.getJobHandler()
+                        .getActivity(activityName);
+                paramsSheet.addCell(new Label(5, r, activity.getDisplayName()));
+                r++;
+            }
         }
 
         m_workbook.write();
@@ -300,6 +337,11 @@ public class ReviewerVendorPoXlsReportHelper
         theSheet.addCell(new Label(c, 2, bundle.getString("lb_creation_date"),
                 headerFormat));
         theSheet.mergeCells(c, 2, c, 3);
+        c++;
+        theSheet.addCell(new Label(c, 2, bundle.getString("lb_activity_name"),
+                headerFormat));
+        theSheet.mergeCells(c, 2, c, 3);
+        theSheet.setColumnView(c, 20);
         c++;
         theSheet.addCell(new Label(c, 2, bundle
                 .getString("lb_accepted_reviewer_date"), headerFormat));
@@ -414,6 +456,20 @@ public class ReviewerVendorPoXlsReportHelper
         wordCountValueRightFormat.setBorder(jxl.format.Border.RIGHT,
                 jxl.format.BorderLineStyle.THICK);
 
+        WritableCellFormat wordCountValueLeftRightFormat = new WritableCellFormat(
+                headerFont);
+        wordCountValueLeftRightFormat.setWrap(true);
+        wordCountValueLeftRightFormat.setBackground(jxl.format.Colour.GRAY_25);
+        wordCountValueLeftRightFormat.setShrinkToFit(false);
+        wordCountValueLeftRightFormat.setBorder(jxl.format.Border.TOP,
+                jxl.format.BorderLineStyle.THIN);
+        wordCountValueLeftRightFormat.setBorder(jxl.format.Border.BOTTOM,
+                jxl.format.BorderLineStyle.THICK);
+        wordCountValueLeftRightFormat.setBorder(jxl.format.Border.LEFT,
+                jxl.format.BorderLineStyle.THICK);
+        wordCountValueLeftRightFormat.setBorder(jxl.format.Border.RIGHT,
+                jxl.format.BorderLineStyle.THICK);
+
         int c = 0;
         theSheet
                 .addCell(new Label(0, 1, bundle.getString("lb_desp_file_list")));
@@ -463,6 +519,16 @@ public class ReviewerVendorPoXlsReportHelper
         theSheet.addCell(new Label(c++, 3, bundle
                 .getString("jobinfo.tradosmatches.invoice.per100matches"),
                 wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_85_94"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_84") + "*",
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle
+                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
         if (data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -473,20 +539,8 @@ public class ReviewerVendorPoXlsReportHelper
             theSheet.addCell(new Label(c++, 3, bundle
                     .getString("lb_context_matches"), wordCountValueFormat));
         }
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_94"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_1_74") + "*",
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
-                wordCountValueRightFormat));
-        theSheet
-                .addCell(new Label(c++, 3, bundle
-                        .getString("lb_repetition_word_cnt"),
-                        wordCountValueRightFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_total"),
-                wordCountValueRightFormat));
+                wordCountValueLeftRightFormat));
 
         theSheet.addCell(new Label(c, 2, bundle
                 .getString("jobinfo.tmmatches.invoice"), wordCountFormat));
@@ -509,6 +563,16 @@ public class ReviewerVendorPoXlsReportHelper
         theSheet.addCell(new Label(c++, 3, bundle
                 .getString("jobinfo.tradosmatches.invoice.per100matches"),
                 wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_85_94"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_84") + "*",
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle
+                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
         if (data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -519,17 +583,6 @@ public class ReviewerVendorPoXlsReportHelper
             theSheet.addCell(new Label(c++, 3, bundle
                     .getString("lb_context_matches"), wordCountValueFormat));
         }
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_94"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_1_74") + "*",
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle
-                .getString("lb_repetition_word_cnt"), wordCountValueFormat));
-        // theSheet.addCell(new Label(c++,3,"Total",wordCountValueRightFormat));
         theSheet.addCell(new Label(c++, 3, bundle
                 .getString("lb_translation_total"), wordCountValueFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_review"),
@@ -614,6 +667,9 @@ public class ReviewerVendorPoXlsReportHelper
                 theSheet.addCell(new DateTime(col++, row, data.creationDate,
                         dateFormat));
                 theSheet.setColumnView(col - 1, 15);
+                
+                theSheet
+                        .addCell(new Label(col++, row, data.currentActivityName));
 
                 // Accepted Reviewer Date
                 if (data.dellReviewActivityState == Task.STATE_REJECTED)
@@ -697,15 +753,15 @@ public class ReviewerVendorPoXlsReportHelper
         int totalsRow = p_row.getValue() + 1; // skip a row
         theSheet.addCell(new Label(0, totalsRow, bundle.getString("lb_totals"),
                 subTotalFormat));
-        theSheet.mergeCells(0, totalsRow, 6, totalsRow);
+        theSheet.mergeCells(0, totalsRow, 7, totalsRow);
 
         int lastRow = p_row.getValue() - 2;
-        int c = 7;
+        int c = 8;
         // Word Count
-        theSheet.addCell(new Formula(c++, totalsRow, "SUM(H5" + ":H" + lastRow
+        theSheet.addCell(new Formula(c++, totalsRow, "SUM(I5" + ":I" + lastRow
                 + ")", subTotalFormat));
         // Invoice
-        theSheet.addCell(new Formula(c++, totalsRow, "SUM(I5" + ":I" + lastRow
+        theSheet.addCell(new Formula(c++, totalsRow, "SUM(J5" + ":J" + lastRow
                 + ")", moneyFormat));
         // add an extra column for Dell Tracking Use
         theSheet.addCell(new Label(c++, totalsRow, "", moneyFormat));
@@ -751,7 +807,7 @@ public class ReviewerVendorPoXlsReportHelper
                 WritableFont.NO_BOLD, false, UnderlineStyle.NO_UNDERLINE,
                 jxl.format.Colour.GRAY_50);
         WritableCellFormat wrongJobFormat = new WritableCellFormat(wrongJobFont);
-
+        
         while (projectIter.hasNext())
         {
             String jobName = (String) projectIter.next();
@@ -759,6 +815,7 @@ public class ReviewerVendorPoXlsReportHelper
             HashMap localeMap = (HashMap) p_projectMap.get(jobName);
             ArrayList locales = new ArrayList(localeMap.keySet());
             Collections.sort(locales);
+            HashMap<String, String> jobLocale = new HashMap<String, String>();
             Iterator localeIter = locales.iterator();
             while (localeIter.hasNext())
             {
@@ -767,6 +824,17 @@ public class ReviewerVendorPoXlsReportHelper
                 String localeName = (String) localeIter.next();
                 ProjectWorkflowData data = (ProjectWorkflowData) localeMap
                         .get(localeName);
+                
+                if (jobLocale.size() != 0
+                        && jobLocale.get(jobName + data.targetLang) != null)
+                {
+                    continue;
+                }
+                else
+                {
+                    jobLocale.put(jobName + data.targetLang, jobName
+                            + data.targetLang);
+                }
                 if (isWrongJob)
                 {
                     theSheet.addCell(new Number(col++, row, data.jobId,
@@ -794,6 +862,23 @@ public class ReviewerVendorPoXlsReportHelper
                         .addCell(new Number(col++, row, data.trados100WordCount));
                 int numwidth = 10;
                 theSheet.setColumnView(col - 1, numwidth);
+                theSheet.addCell(new Number(col++, row,
+                        data.trados95to99WordCount));
+                theSheet.setColumnView(col - 1, numwidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        data.trados85to94WordCount));
+                theSheet.setColumnView(col - 1, numwidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        data.trados75to84WordCount));
+                theSheet.setColumnView(col - 1, numwidth);
+                theSheet.addCell(new Number(col++, row,
+                        data.tradosNoMatchWordCount));
+                theSheet.setColumnView(col - 1, numwidth);
+                theSheet.addCell(new Number(col++, row,
+                        data.tradosRepsWordCount));
+                theSheet.setColumnView(col - 1, numwidth);
                 if (this.data.headers[0] != null)
                 {
                     theSheet.addCell(new Number(col++, row,
@@ -808,29 +893,32 @@ public class ReviewerVendorPoXlsReportHelper
                     theSheet.setColumnView(col - 1, numwidth);
                 }
                 theSheet.addCell(new Number(col++, row,
-                        data.trados95to99WordCount));
-                theSheet.setColumnView(col - 1, numwidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        data.trados75to94WordCount));
-                theSheet.setColumnView(col - 1, numwidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        data.trados1to74WordCount));
-                theSheet.setColumnView(col - 1, numwidth);
-                theSheet.addCell(new Number(col++, row,
-                        data.tradosNoMatchWordCount));
-                theSheet.setColumnView(col - 1, numwidth);
-                theSheet.addCell(new Number(col++, row,
-                        data.tradosRepsWordCount));
-                theSheet.setColumnView(col - 1, numwidth);
-                theSheet.addCell(new Number(col++, row,
                         data.tradosTotalWordCount));
                 theSheet.setColumnView(col - 1, numwidth);
 
                 int moneywidth = 12;
                 theSheet.addCell(new Number(col++, row,
                         asDouble(data.trados100WordCountCost), moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados95to99WordCountCost), moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados85to94WordCountCost), moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados75to84WordCountCost), moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+                theSheet
+                        .addCell(new Number(col++, row,
+                                asDouble(data.tradosNoMatchWordCountCost),
+                                moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.tradosRepsWordCountCost), moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
                 if (this.data.headers[0] != null)
                 {
@@ -846,27 +934,6 @@ public class ReviewerVendorPoXlsReportHelper
                             moneyFormat));
                     theSheet.setColumnView(col - 1, moneywidth);
                 }
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.trados95to99WordCountCost), moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.trados75to94WordCountCost), moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.trados1to74WordCountCost), moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-                theSheet
-                        .addCell(new Number(col++, row,
-                                asDouble(data.tradosNoMatchWordCountCost),
-                                moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.tradosRepsWordCountCost), moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
                 // theSheet.addCell(new
                 // Number(col++,row,asDouble(data.tradosTotalWordCountCost),moneyFormat));
                 // theSheet.setColumnView(col -1,moneywidth);

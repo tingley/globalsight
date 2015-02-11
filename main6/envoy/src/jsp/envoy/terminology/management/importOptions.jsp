@@ -86,6 +86,70 @@ var xmlImportOptions =
 
 eval("<%=errorScript%>");
 
+function disableOtherOptions(obj)
+{
+	if (obj.id == "idSync1")
+	{
+
+		document.getElementById('idSync2O').checked = false;
+		document.getElementById('idSync2M').checked = false;
+		document.getElementById('idSync2D').checked = false;
+		document.getElementById('idSync3O').checked = false;
+		document.getElementById('idSync3M').checked = false;
+		document.getElementById('idSync3D').checked = false;
+		document.getElementById('idNosync3D').checked = false;
+		document.getElementById('idNosync3A').checked = false;
+	}
+	else if (obj.id == "idSync2")
+	{
+		document.getElementById('idSync2O').checked = true;
+		document.getElementById('idSync3O').checked = false;
+		document.getElementById('idSync3M').checked = false;
+		document.getElementById('idSync3D').checked = false;
+		if (document.getElementById('idNosync3A').checked == false 
+				&& document.getElementById('idNosync3D').checked == false)
+		{
+			document.getElementById('idNosync3A').checked = true;
+		}
+	}
+	else if (obj.id == "idSync3")
+	{
+		document.getElementById('idSync3O').checked = true;
+		document.getElementById('idSync2O').checked = false;
+		document.getElementById('idSync2M').checked = false;
+		document.getElementById('idSync2D').checked = false;
+		if (document.getElementById('idNosync3A').checked == false 
+				&& document.getElementById('idNosync3D').checked == false)
+		{
+			document.getElementById('idNosync3A').checked = true;
+		}
+	}
+	else if (obj.id == "idSync2O" || obj.id == "idSync2M" || obj.id == "idSync2D")
+	{
+		document.getElementById('idSync2').checked = true;
+		document.getElementById('idSync3O').checked = false;
+		document.getElementById('idSync3M').checked = false;
+		document.getElementById('idSync3D').checked = false;
+		if (document.getElementById('idNosync3A').checked == false 
+				&& document.getElementById('idNosync3D').checked == false)
+		{
+			document.getElementById('idNosync3A').checked = true;
+		}
+	}
+	else if (obj.id == "idSync3O" || obj.id == "idSync3M" || obj.id == "idSync3D")
+	{
+		document.getElementById('idSync3').checked = true;
+		document.getElementById('idSync2O').checked = false;
+		document.getElementById('idSync2M').checked = false;
+		document.getElementById('idSync2D').checked = false;
+		if (document.getElementById('idNosync3A').checked == false 
+				&& document.getElementById('idNosync3D').checked == false)
+		{
+			document.getElementById('idNosync3A').checked = true;
+		}
+	}
+}
+
 function doCancel()
 {
     window.navigate("<%=urlCancel%>");
@@ -488,43 +552,38 @@ function doOnLoad()
 <INPUT TYPE="hidden" NAME="importoptions" VALUE="ImportOptions XML goes here">
 </FORM>
 <FORM NAME="oDummyForm">
-<input type="radio" name="oSync" id="idSync1" CHECKED="true">
+<input type="radio" name="oSync" id="idSync1" CHECKED onclick="disableOtherOptions(this)">
 <label for="idSync1"><%=lb_addAsNew%></label>
 </DIV>
 <DIV>
-<input type="radio" name="oSync" id="idSync2">
+<input type="radio" name="oSync" id="idSync2" onclick="disableOtherOptions(this)">
 <label for="idSync2"><%=lb_syncConcept%></label>
   <DIV style="margin-left: 40px">
-  <input type="radio" name="oSyncId" id="idSync2O" onclick="idSync2.click()"
-   CHECKED="true">
+  <input type="radio" name="oSyncId" id="idSync2O" onclick="disableOtherOptions(this)">
   <label for="idSync2O"><%=lb_overwrite%></label><br>
-  <input type="radio" name="oSyncId" id="idSync2M" onclick="idSync2.click()">
+  <input type="radio" name="oSyncId" id="idSync2M" onclick="disableOtherOptions(this)">
   <label for="idSync2M"><%=lb_merge%></label><br>
-  <input type="radio" name="oSyncId" id="idSync2D" onclick="idSync2.click()">
+  <input type="radio" name="oSyncId" id="idSync2D" onclick="disableOtherOptions(this)">
   <label for="idSync2D"><%=lb_discard%></label><br>
   </DIV>
 </DIV>
 <DIV>
-<input type="radio" name="oSync" id="idSync3">
+<input type="radio" name="oSync" id="idSync3" onclick="disableOtherOptions(this)">
 <label for="idSync3"><%=lb_syncLanguage%></label>
-  <select name="oLanguage" id="idLanguageList"
-    onclick="idSync3.click()" onchange="idSync3.click()"></select>
+  <select name="oLanguage" id="idLanguageList" onclick="idSync3.click()" onchange="idSync3.click()"></select>
   <DIV style="margin-left: 40px">
-    <input type="radio" name="oSyncLang" id="idSync3O" onclick="idSync3.click()"
-     CHECKED="true">
+    <input type="radio" name="oSyncLang" id="idSync3O" onclick="disableOtherOptions(this)">
     <label for="idSync3O"><%=lb_overwrite%></label><br>
-    <input type="radio" name="oSyncLang" id="idSync3M" onclick="idSync3.click()">
+    <input type="radio" name="oSyncLang" id="idSync3M" onclick="disableOtherOptions(this)">
     <label for="idSync3M"><%=lb_merge%></label><br>
-    <input type="radio" name="oSyncLang" id="idSync3D" onclick="idSync3.click()">
+    <input type="radio" name="oSyncLang" id="idSync3D" onclick="disableOtherOptions(this)">
     <label for="idSync3D"><%=lb_discard%></label><br>
   </DIV>
 <input type="radio" name="foo" id="idFoo" style="visibility: hidden">
 <%=bundle.getString("lb_unsynchronized_entries") %>: &nbsp;
-    <input type="radio" name="oNosyncLang" id="idNosync3D"
-     onclick="idSync3.click()">
+    <input type="radio" name="oNosyncLang" id="idNosync3D">
     <label for="idNosync3D"><%=bundle.getString("lb_discard") %></label>
-    <input type="radio" name="oNosyncLang" id="idNosync3A" checked
-     onclick="idSync3.click()">
+    <input type="radio" name="oNosyncLang" id="idNosync3A">
     <label for="idNosync3A"><%=bundle.getString("lb_add") %></label> &nbsp;
 </DIV>
 </FORM>

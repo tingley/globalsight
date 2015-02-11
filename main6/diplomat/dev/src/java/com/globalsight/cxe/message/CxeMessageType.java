@@ -87,6 +87,9 @@ public class CxeMessageType
     public static final int IDML_IMPORTED_EVENT = 28;
     public static final int IDML_LOCALIZED_EVENT = 29;
     
+    public static final int MIF_LOCALIZED_EVENT = 30;
+    public static final int MIF_IMPORTED_EVENT = 31;
+    
     // data source related constants
     public static final int FILE_SYSTEM_FILE_SELECTED_EVENT = 500;
     public static final int FILE_SYSTEM_EXPORT_EVENT = 501;
@@ -235,6 +238,10 @@ public class CxeMessageType
        //documentum
         fillMaps(DOCUMENTUM_FILE_SELECTED_EVENT, "DOCUMENTUM_FILE_SELECTED_EVENT");
         fillMaps(DOCUMENTUM_EXPORT_EVENT, "DOCUMENTUM_EXPORT_EVENT");
+        
+        //mif
+        fillMaps(MIF_IMPORTED_EVENT, "MIF_IMPORTED_EVENT");
+        fillMaps(MIF_LOCALIZED_EVENT, "MIF_LOCALIZED_EVENT");
     }
 
     //////////////////////////////////////

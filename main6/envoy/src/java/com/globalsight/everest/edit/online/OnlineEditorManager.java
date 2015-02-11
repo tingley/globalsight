@@ -277,4 +277,12 @@ public interface OnlineEditorManager
     public MatchTypeStatistics getMatchTypes(Long p_sourcePageId,
             Long p_targetLocaleId) throws GeneralException, RemoteException;
 
+    /**
+     * Set TM matches for "SegmentView" object.This method allows to reset
+     * TM matches separately.
+     */
+    public SegmentView addSegmentMatches(SegmentView p_view,
+            EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
+            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage);
+
 }

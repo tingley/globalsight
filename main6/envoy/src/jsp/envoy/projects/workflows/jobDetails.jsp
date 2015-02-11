@@ -109,7 +109,7 @@
    String exportURL = export.getPageURL();
    String changeCurrencyURL = changeCurr.getPageURL();
    String editPagesURL = editPages.getPageURL();
-   String downloadURL = download.getPageURL();
+   String downloadURL = download.getPageURL() + "&fromJobDetail=true";
    String editTotalSourcePageWcURL = editTotalSourcePageWc.getPageURL();
    String editExpensesFinalCostURL = editFinalCost.getPageURL()
                                     + "&"
@@ -2239,14 +2239,14 @@ function refreshJobPage()
 		<TR>
 			<TD colspan=4>
 			<amb:permission  name="<%=Permission.ADD_SOURCE_FILES%>" >
-			<input type="button" name="Add Files" value="<%=bundle.getString("lb_add_files") %>" onclick="addSourceFiles()">
+			<input CLASS="standardText" type="button" name="Add Files" value="<%=bundle.getString("lb_add_files") %>" onclick="addSourceFiles()">
 			</amb:permission>
 			<amb:permission  name="<%=Permission.DELETE_SOURCE_FILES%>" >
-			<input type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files") %>" onclick="removeSourceFiles()">
+			<input CLASS="standardText" type="button" name="remove Files" value="<%=bundle.getString("lb_remove_files") %>" onclick="removeSourceFiles()">
 			</amb:permission>
 			<amb:permission  name="<%=Permission.EDIT_SOURCE_FILES%>" >
-			<input type="button" name="download Files" value="<%=bundle.getString("lb_download_edit") %>" onclick="downloadFiles()">
-			<input type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit") %>" onclick="openUploadFile();">
+			<input CLASS="standardText" type="button" name="download Files" value="<%=bundle.getString("lb_download_edit") %>" onclick="downloadFiles()">
+			<input CLASS="standardText" type="button" name="upload Files" value="<%=bundle.getString("lb_upload_edit") %>" onclick="openUploadFile();">
 			</amb:permission> 
 			</TD>
 	   </TR>
@@ -2294,7 +2294,7 @@ function refreshJobPage()
                 <%=bundle.getString("lb_po_number")%><input type = "text" name = "POnumber" id = "POnumber" disabled = "true" size = 15 value = "<%=quotePOnumber%>" onChange= "PoNumberIsChanged=true;"/>
               </span>
               <amb:permission name="<%=Permission.JOB_QUOTE_PONUMBER_EDIT%>" >
-                     <div ALIGN="RIGHT"><input type = "button" name = "PONumberSave" id = "PONumberSave" value = "<%=bundle.getString("lb_po_number_save")%>" onClick = "saveQuotePoNumber()"/></div>
+                     <div ALIGN="RIGHT"><input class="standardText" type = "button" name = "PONumberSave" id = "PONumberSave" value = "<%=bundle.getString("lb_po_number_save")%>" onClick = "saveQuotePoNumber()"/></div>
                       <script>
                             var objPONumberText = document.getElementById('POnumber');
                             objPONumberText.disabled = false;                           
@@ -2500,13 +2500,13 @@ function refreshJobPage()
                         <INPUT CLASS="standardText" TYPE="BUTTON" NAME="Dispatch" VALUE="<%=bundle.getString("lb_dispatch")%>" onclick="submitForm('Dispatch');">
                     </amb:permission>
                     <amb:permission  name="<%=Permission.JOB_WORKFLOWS_SKIP%>" >
-                        <INPUT TYPE="BUTTON" NAME="skip" VALUE="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');">
+                        <INPUT CLASS="standardText" TYPE="BUTTON" NAME="skip" VALUE="<%=bundle.getString("lb_skip_activity")%>" onClick="submitForm('skip');">
                     </amb:permission>
                     <amb:permission name="<%=Permission.JOBS_DOWNLOAD%>" >
-                        <INPUT TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
+                        <INPUT CLASS="standardText" TYPE="BUTTON" NAME=Download VALUE="<%=bundle.getString("lb_download")%>..." onClick="submitForm('Download');">
                     </amb:permission>
                     <amb:permission name="<%=Permission.JOB_WORKFLOWS_PRIORITY%>" >
-                        <INPUT TYPE="BUTTON" NAME=changePriority VALUE="<%=bundle.getString("lb_modify_priority")%>" onClick="submitForm('priority');">
+                        <INPUT CLASS="standardText" TYPE="BUTTON" NAME=changePriority VALUE="<%=bundle.getString("lb_modify_priority")%>" onClick="submitForm('priority');">
                     </amb:permission>
                     
                     <%

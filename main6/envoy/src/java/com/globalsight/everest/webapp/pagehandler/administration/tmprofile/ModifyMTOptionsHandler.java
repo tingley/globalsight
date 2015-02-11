@@ -36,6 +36,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.machineTranslation.MachineTranslator;
 import com.globalsight.machineTranslation.asiaOnline.AsiaOnlineMtInvoker;
 import com.globalsight.machineTranslation.mstranslator.MSTranslatorInvoker;
 import com.microsoft.schemas.MSNSearch._2005._09.fex.LanguagePair;
@@ -111,6 +112,11 @@ public class ModifyMTOptionsHandler extends PageHandler
     	{
         	setChangedTmProfile(p_request, tmProfile);
         	String appid = p_request.getParameter(TMProfileConstants.MT_MS_APPID);
+        	String category = p_request.getParameter(TMProfileConstants.MT_MS_CATEGORY);
+        	if (category == null || category.length() == 0)
+            {
+                category = "general";
+            }
         	
         	try 
         	{
@@ -135,7 +141,8 @@ public class ModifyMTOptionsHandler extends PageHandler
                     URL url = new URL(baseUrl, p_request.getParameter(TMProfileConstants.MT_MS_URL));
                     SoapService soap = new SoapService(url);
                     LanguageService service = soap.getBasicHttpBindingLanguageService();
-                    service.translate(appid, "hello world", "en", "fr");
+                    service.translate(appid, "hello world", "en", "fr",
+                            MachineTranslator.MSMT_CONTENT_TYPE, category);
                     p_request.setAttribute("URL_flag", TMProfileConstants.MT_MS_URL_FLAG_PUBLIC);
                 }
                 catch (Exception exx)
@@ -280,6 +287,8 @@ public class ModifyMTOptionsHandler extends PageHandler
 
             tmProfile.setMsMTUrlFlag(p_request
                     .getParameter(TMProfileConstants.MT_MS_URL_FLAG));
+            tmProfile.setMsMTCategory(p_request
+                    .getParameter(TMProfileConstants.MT_MS_CATEGORY));
         }
         // Asia Online options
         if (engine != null && engine.equalsIgnoreCase("asia_online"))

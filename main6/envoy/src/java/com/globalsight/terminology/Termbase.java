@@ -3130,6 +3130,146 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     }
 
     /**
+     * Get max cid,lid,tid in database.
+     */
+    public Map<String, Long> getMaxIDS()
+    {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rset = null;
+        Map<String, Long> result = new HashMap<String, Long>();
+
+        long cid = 0, lid = 0, tid = 0;
+
+        try
+        {
+            conn = SqlUtil.hireConnection();
+            conn.setAutoCommit(false);        
+            stmt = conn.createStatement();
+            
+            rset = stmt.executeQuery("select NAME, VALUE from TB_SEQUENCE "
+                    + "where NAME='cid' or NAME='lid' or NAME='tid' "
+                    + "FOR UPDATE");
+
+            while (rset.next())
+            {
+                String name = rset.getString(1);
+                if (name.equalsIgnoreCase("cid"))
+                {
+                    cid = rset.getLong(2);
+                }
+                else if (name.equalsIgnoreCase("lid"))
+                {
+                    lid = rset.getLong(2);
+                }
+                else if (name.equalsIgnoreCase("tid"))
+                {
+                    tid = rset.getLong(2);
+                }
+            }
+            
+        }
+        catch (/* SQL */Exception e)
+        {
+            CATEGORY.error("getMaxIDS", e);
+
+            try
+            {
+                conn.rollback();
+            }
+            catch (Exception ex)
+            { /* ignore */
+            }
+            throw new TermbaseException(MSG_SQL_ERROR, null, e);
+        }
+        finally
+        {
+            result.put("cid", Long.valueOf(cid));
+            result.put("lid", Long.valueOf(lid));
+            result.put("tid", Long.valueOf(tid));
+            
+            try
+            {
+                if (rset != null)
+                    rset.close();
+                if (stmt != null)
+                    stmt.close();
+            }
+            catch (Throwable t)
+            { /* ignore */
+            }
+
+            SqlUtil.fireConnection(conn);
+            
+            return result;
+        }
+
+    }
+
+    private void setMaxIDS(long p_cid, long p_lid, long p_tid)
+    {
+        Connection conn = null;
+        Statement stmt = null;
+
+        long cid = 0, lid = 0, tid = 0;
+
+        try
+        {
+            conn = SqlUtil.hireConnection();
+            conn.setAutoCommit(false);        
+            stmt = conn.createStatement();
+            
+            if (p_cid > 0)
+            {
+                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + p_cid
+                        + " WHERE NAME='cid'");
+            }
+            if (p_lid > 0)
+            {
+                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + p_lid
+                        + " WHERE NAME='lid'");
+            }
+            if (p_tid > 0)
+            {
+                stmt.addBatch("UPDATE TB_SEQUENCE SET VALUE=" + p_tid
+                        + " WHERE NAME='tid'");
+            }
+
+            stmt.executeBatch();
+
+            conn.commit();
+
+        }
+        catch (/* SQL */Exception e)
+        {
+            CATEGORY.error("setMaxIDS", e);
+
+            try
+            {
+                conn.rollback();
+            }
+            catch (Exception ex)
+            { /* ignore */
+            }
+            throw new TermbaseException(MSG_SQL_ERROR, null, e);
+        }
+        finally
+        {
+            try
+            {
+                if (stmt != null)
+                    stmt.close();
+            }
+            catch (Throwable t)
+            { /* ignore */
+            }
+
+            SqlUtil.fireConnection(conn);
+        }
+
+    }
+    
+    /**
      * Fetch the existing IDs (lid + tid) used for an entry.
      */
     private void getExistingIds(long p_entryId, ArrayList p_lids,
@@ -3196,10 +3336,13 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
     }
 
     /**
-     * Fetch the existing IDs (lid + tid) used for a list of entry IDs.
+     * Fetch the existing IDs (lid + tid)and language/term list 
+     * used for a list of entry IDs.
      */
     /* private */void getMultipleExistingIds(ArrayList p_entryIds,
-            ArrayList p_lids, ArrayList p_tids) throws TermbaseException
+            ArrayList p_tb_language_lids, ArrayList p_tb_langs,
+            ArrayList p_tb_term_tids, ArrayList p_tb_terms) 
+            throws TermbaseException
     {
         Connection conn = null;
         Statement stmt = null;
@@ -3215,22 +3358,31 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             String inlist = SqlUtil.getInList(p_entryIds);
 
             stmt = conn.createStatement();
-            rset = stmt.executeQuery("select LID from TB_LANGUAGE "
+            rset = stmt.executeQuery("select LID, CID, NAME, LOCALE from TB_LANGUAGE "
                     + "where TBID=" + m_id + " and CID in " + inlist);
 
             while (rset.next())
             {
-                p_lids.add(new Long(rset.getLong(1)));
+                p_tb_language_lids.add(new Long(rset.getLong(1)));
+
+                Language tbLang = new Language(rset.getInt(1), rset.getInt(2),
+                                          rset.getString(3), rset.getString(4));
+                tbLang.setTbid((int)m_id);
+                p_tb_langs.add(tbLang);
             }
 
             rset.close();
 
-            rset = stmt.executeQuery("select TID from TB_TERM " + "where TBID="
-                    + m_id + " and CID in " + inlist);
+            rset = stmt.executeQuery("select TID, LID, CID from TB_TERM " 
+                    + "where TBID=" + m_id + " and CID in " + inlist);
 
             while (rset.next())
             {
-                p_tids.add(new Long(rset.getLong(1)));
+                p_tb_term_tids.add(new Long(rset.getLong(1)));
+                
+                Term term = new Term(rset.getInt(1), rset.getInt(2), rset.getInt(3));
+                term.setTbid((int)m_id);
+                p_tb_terms.add(term);
             }
 
             conn.commit();
@@ -3823,42 +3975,21 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         Statements stmts;
         String statement;
         
-     // Allocate all IDs we need.
+        // Allocate all IDs we need.
         ArrayList cids = new ArrayList(p_entries.keySet());
         Long lid, tid;
         int neededLids = 0, neededTids = 0;
         IntHolder existingLids, existingTids;
-        ArrayList lids = new ArrayList();
-        ArrayList tids = new ArrayList();
+        ArrayList tb_language_lids = new ArrayList();
+        ArrayList tb_langs = new ArrayList();
+        ArrayList tb_term_tids = new ArrayList();
+        ArrayList tb_terms = new ArrayList();
         
-     // Fetch ids already used in entries.
-        getMultipleExistingIds(cids, lids, tids);
+        // Fetch language/term already used in entries.
+        getMultipleExistingIds(cids, tb_language_lids, tb_langs,
+                               tb_term_tids, tb_terms);
         
-        existingLids = new IntHolder(lids.size());
-        existingTids = new IntHolder(tids.size());
-        
-     // Find out how many more IDs we need.
-        for (Iterator it = p_entries.values().iterator(); it.hasNext();)
-        {
-        	Entry entry = (Entry) it.next();
-        	Element root = entry.getDom().getRootElement();
-        	
-        	// Count languages and terms to reserve missing ids for.
-        	List langSets = root.selectNodes("langSet");
-            neededLids += langSets.size();
-            
-            List ntigs = root.selectNodes("langSet/ntig/termGrp");
-            List tigs = root.selectNodes("langSet/tig");
-            neededTids += ntigs.size() + tigs.size();
-        }
-        
-        neededLids -= lids.size();
-        neededTids -= tids.size();
-        
-     // Allocate any needed new ids for the table rows.
-        allocateIds(lids, neededLids, tids, neededTids);
-        
-     // Now we're ready to collect the statements for all entries.
+        // Now we're ready to collect the statements for all entries.
         for (int i = 0, max = cids.size(); i < max; i++)
         {
         	Object cid = null;
@@ -3870,31 +4001,12 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             
             Entry entry = (Entry) p_entries.get(cid);
 
-            stmts = getOverwriteTbxEntryStatements(entry, String.valueOf(cid), lids,
-                    tids, existingLids, existingTids, p_session);
+            stmts = getOverwriteTbxEntryStatements(entry, String.valueOf(cid), 
+                                        tb_language_lids, tb_langs, 
+                                        tb_term_tids, tb_terms, 
+                                        p_session);
 
             result.addAll(stmts);
-        }
-        
-     // Remove any unused language or term rows.
-        while (lids.size() > 0)
-        {
-            lid = (Long) lids.remove(0);
-
-            statement = "delete from tb_language " + "where tbid=" + m_id
-                    + " and lid=" + lid;
-
-            result.addLanguageStatement(statement);
-        }
-
-        while (tids.size() > 0)
-        {
-            tid = (Long) tids.remove(0);
-
-            statement = "delete from tb_term " + "where tbid=" + m_id
-                    + " and tid=" + tid;
-
-            result.addTermStatement(statement);
         }
 
         return result;
@@ -3913,40 +4025,18 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         String statement;
 
         // Allocate all IDs we need.
-
         ArrayList cids = new ArrayList(p_entries.keySet());
         Long lid, tid;
         int neededLids = 0, neededTids = 0;
         IntHolder existingLids, existingTids;
-        ArrayList lids = new ArrayList();
-        ArrayList tids = new ArrayList();
+        ArrayList tb_language_lids = new ArrayList();
+        ArrayList tb_langs = new ArrayList();
+        ArrayList tb_term_tids = new ArrayList();
+        ArrayList tb_terms = new ArrayList();
 
-        // Fetch ids already used in entries.
-        getMultipleExistingIds(cids, lids, tids);
-
-        existingLids = new IntHolder(lids.size());
-        existingTids = new IntHolder(tids.size());
-
-        // Find out how many more IDs we need.
-        for (Iterator it = p_entries.values().iterator(); it.hasNext();)
-        {
-            Entry entry = (Entry) it.next();
-
-            Element root = entry.getDom().getRootElement();
-
-            // Count languages and terms to reserve missing ids for.
-            List langGrps = root.selectNodes("/conceptGrp/languageGrp");
-            neededLids += langGrps.size();
-
-            List termGrps = root.selectNodes("/conceptGrp/languageGrp/termGrp");
-            neededTids += termGrps.size();
-        }
-
-        neededLids -= lids.size();
-        neededTids -= tids.size();
-
-        // Allocate any needed new ids for the table rows.
-        allocateIds(lids, neededLids, tids, neededTids);
+        // Fetch language/term already used in entries.
+        getMultipleExistingIds(cids, tb_language_lids, tb_langs,
+                               tb_term_tids, tb_terms);
 
         // Now we're ready to collect the statements for all entries.
         for (int i = 0, max = cids.size(); i < max; i++)
@@ -3954,31 +4044,12 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             Long cid = (Long) cids.get(i);
             Entry entry = (Entry) p_entries.get(cid);
 
-            stmts = getOverwriteEntryStatements(entry, cid.longValue(), lids,
-                    tids, existingLids, existingTids, p_session);
+            stmts = getOverwriteEntryStatements(entry, cid.longValue(), 
+                       tb_language_lids, tb_langs,
+                       tb_term_tids, tb_terms,
+                       p_session);
 
             result.addAll(stmts);
-        }
-
-        // Remove any unused language or term rows.
-        while (lids.size() > 0)
-        {
-            lid = (Long) lids.remove(0);
-
-            statement = "delete from tb_language " + "where tbid=" + m_id
-                    + " and lid=" + lid;
-
-            result.addLanguageStatement(statement);
-        }
-
-        while (tids.size() > 0)
-        {
-            tid = (Long) tids.remove(0);
-
-            statement = "delete from tb_term " + "where tbid=" + m_id
-                    + " and tid=" + tid;
-
-            result.addTermStatement(statement);
         }
 
         return result;
@@ -3989,22 +4060,27 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * and tids are shuffled across different cids.
      */
     private Statements getOverwriteTbxEntryStatements(Entry p_entry, String p_cid,
-            ArrayList p_lids, ArrayList p_tids, IntHolder p_existingLids,
-            IntHolder p_existingTids, SessionInfo p_session)
+            ArrayList p_tb_language_lids, ArrayList p_tb_langs,
+            ArrayList p_tb_term_tids, ArrayList p_tb_terms, SessionInfo p_session)
             throws TermbaseException
     {
     	Statements result = new Statements();
+    	
+    	long maxLID, maxTID;
+        Map<String, Long> mapIDS = getMaxIDS();
+        maxLID = mapIDS.get("lid");
+        maxTID = mapIDS.get("tid");
+        
     	Long lid, tid;
         String statement;
         
-     // Update <concept> in entry (just for safety)
+        // Update <concept> in entry (just for safety)
         p_entry.setId(Long.valueOf(p_cid));
         EntryUtils.setConceptId(p_entry, Long.valueOf(p_cid));
 
         // Update modification timestamp in entry (this is UPDATE)
         p_session.setTimestamp();
         EntryUtils.setModificationTimeStamp(p_entry, p_session);
-
         
         Element root = p_entry.getDom().getRootElement();
         {
@@ -4041,7 +4117,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             result.addConceptStatement(statement);
         }
         
-     // produce language-level statements
+        // produce language-level statements
         List langSets = root.selectNodes("langSet");
         for (int i = 0, max = langSets.size(); i < max; ++i)
         {
@@ -4061,13 +4137,15 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             }
         	String lxml = xml.toString();
         	boolean needClob = false;
+            int lIndex = getIndexOfTBLangs(Integer.valueOf(p_cid), langName, 
+                                           langLocale, p_tb_langs);
         	
-        	if (p_existingLids.getValue() > 0)
+            if (lIndex > -1)
             {
-                p_existingLids.dec();
+                p_tb_langs.remove(lIndex);
 
-                lid = (Long) p_lids.remove(0);
-
+                lid = (Long) p_tb_language_lids.remove(lIndex);
+                
                 // in-place update of the language info
                 statement = "update TB_LANGUAGE " + "set Cid=" + p_cid + ","
                         + "    Name='" + langName + "'," + "    Locale='"
@@ -4077,7 +4155,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             }
             else
             {
-                lid = (Long) p_lids.remove(0);
+                lid = maxLID++;
 
                 statement = "insert into TB_LANGUAGE "
                         + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
@@ -4105,7 +4183,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                 sortKey = SqlUtil.toHex(Sortkey.getSortkey(term, langLocale),
                         MAX_SORTKEY_LEN);
                 
-             // Limit size of data
+                // Limit size of data
                 term = EditUtil.truncateUTF8Len(term, MAX_TERM_LEN);
                 for (Iterator it2 = termGrp.elementIterator(); it2.hasNext();)
                 {
@@ -4118,15 +4196,15 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                     }
                 }
                 
-                String txml = xml1.toString();
-                
+                String txml = xml1.toString();                
                 boolean needClob1 = false;
                 
-                if (p_existingTids.getValue() > 0)
+                int tIndex = getIndexOfTBTerms(Integer.valueOf(p_cid), lid, p_tb_terms);
+                
+                if (tIndex > -1)
                 {
-                    p_existingTids.dec();
-
-                    tid = (Long) p_tids.remove(0);
+                    p_tb_terms.remove(tIndex);
+                    tid = (Long) p_tb_term_tids.remove(tIndex);
 
                     statement = "update TB_TERM " + " set Cid=" + p_cid + ","
                             + " Lid=" + lid + "," + " Lang_Name='"
@@ -4137,10 +4215,23 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                             + sortKey + "'," + " XML="
                             + SqlUtil.getClobInitializer(txml, needClob1)
                             + " where tbid=" + m_id + " and tid=" + tid;
+                    result.addTermStatement(statement);
+
+                    while (getIndexOfTBTerms(Integer.valueOf(p_cid), lid, p_tb_terms) > -1)
+                    {
+                        tIndex = getIndexOfTBTerms(Integer.valueOf(p_cid), lid, p_tb_terms);
+                        p_tb_terms.remove(tIndex);
+                        tid = (Long) p_tb_term_tids.remove(tIndex);
+
+                        // delete other term with the same language
+                        statement = "DELETE FROM TB_TERM " +
+                                    "WHERE tbid=" + m_id + " AND tid=" + tid;
+                        result.addTermStatement(statement);
+                    }
                 }
                 else
                 {
-                    tid = (Long) p_tids.remove(0);
+                    tid = maxTID++;
 
                     statement = "insert into TB_TERM "
                             + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
@@ -4154,6 +4245,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                 result.addTermStatement(statement);
         	}
         }
+        setMaxIDS(-1, maxLID, maxTID);
         return result;
     }
     
@@ -4162,11 +4254,17 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
      * and tids are shuffled across different cids.
      */
     private Statements getOverwriteEntryStatements(Entry p_entry, long p_cid,
-            ArrayList p_lids, ArrayList p_tids, IntHolder p_existingLids,
-            IntHolder p_existingTids, SessionInfo p_session)
+            ArrayList p_tb_language_lids, ArrayList p_tb_langs,
+            ArrayList p_tb_term_tids, ArrayList p_tb_terms,
+            SessionInfo p_session)
             throws TermbaseException
     {
         Statements result = new Statements();
+        
+        long maxLID, maxTID;
+        Map<String, Long> mapIDS = getMaxIDS();
+        maxLID = mapIDS.get("lid");
+        maxTID = mapIDS.get("tid");
 
         Long lid, tid;
         String statement;
@@ -4294,12 +4392,13 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             String lxml = xml.toString();
             // boolean needClob = EditUtil.getUTF8Len(lxml) > 4000;
             boolean needClob = false;
-
-            if (p_existingLids.getValue() > 0)
+            int lIndex = getIndexOfTBLangs((int) p_cid, langName, 
+                                           langLocale, p_tb_langs);
+            if (lIndex > -1)
             {
-                p_existingLids.dec();
+                p_tb_langs.remove(lIndex);
 
-                lid = (Long) p_lids.remove(0);
+                lid = (Long) p_tb_language_lids.remove(lIndex);
 
                 // in-place update of the language info
                 statement = "update TB_LANGUAGE " + "set Cid=" + p_cid + ","
@@ -4310,8 +4409,8 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             }
             else
             {
-                lid = (Long) p_lids.remove(0);
-
+                lid = maxLID++;
+                
                 statement = "insert into TB_LANGUAGE "
                         + " (TBId, Lid, Cid, Name, Locale, Xml)" + " values ("
                         + m_id + "," + lid + "," + p_cid + "," + "'" + langName
@@ -4374,12 +4473,13 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                 String txml = xml1.toString();
                 // boolean needClob1 = EditUtil.getUTF8Len(txml) > 4000;
                 boolean needClob1 = false;
-
-                if (p_existingTids.getValue() > 0)
+                int tIndex = getIndexOfTBTerms((int)p_cid, lid, p_tb_terms);
+                
+                if (tIndex > -1)
                 {
-                    p_existingTids.dec();
-
-                    tid = (Long) p_tids.remove(0);
+                    p_tb_terms.remove(tIndex);
+                    
+                    tid =  (Long) p_tb_term_tids.remove(tIndex);
 
                     statement = "update TB_TERM " + " set Cid=" + p_cid + ","
                             + " Lid=" + lid + "," + " Lang_Name='"
@@ -4390,11 +4490,24 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
                             + sortKey + "'," + " XML="
                             + SqlUtil.getClobInitializer(txml, needClob1)
                             + " where tbid=" + m_id + " and tid=" + tid;
+                    result.addTermStatement(statement);
+
+                    while (getIndexOfTBTerms((int) p_cid, lid, p_tb_terms) > -1)
+                    {
+                        tIndex = getIndexOfTBTerms((int) p_cid, lid, p_tb_terms);
+                        p_tb_terms.remove(tIndex);
+                        tid = (Long) p_tb_term_tids.remove(tIndex);
+
+                        // delete other term with the same language
+                        statement = "DELETE FROM TB_TERM " +
+                                    "WHERE tbid=" + m_id + " AND tid=" + tid;
+                        result.addTermStatement(statement);
+                    }
                 }
                 else
                 {
-                    tid = (Long) p_tids.remove(0);
-
+                    tid = maxTID++;
+                    
                     statement = "insert into TB_TERM "
                             + " (TBId, Cid, Lid, Tid, Lang_Name, Term, "
                             + " Type, Status, Sort_Key, XML)" + " values ("
@@ -4428,9 +4541,63 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
             }
         }
 
+        setMaxIDS(-1, maxLID, maxTID);
         return result;
     }
 
+    /**
+     * Get the index of tb_language list, by input data.
+     * If can't find, return -1.
+     * 
+     * @param p_cid
+     *            concept id
+     * @param p_langName
+     *            language name
+     * @param p_langLocale
+     *            language locale
+     * @param p_tb_langs
+     *            tb_language list
+     */
+    private int getIndexOfTBLangs(int p_cid, String p_langName,
+            String p_langLocale, ArrayList p_tb_langs)
+    {
+        for (int i = 0; i < p_tb_langs.size(); i++)
+        {
+            Language lang = (Language) p_tb_langs.get(i);
+            if (lang.isEqual(p_cid, p_langName, p_langLocale))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+    
+    /**
+     * Get the index of tb_term list, by input data. 
+     * If can't find, return -1.
+     * 
+     * @param p_cid
+     *            concept id
+     * @param p_lid
+     *            language id
+     * @param p_tb_terms
+     *            term list
+     */
+    private int getIndexOfTBTerms(int p_cid, long p_lid, ArrayList p_tb_terms)
+    {
+        for (int i = 0; i < p_tb_terms.size(); i++)
+        {
+            Term term = (Term) p_tb_terms.get(i);
+            if (term.isEqual(p_cid, (int) p_lid))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+    
     /**
      * <p>
      * Produces SQL statements to delete a single entry from the database.
@@ -4545,7 +4712,7 @@ public class Termbase implements TermbaseExceptionMessages, WebAppConstants
         		stmts = getAddTbxEntryStatements(entry, m_definition, p_session);
         		result.addAll(stmts);
         	} catch (Exception e) {
-        		CATEGORY.warn("batchAddEntries: ignoring invalid entry: "
+        		CATEGORY.warn("batchAddTbxEntriesAsNew: ignoring invalid entry: "
                         + e.getMessage() + "\n" + entry.getXml());
                 continue;
         	}

@@ -49,6 +49,7 @@ public class EventFlowXmlParser
     * to the DesktopApplicationAdapters.
     */
     public static final String EFXML_DA_CATEGORY_NAME = "DesktopApplicationAdapter";
+    private String m_l10nProfileId;
         
     /** Constructor for use by sub classes
     * <br>
@@ -277,6 +278,7 @@ public class EventFlowXmlParser
         m_displayName = getSingleElementValue(m_rootElement,"displayName");
         m_srcLocale = findLocale("source");
         m_targetLocale = findLocale("target");
+        m_l10nProfileId = getSingleElement("batchInfo").getAttribute("l10nProfileId");
     }
 
     /** Finds and sets the root Element for EventFlowXml parsing
@@ -356,6 +358,13 @@ public class EventFlowXmlParser
         return m_targetLocale;
     }
 
+    /**
+     * Gets the L10nProfileId.
+     */
+    public String getL10nProfileId()
+    {
+        return m_l10nProfileId;
+    }
 
     /**
     * Sets the post merge event in the DOM structure

@@ -173,6 +173,7 @@ public interface TMProfileConstants
     
     public static final String MT_MS_URL = "ms_mt_url";
     public static final String MT_MS_APPID = "ms_mt_appid";
+    public static final String MT_MS_CATEGORY = "ms_mt_category";
     public static final String MT_MS_URL_FLAG = "ms_mt_url_flag";
     public static final String MT_MS_URL_FLAG_INTERNAL = "0";
     public static final String MT_MS_URL_FLAG_PUBLIC = "1";

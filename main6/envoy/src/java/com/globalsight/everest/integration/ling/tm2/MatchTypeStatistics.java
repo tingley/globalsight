@@ -24,13 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.globalsight.everest.tuv.TuImpl;
-import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
 import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.persistence.DbUtil;
 import com.globalsight.ling.tm2.persistence.HandleSqlSearch;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Container of match type statistics of a leveraged target page.
@@ -51,6 +48,7 @@ public class MatchTypeStatistics
     public static final int SEGMENT_TM_EXACT = 7;
     public static final int SEGMENT_MT_EXACT = 8;
     public static final int SEGMENT_XLIFF_EXACT = 9;
+    public static final int SEGMENT_PO_EXACT = 10;
 
     // The following two attributes are defined as the low and high
     // range of the bucket used for the sub-leverage-match that's
@@ -76,36 +74,45 @@ public class MatchTypeStatistics
         int statisticsType = NO_MATCH;
         if (p_matchPoint == 100)
         {
-            if (p_matchState != null && 
-                    (p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH) || p_matchState.equals(MatchState.PAGE_TM_EXACT_MATCH)))
+            if (p_matchState != null
+                    && (p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH) || p_matchState
+                            .equals(MatchState.PAGE_TM_EXACT_MATCH)))
             {
                 statisticsType = CONTEXT_EXACT;
-            } 
-            else if (p_matchState != null && p_matchState.equals(MatchState.MT_EXACT_MATCH))
+            }
+            else if (p_matchState != null
+                    && p_matchState.equals(MatchState.MT_EXACT_MATCH))
             {
                 statisticsType = SEGMENT_MT_EXACT;
             }
-            else if(p_matchState != null && p_matchState.equals(MatchState.XLIFF_EXACT_MATCH)) {
+            else if (p_matchState != null
+                    && p_matchState.equals(MatchState.XLIFF_EXACT_MATCH))
+            {
                 statisticsType = SEGMENT_XLIFF_EXACT;
+            }
+            else if (p_matchState != null
+                    && p_matchState.equals(MatchState.PO_EXACT_MATCH))
+            {
+                statisticsType = SEGMENT_PO_EXACT;
             }
             else
             {
                 statisticsType = SEGMENT_TM_EXACT;
             }
         }
-        else if (p_matchPoint >= 50 && p_matchPoint <75)
+        else if (p_matchPoint >= 50 && p_matchPoint < 75)
         {
             statisticsType = LOW_FUZZY;
         }
-        else if (p_matchPoint >= 75 && p_matchPoint <85)
+        else if (p_matchPoint >= 75 && p_matchPoint < 85)
         {
             statisticsType = MED_FUZZY;
         }
-        else if (p_matchPoint >= 85 && p_matchPoint <95)
+        else if (p_matchPoint >= 85 && p_matchPoint < 95)
         {
             statisticsType = MED_HI_FUZZY;
         }
-        else if (p_matchPoint >= 95 && p_matchPoint <100)
+        else if (p_matchPoint >= 95 && p_matchPoint < 100)
         {
             statisticsType = HI_FUZZY;
         }
@@ -113,7 +120,8 @@ public class MatchTypeStatistics
         int lingManagerType = LeverageMatchLingManager.NO_MATCH;
         if (p_matchPoint == 100)
         {
-            if (p_matchState != null && p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH))
+            if (p_matchState != null
+                    && p_matchState.equals(MatchState.UNVERIFIED_EXACT_MATCH))
             {
                 lingManagerType = LeverageMatchLingManager.UNVERIFIED;
             }
@@ -124,7 +132,8 @@ public class MatchTypeStatistics
         }
         else
         {
-            if (p_matchState != null && p_matchState.equals(MatchState.STATISTICS_MATCH))
+            if (p_matchState != null
+                    && p_matchState.equals(MatchState.STATISTICS_MATCH))
             {
                 lingManagerType = LeverageMatchLingManager.STATISTICS;
             }
@@ -255,11 +264,12 @@ public class MatchTypeStatistics
     }
     
     /**
-     * There are two kinds of format to show exact match, judge use which one.
+     * There are four kinds of format to show exact match, judge use which one.
      * It is also used to count in-context match.
      * 
-     * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
-     *         EXACT_MATCH_LOCALIZED
+     * @return true if state is PAGE_TM_EXACT_MATCH, SEGMENT_TM_EXACT_MATCH,
+     *         PO_EXACT_MATCH or XLIFF_EXACT_MATCH(for WS XLF "locked"
+     *         segments).
      */
     public boolean isExactMatchLocalized(long p_tuvId, String p_subId)
     {
@@ -268,20 +278,7 @@ public class MatchTypeStatistics
 
         if (types != null)
         {
-            if (MatchState.XLIFF_EXACT_MATCH.equals(types.getMatchState()))
-            {
-                TuvImpl tuv = HibernateUtil.get(TuvImpl.class, p_tuvId);
-                if (tuv != null)
-                {
-                    TuImpl tu = (TuImpl) tuv.getTu();
-                    if (tu != null)
-                    {
-                        return tu.isXliffLocked();
-                    }
-                }
-            }
-            
-            return types.isExactMatchLocalized();
+            return types.isExactMatchLocalized(p_tuvId);
         }
 
         return false;

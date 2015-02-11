@@ -30,14 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.comment.IssueImpl;
-import com.globalsight.everest.edit.CommentHelper;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.TargetPage;
 import com.globalsight.everest.persistence.PersistentObject;
 import com.globalsight.ling.docproc.extractor.xliff.XliffAlt;
-import com.globalsight.ling.docproc.extractor.xml.GsDOMParser;
 import com.globalsight.ling.tm.LeverageMatchType;
 import com.globalsight.ling.tm.TuLing;
 import com.globalsight.ling.tm.TuvLing;
@@ -51,9 +48,6 @@ import com.globalsight.util.gxml.GxmlElement;
 import com.globalsight.util.gxml.GxmlFragmentReader;
 import com.globalsight.util.gxml.GxmlFragmentReaderPool;
 import com.globalsight.util.gxml.GxmlNames;
-import com.globalsight.everest.tuv.Tu;
-import com.globalsight.everest.tuv.Tuv;
-import com.globalsight.everest.tuv.TuvState;
 
 /**
  * Implements Tuv.
@@ -766,6 +760,13 @@ public final class TuvImpl extends TuvLing implements Tuv, Serializable
             {
                 return true;
             }
+        }
+        
+        // For PO file, if the last modified user is not changed since job is
+        // created, that indicates the target is from PO "msgstr".
+        if ("PO".equalsIgnoreCase(getLastModifiedUser()))
+        {
+            return true;
         }
         
         return (m_state.equals(TuvState.LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED

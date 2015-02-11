@@ -391,7 +391,9 @@ public class GeneralException
             case EX_COMMENT_REFERENCE:
                 m_errorMessage += "comment reference exception"; break;
             case EX_NATIVE_FILE:
-                m_errorMessage += "native file exception"; break;               
+                m_errorMessage += "native file exception"; break;
+            case MSG_FAILED_TO_IMPORT_MIF:
+                m_errorMessage += "improper mif version exception"; break;
             default:
                 m_errorMessage += "unknown exception"; break;
             }

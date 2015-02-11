@@ -371,8 +371,15 @@ OUTER:  for (FuzzyCandidate<T> candidate : candidates) {
         List<TM3Tuv<T>> tuvs = new ArrayList<TM3Tuv<T>>();
         for (TM3Tu<T> tu : tus) {
             for (TM3Tuv<T> tuv : tu.getAllTuv()) {
-                if (tuvIds.contains(tuv.getId()) &&
-                    tuv.getSerializedForm().equals(key.getSerializedForm())) {
+                // XXX For safety we should probably be comparing keys here.
+                // However, just testing string equality on the serialized
+                // form can sometimes produce false negatives (for instance,
+                // this is true in GS due to optional attributes on 
+                // the <segment> markup.  TM3TuvData needs an extra method
+                // to make this comparison.  Since this only matters if
+                // there is a hash collision, I'm not going to worry about
+                // it for now.
+                if (tuvIds.contains(tuv.getId())) {
                     tuvs.add(tuv);
                 }
             }

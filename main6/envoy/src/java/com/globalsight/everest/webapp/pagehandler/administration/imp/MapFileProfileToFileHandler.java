@@ -17,7 +17,6 @@
 package com.globalsight.everest.webapp.pagehandler.administration.imp;
 
 import java.io.IOException;
-import com.globalsight.ling.common.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,6 +50,7 @@ import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.rss.RSSUtil;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
+import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.log.GlobalSightCategory;
 
 
@@ -205,21 +205,12 @@ public class MapFileProfileToFileHandler
                 FileProfile fp = findFileProfile(extension, fpName,
                                              sessionMgr);
                 String fileNames = p_request.getParameter(MAP_FILE_NAMES);
+                String[] fNamesArray = null;
                 if (fileNames != null)
                 {
-                    try
-                    {
-                        fileNames = URLDecoder.decode(fileNames, "UTF-8");
-                    }
-                    catch(Exception e)
-                    {
-                        s_logger.error("Failed to decode fileNames: " + fileNames, e);
-                    }
+                    fNamesArray = getFileNames(fileNames);
+                    addOrUpdateMapping(extension, fp, fNamesArray, sessionMgr);
                 }
-
-                String[] fNamesArray = fileNames.split(",");
-
-                addOrUpdateMapping(extension, fp, fNamesArray, sessionMgr);
 
                 // Here we try to stop a refresh from setting old assignments by removing them
                 p_request.removeAttribute(MAP_EXTENSION);
@@ -777,6 +768,24 @@ public class MapFileProfileToFileHandler
             // just leave and return NULL
         }
         return p;
+    }
+
+    /**
+     * Decode the file names string from jsp page 
+     * and return the file names String[]
+     * 
+     * @param fileNames
+     * @return
+     */
+    String[] getFileNames(String fileNames)
+    {
+        String[] fNamesArray = null;
+        fNamesArray = fileNames.split(",");
+        for (int i = 0; i < fNamesArray.length; i++)
+        {
+            fNamesArray[i] = URLDecoder.decode(fNamesArray[i], "UTF-8");
+        }
+        return fNamesArray;
     }
 }
 

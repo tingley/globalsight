@@ -16,23 +16,22 @@
  */
 package com.globalsight.ling.tw;
 
-import com.globalsight.ling.common.DiplomatBasicParserException;
-
+import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.Vector;
-import java.util.List;
 import java.util.Set;
-import java.util.Iterator;
-import java.util.ArrayList;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.io.UnsupportedEncodingException;
-import com.globalsight.util.edit.SegmentUtil;
+
 import com.globalsight.util.StringUtil;
+import com.globalsight.util.edit.SegmentUtil;
 
 /**
  * PTag error checker.
@@ -48,6 +47,14 @@ public class PseudoErrorChecker
     private ResourceBundle m_resources = null;
     private Locale m_locale = null;
     private static final String RESPATH = "com.globalsight.ling.tw.ErrorChecker";
+    private static final String ESCAPABLE_CHARS = "<>&'\"";
+    private static final String LT = "&lt;";
+    private static final String GT = "&gt;";
+    private static final String AMP = "&amp;";
+    private static final String APOS = "&apos;";
+    private static final String QUOT = "&quot;";
+    private static final String[] ESCAPED_STRINGS =
+    { LT, GT, AMP, APOS, QUOT };
 
     // Source with full subflows expanded.
     String m_sourceWithSubContent = null;
@@ -288,6 +295,72 @@ public class PseudoErrorChecker
     }
     
     /**
+     * Convert all the escapable characters in the given string into their
+     * string (escaped) equivalents. Return the converted string.
+     * 
+     * @param p_str
+     *            the string to be modified.
+     * 
+     * @return the escaped result.
+     */
+    private String escapeString(String p_str)
+    {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < p_str.length(); i++)
+        {
+            char c = p_str.charAt(i);
+            int index = ESCAPABLE_CHARS.indexOf((int) c);
+            if (index > -1)
+            {
+                sb.append(ESCAPED_STRINGS[index]);
+            }
+            else
+            {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Convert all the escaped strings in the given string into their character
+     * (unescaped) equivalents. Return the converted string.
+     * 
+     * @param p_str
+     *            the string to be modified.
+     * 
+     * @return the escaped result.
+     */
+    private String unescapeString(String p_str)
+    {
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < p_str.length(); i++)
+        {
+            char c = p_str.charAt(i);
+            boolean found = false;
+            if (c == '&')
+            {
+                for (int j = 0; !found && j < ESCAPED_STRINGS.length; j++)
+                {
+                    String s = ESCAPED_STRINGS[j];
+                    int index = p_str.indexOf(s, i);
+                    if (found = (index == i))
+                    {
+                        sb.append(ESCAPABLE_CHARS.charAt(j));
+                        i += (s.length() - 1);
+                    }
+                }
+            }
+
+            if (!found)
+            {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
+    /**
      * <p>Validates all the target tag names against the source tag
      * names.</p>
      *
@@ -342,8 +415,18 @@ public class PseudoErrorChecker
                 }
 
                 TagNode srcItem = (TagNode)srcEnumerator.nextElement();
-                if (srcItem.getPTagName().toLowerCase().equals(
-                    strTrgTagName.toLowerCase()) && !srcItem.isMapped())
+                if (srcItem.isMapped())
+                    continue;
+                
+                String srcItemTag = srcItem.getPTagName();
+                boolean isEquals = srcItemTag.equalsIgnoreCase(strTrgTagName);
+                if (!isEquals && TagNode.INTERNAL.equals(srcItem.getTmxType()))
+                {
+                    String encodeTrg = escapeString(strTrgTagName);
+                    isEquals = encodeTrg.equalsIgnoreCase(srcItemTag);
+                }
+                
+                if (isEquals)
                 {
                     String erasable =
                         (String)srcItem.getAttributes().get("erasable");
@@ -475,8 +558,13 @@ public class PseudoErrorChecker
                     missingNames += "\n\t";
                 }
 
-                missingNames += PseudoConstants.PSEUDO_OPEN_TAG +
-                    srcItem.getPTagName() + PseudoConstants.PSEUDO_CLOSE_TAG;
+                String tag = srcItem.getPTagName();
+                if (TagNode.INTERNAL.equals(srcItem.getTmxType()))
+                {
+                    tag = unescapeString(tag);
+                }
+                missingNames += PseudoConstants.PSEUDO_OPEN_TAG + tag
+                        + PseudoConstants.PSEUDO_CLOSE_TAG;
             }
         }
 

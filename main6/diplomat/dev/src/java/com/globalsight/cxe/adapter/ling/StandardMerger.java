@@ -58,6 +58,7 @@ import com.globalsight.ling.docproc.extractor.xml.XmlFilterHelper;
 import com.globalsight.ling.docproc.merger.paginated.PaginatedMerger;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.edit.SegmentUtil;
 
 /**
  * StandardMerger
@@ -260,6 +261,10 @@ public class StandardMerger implements IFormatNames
         {
             p_mergeResult = fixOpenOfficeXml(p_mergeResult);
         }
+        if (isRestoreInvalidUnicodeChar())
+        {
+            p_mergeResult = SegmentUtil.restoreInvalidUnicodeChar(p_mergeResult);
+        }
 
         return p_mergeResult;
     }
@@ -325,6 +330,7 @@ public class StandardMerger implements IFormatNames
             diplomat.setFilterId(filterId);
             diplomat.setFilterTableName(filterTableName);
             diplomat.setTargetLocale(m_targetLocale);
+            diplomat.setCxeMessage(m_cxeMessage);
             mergeResult = diplomat
                     .merge(p_gxml, m_targetEncoding, m_keepGsTags);
         }
@@ -759,6 +765,11 @@ public class StandardMerger implements IFormatNames
     private boolean isOpenOfficeXml()
     {
         return FORMAT_OPENOFFICE_XML.equals(m_formatType);
+    }
+    
+    private boolean isRestoreInvalidUnicodeChar()
+    {
+        return FORMAT_XML.equals(m_formatType) || FORMAT_IDML.equals(m_formatType);
     }
 
     /**

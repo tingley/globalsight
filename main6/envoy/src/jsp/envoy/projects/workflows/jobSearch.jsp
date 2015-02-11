@@ -41,6 +41,10 @@
     String lbsearch = bundle.getString("lb_search");
     String lbclear = bundle.getString("lb_clear");
     
+    String type = (String)sessionMgr.getAttribute("destinationPage");
+    if (type == null)
+        type = "inprogress";
+    
     String searchURL = jobSearch.getPageURL() + "&searchType=" + JobSearchConstants.JOB_SEARCH_COOKIE + "&fromRequest=true";;
      if (request.getAttribute("badresults") != null)
      {
@@ -533,7 +537,27 @@ if (searchCriteria.length > 0)
 else
 {
     // set default status to In Progress
-    setOption(searchForm.<%=statusOptions%>, "<%=Job.DISPATCHED%>");
+    //setOption(searchForm.<%=statusOptions%>, "<%=Job.DISPATCHED%>");
+    <%
+    // Always set the status no matter what
+    if (type.equals("pending")) {
+%>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.PENDING%>");
+<%  } else if (type.equals("ready")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.READY_TO_BE_DISPATCHED%>");
+<%  } else if (type.equals("inprogress")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.DISPATCHED%>");
+<%  } else if (type.equals("localized")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.LOCALIZED%>");
+<%  } else if (type.equals("dtpinprogress")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.DTPINPROGRESS%>");
+<%  } else if (type.equals("exported")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.EXPORTED%>");
+<%  } else if (type.equals("archived")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.ARCHIVED%>");
+<%  } else if (type.equals("allStatus")) { %>
+        setOption(searchForm.<%=statusOptions%>, "<%=Job.ALLSTATUS%>");        
+<%  } %>
 }
 </script>
 </form>

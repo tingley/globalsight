@@ -18,12 +18,10 @@
 package com.globalsight.terminology.importer;
 
 import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseException;
 import com.globalsight.terminology.TermbaseExceptionMessages;
 
 import com.globalsight.importer.IReader;
 import com.globalsight.importer.ImportOptions;
-import com.globalsight.importer.ImporterException;
 
 import com.globalsight.util.ReaderResult;
 import com.globalsight.util.ReaderResultQueue;
@@ -181,6 +179,7 @@ public class GTXmlReader
                 }
             );
 
+        ImportUtil.filterateXmlIllegal(p_url, m_options.getEncoding());
         Document document = reader.read(p_url);
 
         // all done

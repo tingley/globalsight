@@ -53,57 +53,6 @@ public class InternalItem
         this.isRegex = isRegex;
     }
 
-    public String handleString(String s, List<Integer> index)
-    {
-        if (!isSelected)
-            return s;
-        
-        int n = index.get(0);
-        if (!isRegex)
-        {
-            JPTmxEncoder tmx = new JPTmxEncoder();
-            String internalText = tmx.encode(content);
-            int i = s.indexOf(internalText);
-            if (i > -1)
-            {
-                String first = s.substring(0, i);
-                String end = s.substring(i + internalText.length());
-                index.remove(0);
-                index.add(n + 1);
-                s = handleString(first, index) + "<bpt internal=\"yes\" i=\""
-                        + n + "\"></bpt>" + internalText + "<ept i=\"" + n
-                        + "\"></ept>" + handleString(end, index);
-            }
-        }
-        else
-        {
-            try
-            {
-                Pattern p = Pattern.compile(content);
-                Matcher m = p.matcher(s);
-                if (m.find())
-                {
-                    String token = m.group();
-                    int i = s.indexOf(token);
-                    String first = s.substring(0, i);
-                    String end = s.substring(i + token.length());
-                    index.remove(0);
-                    index.add(n + 1);
-                    s = handleString(first, index)
-                            + "<bpt internal=\"yes\" i=\"" + n + "\"></bpt>"
-                            + token + "<ept i=\"" + n + "\"></ept>"
-                            + handleString(end, index);
-                }
-            }
-            catch (Exception e)
-            {
-                s_logger.error(e);
-            }
-        }
-
-        return s;
-    }
-
     public boolean getIsSelected()
     {
         return isSelected;

@@ -65,6 +65,26 @@ InddFilter.prototype.edit = function(filterId, color, specialFilters,
 			+ "></input>");
 	str.append("</td>");
 	str.append("</tr>");
+	
+	selectStr = (this.filter && this.filter.extractLineBreak) ? ""
+			: "checked";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreLineBreak + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='ignoreLineBreak' " + selectStr
+			+ "></input>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	selectStr = (this.filter && this.filter.replaceNonbreakingSpace) ? "checked"
+			: "";
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsReplaceNonbreakingSpace + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='replaceNonbreakingSpace' " + selectStr
+			+ "></input>");
+	str.append("</td>");
+	str.append("</tr>");
 
 	str.append("</table>");
 
@@ -119,6 +139,20 @@ InddFilter.prototype.generateDiv = function(topFilterId, color) {
 	str.append("<input type='checkbox' id='transInddFileInfo'></input>");
 	str.append("</td>");
 	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsIgnoreLineBreak + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='ignoreLineBreak' checked></input>");
+	str.append("</td>");
+	str.append("</tr>");
+	
+	str.append("<tr>");
+	str.append("<td class='htmlFilter_left_td'>" + jsReplaceNonbreakingSpace + "</td>");
+	str.append("<td class='htmlFilter_right_td'>");
+	str.append("<input type='checkbox' id='replaceNonbreakingSpace' ></input>");
+	str.append("</td>");
+	str.append("</tr>");
 
 	str.append("</table>");
 
@@ -152,6 +186,8 @@ function saveInddFilter() {
 	var translateHiddenLayer = document.getElementById("transInddHiddenLayer").checked;
 	var translateMasterLayer = document.getElementById("transInddMasterLayer").checked;
 	var translateFileInfo = document.getElementById("transInddFileInfo").checked;
+	var extractLineBreak = document.getElementById("ignoreLineBreak").checked ? false : true;
+	var replaceNonbreakingSpace = document.getElementById("replaceNonbreakingSpace").checked;
 	var obj = {
 		filterTableName : "indd_filter",
 		filterName : filterName,
@@ -159,7 +195,9 @@ function saveInddFilter() {
 		companyId : companyId,
 		translateHiddenLayer : translateHiddenLayer,
 		translateMasterLayer : translateMasterLayer,
-		translateFileInfo : translateFileInfo
+		translateFileInfo : translateFileInfo,
+		extractLineBreak : extractLineBreak,
+		replaceNonbreakingSpace : replaceNonbreakingSpace
 	};
 	if (saveInddFilter.edit) {
 		closePopupDialog("inddFilterDialog");
@@ -195,6 +233,8 @@ function saveInddFilterCallback(data) {
 		jsFilter.translateHiddenLayer = checkExistInddFilterCallback.obj.translateHiddenLayer;
 		jsFilter.translateMasterLayer = checkExistInddFilterCallback.obj.translateMasterLayer;
 		jsFilter.translateFileInfo = checkExistInddFilterCallback.obj.translateFileInfo;
+		jsFilter.extractLineBreak = checkExistInddFilterCallback.obj.extractLineBreak;
+		jsFilter.replaceNonbreakingSpace = checkExistInddFilterCallback.obj.replaceNonbreakingSpace;
 		jsFilter.companyId = companyId;
 		filter.specialFilters.push(jsFilter);
 		reGenerateFilterList(topFilterId, filter.specialFilters, color);
@@ -215,6 +255,8 @@ function updateInddFilterCallback(data) {
 		jsFilter.translateHiddenLayer = checkExistInddFilterCallback.obj.translateHiddenLayer;
 		jsFilter.translateMasterLayer = checkExistInddFilterCallback.obj.translateMasterLayer;
 		jsFilter.translateFileInfo = checkExistInddFilterCallback.obj.translateFileInfo;
+		jsFilter.extractLineBreak = checkExistInddFilterCallback.obj.extractLineBreak;
+		jsFilter.replaceNonbreakingSpace = checkExistInddFilterCallback.obj.replaceNonbreakingSpace;
 		jsFilter.companyId = companyId;
 		var specialFilters = updateSpecialFilter(saveInddFilter.specialFilters,
 				jsFilter);

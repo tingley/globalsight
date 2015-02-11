@@ -531,7 +531,7 @@
         <tr>
           <td align="right">
             <amb:tableNav bean="<%=JobAttributeConstant.JOB_ATTRIBUTE_LIST%>" key="<%=JobAttributeConstant.JOB_ATTRIBUTES_KEY%>"
-                 pageUrl="self" />
+                 pageUrl="self" otherUrl="<%=otherUrl%>"/>
           </td>
         </tr>
         <tr>

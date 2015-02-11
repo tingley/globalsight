@@ -90,7 +90,7 @@
 
         <set name="workflowTemplates"
             table="L10N_PROFILE_WFTEMPLATE_INFO"
-            cascade="none" inverse="true" lazy="false">
+            cascade="none" inverse="true">
             <key column="L10N_PROFILE_ID" />
           
             <many-to-many

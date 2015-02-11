@@ -84,7 +84,6 @@ String lb_matchResults = bundle.getString("lb_mt_match_results");
 String lb_noMTSegments   = bundle.getString("lb_no_mt_match_results");
 String lb_SourceName = bundle.getString("lb_match_source");
 String lb_TargetName = bundle.getString("lb_match_target");
-String lb_pageTM = bundle.getString("lb_page_tm");
 //
 // TM Matches
 //
@@ -146,7 +145,7 @@ if (tmMatches != null)
         }
         String tmName = p.getTmName();
         stb_segments.append("(");
-        stb_segments.append((p.getMatchType().equals("IN_PROGRESS_TM_EXACT_MATCH")?lb_pageTM:tmName));
+        stb_segments.append(tmName);
         stb_segments.append(")");
         // Need extra info for MT translation for WS XLF file.
         // "translation_type='machine_translation_mt'" in source XLF file.
@@ -832,8 +831,8 @@ function markDiff(s1, s2, diff) {
     diff.innerHTML = s1;
     return;
   }
-  s1 = s1.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.\-:%~\|<>\?()\'\"]/g, " ");
-  s2 = s2.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.\-:%~\|<>\?()\'\"]/g, " ");
+  s1 = s1.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.=\-:%~\|<>\?()\'\"]/g, " ");
+  s2 = s2.replace(/<[^>].*?>/g,"").replace(/\[(x|ph)\d+\]|&(gt|lt)?;|[,.=\-:%~\|<>\?()\'\"]/g, " ");
   
   var a1 = s1.split(" ");
   var a2 = s2.split(" ");
@@ -871,15 +870,26 @@ function replaceString(s1, s2, s3) {
   var arr = s1.split(re);
   var len = arr.length;
   var tmp = "";
+  //There is a problem that len will be 1 if there is no matching string or 
+  //the s2 includes special characters such as @, $, *, # etc.
+  //So it needs to use validateContent to identify if there includes special
+  //characters
   if (len <= 1) {
-    var fi = 0;
-    var index = 0;
-    while ((fi = s1.indexOf(s2, index)) != -1 && index < s1.length) {
-      bs = s1.substring(index, fi);
-      tmp += bs + s3;
-      index = fi + s2.length;
+    if (!validateContent(s2)) {
+        var fi = 0;
+        var index = 0;
+        while ((fi = s1.indexOf(s2, index)) != -1 && index < s1.length) {
+          bs = s1.substring(index, fi);
+          tmp += bs + s3;
+          index = fi + s2.length;
+        }
+        tmp += s1.substring(index);
+    } else {
+        fi = s1.indexOf(s2);
+        bs = s1.substring(0, fi);
+        es = s1.substring(fi + s2.length);
+        tmp = bs + s3 + es;
     }
-    tmp += s1.substring(index);
   } else {
     tmp = arr[0];
     for (i=1;i<arr.length;i++) {
@@ -889,6 +899,18 @@ function replaceString(s1, s2, s3) {
   return tmp;
 }
 
+function validateContent(str) {
+  var disallowChars = "!@#$&*";
+  if (str == null || str.length == 0)
+    return true;
+  for (var i=0;i<str.length;i++) {
+    if (disallowChars.indexOf(str.charAt(i)) != -1) {
+        return false;
+    }
+  }
+  return true;
+}
+	
 function showSegmentData(index)
 {
   var o = a_tmSegments[index];

@@ -62,18 +62,18 @@ public class BatchLoad {
         .addOption(new Option(null, "filetype", true, null))
         .addOption(new Option(null, "create", false, null))
         .addOption(new Option(null, "company", true, null))
-        .addOption(new Option(null, "temp", false, null))
-        .addOption(new Option(null, "no-validate", false, null));
+        .addOption(new Option(null, "temp", false, null));
 
     private static void showUsage(String message) {
         System.err.println(message + "\n" +
+"Usage:\n" +
 "BatchLoad [option]... <tmname> <tmfile>...\n" +
 "  --filetype     tmx2 (default) | xml | <ImportOptions constant>\n" +
 "  --savemode     merge (default) | overwrite | discard\n" +
 "  --company      company id of the TM (default supercompany)\n" +
 "  --create       create the TM first\n" +
-"  --temp         create the TM difrst, delete it after\n" +
-"  --no-validate  don't run the usual validation step\n");
+"  --temp         create the TM first, delete it after\n" +
+"");
         System.exit(1);
     }
 
@@ -119,7 +119,7 @@ public class BatchLoad {
             if (companyId == null) {
                 companyId = "0";
             } else {
-                Integer.parseInt(companyId);
+                Integer.parseInt(companyId);  // verify that it's an int
             }
             CompanyThreadLocal.getInstance().setIdValue(companyId);
 
@@ -133,10 +133,7 @@ public class BatchLoad {
             init();
 
             if (line.hasOption("create") || line.hasOption("temp")) {
-                ProjectTM tm = new ProjectTM();
-                tm.setCompanyId(companyId);
-                tm.setName(tmName);
-                ServerProxy.getProjectHandler().createProjectTM(tm);
+                createTm(tmName);
             } else {
                 ProjectTM tm = ServerProxy.getProjectHandler()
                     .getProjectTMByName(tmxName, false);
@@ -145,32 +142,15 @@ public class BatchLoad {
                 }
             }
 
-            if (! line.hasOption("no-validate")) {
-                // This adds the DOCTYPE required for the file to validate,
-                // among other things
-                File validatedFile = File.createTempFile("batchimport", ".tmx");
-                validatedFile.deleteOnExit();
-                ImportUtil.createInstance().saveTmFileWithValidation(
-                    new File(tmxName), validatedFile);
-                tmxName = validatedFile.getPath();
-            }
+            ImportStats r = runImport(System.err,
+                    tmName, tmxName, tmxType, syncMode);
 
-            runImport(tmName, tmxName, tmxType, syncMode);
+            System.out.println("Imported " + r.getTuCount() + " entries in " +
+                getTimeString(r.getDt()) + ", " +
+                getTimeString(r.getDtPerDu()) + " per TU.");
 
             if (line.hasOption("temp")) {
-                ProjectTM tm = ServerProxy.getProjectHandler()
-                    .getProjectTMByName(tmName, false);
-                LingServerProxy.getTmCoreManager().removeTmData(tm,
-                    // stub this out in favor of using log4j
-                    new ProgressReporter() {
-                        public void setMessageKey(String key, String msg) {
-                            //System.out.println(msg);
-                        }
-                        public void setPercentage(int percentage) {
-                            //System.out.println(percentage + "%");
-                        }
-                    },
-                    new InterruptMonitor());
+                removeTm(tmName);
             }
 
         } catch (ParseException e) {
@@ -193,11 +173,39 @@ public class BatchLoad {
         reg.bind("JobHandlerServer", new JobHandlerWLRMIImpl());
     }
 
-    public static void runImport(
-            String tmName, String tmxName, String tmxType, String syncMode)
+    public static void createTm(String tmName) throws Exception {
+        ProjectTM tm = new ProjectTM();
+        tm.setCompanyId(CompanyThreadLocal.getInstance().getValue());
+        tm.setName(tmName);
+        ServerProxy.getProjectHandler().createProjectTM(tm);
+    }
+
+    public static void removeTm(String tmName) throws Exception {
+        ProjectTM tm = ServerProxy.getProjectHandler()
+            .getProjectTMByName(tmName, false);
+        if (tm != null) {
+            LingServerProxy.getTmCoreManager().removeTmData(tm,
+                new ProgressReporter() {
+                    public void setMessageKey(String key, String msg) {}
+                    public void setPercentage(int percentage) {}
+                },
+                new InterruptMonitor());
+        }
+    }
+
+    public static ImportStats runImport(final PrintStream progressOut,
+            String tmName, final String tmxName, String tmxType, String syncMode)
             throws Exception {
+
+        // This adds the DOCTYPE required for the file to validate,
+        // among other things
+        File validatedFile = File.createTempFile("batchimport", ".tmx");
+        validatedFile.deleteOnExit();
+        ImportUtil.createInstance().saveTmFileWithValidation(
+            new File(tmxName), validatedFile);
+
         ImportOptions options = new ImportOptions();
-        options.setFileName(tmxName);
+        options.setFileName(validatedFile.getPath());
         options.setFileType(tmxType);
         options.setSyncMode(syncMode);
         options.setSelectedSource("all");
@@ -206,7 +214,7 @@ public class BatchLoad {
         IImportManager importer =
             ServerProxy.getTmManager().getImporter(tmName);
         importer.setImportOptions(options.getXml());
-        importer.setImportFile(tmxName);
+        importer.setImportFile(validatedFile.getPath());
 
         // Convert and validate input file.
         String temp = importer.analyzeFile();
@@ -219,47 +227,39 @@ public class BatchLoad {
         }
 
         long start = System.currentTimeMillis();
-        int countTotal = options.getExpectedEntryCount();
+        final long totalCount = options.getExpectedEntryCount();
 
         final Object monitor = new Object();
 
         importer.attachListener(
-            new IProcessStatusListener()
-            {
+            new IProcessStatusListener() {
                 public void listen(int entryCount, int percentage,
-                    String message)
-                {
-                    System.out.print("\rEntry " + entryCount + " - " +
-                        percentage + "% " + message);
-                    if (percentage == 100)
-                    {
-                        System.out.println();
+                        String message) {
+                    if (progressOut != null) {
+                        progressOut.print("\r" + tmxName + ": " +
+                            percentage + "% (" +
+                            entryCount + "/" + totalCount + ")");
+                        if (! message.equals("")) {
+                            progressOut.println(" " + message);
+                        }
                     }
-                    if (message.startsWith("import finished"))
-                    {
-                        synchronized (monitor)
-                        {
+                    if (message.startsWith("import finished")) {
+                        synchronized (monitor) {
                             monitor.notify();
                         }
                     }
                 }
             });
 
-        synchronized (monitor)
-        {
-            // runs in a background thread; we'll wake up when the final
-            // listen message is sent
+        // import runs in a background thread; listener wake up when the final
+        // listen message is sent
+        synchronized (monitor) {
             importer.doImport();
             monitor.wait();
         }
 
         long stop = System.currentTimeMillis();
-        long duration = stop - start;
-        long durationPerTU = duration / countTotal;
-
-        System.out.println("Imported " + countTotal + " entries in " +
-            getTimeString(duration) + ", " +
-            getTimeString(durationPerTU) + " per TU.");
+        return new ImportStats(totalCount, stop - start);
     }
 
     public static String getTimeString(long duration) {
@@ -285,6 +285,28 @@ public class BatchLoad {
             return String.valueOf(hours) + "h " +
                 String.valueOf(minutes) + "m " +
                 String.valueOf(seconds) + "s";
+        }
+    }
+
+    public static class ImportStats {
+        private long tuCount, dt;
+
+        public ImportStats(long tuCount, long dt) {
+            this.tuCount = tuCount;
+            this.dt = dt;
+        }
+
+        public long getTuCount() {
+            return tuCount;
+        }
+        public long getDt() {
+            return dt;
+        }
+        public long getDtPerDu() {
+            return dt / tuCount;
+        }
+        public String toString() {
+            return tuCount + " TUs, " + getTimeString(dt);
         }
     }
 }

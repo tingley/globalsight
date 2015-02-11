@@ -348,4 +348,9 @@ public interface GeneralExceptionConstants
      * Error message id for previewing to XML file.
      */
     public static final int MSG_FAILED_TO_PREVIEW_XML = 4904;
+    
+    /**
+     * Error message id for previewing to XML file.
+     */
+    public static final int MSG_FAILED_TO_IMPORT_MIF = -1102;
 }

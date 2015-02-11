@@ -46,10 +46,14 @@ public class Plug_7_1_8_2 implements Plug
     	files.add("MSXlsxXmlRule.properties");
     	files.add("MSDocxXmlRule.properties");
     	files.add("MSPptxXmlRule.properties");
-    	files.add("MSHeaderXmlRule.properties");
-    	files.add("MSCommentXmlRule.properties");
     	files.add("ResxRule.properties");
     	PlugUtil.copyPropertiesToCompany(files);
+    	
+    	files.clear();
+    	files.add("MSCommentXmlRule.properties");
+    	files.add("MSHeaderXmlRule.properties");
+    	PlugUtil.copyPropertiesToCompany(files, true);
+    	
     }
     
     private void parseTemplates()

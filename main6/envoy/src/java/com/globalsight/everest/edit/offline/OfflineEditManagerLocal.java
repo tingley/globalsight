@@ -26,11 +26,9 @@ import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.regexp.RE;
@@ -69,7 +67,6 @@ import com.globalsight.everest.util.jms.JmsHelper;
 import com.globalsight.everest.webapp.pagehandler.administration.config.xmldtd.XmlDtdManager;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.XmlEntities;
-import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.DocumentElement;
 import com.globalsight.ling.docproc.Output;
@@ -86,7 +83,6 @@ import com.globalsight.ling.tw.TmxPseudo;
 import com.globalsight.ling.tw.internal.XliffInternalTag;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
-import com.globalsight.util.Assert;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.XmlParser;
 import com.globalsight.util.edit.EditUtil;
@@ -152,7 +148,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
 
     static private int counter = 0;
 
-    private boolean isXlfException = false;
+    private boolean isXlfOrTtxException = false;
 
     // static private int m_totalFiles = 0;
 
@@ -1100,7 +1096,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     {
                         s_category.error("xlf parse error");
                         s_category.error(de.getMessage());
-                        isXlfException = true;
+                        isXlfOrTtxException = true;
                         throw de;
                     }
                     StringReader sr = new StringReader(xlfContent);
@@ -1134,9 +1130,9 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     }
                     catch (DocumentException de)
                     {
-                        s_category.error("xlf parse error");
+                        s_category.error("ttx parse error");
                         s_category.error(de.getMessage());
-                        isXlfException = true;
+                        isXlfOrTtxException = true;
                         throw de;
                     }
 
@@ -1194,7 +1190,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                     {
                         s_category.error("xlf parse error");
                         s_category.error(de.getMessage());
-                        isXlfException = true;
+                        isXlfOrTtxException = true;
                         throw de;
                     }
                     StringReader sr = new StringReader(xlfContent);
@@ -1249,7 +1245,7 @@ public class OfflineEditManagerLocal implements OfflineEditManager
                                 + ex2.toString());
 
                 rslt.m_type = UPLOAD_TYPE_DETECTION_ERROR;
-                if (isXlfException)
+                if (isXlfOrTtxException)
                 {
                     throw ex2;
                 }

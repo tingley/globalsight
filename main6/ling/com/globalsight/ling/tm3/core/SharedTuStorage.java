@@ -62,13 +62,15 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
             .append(" as tu");
         int i = 0;
         for (Map.Entry<TM3Attribute, String> attr : attributes.entrySet()) {
-            String alias = "attr" + i++;
-            sb.append(" INNER JOIN ")
-              .append(getStorage().getAttrValTableName())
-              .append(" AS ").append(alias)
-              .append(" ON tu.id = ").append(alias).append(".tuId AND ")
-              .append(alias).append(".attrId = ?").addValue(attr.getKey().getId())
-              .append(" AND ").append(alias).append(".value = ?").addValue(attr.getValue());
+            if (attr.getKey().getAffectsIdentity()) {
+                String alias = "attr" + i++;
+                sb.append(" INNER JOIN ")
+                  .append(getStorage().getAttrValTableName())
+                  .append(" AS ").append(alias)
+                  .append(" ON tu.id = ").append(alias).append(".tuId AND ")
+                  .append(alias).append(".attrId = ?").addValue(attr.getKey().getId())
+                  .append(" AND ").append(alias).append(".value = ?").addValue(attr.getValue());
+            }
         }
         sb.append(" WHERE dummy.tuId = tu.id");
         return sb;
@@ -92,8 +94,10 @@ class SharedTuStorage<T extends TM3Data> extends TuStorage<T> {
         }
         if (! inlineAttrs.isEmpty()) {
             for (Map.Entry<TM3Attribute, Object> e : inlineAttrs.entrySet()) {
-                sb.append(" AND tu." + e.getKey().getColumnName() + " = ?");
-                sb.addValue(e.getValue());
+                if (e.getKey().getAffectsIdentity()) {
+                    sb.append(" AND tu." + e.getKey().getColumnName() + " = ?");
+                    sb.addValue(e.getValue());
+                }
             }
         }
         if (targetLocales != null) {

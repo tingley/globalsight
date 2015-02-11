@@ -1695,7 +1695,7 @@
         <PageLink linkName="dtpUpload" destinationPageName="TK2"></PageLink>
         <PageLink linkName="editor" destinationPageName="ED1"></PageLink>
         <PageLink linkName="editorSameWindow" destinationPageName="EDN1"></PageLink>
-        <PageLink linkName="finish" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="finish" destinationPageName="ST"></PageLink>
         <PageLink linkName="previous" destinationPageName="TK1"></PageLink>
         <PageLink linkName="reject" destinationPageName="TK4"></PageLink>
         <PageLink linkName="upload" destinationPageName="TK8"></PageLink>
@@ -2635,6 +2635,9 @@
       </WebPage>
       <WebPage pageName="CUST_DLOAD" isDefault="false" jspName="/envoy/administration/customer/download/downloadApplet.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler">
         <PageLink linkName="done" destinationPageName="WF3"></PageLink>
+        <PageLink linkName="doneFromJob" destinationPageName="DTLS"></PageLink>
+        <PageLink linkName="doneFromExportJobs" destinationPageName="WF5"></PageLink>
+        <PageLink linkName="doneFromLocalizedJobs" destinationPageName="WF4"></PageLink>
       </WebPage>
       <WebPage pageName="HOME" isDefault="false" jspName="/envoy/login/welcome.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.login.WelcomeHandler"></WebPage>
     </WebActivity>
@@ -2646,6 +2649,7 @@
       </WebPage>
       <WebPage pageName="CUST_Activity_DLOAD" isDefault="false" jspName="/envoy/administration/customer/download/downloadApplet.jsp" pageHandlerClassName="com.globalsight.everest.webapp.pagehandler.administration.customer.download.DownloadFileHandler">
         <PageLink linkName="done" destinationPageName="TK1"></PageLink>
+        <PageLink linkName="doneFromTask" destinationPageName="TK2"></PageLink>
       </WebPage>
     </WebActivity>
   </WebModule>

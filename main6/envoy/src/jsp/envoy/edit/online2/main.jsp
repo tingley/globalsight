@@ -80,28 +80,13 @@ String lb_verboseTags = bundle.getString("lb_editor_verbose_tags");
 String lb_fileNavigation = bundle.getString("lb_fileNavigation");
 String lb_pageNavigation = bundle.getString("lb_pageNavigation");
 
-//file navigation
-String lb_prevFile = "<IMG SRC='/globalsight/images/editorPreviousPage.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-String lb_nextFile = "<IMG SRC='/globalsight/images/editorNextPage.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-if (state.isFirstPage())
-{
-    lb_prevFile = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-}
-if (state.isLastPage())
-{
-    lb_nextFile = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-}
-//page navigation
-String lb_prevPage = "<IMG SRC='/globalsight/images/editorPreviousPage.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-String lb_nextPage = "<IMG SRC='/globalsight/images/editorNextPage.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-if (state.isFirstBatch())
-{
-    lb_prevPage = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-}
-if (state.isLastBatch())
-{
-    lb_nextPage = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
-}
+//file navigation (default unavailable)
+String lb_prevFile = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
+String lb_nextFile = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
+//page navigation (default unavailable)
+String lb_prevPage = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
+String lb_nextPage = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
+
 PaginateInfo pi = state.getPaginateInfo();
 
 // Todo: re-enable length check for target translations
@@ -1405,12 +1390,16 @@ function InsertPTag(tag)
 
 function navigatePage(offset)
 {
-    if (canClose(false))
+	if (canClose(false))
     {
+	    var pre = "<IMG SRC='/globalsight/images/editorPreviousPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
+	    var next = "<IMG SRC='/globalsight/images/editorNextPagex.gif' BORDER=0 HSPACE=1 VSPACE=2>";
+		document.getElementById("fileNavPre").innerHTML = pre;
+		document.getElementById("fileNavNext").innerHTML = next;
+		
     	var str_url = "<%=url_refresh%>&refresh=" + offset;
 		document.location = str_url;
     }
-		
 }
 
 function openInfoWin()
@@ -2393,7 +2382,54 @@ function doOnLoad()
 	fnImageSetArray();
 	fnImageSetGrayColorAndListener();
   }
+
+  updateFileNavigationArrow();
+  updatePageNavigationArrow();
 }
+
+function updateFileNavigationArrow()
+{
+	var fileNavPre, fileNavNext;
+
+	var isFirstPage = '<%=state.isFirstPage()%>';
+	if (isFirstPage == 'false')
+	{
+		fileNavPre = "<A HREF='#' onclick='navigatePage(-1); return false;' onfocus='this.blur()'>"
+			+ "<IMG SRC='/globalsight/images/editorPreviousPage.gif' BORDER=0 HSPACE=1 VSPACE=2></A>";
+			    			
+		document.getElementById("fileNavPre").innerHTML = fileNavPre;
+	}
+
+	var isLastPage = '<%=state.isLastPage()%>';
+	if (isLastPage == 'false')
+	{
+       fileNavNext = "<A HREF='#' onclick='navigatePage(1); return false;' onfocus='this.blur()'>"
+           + "<IMG SRC='/globalsight/images/editorNextPage.gif' BORDER=0 HSPACE=1 VSPACE=2></A>";
+       document.getElementById("fileNavNext").innerHTML = fileNavNext;
+	}
+}
+
+function updatePageNavigationArrow()
+{
+   var pageNavPre, pageNavNext;
+
+   var isFirstBatch = '<%=state.isFirstBatch()%>';
+   if (isFirstBatch == 'false')
+   {
+       pageNavPre = "<A HREF='#' onclick='navigatePage(-11); return false;' onfocus='this.blur()'>"
+           + "<IMG SRC='/globalsight/images/editorPreviousPage.gif' BORDER=0 HSPACE=1 VSPACE=2></A>";
+       document.getElementById("pageNavPre").innerHTML = pageNavPre;
+   }
+
+   var isLastBatch = '<%=state.isLastBatch()%>';
+	if (isLastBatch == 'false')
+	{
+       pageNavNext = "<A HREF='#' onclick='navigatePage(11); return false;' onfocus='this.blur()'>"
+           + "<IMG SRC='/globalsight/images/editorNextPage.gif' BORDER=0 HSPACE=1 VSPACE=2></A>";
+       document.getElementById("pageNavNext").innerHTML = pageNavNext;
+	}
+}
+
 </SCRIPT>
 <style type="text/css">
       #menu1  {display:block; width:400px; height:400px; 
@@ -2455,37 +2491,18 @@ border: 2px solid black; padding: 10 100; font-size: 14pt; z-index: 99;">
 <%--
     <P>Page: <span id="idPagename"><%=str_pageName%></span>
 --%>
-
     <span><%=bundle.getString("lb_inline_editor") %>: <%=str_sourceLocale_dis%> &#x2192; <%=str_targetLocale_dis%></span>
     <SPAN>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;</SPAN>
     <!-- File Navigation -->
     <SPAN><%=lb_fileNavigation%>
-	    <% if (!state.isFirstPage()) { %>
-	    <A HREF="#" onclick="navigatePage(-1); return false;"
-	    onfocus="this.blur()"><%=lb_prevFile%></A>
-	    <% } else { %>
-	    <%=lb_prevFile%>
-	    <% } %>
-	    <% if (!state.isLastPage()) { %>
-	    <A HREF="#" onclick="navigatePage(1); return false;"
-	    onfocus="this.blur()"><%=lb_nextFile%></A>
-	    <% } else { %>
-	    <%=lb_nextFile%>
-	    <% } %>
+        <label id="fileNavPre"><%=lb_prevFile%></label>
+        <label id="fileNavNext"><%=lb_nextFile%></label>
      </SPAN>
      <SPAN>&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;</SPAN>
      <!-- Page Navigation -->
      <SPAN><%=lb_pageNavigation%>&nbsp;( <%=pi.getCurrentPageNum()%> of <%=pi.getTotalPageNum()%> )
-	    <% if (!state.isFirstBatch()) { %>
-	    <A HREF="#" onclick="navigatePage(-11); return false;" onfocus="this.blur()"><%=lb_prevPage%></A>
-	    <% } else { %>
-	    <%=lb_prevPage%>
-	    <% } %>
-	    <% if (!state.isLastBatch()) { %>
-	    <A HREF="#" onclick="navigatePage(11); return false;" onfocus="this.blur()"><%=lb_nextPage%></A>
-	    <% } else { %>
-	    <%=lb_nextPage%>
-	    <% } %>
+        <label id="pageNavPre"><%=lb_prevPage%></label>
+        <label id="pageNavNext"><%=lb_nextPage%></label>
      </SPAN>
 
 </div>

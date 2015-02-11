@@ -47,7 +47,7 @@ String pageFormat = state.getPageFormat();
 boolean hasPreview = EditUtil.hasPreviewMode(pageFormat);
 boolean isOOO = pageFormat.startsWith("openoffice") || pageFormat.equals(IFormatNames.FORMAT_OFFICE_XML);
 boolean hasDynamicPreview = false;
-boolean hasPDFPreview = false;
+boolean hasPDFPreview = EditUtil.hasPDFPreviewMode(state);
 boolean isTeamsiteSource = false;
 long pageId = state.getTargetPageId().longValue();
 Object vpdfobj = sessionMgr.getAttribute("tgt_view_pdf");
@@ -55,16 +55,8 @@ boolean viewPdf = vpdfobj == null ? false : true;
 
 String pageName = pageInfo.getPageName();
 String pageNamePath = pageName.replaceAll("\\\\","/");
-int index = pageName.lastIndexOf(".");
-String extensionStr = pageName.substring(index + 1);
-
-if((extensionStr.equals("indd") || extensionStr.equals("inx"))
-        && !pageName.startsWith(AdobeHelper.XMP_DISPLAY_NAME_PREFIX))
-{
-    hasPDFPreview = true;
-}
-
 String dataSource = pageInfo.getDataSourceType();
+
 if (dataSource.equals(ExportConstants.TEAMSITE))
 {
     isTeamsiteSource = true;

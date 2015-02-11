@@ -150,7 +150,7 @@ public class QuarkFrameAdapter extends BaseAdapter
     }
 
     /**
-     * Converts the content to Xml and returns an AdapterResult.
+     * Converts the content to XML/Mif and returns an AdapterResult.
      * 
      * @param p_cxeMessage
      *            CxeMessage of type QUARK_IMPORTED_EVENT or
@@ -180,9 +180,9 @@ public class QuarkFrameAdapter extends BaseAdapter
             DesktopAppHelper helper = DesktopAppHelperFactory
                     .createDesktopAppHelper(m_workingDir, p_cxeMessage,
                             getLogger(), p_formatType);
-            MessageData newContent = helper.convertNativeToXml();
+            MessageData newContent = helper.convert();
             String newEventFlowXml = helper.getEventFlowXml();
-            CxeMessageType type = helper.getPostNativeToXmlConversionEvent();
+            CxeMessageType type = helper.getPostConversionEvent();
             CxeMessage outgoingMsg = new CxeMessage(type);
             outgoingMsg.setParameters(p_cxeMessage.getParameters());
             outgoingMsg.setEventFlowXml(newEventFlowXml);
@@ -206,7 +206,7 @@ public class QuarkFrameAdapter extends BaseAdapter
     }
 
     /**
-     * Handles the export case. Converts from XML to Quark/Frame
+     * Handles the export case. Converts from XML/Mif to Quark/Frame
      * 
      * @param p_cxeMessage
      *            CxeMessage of type QUARK_LOCALIZED_EVENT or
@@ -222,9 +222,9 @@ public class QuarkFrameAdapter extends BaseAdapter
             DesktopAppHelper helper = DesktopAppHelperFactory
                     .createDesktopAppHelper(m_workingDir, p_cxeMessage,
                             getLogger(), p_formatType);
-            MessageData newContent = helper.convertXmlToNative();
+            MessageData newContent = helper.convertBack();
             String newEventFlowXml = helper.getEventFlowXml();
-            CxeMessageType type = helper.getPostXmlToNativeConversionEvent();
+            CxeMessageType type = helper.getPostConversionBackEvent();
             CxeMessage outgoingMsg = new CxeMessage(type);
             outgoingMsg.setParameters(p_cxeMessage.getParameters());
             outgoingMsg.setEventFlowXml(newEventFlowXml);
@@ -239,7 +239,7 @@ public class QuarkFrameAdapter extends BaseAdapter
         }
         catch (Exception e)
         {
-            getLogger().error("Problem handling MS Office Re-Conversion.", e);
+            getLogger().error("Problem handling QuarkFrame conversion back.", e);
             DesktopApplicationAdapterException pae = new DesktopApplicationAdapterException(
                     "Unexpected", null, e);
             return this.makeExportStatus(p_cxeMessage, pae);

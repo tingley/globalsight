@@ -62,33 +62,33 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             }
             if (children[1].getValue())
             {
-                result.add(new Long(workflowData.getTradosInContextWordCount()));
-                workflowData.setTradosInContextWordCount(0l);
-            }
-            if (children[2].getValue())
-            {
                 result.add(new Long(workflowData.getTrados95to99WordCount()));
                 workflowData.setTrados95to99WordCount(0l);
             }
+            if (children[2].getValue())
+            {
+                result.add(new Long(workflowData.getTrados85to94WordCount()));
+                workflowData.setTrados85to94WordCount(0l);
+            }
             if (children[3].getValue())
             {
-                result.add(new Long(workflowData.getTrados75to94WordCount()));
-                workflowData.setTrados75to94WordCount(0l);
+                result.add(new Long(workflowData.getTrados75to84WordCount()));
+                workflowData.setTrados75to84WordCount(0l);
             }
             if (children[4].getValue())
-            {
-                result.add(new Long(workflowData.getTrados1to74WordCount()));
-                workflowData.setTrados1to74WordCount(0l);
-            }
-            if (children[5].getValue())
             {
                 result.add(new Long(workflowData.getTradosNoMatchWordCount()));
                 workflowData.setTradosNoMatchWordCount(0l);
             }
-            if (children[6].getValue())
+            if (children[5].getValue())
             {
                 result.add(new Long(workflowData.getTradosRepsWordCount()));
                 workflowData.setTradosRepsWordCount(0l);
+            }
+            if (children[6].getValue())
+            {
+                result.add(new Long(workflowData.getTradosInContextWordCount()));
+                workflowData.setTradosInContextWordCount(0l);
             }
             if (children[7].getValue())
             {
@@ -112,33 +112,33 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             }
             if (children[1].getValue())
             {
-                result.add(workflowData.getTradosInContextWordCountCost());
-                workflowData.setTradosInContextWordCountCost(new BigDecimal(0f));
-            }
-            if (children[2].getValue())
-            {
                 result.add(workflowData.getTrados95to99WordCountCost());
                 workflowData.setTrados95to99WordCountCost(new BigDecimal(0f));
             }
+            if (children[2].getValue())
+            {
+                result.add(workflowData.getTrados85to94WordCountCost());
+                workflowData.setTrados85to94WordCountCost(new BigDecimal(0f));
+            }
             if (children[3].getValue())
             {
-                result.add(workflowData.getTrados75to94WordCountCost());
-                workflowData.setTrados75to94WordCountCost(new BigDecimal(0f));
+                result.add(workflowData.getTrados75to84WordCountCost());
+                workflowData.setTrados75to84WordCountCost(new BigDecimal(0f));
             }
             if (children[4].getValue())
-            {
-                result.add(workflowData.getTrados1to74WordCountCost());
-                workflowData.setTrados1to74WordCountCost(new BigDecimal(0f));
-            }
-            if (children[5].getValue())
             {
                 result.add(workflowData.getTradosNoMatchWordCountCost());
                 workflowData.setTradosNoMatchWordCountCost(new BigDecimal(0f));
             }
-            if (children[6].getValue())
+            if (children[5].getValue())
             {
                 result.add(workflowData.getTradosRepsWordCountCost());
                 workflowData.setTradosRepsWordCountCost(new BigDecimal(0f));
+            }
+            if (children[6].getValue())
+            {
+                result.add(workflowData.getTradosInContextWordCountCost());
+                workflowData.setTradosInContextWordCountCost(new BigDecimal(0f));
             }
             if (children[7].getValue())
             {
@@ -166,27 +166,27 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             }
             if (children[1].getValue())
             {
-                result.add(new Long(workflowData.getTradosInContextWordCountAmount()));
+                result.add(new Long(workflowData.getTrados95to99WordCountAmount()));
             }
             if (children[2].getValue())
             {
-                result.add(new Long(workflowData.getTrados95to99WordCountAmount()));
+                result.add(new Long(workflowData.getTrados85to94WordCountAmount()));
             }
             if (children[3].getValue())
             {
-                result.add(new Long(workflowData.getTrados75to94WordCountAmount()));
+                result.add(new Long(workflowData.getTrados75to84WordCountAmount()));
             }
             if (children[4].getValue())
             {
-                result.add(new Long(workflowData.getTrados1to74WordCountAmount()));
+                result.add(new Long(workflowData.getTradosNoMatchWordCountAmount()));
             }
             if (children[5].getValue())
             {
-                result.add(new Long(workflowData.getTradosNoMatchWordCountAmount()));
+                result.add(new Long(workflowData.getTradosRepsWordCountAmount()));
             }
             if (children[6].getValue())
             {
-                result.add(new Long(workflowData.getTradosRepsWordCountAmount()));
+                result.add(new Long(workflowData.getTradosInContextWordCountAmount()));
             }
             if (children[7].getValue())
             {
@@ -206,27 +206,27 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             }
             if (children[1].getValue())
             {
-                result.add(workflowData.getTradosInContextWordCountCostAmount());
+                result.add(workflowData.getTrados95to99WordCountCostAmount());
             }
             if (children[2].getValue())
             {
-                result.add(workflowData.getTrados95to99WordCountCostAmount());
+                result.add(workflowData.getTrados85to94WordCountCostAmount());
             }
             if (children[3].getValue())
             {
-                result.add(workflowData.getTrados75to94WordCountCostAmount());
+                result.add(workflowData.getTrados75to84WordCountCostAmount());
             }
             if (children[4].getValue())
             {
-                result.add(workflowData.getTrados1to74WordCountCostAmount());
+                result.add(workflowData.getTradosNoMatchWordCountCostAmount());
             }
             if (children[5].getValue())
             {
-                result.add(workflowData.getTradosNoMatchWordCountCostAmount());
+                result.add(workflowData.getTradosRepsWordCountCostAmount());
             }
             if (children[6].getValue())
             {
-                result.add(workflowData.getTradosRepsWordCountCostAmount());
+                result.add(workflowData.getTradosInContextWordCountCostAmount());
             }
             if (children[7].getValue())
             {
@@ -249,10 +249,9 @@ public class ParamTradosMatchesPair extends ParamObjectPair
                 p_workflow.getSubLevRepetitionWordCount());
 
         p_workflowData.setTrados95to99WordCount(wfc.updatedHiFuzzyMatchCount());
-        p_workflowData.setTrados75to94WordCount(
-            wfc.updatedMedFuzzyMatchCount() + 
-            wfc.updatedMedHiFuzzyMatchCount());
-        p_workflowData.setTrados1to74WordCount(wfc.updatedLowFuzzyMatchCount());
+        p_workflowData.setTrados85to94WordCount(wfc.updatedMedHiFuzzyMatchCount());
+        p_workflowData.setTrados75to84WordCount(wfc.updatedMedFuzzyMatchCount());
+        p_workflowData.setTrados50to74WordCount(wfc.updatedLowFuzzyMatchCount());
 
         p_workflowData.setTradosNoMatchWordCount(
                 p_workflow.getNoMatchWordCount() + 
@@ -268,8 +267,9 @@ public class ParamTradosMatchesPair extends ParamObjectPair
                 p_workflowData.getTrados100WordCount() + 
                 p_workflowData.getTradosInContextWordCount() + 
                 p_workflowData.getTrados95to99WordCount() +
-                p_workflowData.getTrados75to94WordCount() + 
-                p_workflowData.getTrados1to74WordCount() +
+                p_workflowData.getTrados85to94WordCount() + 
+                p_workflowData.getTrados75to84WordCount() +
+                p_workflowData.getTrados50to74WordCount() +
                 p_workflowData.getTradosRepsWordCount() + 
                 p_workflowData.getTradosNoMatchWordCount());
     }
@@ -306,10 +306,11 @@ public class ParamTradosMatchesPair extends ParamObjectPair
             //fuzzy match costs
             p_workflowData.setTrados95to99WordCountCost(
                     p_workflowData.toBigDecimal(costByWordCount.getHiFuzzyMatchCost()));
-            p_workflowData.setTrados75to94WordCountCost(p_workflowData.toBigDecimal(
-                    costByWordCount.getMedFuzzyMatchCost() +
-                    costByWordCount.getMedHiFuzzyMatchCost()));
-            p_workflowData.setTrados1to74WordCountCost(
+            p_workflowData.setTrados85to94WordCountCost(
+                    p_workflowData.toBigDecimal(costByWordCount.getMedHiFuzzyMatchCost()));
+            p_workflowData.setTrados75to84WordCountCost(
+                    p_workflowData.toBigDecimal(costByWordCount.getMedFuzzyMatchCost()));
+            p_workflowData.setTrados50to74WordCountCost(
                     p_workflowData.toBigDecimal(costByWordCount.getLowFuzzyMatchCost()));
                                   
             //new words, no match costs  
@@ -321,8 +322,9 @@ public class ParamTradosMatchesPair extends ParamObjectPair
                     p_workflowData.getTrados100WordCountCost()
                     .add(p_workflowData.getTradosInContextWordCountCost())
                     .add(p_workflowData.getTrados95to99WordCountCost())
-                    .add(p_workflowData.getTrados75to94WordCountCost())
-                    .add(p_workflowData.getTrados1to74WordCountCost())
+                    .add(p_workflowData.getTrados85to94WordCountCost())
+                    .add(p_workflowData.getTrados75to84WordCountCost())
+                    .add(p_workflowData.getTrados50to74WordCountCost())
                     .add(p_workflowData.getTradosRepsWordCountCost())
                     .add(p_workflowData.getTradosNoMatchWordCountCost()));
         }  

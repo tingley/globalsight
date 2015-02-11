@@ -5,6 +5,7 @@
          com.globalsight.everest.servlet.util.SessionManager,
          com.globalsight.everest.webapp.WebAppConstants,
          com.globalsight.util.GlobalSightLocale,
+         com.globalsight.everest.workflow.Activity,
          com.globalsight.everest.webapp.javabean.NavigationBean,
          com.globalsight.everest.webapp.pagehandler.PageHandler,
          com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper,
@@ -14,6 +15,7 @@
          com.globalsight.everest.foundation.SearchCriteriaParameters,
          com.globalsight.everest.foundation.User,
          com.globalsight.everest.util.comparator.JobComparator,
+         com.globalsight.everest.util.comparator.ActivityComparator,
          com.globalsight.everest.jobhandler.Job,
          com.globalsight.everest.jobhandler.JobSearchParameters,
          com.globalsight.everest.projecthandler.ProjectInfo,
@@ -151,35 +153,6 @@ function submitForm()
 </tr>
 
 <tr>
-<td class="standardText" colspan=2>
-<%=bundle.getString("lb_creation_date_range")%>:
-</td>
-</tr>
-<tr>
-<td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
-<%=bundle.getString("lb_starts")%>:
-<input type="text" name="<%=creationStart%>" size="3" maxlength="9">
-<select name="<%=creationStartOptions%>">
-<option value='-1'></option>
-<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-</select>
-<%=bundle.getString("lb_ends")%>:
-<input type="text" name="<%=creationEnd%>" size="3" maxlength="9">
-<select name="<%=creationEndOptions%>" onChange="checkNow(this, searchForm.<%=creationEnd%>)">
-<option value='-1'></option>
-<option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
-<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
-<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
-<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
-<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
-</select>
-</td>
-</tr>
-
-<tr>
 <td class="standardText"><%=bundle.getString("lb_target_language")%>:</td>
 <td class="standardText" VALIGN="BOTTOM">
 <select name="targetLang" multiple="true" size=4>
@@ -209,7 +182,81 @@ function submitForm()
 </td>
 </tr>
 
-	<tr>
+<tr>
+<td class="standardText"><%=bundle.getString("lb_activity_name")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="activityName" multiple="true" size=4>
+<OPTION value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<%
+         Collection atc = ServerProxy.getJobHandler().getAllActivities();
+         ArrayList activities = null;
+         if(atc!=null)
+         {
+             activities = new ArrayList(atc);
+         }
+         else
+         {
+             activities = new ArrayList();
+         }
+         Collections.sort(activities, new ActivityComparator(Locale.US));
+         Iterator iterator = activities.iterator();
+         while (iterator.hasNext())
+         {
+             
+             Activity activity = (Activity) iterator.next();
+             if(activity.getActivityType()==Activity.TYPE_REVIEW||activity.getActivityType()==Activity.TYPE_REVIEW_EDITABLE){
+%>
+<option VALUE="<%=activity.getActivityName()%>"><%=activity.getDisplayName()%></OPTION>
+<%
+         }
+         }
+%>
+</select>
+</td>
+</tr>
+
+<tr>
+<td class="standardText"><%=bundle.getString("lb_job_status")%>:</td>
+<td class="standardText" VALIGN="BOTTOM">
+<select name="status" MULTIPLE size=4>
+<option value="*" SELECTED>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option value='<%=Job.READY_TO_BE_DISPATCHED%>'><%= bundle.getString("lb_ready") %></option>
+<option value='<%=Job.DISPATCHED%>'><%= bundle.getString("lb_inprogress") %></option>
+<option value='<%=Job.LOCALIZED%>'><%= bundle.getString("lb_localized") %></option>
+<option value='<%=Job.EXPORTED%>'><%= bundle.getString("lb_exported") %></option>
+</select>
+</td>
+</tr>
+
+<tr>
+<td class="standardText" colspan=2>
+<%=bundle.getString("lb_creation_date_range")%>:
+</td>
+</tr>
+<tr>
+<td class="standardText" style="padding-left:70px" colspan=2 VALIGN="BOTTOM">
+<%=bundle.getString("lb_starts")%>:
+<input type="text" name="<%=creationStart%>" size="3" maxlength="9">
+<select name="<%=creationStartOptions%>">
+<option value='-1'></option>
+<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+</select>
+<%=bundle.getString("lb_ends")%>:
+<input type="text" name="<%=creationEnd%>" size="3" maxlength="9">
+<select name="<%=creationEndOptions%>" onChange="checkNow(this, searchForm.<%=creationEnd%>)">
+<option value='-1'></option>
+<option value='<%=SearchCriteriaParameters.NOW%>'><%=bundle.getString("lb_now")%></option>
+<option value='<%=SearchCriteriaParameters.HOURS_AGO%>'><%=bundle.getString("lb_hours_ago")%></option>
+<option value='<%=SearchCriteriaParameters.DAYS_AGO%>'><%=bundle.getString("lb_days_ago")%></option>
+<option value='<%=SearchCriteriaParameters.WEEKS_AGO%>'><%=bundle.getString("lb_weeks_ago")%></option>
+<option value='<%=SearchCriteriaParameters.MONTHS_AGO%>'><%=bundle.getString("lb_months_ago")%></option>
+</select>
+</td>
+</tr>
+<tr>
 		<td class="standardText"><%=bundle.getString("lb_currency")%>:</td>
 		<td><SELECT NAME="currency">
 			<%
@@ -239,7 +286,7 @@ function submitForm()
 	<%  }  %>
 			
 		</SELECT></td>
-	</tr>
+</tr>
 
 	<tr>
 <amb:permission name="<%=Permission.REPORTS_DELL_ONLINE_JOBS_RECALC%>" >

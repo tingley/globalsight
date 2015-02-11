@@ -618,11 +618,11 @@ public class JobDetailsHandler extends PageHandler implements UserParamNames
                                 .getPageURL(), getJobDetailsInfo(p_request,
                                 s_isCostingEnabled, s_isRevenueEnabled)));
         // turn on cache for previous button.
-        p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-        p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-        p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
+        //p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        //p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+        //p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
         // cache
-        p_response.addHeader("Cache-Control", "max-age=0");
+        //p_response.addHeader("Cache-Control", "max-age=0");
 
         // Update the session with this most recently used job
         updateMRUJob(p_request, session, job, p_response);

@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.proxy.HibernateProxy;
 import org.jbpm.JbpmContext;
 import org.jbpm.graph.def.Node;
@@ -205,7 +207,7 @@ public class WorkflowJbpmUtil
      * The fromat of the node name is like:
      * 
      * <pre>
-     * 	node_[index]_activityname
+     *  node_[index]_activityname
      * </pre>
      * 
      * And the task name is like :
@@ -783,7 +785,64 @@ public class WorkflowJbpmUtil
 
         return delegation;
     }
+    
+    public static List<Long> getRejectedTaskIds(List<TaskInstance> tasks,
+            String p_userId)
+    {
+        JbpmContext ctx = WorkflowConfiguration.getInstance()
+        .getCurrentContext();
+        
+        List<Long> allIds = new ArrayList<Long>();
+        if (tasks == null || tasks.size() == 0)
+        {
+            return allIds;
+        }
 
+        for (TaskInstance task : tasks)
+        {
+            allIds.add(task.getId());
+        }
+
+        String idsString = allIds.toString();
+        idsString = idsString.substring(1, idsString.length() - 1);
+
+        StringBuffer sql = new StringBuffer("select vi.TASKINSTANCE_ID ");
+        sql.append("from JBPM_GS_VARIABLE vi ");
+        sql.append("where vi.NAME = :name and vi.VALUE = :value ");
+        sql.append("and vi.CATEGORY = 'reject' and vi.TASKINSTANCE_ID in (:ids);");
+
+        SQLQuery query = null;
+        Session session = ctx.getSession();
+        query = session.createSQLQuery(sql.toString());
+        query.setString("name", WorkflowConstants.VARIABLE_IS_REJECTED);
+        query.setString("value", p_userId);
+        query.setParameterList("ids", allIds);
+
+        List<Long> ids = new ArrayList<Long>();
+        for (Object id : query.list())
+        {
+            //id is BigInteger
+            ids.add(Long.parseLong(id.toString()));
+        }
+        return ids;
+    }
+    
+    public static int getStateFromTaskInstance(TaskInstance p_ti,
+            String p_userId, int p_taskState)
+    {
+        return getStateFromTaskInstance(p_ti, p_userId, p_taskState, null);
+    }
+
+    private static boolean isUserRejected(JbpmContext ctx, String userId,
+            TaskInstance ti, List<Long> rejectTaskIds)
+    {
+        if (rejectTaskIds == null)
+            return WorkflowJbpmPersistenceHandler.isUserRejected(ctx, userId,
+                    ti);
+
+        return rejectTaskIds.indexOf(ti.getId()) > -1;
+    }
+    
     /**
      * Gets the state from task instance.
      * 
@@ -797,7 +856,7 @@ public class WorkflowJbpmUtil
      * @return the state.
      */
     public static int getStateFromTaskInstance(TaskInstance p_ti,
-            String p_userId, int p_taskState)
+            String p_userId, int p_taskState, List<Long> rejectTaskIds)
     {
 
         JbpmContext ctx = WorkflowConfiguration.getInstance()
@@ -832,16 +891,20 @@ public class WorkflowJbpmUtil
         else
         {
             /* for the non pm user */
-            boolean isRejected = WorkflowJbpmPersistenceHandler.isUserRejected(
-                    ctx, p_userId, p_ti);
-            //fix for GBS-1470
-            boolean isRejectedForReassign = WorkflowJbpmPersistenceHandler.isUserRejectedForReassign(
-            		ctx, p_userId, p_ti);
-            if (!isRejectedForReassign&&isRejected)
+            boolean isRejected = isUserRejected(
+                    ctx, p_userId, p_ti, rejectTaskIds);
+            
+            if (isRejected)
             {
-                return state;
+              //fix for GBS-1470
+                boolean isRejectedForReassign = WorkflowJbpmPersistenceHandler.isUserRejectedForReassign(
+                        ctx, p_userId, p_ti);
+                
+                if (!isRejectedForReassign)
+                {
+                    return state;
+                }
             }
-
         }
 
         if (p_ti.getStart() == null)
@@ -928,7 +991,7 @@ public class WorkflowJbpmUtil
      *            the id of the task.
      * @return assignees.
      */
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public static List<String> getAssignees(long taskId)
     {
         List<String> assignees = new ArrayList<String>();
@@ -962,8 +1025,8 @@ public class WorkflowJbpmUtil
 
         return assignees;
     }
-	
-	/**
+    
+    /**
      * Gets the assignees in the task instance.
      * 
      * @param p_ti

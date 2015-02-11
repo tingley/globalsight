@@ -69,6 +69,8 @@
     }
     
     String helperText = bundle.getString("helper_text_job_archive");
+    
+    /*
     int myJobsDaysRetrieved = 0;
     try
     {
@@ -88,6 +90,7 @@
     {
         // assume 0
     }
+    */
 %>                       
 <%@ include file="/envoy/projects/workflows/jobSort.jspIncl" %>
 <HTML>

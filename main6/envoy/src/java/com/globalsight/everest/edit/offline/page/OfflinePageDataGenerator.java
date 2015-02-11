@@ -218,8 +218,8 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
     {
         try
         {
-            ResourceBundle bundle = ResourceBundle
-                    .getBundle(AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY);
+            ResourceBundle bundle = ResourceBundle.getBundle(
+                    AmbassadorDwUpConstants.OFFLINE_CONFIG_PROPERTY, Locale.US);
 
             // Override default max number of fuzzy to display.
             String tmp = bundle
@@ -990,7 +990,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                 {
                     // We **always** use the current target.
                     trgSubGxml = trgSub.toGxmlExcludeTopTags();
-                    trgScore = 100; // this affects Trados output
+                    trgScore = 0; // this affects Trados output
                     matchTypeDisplay = getDisplayMatchType(
                             INDICATE_CURRENT_TARGET_SUB, subProtection, String
                                     .valueOf(trgScore));
@@ -1028,6 +1028,7 @@ public class OfflinePageDataGenerator implements AmbassadorDwUpConstants
                         .setCopyOfSource((state != LeverageMatchLingManager.UNVERIFIED)
                                 && (state != LeverageMatchLingManager.EXACT)
                                 && !fuzzyMatchInserted);
+                result.setSourceTuv(srcTuv);
                 result.setDisplayParentOfSubTagName(trgSubData
                         .getParentOfSubTagName());
                 result.setTouched(trgTuv);

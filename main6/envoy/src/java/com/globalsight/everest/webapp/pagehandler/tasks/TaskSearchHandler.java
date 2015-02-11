@@ -16,37 +16,31 @@
  */
 package com.globalsight.everest.webapp.pagehandler.tasks;
 
-import javax.servlet.RequestDispatcher;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.StringTokenizer;
-
-import java.rmi.RemoteException;
-
-// globalsight
+import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.foundation.User;
-import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.servlet.EnvoyServletException;
-import com.globalsight.everest.webapp.WebAppConstants;
-import com.globalsight.everest.webapp.javabean.NavigationBean;
-import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
-import com.globalsight.everest.webapp.pagehandler.PageHandler;
-import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
-import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
-import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
-import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
 import com.globalsight.everest.servlet.util.SessionManager;
+import com.globalsight.everest.taskmanager.Task;
+import com.globalsight.everest.webapp.WebAppConstants;
+import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
+import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.users.UserHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.administration.workflow.WorkflowTemplateHandlerHelper;
+import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
+import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 
 public class TaskSearchHandler extends PageHandler
 {
@@ -65,7 +59,45 @@ public class TaskSearchHandler extends PageHandler
                                   ServletContext context)
     throws ServletException, IOException, RemoteException, EnvoyServletException
     {
-        String action = (String)request.getParameter("action");
+        HttpSession session = request.getSession();
+        User user = TaskHelper.getUser(session);
+        String action = request.getParameter(TASK_ACTION);
+        String userId = user.getUserId();
+
+        if (TASK_ACTION_FINISH.equals(action))
+        {
+            Task task = (Task) TaskHelper
+                    .retrieveObject(session, WORK_OBJECT);
+
+            SessionManager sessionMgr = (SessionManager) session
+                    .getAttribute(SESSION_MANAGER);
+            // Clear the delayTimeTable date for this job export
+            Hashtable delayTimeTable = (Hashtable) sessionMgr
+                    .getAttribute(WebAppConstants.TASK_COMPLETE_DELAY_TIME_TABLE);
+            if (delayTimeTable != null)
+            {
+                String delayTimeKey = userId + String.valueOf(task.getId());
+                Object startTimeObj = delayTimeTable.get(delayTimeKey);
+                if (startTimeObj != null)
+                {
+                    delayTimeTable.remove(delayTimeKey);
+                }
+            }
+
+            String companyName = CompanyThreadLocal.getInstance().getValue();
+            Thread t = new Thread(new TaskCompleteThread(session.getId(), userId, task, request
+                    .getParameter("arrow"), companyName));
+            t.start();
+            
+            // remove from MRU list
+            String displayLocale = task.getSourceLocale().toString() + "->"
+                    + task.getTargetLocale().toString();
+            String thisTask = displayLocale + ":" + task.getJobName() + ":"
+                    + task.getId() + ":" + task.getState();
+            TaskHelper
+                    .removeMRUtask(request, session, thisTask, response);
+        }
+        
         setup(request);
         
         super.invokePageHandler(pageDescriptor, request, response, context);
@@ -78,10 +110,10 @@ public class TaskSearchHandler extends PageHandler
      * @return the name of the link to follow
      */
     public ControlFlowHelper getControlFlowHelper(
-        HttpServletRequest p_request, HttpServletResponse p_response)
+        HttpServletRequest request, HttpServletResponse response)
     {
 
-        return new TaskSearchControlFlowHelper(p_request, p_response);
+        return new TaskSearchControlFlowHelper(request, response);
     }
 
     /**

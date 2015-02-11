@@ -55,10 +55,11 @@ public interface TM3Data {
 
     /**
      * Test object equality.
-     * <p>
+     * <p>"Equality" in this case may be as simple as a string compare,
+     * or there may be more complicated logical comparisons going on.
      * <b>Warning:</b> Implementations <b>must</b> override <tt>equals()</tt>
      * or else run the risk of duplicate target TUVs being persisted in the 
-     * database.
+     * database.  
      * @param o object to test for equality
      * @return true if the objects are equal; false otherwise
      */

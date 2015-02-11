@@ -680,3 +680,9 @@ a.wordCountLinks:link {
     text-decoration: none;
 }
 
+.editorSegmentMT {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    /*word-break: break-all;*/
+    word-wrap: break-word;
+}

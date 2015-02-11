@@ -32,6 +32,7 @@ import com.globalsight.ling.docproc.IFormatNames;
 import com.globalsight.ling.docproc.Output;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.machineTranslation.google.GoogleProxy;
+import com.globalsight.util.StringUtil;
 
 /**
  * <p>
@@ -60,8 +61,8 @@ public class Extractor extends AbstractExtractor implements
     public static Map<String, String> sourceMap;
     public static Map<String, String> targetMap;
     
-    private boolean isSetTargetLanguage = false;
-    private List targetList;
+    private boolean m_isSetTargetLanguage = false;
+    private List<String> m_targetList;
 
     public Extractor()
     {
@@ -81,8 +82,8 @@ public class Extractor extends AbstractExtractor implements
 
     public void extract() throws ExtractorException
     {
-        isSetTargetLanguage = false;
-        targetList = new ArrayList();
+        m_isSetTargetLanguage = false;
+        m_targetList = new ArrayList();
         
         Output output = getOutput();
         output.setDataFormat(IFormatNames.FORMAT_PO);
@@ -91,8 +92,9 @@ public class Extractor extends AbstractExtractor implements
 
         String content = null, realContent = null;
         boolean isMsgID = false, isMsgIDPlural = false;
-        boolean isMsgStr = false;
-        List<String> msgIDList = new ArrayList<String>(), msgIDPluralList = new ArrayList<String>();
+        boolean isMsgStr = false, isMsgStrPlural = false;
+        List<String> msgIDList = new ArrayList<String>();
+        List<String> msgIDPluralList = new ArrayList<String>();
         List<String> msgStrList = new ArrayList<String>();
         int pluralLen = 2;
 
@@ -115,6 +117,14 @@ public class Extractor extends AbstractExtractor implements
                     isMsgStr = false;
                     addOutput(output, typeSke, content + "\n", msgIDList, msgStrList);
                 }
+            }
+            else if (content.startsWith(POToken.MSGSTR_PLURAL))
+            {
+                msgStrList.add(realContent);
+                isMsgIDPlural = false;
+                isMsgID = false;
+                isMsgStr = false;
+                isMsgStrPlural = true;
             }
             else if (content.startsWith(POToken.MSGSTR))
             {
@@ -140,6 +150,12 @@ public class Extractor extends AbstractExtractor implements
                 {
                     msgStrList.add(realContent);
                 }
+                else if (isMsgStrPlural)
+                {
+                    int lastIndex = msgStrList.size() - 1;
+                    String temp = msgStrList.get(lastIndex) + realContent;
+                    msgStrList.set(lastIndex, temp);
+                }
             }
             else
             {
@@ -155,7 +171,7 @@ public class Extractor extends AbstractExtractor implements
 
         addMsgListAndComm(msgIDList, msgIDPluralList, isMsgIDPlural, pluralLen,
                 output, content, msgStrList, isMsgID, isMsgStr);
-        setTargetLanguage(msgStrList, output, true);
+        setTargetLanguage(msgIDList, msgIDPluralList, msgStrList, output, true);
         isMsgID = false;
         isMsgIDPlural = false;
         isMsgStr = false;
@@ -177,39 +193,36 @@ public class Extractor extends AbstractExtractor implements
      */
     public void addMsgListAndComm(List<String> p_msgIDList,
             List<String> p_msgIDPluralList, boolean p_isMsgIDPlural,
-            int p_pluralLen, Output p_output, String p_content,
+            int p_pluraLen, Output p_output, String p_content,
             List<String> p_msgStrList, boolean p_isMsgID, boolean p_isMsgStr)
     {
         if (p_msgIDPluralList != null && p_msgIDPluralList.size() > 0
                 && p_msgIDList != null && p_msgIDList.size() > 0)
         {
             int msgStr_Index = 0;
-            p_output.addSkeleton(POToken.MSGSTR + "[" + (msgStr_Index++) + "] \"");
-            addTranslatable(p_output, p_msgIDList.get(0), p_msgStrList.get(0));
+            String source = getStringFromList(p_msgIDList);
+            String target = p_msgStrList.get(msgStr_Index);
+            p_output.addSkeleton(POToken.MSGSTR_PLURAL + (msgStr_Index++) + "] \"");
+            addTranslatable(p_output, source, target);
             p_output.addSkeleton("\"\n");
 
-            for (int i = 0; (i < p_msgIDPluralList.size())
-                    && (msgStr_Index < p_pluralLen); i++)
+            source = getStringFromList(p_msgIDPluralList);
+            while (msgStr_Index < p_msgStrList.size())
             {
-                String temp = p_msgIDPluralList.get(i);
-                String target = temp;
-                if ((i+1) < p_msgStrList.size())
-                {
-                    target = p_msgStrList.get(i+1);
-                }
+                target = p_msgStrList.get(msgStr_Index);
 
-                if (temp.equals("\n"))
+                if (source.equals("\n"))
                 {
-                    p_output.addSkeleton(temp);
+                    p_output.addSkeleton(source);
                 }
-                else if (temp.trim().length() < 1)
+                else if (source.trim().length() < 1)
                 {
-                    p_output.addSkeleton("\"" + temp + "\"\n");
+                    p_output.addSkeleton("\"" + source + "\"\n");
                 }
                 else
                 {
-                    p_output.addSkeleton(POToken.MSGSTR + "[" + (msgStr_Index++) + "] \"");
-                    addTranslatable(p_output, temp, target);
+                    p_output.addSkeleton(POToken.MSGSTR_PLURAL + (msgStr_Index++) + "] \"");
+                    addTranslatable(p_output, source, target);
                     p_output.addSkeleton("\"\n");
                 }
             }
@@ -224,15 +237,8 @@ public class Extractor extends AbstractExtractor implements
             addOutput(p_output, typeSke, p_content + "\n", p_msgIDList, p_msgStrList);
         }
         
-        if (p_msgIDList != null && p_msgIDList.size() > 0)
-        {
-            String temp = p_msgIDList.get(0);
-            if (temp != null && temp.trim().length() > 0)
-            {
-                setTargetLanguage(p_msgStrList, p_output, false);
-            }
-        }
-        
+        // Detect the language of target/msgStr, which is used for creating tuv.
+        setTargetLanguage(p_msgIDList, p_msgIDPluralList,p_msgStrList, p_output, false);
 
         if (p_msgIDList != null)        p_msgIDList.clear();
         if (p_msgIDPluralList != null)  p_msgIDPluralList.clear();
@@ -268,10 +274,9 @@ public class Extractor extends AbstractExtractor implements
                 }
                 return;
             }
-            else if (p_msgStrList == null
+            /*else if (p_msgStrList == null
                     || p_msgStrList.size() < 1
-                    || (p_msgStrList.size() == 1 && ("".equals(p_msgStrList
-                            .get(0)))))
+                    || (p_msgStrList.size() == 1 && ("".equals(p_msgStrList.get(0)))))
             {
                 for (int i = 0; i < p_msgIDList.size(); i++)
                 {
@@ -287,7 +292,7 @@ public class Extractor extends AbstractExtractor implements
                     String msgStr = (String) p_msgStrList.get(i);
                     addMsgStr(msgID, p_output, (i == 0 ? true : false), msgStr);
                 }
-            }
+            }*/
             else
             {
                 String source = getStringFromList(p_msgIDList);
@@ -312,14 +317,13 @@ public class Extractor extends AbstractExtractor implements
         if (p_list == null || p_list.size() == 0)
             return "";
 
-        String result = "";
-        String tag = " ";
+        StringBuffer result = new StringBuffer();
         for (String str : p_list)
         {
-            result = result + str + tag;
+            result.append(str);
         }
 
-        return result;
+        return result.toString();
     }
 
     /**
@@ -498,48 +502,37 @@ public class Extractor extends AbstractExtractor implements
      * which will be used for creating activity/task, 
      * such as target language in XLF File.
      * 
+     * @param p_msgIDList
+     *            msgid String List
+     * @param p_msgIDPluralList
+     *            msgid_plural String List
      * @param p_msgStrList
-     *            target String List
+     *            msgstr String List
      * @param p_output
      * @param isLastLine
      *            if it is the last line of File
      */
-    public void setTargetLanguage(List p_msgStrList, Output p_output, boolean isLastLine)
+    private void setTargetLanguage(List<String> p_msgIDList,
+            List<String> p_msgIDPluralList, List<String> p_msgStrList,
+            Output p_output, boolean isLastLine)
     {
-        if (isSetTargetLanguage)
+        if (m_isSetTargetLanguage)
             return;
-
-        String msgStr, target;
-        if (p_msgStrList != null && p_msgStrList.size() > 0)
-        {
-            for (int i = 0; i < p_msgStrList.size(); i++)
-            {
-                msgStr = (String) p_msgStrList.get(i);
-                if (msgStr != null)
-                {
-                    target = GoogleProxy.detectLanguage(msgStr);
-                    if (target != null && target.trim().length() > 0)
-                    {
-                        targetList.add(target);
-                    }
-                }                
-            }
-        }
-
-        if (targetList != null && ((targetList.size() > 30) || isLastLine))
+        
+        String target;
+        if (m_targetList != null && ((m_targetList.size() > 30) || isLastLine))
         {
             Map<String, Integer> map = new HashMap<String, Integer>();
-            String tar;
-            for (int i = 0; i < targetList.size(); i++)
+            for (int i = 0; i < m_targetList.size(); i++)
             {
-                tar = (String) targetList.get(i);
-                if (map.containsKey(tar))
+                target = (String) m_targetList.get(i);
+                if (map.containsKey(target))
                 {
-                    map.put(tar, map.get(tar) + 1);
+                    map.put(target, map.get(target) + 1);
                 }
                 else
                 {
-                    map.put(tar, 1);
+                    map.put(target, 1);
                 }
             }
 
@@ -559,11 +552,58 @@ public class Extractor extends AbstractExtractor implements
                     if (target != null && target.trim().length() > 0)
                     {
                         p_output.setTargetLanguage(target);
-                        isSetTargetLanguage = true;
+                        m_isSetTargetLanguage = true;
                     }
 
-                    targetList.clear();
+                    m_targetList.clear();
                     break;
+                }
+            }
+        }
+
+        if (p_msgIDList == null || p_msgIDList.size() == 0
+                || p_msgStrList == null || p_msgStrList.size() == 0)
+        {
+            return;
+        }
+        
+        String msgID = getStringFromList(p_msgIDList).trim();
+        String msgIDPlural = getStringFromList(p_msgIDPluralList).trim();
+        String msgStr;
+        
+        if (msgIDPlural.length() == 0)
+        {
+            msgStr = getStringFromList(p_msgStrList).trim();
+            if (!StringUtil.equalsIgnoreSpace(msgStr, msgID) && msgID.length()>0)
+            {
+                target = GoogleProxy.detectLanguage(msgStr);
+                if (target != null && target.trim().length() > 0)
+                {
+                    m_targetList.add(target);
+                }
+            }
+        }
+        else if (p_msgStrList.size() > 1)
+        {
+            msgStr = p_msgStrList.get(0);
+            msgStr = msgStr == null ? "" : msgStr.trim();
+            if (!StringUtil.equalsIgnoreSpace(msgStr, msgID))
+            {
+                target = GoogleProxy.detectLanguage(msgStr);
+                if (target != null && target.trim().length() > 0)
+                {
+                    m_targetList.add(target);
+                }
+            }
+
+            msgStr = p_msgStrList.get(1);
+            msgStr = msgStr == null ? "" : msgStr.trim();
+            if (!StringUtil.equalsIgnoreSpace(msgStr, msgIDPlural))
+            {
+                target = GoogleProxy.detectLanguage(msgStr);
+                if (target != null && target.trim().length() > 0)
+                {
+                    m_targetList.add(target);
                 }
             }
         }

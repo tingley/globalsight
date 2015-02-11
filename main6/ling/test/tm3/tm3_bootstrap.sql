@@ -28,6 +28,7 @@ CREATE TABLE `TM3_ATTR` (
   `name` varchar(128) NOT NULL,
   `columnName` varchar(32),
   `valueType` varchar(128) NOT NULL,
+  `affectsIdentity` char(1) NOT NULL DEFAULT 'Y',
   PRIMARY KEY (`id`),
   UNIQUE KEY `tmId` (`tmId`,`name`),
   CONSTRAINT `tm3_attr_ibfk_1` FOREIGN KEY (`tmId`) REFERENCES `TM3_TM` (`id`) ON DELETE CASCADE

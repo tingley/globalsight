@@ -72,8 +72,9 @@ public abstract class TestTM3 {
     
     static Set<TM3Attribute> inlineAttrs() {
         Set<TM3Attribute> r = new HashSet<TM3Attribute>();
-        r.add(new TM3Attribute("inlineString", new StringType(), "inlineString"));
-        r.add(new TM3Attribute("inlineBoolean", new BooleanType(), "inlineBoolean"));
+        r.add(new TM3Attribute("inlineString", new StringType(), "inlineString", true));
+        r.add(new TM3Attribute("inlineBoolean", new BooleanType(), "inlineBoolean", true));
+        r.add(new TM3Attribute("optionalString", new StringType(), "optionalString", false));
         return r;
     }
 
@@ -153,7 +154,7 @@ public abstract class TestTM3 {
             return "TestData(" + data + ")";
         }
     }
-    
+
     static class TestDataFactory implements TM3DataFactory<TestData> {
         private TM3FuzzyMatchScorer<TestData> scorer = new TestScorer();
         
@@ -194,6 +195,48 @@ public abstract class TestTM3 {
             return cfg;
         }
 
+    }
+    
+    // Variant that returns a specified fingerprint rather
+    // than one computed from the content, and also reimplements
+    // equals() to just compare the fingerprint.
+    static class FixedValueTestData extends TestData {
+        private long fingerprint;
+        FixedValueTestData(String data, long fingerprint) {
+            super(data);
+            this.fingerprint = fingerprint;
+        }
+
+        @Override
+        public long getFingerprint() {
+            return fingerprint;
+        }
+        
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof FixedValueTestData)) {
+                return false;
+            }
+            FixedValueTestData d = (FixedValueTestData)o;
+            return getFingerprint() == d.getFingerprint();
+        }
+        
+        @Override
+        public String toString() {
+            return "Fixed(" + fingerprint + ")[" + getSerializedForm() + "]";
+        }
+    }
+    
+    static class FixedValueTestDataFactory extends TestDataFactory {
+        private long fingerprint;
+        FixedValueTestDataFactory(long fingerprint) {
+            this.fingerprint = fingerprint;
+        }
+        
+        @Override
+        public TestData fromSerializedForm(TM3Locale locale, String value) {
+            return new FixedValueTestData(value, fingerprint);
+        }
     }
     
     // Remove the DB used by the current test
@@ -270,7 +313,6 @@ public abstract class TestTM3 {
     // Test methods
     // These just call into the implementations below
     //
-
     @Test
     public void testExactMatch() throws Exception {
         testExactMatch(
@@ -287,6 +329,12 @@ public abstract class TestTM3 {
     @Test
     public void testExactMatchingWithAttrs() throws Exception {
         testExactMatchingWithAttrs(
+                manager.getTm(currentSession, FACTORY, currentTestId), EN_US, FR_FR);
+    }
+    
+    @Test
+    public void testExactMachingWithNonIdentityAttributes() throws Exception {
+        testExactMachingWithNonIdentityAttributes(
                 manager.getTm(currentSession, FACTORY, currentTestId), EN_US, FR_FR);
     }
     
@@ -523,6 +571,11 @@ public abstract class TestTM3 {
         TM3Tm<TestData> tm = manager.getTm(currentSession, FACTORY, currentTestId);
         testOverwriteWithIdenticalTargets(tm, EN_US, FR_FR);
     }
+  
+    @Test
+    public void testFixedFingerprintTuvs() throws Exception {
+        testFixedFingerprintTuvs(EN_US, FR_FR);
+    }
     
     // 
     // Test implementations
@@ -655,6 +708,55 @@ public abstract class TestTM3 {
             tx.commit();
 
             cleanupTestDb(manager);          
+        }
+        catch (Exception e) {
+            tx.rollback();
+            throw e;
+        }
+    }
+    
+    public void testExactMachingWithNonIdentityAttributes(TM3Tm<TestData> tm, 
+            TestLocale srcLocale, final TestLocale tgtLocale) throws Exception {
+
+        Transaction tx = null;
+        try {
+            tx = currentSession.beginTransaction();
+
+            final TM3Attribute attr1 = tm.getAttributeByName("inlineString");
+            final TM3Attribute attr2 = tm.getAttributeByName("optionalString");
+
+            TestData srcData1 = new TestData("This is source 1");
+            TestData tgtData1 = new TestData("This is target 1");
+            TestData tgtData2 = new TestData("This is target 2");
+            
+            // Save two segments that are identical in text and identity-determining
+            // attributes, but different in a non-identity-affecting attribute.
+            // The result of this should be a single TU in the DB, with two 
+            // target tuvs.
+            tm.save(srcLocale, srcData1, TM3Attributes.many(
+                    TM3Attributes.entry(attr1, "required"),
+                    TM3Attributes.entry(attr2, "optional1")),
+                tgtLocale, tgtData1, TM3SaveMode.MERGE, currentTestEvent);
+            tm.save(srcLocale, srcData1, TM3Attributes.many(
+                    TM3Attributes.entry(attr1, "required"),
+                    TM3Attributes.entry(attr2, "optional2")),
+                tgtLocale, tgtData2, TM3SaveMode.MERGE, currentTestEvent);
+            tx.commit();
+            
+            tx = currentSession.beginTransaction();
+
+            TM3LeverageResults<TestData> results = 
+                tm.findMatches(srcData1, srcLocale, null, 
+                               TM3Attributes.one(attr1, "required"),
+                               TM3MatchType.EXACT, false);
+            assertEquals(1, results.getMatches().size());
+            TM3Tu<TestData> tu = results.getMatches().first().getTu();
+            List<TM3Tuv<TestData>> targets = tu.getTargetTuvs();
+            assertEquals(2, targets.size());
+            assertEquals(tgtData1, targets.get(0).getContent());
+            assertEquals(tgtLocale, targets.get(0).getLocale());
+            assertEquals(tgtData2, targets.get(1).getContent());
+            assertEquals(tgtLocale, targets.get(1).getLocale());
         }
         catch (Exception e) {
             tx.rollback();
@@ -2680,6 +2782,55 @@ public abstract class TestTM3 {
             List<TM3Tuv<TestData>> targetTuvs = tu.getLocaleTuvs(tgtLocale);
             assertEquals(1, targetTuvs.size());
             assertTrue(targetTuvs.get(0).getContent().equals(tgtData2));
+            tx.commit();
+
+            cleanupTestDb(manager);
+        }
+        catch (Exception e) {
+            tx.rollback();
+            throw e;
+        }
+    }
+    
+    // In GlobalSight, it's possible to have logically identical TUVs with content
+    // that is not string-identical (because of optional inline XML attributes).  
+    // We simulate with a test here.
+    public void testFixedFingerprintTuvs(TestLocale srcLocale, 
+            final TestLocale tgtLocale) throws Exception {
+        FixedValueTestDataFactory factory = new FixedValueTestDataFactory(2L);
+        TM3Tm<TestData> tm = manager.getTm(currentSession, factory, currentTestId);
+        Transaction tx = null;
+        try {
+            tx = currentSession.beginTransaction();
+            // Now let's create some segments.
+            TestData srcData1 = 
+                new TestData("This is source 1");
+            // These two targets are "different", but they are logically the same
+            // in the opinion of the TM3Data implementation
+            TestData tgtData1 = new FixedValueTestData("This is target 1", 2L);
+            TestData tgtData2 = new FixedValueTestData("This is target 2", 2L);
+            TM3Saver<TestData> saver = tm.createSaver();
+            saver.tu(srcData1, srcLocale, currentTestEvent)
+                 .target(tgtData1, tgtLocale, currentTestEvent)
+                 .save(TM3SaveMode.MERGE);
+            tx.commit();
+            
+            tx = currentSession.beginTransaction();
+            saver = tm.createSaver();
+            saver.tu(srcData1, srcLocale, currentTestEvent)
+                 .target(tgtData2, tgtLocale, currentTestEvent)
+                 .save(TM3SaveMode.MERGE);
+            tx.commit();
+
+            tx = currentSession.beginTransaction();
+            // make sure there is only one target tuv
+            TM3LeverageResults<TestData> results =
+                tm.findMatches(srcData1, srcLocale, null,  TM3Attributes.NONE, TM3MatchType.EXACT, false);
+            expectResults(results, expected(srcData1, true));
+            TM3Tu<TestData> tu = results.getMatches().first().getTu();
+            List<TM3Tuv<TestData>> targetTuvs = tu.getLocaleTuvs(tgtLocale);
+            assertEquals(1, targetTuvs.size());
+            assertTrue(targetTuvs.get(0).getContent().equals(tgtData1));
             tx.commit();
 
             cleanupTestDb(manager);

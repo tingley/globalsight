@@ -126,7 +126,7 @@ public class BatchDataCenterByCid
         	   switch (m_options.getNosyncAction())
                {
 	               case SyncOptions.NOSYNC_ADD:
-	                   Statements stmts = getAddStatements(m_entriesWithNoId);
+	                   Statements stmts = getAddTbxStatements(m_entriesWithNoId);
 	
 	                   if (result == null)
 	                   {
@@ -520,4 +520,13 @@ public class BatchDataCenterByCid
 	
 	    return result;
 	}
+    
+    private Statements getAddTbxStatements(ArrayList p_entries)
+    {
+        Statements result;
+        
+        result = m_termbase.batchAddTbxEntriesAsNew(p_entries, null, m_session);
+        
+        return result;
+    }
 }

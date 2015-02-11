@@ -24,7 +24,7 @@ public interface ExtractorInterface
         throws ExtractorException;
 
     /**
-     * Set references to the input and putput objects.
+     * Set references to the input and output objects.
      * @param p_input com.globalsight.ling.docproc.EFInputData
      * @param p_output com.globalsight.ling.docproc.Output
      */

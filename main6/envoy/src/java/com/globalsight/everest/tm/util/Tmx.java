@@ -22,7 +22,6 @@ import com.globalsight.util.UTC;
 
 import org.dom4j.Attribute;
 import org.dom4j.Element;
-import org.dom4j.Node;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -425,7 +424,12 @@ public class Tmx
         }
         else
         {
-            return "<!DOCTYPE tmx SYSTEM \"http://www.lisa.org/tmx/"
+            // Change "DOCTYPE" reference path
+            // from:
+            // <!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd" >
+            // to:
+            // <!DOCTYPE tmx SYSTEM "tmx14.dtd" >
+            return "<!DOCTYPE tmx SYSTEM \""
                     + getTmxDtdFromVersion(m_tmxVersion) + "\" >";
         }
     }

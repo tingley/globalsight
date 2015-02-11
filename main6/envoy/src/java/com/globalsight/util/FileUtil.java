@@ -94,6 +94,21 @@ public class FileUtil
             }
         }
     }
+    
+    public static void copyFolder(File sF, File tF) throws IOException
+    {
+        String sP = sF.getAbsolutePath().replace("\\", "/");
+        String tP = tF.getAbsolutePath().replace("\\", "/");
+        
+        List<File> alls = getAllFiles(sF);
+        for (File f : alls)
+        {
+            String path = f.getAbsolutePath().replace("\\", "/");
+            path = path.replace(sP, tP);
+            
+            copyFile(f, new File(path));
+        }
+    }
 
     /**
      * Gets all files under the specified fold.
@@ -474,6 +489,7 @@ public class FileUtil
     {
         byte[] bs = readFile(file, 150);
         String encoding = "utf-8";
+        boolean findEncoding = false;
 
         Map chars = Charset.availableCharsets();
         Set keys = chars.keySet();
@@ -495,6 +511,7 @@ public class FileUtil
                 if (matcher.find())
                 {
                     encoding = matcher.group(1);
+                    findEncoding = true;
                 }
                 else
                 {
@@ -502,6 +519,7 @@ public class FileUtil
                     if (guessedEncoding != null)
                     {
                         encoding = guessedEncoding;
+                        findEncoding = true;
                     }
                 }
 
@@ -509,6 +527,89 @@ public class FileUtil
             }
         }
 
-        return encoding;
+        return findEncoding ? encoding : "UTF-8";
+    }
+    
+    public static String unUnicode(String s)
+    {
+        char[] in = s.toCharArray();
+        int off = 0;
+        int len = s.length();
+        char[] convtBuf = s.toCharArray();
+
+        char aChar;
+        char[] out = convtBuf;
+        int outLen = 0;
+        int end = off + len;
+
+        while (off < end)
+        {
+            aChar = in[off++];
+            if (aChar == '\\')
+            {
+                aChar = in[off++];
+                if (aChar == 'u')
+                {
+                    // Read the xxxx
+                    int value = 0;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        aChar = in[off++];
+                        switch (aChar)
+                        {
+                        case '0':
+                        case '1':
+                        case '2':
+                        case '3':
+                        case '4':
+                        case '5':
+                        case '6':
+                        case '7':
+                        case '8':
+                        case '9':
+                            value = (value << 4) + aChar - '0';
+                            break;
+                        case 'a':
+                        case 'b':
+                        case 'c':
+                        case 'd':
+                        case 'e':
+                        case 'f':
+                            value = (value << 4) + 10 + aChar - 'a';
+                            break;
+                        case 'A':
+                        case 'B':
+                        case 'C':
+                        case 'D':
+                        case 'E':
+                        case 'F':
+                            value = (value << 4) + 10 + aChar - 'A';
+                            break;
+                        default:
+                            throw new IllegalArgumentException(
+                                    "Malformed \\uxxxx encoding.");
+                        }
+                    }
+                    out[outLen++] = (char) value;
+                }
+                else
+                {
+                    if (aChar == 't')
+                        aChar = '\t';
+                    else if (aChar == 'r')
+                        aChar = '\r';
+                    else if (aChar == 'n')
+                        aChar = '\n';
+                    else if (aChar == 'f')
+                        aChar = '\f';
+                    out[outLen++] = aChar;
+                }
+            }
+            else
+            {
+                out[outLen++] = aChar;
+            }
+        }
+        return new String(out, 0, outLen);
     }
 }

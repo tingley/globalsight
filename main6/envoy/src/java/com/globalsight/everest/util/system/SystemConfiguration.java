@@ -77,6 +77,16 @@ public abstract class SystemConfiguration implements SystemConfigParamNames
     }
 
     /**
+     * Debug hook to replace the standard DB-backed configuration with
+     * something else.  Use for testing only!
+     * 
+     * @param config
+     */
+    public static void setDebugInstance(SystemConfiguration config) {
+        m_systemConfig = config;
+    }
+    
+    /**
      * Get the main System4 SystemConfiguration object.
      * 
      * @return an instance of EnvoySystemConfiguration

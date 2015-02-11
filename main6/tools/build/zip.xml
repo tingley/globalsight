@@ -15,6 +15,8 @@
 			<!-- grab all the Jboss specific files -->
 			<zipfileset dir="${jbossUtilDir}" prefix="${product}/jboss" />
 			<zipfileset dir="${jbossServerDir}" prefix="${product}/jboss/jboss_server" />
+			<!-- grab gsjava scripts -->
+			<zipfileset dir="${gsjavaDir}" prefix="${product}/jboss" />
 
 			<zipfileset dir="${capclasses}/globalsight.ear/lib" prefix="${product}/${deployment}/globalsight.ear/lib" includes="globalsight.jar" />
 
@@ -163,6 +165,8 @@
 			<zipfileset dir="../../envoy/src/dojo" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/dojo" />
 			
 			<zipfileset dir="../../envoy/src/dijit" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/dijit" />
+
+			<zipfileset dir="../../envoy/src/dojox" prefix="${product}/${deployment}/globalsight.ear/globalsight-web.war/dojox" />
 			
 			<zipfileset dir="../../envoy/src/java/properties" prefix="${product}/${deployment}/globalsight.ear/lib/classes/properties" />
 

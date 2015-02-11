@@ -59,12 +59,16 @@
     String ssoChecked = "";//default
     String isSsoChecked = "false";//default
     String ssoIdpUrl = "";
+    String sessionTime = "";
     boolean isReviewOnly = false;
     String enableTM3Checked = "";
     if (company != null)
     {
         companyName = company.getName();
         desc = company.getDescription();
+        sessionTime = company.getSessionTime();
+        
+        if (sessionTime==null) sessionTime="";
         if (desc == null) desc = "";
         
         boolean enableIPFilte = company.getEnableIPFilter();
@@ -117,7 +121,7 @@ function submitForm(formAction)
     }
     if (formAction == "save")
     {
-        if (confirmForm()) 
+        if (confirmForm() && confirmTime()) 
         {
             companyForm.action = "<%=saveURL%>";
             companyForm.submit();
@@ -180,7 +184,38 @@ function confirmForm()
     }
 %>
 
+	return true;
+}
+
+function confirmTime()
+{
+	var sessionTime = companyForm.sessionTimeField.value;
+	{
+		if (sessionTime!='')
+		{
+			if(isNumeric(sessionTime))
+			{
+				sessionTime = parseInt(sessionTime)
+				if (sessionTime > 480 || sessionTime < 30)
+				{
+					alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company_time"))%>");
+					return false;
+				}
+			}
+			else
+			{
+				alert("<%=EditUtil.toJavascript(bundle.getString("msg_duplicate_company_time"))%>");
+				return false;
+			}
+		}
+	}
     return true;
+}
+
+function isNumeric(str){
+	if (str.startsWith("0"))
+		return false;
+	return /^(-|\+)?\d+(\.\d+)?$/.test(str);
 }
 
 function onEnableSSOSwitch()
@@ -247,7 +282,7 @@ function doOnload()
                 <% if (edit) { %>
                     <%=companyName%>
                 <% } else { %>
-                    <input type="textfield" name="<%=CompanyConstants.NAME%>" maxlength="40" size="30" value="<%=companyName%>">
+                    <input type="text" name="<%=CompanyConstants.NAME%>" maxlength="40" size="30" value="<%=companyName%>">
                 <% } %>
             </td>
             <td valign="center">
@@ -261,6 +296,13 @@ function doOnload()
             <td valign="top"><%=bundle.getString("lb_description")%>:</td>
             <td colspan="2">
                 <textarea rows="6" cols="40" name="<%=CompanyConstants.DESC%>"><%=desc%></textarea>
+            </td>
+        </tr>
+        
+        <tr>
+        	<td valign="top"><%=bundle.getString("lb_session_timeout")%>&nbsp;(<%=bundle.getString("lb_minutes")%>):</td>
+        	<td colspan="2">
+                <input type="text" name="<%=CompanyConstants.SESSIONTIME%>" maxlength="3" size="20" value="<%=sessionTime%>">&nbsp;(30-480)
             </td>
         </tr>
         

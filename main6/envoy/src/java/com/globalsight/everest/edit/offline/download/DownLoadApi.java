@@ -32,8 +32,6 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.Vector;
 
-import org.apache.tools.ant.taskdefs.condition.IsFalse;
-
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.edit.SynchronizationManager;
 import com.globalsight.everest.edit.SynchronizationStatus;
@@ -529,9 +527,10 @@ public class DownLoadApi implements AmbassadorDwUpConstants
         }
 
         // check that it is unique - not used so far in this download
-        if (m_uniqueJobFileNames.get(uniqueName + ext) == null)
+        String uniqueFileName = (uniqueName + ext).toLowerCase();
+        if (m_uniqueJobFileNames.get(uniqueFileName) == null)
         {
-            m_uniqueJobFileNames.put(uniqueName + ext, "");
+            m_uniqueJobFileNames.put(uniqueFileName, "");
             return uniqueName + ext;
         }
         else

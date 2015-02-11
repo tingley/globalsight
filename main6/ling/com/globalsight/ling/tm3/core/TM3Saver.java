@@ -22,13 +22,11 @@ import java.util.Map;
  *   saver.save(TM3SaveMode.MERGE);
  * </pre>
  */
-public class TM3Saver<T extends TM3Data> {
+public abstract class TM3Saver<T extends TM3Data> {
 
-    private BaseTm<T> tm;
     List<Tu> tus = new ArrayList<Tu>();
     
-    TM3Saver(BaseTm<T> tm) {
-        this.tm = tm;
+    TM3Saver() {
     }
     
     /**
@@ -56,11 +54,7 @@ public class TM3Saver<T extends TM3Data> {
      * @return
      * @throws TM3Exception
      */
-    public List<TM3Tu<T>> save(TM3SaveMode mode) throws TM3Exception {
-        List<TM3Tu<T>> saved = tm.save(this, mode);
-        tus.clear();
-        return saved;
-    }
+    public abstract List<TM3Tu<T>> save(TM3SaveMode mode) throws TM3Exception;
     
     /**
      * Representation of an unsaved TU, created by a call to 
@@ -136,9 +130,10 @@ public class TM3Saver<T extends TM3Data> {
         public List<TM3Tu<T>> save(TM3SaveMode mode) {
             return TM3Saver.this.save(mode);
         }
+        
     }
     
-    class Tuv {
+    public class Tuv {
         T content;
         TM3Locale locale;
         TM3Event event;
@@ -146,6 +141,15 @@ public class TM3Saver<T extends TM3Data> {
             this.content = content;
             this.locale = locale;
             this.event = event;
+        }
+        public T getContent() {
+            return content;
+        }
+        public TM3Locale getLocale() {
+            return locale;
+        }
+        public TM3Event getEvent() {
+            return event;
         }
     }
 }

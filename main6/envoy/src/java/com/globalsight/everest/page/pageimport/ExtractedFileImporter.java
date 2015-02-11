@@ -127,15 +127,17 @@ public class ExtractedFileImporter extends FileImporter
     private static String LAST_RENDER = "<ph[^>]*>&lt;w:lastRenderedPageBreak/&gt;</ph>";
 
     private static String REGEX_BPT = "<bpt[^>]*i=\"([^\"]*)\"[^>]*>";
-    private static String REGEX_BPT_ALL = "(<bpt[^>]*i=\"{0}\"[^>]*>)[^>]*</bpt>.*(<ept[^>]*i=\"{0}\"[^>]*>)[^>]*</ept>";
-    private static String REGEX_BPT_ALL2 = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>(.*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
-    private static String REGEX_BPT_ALL3 = "(<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>)(.*)(<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>)";
+    private static String REGEX_BPT_ALL = "(<bpt[^>]*i=\"{0}\"[^>]*>)[^>]*</bpt>[\\d\\D]*(<ept[^>]*i=\"{0}\"[^>]*>)[^>]*</ept>";
+    private static String REGEX_BPT_ALL2 = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>([\\d\\D]*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
+    private static String REGEX_BPT_ALL3 = "(<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>)([\\d\\D]*)(<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>)";
     private static String REGEX_BPT_ALL_SPACE = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>([ ]*)<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_SAME_TAG = "(<bpt[^>]*>)([^<]*)(</bpt>)([^<]*)(<ept[^>]*>)([^<]*)(</ept>)(<bpt[^>]*>)([^<]*)(</bpt>)([^<]*)(<ept[^>]*>)([^<]*)(</ept>)";
     private static String REGEX_IT = "<[pi][^>]*>[^<]*</[pi][^>]*>";
     private static String REGEX_IT2 = "(<it[^>]*>)([^<]*)(</it>)";
     private static String REGEX_TAG = "(<[^be][^>]*>)([^<]*)(</[^>]*>)";
-    private static String REGEX_SEGMENT = "(<segment[^>]*>)(.*?)</segment>";
+    private static String REGEX_SEGMENT = "(<segment[^>]*>)([\\d\\D]*?)</segment>";
+    private static String REGEX_PH_AFTER = "(<[^>]*>)([^<]*)(</[^>]*>)<ph[^>]*>([^<]*)</ph>";
+    private static String REGEX_PH_BEFORE = "<ph[^>]*>([^<]*)</ph>(<[^>]*>)([^<]*)(</[^>]*>)";
 
     private static String PRESERVE = "&lt;w:t xml:space=&quot;preserve&quot;&gt;";
     private static String NO_PRESERVE = "&lt;w:t&gt;";
@@ -640,7 +642,7 @@ public class ExtractedFileImporter extends FileImporter
             return p_tuList;
         }
 
-        Pattern p = Pattern.compile("<fileProfileId>(.*)</fileProfileId>");
+        Pattern p = Pattern.compile("<fileProfileId>([\\d\\D]*)</fileProfileId>");
         Matcher m = p.matcher(p_request.getEventFlowXml());
         String pageDataType = null;
         boolean isJavaProperties = false;
@@ -1448,6 +1450,11 @@ public class ExtractedFileImporter extends FileImporter
                     tuv = setGxmlForOffice((TuvImpl) tuv, seg
                             .toGxml(p_pageDataType));
                 }
+                else if (isIdmlFile(fileName))
+                {
+                    tuv = setGxmlForIdml((TuvImpl) tuv, seg
+                            .toGxml(p_pageDataType));
+                }
                 else
                 {
                     tuv.setGxml(seg.toGxml(p_pageDataType));
@@ -1489,6 +1496,15 @@ public class ExtractedFileImporter extends FileImporter
         return ".docx".equalsIgnoreCase(type);
     }
 
+    private boolean isIdmlFile(String fileName)
+    {
+        int index = fileName.lastIndexOf('.');
+        if (index < 0)
+            return false;
+        
+        String type = fileName.substring(index);
+        return ".idml".equalsIgnoreCase(type);
+    }
 
     /**
      * Extracts a removed tag from a bpt fragment.
@@ -1839,6 +1855,77 @@ public class ExtractedFileImporter extends FileImporter
         s = s.replaceAll(SPELL_END_2, "");
         s = s.replaceAll(LAST_RENDER, "");
 
+        return s;
+    }
+
+    private TuvImpl setGxmlForIdml(TuvImpl tuv, String gxml)
+    {
+        if (gxml != null)
+        {
+            gxml = mergeOneBpt(gxml);
+            gxml = removeTags(tuv, gxml);
+            gxml = mergeMultiTags(gxml);
+            gxml = mergePh(gxml);
+            
+            gxml = removeAllPrefixAndSuffixTags(tuv, gxml);
+        }
+        
+        tuv.setGxml(gxml);
+
+        return tuv;
+    }
+    
+    private String mergePh(String s)
+    {
+        s = mergePhAfter(s);
+        s = mergePhBefore(s);
+        
+        return s;
+    }
+    
+    private String mergePhBefore(String s)
+    {
+        Pattern p = Pattern.compile(REGEX_PH_BEFORE);
+        Matcher m = p.matcher(s);
+        while (m.find())
+        {
+            String all = m.group();
+            int index = s.indexOf(all);
+            if (index > -1)
+            {
+                String content1 = m.group(1);
+                String tagStart = m.group(2);
+                String content2 = m.group(3);
+                String tagEnd = m.group(4);
+                
+                String changed = tagStart + content1 + content2 + tagEnd;
+                s = s.replace(all, changed);
+                m = p.matcher(s);
+            }
+        }
+        return s;
+    }
+    
+    private String mergePhAfter(String s)
+    {
+        Pattern p = Pattern.compile(REGEX_PH_AFTER);
+        Matcher m = p.matcher(s);
+        while (m.find())
+        {
+            String all = m.group();
+            int index = s.indexOf(all);
+            if (index > -1)
+            {
+                String tagStart = m.group(1);
+                String content1 = m.group(2);
+                String tagEnd = m.group(3);
+                String content2 = m.group(4);
+                
+                String changed = tagStart + content1 + content2 + tagEnd;
+                s = s.replace(all, changed);
+                m = p.matcher(s);
+            }
+        }
         return s;
     }
 

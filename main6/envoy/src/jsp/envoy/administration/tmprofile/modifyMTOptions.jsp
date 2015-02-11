@@ -24,6 +24,7 @@
     		com.globalsight.cxe.entity.segmentationrulefile.SegmentationRuleFileImpl,
     		com.globalsight.everest.util.comparator.SegmentationRuleFileComparator,
     		com.globalsight.everest.projecthandler.ProMTInfo,
+    		com.globalsight.ling.common.XmlEntities,
     		java.util.Collections,
     		java.util.List,
     		java.util.Locale,
@@ -46,6 +47,7 @@
 <jsp:useBean id="self" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
+	XmlEntities m_xmlEncoder = new XmlEntities();
     ResourceBundle bundle = PageHandler.getBundle(session);
     String lbNext = bundle.getString("lb_next");
     String lbSave = bundle.getString("lb_save");
@@ -187,7 +189,7 @@
 						alert("<%=bundle.getString("msg_tm_mt_url_empty")%>");
 						return false;
 				    }
-				    else if (msMTCanSave != null && trim(msMTCanSave) == 'false') 
+				    else if ((msMTCanSave != null && trim(msMTCanSave) == 'false') || msInputChanged()) 
 					{
 				        alert("<%=bundle.getString("lb_tm_mt_ms_engine_cannot_save")%>");
 				        return false;
@@ -251,6 +253,27 @@
 			}
 		}
 		else 
+		{
+			return false;
+		}
+	}
+
+	function msInputChanged()
+	{
+		var formerURL = "<%=tmProfile.getMsMTUrl()%>";
+		var currentURL = document.getElementById('idMsMtUrl').value;
+
+		var formerAppid = "<%=tmProfile.getMsMTAppID()%>";
+		var currentAppid = document.getElementById('idMsMtAppid').value;
+
+		var formerCategory = "<%=tmProfile.getMsMTCategory()%>";
+		var currentCategory = document.getElementById('idMsMtCategory').value;
+
+		if (formerURL != currentURL || formerAppid != currentAppid || formerCategory != currentCategory)
+		{
+			return true;
+		}
+		else
 		{
 			return false;
 		}
@@ -618,14 +641,14 @@
 	     }
 	 %>
 	 <p>
-	 <TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="88%">
+	 <TABLE CELLSPACING="2" CELLPADDING="2" BORDER="0" class="standardText" WIDTH="95%">
 	      <tr><td colspan="3"><b><%=bundle.getString("lb_tm_ms_mt_title")%></b></td></tr>
 	      <tr>
 	        <td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_url")%><font color="red">*</font>: </td>
 	        <td>
 	        	<INPUT CLASS="standardText" ID="idMsMtUrl" NAME="<%=TMProfileConstants.MT_MS_URL%>" 
-	        			value="<%=tmProfile.getMsMTUrl() == null ? "http://api.microsofttranslator.com/V2/Soap.svc" : tmProfile
-                            .getMsMTUrl()%>" TYPE="text" MAXLENGTH="99" SIZE="90" />
+	        			value="<%=tmProfile.getMsMTUrl() == null ? "http://api.microsofttranslator.com/V2/Soap.svc" : m_xmlEncoder.encodeStringBasic(tmProfile
+                            .getMsMTUrl())%>" TYPE="text" MAXLENGTH="99" SIZE="90" />
 	        </td>
 			<td ALIGN="LEFT"><INPUT TYPE="BUTTON" VALUE="<%=bundle.getString("lb_test_host")%>" ID="test" onclick="submitForm('testMSMT');"/></td>
 	      </tr>
@@ -633,9 +656,18 @@
 	      	<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_appid")%>: </td>
 	      	<td>
 	      		<INPUT CLASS="standardText" ID="idMsMtAppid" NAME="<%=TMProfileConstants.MT_MS_APPID%>" 
-	        			value="<%=tmProfile.getMsMTAppID() == null ? "" : tmProfile
-                    .getMsMTAppID()%>" TYPE="text" MAXLENGTH="50" SIZE="60" />
+	        			value="<%=tmProfile.getMsMTAppID() == null ? "" : m_xmlEncoder.encodeStringBasic(tmProfile
+	                        .getMsMTAppID())%>" TYPE="text" MAXLENGTH="50" SIZE="60" />
 	        			<a href="http://www.bing.com/developers/appids.aspx" target="_blank"><%=bundle.getString("lb_tm_ms_mt_appid_tag")%></a>
+	      	</td>
+	      </tr>
+	      <tr>
+	      	<td ALIGN="LEFT"><%=bundle.getString("lb_tm_ms_mt_category")%>: </td>
+	      	<td colspan="2">
+	      		<INPUT CLASS="standardText" ID="idMsMtCategory" NAME="<%=TMProfileConstants.MT_MS_CATEGORY%>" 
+	        			value="<%=tmProfile.getMsMTCategory() == null ? "general" : m_xmlEncoder.encodeStringBasic(tmProfile
+	                    .getMsMTCategory())%>" TYPE="text" MAXLENGTH="50" SIZE="60" />
+                    	<%=bundle.getString("lb_tm_ms_mt_category_optional")%>
 	      	</td>
 	      </tr>
 	      <%

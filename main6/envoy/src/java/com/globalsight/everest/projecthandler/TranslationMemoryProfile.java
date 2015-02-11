@@ -172,6 +172,8 @@ public class TranslationMemoryProfile extends PersistentObject
     private String m_msMTUrl = null;
 
     private String msMTAppID = null;
+    
+    private String msMTCategory = null;
 
     private String msMTUrlFlag = null;
 
@@ -244,6 +246,16 @@ public class TranslationMemoryProfile extends PersistentObject
     public void setMsMTUrlFlag(String msMTUrlFlag)
     {
         this.msMTUrlFlag = msMTUrlFlag;
+    }
+
+    public String getMsMTCategory()
+    {
+        return msMTCategory;
+    }
+
+    public void setMsMTCategory(String msMTCategory)
+    {
+        this.msMTCategory = msMTCategory;
     }
 
     public String getMsMTAppID()
@@ -435,11 +447,6 @@ public class TranslationMemoryProfile extends PersistentObject
         m_multipleMatchesPenalty = p_multipleMatchesPenalty;
     }
 
-    public void setIsLeverageExactMatches(boolean p_isExactMatchLeveraging)
-    {
-        m_isExactMatchLeveraging = p_isExactMatchLeveraging;
-    }
-
     public void setL10nProfile(L10nProfile p_l10nProfile)
     {
         m_l10nProfile = p_l10nProfile;
@@ -495,11 +502,6 @@ public class TranslationMemoryProfile extends PersistentObject
     public boolean isLeverageLocalizable()
     {
         return m_isLeverageLocalizable;
-    }
-
-    public boolean isLeverageExactMatch()
-    {
-        return m_isExactMatchLeveraging;
     }
 
     public Vector getProjectTMsToLeverageFrom()
@@ -661,6 +663,24 @@ public class TranslationMemoryProfile extends PersistentObject
     public void setIsExactMatchLeveraging(boolean exactMatchLeveraging)
     {
         m_isExactMatchLeveraging = exactMatchLeveraging;
+    }
+
+    /**
+     * @deprecated
+     * @see setIsExactMatchLeveraging(boolean exactMatchLeveraging)
+     */
+    public void setIsLeverageExactMatches(boolean p_isExactMatchLeveraging)
+    {
+        m_isExactMatchLeveraging = p_isExactMatchLeveraging;
+    }
+
+    /**
+     * @deprecated
+     * @see getIsExactMatchLeveraging()
+     */
+    public boolean isLeverageExactMatch()
+    {
+        return m_isExactMatchLeveraging;
     }
 
     public boolean getIsTypeSensitiveLeveraging()

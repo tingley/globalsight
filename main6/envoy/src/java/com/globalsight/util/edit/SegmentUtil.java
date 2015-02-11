@@ -23,6 +23,10 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
+
+import com.globalsight.ling.common.XmlEntities;
+import com.globalsight.ling.docproc.SegmentNode;
 import com.globalsight.ling.tw.internal.InternalTextUtil;
 import com.globalsight.machineTranslation.promt.ProMTProxy;
 
@@ -39,6 +43,9 @@ public class SegmentUtil
     private String NOTCOUNT_TAG_4 = "</" + XML_NOTCOUNT_TAG + ">";
     
     public static String XML_NOTCOUNT_TAG = "not_translate";
+    
+    private static Pattern HTML_TAG_PATTERN = 
+        Pattern.compile("<(\"[^\"]*\"|'[^']*'|[^'\">])*>");
     
     /**
      * Gets a new class.
@@ -282,5 +289,72 @@ public class SegmentUtil
         str = str.replaceAll("&gt;", "&amp;gt;");
         
         return str;
+    }
+    
+    public static String protectInvalidUnicodeChar(String str)
+    {
+        str = str.replaceAll("&#x100088;", "<gs_xml_placeholder type=\"InvalidUnicodeChar\" value=\"100088\"/>");
+        return str;
+    }
+    
+    public static String restoreInvalidUnicodeChar(String str)
+    {
+        str = str.replaceAll("<gs_xml_placeholder type=\"InvalidUnicodeChar\" value=\"100088\"/>", "&#x100088;");
+        return str;
+    }
+    
+    /**
+     * Replace the HTML tag with place holder in segment node
+     */
+    public static void replaceHtmltagWithPH(SegmentNode p_node){
+        String segment = p_node.getSegment();
+        p_node.setSegment(replaceHtmltagWithPH(segment));
+    }
+    
+    /**
+     * Replace the HTML tag with place holder in segment
+     * 
+     * @param p_str
+     *            segment string
+     */
+    public static String replaceHtmltagWithPH(String p_str)
+    {
+        String result = p_str.replace("&lt;", "<").replace("&gt;", ">");
+        Matcher m = HTML_TAG_PATTERN.matcher(result);
+        int index = 1;
+        String htmlTag;
+
+        while (m.find())
+        {
+            htmlTag = m.group(0);
+            String replace = handleInlineTag(htmlTag, index);
+            result = StringUtils.replace(result, htmlTag, replace, 1);
+            if (result.contains(replace))
+            {
+                index++;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Transfer tags into inline tags with &lt;ph&gt;
+     * 
+     * @param p_str
+     *            the String which need protected/inline
+     * @param p_index
+     *            the place holder index
+     */
+    private static String handleInlineTag(String p_str, int p_index)
+    {
+        String tagType = "phOfGS";
+        StringBuffer stuff = new StringBuffer();
+        XmlEntities m_xmlEncoder = new XmlEntities();
+        stuff.append("<ph type=\"" + tagType + "\" id=\"" + p_index + "\""
+                + " x=\"" + p_index++ + "\">");
+        stuff.append(m_xmlEncoder.encodeStringBasic(p_str));
+        stuff.append("</ph>");
+        return stuff.toString();
     }
 }

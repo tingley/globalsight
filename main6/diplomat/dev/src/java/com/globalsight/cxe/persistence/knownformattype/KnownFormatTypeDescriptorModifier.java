@@ -52,25 +52,25 @@ public class KnownFormatTypeDescriptorModifier
     {
         Vector formats = new Vector();
 
-        if (CxeProxy.isMsOfficeAdapterInstalled() == false)
-        {
-            formats.add(FORMAT_WORD);
-            formats.add(FORMAT_EXCEL);
-            formats.add(FORMAT_PPT);
-        }
-
-        if (CxeProxy.isQuarkFrameAdapterInstalled() == false)
-        {
-            formats.add(FORMAT_FRAME5);
-            formats.add(FORMAT_QUARK);
-            formats.add(FORMAT_FRAME6);
-            formats.add(FORMAT_FRAME7);
-        }
-
-        if (CxeProxy.isPdfAdapterInstalled() == false)
-        {
-            formats.add(FORMAT_PDF);
-        }
+//        if (CxeProxy.isMsOfficeAdapterInstalled() == false)
+//        {
+//            formats.add(FORMAT_WORD);
+//            formats.add(FORMAT_EXCEL);
+//            formats.add(FORMAT_PPT);
+//        }
+//
+//        if (CxeProxy.isQuarkFrameAdapterInstalled() == false)
+//        {
+//            formats.add(FORMAT_FRAME5);
+//            formats.add(FORMAT_QUARK);
+//            formats.add(FORMAT_FRAME6);
+//            formats.add(FORMAT_FRAME7);
+//        }
+//
+//        if (CxeProxy.isPdfAdapterInstalled() == false)
+//        {
+//            formats.add(FORMAT_PDF);
+//        }
 
         return formats;
     }

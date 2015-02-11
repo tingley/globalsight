@@ -82,10 +82,6 @@ function cleanError()
                         <TD><%=request.getAttribute(JobManagementHandler.JOB_DATE_CREATED_SCRIPTLET)%></TD>
                     </TR>
                     <TR CLASS="standardText">
-                        <TD NOWRAP><B><%=bundle.getString("lb_data_source")%>:<B></TD>
-                        <TD><%=request.getAttribute(JobManagementHandler.DATA_SOURCE_SCRIPTLET)%></TD>
-                    </TR>
-                    <TR CLASS="standardText">
                         <TD NOWRAP><B><%=bundle.getString("lb_source_word_count_total")%>:<B></TD>
                         <TD><%=request.getAttribute(JobManagementHandler.TOTAL_SOURCE_PAGE_WC)%></TD>
                     </TR>

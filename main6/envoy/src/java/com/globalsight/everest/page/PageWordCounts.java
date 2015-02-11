@@ -31,7 +31,8 @@ public class PageWordCounts
     //The default context match word counts.
     private Integer m_contextMatchWordCount = new Integer(0);
     
-    //The exact match word counts if use in-context match.
+    // The exact match word counts if use in-context match(exclude ICE
+    // word counts).
     private Integer m_segmentTmWordCount = new Integer(0);
     
     private Integer m_lowFuzzyWordCount = new Integer(0);
@@ -55,6 +56,8 @@ public class PageWordCounts
     private Integer m_MTExactMatchWordCount = new Integer(0);
     
     private Integer m_xliffExactMatchWordCount = new Integer(0);
+    
+    private Integer m_poExactMatchWordCount = new Integer(0);
 
     //////////////////////////////////////////////////////////////////
     // Constructors
@@ -376,6 +379,16 @@ public class PageWordCounts
     public int getXliffExtractMatchWordCount()
     {
         return this.m_xliffExactMatchWordCount;
+    }
+    
+    public void setPoExactMatchWordCount(int p_poExactMatchWordCount)
+    {
+        this.m_poExactMatchWordCount = new Integer(p_poExactMatchWordCount);
+    }
+    
+    public int getPoExactMatchWordCount()
+    {
+        return this.m_poExactMatchWordCount;
     }
 
     /**

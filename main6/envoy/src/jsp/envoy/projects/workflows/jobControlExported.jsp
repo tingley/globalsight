@@ -81,6 +81,8 @@
     }
     
     String helperText = bundle.getString("helper_text_job_exported");
+    
+    /*
     int myJobsDaysRetrieved = 0;
     try
     {
@@ -100,6 +102,7 @@
     {
         // assume 0
     }
+    */
 %>                       
 <HTML>
 <HEAD>
@@ -368,7 +371,7 @@ function submitForm(buttonClicked)
    }
    else if (buttonClicked == "Download")
    {
-      JobForm.action = "<%=downloadURL%>&firstEntry=true&<%=DownloadFileHandler.PARAM_JOB_ID%>" +
+      JobForm.action = "<%=downloadURL%>&firstEntry=true&from=export&<%=DownloadFileHandler.PARAM_JOB_ID%>" +
                         "=" + jobId + "&<%=DownloadFileHandler.DOWNLOAD_FROM_JOB%>=true";
       JobForm.submit();
       return;

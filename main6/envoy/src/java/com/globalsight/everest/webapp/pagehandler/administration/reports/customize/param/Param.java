@@ -65,8 +65,9 @@ public interface Param {
     static public final String TRADOS_MATCHES_WORD_COUNTS_PER100 = "jobinfo.tradosmatches.wordcounts.per100matches";
     static public final String TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT = "jobinfo.tradosmatches.wordcounts.perincontextmatches";
     static public final String TRADOS_MATCHES_WORD_COUNTS_PER95 = "jobinfo.tradosmatches.wordcounts.per95matches";
+    static public final String TRADOS_MATCHES_WORD_COUNTS_PER85 = "jobinfo.tradosmatches.wordcounts.per85matches";
     static public final String TRADOS_MATCHES_WORD_COUNTS_PER75 = "jobinfo.tradosmatches.wordcounts.per75matches";
-    static public final String TRADOS_MATCHES_WORD_COUNTS_PER1 = "jobinfo.tradosmatches.wordcounts.per1matches";
+    static public final String TRADOS_MATCHES_WORD_COUNTS_PER50 = "jobinfo.tradosmatches.wordcounts.per50matches";
     static public final String TRADOS_MATCHES_WORD_COUNTS_NOMATCH = "jobinfo.tradosmatches.wordcounts.nomatch";
     static public final String TRADOS_MATCHES_WORD_COUNTS_REPETITION = "jobinfo.tradosmatches.wordcounts.repetition";
     static public final String TRADOS_MATCHES_WORD_COUNTS_TOTAL = "jobinfo.tradosmatches.wordcounts.total";
@@ -74,8 +75,9 @@ public interface Param {
     static public final String TRADOS_MATCHES_INVOICE_PER100 = "jobinfo.tradosmatches.invoice.per100matches";
     static public final String TRADOS_MATCHES_INVOICE_PERINCONTEXT = "jobinfo.tradosmatches.invoice.perincontextmatches";
     static public final String TRADOS_MATCHES_INVOICE_PER95 = "jobinfo.tradosmatches.invoice.per95matches";
+    static public final String TRADOS_MATCHES_INVOICE_PER85 = "jobinfo.tradosmatches.invoice.per85matches";
     static public final String TRADOS_MATCHES_INVOICE_PER75 = "jobinfo.tradosmatches.invoice.per75matches";
-    static public final String TRADOS_MATCHES_INVOICE_PER1 = "jobinfo.tradosmatches.invoice.per1matches";
+    static public final String TRADOS_MATCHES_INVOICE_PER50 = "jobinfo.tradosmatches.invoice.per50matches";
     static public final String TRADOS_MATCHES_INVOICE_NOMATCH = "jobinfo.tradosmatches.invoice.nomatch";
     static public final String TRADOS_MATCHES_INVOICE_REPETITION = "jobinfo.tradosmatches.invoice.repetition";
     static public final String TRADOS_MATCHES_INVOICE_JOB_TOTAL = "jobinfo.tradosmatches.invoice.jobtotal";
@@ -125,21 +127,21 @@ public interface Param {
         TRADOS_MATCHES,
         TRADOS_MATCHES_WORD_COUNTS,
         TRADOS_MATCHES_WORD_COUNTS_PER100,
-        TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT,
         TRADOS_MATCHES_WORD_COUNTS_PER95,
+        TRADOS_MATCHES_WORD_COUNTS_PER85,
         TRADOS_MATCHES_WORD_COUNTS_PER75,
-        TRADOS_MATCHES_WORD_COUNTS_PER1,
         TRADOS_MATCHES_WORD_COUNTS_NOMATCH,
         TRADOS_MATCHES_WORD_COUNTS_REPETITION,
+        TRADOS_MATCHES_WORD_COUNTS_PERINCONTEXT,
         TRADOS_MATCHES_WORD_COUNTS_TOTAL,
         TRADOS_MATCHES_INVOICE,
         TRADOS_MATCHES_INVOICE_PER100,
-        TRADOS_MATCHES_INVOICE_PERINCONTEXT,
         TRADOS_MATCHES_INVOICE_PER95,
+        TRADOS_MATCHES_INVOICE_PER85,
         TRADOS_MATCHES_INVOICE_PER75,
-        TRADOS_MATCHES_INVOICE_PER1,
         TRADOS_MATCHES_INVOICE_NOMATCH,
         TRADOS_MATCHES_INVOICE_REPETITION,
+        TRADOS_MATCHES_INVOICE_PERINCONTEXT,
         TRADOS_MATCHES_INVOICE_JOB_TOTAL,
         SEGMENT_COMMENTS,
         SEGMENT_NUMBER,

@@ -150,9 +150,11 @@ public class ExportHelper
     private String srcHtmlText;
     
     private static String REGEX_BPT = "<bpt[^>]*i=\"([^\"]*)\"[^>]*>";
-    private static String REGEX_BPT_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>.*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
+    private static String REGEX_BPT_ALL = "<bpt[^>]*i=\"{0}\"[^>]*>[^>]*</bpt>[\\d\\D]*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
+    private static String REGEX_BPT_ALL_SUB = "<bpt[^>]*i=\"{0}\"[^>]*>.*</bpt>.*<ept[^>]*i=\"{0}\"[^>]*>[^>]*</ept>";
     private static String REGEX_IT_END = "[^>]*<it[^>]*pos=\"end\"[^>]*>[^<]*</it>";
     private static String REGEX_IT_START = "<it[^>]*pos=\"begin\"[^>]*>[^<]*</it>[^<]*";
+    private static String REGEX_IT = "<it [^>]*>([^<]*)</it>";
 
     // //////////////////
     // Public Methods //
@@ -621,24 +623,36 @@ public class ExportHelper
             while (s != null)
             {
                 srcHtml.append(s);
-                if (s.indexOf("<xml") != -1)
+                if ((s.indexOf("<xml") != -1) && (s.indexOf("</xml>") != -1))
                 {
+                  //Fix for GBS-1744
+                  if (s.indexOf("<xml") > s.indexOf("</xml>"))
+                  {
                     srcXML.append(s);
                     srcXML.append("\n");
-                    isXml = true;
+                  }
                 }
-                if (s.indexOf("</xml>") != -1)
+                else
                 {
-                    srcXML.append(s);
-                    srcXML.append("\n");
-                    xmls.add(srcXML.toString());
-                    srcXML = new StringBuilder();
-                    isXml = false;
-                }
-                if (isXml && s.indexOf("<xml") == -1)
-                {
-                    srcXML.append(s);
-                    srcXML.append("\n");
+                    if (s.indexOf("<xml") != -1)
+                    {
+                        srcXML.append(s);
+                        srcXML.append("\n");
+                        isXml = true;
+                    }
+                    if (s.indexOf("</xml>") != -1)
+                    {
+                        srcXML.append(s);
+                        srcXML.append("\n");
+                        xmls.add(srcXML.toString());
+                        srcXML = new StringBuilder();
+                        isXml = false;
+                    }
+                    if (isXml && s.indexOf("<xml") == -1)
+                    {
+                        srcXML.append(s);
+                        srcXML.append("\n");
+                    }
                 }
                 srcHtml.append("\n");
                 s = br.readLine();
@@ -873,7 +887,7 @@ public class ExportHelper
      * @return
      * @throws IOException
      */
-    public File getTargetXmlPage(long pageId) throws IOException
+    public File getTargetXmlPage(long pageId, int p_eventValue) throws IOException
     {
         TargetPage targetPage = HibernateUtil.get(TargetPage.class, pageId);
         m_page = targetPage;
@@ -887,13 +901,14 @@ public class ExportHelper
                 .getGlobalSightLocale()), targetPage.getGlobalSightLocale(),
                 false, null);
         File temp = File.createTempFile("~GS", ".xml");
-        FileWriter out = new FileWriter(temp);
-        out.write(page);
-        out.flush();
-        out.close();
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(temp), "UTF-8");
+        //FileWriter out = new FileWriter(temp);
+        writer.write(page);
+        writer.flush();
+        writer.close();
 
         CxeMessage cxeMessage = new CxeMessage(CxeMessageType
-                .getCxeMessageType(CxeMessageType.XML_IMPORTED_EVENT));
+                .getCxeMessageType(p_eventValue));
         cxeMessage.setEventFlowXml(eventFlowXml);
         cxeMessage.setMessageData(new FileMessageData(temp.getPath()));
         StandardMerger merger = new StandardMerger(cxeMessage, null);
@@ -902,10 +917,11 @@ public class ExportHelper
         temp.delete();
 
         File xmlFile = File.createTempFile("~GS", ".xml");
-        FileWriter output = new FileWriter(xmlFile);
-        output.write(content);
-        output.flush();
-        output.close();
+        OutputStreamWriter outwriter = new OutputStreamWriter(new FileOutputStream(xmlFile), "UTF-8");
+        //FileWriter output = new FileWriter(xmlFile);
+        outwriter.write(content);
+        outwriter.flush();
+        outwriter.close();
         return xmlFile;
     }
 
@@ -1761,9 +1777,9 @@ public class ExportHelper
                 TuvImpl tuv = (TuvImpl) p_segment;
                 TuImpl tu = (TuImpl) tuv.getTu();
 
-                if (IFormatNames.FORMAT_OFFICE_XML.equals(tu.getDataType()))
+                if (hasRemovedTags(tu))
                 {
-                    String regex = "(<segment[^>]*>)(.*)(</segment>)";
+                    String regex = "(<segment[^>]*>)([\\d\\D]*)(</segment>)";
                     Pattern p = Pattern.compile(regex);
                     Matcher m = p.matcher(tuvContent);
 
@@ -1795,6 +1811,21 @@ public class ExportHelper
         p_template.insertTuvContent(tuId, tuvContent);
     }
     
+    private boolean hasRemovedTags(TuImpl tu)
+    {
+        String type = tu.getDataType();
+        if (IFormatNames.FORMAT_OFFICE_XML.equals(type))
+            return true;
+        
+        if (IFormatNames.FORMAT_XML.equals(type))
+        {
+            if (m_sourcePage != null && m_sourcePage.getExternalPageId().endsWith(".idml"))
+                return true;
+        }
+        
+        return false;
+    }
+    
     private String addRemovedPrefixTag(String s, RemovedPrefixTag tag)
     {
         if (tag == null || s == null)
@@ -1814,7 +1845,7 @@ public class ExportHelper
         
         return s + tag.getString();
     }
-
+    
     /**
      * Adds tags which removed during import.
      * 
@@ -1831,32 +1862,80 @@ public class ExportHelper
             return s;
         }
         
-        // for [it] start
-        Pattern pItStart = Pattern.compile(REGEX_IT_START);
-        Matcher mItStart = pItStart.matcher(s);
-        
-        if (mItStart.find())
+        boolean isIdml = false;
+        if (m_page != null)
         {
-            String all = mItStart.group();
-            int index = s.indexOf(all);
-            String s1 = s.substring(0, index);
-            String s2 = s.substring(index + all.length());
-            return addRemovedTags(s1, removedTag) + all
-                    + s2;
+            String page = m_page.getExternalPageId();
+            if (page != null && page.toLowerCase().endsWith(".idml"))
+            {
+                isIdml = true;
+            }
         }
         
-        // for [it] end
-        Pattern pIt = Pattern.compile(REGEX_IT_END);
-        Matcher mIt = pIt.matcher(s);
-        
-        if (mIt.find())
+        if (isIdml)
         {
-            String all = mIt.group();
-            int index = s.indexOf(all);
-            String s1 = s.substring(0, index);
-            String s2 = s.substring(index + all.length());
-            return s1 + all
-                    + addRemovedTags(s2, removedTag);
+            // for [it]
+            Pattern pIt = Pattern.compile(REGEX_IT);
+            Matcher mIt = pIt.matcher(s);
+            
+            String prefixTag = removedTag.getPrefixString();
+            String suffixTag = removedTag.getSuffixString();
+            
+            if (mIt.find())
+            {
+                String all = mIt.group();
+                String content = mIt.group(1);
+                          
+                int sPre = content.indexOf("&lt;Content&gt;");
+                int ePre = content.lastIndexOf("&lt;Content&gt;");
+                int sSuf = content.indexOf("&lt;/Content&gt;");
+                int eSuf = content.lastIndexOf("&lt;/Content&gt;");
+                
+                boolean ignoreBefore = sSuf > -1 && (sSuf < sPre || sPre == -1);
+                boolean ignoreAfter = ePre > eSuf;
+                
+                int index = s.indexOf(all);
+                String s1 = s.substring(0, index);
+                String s2 = s.substring(index + all.length());
+                
+                if (!ignoreBefore)
+                    s1 = addRemovedTags(s1, removedTag);
+                
+                if (!ignoreAfter)
+                    s2 = addRemovedTags(s2, removedTag);
+                
+                return s1 + all + s2;
+            }
+        }
+        else
+        {
+         // for [it] start
+            Pattern pItStart = Pattern.compile(REGEX_IT_START);
+            Matcher mItStart = pItStart.matcher(s);
+            
+            if (mItStart.find())
+            {
+                String all = mItStart.group();
+                int index = s.indexOf(all);
+                String s1 = s.substring(0, index);
+                String s2 = s.substring(index + all.length());
+                return addRemovedTags(s1, removedTag) + all
+                        + s2;
+            }
+            
+            // for [it] end
+            Pattern pIt = Pattern.compile(REGEX_IT_END);
+            Matcher mIt = pIt.matcher(s);
+            
+            if (mIt.find())
+            {
+                String all = mIt.group();
+                int index = s.indexOf(all);
+                String s1 = s.substring(0, index);
+                String s2 = s.substring(index + all.length());
+                return s1 + all
+                        + addRemovedTags(s2, removedTag);
+            }
         }
         
         // for bpt
@@ -1864,8 +1943,9 @@ public class ExportHelper
         Matcher m = p.matcher(s);
         if (m.find())
         {
-            Pattern p2 = Pattern.compile(MessageFormat.format(REGEX_BPT_ALL, m
-                    .group(1)));
+            String idd = m.group(1);
+            String re = s.contains("</sub>") ? REGEX_BPT_ALL_SUB : REGEX_BPT_ALL;
+            Pattern p2 = Pattern.compile(MessageFormat.format(re, idd));
             Matcher m2 = p2.matcher(s);
 
             if (m2.find())
@@ -1894,7 +1974,7 @@ public class ExportHelper
         return "<bpt>" + removedTag.getPrefixString() + "</bpt>" + s + "<ept>"
                 + removedTag.getSuffixString() + "</ept>";
     }
-    
+
     /**
      * Adds the project_tm_tu_id to the segment gxml
      * 

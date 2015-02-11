@@ -19,6 +19,7 @@ package com.globalsight.ling.common;
 import java.util.Properties;
 import java.util.Stack;
 
+import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.ling.tw.Tmx2PseudoHandler;
 
 /**
@@ -36,6 +37,17 @@ public class DiplomatBasicParser
     StringBuffer m_attrName;
     StringBuffer m_attrValue;
     Properties   m_attributes;
+    private CxeMessage cxeMessage = null;
+    
+    public CxeMessage getCxeMessage()
+    {
+        return cxeMessage;
+    }
+
+    public void setCxeMessage(CxeMessage cxeMessage)
+    {
+        this.cxeMessage = cxeMessage;
+    }
 
     /** Constructor. */
     public DiplomatBasicParser(DiplomatBasicHandler p_handler)
@@ -202,6 +214,16 @@ public class DiplomatBasicParser
                         }
                         else
                         {
+                            if (cxeMessage != null
+                                    && cxeMessage.getMessageType().getName()
+                                            .equals("MIF_LOCALIZED_EVENT"))
+                            {
+                                subString = subString.replace("\\", "\\\\");
+                                subString = subString.replace("&apos;", "\\q");
+                                subString = subString.replace("`", "\\Q");
+                                subString = subString.replace("&amp;gt;", "\\>");
+                                subString = subString.replace("&gt;", "\\>");
+                            }
                             isExtracted = (extractedStack.size() > 0) ? extractedStack.peek() : false;
                             String tag = (tagStack.size() > 0) ? tagStack.peek() : "start";
 
@@ -236,7 +258,18 @@ public class DiplomatBasicParser
                 else
                 {
                     m_end = m_maxLen;
-                    m_handler.handleText(p_tmx.substring(m_start, m_end));
+                    p_tmx = p_tmx.substring(m_start, m_end);
+                    if (cxeMessage != null
+                            && cxeMessage.getMessageType().getName().equals(
+                                    "MIF_LOCALIZED_EVENT"))
+                    {
+                        p_tmx = p_tmx.replace("\\", "\\\\");
+                        p_tmx = p_tmx.replace("&apos;", "\\q");
+                        p_tmx = p_tmx.replace("`", "\\Q");
+                        p_tmx = p_tmx.replace("&amp;gt;", "\\>");
+                        p_tmx = p_tmx.replace("&gt;", "\\>");
+                    }
+                    m_handler.handleText(p_tmx);
                 }
             }
         }

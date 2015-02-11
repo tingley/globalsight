@@ -54,6 +54,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.ling.common.URLDecoder;
+import com.globalsight.ling.common.URLEncoder;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
@@ -80,6 +81,10 @@ public class DownloadFileHandler extends PageHandler
     public static final String SELECT_FILE = "selectFile";
     public static final String DOWNLOAD_APPLET = "downloadApplet";
     public static final String DONE = "done";
+    public static final String DONE_FROM_JOB = "doneFromJob";
+    public static final String DONE_FROM_EXPORT_JOBS = "doneFromExportJobs";
+    public static final String DONE_FROM_LOCALIZED_JOBS = "doneFromLocalizedJobs";
+    public static final String DONE_FROM_TASK = "doneFromTask";
     public static final String DESKTOP_FOLDER = "webservice";
     public static final String CompanyType = "companyType";
 
@@ -116,12 +121,24 @@ public class DownloadFileHandler extends PageHandler
                 p_pageDescriptor.getPageName());
         NavigationBean doneBean = new NavigationBean(DONE, p_pageDescriptor
                 .getPageName());
+        NavigationBean doneFromJobBean = new NavigationBean(DONE_FROM_JOB, p_pageDescriptor
+                .getPageName());
+        NavigationBean doneFromTaskBean = new NavigationBean(DONE_FROM_TASK, p_pageDescriptor
+                .getPageName());
+        NavigationBean doneFromExportJobsBean = new NavigationBean(DONE_FROM_EXPORT_JOBS, p_pageDescriptor
+                .getPageName());
+        NavigationBean doneFromLocalizedJobsBean = new NavigationBean(DONE_FROM_LOCALIZED_JOBS, p_pageDescriptor
+                .getPageName());
 
         p_request.setAttribute(FOLDER_LISTING, folderListingBean);
         p_request.setAttribute(FILE_LIST, fileListBean);
         p_request.setAttribute(SELECT_FILE, selectFileBean);
         p_request.setAttribute(DOWNLOAD_APPLET, downloadAppletBean);
         p_request.setAttribute(DONE, doneBean);
+        p_request.setAttribute(DONE_FROM_JOB, doneFromJobBean);
+        p_request.setAttribute(DONE_FROM_TASK, doneFromTaskBean);
+        p_request.setAttribute(DONE_FROM_EXPORT_JOBS, doneFromExportJobsBean);
+        p_request.setAttribute(DONE_FROM_LOCALIZED_JOBS, doneFromLocalizedJobsBean);
 
         HttpSession session = p_request.getSession(true);
         SessionManager sessionMgr = (SessionManager) session
@@ -412,11 +429,11 @@ public class DownloadFileHandler extends PageHandler
         prepareFileList(p_request, sessionMgr, depth, pageList);
 
         // turn off cache. do both. "pragma" for the older browsers.
-        p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
-        p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
-        p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
+        //p_response.setHeader("Pragma", "no-cache"); // HTTP 1.0
+        //p_response.setHeader("Cache-Control", "no-cache"); // HTTP 1.1
+        //p_response.addHeader("Cache-Control", "no-store"); // tell proxy not to
         // cache
-        p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
+        //p_response.addHeader("Cache-Control", "max-age=0"); // stale right away
 
         // forward to the jsp page.
         RequestDispatcher requestDispatcher = p_context
@@ -577,9 +594,23 @@ public class DownloadFileHandler extends PageHandler
             {
                 //Fix for GBS-1570, get the selected files list string 
                 String selectedFilesListStr = p_request.getParameter("selectedFileList");
-                if(selectedFilesListStr!=null&&!selectedFilesListStr.equals(""))
+                if (selectedFilesListStr != null
+                        && !selectedFilesListStr.equals(""))
                 {
-                    String selectedFiles[] = selectedFilesListStr.split(",");
+                    String[] selectedFiles = selectedFilesListStr.split(",");
+                    for (int i = 0; i < selectedFiles.length; i++)
+                    {
+                        try
+                        {
+                            selectedFiles[i] = URLDecoder.decode(
+                                    selectedFiles[i], "UTF-8");
+                        }
+                        catch (Exception e)
+                        {
+                            CATEGORY.error("Failed to decode fileNames: "
+                                    + selectedFilesListStr, e);
+                        }
+                    }
                     HashSet selectedFilesList = new HashSet();
                     for (int i = 0; i < selectedFiles.length; i++)
                     {
@@ -624,7 +655,7 @@ public class DownloadFileHandler extends PageHandler
                 AmbFileStoragePathUtils.CUSTOMER_DOWNLOAD_SUB_DIR);
         tmpDir.mkdirs();
         File zipFile = File.createTempFile("gsa", ".jar", tmpDir);
-        ZipIt zipit = new ZipIt();
+
         File[] entryFiles = new File[p_fileList.size()];
         String[] lastModifiedTimes = new String[p_fileList.size()];
         Iterator iter = p_fileList.iterator();
@@ -638,8 +669,8 @@ public class DownloadFileHandler extends PageHandler
             entryFiles[i++] = realFile;
         }
 
-        zipit.addEntriesToZipFile(zipFile, entryFiles);
-        Long zipFileSize = new Long(zipFile.length());
+        ZipIt.addEntriesToZipFile(zipFile, entryFiles);
+        Long zipFileSize = Long.valueOf(zipFile.length());
         StringBuffer zipUrl = new StringBuffer();
         zipUrl.append("/globalsight/").append(
                 AmbFileStoragePathUtils.CUSTOMER_DOWNLOAD_SUB_DIR).append("/")
@@ -651,11 +682,12 @@ public class DownloadFileHandler extends PageHandler
             lastModifiedTimesStr.append(",");
             lastModifiedTimesStr.append(lastModifiedTimes[j]);
         }
-        StringBuffer fileNames = new StringBuffer(entryFiles[0].getName());
+        StringBuffer fileNames = new StringBuffer(URLEncoder.encode(
+                entryFiles[0].getName(), "UTF-8"));
         for (int j = 1; j < entryFiles.length; j++)
         {
             fileNames.append(",");
-            fileNames.append(entryFiles[j].getName());
+            fileNames.append(URLEncoder.encode(entryFiles[j].getName(), "UTF-8"));
         }
         p_request.setAttribute("jobName", jobName);
         p_request.setAttribute("locale", locale);

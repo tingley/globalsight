@@ -164,6 +164,57 @@ public class DiplomatWordCounter
     {
         m_countDashedTokens = p_arg;
     }
+    
+    /**
+     * Recount the word count of the input document element
+     * 
+     * @param p_de
+     *            input document element
+     * @param p_diplomat
+     *            for set m_locale
+     */
+    public void countDocumentElement(DocumentElement p_de, Output p_diplomat)
+    {
+        if (m_si == null)
+        {
+            m_output = p_diplomat;
+            m_locale = getLocale();
+            m_si = GlobalsightRuleBasedBreakIterator.getWordInstance(m_locale);
+        }
+        
+        switch (p_de.type())
+        {
+            case DocumentElement.TRANSLATABLE:
+                TranslatableElement element = (TranslatableElement) p_de;
+
+                int translatableWordCount = 0;
+
+                ArrayList segments = element.getSegments();
+                for (int i = 0, max = segments.size(); i < max; i++)
+                {
+                    SegmentNode segment = (SegmentNode) segments.get(i);
+
+                    int segmentWordCount = countSegment(segment);
+
+                    segment.setWordCount(segmentWordCount);
+                    translatableWordCount += segmentWordCount;
+                }
+
+                element.setWordcount(translatableWordCount);
+                break;
+
+            case DocumentElement.LOCALIZABLE:
+                LocalizableElement locElement = (LocalizableElement) p_de;
+
+                // Localizables count as 1 token or 0, depending on
+                // the configuration (Diplomat.properties).
+                locElement.setWordcount(m_localizableCount);
+                break;
+
+            default:
+                break;
+        }
+    }
 
     /**
      * <p>Takes Diplomat XML inside an <code>Output</code> object and
@@ -187,7 +238,7 @@ public class DiplomatWordCounter
 
         m_output.setTotalWordCount(m_totalWordCount);
     }
-
+    
     /**
      * Input DiplomatXml and return new DiplomatXml string with word
      * counts.

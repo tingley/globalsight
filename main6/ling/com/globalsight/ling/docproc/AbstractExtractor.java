@@ -782,6 +782,26 @@ public abstract class AbstractExtractor implements ExtractorInterface
                     in = new ByteArrayInputStream(str.getBytes(encoding));
                 }
                 
+                if (m_input.getType() == m_ExtractorRegistry.getFormatId(IFormatNames.FORMAT_XML)
+                        || m_input.getType() == m_ExtractorRegistry
+                                .getFormatId(IFormatNames.FORMAT_IDML))
+                {
+                    BufferedReader buffReader = new BufferedReader(new InputStreamReader(in,
+                            encoding));
+
+                    String tempString = buffReader.readLine();
+                    StringBuffer newString = new StringBuffer();
+
+                    while (tempString != null)
+                    {
+                        newString.append(tempString).append("\n");
+                        tempString = buffReader.readLine();
+                    }
+
+                    String str = SegmentUtil.protectInvalidUnicodeChar(newString.toString());
+                    in = new ByteArrayInputStream(str.getBytes(encoding));
+                }
+                
                 input = new InputStreamReader(in, encoding);
             }
             catch (UnsupportedEncodingException e)

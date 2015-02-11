@@ -607,6 +607,7 @@ public class JobHandlerLocal implements JobHandler
             {
                 c.setDescription(p_company.getDescription());
                 c.setEnableIPFilter(p_company.getEnableIPFilter());
+                c.setSessionTime(p_company.getSessionTime());
                 c.setEnableTMAccessControl(p_company.getEnableTMAccessControl());
                 c.setEnableTBAccessControl(p_company.getEnableTBAccessControl());
                 c.setEnableSSOLogin(p_company.getEnableSSOLogin());
@@ -1172,8 +1173,7 @@ public class JobHandlerLocal implements JobHandler
             throws RemoteException, JobException
     {
         Collection<JobImpl> results = null;
-        m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                .getIntParameter(SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+        m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
         try
         {
@@ -1208,8 +1208,7 @@ public class JobHandlerLocal implements JobHandler
     {
         Collection<JobImpl> results = null;
 
-        m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                .getIntParameter(SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+        m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
         try
         {
             String sql = jobsByStateListQuery(p_listOfStates);
@@ -1234,8 +1233,7 @@ public class JobHandlerLocal implements JobHandler
             Vector<String> p_listOfStates, boolean p_queryLimitByDate)
             throws RemoteException, JobException
     {
-        m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                .getIntParameter(SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+        m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
         if (!p_queryLimitByDate || m_myJobsDaysRetrieved <= 0)
         {
             return getJobsByStateList(p_listOfStates);
@@ -1265,8 +1263,7 @@ public class JobHandlerLocal implements JobHandler
         Collection<JobImpl> results = null;
         m_size = SystemConfiguration.getInstance().getIntParameter(
                 SystemConfigParamNames.RECORDS_PER_PAGE_JOBS);
-        m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                .getIntParameter(SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+        m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
         try
         {
@@ -1342,9 +1339,7 @@ public class JobHandlerLocal implements JobHandler
 
         try
         {
-            m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                    .getIntParameter(
-                            SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+            m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
             String sql = jobsByManagerAndStateListQuery(p_listOfStates);
             Map<String, Object> map = new HashMap<String, Object>();
@@ -1372,6 +1367,19 @@ public class JobHandlerLocal implements JobHandler
     }
 
     /**
+     * To make search result from My Jobs menu be same as search page, return 0 directly
+     * @return 0
+     */
+    private int getMyJobsDaysRetrieved()
+    {
+        return 0;
+        /*
+        return SystemConfiguration.getInstance().getIntParameter(
+                SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+                */
+    }
+
+    /**
      * Get a collection of Jobs for a Workflow Manager (who assists PM for
      * workflow modifications.
      * 
@@ -1395,9 +1403,7 @@ public class JobHandlerLocal implements JobHandler
 
         try
         {
-            m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                    .getIntParameter(
-                            SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+            m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
             String sql = jobsByWfManagerAndStateListQuery(p_listOfStates);
             Map map = new HashMap();
@@ -2415,9 +2421,7 @@ public class JobHandlerLocal implements JobHandler
 
         try
         {
-            m_myJobsDaysRetrieved = SystemConfiguration.getInstance()
-                    .getIntParameter(
-                            SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED);
+            m_myJobsDaysRetrieved = getMyJobsDaysRetrieved();
 
             String sql = getJobsByUserAndStateListQuery(p_userId, p_listOfStates);
             Map map = new HashMap();

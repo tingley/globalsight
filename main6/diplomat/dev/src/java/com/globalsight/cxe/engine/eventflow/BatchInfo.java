@@ -40,6 +40,7 @@ public class BatchInfo implements Serializable {
 	private static final String DOC_PAGE_COUNT = "docPageCount";
 	private static final String PAGE_NUMBER = "pageNumber";
 	private static final String PAGE_COUNT = "pageCount";
+	private static final String UUID = "uuid";
 	private static final String BATCH_ID = "batchId";
 
 	public static class ProcessMode implements Serializable {
@@ -102,6 +103,7 @@ public class BatchInfo implements Serializable {
 	private String m_masterTranslated;
 	private String m_inddHiddenTranslated;
 	private String m_adobeXmpTranslated;
+	private String uuid;
 	
 	private String m_l10nProfileId;
 	private ProcessMode m_processMode = ProcessMode.AUTOMATIC;
@@ -129,6 +131,10 @@ public class BatchInfo implements Serializable {
         Element xmpTranslatedElement = XmlUtils.getDirectChildElement(p_elem, ADOBE_XMP_TRANSLATED);
         if (xmpTranslatedElement != null)
             m_adobeXmpTranslated = XmlUtils.getElementValue(xmpTranslatedElement);
+        
+        Element uuidElement = XmlUtils.getDirectChildElement(p_elem, UUID);
+        if (uuidElement != null)
+            uuid = XmlUtils.getElementValue(uuidElement);
 		
 		m_l10nProfileId = XmlUtils.getAttributeValue(p_elem, L10N_PROFILE_ID);
 		m_processMode = ProcessMode.getProcessMode(XmlUtils.getAttributeValue(p_elem, PROCESSING_MODE));
@@ -267,6 +273,7 @@ public class BatchInfo implements Serializable {
 		XmlUtils.appendElement(sb, INDD_HIDDEN_TRANSLATED, m_inddHiddenTranslated);
 		XmlUtils.appendElement(sb, ADOBE_XMP_TRANSLATED, m_adobeXmpTranslated);
 		XmlUtils.appendElement(sb, JOB_NAME, EditUtil.encodeXmlEntities(m_jobName));
+		XmlUtils.appendElement(sb, UUID, EditUtil.encodeXmlEntities(uuid));
 		
 		XmlUtils.appendElementEnd(sb, BATCH_INFO);
 		XmlUtils.appendLine(sb);
@@ -286,4 +293,5 @@ public class BatchInfo implements Serializable {
 		
 		System.out.println(batchInfo.serializeToXml());
 	}
+
 }

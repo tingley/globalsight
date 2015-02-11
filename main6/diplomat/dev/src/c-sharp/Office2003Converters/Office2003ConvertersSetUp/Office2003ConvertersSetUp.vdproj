@@ -254,7 +254,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:GlobalSight.Common, Version=1.0.4043.17167, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:GlobalSight.Common, Version=1.0.4043.17966, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_081D10FF89131DFE9C324FE7F010AF15"
@@ -530,7 +530,7 @@
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:8.0"
+        "ProductVersion" = "8:8.1"
         "Manufacturer" = "8:Welocalize Inc."
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"

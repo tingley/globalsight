@@ -1,8 +1,10 @@
 <project name="GlobalSight" default="all" basedir=".">
 
+	<!-- optional user-specified properties, eg gs.home -->
+	<property file="user.build.properties" />
 	<loadproperties srcFile="build.properties" />
 
-	<property environment="env" />
+    <tstamp />
 
 	<!-- IMPORTANT PROPERTIES TO CHANGE FOR EACH BUILD -->
 	<target name="mkdirs">
@@ -10,45 +12,25 @@
 		<mkdir dir="${tmpclasses}" />
 	</target>
 
-	<target name="init" depends="tstamp,mkdirs,buildversion">
+	<target name="init" depends="mkdirs,buildversion">
 		<echo message="***** Main build file ${ant.file} , java version ${ant.java.version} : init *****" />
 		<ant antfile="gsCommon_build.xml" target="init" />
 	</target>
-	<target name="buildversion" depends="mkdirs,tstamp">
+	<target name="buildversion" depends="mkdirs">
 		<!-- Create a BuildVersion.java which holds the current build version -->
-		<echo file="BuildVersion.java" append="false">
-package com.globalsight;
-public class BuildVersion
-{
-    /** Product Name **/
-    public static final String PRODUCT="${product}";
-    
-    /** Product Version **/
-    public static final String VERSION="${version}";
-    
-    /** Build Date **/
-    public static final String BUILD_DATE="${DSTAMP}";
-    
-    /**the build version will get displayed in the about box **/
-    public static final String BUILD_VERSION="${version}";
-    
-    /** Prints out the Build version info **/ 
-    public static void main(String args[])
-    {
-        System.out.println(PRODUCT + " version: " + VERSION);    
-        System.out.println("Build version: " + BUILD_VERSION);
-        System.out.println("Build date: " + BUILD_DATE);        
-    }
-}
-</echo>
+        <loadfile property="buildversion.java"
+                  srcFile="BuildVersion.java.template">
+            <filterchain>
+                <expandproperties/>
+            </filterchain>
+        </loadfile>
+        <echo file="BuildVersion.java" message="${buildversion.java}" />
 		<javac nowarn="${nowarn}" verbose="${javacverbose}" encoding="ISO-8859-1" target="${javactarget}" classpath="${classpath}" srcdir="." destdir="${serverclassesDest}" includes="BuildVersion.java">
+            <!-- Only recompile the file when it changes. NB this updates
+                 the cache even if javac fails, so next time it will think
+                 everything is up to date even though it's not! -->
+            <modified />
 		</javac>
-	</target>
-
-	<target name="tstamp" depends="distdir">
-		<tstamp>
-		</tstamp>
-
 	</target>
 
 	<target name="distdir">
@@ -121,6 +103,10 @@ public class BuildVersion
 		<jar jarfile="jbpmLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/jbpmLibs.mf" />
 		<jar jarfile="hibernateLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/hibernateLibs.mf" />
 		<jar jarfile="ssoLibs.jar" basedir="../lib" includes="README.txt" manifest="../lib/ssoLibs.mf" />
+	</target>
+
+	<target name="test">
+		<ant antfile="../../test/build.xml" />
 	</target>
 
 	<target name="ling">
@@ -272,12 +258,12 @@ public class BuildVersion
 		</jar>
 	</target>
 
-	<target name="zip" depends="tstamp,thirdPartyJars,globalsight.jar">
+	<target name="zip" depends="distdir,thirdPartyJars,globalsight.jar">
 		<ant antfile="zip.xml" target="zip" />
 	</target>
 
 	<!-- Zip file for netegrity specific files -->
-	<target name="netegrity" depends="tstamp">
+	<target name="netegrity" depends="distdir">
 		<ant antfile="zip.xml" target="netegrity" />
 	</target>
 
@@ -288,27 +274,27 @@ public class BuildVersion
 
 	<!-- Make the zip file for locale dependent property files -->
 	<!-- en_US locale  -->
-	<target name="en_US_zip" depends="tstamp">
+	<target name="en_US_zip" depends="distdir">
 		<ant antfile="zip.xml" target="en_US_zip" />
 	</target>
 
 	<!-- fr_FR locale  -->
-	<target name="fr_FR_zip" depends="tstamp">
+	<target name="fr_FR_zip" depends="distdir">
 		<ant antfile="zip.xml" target="fr_FR_zip" />
 	</target>
 
 	<!-- es_ES locale  -->
-	<target name="es_ES_zip" depends="tstamp">
+	<target name="es_ES_zip" depends="distdir">
 		<ant antfile="zip.xml" target="es_ES_zip" />
 	</target>
 
 	<!-- de_DE locale  -->
-	<target name="de_DE_zip" depends="tstamp">
+	<target name="de_DE_zip" depends="distdir">
 		<ant antfile="zip.xml" target="de_DE_zip" />
 	</target>
 
 	<!-- ja_JP locale  -->
-	<target name="ja_JP_zip" depends="tstamp">
+	<target name="ja_JP_zip" depends="distdir">
 		<ant antfile="zip.xml" target="ja_JP_zip" />
 	</target>
 
@@ -499,20 +485,20 @@ public class BuildVersion
 	</target>
 
 	<!-- Target to package all converters -->
-	<target name="AllConverters" depends="tstamp,PdfConverter,WordConverter,ExcelConverter,PowerPointConverter,WordXPConverter,ExcelXPConverter,PowerPointXPConverter">
+	<target name="AllConverters" depends="PdfConverter,WordConverter,ExcelConverter,PowerPointConverter,WordXPConverter,ExcelXPConverter,PowerPointXPConverter">
 		<echo message="**** Packaging all Converters ****" />
 	</target>
 
-	<target name="AllXPConverters" depends="tstamp,WordXPConverter,ExcelXPConverter,PowerPointXPConverter">
+	<target name="AllXPConverters" depends="WordXPConverter,ExcelXPConverter,PowerPointXPConverter">
 		<echo message="**** Packaging all Office XP Converters ****" />
 	</target>
 
-	<target name="All2003Converters" depends="tstamp,Word2003Converter,Excel2003Converter,PowerPoint2003Converter">
+	<target name="All2003Converters" depends="Word2003Converter,Excel2003Converter,PowerPoint2003Converter">
 		<echo message="**** Packaging all Office 2003 Converters ****" />
 	</target>
 
 	<!-- GlobalSight Adobe Converter -->
-	<target name="AdobeConverter" depends="tstamp">
+	<target name="AdobeConverter" depends="distdir">
 		<echo message="**** Packaging Adobe Converter ****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_adobe.zip">
 			<zipfileset dir="../../diplomat\dev\src\c-sharp\AdobeConverter\AdobeConverter\AdobeConverter\bin\Release" prefix="AdobeConverter" includes="*.exe,*.dll,*.pdb" excludes="AdobeConverter.vshost.exe" />
@@ -520,7 +506,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight PDF Converter Service -->
-	<target name="PdfConverter" depends="tstamp">
+	<target name="PdfConverter" depends="distdir">
 		<echo message="***** GlobalSight PDF Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_pdf.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/PdfConverter/PdfConverter/bin/Debug" prefix="globalsight/pdfconverter/bin" includes="PdfConverter.exe,*.dll" />
@@ -529,7 +515,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight Word Converter Service -->
-	<target name="WordConverter" depends="tstamp">
+	<target name="WordConverter" depends="distdir">
 		<echo message="***** GlobalSight Word Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_word.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2000/WordConverter/WordConverter/bin/Debug" prefix="globalsight/wordconverter/bin" includes="*.exe,*.dll" />
@@ -538,7 +524,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight Word XP Converter Service -->
-	<target name="WordXPConverter" depends="tstamp">
+	<target name="WordXPConverter" depends="distdir">
 		<echo message="***** GlobalSight Word XP Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_wordxp.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/XP/WordXPConverterSetup/Debug" prefix="" includes="*.*" />
@@ -546,7 +532,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight Word 2003 Converter Service -->
-	<target name="Word2003Converter" depends="tstamp">
+	<target name="Word2003Converter" depends="distdir">
 		<echo message="***** GlobalSight Word 2003 Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_word2003.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/Word2003ConverterSetup/Debug" prefix="" includes="*.*" />
@@ -554,7 +540,7 @@ public class BuildVersion
 	</target>
 	
 	<!-- GlobalSight Office 2007 Converter -->
-	<target name="Office2007Converter" depends="tstamp">
+	<target name="Office2007Converter" depends="distdir">
 		<echo message="**** Packaging Office 2007 Converter ****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_office2007.zip">
 			<zipfileset dir="../../diplomat\dev\src\c-sharp\Office2007Converters\Office2007ConvertersSetup\Release" prefix="" includes="*.*" />
@@ -562,7 +548,7 @@ public class BuildVersion
 	</target>
 	
 	<!-- GlobalSight Office 2003 Converter -->
-	<target name="Office2003Converter" depends="tstamp">
+	<target name="Office2003Converter" depends="distdir">
 		<echo message="**** Packaging Office 2003 Converter ****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_office2003.zip">
 			<zipfileset dir="../../diplomat\dev\src\c-sharp\Office2003Converters\Office2003ConvertersSetup\Release" prefix="" includes="*.*" />
@@ -570,7 +556,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight PPT Converter Service -->
-	<target name="PowerPointConverter" depends="tstamp">
+	<target name="PowerPointConverter" depends="distdir">
 		<echo message="***** GlobalSight PowerPoint Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_powerpoint.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2000/PowerPointConverter/PowerPointConverter/bin/Debug" prefix="globalsight/powerpointconverter/bin" includes="*.exe,*.dll" />
@@ -579,7 +565,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight PPT XP Converter Service -->
-	<target name="PowerPointXPConverter" depends="tstamp">
+	<target name="PowerPointXPConverter" depends="distdir">
 		<echo message="***** GlobalSight PowerPoint XP Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_powerpointxp.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/XP/PowerPointXPConverterSetup/Debug" prefix="" includes="*.*" />
@@ -587,7 +573,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight PPT 2003 Converter Service -->
-	<target name="PowerPoint2003Converter" depends="tstamp">
+	<target name="PowerPoint2003Converter" depends="distdir">
 		<echo message="***** GlobalSight PowerPoint 2003 Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_powerpoint2003.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/PowerPoint2003ConverterSetup/Debug" prefix="" includes="*.*" />
@@ -595,7 +581,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight Excel Converter Service -->
-	<target name="ExcelConverter" depends="tstamp">
+	<target name="ExcelConverter" depends="distdir">
 		<echo message="***** GlobalSight Excel Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_excel.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2000/ExcelConverter/ExcelConverter/bin/Debug" prefix="globalsight/excelconverter/bin" includes="*.exe,*.dll" />
@@ -604,7 +590,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight Excel XP Converter Service -->
-	<target name="ExcelXPConverter" depends="tstamp">
+	<target name="ExcelXPConverter" depends="distdir">
 		<echo message="***** GlobalSight Excel XP Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_excelxp.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/XP/ExcelXPConverterSetup/Debug" prefix="" includes="*.*" />
@@ -612,7 +598,7 @@ public class BuildVersion
 	</target>
 
 	<!-- GlobalSight Excel 2003 Converter Service -->
-	<target name="Excel2003Converter" depends="tstamp">
+	<target name="Excel2003Converter" depends="distdir">
 		<echo message="***** GlobalSight Excel 2003 Converter *****" />
 		<zip duplicate="preserve" zipfile="${converterdist}/conv_excel2003.zip">
 			<zipfileset dir="../../diplomat/dev/src/c-sharp/2003/Excel2003ConverterSetup/Debug" prefix="" includes="*.*" />
@@ -623,7 +609,7 @@ public class BuildVersion
 	<!-- Both the C# and Java clients serve as examples of how one could -->
 	<!-- write a web service client, so we package up everything including -->
 	<!-- code, docs, libs, etc. -->
-	<target name="WebServiceClients" depends="tstamp,DesktopIcon">
+	<target name="WebServiceClients" depends="distdir,DesktopIcon">
 		<echo message="***** GlobalSight Web Service Testers -- Java and C# clients *****" />
 		<ant antfile="../../envoy/src/webserviceClients/java/build.xml" target="all" inheritAll="false" />
 
@@ -656,6 +642,7 @@ public class BuildVersion
 		<ant antfile="../../envoy/src/build.xml" target="clean" />
 		<ant antfile="../../diplomat/build/build.xml" target="clean" />
 		<ant antfile="../install/build.xml" target="clean" />
+		<ant antfile="../../test/build.xml" target="clean" />
 		<ant dir="${lingtools}/debex" antfile="build.xml" target="clean" />
 		<ant dir="${lingtools}/galign" antfile="build.xml" target="clean" />
 		<ant dir="../../${diplomatDevSrcJava}/../webtop-plugin" antfile="build.xml" target="clean" inheritAll="false" />
@@ -668,6 +655,9 @@ public class BuildVersion
 		<delete dir="${docdirectory}">
 		</delete>
 		<delete file="BuildVersion.java" />
+		<delete file="cache.properties" />
+		<delete file="run.classpath.bat" />
+		<delete file="run.classpath.sh" />
 		<delete dir="com" />
 		<delete file="graphicalWf.jar" />
 		<delete file="customer.jar" />
@@ -678,6 +668,7 @@ public class BuildVersion
 		<delete file="jbpmLibs.jar" />
 		<delete file="ssoLibs.jar" />
 		<delete file="hibernateLibs.jar" />
+        <delete dir="${testreports}" failonerror="false"/>
 	</target>
 
 	<target name="cleancommon">
@@ -700,6 +691,10 @@ public class BuildVersion
 		<ant antfile="../../envoy/src/build.xml" target="cleantb" />
 	</target>
 
+	<target name="cleantest">
+		<ant antfile="../../test/build.xml" target="clean" />
+	</target>
+
 	<target name="cleaninstall">
 		<ant antfile="../install/build.xml" target="clean" />
 	</target>
@@ -709,6 +704,66 @@ public class BuildVersion
 	</target>
 
 	<target name="cleanbuildling" depends="cleanling, ling" />
+
+    <!-- classpath for running GS code within the source tree.  Probably, we
+         should separate the compile classpath from the run classpath. -->
+    <path id="run.classpath">
+        <!-- classpath property is really for compiling and doesn't have the
+             right run-time load ordering. -->
+        <pathelement location="${hibernateJarLib}/dom4j-1.6.1.jar" />
+        <pathelement location="${commonJarLib}/jaxen-1.1-beta-4.jar" />
+        <pathelement path="${classpath}"/>
+        <!-- classpath property doesn't have this because it's not needed for
+             compiling. -->
+        <pathelement location="${mysqlJarLib}/mysql-connector-java-5.1.6-bin.jar" />
+        <pathelement location="${testclasses}"/>
+        <!-- for *.hbm.xml -->
+        <pathelement location="../../${lingSrcJava}"/>
+        <pathelement location="../../${envoySrcJava}"/>
+    </path>
+
+    <!-- classpath for running GS code within the source tree, referring to
+         an install for generated properties.  The gs.home property is the
+         globalsight.ear directory of the install, and can be set in
+         user.build.properties.  Note it's up to you to make sure your
+         install is in sync with the source. -->
+
+    <path id="runwithinstall.classpath">
+        <path refid="run.classpath" />
+        <pathelement location="${gs.home}/lib/classes" />
+    </path>
+
+    <target name="write-run-classpath">
+        <pathconvert property="runwithinstall.classpath" refid="runwithinstall.classpath" />
+        <echo>Writing classpath to run.classpath.{bat,sh}</echo>
+        <echo file="run.classpath.bat" message="set RUNCLASSPATH=${runwithinstall.classpath}" />
+        <echo file="run.classpath.sh" message="RUNCLASSPATH=${runwithinstall.classpath}" />
+    </target>
+
+    <!-- Run all unittests (or just one if test property is set) -->
+    <target name="runtests" depends="test">
+        <mkdir dir="${testreports}"/>
+        <mkdir dir="${testreports}/raw"/>
+        <junit fork="yes" printsummary="yes" failureproperty="junit.failure">
+        <!-- haltonfailure="yes"> -->
+          <classpath refid="runwithinstall.classpath" />
+          <batchtest unless="test" todir="${testreports}/raw">
+            <fileset dir="../../test">
+              <include name="**/Test*.java" />
+              <include name="**/*Test.java" />
+            </fileset>
+            <formatter type="xml"/>
+          </batchtest>
+          <test if="test" name="${test}" todir="${testreports}/raw">
+            <formatter type="xml"/>
+          </test>
+        </junit>
+        <junitreport todir="${testreports}">
+          <fileset dir="${testreports}/raw"/>
+          <report todir="${testreports}"/>
+        </junitreport>
+        <fail if="junit.failure" message="Unit test(s) failed.  See reports!"/>
+    </target>
 
 	<!-- Sign the customer.jar for the applets -->
 	<target name="signCustomerJar">

@@ -1,0 +1,1 @@
+update KNOWN_FORMAT_TYPE set NAME = 'MIF 9' where id = 49;

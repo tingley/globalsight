@@ -35,7 +35,33 @@
     String selectFileURL = selectFile.getPageURL();
     String downloadAppletURL = downloadApplet.getPageURL();
     String doneURL = done.getPageURL();
-
+    
+    String fromJobDetail = request.getParameter("fromJobDetail");
+    if ("true".equals(fromJobDetail))
+    {
+    	downloadAppletURL += "&fromJobDetail=true";
+    	selectFileURL += "&fromJobDetail=true";
+    }
+    else
+    {
+    	String fromTaskDetail = request.getParameter("fromTaskDetail");
+        if ("true".equals(fromTaskDetail))
+        {
+            downloadAppletURL += "&fromTaskDetail=true";
+            selectFileURL += "&fromTaskDetail=true";
+        }
+        else
+        {
+        	String from = request.getParameter("from");
+        	if (from != null && from.length() > 0)
+        	{
+        		downloadAppletURL += "&from=" + from;
+        		selectFileURL += "&from=" + from;
+        	}
+        }
+    }
+    
+    
     // Get the folder selected if there was any.
     String currentFolder = (String)session.getAttribute(DownloadFileHandler.PARAM_CURRENT_FOLDER);
     List pageList = (List)sessionMgr.getAttribute(DownloadFileHandler.PARAM_DOWNLOAD_FILE_NAME);
@@ -351,7 +377,7 @@ function submitForm(action)
     	         {
     	            file += ","; // must add a [white space] delimiter
     	         }
-    	         file += form.file[i].value;
+    	         file += encodeURIComponent(form.file[i].value).replace(/%C2%A0/g, "%20");
     	      }
     	   }
     	}
@@ -612,7 +638,7 @@ function navigateDirectories (folder)
 <FORM METHOD="post" NAME="downloadFilesForm">
 <INPUT NAME="fileAction" VALUE="download" TYPE="HIDDEN">
 <INPUT NAME="selectedFileList" VALUE="" TYPE="HIDDEN">
-<INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_cancel")%>" ONCLICK="submitForm('cancel');">
+<INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_cancel")%>" ONCLICK="javascript:history.go(-1);">
 <INPUT TYPE=BUTTON VALUE="<%=bundle.getString("lb_download")%>" ONCLICK="submitForm('download');"
 <%
   if (importFileList.size() == 0) out.print(" DISABLED");

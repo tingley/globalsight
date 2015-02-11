@@ -65,7 +65,8 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.extractor.msoffice.OfficeXmlExtractor",
         "com.globalsight.ling.docproc.extractor.rc.Extractor",
         "com.globalsight.ling.docproc.extractor.xml.Extractor",             // for resx
-        "com.globalsight.ling.docproc.extractor.idml.IdmlExtractor"             // IDML
+        "com.globalsight.ling.docproc.extractor.idml.IdmlExtractor",             // IDML
+        "com.globalsight.ling.docproc.extractor.fm.Extractor"               // for mif
         };
 
     // Codec class names.
@@ -78,7 +79,7 @@ public class ExtractorRegistry
         "com.globalsight.ling.common.JSEscapeSequence",  // for Java
         "com.globalsight.ling.common.CssEscapeSequence",
         "com.globalsight.ling.common.CssEscapeSequence", // list twice
-        "com.globalsight.ling.common.XmlEnDecoder",
+        "com.globalsight.ling.common.XmlEnDecoder",      // XML
         "com.globalsight.ling.common.XmlEnDecoder",      // same for XSL
         "com.globalsight.ling.common.JPEscapeSequence",  // JavaProperties
         "com.globalsight.ling.common.JPEscapeSequence",  // list twice
@@ -106,7 +107,9 @@ public class ExtractorRegistry
         "com.globalsight.ling.common.PTEscapeSequence",   // PO [29]
         "com.globalsight.ling.common.XmlEnDecoder",       // Office (XML)
         "com.globalsight.ling.common.PTEscapeSequence",   // RC
-        "com.globalsight.ling.common.XmlEnDecoder"        // IDML
+        "com.globalsight.ling.common.XmlEnDecoder",       //RESX
+        "com.globalsight.ling.common.XmlEnDecoder",        // IDML
+        "com.globalsight.ling.common.MifEnDecoder"        //MIF
         };
 
     // Post merge process class names
@@ -119,7 +122,7 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
-        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",
+        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",   // XML
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",      // JavaProperties
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
@@ -147,7 +150,9 @@ public class ExtractorRegistry
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",
         "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",    // Office (XML)
         "com.globalsight.ling.docproc.merger.plaintext.PlaintextPostMergeProcessor", //RC
-        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor"  // IDML
+        "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor",    // RESX
+        "com.globalsight.ling.docproc.merger.xml.XmlPostMergeProcessor",  // IDML
+        "com.globalsight.ling.docproc.merger.NoOpPostMergeProcessor"     //MIF
         };
 
     // format names used in diplomat
@@ -188,7 +193,8 @@ public class ExtractorRegistry
         FORMAT_OFFICE_XML,
         FORMAT_RC,
         FORMAT_RESX,
-        FORMAT_IDML
+        FORMAT_IDML,
+        FORMAT_MIF
     };
 
 

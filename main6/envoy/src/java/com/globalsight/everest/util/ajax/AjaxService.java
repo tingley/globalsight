@@ -375,7 +375,7 @@ public class AjaxService extends HttpServlet
                 jsFunctionText, companyId, enableUnicodeEscape);
     }
     
-    public void saveInddFilter()
+    private void loadInddFilterParameter(InddFilter filter)
     {
         String filterName = request.getParameter("filterName");
         String filterDesc = request.getParameter("filterDesc");
@@ -385,28 +385,32 @@ public class AjaxService extends HttpServlet
                 .getParameter("translateMasterLayer"));
         boolean translateFileInfo = Boolean.parseBoolean(request
                 .getParameter("translateFileInfo"));
-
-        InddFilter filter = new InddFilter();
+        boolean extractLineBreak = Boolean.parseBoolean(request
+                .getParameter("extractLineBreak"));
+        boolean replaceNonbreakingSpace = Boolean.parseBoolean(request
+                .getParameter("replaceNonbreakingSpace"));
+        
         filter.setCompanyId(companyId);
         filter.setTranslateHiddenLayer(translateHiddenLayer);
         filter.setTranslateMasterLayer(translateMasterLayer);
         filter.setTranslateFileInfo(translateFileInfo);
         filter.setFilterDescription(filterDesc);
         filter.setFilterName(filterName);
+        filter.setExtractLineBreak(extractLineBreak);
+        filter.setReplaceNonbreakingSpace(replaceNonbreakingSpace);
+    }
+    
+    public void saveInddFilter()
+    {
+        InddFilter filter = new InddFilter();
+        loadInddFilterParameter(filter);
         long filterId = FilterHelper.saveFilter(filter);
         writer.write(filterId + "");
     }
-
+    
     public void updateInddFilter()
     {
         String filterName = request.getParameter("filterName");
-        String filterDesc = request.getParameter("filterDesc");
-        boolean translateHiddenLayer = Boolean.parseBoolean(request
-                .getParameter("translateHiddenLayer"));
-        boolean translateMasterLayer = Boolean.parseBoolean(request
-                .getParameter("translateMasterLayer"));
-        boolean translateFileInfo = Boolean.parseBoolean(request
-                .getParameter("translateFileInfo"));
 
         String hql = "from InddFilter infl where infl.filterName=:name "
                 + "and infl.companyId = :companyId";
@@ -417,10 +421,7 @@ public class AjaxService extends HttpServlet
         InddFilter filter = (InddFilter) HibernateUtil.getFirst(hql, map);
         if (filter != null)
         {
-            filter.setFilterDescription(filterDesc);
-            filter.setTranslateHiddenLayer(translateHiddenLayer);
-            filter.setTranslateMasterLayer(translateMasterLayer);
-            filter.setTranslateFileInfo(translateFileInfo);
+            loadInddFilterParameter(filter);
             HibernateUtil.update(filter);
         }
     }

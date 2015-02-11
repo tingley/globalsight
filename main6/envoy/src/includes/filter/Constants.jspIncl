@@ -199,6 +199,8 @@ var jsTranslatable = "<%= bundle.getString("lb_filter_Translatable") %>";
 var jsTransHiddenLayer = "<%= bundle.getString("lb_filter_indd_TransHiddenLayer") %>";
 var jsTransMasterLayer = "<%= bundle.getString("lb_filter_indd_TransMasterLayer") %>";
 var jsTransFileInfo = "<%= bundle.getString("lb_filter_indd_TransFileInfo") %>";
+var jsIgnoreLineBreak = "<%= bundle.getString("lb_filter_indd_ExtractLineBreak") %>";
+var jsReplaceNonbreakingSpace = "<%= bundle.getString("lb_filter_indd_ReplaceNonbreakingSpace") %>";
 
 var jsOOTransHeader = "<%= bundle.getString("lb_filter_ooFilter_transHeader") %>";
 var jsOOTransFileinfo = "<%= bundle.getString("lb_filter_ooFilter_transFileInfo") %>";

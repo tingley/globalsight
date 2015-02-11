@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/src/!svn/ver/15375/dojox/trunk/grid/compat/tests/support
+END
+data.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/src/!svn/ver/15375/dojox/trunk/grid/compat/tests/support/data.php
+END
+json.php
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/src/!svn/ver/15375/dojox/trunk/grid/compat/tests/support/json.php
+END
+testtbl.sql
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/src/!svn/ver/14371/dojox/trunk/grid/compat/tests/support/testtbl.sql
+END
+yahoo_search.js
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/src/!svn/ver/14381/dojox/trunk/grid/compat/tests/support/yahoo_search.js
+END
+test_data.js
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/src/!svn/ver/14381/dojox/trunk/grid/compat/tests/support/test_data.js
+END
+geography.xml
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/src/!svn/ver/14381/dojox/trunk/grid/compat/tests/support/geography.xml
+END
+books.xml
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/src/!svn/ver/14381/dojox/trunk/grid/compat/tests/support/books.xml
+END
+movies.csv
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/src/!svn/ver/14371/dojox/trunk/grid/compat/tests/support/movies.csv
+END
+test_data_objects.js
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/src/!svn/ver/14381/dojox/trunk/grid/compat/tests/support/test_data_objects.js
+END

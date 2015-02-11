@@ -74,6 +74,7 @@ import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.ling.docproc.AbstractExtractor;
 import com.globalsight.ling.docproc.DiplomatAPI;
 import com.globalsight.ling.docproc.DiplomatSegmenterException;
+import com.globalsight.ling.docproc.DiplomatWordCounter;
 import com.globalsight.ling.docproc.DiplomatWordCounterException;
 import com.globalsight.ling.docproc.DiplomatWriter;
 import com.globalsight.ling.docproc.DocumentElement;
@@ -88,7 +89,9 @@ import com.globalsight.ling.docproc.SkeletonElement;
 import com.globalsight.ling.docproc.TranslatableElement;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.persistence.hibernate.HibernateUtil;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.edit.SegmentUtil;
 
 /**
  * StandardExtractor is a helper class for the LingAdapter.
@@ -574,6 +577,13 @@ public class StandardExtractor
     
     /**
      * Apply secondary filter for PO File.
+     * All HTML tags should be protected.
+     * 1) If the target (msgstr) is empty or same with source (msgid), 
+     *    the data will be parsed by the Secondary Extractor.
+     * 2) If the target (msgstr) is different with source (msgid), 
+     *    the data will be parsed by SegmentUtil.replaceHtmltagWithPH.
+     * 3) If the data is invalid for the Secondary Extractor (HTML/XML Extractor), 
+     *    the data will be parsed by SegmentUtil.replaceHtmltagWithPH. 
      */
     private void doSecondFilterForPO(Output p_extractedOutPut, Iterator p_it,
             DiplomatAPI p_diplomat, FileProfileImpl p_fp, String p_fpId,
@@ -586,20 +596,17 @@ public class StandardExtractor
         TranslatableElement elemSource = new TranslatableElement();
         TranslatableElement elemTarget = new TranslatableElement();
         String xliffpart;
-        boolean isXML = FilterConstants.XMLRULE_TABLENAME
-                .equals(p_secondFilterTableName);
-        boolean isHTML = FilterConstants.HTML_TABLENAME
-                .equals(p_secondFilterTableName);
+        boolean isXML = FilterConstants.XMLRULE_TABLENAME.equals(p_secondFilterTableName);
+        boolean isHTML = FilterConstants.HTML_TABLENAME.equals(p_secondFilterTableName);
+        DiplomatWordCounter wc = new DiplomatWordCounter();
         while (p_it.hasNext())
         {
             DocumentElement element = (DocumentElement) p_it.next();
 
             if (element instanceof TranslatableElement)
             {
-                ArrayList segments = ((TranslatableElement) element)
-                        .getSegments();
-                xliffpart = ((TranslatableElement) element)
-                        .getXliffPartByName();
+                ArrayList segments = ((TranslatableElement) element).getSegments();
+                xliffpart = ((TranslatableElement) element).getXliffPartByName();
                 if (xliffpart.equals("source"))
                 {
                     segSource = segments;
@@ -613,20 +620,18 @@ public class StandardExtractor
                 }
 
                 // If need do a secondary filter.
-                boolean isSecondaryFilter = true;
+                boolean needSecondaryFilter = true;
                 if (segSource != null && segTarget != null
                         && segSource.size() == segTarget.size())
                 {
-                    String source;
+                    String source, target;
                     for (int i = 0, max = segSource.size(); i < max; i++)
                     {
-                        source = (String) ((SegmentNode) segSource.get(i))
-                                .getSegment();
-                        if (source == null
-                                || (!source.equals(((SegmentNode) segTarget
-                                        .get(i)).getSegment())))
+                        source = ((SegmentNode) segSource.get(i)).getSegment();
+                        target = ((SegmentNode) segTarget.get(i)).getSegment();
+                        if (!StringUtil.equalsIgnoreSpace(source, target))
                         {
-                            isSecondaryFilter = false;
+                            needSecondaryFilter = false;
                             break;
                         }
                     }
@@ -634,13 +639,12 @@ public class StandardExtractor
 
                 SegmentNode sn;
                 String seg;
-                if (isSecondaryFilter && segments != null
-                        && segments.size() > 0)
+                if (segSource != null && segSource.size() > 0)
                 {
                     // Modify Segment for HTML/XML Filter
-                    for (int i = 0, max = segments.size(); i < max; i++)
+                    for (int i = 0, max = segSource.size(); i < max; i++)
                     {
-                        sn = (SegmentNode) segments.get(i);
+                        sn = (SegmentNode) segSource.get(i);
                         seg = sn.getSegment();
                         seg = seg.replace("&amp;", m_tag_amp);
                         if (isXML && !checkIfXMLIsWellFormed(seg))
@@ -655,22 +659,10 @@ public class StandardExtractor
                         {
                             sn.setSegment(seg);
                         }
-
-                        if (isXML
-                                && !checkIfXMLIsWellFormed(((SegmentNode) segments
-                                        .get(i)).getSegment()))
-                        {
-                            p_extractedOutPut.addDocumentElement(elemSource);
-                            p_extractedOutPut.addDocumentElement(elemTarget);
-                            isSecondaryFilter = false;
-                            break;
-                        }
                     }
 
-                    for (int i = 0, max = segments.size(); (i < max)
-                            && isSecondaryFilter; i++)
+                    for (int i = 0, max = segSource.size(); i < max; i++)
                     {
-//                        boolean needDecodeTwice = false;
                         p_diplomat.resetForChainFilter();
 
                         // Not from aligner.
@@ -678,19 +670,15 @@ public class StandardExtractor
                         {
                             p_diplomat.setFileProfileId(p_fpId);
                             p_diplomat.setFilterId(p_secondFilterId);
-                            p_diplomat
-                                    .setFilterTableName(p_secondFilterTableName);
+                            p_diplomat.setFilterTableName(p_secondFilterTableName);
                         }
 
                         String inputFormatName = getInputFormatName(p_secondFilterTableName);
                         p_diplomat.setInputFormat(inputFormatName);
 
-                        SegmentNode node = (SegmentNode) segments.get(i);
+                        SegmentNode node = (SegmentNode) segSource.get(i);
                         XmlEntities xe = new XmlEntities();
-//                        boolean hasLtGt = node.getSegment().contains("<")
-//                                || node.getSegment().contains(">");
-                        String segmentValue = xe.decodeStringBasic(node
-                                .getSegment());
+                        String segmentValue = xe.decodeStringBasic(node.getSegment());
                         // decode TWICE to make sure secondary parser can work
                         // as expected,
                         // but it will result in an entity issue,seems it can't
@@ -698,7 +686,6 @@ public class StandardExtractor
                         // in current framework of GS.
                         if (segmentValue.indexOf("&") > -1)
                         {
-//                            needDecodeTwice = true;
                             segmentValue = xe.decodeStringBasic(segmentValue);
                         }
 
@@ -716,65 +703,95 @@ public class StandardExtractor
                         }
                         catch (Exception e)
                         {
+                            // Protected the data with PlaceHolder, and recount
+                            SegmentNode node01 = (SegmentNode) segSource.get(0);
+                            String text = node01.getSegment();
+                            text = text.replace(m_tag_amp, "&amp;");
+                            node01.setSegment(text);
+                            SegmentUtil.replaceHtmltagWithPH(node01);
+                            SegmentNode node02 = (SegmentNode) segTarget.get(0);
+                            SegmentUtil.replaceHtmltagWithPH(node02);  
+                            
+                            wc.countDocumentElement(elemSource, p_extractedOutPut);
+                            wc.countDocumentElement(elemTarget, p_extractedOutPut);
+                            
                             p_extractedOutPut.addDocumentElement(elemSource);
                             p_extractedOutPut.addDocumentElement(elemTarget);
                             break;
                         }
 
                         Output _output = p_diplomat.getOutput();
-                        Iterator it2 = _output.documentElementIterator();
-                        while (it2.hasNext())
+                        if (needSecondaryFilter)
                         {
-                            DocumentElement element2 = (DocumentElement) it2
-                                    .next();
-                            if (element2 instanceof SkeletonElement)
+                            Iterator it2 = _output.documentElementIterator();
+                            while (it2.hasNext())
                             {
-                                String text = ((SkeletonElement) element2)
-                                        .getSkeleton();
-                                if (isXML && text.startsWith(m_tag_start))
+                                DocumentElement element2 = (DocumentElement) it2.next();
+                                if (element2 instanceof SkeletonElement)
                                 {
-                                    text = text.substring(m_tag_start.length());
-                                }
-                                else if (isXML && text.endsWith(m_tag_end))
-                                {
-                                    text = text.substring(0, text.length()
-                                            - m_tag_end.length());
-                                }
+                                    String text = ((SkeletonElement) element2).getSkeleton();
+                                    if (isXML && text.startsWith(m_tag_start))
+                                    {
+                                        text = text.substring(m_tag_start.length());
+                                    }
+                                    else if (isXML && text.endsWith(m_tag_end))
+                                    {
+                                        text = text.substring(0, text.length()
+                                                - m_tag_end.length());
+                                    }
 
-                                text = text.replace(m_tag_amp, "&amp;");
-
-                                ((SkeletonElement) element2).setSkeleton(text);
-                            }
-                            else if (element2 instanceof LocalizableElement)
-                            {
-                                String text = ((LocalizableElement) element2)
-                                        .getChunk();
-                                text = xe.encodeStringBasic(text);
-                                ((LocalizableElement) element2).setChunk(text);
-                            }
-                            else if (element2 instanceof TranslatableElement)
-                            {
-                                List segs = ((TranslatableElement) element2)
-                                        .getSegments();
-                                String text;
-                                for (int j = 0; i < segs.size(); i++)
-                                {
-                                    sn = (SegmentNode) segs.get(j);
-                                    text = sn.getSegment();
                                     text = text.replace(m_tag_amp, "&amp;");
-                                    sn.setSegment(text);
+
+                                    ((SkeletonElement) element2).setSkeleton(text);
+                                }
+                                else if (element2 instanceof LocalizableElement)
+                                {
+                                    String text = ((LocalizableElement) element2).getChunk();
+                                    text = xe.encodeStringBasic(text);
+                                    ((LocalizableElement) element2).setChunk(text);
+                                }
+                                else if (element2 instanceof TranslatableElement)
+                                {
+                                    List segs = ((TranslatableElement) element2).getSegments();
+                                    String text;
+                                    for (int j = 0; j < segs.size(); j++)
+                                    {
+                                        sn = (SegmentNode) segs.get(j);
+                                        text = sn.getSegment();
+                                        text = text.replace(m_tag_amp, "&amp;");
+                                        sn.setSegment(text);
+                                    }
                                 }
 
+                                p_extractedOutPut.addDocumentElement(element2);
                             }
-
-                            p_extractedOutPut.addDocumentElement(element2);
+                        }
+                        else
+                        {
+                            // Protected the data with PlaceHolder, and recount
+                            // source word count comes from HTML/XML filter
+                            SegmentNode node01 = (SegmentNode) segSource.get(0);
+                            String text = node01.getSegment();
+                            text = text.replace(m_tag_amp, "&amp;");
+                            if (isXML && text.startsWith(m_tag_start)
+                                    && text.endsWith(m_tag_end))
+                            {
+                                text = text.substring(m_tag_start.length(), 
+                                            text.length() - m_tag_end.length());
+                            }
+                            node01.setSegment(text);
+                            SegmentUtil.replaceHtmltagWithPH(node01);                            
+                            SegmentNode node02 = (SegmentNode) segTarget.get(0);
+                            SegmentUtil.replaceHtmltagWithPH(node02); 
+                            
+                            node01.setWordCount(_output.getWordCount());
+                            wc.countDocumentElement(elemTarget, p_extractedOutPut);
+                            
+                            p_extractedOutPut.addDocumentElement(elemSource);
+                            p_extractedOutPut.addDocumentElement(elemTarget);
+                            break;
                         }
                     }
-                }
-                else
-                {
-                    p_extractedOutPut.addDocumentElement(elemSource);
-                    p_extractedOutPut.addDocumentElement(elemTarget);
                 }
             }
             else
@@ -784,7 +801,7 @@ public class StandardExtractor
         }
     }
     
-    /*
+    /**
      * The XML data must be well-formed, otherwise SAX will throw exception.
      */
     private boolean checkIfXMLIsWellFormed(String p_xmlData)
@@ -1519,6 +1536,12 @@ public class StandardExtractor
                         String leftStr = strA.substring(0, left);
                         leftStr = leftStr.replace("<", "&lt;");                     
                         String rightStr = strA.substring(left);
+                        
+                        // replace tag like < a> to <a>
+                        if (rightStr.matches("<\\s+.+"))
+                        {
+                            rightStr = rightStr.replaceFirst("<\\s+", "<");
+                        }
 
                         sb.append(leftStr).append(rightStr);
                         

@@ -37,6 +37,7 @@ public interface CompanyConstants {
     // fields
     public static final String NAME = "nameField";
     public static final String DESC = "descField";
+    public static final String SESSIONTIME = "sessionTimeField";
     public static final String ENABLE_IP_FILTER = "enableIPFilterField";
     public static final String ENABLE_TM_ACCESS_CONTROL = "enableTMAccessControlFiled";
     public static final String ENABLE_TB_ACCESS_CONTROL = "enableTBAccessControlFiled";

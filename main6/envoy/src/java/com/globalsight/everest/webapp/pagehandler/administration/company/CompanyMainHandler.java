@@ -449,6 +449,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         Company company = new Company();
         company.setName(p_request.getParameter(CompanyConstants.NAME).trim());
         company.setDescription(p_request.getParameter(CompanyConstants.DESC));
+        company.setSessionTime(p_request.getParameter(CompanyConstants.SESSIONTIME));
         String enableIPFilter = p_request
                 .getParameter(CompanyConstants.ENABLE_IP_FILTER);
         String enableTMAccessControl = p_request
@@ -519,6 +520,7 @@ public class CompanyMainHandler extends PageHandler implements CompanyConstants 
         Company company = (Company) sessionMgr
                 .getAttribute(CompanyConstants.COMPANY);
         company.setDescription(p_request.getParameter(CompanyConstants.DESC));
+        company.setSessionTime(p_request.getParameter(CompanyConstants.SESSIONTIME));
         String enableIPFilter = p_request
                 .getParameter(CompanyConstants.ENABLE_IP_FILTER);
         String enableTMAccessControl = p_request

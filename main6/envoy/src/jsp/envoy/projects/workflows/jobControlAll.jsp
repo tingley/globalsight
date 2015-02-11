@@ -74,6 +74,7 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
     String refreshUrl = allStatusURL;
     String helperText = bundle.getString("helper_text_job_all_status");
     
+    /*
     int myJobsDaysRetrieved = 0;
     try
     {
@@ -93,6 +94,7 @@ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
     {
         // assume 0
     }
+    */
 %>
 <HTML>
 <HEAD>

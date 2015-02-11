@@ -19,28 +19,21 @@ package com.globalsight.terminology.indexer;
 
 import com.globalsight.terminology.indexer.IndexObject;
 
-import com.globalsight.terminology.Definition;
 import com.globalsight.terminology.Entry;
 import com.globalsight.terminology.EntryUtils;
 import com.globalsight.terminology.Termbase;
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
-
+import com.globalsight.terminology.importer.ImportUtil;
 import com.globalsight.terminology.util.XmlParser;
 
 import com.globalsight.ling.lucene.Index;
 
-import com.globalsight.util.SessionInfo;
 import com.globalsight.log.GlobalSightCategory;
 
-import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.Node;
 
 import java.util.*;
 import java.io.IOException;
-import java.io.*;
 
 /**
  * Adds termbase entries to the fuzzy and fulltext indexes defined on
@@ -196,6 +189,8 @@ public class Writer
     private Document parseFragment(String p_xml)
         throws IOException
     {
+        // remove the illegal character such as "x0x"
+        p_xml = ImportUtil.removeIllegalXmlChar(p_xml);
         XmlParser parser = null;
 
         try

@@ -104,6 +104,12 @@ public class CvsUtil
                 SERVER_NAME + "/jboss/jboss_server/server/default/conf/standardjboss.xml");
         SPECIAL_FILES.put("/mail-service.xml.template",
                 SERVER_NAME +"/jboss/mail-service.xml.template");
+        SPECIAL_FILES.put("/uil2-service.xml.template",
+                SERVER_NAME +"/jboss/uil2-service.xml.template");
+        SPECIAL_FILES.put("/startJboss.sh.template",
+                SERVER_NAME +"/jboss/startJboss.sh.template");
+        SPECIAL_FILES.put("/jboss-service.xml.template",
+                SERVER_NAME +"/jboss/jboss-service.xml.template");
         SPECIAL_FILES.put("/envoy/src/web.xml.template",
                 NEW_EAR_PATH + "/globalsight-web.war/WEB-INF/web.xml.template");
         SPECIAL_FILES.put("/server/default/conf/readme.txt",
@@ -183,6 +189,8 @@ public class CvsUtil
     {
         IGNORE_FILTER.add("GlobalSight Installer");
         IGNORE_FILTER.add("/main6/docs/");
+        IGNORE_FILTER.add("/main6/test/");
+        IGNORE_FILTER.add("/envoy/hibernatetest/");
         IGNORE_FILTER.add("(from");
         IGNORE_FILTER.add("/ambassador-desktop/");
         IGNORE_FILTER.add("/tools/client tools/");

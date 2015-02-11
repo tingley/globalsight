@@ -9,6 +9,7 @@ public class TM3Attribute {
     private BaseTm tm;
     private TM3AttributeValueType valueType;
     private String columnName;
+    private boolean affectsIdentity = true;
     
     TM3Attribute() { }
     
@@ -26,10 +27,11 @@ public class TM3Attribute {
      * pool.
      */
     public TM3Attribute(String name, TM3AttributeValueType valueType,
-            String columnName) {
+            String columnName, boolean affectsIdentity) {
         this.name = name;
         this.valueType = valueType;
         this.columnName = columnName;
+        this.affectsIdentity = affectsIdentity;
     }
     
     long getId() {
@@ -58,7 +60,7 @@ public class TM3Attribute {
 
     private void setValueTypeClass(String valueTypeClass) {
         try {
-            Class c = Class.forName(valueTypeClass);
+            Class<?> c = Class.forName(valueTypeClass);
             this.valueType = (TM3AttributeValueType) c.newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Can't initialize attribute", e);
@@ -81,6 +83,14 @@ public class TM3Attribute {
         this.columnName = columnName;
     }
 
+    public boolean getAffectsIdentity() {
+        return affectsIdentity;
+    }
+    
+    private void setAffectsIdentity(boolean affectsIdentity) {
+        this.affectsIdentity = affectsIdentity;
+    }
+    
     TM3Tm getTm() {
         return tm;
     }

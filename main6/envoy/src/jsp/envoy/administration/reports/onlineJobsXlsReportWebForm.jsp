@@ -302,6 +302,12 @@ function checkThis(obj){
 		</SELECT></td>
 	</tr>
 	<tr>
+	<td><%=bundle.getString("lb_online_report_matches")%>:</td>
+	<td>
+	    <input type="checkbox" name="reportStyle" value="trados" checked><%=bundle.getString("lb_online_report_trados")%>
+	</td>
+	</tr>
+	<tr>
 		<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
 		<TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
 	</tr>

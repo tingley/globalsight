@@ -63,9 +63,11 @@ public class ProjectWorkflowData {
 
     private long trados95to99WordCount = 0;
 
-    private long trados75to94WordCount = 0;
+    private long trados85to94WordCount = 0;
+    
+    private long trados75to84WordCount = 0;
 
-    private long trados1to74WordCount = 0;
+    private long trados50to74WordCount = 0;
 
     private long tradosNoMatchWordCount = 0;
 
@@ -80,9 +82,11 @@ public class ProjectWorkflowData {
 
     private long trados95to99WordCountAmount = 0;
 
-    private long trados75to94WordCountAmount = 0;
+    private long trados85to94WordCountAmount = 0;
+    
+    private long trados75to84WordCountAmount = 0;
 
-    private long trados1to74WordCountAmount = 0;
+    private long trados50to74WordCountAmount = 0;
 
     private long tradosNoMatchWordCountAmount = 0;
 
@@ -189,16 +193,22 @@ public class ProjectWorkflowData {
     private BigDecimal trados95to99WordCountCostAmount = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
 
-    private BigDecimal trados75to94WordCountCost = new BigDecimal(
+    private BigDecimal trados85to94WordCountCost = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
     
-    private BigDecimal trados75to94WordCountCostAmount = new BigDecimal(
+    private BigDecimal trados85to94WordCountCostAmount = new BigDecimal(
+            BIG_DECIMAL_ZERO_STRING);
+    
+    private BigDecimal trados75to84WordCountCost = new BigDecimal(
+            BIG_DECIMAL_ZERO_STRING);
+    
+    private BigDecimal trados75to84WordCountCostAmount = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
 
-    private BigDecimal trados1to74WordCountCost = new BigDecimal(
+    private BigDecimal trados50to74WordCountCost = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
     
-    private BigDecimal trados1to74WordCountCostAmount = new BigDecimal(
+    private BigDecimal trados50to74WordCountCostAmount = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
 
     private BigDecimal tradosRepsWordCountCost = new BigDecimal(
@@ -511,58 +521,86 @@ public class ProjectWorkflowData {
             this.trados100WordCountCostAmount.add(trados100WordCountCost);
     }
 
-    public long getTrados1to74WordCount() {
-        return this.trados1to74WordCount;
+    public long getTrados50to74WordCount() {
+        return this.trados50to74WordCount;
     }
     
-    public long getTrados1to74WordCountAmount() {
-        return this.trados1to74WordCountAmount;
+    public long getTrados50to74WordCountAmount() {
+        return this.trados50to74WordCountAmount;
     }
 
-    public void setTrados1to74WordCount(long trados1to74WordCount) {
-        this.trados1to74WordCount = trados1to74WordCount;
-        this.trados1to74WordCountAmount += trados1to74WordCount;
+    public void setTrados50to74WordCount(long trados50to74WordCount) {
+        this.trados50to74WordCount = trados50to74WordCount;
+        this.trados50to74WordCountAmount += trados50to74WordCount;
     }
 
-    public BigDecimal getTrados1to74WordCountCost() {
-        return this.trados1to74WordCountCost;
+    public BigDecimal getTrados50to74WordCountCost() {
+        return this.trados50to74WordCountCost;
     }
     
-    public BigDecimal getTrados1to74WordCountCostAmount() {
-        return this.trados1to74WordCountCostAmount;
+    public BigDecimal getTrados50to74WordCountCostAmount() {
+        return this.trados50to74WordCountCostAmount;
     }
 
-    public void setTrados1to74WordCountCost(BigDecimal trados1to74WordCountCost) {
-        this.trados1to74WordCountCost = trados1to74WordCountCost;
-        this.trados1to74WordCountCostAmount = 
-            this.trados1to74WordCountCostAmount.add(trados1to74WordCountCost);
+    public void setTrados50to74WordCountCost(BigDecimal trados50to74WordCountCost) {
+        this.trados50to74WordCountCost = trados50to74WordCountCost;
+        this.trados50to74WordCountCostAmount = 
+            this.trados50to74WordCountCostAmount.add(trados50to74WordCountCost);
     }
 
-    public long getTrados75to94WordCount() {
-        return this.trados75to94WordCount;
+    public long getTrados85to94WordCount() {
+        return this.trados85to94WordCount;
     }
     
-    public long getTrados75to94WordCountAmount() {
-        return this.trados75to94WordCountAmount;
+    public long getTrados85to94WordCountAmount() {
+        return this.trados85to94WordCountAmount;
     }
 
-    public void setTrados75to94WordCount(long trados75to94WordCount) {
-        this.trados75to94WordCount = trados75to94WordCount;
-        this.trados75to94WordCountAmount += trados75to94WordCount;
-    }
-
-    public BigDecimal getTrados75to94WordCountCost() {
-        return this.trados75to94WordCountCost;
+    public void setTrados85to94WordCount(long trados85to94WordCount) {
+        this.trados85to94WordCount = trados85to94WordCount;
+        this.trados85to94WordCountAmount += trados85to94WordCount;
     }
     
-    public BigDecimal getTrados75to94WordCountCostAmount() {
-        return this.trados75to94WordCountCostAmount;
+    public long getTrados75to84WordCount() {
+        return this.trados75to84WordCount;
+    }
+    
+    public long getTrados75to84WordCountAmount() {
+        return this.trados75to84WordCountAmount;
     }
 
-    public void setTrados75to94WordCountCost(BigDecimal trados75to94WordCountCost) {
-        this.trados75to94WordCountCost = trados75to94WordCountCost;
-        this.trados75to94WordCountCostAmount = 
-            this.trados75to94WordCountCostAmount.add(trados75to94WordCountCost);
+    public void setTrados75to84WordCount(long trados75to84WordCount) {
+        this.trados75to84WordCount = trados75to84WordCount;
+        this.trados75to84WordCountAmount += trados75to84WordCount;
+    }
+    
+
+    public BigDecimal getTrados85to94WordCountCost() {
+        return this.trados85to94WordCountCost;
+    }
+    
+    public BigDecimal getTrados85to94WordCountCostAmount() {
+        return this.trados85to94WordCountCostAmount;
+    }
+
+    public void setTrados85to94WordCountCost(BigDecimal trados85to94WordCountCost) {
+        this.trados85to94WordCountCost = trados85to94WordCountCost;
+        this.trados85to94WordCountCostAmount = 
+            this.trados85to94WordCountCostAmount.add(trados85to94WordCountCost);
+    }
+    
+    public BigDecimal getTrados75to84WordCountCost() {
+        return this.trados75to84WordCountCost;
+    }
+    
+    public BigDecimal getTrados75to84WordCountCostAmount() {
+        return this.trados75to84WordCountCostAmount;
+    }
+
+    public void setTrados75to84WordCountCost(BigDecimal trados75to84WordCountCost) {
+        this.trados75to84WordCountCost = trados75to84WordCountCost;
+        this.trados75to84WordCountCostAmount = 
+            this.trados75to84WordCountCostAmount.add(trados75to84WordCountCost);
     }
 
     public long getTrados95to99WordCount() {

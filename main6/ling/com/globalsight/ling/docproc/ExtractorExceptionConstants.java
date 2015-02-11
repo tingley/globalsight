@@ -242,6 +242,10 @@ public interface ExtractorExceptionConstants
     //RC extractor
     public static final int RC_PARSE_ERROR               =   -1100;
     
+    //MIF extractor
+    public static final int MIF_PARSE_ERROR               =   -1101;
+    public static final int MIF_VERSION_ERROR               =   -1102;
+    
     //
     // error messages
     //

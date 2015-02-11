@@ -140,7 +140,7 @@ public abstract class InstallUtil
             return Integer.parseInt(v1[i]) - Integer.parseInt(v2[i]);
         }
 
-        return v2.length - v1.length;
+        return v1.length - v2.length;
     }
     
     private int compareVersion(String f1, String f2)

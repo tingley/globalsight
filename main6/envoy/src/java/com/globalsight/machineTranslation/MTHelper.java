@@ -16,9 +16,13 @@
  */
 package com.globalsight.machineTranslation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import com.globalsight.everest.edit.online.OnlineEditorManagerLocal;
 import com.globalsight.everest.foundation.L10nProfile;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
@@ -30,6 +34,11 @@ import com.globalsight.everest.tuv.TuvManager;
 import com.globalsight.everest.webapp.pagehandler.edit.online.EditorState;
 import com.globalsight.ling.common.XmlEntities;
 import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlException;
+import com.globalsight.util.gxml.GxmlFragmentReader;
+import com.globalsight.util.gxml.GxmlFragmentReaderPool;
+import com.globalsight.util.gxml.TextNode;
 
 public class MTHelper
 {
@@ -80,9 +89,30 @@ public class MTHelper
                 TuvManager tuvMananger = ServerProxy.getTuvManager();
                 Tuv sourceTuv = tuvMananger.getTuvForSegmentEditor(p_state
                         .getTuId(), p_state.getSourceLocale().getIdAsLong());
-                String sourceString = sourceTuv.getGxmlElement().getTextValue();
-                mtString = mt.translate(p_state.getSourceLocale().getLocale(),
-                        p_state.getTargetLocale().getLocale(), sourceString);
+
+                String sourceString = null;
+                long subId = p_state.getSubId();
+                if (OnlineEditorManagerLocal.DUMMY_SUBID.equals(String
+                        .valueOf(subId)))
+                {
+                    sourceString = sourceTuv.getGxmlElement().getTextValue();
+                }
+                else
+                {
+                    GxmlElement subEle = sourceTuv
+                            .getSubflowAsGxmlElement(String.valueOf(subId));
+                    sourceString = subEle.getTextValue();
+                }
+
+                // translate segment
+                if (sourceString != null && sourceString.trim().length() > 0)
+                {
+                    mtString = mt
+                            .translate(p_state.getSourceLocale().getLocale(),
+                                    p_state.getTargetLocale().getLocale(),
+                                    sourceString);                   
+                }
+
 //                if (sourceString.equals(mtString))
 //                {
 //                    mtString = "";
@@ -190,4 +220,91 @@ public class MTHelper
             p_mt.setMtParameterMap(paramHM);
         }
     }
+    
+    /**
+     * Get all translatable TextNode list in the specified gxml.
+     * 
+     * @param p_gxml
+     * @return List in TextNode
+     */
+    public static List getImmediateAndSubImmediateTextNodes(GxmlElement p_rootElement)
+    {
+        if (p_rootElement == null)
+        {
+            return null;
+        }
+
+        List result = new ArrayList();
+        // Immediate TextNode list for the root element
+        List immediateTextNodeList = p_rootElement.getTextNodeWithoutInternal();
+        result.addAll(immediateTextNodeList);
+
+        // Add immediate TextNode list for all sub GxmlElement.
+        List subFlowList =
+            p_rootElement.getDescendantElements(GxmlElement.SUB_TYPE);
+        if (subFlowList != null && subFlowList.size() > 0)
+        {
+            Iterator it = subFlowList.iterator();
+            while (it.hasNext())
+            {
+                GxmlElement subEle = (GxmlElement) it.next();
+                List subImmediateTextNodeList =
+                    subEle.getChildElements(GxmlElement.TEXT_NODE);
+                result.addAll(subImmediateTextNodeList);
+            }
+        }
+
+        return result;
+    }
+    
+    /**
+     * Get all text values for immediate text nodes and all sub segments in
+     * current GxmlElement object.
+     */
+    public static String getAllTranslatableTextValue(GxmlElement p_rootElement)
+    {
+        List textNodeList = getImmediateAndSubImmediateTextNodes(p_rootElement);
+        
+        StringBuffer result = new StringBuffer();
+        if (textNodeList != null && textNodeList.size() > 0)
+        {
+            Iterator it = textNodeList.iterator();
+            while (it.hasNext())
+            {
+                TextNode tn = (TextNode) it.next();
+                result.append(tn.getTextValue());
+            }
+        }
+        
+        return result.toString();
+    }
+    
+    /**
+     * Get GxmlElement object for specified GXML.
+     */
+    public static GxmlElement getGxmlElement(String p_gxml)
+    {
+        if (p_gxml == null || p_gxml.trim().length() == 0)
+        {
+            return null;
+        }
+        
+        GxmlElement result = null;
+        GxmlFragmentReader reader = null;
+        try
+        {
+            reader = GxmlFragmentReaderPool.instance().getGxmlFragmentReader();
+            result = reader.parseFragment(p_gxml);
+        }
+        catch (GxmlException ex)
+        {
+        }
+        finally
+        {
+            GxmlFragmentReaderPool.instance().freeGxmlFragmentReader(reader);
+        }
+
+        return result;
+    }
+
 }

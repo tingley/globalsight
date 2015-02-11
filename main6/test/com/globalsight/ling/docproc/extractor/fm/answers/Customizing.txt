@@ -1,0 +1,190 @@
+n
+n
+u
+n
+n
+Note:
+Figure[x1]-[x2]:
+Figure[x3]-[x4]:
+n
+Step
+u
+Table[x5]-[x6]:
+Question/Issue:
+See Also:
+Table
+Table
+Chapter
+(Continued)
+LocalProductShort
+BMC
+(Sheet [x7] of [x8])
+BMC Software, Inc.
+BMC Remedy Action Request System
+AR[x9]System
+7.5.00
+Name="Q103" Version="3.1.0" Status="Release" RevDate="27-May-2003" Creator="Simon F. Bate"
+BMC Software, Inc.
+Alert Guide
+doc_feedback@bmc.com
+January 2009
+BMC Remedy Action Request System 7.5.00
+BMC Remedy User
+BMC Remedy Data Import
+BMC Remedy Alert
+1991�009
+step[x10] on page
+(page[x11])
+page\\
+Table[x12] on page
+Table
+Figure
+step[x13] on page
+Status="Release" RevDate="Feb 2005" ModifiedBy="Lisa Blue"
+step
+Figure[x14] on page
+Keyword
+Description
+$ENTRYID$
+Request ID of source request
+$FORM$
+Form of source request
+$MESSAGE$
+Alert message text
+$PRIORITY$
+Priority assigned to the alert
+$SOURCE$
+Alert source tag string (such as AR, FB, and so on)
+$SERVER$
+Server of source request
+$TIMESTAMP$
+Time and date the alert was created
+$USER$
+Alert recipient
+$UTCSECONDS$
+Seconds between midnight, January 1, 1970 Universal Coordinated Time (UTC, or GMT) and the date the alert was created
+$UTCTIMESTAMP$
+Textual timestamp using UTC time that the alert was created
+[x15]Customizing
+The following topics are available[x16]:
+n
+n
+n
+n
+n
+[x17]L[x18]oading [x19] on startup
+1
+In the Alert Summary dialog box, choose Tools > Options[x20] to open the Options dialog box[x21].[x22]
+2
+I[x23]n the General tab, select or clear the Automatically start [x24] check box, depending on how you want [x25] to start:
+n
+If the check box is selected, [x26] starts when your computer starts.
+n
+If the check box is cleared, you must [x27]s[x28]tart [x29] [x30]manually
+3
+Click OK[x31].
+To log in to [x32] automatically when it starts, you must clear the Prompt for Login option.
+[x33]Prompting for [x34] Login
+1
+In the Alert Summary dialog box, choose Tools > Options[x35] to open the Options dialog box.
+2
+I[x36]n the General tab, select or clear Prompt for Login depending on how you want [x37] to start:
+n
+If the Prompt for Login box is selected, you must enter your user name and password each time you start [x38].
+n
+If this box is not selected, the user name and password you enter is saved and used to automatically log you in the next time [x39] is started.
+WARNING: If P[x40]rompt for Login is not selected and you were the last user to log in, the next user to run [x41] on that machine will be logged in under your user name.
+[x42]Enabling logging
+u
+To enable logging
+1
+In the Alert Summary dialog box, choose Tools > Options[x43] to open the Options dialog box[x44].
+2
+I[x45]n the General tab, check Enable Logging if you want incoming data to be stored in a local alert log.
+3
+In the File Name field, enter the path and name of the log file. 
+You can use the Browse button to find the folder where you want to store the alert log file.
+By default, alert log files are stored with a [x46]*.log [x47]file extension.
+Setting the Listen Port
+The Listen Port is used in conjunction with Advanced Server Properties settings in the Accounts dialog box to configure [x48] to function outside of a firewall.
+u
+To set the listen port
+1
+In the Alert Summary dialog box, choose Tools > Options[x49] to open the Options dialog box.
+2
+I[x50]n the General tab, enter a port number between 1025 and 32768 in the Listen Port field.
+Click OK[x51].[x52]
+3
+Log in again for the setting to take effect.
+[x53]Setting alert methods
+By default, [x54] displays the Alert Message dialog box when an alert is received. 
+However, you can choose from the following alert options:
+n
+Display Alert Message[x55] displays the Alert Popup dialog box. 
+While the Alert Popup dialog box is displayed, it counts the number of alerts that you receive.
+n
+Flash Icon[x56] flashes the [x57] icon in the tray when an alert has been received.
+n
+Beep[x58] sounds a beep or bell.
+n
+Play Sound File[x59] plays the [x60].wav[x61] file that you have designated as your alert.
+n
+Run Process[x62] runs the executable you specify.
+Related [x63]topics
+n
+n
+Setting the alert method
+u
+T[x64]o set the alert method
+1
+In the Alert Summary dialog box, choose Tools > Options.
+The Options dialog box appears.
+2
+In the Alerts tab, check the ways you want to be alerted[x65].
+3
+Click OK.
+[x66]Specifying the sound file alert
+u
+To set the sound file alert
+1
+In the Alert Summary dialog box, choose Tools > Options[x67] to open the Options dialog box[x68].[x69]
+2
+I[x70]n the Alerts tab, check the Play Sound File box.
+3
+Click the Browse (...) button.[x71]
+4
+In the Alert WAV dialog box, select a [x72]*[x73].wav[x74] file.
+5
+Click Open.
+6
+Click the Play icon to test the file.
+7
+Click OK to close the Options dialog box.
+[x75]Specifying the Run Process command line
+u
+To specify the Run Process command line
+1
+In the Alert Summary dialog box, choose Tools > Options.
+The Options dialog box appears.
+2
+In the Alerts tab, check the Run Process box.
+3
+Click the Browse (...) button and select any executable ([x76]*.exe[x77]) file.
+4
+Click Open.
+5
+Add parameters and keywords manually, or click the Keyword button and select keywords from the list.[x78]
+6
+Click Test to test the file.[x79]
+7
+Click OK to close the Options dialog box.
+[x80]Using the Run Process command line
+Use Run Process to run a process on the client. 
+The system will execute the command specified in the Command Line field. 
+You can type or browse for the command. 
+Use the Command Line list to insert keywords, or enter your own keywords manually. 
+Keywords will expand when the process runs.
+Keywords must be enclosed in dollar signs. 
+If an expanded value contains spaces, the system automatically inserts double quotation marks around the parameter so that the operating system interprets it as a single value.
+The following keywords are available in [x81]:
+See the [x82]Workflow Object[x83]s Guide [x84]f[x85]or more Run Process command-line syntax guidelines.[x86]

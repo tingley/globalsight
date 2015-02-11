@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Vector;
 
-import com.globalsight.everest.edit.SegmentProtectionManager;
+import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
 import com.globalsight.everest.integration.ling.tm2.MatchTypeStatistics;
 import com.globalsight.everest.servlet.util.ServerProxy;
@@ -224,8 +224,15 @@ public class LeverageUtil
         {
             return false;
         }
+        
+        // If its data-type is "PO" (it is exact match localized here), count it
+        // as ICE.
+        if (isPoDataType(index, p_sourceTuvs))
+        {
+            return true;
+        }
 
-        // Check previous tuv is exact matct.
+        // Check previous tuv is exact match.
         int previousIndex;
         for (previousIndex = index - 1; previousIndex >= 0; previousIndex--)
         {
@@ -434,8 +441,7 @@ public class LeverageUtil
             Tuv sourceTuv = (Tuv) o;
             id = sourceTuv.getId();
             Tuv targetTuv = (Tuv) p_targetTuvs.get(index);
-            isLocalized = SegmentProtectionManager
-                    .isTuvInProtectedState(targetTuv);
+            isLocalized = EditHelper.isTuvInProtectedState(targetTuv);
         }
         else
         {
@@ -449,5 +455,41 @@ public class LeverageUtil
 
         return state == LeverageMatchLingManager.EXACT && matchType != 6
                 && isLocalized;
+    }
+    
+    /**
+     * Judge if the TUV is from PO file.
+     * 
+     * @param index
+     * @param p_sourceTuvs
+     * @return
+     */
+    static boolean isPoDataType(int index, List p_sourceTuvs)
+    {
+        if (p_sourceTuvs == null || p_sourceTuvs.size() == 0 || index < 0
+                || index >= p_sourceTuvs.size())
+        {
+            return false;
+        }
+
+        Object o = p_sourceTuvs.get(index);
+        String dataType = null;
+        if (o instanceof Tuv)
+        {
+            Tuv sourceTuv = (Tuv) o;
+            dataType = sourceTuv.getTu().getDataType();
+        }
+        else
+        {
+            SegmentTmTuv sourceTuv = (SegmentTmTuv) o;
+            dataType = sourceTuv.getTu().getFormat();
+        }
+        
+        if ("po".equalsIgnoreCase(dataType))
+        {
+            return true;
+        }
+        
+        return false;
     }
 }

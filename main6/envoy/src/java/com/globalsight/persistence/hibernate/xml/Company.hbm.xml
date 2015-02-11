@@ -11,6 +11,8 @@
             unique="false" />
         <property name="name" length="40" column="NAME" type="string"
             not-null="true" unique="false" />
+        <property name="sessionTime" length="10" column="SESSION_TIME" type="string"
+            not-null="false" unique="false" />
         <property name="isActive" column="IS_ACTIVE" type="yes_no"
             not-null="true" unique="false" />
         <property name="enableIPFilter" column="ENABLE_IP_FILTER" type="yes_no"

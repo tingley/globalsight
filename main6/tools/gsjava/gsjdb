@@ -1,0 +1,50 @@
+#!/bin/sh
+
+set -e
+
+# A wrapper that runs jdb with the sourcepath set to the GS source (and
+# third-party sources, if they are installed above the GS source).
+# Meant to be run as:
+# GS_JAVA=./gsjdb.sh ./gsjava.sh ...
+# This allows to debug any wrapper using gsjava.sh 
+
+DIR=$(dirname $0)
+
+if [ "x$GS_SOURCE" == x ]; then
+    if [ -e "$DIR/../../../main6/tools/build/build.xml" ]; then
+        GS_SOURCE="$DIR/../../.."
+    else
+        echo "set GS_SOURCE to the root of the source tree" >&2
+        exit 1
+    fi
+fi
+
+THIRD_SOURCE="$GS_SOURCE/.."
+
+# NB adding src/jsp to the sourcepath only works if you create an symlink
+# org/apache/jsp pointing pack to it.
+SOURCEPATH="\
+$GS_SOURCE/main6/envoy/src/java:\
+$GS_SOURCE/main6/envoy/src/jsp:\
+$GS_SOURCE/main6/diplomat/dev/src/java:\
+$GS_SOURCE/main6/ling:\
+$GS_SOURCE/main6/test:\
+$THIRD_SOURCE/jakarta-tomcat-5.0.28-src/jakarta-tomcat-catalina/catalina/src/share:\
+$THIRD_SOURCE/jakarta-tomcat-5.0.28-src/jakarta-tomcat-jasper/jasper2/src/share:\
+$THIRD_SOURCE/commons-logging-1.0.3-src/src/java:\
+$THIRD_SOURCE/jakarta-log4j-1.2.8/src/java:\
+$THIRD_SOURCE/xerces-1_4_3/src:\
+$THIRD_SOURCE/hibernate-3.1/src:\
+$THIRD_SOURCE/jboss-4.0.1-src/system/src/main:\
+$THIRD_SOURCE/dom4j-1.6.1/src/java:\
+$THIRD_SOURCE/jaxen-1.1-beta-4/src/java/main:\
+$THIRD_SOURCE/commons-collections-3.1/src/java:\
+$THIRD_SOURCE/mysql-connector-java-5.1.6/src:\
+$SOURCEPATH"
+
+if type -p rlwrap &> /dev/null; then
+    rlwrap jdb -sourcepath "$SOURCEPATH" "$@"
+else
+    jdb -sourcepath "$SOURCEPATH" "$@"
+fi
+

@@ -13,6 +13,14 @@
 %>
 <jsp:useBean id="done" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="doneFromJob" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="doneFromTask" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="doneFromExportJobs" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
+ <jsp:useBean id="doneFromLocalizedJobs" scope="request"
+ class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <jsp:useBean id="self" scope="request"
  class="com.globalsight.everest.webapp.javabean.NavigationBean" />
 <%
@@ -26,7 +34,31 @@
     
     // button urls    
     String selfURL = self.getPageURL();
-    String doneURL = done.getPageURL();
+    String doneURL = null;
+    
+    String fromJobDetail = request.getParameter("fromJobDetail");
+    String fromTaskDetail = request.getParameter("fromTaskDetail");
+    String from = request.getParameter("from");
+    if ("true".equals(fromJobDetail))
+    {
+    	doneURL = doneFromJob.getPageURL();
+    }
+    else if ("true".equals(fromTaskDetail))
+    {
+        doneURL = doneFromTask.getPageURL();
+    }
+    else if ("export".equals(from))
+    {
+    	doneURL = doneFromExportJobs.getPageURL();
+    }
+    else if ("localized".equals(from))
+    {
+        doneURL = doneFromLocalizedJobs.getPageURL();
+    }
+    else
+    {
+        doneURL = done.getPageURL();
+    }
     
     String title = "Customer Download";
     StringBuffer sb = new StringBuffer();

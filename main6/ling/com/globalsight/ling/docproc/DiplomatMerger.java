@@ -19,6 +19,7 @@ package com.globalsight.ling.docproc;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +34,7 @@ import org.dom4j.Element;
 import com.globalsight.cxe.entity.filterconfiguration.FilterHelper;
 import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
+import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.everest.page.PageTemplate;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.ling.common.DiplomatBasicHandler;
@@ -40,6 +42,7 @@ import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicParserException;
 import com.globalsight.ling.common.DiplomatNames;
 import com.globalsight.ling.common.EncodingChecker;
+import com.globalsight.ling.common.HtmlEntities;
 import com.globalsight.ling.common.NativeEnDecoder;
 import com.globalsight.ling.common.NativeEnDecoderException;
 import com.globalsight.ling.common.Text;
@@ -95,6 +98,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     private TmxTagGenerator m_tagGenerator = null;
     private Properties m_subProperties = null;
     private EncodingChecker m_encodingChecker = null;
+    private CxeMessage cxeMessage = null;
     private boolean m_convertHtmlEntityForHtml;
     private boolean m_convertHtmlEntityForXml;
     private long m_filterId;
@@ -217,12 +221,9 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
         if (m_isCDATA)
         {
-            targetSeg = targetSeg.replaceAll("&lt;", "<");
-            targetSeg = targetSeg.replaceAll("&gt;", ">");
-            targetSeg = targetSeg.replaceAll("&apos;", "\'");
-            targetSeg = targetSeg.replaceAll("&quot;", "\"");
-            targetSeg = targetSeg.replaceAll("&amp;", "&");
-
+            targetSeg = convertHtmlEntityForXml(targetSeg,
+                    m_convertHtmlEntityForXml);
+            
             m_isCDATA = false;
         }
         else
@@ -233,6 +234,51 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         }
 
         return targetSeg;
+    }
+    
+    private String decoding(String s)
+    {
+        HashMap<String, Character> map = new HashMap<String, Character>();
+        map.putAll(HtmlEntities.mHtmlEntityToChar);
+        map.putAll(HtmlEntities.mDefaultEntityToChar);
+        map.remove("&nbsp");
+        for (String key : map.keySet())
+        {
+            String value = map.get(key).toString();
+            s = s.replace(key, value);
+        }
+        
+        return s;
+    }
+    
+    private String encoding(String s)
+    {
+        HashMap<Character, String> map = new HashMap<Character, String>();
+        map.putAll(HtmlEntities.mHtmlCharToEntity);
+        map.putAll(HtmlEntities.mDefaultCharToEntity);
+        for (Character key : map.keySet())
+        {
+            String value = map.get(key);
+            s = s.replace(key.toString(), value);
+        }
+        
+        return s;
+    }
+    
+    private String convertHtmlEntityForXml(String s, boolean isConvert)
+    {
+        if (s == null || s.length() == 0)
+            return s;
+
+        s = decoding(s);
+        s = decoding(s);
+        
+        if (isConvert)
+        {
+            s = encoding(s);
+        }
+        
+        return s;
     }
 
     private String entityDecodeForXliff(String sourceSeg)
@@ -269,6 +315,11 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         if (!isXliff)
         {
             targetSeg = targetSeg.replaceAll("&apos;", "\'");
+        }
+
+        if (m_isCDATA && sourceSeg.indexOf("]]>") >= 0)
+        {
+            m_isCDATA = false;
         }
 
         // Mark the CDATA element for "entityEncode(String sourceSeg)"
@@ -477,6 +528,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         DiplomatParserState state = (DiplomatParserState) m_stateStack.peek();
         String type = state.getType();
         String format = null;
+        String mainFormat = m_output.getDataFormat();
 
         // non-subflow context
         if (state.getFormat() != null)
@@ -496,6 +548,11 @@ public class DiplomatMerger implements DiplomatMergerImpl,
             }
         }
 
+        if (mainFormat == null || mainFormat.length() == 0)
+        {
+            mainFormat = format;
+        }
+
         // subflow context
         if (m_subProperties != null)
         {
@@ -512,7 +569,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
 
         try
         {
-            if (isContent() && !format.equals("xlf"))
+            if (isContent() && !format.equals("xlf") && !FORMAT_PO.equals(mainFormat))
             {
                 tmp = applyNativeEncoding(tmp, format, type, m_l10nContent
                         .getLastChar());
@@ -527,17 +584,22 @@ public class DiplomatMerger implements DiplomatMergerImpl,
                     tmp = unescapeXml(tmp);
                 }
             }
+            
+            if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(mainFormat)
+                    && ExtractorRegistry.FORMAT_HTML.equalsIgnoreCase(format)
+                    && m_isCDATA)
+            {
+                if (isContent())
+                {
+                    tmp = convertHtmlEntityForXml(tmp, m_convertHtmlEntityForXml);
+                }
+            }
 
             if (ExtractorRegistry.FORMAT_XML.equalsIgnoreCase(format))
             {
                 if (isContent())
                 {
                     tmp = entityEncode(tmp);
-
-                    if (m_convertHtmlEntityForXml)
-                    {
-                        tmp = unescapeXml(tmp);
-                    }
                 }
                 else
                 {
@@ -980,6 +1042,7 @@ public class DiplomatMerger implements DiplomatMergerImpl,
     {
         try
         {
+            m_diplomatParser.setCxeMessage(cxeMessage);
             m_diplomatParser.parse(p_diplomat);
         }
         catch (DiplomatBasicParserException e)
@@ -1149,5 +1212,15 @@ public class DiplomatMerger implements DiplomatMergerImpl,
         {
             XmlParser.fire(parser);
         }
+    }
+	
+    public CxeMessage getCxeMessage()
+    {
+        return cxeMessage;
+    }
+
+    public void setCxeMessage(CxeMessage cxeMessage)
+    {
+        this.cxeMessage = cxeMessage;
     }
 }

@@ -356,7 +356,7 @@ function setTermbasesState(trueOrfalse) {
 			</td>
 						
 			<td class="standardText" align="left"><%=bundle.getString("lb_search_for") %><SPAN CLASS="asterisk">*</SPAN>: </td>
-			<td class="standardTest"><input type="text" size="35" name="searchstr" id="id_searchstr" value="<%= searchstr == null?"":searchstr%>"></td>
+			<td class="standardTest"><input type="text" size="35" name="searchstr" id="id_searchstr" value="<%= searchstr == null?"":searchstr%>" onkeypress="if(event.keyCode==13||event.which==13){return false;}"></td>
 			<td><input type="button" name="Submit" value="<%=bundle.getString("lb_search") %>" onClick="return search('current');"></td>
 			<td>&nbsp;</td>
 		</tr>

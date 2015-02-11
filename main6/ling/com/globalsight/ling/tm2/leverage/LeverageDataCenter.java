@@ -346,7 +346,12 @@ public class LeverageDataCenter
                         // ExactMatchedSegments object 
                         exactMatchedSegments.putLeveragedSegment(targetLocale,
                                 originalTuv.getId(), matchedTuv.getSegment(),
-                                getJobTuvState(matchedTuv.getMatchState()), matchedTuv.getModifyDate(), m_leverageOptions.getTmIndexsToLeverageFrom().get(matchedTuv.getTu().getTmId()).intValue(), matchedTuv.getSid(), matchedTuv.getId());
+                                getJobTuvState(matchedTuv.getMatchState()),
+                                matchedTuv.getModifyDate(), m_leverageOptions
+                                        .getTmIndexsToLeverageFrom().get(
+                                                matchedTuv.getTu().getTmId())
+                                        .intValue(), matchedTuv.getSid(),
+                                matchedTuv.getId());
                     }  
                 }
             }

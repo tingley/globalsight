@@ -478,6 +478,19 @@ public class SourcePage extends Page
         return file;
     }
     
+    public File getFileByPageCompanyId()
+    {
+        String filePath = AmbFileStoragePathUtils.getCxeDocDirPath(m_companyId)
+                + File.separator + filtSpecialFile(getExternalPageId());
+        File file = new File(filePath);
+        if (!file.exists())
+        {
+            file = null;
+        }
+        
+        return file;
+    }
+    
     /**
      * Convert "(Adobe file information) indd\myInddFile.indd" into
      * "indd\myInddFile.indd" or "(header) word\myWordFile.doc" into

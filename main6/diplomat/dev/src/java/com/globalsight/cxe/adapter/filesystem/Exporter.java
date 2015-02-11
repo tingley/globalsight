@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +53,7 @@ import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.cxe.message.FileMessageData;
 import com.globalsight.diplomat.util.Logger;
+import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.cvsconfig.CVSUtil;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.JobEditionInfo;
@@ -69,6 +71,7 @@ import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.AmbFileStoragePathUtils;
 import com.globalsight.util.FileUtil;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.zip.ZipIt;
 
 /**
  * Helper class used by the FileSystemAdapter for exporting
@@ -424,6 +427,14 @@ public class Exporter
                 {
                     addDtdValidationFailedComment();
                     FILE_STATES.remove(m_batchId);
+                    
+                    boolean isXLZFP = ServerProxy
+                            .getFileProfilePersistenceManager()
+                            .isXlzReferenceXlfFileProfile(fp.getName());
+                    if (isXLZFP)
+                    {
+                        processXLZFiles(wf);
+                    }
                 }
             }
         }
@@ -1291,5 +1302,117 @@ public class Exporter
         }
         
         return je;
+    }
+    
+    /**
+     * Process the files if the source file is with XLZ file format
+     * @param p_wf
+     * @author Vincent Yan, 2011/01/27
+     */
+    private void processXLZFiles(Workflow p_wf) 
+    {
+        if (p_wf == null || p_wf.getAllTargetPages().size() == 0)
+            return;
+
+        TargetPage tp = null;
+        String externalId = "";
+        String tmp = "", tmpFile = "";
+        String sourceFilename = "", targetFilename = "";
+        String sourceDir = "", targetDir = "";
+        File sourceFile = null, targetFile = null;
+        File sourcePath = null, targetPath = null;
+        ArrayList<String> xlzFiles = new ArrayList<String>();
+
+        logger.info("Begin processing xlz files.");
+        try
+        {
+            Vector targetPages = p_wf.getAllTargetPages();
+            String baseDir = AmbFileStoragePathUtils.getCxeDocDirPath().concat(File.separator);
+            
+            Job job = p_wf.getJob();
+            String companyId = job.getCompanyId();
+            String companyName = CompanyWrapper.getCompanyNameById(companyId);
+            
+            if ("1".equals(CompanyWrapper.getCurrentCompanyId())
+                    && !"1".equals(job.getCompanyId())) 
+            {
+                baseDir += companyName + File.separator;
+            }
+            
+            for (int i = 0; i < targetPages.size(); i++)
+            {
+                tp = (TargetPage) targetPages.get(i);
+                externalId = tp.getSourcePage().getExternalPageId();
+
+                if (externalId.toLowerCase().endsWith(".xlf")
+                        || externalId.toLowerCase().endsWith(".xliff"))
+                {
+                    tmp = externalId.substring(0,
+                            externalId.lastIndexOf(File.separator));
+                    sourceFilename = baseDir + tmp + ".xlz";
+                    sourceFile = new File(sourceFilename);
+                    if (sourceFile.exists() && sourceFile.isFile())
+                    {
+                        // source file is with xlz file format
+                        targetDir = baseDir + tp.getExportSubDir()
+                                + tmp.substring(tmp.indexOf(File.separator));
+                        if (!xlzFiles.contains(targetDir))
+                            xlzFiles.add(targetDir);
+
+                        // Get exported target path
+                        targetPath = new File(targetDir);
+
+                        // Get source path
+                        sourceDir = baseDir + tmp;
+                        sourcePath = new File(sourceDir);
+
+                        // Copy all files extracted from xlz file from source
+                        // path to exported target path
+                        // Because xliff files can be exported by GS
+                        // auotmatically, then ignore them and
+                        // just copy the others file to target path
+                        File[] files = sourcePath.listFiles();
+                        for (File f : files)
+                        {
+                            if (f.isDirectory())
+                                continue;
+                            tmpFile = f.getAbsolutePath().toLowerCase();
+                            if (tmpFile.endsWith(".xlf")
+                                    || tmpFile.endsWith(".xliff"))
+                                continue;
+                            org.apache.commons.io.FileUtils.copyFileToDirectory(f, targetPath);
+                        }
+                    }
+                }
+
+                // Verify if the exported file is generated
+                targetFilename = baseDir + tp.getExportSubDir()
+                        + File.separator;
+                targetFilename += externalId.substring(externalId
+                        .indexOf(File.separator) + 1);
+                targetFile = new File(targetFilename);
+                if (!targetFile.exists())
+                {
+                    logger.error("File " + targetFilename + " is not exist");
+                }
+            }
+
+            // Generate exported XLZ file and remove temporary folders
+            for (int i = 0; i < xlzFiles.size(); i++)
+            {
+                targetDir = xlzFiles.get(i);
+                targetPath = new File(targetDir);
+
+                ZipIt.addEntriesToZipFile(new File(targetDir + ".xlz"),
+                        targetPath.listFiles(), true, "");
+            }
+            
+            logger.info("Processing xlz files finished");
+        }
+        catch (Exception e)
+        {
+            logger.error("Error in WorkflowManagerLocal.processXLZFiles. ");
+            logger.error(e);
+        }
     }
 }

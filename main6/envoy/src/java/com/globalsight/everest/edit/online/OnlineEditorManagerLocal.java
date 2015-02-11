@@ -35,6 +35,7 @@ import javax.naming.NamingException;
 import com.globalsight.everest.comment.CommentManager;
 import com.globalsight.everest.comment.Issue;
 import com.globalsight.everest.edit.CommentHelper;
+import com.globalsight.everest.edit.EditHelper;
 import com.globalsight.everest.edit.ImageHelper;
 import com.globalsight.everest.edit.SegmentProtectionManager;
 import com.globalsight.everest.edit.SegmentRepetitions;
@@ -1419,7 +1420,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String itemType = tu.getTuType();
 
         boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
-                || (p_options.getEditMode() == EDITMODE_DEFAULT && SegmentProtectionManager
+                || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
                         .isTuvInProtectedState(p_targetTuv));
 
         boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
@@ -1428,6 +1429,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         // HTML class attribute that colors the segment in the editor
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
                 DUMMY_SUBID, isExcluded, unlock, p_repetitions);
+        // For "localized" segment,if target is same with source,commonly
+        // display as "no match" in blue color,for segment with sub,display
+        // according to its LMs.
         String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
                 dataType, p_options.getViewMode());
         String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
@@ -1436,7 +1440,16 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             if (segment.trim().equals(segmentSrc.trim()))
             {
-                style = STYLE_NO_MATCH;
+                List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+                if (subFlows != null && subFlows.size() > 0)
+                {
+                    style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
+                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions);
+                }
+                else
+                {
+                    style = STYLE_NO_MATCH;                
+                }
             }
         }
         else
@@ -1838,8 +1851,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 .getPermissionSetForUser(userName);
         p_options.setTmProfile(p_targetPage.getSourcePage().getRequest()
                 .getJob().getL10nProfile().getTranslationMemoryProfile());
-        boolean havePermission = ps
-                .getPermissionFor(Permission.IN_CONTEXT_MATCH);
+
         Tu tu = p_targetTuv.getTu();
         long tuId = tu.getTuId();
         long tuvId = p_targetTuv.getId();
@@ -1859,6 +1871,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         // HTML class attribute that colors the segment in the editor
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
                 DUMMY_SUBID, isExcluded, unlock, p_repetitions);
+        // For "localized" segment,if target is same with source,commonly
+        // display as "no match" in blue color,for segment with sub,display
+        // according to its LMs.
         String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
                 dataType, p_options.getViewMode());
         String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
@@ -1869,7 +1884,16 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             if (segment.trim().equals(segmentSrc.trim()))
             {
-                style = STYLE_NO_MATCH;
+                List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+                if (subFlows != null && subFlows.size() > 0)
+                {
+                    style = getMatchStyleByLM(p_matchTypes, p_srcTuv,
+                            p_targetTuv, DUMMY_SUBID, unlock, p_repetitions);
+                }
+                else
+                {
+                    style = STYLE_NO_MATCH;
+                }
             }
 
             isReadOnly = false;
@@ -1893,7 +1917,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         {
             style = STYLE_EXACT_MATCH;
             isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
-                    || (p_options.getEditMode() == EDITMODE_DEFAULT && SegmentProtectionManager
+                    || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
                             .isTuvInProtectedState(p_targetTuv));
         }
 
@@ -2648,8 +2672,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 // The save tm have the highest priority : -1
                 if (match.getTmIndex() == Leverager.HIGHEST_PRIORTIY)
                 {
-                    tmName = ServerProxy.getProjectHandler().getProjectTMById(
-                            leverageOptions.getSaveTmId(), false).getName();
+                    if (match.getMatchCategory() == DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_SAME_JOB
+                            || match.getMatchCategory() == DynamicLeveragedSegment.FROM_IN_PROGRESS_TM_OTHER_JOB)
+                    {
+                        tmName = "Page TM";
+                    }
+                    else
+                    {
+                        tmName = ServerProxy.getProjectHandler()
+                                .getProjectTMById(
+                                        leverageOptions.getSaveTmId(), false)
+                                .getName();
+                    }
                 }
                 else if (match.getTmIndex() == Leverager.MT_PRIORITY)
                 {
@@ -2727,6 +2761,46 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         }
 
         return p_view;
+    }
+    
+    /**
+     * Set segment matches for "SegmentView" object.This method allows to re-set
+     * TM matches separately.
+     */
+    public SegmentView addSegmentMatches(SegmentView p_view,
+            EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
+            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage)
+    {
+        SegmentView segmentView = null;
+
+        try
+        {
+            Tuv sourceTuv;
+            Tuv targetTuv;
+            targetTuv = m_tuvManager.getTuvForSegmentEditor(p_tuvId);
+
+            String mergeState = targetTuv.getMergeState();
+            if (mergeState.equals(Tuv.NOT_MERGED))
+            {
+                sourceTuv = m_tuvManager.getTuvForSegmentEditor(p_tuId,
+                        p_sourceLocaleId);
+            }
+            else
+            {
+                sourceTuv = getMergedSourceTuvByTargetId(p_tuvId);
+            }
+
+            segmentView = addSegmentMatches(p_view, sourceTuv, targetTuv,
+                    String.valueOf(p_subId), p_state.getTmNames(), p_releverage);
+        }
+        catch (Exception e)
+        {
+            // Trying to reset TM matches,this should not crash GS,so eat it.
+            String arg = "Failed to reset TM matches for segmentView.";
+            CATEGORY.error(arg, e);
+        }
+
+        return segmentView;
     }
 
     /**
@@ -3734,7 +3808,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String itemType = tu.getTuType();
 
         boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
-                || (p_options.getEditMode() == EDITMODE_DEFAULT && SegmentProtectionManager
+                || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
                         .isTuvInProtectedState(p_targetTuv));
 
         boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
@@ -3744,6 +3818,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
                 DUMMY_SUBID, isExcluded, unlock, p_repetitions);
 
+        // For "localized" segment,if target is same with source,commonly
+        // display as "no match" in blue color,for segment with sub,display
+        // according to its LMs.
         String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
                 dataType, p_options.getViewMode());
         String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
@@ -3751,7 +3828,16 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         if (STYLE_UPDATED.equals(style)
                 && segment.trim().equals(segmentSrc.trim()))
         {
-            style = STYLE_NO_MATCH;
+            List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+            if (subFlows != null && subFlows.size() > 0)
+            {
+                style = getMatchStyleByLM(p_matchTypes, p_srcTuv, p_targetTuv,
+                        DUMMY_SUBID, unlock, p_repetitions);
+            }
+            else
+            {
+                style = STYLE_NO_MATCH;                
+            }
         }
         // Get the target page locale so we can set the DIR attribute
         // for right-to-left languages such as Hebrew and Arabic
@@ -3930,21 +4016,33 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         isExcluded = SegmentProtectionManager.isTuvExcluded(
                                 subElmt, itemType, p_excludedItemTypes);
 
+                        // For "localized" segment,if target is same with
+                        // source,commonly display as "no match" in blue
+                        // color,for segment with sub,display according to its
+                        // LMs.
                         style = getMatchStyle(p_matchTypes, p_srcTuv,
                                 p_targetTuv, subId, isExcluded, unlock,
                                 p_repetitions);
-
                         segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
                                 p_options.getViewMode());
-
                         segmentSrc = GxmlUtil.getDisplayHtml(subElmtSrc,
                                 dataType, p_options.getViewMode());
                         if (STYLE_UPDATED.equals(style)
                                 && segment.trim().equals(segmentSrc.trim()))
                         {
-                            style = STYLE_NO_MATCH;
+                            List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+                            if (subFlows != null && subFlows.size() > 0)
+                            {
+                                style = getMatchStyleByLM(p_matchTypes,
+                                        p_srcTuv, p_targetTuv, subId, unlock,
+                                        p_repetitions);
+                            }
+                            else
+                            {
+                                style = STYLE_NO_MATCH;
+                            }
                         }
-
+                        
                         result.append("<TR>");
                         result.append(getSubIdColumn(tuId, subId));
 
@@ -4252,7 +4350,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         String itemType = tu.getTuType();
 
         boolean isReadOnly = p_options.getEditMode() == EDITMODE_READ_ONLY
-                || (p_options.getEditMode() == EDITMODE_DEFAULT && SegmentProtectionManager
+                || (p_options.getEditMode() == EDITMODE_DEFAULT && EditHelper
                         .isTuvInProtectedState(p_targetTuv));
 
         boolean isExcluded = SegmentProtectionManager.isTuvExcluded(elem,
@@ -4261,7 +4359,9 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         // HTML class attribute that colors the segment in the editor
         String style = getMatchStyle(p_matchTypes, p_srcTuv, p_targetTuv,
                 DUMMY_SUBID, isExcluded, unlock, p_repetitions);
-
+        // For "localized" segment,if target is same with source,commonly
+        // display as "no match" in blue color,for segment with sub,display
+        // according to its LMs.
         String segment = GxmlUtil.getDisplayHtml(p_targetTuv.getGxmlElement(),
                 dataType, p_options.getViewMode());
         String segmentSrc = GxmlUtil.getDisplayHtml(p_srcTuv.getGxmlElement(),
@@ -4269,8 +4369,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
         if (STYLE_UPDATED.equals(style)
                 && segment.trim().equals(segmentSrc.trim()))
         {
-            style = STYLE_NO_MATCH;
+            List subFlows = p_targetTuv.getSubflowsAsGxmlElements();
+            if (subFlows != null && subFlows.size() > 0)
+            {
+                style = getMatchStyleByLM(p_matchTypes, p_srcTuv, p_targetTuv,
+                        DUMMY_SUBID, unlock, p_repetitions);
+            }
+            else
+            {
+                style = STYLE_NO_MATCH;
+            }
         }
+        
         // Get the target page locale so we can set the DIR attribute
         // for right-to-left languages such as Hebrew and Arabic
         boolean b_rtlLocale = EditUtil.isRTLLocale(p_targetPage
@@ -4422,11 +4532,13 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
 
                         isExcluded = SegmentProtectionManager.isTuvExcluded(
                                 subElmt, itemType, p_excludedItemTypes);
-
+                        // For "localized" segment,if target is same with
+                        // source,commonly display as "no match" in blue
+                        // color,for segment with sub,display according to its
+                        // LMs.
                         style = getMatchStyle(p_matchTypes, p_srcTuv,
                                 p_targetTuv, subId, isExcluded, unlock,
                                 p_repetitions);
-
                         segment = GxmlUtil.getDisplayHtml(subElmt, dataType,
                                 p_options.getViewMode());
                         segmentSrc = GxmlUtil.getDisplayHtml(subElmtSrc,
@@ -4434,7 +4546,18 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                         if (STYLE_UPDATED.equals(style)
                                 && segment.trim().equals(segmentSrc.trim()))
                         {
-                            style = STYLE_NO_MATCH;
+                            List subFlows = 
+                                p_targetTuv.getSubflowsAsGxmlElements();
+                            if (subFlows != null && subFlows.size() > 0)
+                            {
+                                style = getMatchStyleByLM(p_matchTypes,
+                                        p_srcTuv, p_targetTuv, subId, unlock,
+                                        p_repetitions);
+                            }
+                            else
+                            {
+                                style = STYLE_NO_MATCH;
+                            }
                         }
 
                         result.append("<TR>");
@@ -5320,7 +5443,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
     {
         StringBuffer result = new StringBuffer();
 
-        result.append("<TD NOWRAP>");
+        result.append("<TD STYLE=\"font-size: 10pt\" NOWRAP>");
         result.append(p_tuId);
         result.append('.');
         result.append(p_subId);
@@ -5523,6 +5646,14 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             return STYLE_UPDATED;
         }
 
+        return getMatchStyleByLM(p_matchTypes, p_srcTuv, p_trgTuv, p_subId,
+                p_unlock, p_repetitions);
+    }
+    
+    private String getMatchStyleByLM(MatchTypeStatistics p_matchTypes,
+            Tuv p_srcTuv, Tuv p_trgTuv, String p_subId, boolean p_unlock,
+            SegmentRepetitions p_repetitions)
+    {
         int state = p_matchTypes.getLingManagerMatchType(p_srcTuv.getId(),
                 p_subId);
 
@@ -5532,8 +5663,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
                 return STYLE_UNVERIFIED;
 
             case LeverageMatchLingManager.EXACT:
-                if (SegmentProtectionManager.isTuvInProtectedState(p_trgTuv)
-                        && !p_unlock)
+                if (EditHelper.isTuvInProtectedState(p_trgTuv) && !p_unlock)
                 {
                     return STYLE_LOCKED;
                 }
@@ -5588,7 +5718,7 @@ public class OnlineEditorManagerLocal implements OnlineEditorManager
             case LeverageMatchLingManager.UNVERIFIED:
                 return STYLE_SEGMENT_UNVERIFIED;
             case LeverageMatchLingManager.EXACT:
-                if (SegmentProtectionManager.isTuvInProtectedState(p_trgTuv))
+                if (EditHelper.isTuvInProtectedState(p_trgTuv))
                 {
                     return STYLE_SEGMENT_LOCKED;
                 }

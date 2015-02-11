@@ -1,0 +1,5 @@
+<outer v="1.0" >
+	<inner>
+		<text id="30"><![CDATA[blah blah <span style="font-weight:bold;">blah</span> blah blah <span style="text-decoration:underline">blah</span> blah blah blah – blah blah blah.]]></text>
+	</inner>
+</outer>

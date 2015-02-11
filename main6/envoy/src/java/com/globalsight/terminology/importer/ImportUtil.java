@@ -18,26 +18,21 @@
 package com.globalsight.terminology.importer;
 
 //import com.globalsight.importer.ImportOptions;
-import com.globalsight.importer.IReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.globalsight.util.ReaderResult;
-
-import com.globalsight.terminology.TermbaseException;
-import com.globalsight.terminology.TermbaseExceptionMessages;
-
+import com.globalsight.everest.webapp.pagehandler.terminology.management.FileUploadHelper;
 import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.ling.common.CodesetMapper;
-
 import org.apache.regexp.RE;
 
-import java.io.*;
-import java.util.*;
-
-import sun.io.MalformedInputException;
 import com.globalsight.terminology.Termbase;
 import com.globalsight.terminology.Definition.Language;
 import com.globalsight.terminology.importer.ImportOptions.ColumnDescriptor;
-import com.globalsight.terminology.importer.ImportOptions;
 
 import jxl.Cell;
 import jxl.Sheet;
@@ -278,5 +273,93 @@ public class ImportUtil
     	}
     	return p_columnName;
     }
+    
+    /**
+     * Remove the illegal char of XML file.
+     * 
+     * @param p_url
+     *            file path name
+     * @param p_charsetName
+     *            character set name
+     */
+    public static void filterateXmlIllegal(String p_url, String p_charsetName)
+    {
+        Reader reader = null;
+        File file = new File(p_url);
+        if (p_charsetName == null || p_charsetName.length() == 0)
+        {
+            p_charsetName = "UTF-8";
+        }
 
+        try
+        {
+            reader = new InputStreamReader(new FileInputStream(file),p_charsetName);
+            int tempchar;
+
+            String tempUrl = file.getParentFile().toString();
+            tempUrl = tempUrl + "\\" + "temp.xml";
+            FileOutputStream out = new FileOutputStream(tempUrl);
+
+            while ((tempchar = reader.read()) != -1)
+            { 
+                if (isXMLCharacter((char) tempchar))
+                {
+                    String s = "" + (char) tempchar;
+                    out.write(s.getBytes(p_charsetName));
+                }
+            }
+
+            reader.close();
+            out.flush();
+            out.close();
+            
+            file.delete();
+            File tempFile = new File(tempUrl);
+            tempFile.renameTo(new File(p_url));
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+     * Check if the char is illegal char of xml file
+     */
+    public static boolean isXMLCharacter(char c)
+    {
+        if (c >= 0x20 && c <= 0xD7FF)
+            return true;
+        if (c >= 0xE000 && c <= 0xFFFD)
+            return true;
+        if (c >= 0x10000 && c <= 0x10FFFF)
+            return true;
+
+        if (c == '\n')
+            return true;
+        if (c == '\r')
+            return true;
+        if (c == '\t')
+            return true;
+
+        return false;
+    }
+    
+    /*
+     * Remove the xml string illegal char
+     */
+    public static String removeIllegalXmlChar(String value)
+    {
+        String newStr = new String();
+        
+        for (int i = 0; i < value.length(); ++i)
+        {
+            if (isXMLCharacter(value.charAt(i)))
+            {
+                newStr = newStr + value.charAt(i);
+            }
+        }
+        
+        return newStr;
+    }
 }

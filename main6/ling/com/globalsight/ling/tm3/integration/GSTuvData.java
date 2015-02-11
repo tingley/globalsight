@@ -24,6 +24,7 @@ import com.globalsight.util.GlobalSightLocale;
 public class GSTuvData implements TM3Data {
 
     private String data;
+    private String parsedData = null;
     private GlobalSightLocale locale;
     private Long fingerprint;
     
@@ -47,10 +48,9 @@ public class GSTuvData implements TM3Data {
     public GlobalSightLocale getLocale() {
         return locale;
     }
-    
-    @Override
-    public long getFingerprint() {
-        if (fingerprint == null) {
+
+    protected String getParsedData() {
+        if (parsedData == null) {
             try
             {
                 // Use the SegmentTmTuv handler, rather than the
@@ -60,12 +60,20 @@ public class GSTuvData implements TM3Data {
                 DiplomatBasicParser diplomatParser =
                     new DiplomatBasicParser(handler);
                 diplomatParser.parse(getData());
-                fingerprint = Fingerprint.fromString(handler.toString());
+                parsedData = handler.toString();
             }
             catch (Exception ex)
             {
                 throw new LingManagerException(ex);
             }
+        }
+        return parsedData;
+    }
+    
+    @Override
+    public long getFingerprint() {
+        if (fingerprint == null) {
+            fingerprint = Fingerprint.fromString(getParsedData());
         }
         return fingerprint;
     }
@@ -87,12 +95,19 @@ public class GSTuvData implements TM3Data {
         return fps;
     }
 
+    /**
+     * Slightly unusual equals() implementation, because a string
+     * compare on the underlying XML can give false *negatives* because
+     * of the presence of optional attributes in the XML markup.  To do
+     * a real comparison, we need to compare the parsed content, just
+     * like we do for fingerprint comparison.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || !(o instanceof GSTuvData)) {
             return false;
         }
-        return getData().equals(((GSTuvData)o).getData()) &&
+        return getParsedData().equals(((GSTuvData)o).getParsedData()) &&
                getLocale().equals(((GSTuvData)o).getLocale());
     }
  

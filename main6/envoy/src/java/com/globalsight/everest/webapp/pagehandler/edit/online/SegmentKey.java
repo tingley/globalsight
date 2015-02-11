@@ -85,7 +85,7 @@ public class SegmentKey extends PersistentObject
     
     public int hashCode()
     {
-        return 0;
+        return currentKey.hashCode();
     }
     
     public String toString()

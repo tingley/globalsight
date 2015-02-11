@@ -459,6 +459,19 @@ public class PageTemplate extends PersistentObject
                         }
                     }
                 }
+                // For PO file format, revert original target content in some cases.
+                else if (IFormatNames.FORMAT_PO.equals(tu.getDataType())
+                        && tu instanceof TuImpl)
+                {
+                    boolean revertTrgCase1 =
+                        sourceTuv.getGxml().equals(targetTuv.getGxml())
+                            && targetTuv.getState().getValue() 
+                                == TuvState.NOT_LOCALIZED.getValue();
+                    if (revertTrgCase1)
+                    {
+                        tuvString = tu.getXliffTarget();
+                    }
+                }
 
                 // if the job creating file is from worldserver, then add the
                 // leverage match results into the alt-trans parts

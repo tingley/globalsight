@@ -80,7 +80,7 @@ public class ConfigMainHandler extends PageHandler {
             //For this parameter is system level parameter, not company level
             //SystemConfigParamNames.CUSTOMER_INSTALL_KEY,
             SystemConfigParamNames.IS_DELL,
-            SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED,
+            //SystemConfigParamNames.MY_JOBS_DAYS_RETRIEVED,
             // Add parameters for master layer translate switch
             // move ADOBE_XMP_TRANSLATE, INDESIGN_MASTER_TRANSLATE to filter
             //SystemConfigParamNames.ADOBE_XMP_TRANSLATE,

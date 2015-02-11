@@ -90,7 +90,40 @@ function validateForm()
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
     if (!isInteger(searchForm.<%=creationEnd%>.value))
         return ('<%=bundle.getString("jsmsg_job_search_bad_date")%>');
+    if(searchForm.reportOnJobId.checked)
+    {
+        var patrn = /^[0-9,\s]*$/;
+        if(searchForm.jobIds.value==""||!patrn.exec(searchForm.jobIds.value))
+        {
+           return ('<%=bundle.getString("lb_invalid_jobid")%>');
+        }
+    }
     return "";
+}
+
+function setDisable(reportOn)
+{
+	if(reportOn=="jobStatus")
+	{
+		searchForm.jobIds.disabled=true;
+		searchForm.jobStatus.disabled=false;
+		searchForm.projectId.disabled=false;
+		searchForm.<%=creationStart%>.disabled=false;
+		searchForm.<%=creationStartOptions%>.disabled=false;
+		searchForm.<%=creationEnd%>.disabled=false;
+		searchForm.<%=creationEndOptions%>.disabled=false;
+	}
+	else
+	{
+		searchForm.jobIds.disabled=false;
+		searchForm.jobStatus.disabled=true;
+		searchForm.projectId.disabled=true;
+		searchForm.<%=creationStart%>.disabled=true;
+		searchForm.<%=creationStartOptions%>.disabled=true;
+		searchForm.<%=creationEnd%>.disabled=true;
+		searchForm.<%=creationEndOptions%>.disabled=true;
+
+    }
 }
 
 function submitForm()
@@ -183,18 +216,6 @@ function submitForm()
 </td>
 </tr>
 
-<tr>
-<td class="standardText"></td>
-<td class="standardText" VALIGN="BOTTOM">
-<input type="checkbox" name="states" value="ready" checked> <%=bundle.getString("include_ready_jobs")%><br>
-<input type="checkbox" name="states" value="pending"> <%=bundle.getString("include_pending_jobs")%><br>
-<input type="checkbox" name="states" value="progress"> <%=bundle.getString("include_in_progress_jobs")%><br>
-<input type="checkbox" name="states" value="localized"> <%=bundle.getString("include_localized_jobs")%><br>
-<input type="checkbox" name="states" value="exported"> <%=bundle.getString("include_exported_jobs")%><br>
-<input type="checkbox" name="states" value="archived"> <%=bundle.getString("include_archived_jobs")%><br>
-</td>
-</tr>
-
 <INPUT NAME="status" TYPE="HIDDEN" VALUE='<%=Job.DISPATCHED%>'/>
 
 <tr>
@@ -244,8 +265,45 @@ function submitForm()
 </select>
 </td>
 </tr>
+
 <tr>
-<td><input type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
+<td class="standardText"><%=bundle.getString("lb_report_on")%></td>
+<td class="standardText" VALIGN="BOTTOM">
+<table cellspacing=0>
+<tr>
+<td>
+<input type="radio" id="reportOnStatus" name="reportOn" checked onclick="setDisable('jobStatus')" value="jobStatus"/><%=bundle.getString("lb_job_status")%>:</td>
+<td>
+<select id="jobStatus" name="jobStatus" multiple="true" size=4>
+<option value="*" selected>&lt;<%=bundle.getString("all")%>&gt;</OPTION>
+<option VALUE="ready"><%=bundle.getString("lb_ready")%></OPTION>
+<option VALUE="progress"><%=bundle.getString("lb_inprogress")%></OPTION>
+<option VALUE="localized"><%=bundle.getString("lb_localized")%></OPTION>
+<option VALUE="exported"><%=bundle.getString("lb_exported")%></OPTION>
+<option VALUE="archived"><%=bundle.getString("lb_archived")%></OPTION>
+</select>
+</td>
+</tr>
+<tr>
+<td>
+<input type="radio" id="reportOnJobId" name="reportOn" onclick="setDisable('jobIds')" value="jobIds"/><%=bundle.getString("lb_job_ids")%>
+</td>
+<td><input type="text" id="jobIds" name="jobIds" value="" disabled><%=bundle.getString("lb_job_ids_description")%></td>
+</tr>
+</table>
+</td>
+</tr>
+
+<tr>
+<td><%=bundle.getString("lb_export_as")%></td>
+<td>
+<input type="radio" name="exportFormat" value="xls" checked>XLS<br>
+<input type="radio" name="exportFormat" value="csv">CSV
+</td>
+</tr>
+
+<tr>
+<td><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_shutdownSubmit")%>" onClick="submitForm()"></td>
 <TD><INPUT type="BUTTON" VALUE="<%=bundle.getString("lb_cancel")%>" onClick="window.close()"></TD>
 </tr>
 </table>

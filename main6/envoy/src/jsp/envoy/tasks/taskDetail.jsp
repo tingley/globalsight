@@ -337,7 +337,6 @@ private String qualifyActivity(String activity){
     
     String downloadReportUrl = downloadreport.getPageURL();
   
-
     String dAbbr = bundle.getString("lb_abbreviation_day");
     String hAbbr = bundle.getString("lb_abbreviation_hour");
     String mAbbr = bundle.getString("lb_abbreviation_minute");
@@ -619,7 +618,7 @@ private String qualifyActivity(String activity){
     //Create the downloadLink for the download button
     StringBuffer downloadLink = new StringBuffer("/globalsight/ControlServlet" +
                                 "?linkName=jobDownload&pageName=TK2" + 
-                                "&firstEntry=true");
+                                "&firstEntry=true&fromTaskDetail=true");
     downloadLink.append("&");
     downloadLink.append(DownloadFileHandler.PARAM_JOB_ID);
     downloadLink.append("=");

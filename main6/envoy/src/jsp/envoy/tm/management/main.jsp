@@ -477,6 +477,31 @@ function doLoad()
   loadGuides();
 
   eval("<%=errorScript%>");
+  
+  <%
+  int enableReindex = 0;
+  if(tms!=null&&tms.size()>0)
+  {
+     Iterator tmIter = tms.iterator();
+     while (tmIter.hasNext())
+     {
+       ProjectTM projectTm = (ProjectTM) tmIter.next();
+	   if(projectTm.getTm3Id()==null)
+	   {
+	      enableReindex = 1;
+	      break;
+	   }	
+     }
+ }
+ %>
+ if(<%=enableReindex%>==1)
+  {
+    if (TMForm.reindexBtn)
+    {
+       TMForm.reindexBtn.disabled = false;
+    }
+  }
+  
 }
 </SCRIPT>
 </HEAD>
@@ -595,7 +620,7 @@ function doLoad()
          TITLE="<%=bundle.getString("helper_text_tm_export_tm")%>">
     </amb:permission>
     <amb:permission name="<%=Permission.TM_REINDEX%>" >
-      <INPUT CLASS="standardText" TYPE="BUTTON" name="reindexBtn"
+      <INPUT CLASS="standardText" TYPE="BUTTON" name="reindexBtn" disabled
          VALUE="<%=bundle.getString("lb_reindex")%>"
          ID="idReindex" onclick="reindexTM()"
          TITLE="<%=bundle.getString("helper_text_tm_reindex_tm")%>">

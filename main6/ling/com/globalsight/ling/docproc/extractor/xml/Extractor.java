@@ -551,14 +551,30 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 }
                 else
                 {
-                    boolean isInline = Rule.isInline(m_ruleMap, getChildNode(
-                            parentNode, 1));
-                    boolean isPreserveWS = Rule.isPreserveWhiteSpace(m_ruleMap,
-                            parentNode, m_xmlFilterHelper
-                                    .isPreserveWhiteSpaces());
-                    String temp = m_xmlFilterHelper.processText(nodeValue,
-                            isInline, isPreserveWS);
-                    outputExtractedStuff(temp, isTranslatable, isPreserveWS);
+                    boolean isInline = Rule.isInline(m_ruleMap, getChildNode(parentNode, 1));
+                    boolean isPreserveWS = Rule.isPreserveWhiteSpace(m_ruleMap, parentNode,
+                            m_xmlFilterHelper.isPreserveWhiteSpaces());
+                    boolean outputLinkTipInInstrText = isOfficeTipInInstrText(parentNode);
+                    String temp = m_xmlFilterHelper.processText(nodeValue, isInline, isPreserveWS);
+                    
+                    if (outputLinkTipInInstrText)
+                    {
+                        int indexOfO = nodeValue.indexOf("\\o");
+                        int indexOfA = nodeValue.indexOf("\"", indexOfO);
+                        int indexOfB = nodeValue.indexOf("\"", indexOfA + 1);
+
+                        String pre = nodeValue.substring(0, indexOfA + 1);
+                        String tip = nodeValue.substring(indexOfA + 1, indexOfB);
+                        String suf = nodeValue.substring(indexOfB);
+
+                        outputSkeleton(pre);
+                        outputExtractedStuff(tip, isTranslatable, isPreserveWS);
+                        outputSkeleton(suf);
+                    }
+                    else
+                    {
+                        outputExtractedStuff(temp, isTranslatable, isPreserveWS);
+                    }
                 }
                 setSid(sid);
             }
@@ -897,6 +913,8 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         isEmbeddable = Rule.isInline(m_ruleMap, p_node);
         boolean isInternal = Rule.isInternal(m_ruleMap, p_node);
         boolean isPreserveWS = false;
+        boolean isInstrText = isOfficeInstrText(name);
+        boolean outputLinkTipInInstrText = isOfficeTipInInstrText(p_node);
 
         if (extracts)
         {
@@ -1127,7 +1145,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                         outputAttributes(wrprNode, wrprNode.getAttributes(), isEmbeddable, false);
                         outputExtractedStuff("&gt;", isTranslatable, isPreserveWS);
 
-                        outputChildUsePh(wrprNode, isTranslatable, isPreserveWS);
+                        outputChildUsePh(wrprNode, isTranslatable, isPreserveWS, false);
 
                         outputExtractedStuff("&lt;/" + wrprNodeName + "&gt;", isTranslatable,
                                 isPreserveWS);
@@ -1151,7 +1169,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
 
             if (isEmbeddable)
             {
-                if (!isEmptyTag)
+                if (!isEmptyTag && !outputLinkTipInInstrText)
                 {
                     // usePhForNode = checkIsAllNonExtract(p_node);
                     usePhForNode = true;
@@ -1188,6 +1206,11 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                                 + (type != null ? type : name) + "\"";
                     }
     
+                    if (outputLinkTipInInstrText)
+                    {
+                        stuff += " isTranslate=\"false\" innerTextNodeIndex=\"\"";
+                    }
+                    
                     if (isErasable)
                     {
                         stuff += " erasable=\"yes\"";
@@ -1242,7 +1265,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 if (usePhForNode)
                 {
                     outputExtractedStuff("&gt;", isTranslatable, isPreserveWS);
-                    outputChildUsePh(p_node, isTranslatable, isPreserveWS);
+                    outputChildUsePh(p_node, isTranslatable, isPreserveWS, isInstrText);
                     outputExtractedStuff("&lt;/" + name + "&gt;</ph>",
                             isTranslatable, isPreserveWS);
                     hasProcessInlineChildNode = true;
@@ -1266,18 +1289,19 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     {
                         if (p_node.getChildNodes().getLength() == 1)
                         {
-                            outputExtractedStuff("&gt;", isTranslatable, isPreserveWS);
-                            domNodeVisitor(p_node.getFirstChild(), true,
-                                    isTranslatable, switchesExtraction);
-                            outputExtractedStuff("</bpt>", isTranslatable, isPreserveWS);
+                            String endtext = outputLinkTipInInstrText ? "&gt;</bpt>" : "&gt;";
+                            outputExtractedStuff(endtext, isTranslatable, isPreserveWS);
+                            domNodeVisitor(p_node.getFirstChild(), true, isTranslatable,
+                                    switchesExtraction);
+                            String endtext2 = outputLinkTipInInstrText ? "" : "</bpt>";
+                            outputExtractedStuff(endtext2, isTranslatable, isPreserveWS);
                             hasProcessInlineChildNode = true;
                         }
                         else
                         {
                             outputExtractedStuff("&gt;", isTranslatable, isPreserveWS);
-                            domNodeVisitor(p_node.getFirstChild(), false,
-                                    isTranslatable, switchesExtraction,
-                                    isInExtraction);
+                            domNodeVisitor(p_node.getFirstChild(), false, isTranslatable,
+                                    switchesExtraction, isInExtraction);
                             if (isInExtraction)
                             {
                                 outputExtractedStuff("</bpt>", isTranslatable, isPreserveWS);
@@ -1443,6 +1467,38 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         }
     }
 
+    private boolean isOfficeTipInInstrText(Node p_node)
+    {
+        if (isOfficeInstrText(p_node.getNodeName()))
+        {
+            try
+            {
+                String text = p_node.getFirstChild().getNodeValue();
+                if (text.contains(" \\o \""))
+                {
+                    int index = text.indexOf(" \\o \"");
+                    int index2 = text.indexOf("\"", index + 5);
+                    
+                    if (index2 != -1)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception eee)
+            {
+                return false;
+            }
+        }
+        
+        return false;
+    }
+
+    private boolean isOfficeInstrText(String name)
+    {
+        return m_isOfficeXml && "w:instrText".equals(name);
+    }
+
     private boolean isWRNode(String name)
     {
         return "w:r r a:r".contains(name);
@@ -1494,7 +1550,7 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
         return false;
     }
 
-    private void outputChildUsePh(Node p_node, boolean isTranslatable, boolean isPreserveWS)
+    private void outputChildUsePh(Node p_node, boolean isTranslatable, boolean isPreserveWS, boolean isInstrText)
     {
         NodeList list = p_node.getChildNodes();
         if (list != null)
@@ -1528,14 +1584,22 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                     else
                     {
                         outputExtractedStuff("&gt;", isTranslatable, isPreserveWS);
-                        outputChildUsePh(node, isTranslatable, isPreserveWS);
+                        outputChildUsePh(node, isTranslatable, isPreserveWS, isInstrText);
                         outputExtractedStuff("&lt;/" + name + "&gt;",
                                 isTranslatable, isPreserveWS);
                     }
                 }
                 else if (node.getNodeType() == Node.TEXT_NODE)
                 {
-                    outputExtractedStuff(node.getNodeValue(), isTranslatable, isPreserveWS);
+                    String text = node.getNodeValue();
+                    String temp = m_xmlEncoder.encodeStringBasic(text);
+
+                    if (!isInstrText)
+                    {
+                        temp = m_xmlEncoder.encodeStringBasic(temp);
+                    }
+
+                    outputExtractedStuff(temp, isTranslatable, isPreserveWS);
                 }
                 else
                 {
@@ -1543,7 +1607,6 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
                 }
             }
         }
-        
     }
     
     private boolean checkIsAllNonExtract(Node p_node)
@@ -2344,5 +2407,10 @@ public class Extractor extends AbstractExtractor implements ExtractorInterface,
     public void setIsIdmlXml(boolean mIsIdmlXml)
     {
         m_isIdmlXml = mIsIdmlXml;
+    }
+    
+    public boolean isOfficeXml()
+    {
+        return m_isOfficeXml;
     }
 }

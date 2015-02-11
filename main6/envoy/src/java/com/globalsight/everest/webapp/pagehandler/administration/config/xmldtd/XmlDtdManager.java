@@ -34,6 +34,7 @@ import org.dom4j.io.SAXReader;
 import com.globalsight.cxe.entity.fileprofile.FileProfileImpl;
 import com.globalsight.cxe.entity.xmldtd.XmlDtd;
 import com.globalsight.cxe.entity.xmldtd.XmlDtdImpl;
+import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.comment.CommentImpl;
 import com.globalsight.everest.company.CompanyThreadLocal;
 import com.globalsight.everest.company.CompanyWrapper;
@@ -407,7 +408,7 @@ public class XmlDtdManager
 
                 try
                 {
-                    File xml = helper.getTargetXmlPage(targetPage.getId());
+                    File xml = helper.getTargetXmlPage(targetPage.getId(), CxeMessageType.XML_IMPORTED_EVENT);
                     validateXmlFile(xmlDtd.getId(), xml);
                 }
                 catch (IOException e)

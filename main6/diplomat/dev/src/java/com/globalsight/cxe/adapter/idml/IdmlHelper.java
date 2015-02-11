@@ -62,6 +62,11 @@ public class IdmlHelper
     
     private static final String CONTENT = "content.xml";
     
+    private static final String LINE_BREAK = FileUtil.unUnicode("\u2028");
+    private static final String NONBREEAKING_SPACE = FileUtil.unUnicode("\u00A0");
+    private static final String PARAGRAPH_START = "<ParagraphStyleRange";
+    private static final String PARAGRAPH_END = "</ParagraphStyleRange>";
+    
     private static final String METADATA = "META-INF" + File.separator
             + "metadata.xml";
 
@@ -98,6 +103,15 @@ public class IdmlHelper
     {
         m_cxeMessage = p_cxeMessage;
         m_eventFlow = new EventFlow(p_cxeMessage.getEventFlowXml());
+    }
+    
+    /**
+     * Just for junit test
+     * @deprecated
+     */
+    public IdmlHelper()
+    {
+
     }
 
     /**
@@ -438,14 +452,34 @@ public class IdmlHelper
 
         File designmap = new File(dir + "/designmap.xml");
         String content = FileUtil.readFile(designmap, "utf-8");
-
-        Pattern p = Pattern.compile("<idPkg:Story src=\"([^\"]*?/Story_([^\"]*?).xml)\"/>");
-        Matcher m = p.matcher(content);
-
         StringBuffer s = new StringBuffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
         s.append(FileUtil.lineSeparator);
         s.append("<stories>");
+        
+        if (isTranslateFileInfo())
+        {
+            String path = dir + File.separator + METADATA;
+            File f = new File(path);
+            if (f.exists())
+            {
+                String c = FileUtil.readFile(f, "utf-8");
+                c = c.replaceFirst("<\\?xml ", "<xml ");
+                c = c.replaceFirst("\"\\?>", "\"/>");
+                c = formatForImport(c);
+                
+                s.append(FileUtil.lineSeparator);
+                s.append("<story name=\"").append(METADATA).append("\">");
+                s.append(FileUtil.lineSeparator);
+                s.append(c);
+                s.append(FileUtil.lineSeparator);
+                s.append("</story>");
+            }
+        }
+        
+
+        Pattern p = Pattern.compile("<idPkg:Story src=\"([^\"]*?/Story_([^\"]*?).xml)\"/>");
+        Matcher m = p.matcher(content);
 
         while (m.find())
         {
@@ -473,26 +507,6 @@ public class IdmlHelper
             s.append("</story>");
         }
         
-        if (isTranslateFileInfo())
-        {
-            String path = dir + File.separator + METADATA;
-            File f = new File(path);
-            if (f.exists())
-            {
-                String c = FileUtil.readFile(f, "utf-8");
-                c = c.replaceFirst("<\\?xml ", "<xml ");
-                c = c.replaceFirst("\"\\?>", "\"/>");
-                c = formatForImport(c);
-                
-                s.append(FileUtil.lineSeparator);
-                s.append("<story name=\"").append(METADATA).append("\">");
-                s.append(FileUtil.lineSeparator);
-                s.append(c);
-                s.append(FileUtil.lineSeparator);
-                s.append("</story>");
-            }
-        }
-
         s.append(FileUtil.lineSeparator);
         s.append("</stories>");
 
@@ -502,7 +516,33 @@ public class IdmlHelper
         return f;
     }
     
-    private boolean isTranslateFileInfo()
+    private String optimizeForOddChar(String s)
+    {
+        if (!isExtractLineBreak())
+        {
+            s = removeLinkBreak(s);
+        }
+        
+        if (isReplaceNonbreakingSpace())
+        {
+            s = replaceSpace(s);
+        }
+        
+        return s;
+    }
+    
+    private String removeLinkBreak(String s)
+    {
+        s = s.replace(LINE_BREAK, "");
+        return s;
+    }
+    
+    private String replaceSpace(String s)
+    {
+        return s.replace(NONBREEAKING_SPACE, " ");
+    }
+    
+    private InddFilter getInddFilter()
     {
         if (filter == null)
         {
@@ -514,7 +554,23 @@ public class IdmlHelper
             filter = new InddFilter();
         }
         
-        return filter.getTranslateFileInfo();
+        return filter;
+    }
+    
+    private boolean isTranslateFileInfo()
+    {
+        return getInddFilter().getTranslateFileInfo();
+    }
+    
+    private boolean isExtractLineBreak()
+    {
+        return getInddFilter().getExtractLineBreak();
+    }
+    
+    private boolean isReplaceNonbreakingSpace()
+    {
+      
+        return getInddFilter().isReplaceNonbreakingSpace();
     }
     
     /**
@@ -1002,23 +1058,59 @@ public class IdmlHelper
         return temp.toString();
     }
     
-    private String formatForImport(String s)
+    private int getIndexOfParaStart(StringBuffer s, int index)
     {
+        int n = s.indexOf(PARAGRAPH_START, index + 1);
+        if (n < 0)
+            return n;
+        
+        int n2 = s.indexOf(">", n);
+        
+        if (s.charAt(n2 - 1) == '/')
+            return getIndexOfParaStart(s, n2);
+        
+        return n;
+    }
+    
+    public String formatForImport(String s)
+    {
+        s = optimizeForOddChar(s); 
         StringBuffer temp = new StringBuffer(s);
-
-        Pattern p = Pattern
-                .compile("<ParagraphStyleRange[^>]*?>([\\d\\D]*?)</ParagraphStyleRange>");
-        Matcher m = p.matcher(s);
-        int index = -1;
-        while (m.find())
+        
+        int parL = PARAGRAPH_END.length();
+        int index = getIndexOfParaStart(temp, -1);
+        
+        while (index > 0)
         {
-            String content = m.group();
+            int n2 = temp.indexOf(PARAGRAPH_END, index);
+            
+            if (n2 < 0)
+            {
+                break;
+            }
+            
+            String content = temp.substring(index, n2 + parL);
+            String temContent = content.replaceAll("<ParagraphStyleRange[^>]*/>", "");
+            
+            while (temContent.split(PARAGRAPH_START).length != temContent.split(PARAGRAPH_END).length + 1)
+            {
+                n2 = s.indexOf(PARAGRAPH_END, n2 + 1);
+                if (n2 < 0)
+                    break;
+                
+                content = temp.substring(index, n2 + parL);
+                temContent = content.replaceAll("<ParagraphStyleRange[^>]*/>", "");
+            }
+            
             String content2 = trimSpace(content);
-            index = temp.indexOf(content, index + 1);
             temp = temp.replace(index, index + content.length(), content2);
+            
+            index = getIndexOfParaStart(temp, index + 1);
         }
-
-        return temp.toString();
+        
+        String range = temp.toString();
+        IdmlTagHelper h = new IdmlTagHelper();
+        return h.mergeTags(range);
     }
     
     public static String formatForOfflineDownload (String s)

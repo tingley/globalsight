@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -88,7 +89,11 @@ public class UniqueSegmentRepositoryForCorpus
     // returns a list of identical segment as the given tuv in the page.
     public List<BaseTmTuv> getIdenticalSegment(BaseTmTuv p_tuv)
     {
-        return m_identicalTuvs.get(p_tuv);
+        List<BaseTmTuv> tuvs = m_identicalTuvs.get(p_tuv);
+        if (tuvs == null) {
+            tuvs = Collections.emptyList();
+        }
+        return tuvs;
     }
 
 

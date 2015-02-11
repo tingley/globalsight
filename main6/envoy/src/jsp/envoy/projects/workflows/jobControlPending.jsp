@@ -61,6 +61,8 @@
     String refreshUrl = pendingURL;
     
     String helperText = bundle.getString("helper_text_job_pending");
+    
+    /*
     int myJobsDaysRetrieved = 0;
     try
     {
@@ -80,6 +82,7 @@
     {
         // assume 0
     }
+    */
 %>                       
 <HTML>
 <HEAD>

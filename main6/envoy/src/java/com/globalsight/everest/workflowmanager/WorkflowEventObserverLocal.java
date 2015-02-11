@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.globalsight.cxe.entity.exportlocation.ExportLocation;
+import com.globalsight.cxe.entity.fileprofile.FileProfile;
 import com.globalsight.cxe.persistence.exportlocation.ExportLocationPersistenceManager;
 import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.integration.ling.LingServerProxy;
@@ -221,19 +222,32 @@ public class WorkflowEventObserverLocal implements WorkflowEventObserver
             wfClone.setExportDate(new Date());
             possiblyUpdateJobForExport(wfClone, Workflow.EXPORTED);
             
-            //re-index the new added entry
-            String termbaseName = wfClone.getJob().getL10nProfile().getProject().getTermbaseName();
-            Termbase tb = TermbaseList.get(termbaseName);
-            
-            try{
-                if(!tb.isIndexing()) {
-                    ITermbaseManager s_manager = ServerProxy.getTermbaseManager();
-                    ITermbase itb = s_manager.connect(termbaseName, 
-                            wfClone.getJob().getL10nProfile().getProject().getProjectManagerId(), "");
-                    IIndexManager indexer = itb.getIndexer();
-                    indexer.doIndex();
+            // re-index the new added entry
+            FileProfile fileProfile = wfClone.getJob().getFileProfile();
+
+            if (fileProfile.getTerminologyApproval() == 1)
+            {
+                String termbaseName = wfClone.getJob().getL10nProfile()
+                        .getProject().getTermbaseName();
+                Termbase tb = TermbaseList.get(termbaseName);
+
+                try
+                {
+                    if (!tb.isIndexing())
+                    {
+                        ITermbaseManager s_manager = ServerProxy
+                                .getTermbaseManager();
+                        ITermbase itb = s_manager.connect(termbaseName, wfClone
+                                .getJob().getL10nProfile().getProject()
+                                .getProjectManagerId(), "");
+                        IIndexManager indexer = itb.getIndexer();
+                        indexer.doIndex();
+                    }
                 }
-            }catch(Exception e){}
+                catch (Exception e)
+                {
+                }
+            }
 
             /*
              * for desktop icon download Ambassador.getDownloadableJobs(...)

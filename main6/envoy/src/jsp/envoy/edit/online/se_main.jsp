@@ -174,7 +174,9 @@ if (newStatus != null)
 
 %>
 
-<%@page import="com.globalsight.everest.edit.SegmentProtectionManager"%><HTML>
+<%@page import="com.globalsight.everest.edit.SegmentProtectionManager"%>
+<HTML>
+<!-- This is envoy\edit\online\se_main.jsp-->
 <HEAD>
 <TITLE><%=lb_title%></TITLE>
 <script src="/globalsight/envoy/edit/online/richedit.js"></script>
@@ -542,7 +544,15 @@ function HasFormattingTags()
 
 function openPtags()
 {
-	return datatype == "xlf";
+	if (datatype == "xlf" || datatype == "mif" || datatype == "fm" 
+		|| datatype == "po")
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 // PTags are all segment-internal tags, including formatting tags

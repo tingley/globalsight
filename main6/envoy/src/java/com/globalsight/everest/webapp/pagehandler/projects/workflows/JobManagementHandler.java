@@ -1782,7 +1782,9 @@ public abstract class JobManagementHandler extends PageHandler
                 list.add(status);
                 if (status.equals(Job.PENDING))
                 {
+                    list.add(Job.BATCHRESERVED);
                     list.add(Job.IMPORTFAILED);
+                    list.add(Job.ADD_FILE);
                 }
                 else if (status.equals(Job.EXPORTED))
                 {

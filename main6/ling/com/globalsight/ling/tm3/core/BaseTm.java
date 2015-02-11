@@ -348,7 +348,7 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
    
     @Override
     public TM3Saver<T> createSaver() {
-        return new TM3Saver<T>(this);
+        return new BaseSaver<T>(this);
     }
     
     @Override
@@ -490,13 +490,25 @@ abstract class BaseTm<T extends TM3Data> implements TM3Tm<T> {
                 .getExactMatches(conn, source, srcLocale, null,
                                  inlineAttributes, customAttributes, false, true);
         List<TM3Tuv<T>> filtered = new ArrayList<TM3Tuv<T>>();
-        int desiredAttrCount = inlineAttributes.size() + customAttributes.size();
+        int desiredAttrCount = requiredCount(inlineAttributes.keySet()) +
+                               requiredCount(customAttributes.keySet());
         for (TM3Tuv<T> tuv : tuvs) {
-            if (tuv.getTu().getAttributes().size() == desiredAttrCount) {
+            if (requiredCount(tuv.getTu().getAttributes().keySet()) 
+                                        == desiredAttrCount) {
                 filtered.add(tuv);
             }
         }
         return filtered.size() == 0 ? null : filtered.get(0).getTu();
+    }
+
+    private int requiredCount(Set<TM3Attribute> attrs) {
+        int required = 0;
+        for (TM3Attribute attr : attrs) {
+            if (attr.getAffectsIdentity()) {
+                required++;
+            }
+        }
+        return required;
     }
 
     @Override

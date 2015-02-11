@@ -16,6 +16,7 @@
  */
 package com.globalsight.ling.docproc;
 
+import com.globalsight.cxe.adapter.msoffice.OfficeXmlHelper;
 import com.globalsight.ling.common.DiplomatBasicParser;
 import com.globalsight.ling.common.DiplomatBasicHandler;
 import com.globalsight.ling.common.DiplomatBasicParserException;
@@ -51,6 +52,7 @@ public class DiplomatPostProcessor
     private StringBuffer m_currentSegment = new StringBuffer();
     private int m_externalMatchingCount = 1;
     private Stack m_tmxStateStack = null;
+    private String formatName = null;
 
     //
     // Constructor
@@ -351,7 +353,7 @@ public class DiplomatPostProcessor
     {
         Integer state = (Integer)m_tmxStateStack.peek();
 
-        if (state == s_TEXT)
+        if (state == s_TEXT && !OfficeXmlHelper.OFFICE_XML.equalsIgnoreCase(formatName))
         {
             m_currentSegment.append(wrapNbsp(p_text));
         }
@@ -369,5 +371,15 @@ public class DiplomatPostProcessor
     public void handleStop()
         throws DiplomatBasicParserException
     {
+    }
+
+    public String getFormatName()
+    {
+        return formatName;
+    }
+
+    public void setFormatName(String formatName)
+    {
+        this.formatName = formatName;
     }
 }

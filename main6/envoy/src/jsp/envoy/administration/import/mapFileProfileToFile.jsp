@@ -170,15 +170,17 @@
 
       if (selFiles != null && selFiles.length > 0)
       {
-        fileString += selFiles[0].firstChild.data;
+
+        fileString += encodeURIComponent(selFiles[0].firstChild.data).replace(/%C2%A0/g, "%20");
         for (var idx=1 ; idx < selFiles.length; idx++)
         {
-          fileString += "," + selFiles[idx].firstChild.data;
+          var selfFile = encodeURIComponent(selFiles[idx].firstChild.data).replace(/%C2%A0/g, "%20");
+          fileString += "," + selfFile;
         }
          
         // For the bug AMB177 that the name include some special chars, such as '&'.
         // replace Non-breaking space(&nbsp;) with normal space.
-        fileString = encodeURIComponent(fileString).replace(/%C2%A0/g, "%20");
+        //fileString = encodeURIComponent(fileString).replace(/%C2%A0/g, "%20");
       }
       else
       {

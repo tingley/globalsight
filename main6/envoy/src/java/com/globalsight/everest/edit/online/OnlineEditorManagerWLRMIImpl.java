@@ -304,4 +304,17 @@ public class OnlineEditorManagerWLRMIImpl
     {
         return m_localReference.getMatchTypes(p_sourcePageId, p_targetLocaleId);
     }
+    
+    /**
+     * Set TM matches for "SegmentView" object.This method allows to reset
+     * TM matches separately.
+     */
+    public SegmentView addSegmentMatches(SegmentView p_view,
+            EditorState p_state, long p_tuId, long p_tuvId, long p_subId,
+            long p_sourceLocaleId, long p_targetLocaleId, boolean p_releverage)
+    {
+        return m_localReference.addSegmentMatches(p_view, p_state, p_tuId,
+                p_tuvId, p_subId, p_sourceLocaleId, p_targetLocaleId,
+                p_releverage);
+    }
 }

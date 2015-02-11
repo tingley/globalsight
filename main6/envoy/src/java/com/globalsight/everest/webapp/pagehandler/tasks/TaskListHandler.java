@@ -146,10 +146,10 @@ public class TaskListHandler extends PageHandler
             }
         } 
         try {
-        	handleTaskRequest(p_request, p_response, sess, user);
+            handleTaskRequest(p_request, p_response, sess, user);
         } catch (NamingException ne) {
-        	//TODO error info
-        	log.error(ne);
+            //TODO error info
+            log.error(ne);
         }
         selectTasksForDisplay(p_request, sess, user);
 
@@ -190,45 +190,13 @@ public class TaskListHandler extends PageHandler
             HttpServletResponse p_response, HttpSession p_session, User p_user)
             throws ServletException, IOException, TaskException, GeneralException, NamingException
     {
-        String userId = p_user.getUserId();
-
         String action = p_request.getParameter(TASK_ACTION);
         if (TASK_ACTION_ACCEPTALL.equals(action))
         {
             acceptAllTasks(p_session, p_request, p_user);
         }
 
-        if (TASK_ACTION_FINISH.equals(action))
-        {
-            Task task = (Task) TaskHelper
-                    .retrieveObject(p_session, WORK_OBJECT);
-
-            SessionManager sessionMgr = (SessionManager) p_session
-                    .getAttribute(SESSION_MANAGER);
-            // Clear the delayTimeTable date for this job export
-            Hashtable delayTimeTable = (Hashtable) sessionMgr
-                    .getAttribute(WebAppConstants.TASK_COMPLETE_DELAY_TIME_TABLE);
-            if (delayTimeTable != null)
-            {
-                String delayTimeKey = userId + String.valueOf(task.getId());
-                Object startTimeObj = delayTimeTable.get(delayTimeKey);
-                if (startTimeObj != null)
-                {
-                    delayTimeTable.remove(delayTimeKey);
-                }
-            }
-
-            TaskHelper.completeTask(p_session.getId(), userId, task, p_request
-                    .getParameter("arrow"));
-            // remove from MRU list
-            String displayLocale = task.getSourceLocale().toString() + "->"
-                    + task.getTargetLocale().toString();
-            String thisTask = displayLocale + ":" + task.getJobName() + ":"
-                    + task.getId() + ":" + task.getState();
-            TaskHelper
-                    .removeMRUtask(p_request, p_session, thisTask, p_response);
-        }
-        else if(RECREATE_EDITION_JOB.equals(action)) {
+        if(RECREATE_EDITION_JOB.equals(action)) {
             TaskImpl task = (TaskImpl) TaskHelper.retrieveObject(p_session, WORK_OBJECT);
             WorkflowManagerLocal wfm =  new WorkflowManagerLocal();
             wfm.recreateGSEdtionJob(task);
@@ -363,6 +331,8 @@ public class TaskListHandler extends PageHandler
                     .equalsIgnoreCase(consolidate));
             downloadParams.setConsolidateTermFiles("yes".equalsIgnoreCase(consolidateTerm));
             downloadParams.setTermFormat(terminology);
+            downloadParams
+                    .setJob(ServerProxy.getJobHandler().getJobById(jobId));
             downloadParams.setDisplayExactMatch(displayExactMatch);
             OEMProcessStatus status = new OEMProcessStatus(downloadParams);
             OfflineEditManager odm = ServerProxy.getOfflineEditManager();
@@ -416,41 +386,30 @@ public class TaskListHandler extends PageHandler
         params.setActivityState(new Integer(Task.STATE_ACTIVE));
         
         String taskIds = p_request.getParameter("taskParam");
-        
-        Collection tasks = ServerProxy.getTaskManager().getTasks(params);
-        Iterator taskIterator = tasks.iterator();
-        
-        while (taskIterator.hasNext())
+        StringTokenizer tokenizer = new StringTokenizer(taskIds);
+        while (tokenizer.hasMoreTokens())
         {
-            Task task = (Task) taskIterator.next();
-            if (task.getAllAssignees().contains(p_user.getUserId()))
+            String taskId = tokenizer.nextToken();
+            TaskImpl task = HibernateUtil.get(TaskImpl.class,
+                    Long.parseLong(taskId));
+
+            if (task != null)
             {
+                WorkflowTaskInstance wfTask = ServerProxy.getWorkflowServer()
+                        .getWorkflowTaskInstance(p_user.getUserId(),
+                                task.getId(), Task.STATE_ACTIVE);
+                task.setWorkflowTask(wfTask);
+        
+                if (!task.getAllAssignees().contains(p_user.getUserId()))
+                    continue;
                 
-                //GBS-630: This fragment is used to verify whether the activity is checked in UI
-                //TODO: Better to refactor TaskSearchParameters to support multiple job ids
-                if (taskIds != null && !"".equals(taskIds)) {       
-                    String taskId = "";
-                    StringTokenizer tokenizer = new StringTokenizer(taskIds);
-                    boolean checked = false;
-                    while (tokenizer.hasMoreTokens())
-                    {
-                        taskId = tokenizer.nextToken();
-                        if (Long.parseLong(taskId) == task.getId()) {
-                            checked = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!checked) {
-                        continue;
-                    }
-                } 
+                if (task.getState() != Task.STATE_ACTIVE)
+                    continue;
                 
                 TaskHelper.acceptTask(p_session.getId(), p_user.getUserId(),
                         task);
             }
         }
-        
     }
 
     /**
@@ -890,10 +849,10 @@ public class TaskListHandler extends PageHandler
             Task task = TaskHelper.getTask(p_session.getId(), p_user.getUserId(),
                     taskId, taskState);
             try {
-	            // Accept the task
-	            TaskHelper.acceptTask(p_session.getId(), p_user.getUserId(), task);
+                // Accept the task
+                TaskHelper.acceptTask(p_session.getId(), p_user.getUserId(), task);
             } catch (NamingException ne) {
-            	
+                
             }
             
             // update task in session

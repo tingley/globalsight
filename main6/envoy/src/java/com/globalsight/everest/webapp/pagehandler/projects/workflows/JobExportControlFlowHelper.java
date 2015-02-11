@@ -17,7 +17,6 @@
 
 package com.globalsight.everest.webapp.pagehandler.projects.workflows;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,9 +29,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.io.FileUtils;
-
-import com.globalsight.everest.company.CompanyWrapper;
 import com.globalsight.everest.foundation.User;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.jobhandler.jobcreation.JobAdditionEngine;
@@ -55,8 +51,6 @@ import com.globalsight.everest.webapp.pagehandler.ControlFlowHelper;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.util.AmbFileStoragePathUtils;
-import com.globalsight.util.zip.ZipIt;
 
 /**
  * This control flow helper exports the selected pages
@@ -433,15 +427,6 @@ class JobExportControlFlowHelper
         ArrayList stfWorkflowIds = new ArrayList();
         HashMap wfMap = new HashMap();
         
-        ArrayList<String> parentFolders = new ArrayList<String>();
-        TargetPage[] targetPages = new TargetPage[pages.length];
-        TargetPage tp = null;
-        SourcePage sp = null;
-        String externalId = "";
-        String pathName = "";
-        String tmpName = "";
-        String exportSubDir = "";
-        
         // Find the workflows associated with the pages checked
         for (int i = 0; i < pages.length; i++)
         {       
@@ -465,28 +450,6 @@ class JobExportControlFlowHelper
                 prepareSecondaryTargetInfo(stfIds, curPageId, wfMap, 
                                            wfId, stfMap, stfWorkflowIds);
             }            
-            
-            /**
-             * GBS-1785, XLZ Support Added by Vincent Yan, 2011/01/26 Get all
-             * parent folders which are used to store the exported target files.
-             * For now, it just process the xlf/xliff file format.
-             */
-            tp = WorkflowHandlerHelper.getTargetPage(curPageId.longValue());
-            targetPages[i] = tp;
-            externalId = tp.getSourcePage().getExternalPageId();
-            tmpName = externalId.substring(externalId.lastIndexOf(".") + 1);
-            if (tmpName != null
-                    && (tmpName.equalsIgnoreCase("xlf") || tmpName
-                            .equalsIgnoreCase("xliff")))
-            {
-                exportSubDir = tp.getExportSubDir();
-                pathName = externalId.substring(0,
-                        externalId.lastIndexOf(File.separator));
-                if (!parentFolders.contains(pathName))
-                {
-                    parentFolders.add(pathName);
-                }
-            }
         }
 
         // before exporting, let's make sure no page is in UPDATING state
@@ -500,50 +463,6 @@ class JobExportControlFlowHelper
         exportSecondaryTargetFiles(stfIds, session, stfWorkflowIds,stfMap);
         wfList.removeAll(stfMap.keySet());
         wfList.addAll(stfMap.keySet());
-        
-        // GBS-1785, added by Vincent Yan, 2011/01/26
-        if (parentFolders.size() > 0)
-        {
-            File tmpTargetFile = null;
-            String tmpFilename = "";
-            String tmpSourceFilename = "";
-            String baseDocDir = AmbFileStoragePathUtils.getCxeDocDirPath()
-                    .concat(File.separator);
-            String companyId = "", companyName = "";
-            tp = targetPages[0];
-            companyId = tp.getSourcePage().getCompanyId();
-            companyName = CompanyWrapper.getCompanyNameById(companyId);
-            if ("1".equals(CompanyWrapper.getCurrentCompanyId()))
-            {
-                baseDocDir += companyName + File.separator;
-            }
-
-            // To verify if all target files are exported
-            for (int i = 0; i < targetPages.length; i++)
-            {
-                tp = targetPages[i];
-                tmpSourceFilename = tp.getExternalPageId();
-                tmpSourceFilename = tmpSourceFilename
-                        .substring(tmpSourceFilename.indexOf(File.separator));
-                tmpFilename = baseDocDir + targetPages[i].getExportSubDir()
-                        + File.separator + tmpSourceFilename;
-                tmpTargetFile = new File(tmpFilename);
-                while (!tmpTargetFile.exists())
-                {
-                    try
-                    {
-                        Thread.sleep(500);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        CATEGORY.error(e);
-                    }
-                }
-            }
-
-            // Process exported files and generate XLZ file
-            processXLZFiles(baseDocDir, parentFolders, exportSubDir);
-        }
         
         return wfList;
     }
@@ -642,65 +561,5 @@ class JobExportControlFlowHelper
         }
 
         return value;
-    }
-    
-    /**
-     * Generate exported XLZ file if the source file is XLZ file format After
-     * generating XLZ file, the folders which used to store exported xliff files
-     * and other files in original XLZ source file will be removed.
-     * 
-     * @param p_folders
-     * @param p_exportSubDir
-     * @author Vincent Yan, 2011/01/26
-     */
-    private void processXLZFiles(String p_baseDocDir, ArrayList<String> p_folders,
-            String p_exportSubDir)
-    {
-        String baseDocDir = p_baseDocDir;
-        String filePath = "";
-        String pathName = "";
-        String sourcePath = "", targetPath = "";
-        File fSourcePath, fTargetPath;
-        File file = null;
-        String tmp = "";
-        File targetXLZFile = null;
-        try
-        {
-            for (String fn : p_folders)
-            {
-                filePath = baseDocDir + File.separator + fn + ".xlz";
-                file = new File(filePath);
-                if (file.exists() && file.isFile())
-                {
-                    // Exist a xlz file with the special folder name
-                    sourcePath = baseDocDir + File.separator + fn;
-                    targetPath = baseDocDir + File.separator + p_exportSubDir
-                            + File.separator
-                            + fn.substring(fn.indexOf(File.separator) + 1);
-                    fSourcePath = new File(sourcePath);
-                    fTargetPath = new File(targetPath);
-                    for (File f : fSourcePath.listFiles())
-                    {
-                        tmp = f.getName().toLowerCase();
-                        if (!tmp.endsWith(".xlf") && !tmp.endsWith(".xliff"))
-                        {
-                            FileUtils.copyFileToDirectory(f, fTargetPath);
-                        }
-                    }
-
-                    // Generate the output XLZ file
-                    targetXLZFile = new File(targetPath + ".xlz");
-                    ZipIt.addEntriesToZipFile(targetXLZFile,
-                            fTargetPath.listFiles(), true, "");
-
-                    // Remove the temporary folders
-                    //FileUtils.deleteAllFilesSilently(targetPath);
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            CATEGORY.error(e);
-        }
     }
 }

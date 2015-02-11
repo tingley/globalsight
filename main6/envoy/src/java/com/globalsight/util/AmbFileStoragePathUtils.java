@@ -162,6 +162,18 @@ public class AmbFileStoragePathUtils
 
         return (String) cxeDocDirPaths.get(companyId);
     }
+    
+    public static String getCxeDocDirPath(String p_companyId)
+    {
+        if (cxeDocDirPaths.get(p_companyId) == null)
+        {
+            String cxeDocDirPath = sc
+                    .getStringParameter(SystemConfigParamNames.CXE_DOCS_DIR, p_companyId);
+            cxeDocDirPaths.put(p_companyId, cxeDocDirPath);
+        }
+
+        return (String) cxeDocDirPaths.get(p_companyId);
+    }
 
     /**
      * Get the storage dir for company base on the company_id in current thread.

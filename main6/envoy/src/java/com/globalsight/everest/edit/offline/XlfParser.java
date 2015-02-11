@@ -40,7 +40,9 @@ public class XlfParser {
 //			}
 
 			String target = transUnit.getTarget();
-			target = EditUtil.decodeXmlEntities(target);
+			
+			//For GBS-1869, It seems that docode is not needed.
+//			target = EditUtil.decodeXmlEntities(target);
 
 			result.append(target);
 			result.append(XliffConstants.NEW_LINE);

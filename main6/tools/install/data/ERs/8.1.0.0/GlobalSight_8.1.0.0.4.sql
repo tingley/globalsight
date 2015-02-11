@@ -1,0 +1,1 @@
+alter table Company add column SESSION_TIME varchar(10) DEFAULT null;

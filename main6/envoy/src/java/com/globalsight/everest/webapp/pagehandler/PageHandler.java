@@ -286,6 +286,25 @@ public class PageHandler
         {
             pageNum = lastPageNumber.intValue();
         }
+        
+        // GBS-1322 problem (4).
+        // Page number will be set to previous or no result page if removing the
+        // record which is the only one in current page.
+        int size = 0;
+        if (data != null)
+        {
+            size = data.size();
+            if ((size % numItemsDisplayed == 0)
+                    && (pageNum * numItemsDisplayed > size))
+            {
+                pageNum--;
+                if (pageNum == 0)
+                {
+                    pageNum = 1;                    
+                }
+            }
+        }
+            
         String sortType = (String) request.getParameter(thisSortChoiceStr);
         int sortChoice = 0;
         if (sortType == null)
@@ -352,7 +371,6 @@ public class PageHandler
         }
 
         List subList = null;
-        int size = 0;
         if (data != null)
         {
             try

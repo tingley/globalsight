@@ -246,6 +246,7 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             	String url = p_request.getParameter(TMProfileConstants.MT_MS_URL);
             	String appid = p_request.getParameter(TMProfileConstants.MT_MS_APPID);
             	String url_flag = p_request.getParameter(TMProfileConstants.MT_MS_URL_FLAG);
+            	String category = p_request.getParameter(TMProfileConstants.MT_MS_CATEGORY);
             	if (url != null && !"".equals(url.trim()))
             	{
             		tmProfile.setMsMTUrl(url.trim());
@@ -257,6 +258,10 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
             	if (url_flag != null && !url_flag.equals("")) 
             	{
             		tmProfile.setMsMTUrlFlag(url_flag);
+            	}
+            	if (category != null && !category.equals(""))
+            	{
+            	    tmProfile.setMsMTCategory(category);
             	}
             }
             
@@ -479,11 +484,11 @@ public class TMProfileHandler extends PageHandler implements TMProfileConstants
         String levExactMatches = p_request.getParameter("levExactMatches");
         if (levExactMatches == null)
         {
-            tmProfile.setIsLeverageExactMatches(false);
+            tmProfile.setIsExactMatchLeveraging(false);
         }
         else if (levExactMatches.equals("true"))
         {
-            tmProfile.setIsLeverageExactMatches(true);
+            tmProfile.setIsExactMatchLeveraging(true);
         }
 
         String levContextMatches = p_request

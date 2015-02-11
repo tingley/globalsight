@@ -50,4 +50,9 @@ public class XlsReportData
     public HashMap projectMap = new HashMap();
     
     public String[] headers = null;
+    
+    public boolean allActivities = false;
+    public ArrayList activityNameList = new ArrayList();
+    public boolean allJobStatus = false;
+    public ArrayList jobStatusList = new ArrayList();
 }

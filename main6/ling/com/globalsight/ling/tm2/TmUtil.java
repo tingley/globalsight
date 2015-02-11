@@ -118,14 +118,10 @@ public class TmUtil
     {
         Map<String, SegmentTmTu> newTus = new HashMap<String, SegmentTmTu>();
 
-        Iterator itLocale = p_tu.getAllTuvLocales().iterator();
-        while (itLocale.hasNext())
+        for (GlobalSightLocale locale : p_tu.getAllTuvLocales())
         {
-            GlobalSightLocale locale = (GlobalSightLocale) itLocale.next();
-            Iterator itTuv = p_tu.getTuvList(locale).iterator();
-            while (itTuv.hasNext())
+            for (BaseTmTuv tuv : p_tu.getTuvList(locale))
             {
-                BaseTmTuv tuv = (BaseTmTuv) itTuv.next();
                 Collection splitSegments = tuv.prepareForSegmentTm();
 
                 // check the number of segments returned. The number

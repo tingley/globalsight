@@ -21,8 +21,10 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -84,8 +86,16 @@ public class DownloadTask
 		if (lastModifiedTimes != null && fileNames != null) {
 			String[] fileNamesStr = fileNames.split(",");
 			String[] lastModifiedTimesStr = lastModifiedTimes.split(",");
-			for (int i = 0; i < fileNamesStr.length; i ++) {
-				fileLastModifiedTimes.put(fileNamesStr[i], lastModifiedTimesStr[i]);
+			for (int i = 0; i < fileNamesStr.length;i ++) {
+				try
+                {
+                    fileLastModifiedTimes.put(URLDecoder.decode(fileNamesStr[i], "UTF-8"), lastModifiedTimesStr[i]);
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
 			}
 		}
 		m_saveToDir = p_saveToDir;

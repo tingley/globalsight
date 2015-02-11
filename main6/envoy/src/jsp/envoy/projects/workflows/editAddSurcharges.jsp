@@ -130,10 +130,20 @@
         {
            return false;
         }
-        if (jobForm.surchargeName.value == "")
+        var tmp = jobForm.surchargeName.value;
+        var partern = /[^A-Za-z0-9_ ]/;
+        var patternSpace = /\s*\S+/;
+        if (tmp == "" )
         {
            // Make sure the  Name is not null
            alert("<%=bundle.getString("jsmsg_enter_surcharge_name")%>"); 
+           jobForm.surchargeName.focus();
+           return false;
+        }
+
+		if(partern.test(tmp)||!patternSpace.test(tmp))
+        {
+            alert("<%=bundle.getString("lb_invalid_surcharge_name")%>"); 
            jobForm.surchargeName.focus();
            return false;
         }
@@ -147,7 +157,7 @@
         }
 
         if (isNaN(jobForm.surchargeValue.value) || 
-            jobForm.surchargeValue.value == "")
+            jobForm.surchargeValue.value.replace(/(^\s*)|(\s*$)/g, "") == "")
         {
            // Make sure the value entered is a number
            alert("<%=bundle.getString("jsmsg_enter_surcharge_value")%>"); 

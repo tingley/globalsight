@@ -342,6 +342,10 @@ public class FileUploadHelper implements Runnable
             {
                 CATEGORY.error(e);
             }
+            finally
+            {
+                outFile.delete();
+            }
             status.setSavedFilepath(savedFile.getAbsolutePath());
         }
         status.setImportOptions(getImportOptions());

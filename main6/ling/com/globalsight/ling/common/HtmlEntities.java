@@ -30,11 +30,11 @@ import java.util.*;
 public class HtmlEntities
     extends Entities
 {
-    private static final HashMap mHtmlCharToEntity = mapHtmlCharToEntity();
-    private static final HashMap mHtmlEntityToChar = mapHtmlEntityToChar();
-    private static final HashMap
+    public static final HashMap mHtmlCharToEntity = mapHtmlCharToEntity();
+    public static final HashMap mHtmlEntityToChar = mapHtmlEntityToChar();
+    public static final HashMap
         mDefaultCharToEntity = mapHtmlDefaultCharToEntity();
-    private static final HashMap
+    public static final HashMap
         mDefaultEntityToChar = mapHtmlDefaultEntityToChar();
     private static final HashMap
         WINDOWS1252_UNICODE_MAP = mapWindows1252ToUnicode();

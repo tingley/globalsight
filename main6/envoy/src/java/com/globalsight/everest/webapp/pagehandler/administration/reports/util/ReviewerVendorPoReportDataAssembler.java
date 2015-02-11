@@ -22,9 +22,12 @@ import java.io.FileReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,6 +46,7 @@ import com.globalsight.everest.util.system.SystemConfigParamNames;
 import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.pagehandler.projects.workflows.JobSearchConstants;
+import com.globalsight.everest.workflow.Activity;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.log.GlobalSightCategory;
 
@@ -55,8 +59,6 @@ public class ReviewerVendorPoReportDataAssembler
     
     private XlsReportData reportData = null;
     
-    private String reviewActivityName = null;
-    
     public ReviewerVendorPoReportDataAssembler(HttpServletRequest p_request)
     {
         this.request = p_request;
@@ -68,9 +70,63 @@ public class ReviewerVendorPoReportDataAssembler
         return this.reportData;
     }
     
-    public void setReviewActivtityName(String reviewActivityName)
+    public void setActivityNameList()
     {
-        this.reviewActivityName = reviewActivityName;
+        String[] activityNameList = request.getParameterValues("activityName");
+        for (int i = 0; i < activityNameList.length; i++)
+        {
+            if ("*".equals(activityNameList[i]))
+            {
+                reportData.activityNameList.clear();
+                reportData.allActivities = true;
+                Collection atc = null;
+                try
+                {
+                    atc = ServerProxy.getJobHandler().getAllActivities();
+                }
+                catch (Exception e)
+                {
+                    s_logger.error("Failed to get all activities!", e);
+                }
+                if (atc != null)
+                {
+                    Iterator it = atc.iterator();
+                    while (it.hasNext())
+                    {
+                        Activity at = (Activity) it.next();
+                        if (at.getActivityType() == Activity.TYPE_REVIEW
+                                || at.getActivityType() == Activity.TYPE_REVIEW_EDITABLE)
+                        {
+                            reportData.activityNameList.add(at
+                                    .getActivityName());
+                        }
+                    }
+                }
+                break;
+            }
+            else
+            {
+                reportData.activityNameList.add(activityNameList[i]);
+            }
+        }
+    }
+    
+    public void setJobStateList()
+    {
+        String[] jobStates = request.getParameterValues("status");
+
+        for (int i = 0; i < jobStates.length; i++)
+        {
+            if ("*".equals(jobStates[i]))
+            {
+                reportData.allJobStatus = true;
+                break;
+            }
+            else
+            {
+                reportData.jobStatusList.add(jobStates[i]);
+            }
+        }
     }
     
     public void setProjectIdList()
@@ -155,74 +211,75 @@ public class ReviewerVendorPoReportDataAssembler
         while (jobIter.hasNext())
         {
             Job j = (Job) jobIter.next();
+            if (!reportData.allJobStatus)
+            {
+                if (!reportData.jobStatusList.contains(j.getState()))
+                {
+                    continue;
+                }
+            }
             TranslationMemoryProfile tmProfile = j.getL10nProfile().getTranslationMemoryProfile();
-//            boolean isUseInContext = tmProfile.getIsContextMatchLeveraging();
+            //boolean isUseInContext = tmProfile.getIsContextMatchLeveraging();
             boolean isInContextMatch = PageHandler.isInContextMatch(j, tmProfile);
             boolean isDefaultContextMatch = PageHandler.isDefaultContextMatch(j);
             // only handle jobs in these states
-            if (!(Job.DISPATCHED.equals(j.getState()) || 
-                  Job.EXPORTED.equals(j.getState()) || 
-                  Job.EXPORT_FAIL.equals(j.getState()) || 
-                  Job.ARCHIVED.equals(j.getState()) || 
-                  Job.LOCALIZED.equals(j.getState())))
-            {
-                continue;
-            }
 
             Iterator wfIter = j.getWorkflows().iterator();
             while (wfIter.hasNext())
             {
-                Workflow w = (Workflow) wfIter.next();
+              Workflow w = (Workflow) wfIter.next();
+               
+              // skip certain workflows
+              if (Workflow.PENDING.equals(w.getState()) || 
+                  Workflow.IMPORT_FAILED.equals(w.getState()) || 
+                  Workflow.CANCELLED.equals(w.getState()) || 
+                  Workflow.BATCHRESERVED.equals(w.getState()) || 
+                  Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
+              {
+                  continue;
+              }
                 
-                // skip certain workflows
-                if (Workflow.PENDING.equals(w.getState()) || 
-                    Workflow.IMPORT_FAILED.equals(w.getState()) || 
-                    Workflow.CANCELLED.equals(w.getState()) || 
-                    Workflow.BATCHRESERVED.equals(w.getState()) || 
-                    Workflow.READY_TO_BE_DISPATCHED.equals(w.getState()))
-                {
-                    continue;
-                }
-                
-                // skip workflows without special target lang
-                String targetLang = w.getTargetLocale().toString();
-                if (!(reportData.wantsAllTargetLangs ||
-                      reportData.targetLangList.contains(targetLang)))
-                {
-                    continue;
-                }
-                
-                // skip workflows without "REPORT_ACTIVITY" activity
-                Task dellReviewActivity = null;
-                Iterator tasksIterator = w.getTasks().values().iterator();
-                while (tasksIterator.hasNext())
-                {
-                    Task task = (Task) tasksIterator.next();
-                    if (reviewActivityName.equals(task.getTaskName()))
-                    {
-                        dellReviewActivity = task;
-                        if (task.getState() != Task.STATE_REJECTED)
-                        {
-                            break;
-                        }
-                    }
-                }
-                if (dellReviewActivity == null) continue;
-                
-                
+              // skip workflows without special target lang
+              String targetLang = w.getTargetLocale().toString();
+              if (!(reportData.wantsAllTargetLangs ||
+                    reportData.targetLangList.contains(targetLang)))
+              {
+                  continue;
+              }
+               
+              // skip workflows without "REPORT_ACTIVITY" activity
+              Map<String,Task> dellReviewActivities = new HashMap<String, Task>();
+              Iterator tasksIterator = w.getTasks().values().iterator();
+              while (tasksIterator.hasNext())
+              {
+                  Task task = (Task) tasksIterator.next();
+                  if (reportData.activityNameList.contains(task.getTaskName()))
+                  {
+                      if(dellReviewActivities.get(task.getTaskName())==null)
+                      {
+                          dellReviewActivities.put(task.getTaskName(), task);
+                      }    
+                  }
+              }
+              Iterator it = dellReviewActivities.entrySet().iterator();
+              while(it.hasNext())
+              {
+                Entry entry = (java.util.Map.Entry) it.next();
+                Task dellReviewActivity = (Task) entry.getValue();
+
                 long jobId = j.getId();
-                HashMap localeMap = (HashMap)projectMap.get(Long.toString(jobId));
-                if (localeMap == null)
+                HashMap localeAvticityMap = (HashMap)projectMap.get(Long.toString(jobId));
+                if (localeAvticityMap == null)
                 {
-                    localeMap = new HashMap();
-                    projectMap.put(Long.toString(jobId), localeMap);
+                    localeAvticityMap = new HashMap();
+                    projectMap.put(Long.toString(jobId), localeAvticityMap);
                 }
 
-                ProjectWorkflowData data = (ProjectWorkflowData)localeMap.get(targetLang);
+                ProjectWorkflowData data = (ProjectWorkflowData)localeAvticityMap.get(targetLang+dellReviewActivity.getTaskName());
                 if (data == null)
                 {
                     data = new ProjectWorkflowData();
-                    localeMap.put(targetLang, data);
+                    localeAvticityMap.put(targetLang+dellReviewActivity.getTaskName(), data);
                     data.jobName = j.getJobName();
                     data.jobId = jobId;
                     data.projectDesc = getProjectDesc(j);
@@ -230,6 +287,7 @@ public class ReviewerVendorPoReportDataAssembler
                     data.creationDate = j.getCreateDate();
                     data.dellReviewActivityState = dellReviewActivity.getState();
                     data.acceptedReviewerDate = dellReviewActivity.getAcceptedDate();
+                    data.currentActivityName = dellReviewActivity.getTaskDisplayName();
                 }
 
                 // now add or amend the data in the ProjectWorkflowData based on
@@ -258,9 +316,9 @@ public class ReviewerVendorPoReportDataAssembler
                                                data.medHiFuzzyMatchWordCount + 
                                                data.hiFuzzyMatchWordCount;
                 data.trados95to99WordCount = data.hiFuzzyMatchWordCount;
-                data.trados75to94WordCount = data.medFuzzyMatchWordCount + 
-                                             data.medHiFuzzyMatchWordCount;
-                data.trados1to74WordCount = data.lowFuzzyMatchWordCount;
+                data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
+                data.trados75to84WordCount = data.medFuzzyMatchWordCount;
+                data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
 
                 // add the lowest fuzzies and sublev match to nomatch
                 data.noMatchWordCount += w.getNoMatchWordCount() + 
@@ -281,7 +339,7 @@ public class ReviewerVendorPoReportDataAssembler
                 data.tradosInContextWordCount = data.inContextMatchWordCount;
                 data.tradosContextWordCount = data.contextMatchWordCount;
                 
-//                data.contextMatchWordCount += w.getContextMatchWordCount();
+                //data.contextMatchWordCount += w.getContextMatchWordCount();
                 data.totalWordCount += w.getTotalWordCount();
 
                 data.dellTotalWordCount = w.getTotalWordCount();
@@ -290,8 +348,9 @@ public class ReviewerVendorPoReportDataAssembler
                 							data.tradosInContextWordCount + 
                 							data.tradosContextWordCount +
                                             data.trados95to99WordCount + 
-                                            data.trados75to94WordCount + 
-                                            data.trados1to74WordCount + 
+                                            data.trados85to94WordCount +
+                                            data.trados75to84WordCount+
+                                            data.trados50to74WordCount+
                                             data.tradosRepsWordCount + 
                                             data.tradosNoMatchWordCount;
 
@@ -461,11 +520,11 @@ public class ReviewerVendorPoReportDataAssembler
                     // Trados breakdown for fuzzy
                     data.trados95to99WordCountCost = data.hiFuzzyMatchWordCountCost;
                     
-                    data.trados75to94WordCountCost = 
-                        data.medFuzzyMatchWordCountCost
-                            .add(data.medHiFuzzyMatchWordCountCost);
+                    data.trados85to94WordCountCost = data.medHiFuzzyMatchWordCountCost;
                     
-                    data.trados1to74WordCountCost = data.lowFuzzyMatchWordCountCost;
+                    data.trados75to84WordCountCost = data.medFuzzyMatchWordCountCost;
+                    
+                    data.trados50to74WordCountCost = data.lowFuzzyMatchWordCountCost;
 
                     // new words, no match costs
                     data.noMatchWordCountCost = 
@@ -493,8 +552,9 @@ public class ReviewerVendorPoReportDataAssembler
                         	.add(data.tradosInContextWordCountCost)
                         	.add(data.tradosContextWordCountCost)
                             .add(data.trados95to99WordCountCost)
-                            .add(data.trados75to94WordCountCost)
-                            .add(data.trados1to74WordCountCost)
+                            .add(data.trados85to94WordCountCost)
+                            .add(data.trados75to84WordCountCost)
+                            .add(data.trados50to74WordCountCost)
                             .add(data.tradosRepsWordCountCost)
                             .add(data.tradosNoMatchWordCountCost);
 
@@ -515,6 +575,8 @@ public class ReviewerVendorPoReportDataAssembler
             {
                 ServerProxy.getCostingEngine().reCostJob(j, pivotCurrency,
                         Cost.REVENUE);
+            }
+            
             }
         }
         

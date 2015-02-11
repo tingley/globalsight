@@ -96,6 +96,8 @@
     }
     
     String helperText = bundle.getString("helper_text_job_dtpinprogress");
+    
+    /*
     int myJobsDaysRetrieved = 0;
     try
     {
@@ -115,6 +117,7 @@
     {
         // assume 0
     }
+    */
 %>
 <HTML>
 <HEAD>

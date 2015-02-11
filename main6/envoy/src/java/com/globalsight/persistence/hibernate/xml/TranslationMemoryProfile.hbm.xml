@@ -142,6 +142,8 @@
             type="string" not-null="false" unique="false" />
         <property name="msMTUrlFlag" column="MS_MT_URL_FLAG"
             type="string" not-null="false" unique="false" />
+        <property name="msMTCategory" column="MS_MT_CATEGORY"
+            type="string" not-null="false" unique="false" />
 
         <property name="aoMtUrl" column="AO_URL"
             type="string" not-null="false" unique="false" />

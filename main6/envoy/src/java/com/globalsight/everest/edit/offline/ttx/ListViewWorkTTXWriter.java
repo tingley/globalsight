@@ -53,14 +53,14 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
      *@param DownloadParams
      */
     protected void writeTTXFrontMatter(DownloadParams p_downloadParams)
-        throws IOException, AmbassadorDwUpException
+    	throws IOException, AmbassadorDwUpException
     {
-        m_outputStream.write("<FrontMatter>");
-        
-        Format format = new SimpleDateFormat("yyyyMMdd HHmmss");
-        String creationDate = format.format(new Date());
-        String creationTool = "GlobalSight";
-        String creationToolVersion = ServerUtil.getVersion();
+    	m_outputStream.write("<FrontMatter>");
+    	
+    	Format format = new SimpleDateFormat("yyyyMMdd HHmmss");
+    	String creationDate = format.format(new Date());
+    	String creationTool = "GlobalSight";
+    	String creationToolVersion = ServerUtil.getVersion();
         m_outputStream.write("<ToolSettings CreationDate="
                 + str2DoubleQuotation(creationDate) + " CreationTool="
                 + str2DoubleQuotation(creationTool) + " CreationToolVersion="
@@ -69,18 +69,18 @@ public class ListViewWorkTTXWriter extends TTXWriterUnicode
         // set to "XML" despite of original format
         // TRADOS only recognizes "XML","HTML","PlugInVonverted","RTF" etc, and
         // they are case sensitive.
-        String dataType = "XML";
-        String page_encoding = m_page.getEncoding();
-        String settingName = "GS";
-        String settingsPath = "";
-        GlobalSightLocale srcGSL = p_downloadParams.getSourceLocale();
+    	String dataType = "XML";
+    	String page_encoding = m_page.getEncoding();
+    	String settingName = "GS";
+    	String settingsPath = "";
+    	GlobalSightLocale srcGSL = p_downloadParams.getSourceLocale();
         String sourceLanguage = srcGSL.getLanguage().toUpperCase() + "-"
                 + srcGSL.getCountry().toUpperCase();
-        GlobalSightLocale trgGSL = p_downloadParams.getTargetLocale();
+    	GlobalSightLocale trgGSL = p_downloadParams.getTargetLocale();
         String targetLanguage = trgGSL.getLanguage().toUpperCase() + "-"
                 + trgGSL.getCountry().toUpperCase();
-        String settingsRelativePath = "..\\help\\GS.ini";
-        
+    	String settingsRelativePath = "..\\help\\GS.ini";
+    	
         m_outputStream.write("<UserSettings" + " DataType="
                 + str2DoubleQuotation(dataType) + " O-Encoding="
                 + str2DoubleQuotation(page_encoding) + " SettingsName="

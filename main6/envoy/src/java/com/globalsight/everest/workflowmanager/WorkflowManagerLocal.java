@@ -141,6 +141,7 @@ import com.globalsight.everest.util.system.SystemConfiguration;
 import com.globalsight.everest.webapp.WebAppConstants;
 import com.globalsight.everest.webapp.javabean.TaskInfoBean;
 import com.globalsight.everest.webapp.pagehandler.PageHandler;
+import com.globalsight.everest.webapp.pagehandler.administration.imp.XLZFileHelper;
 import com.globalsight.everest.webapp.pagehandler.offline.OfflineConstants;
 import com.globalsight.everest.webapp.pagehandler.offline.download.SendDownloadFileHelper;
 import com.globalsight.everest.webapp.pagehandler.tasks.TaskHelper;
@@ -4232,11 +4233,6 @@ public class WorkflowManagerLocal implements WorkflowManager
                         exportLocalizedWorkflow(p_sessionId, wfClone.getId(),
                                 projectMgrUserId, isDbJob);
                         
-                        //GBS-1785, Added by Vincent Yan, 2011/01/27
-                        if (isCompleted) {
-                            processXLZFiles(wfClone);
-                        }
-                        
                         // instance DTP Workflow
                         JobAdditionEngine m_jobAdditionEngine = new JobAdditionEngine();
                         List<Workflow> wfList = new ArrayList<Workflow>();
@@ -4350,7 +4346,7 @@ public class WorkflowManagerLocal implements WorkflowManager
                 targetFile = new File(targetFilename);
                 while (!targetFile.exists())
                 {
-                    Thread.sleep(500);
+                    Thread.sleep(1000);
                 }
             }
 

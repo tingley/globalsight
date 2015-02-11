@@ -59,6 +59,7 @@ import com.globalsight.ling.common.URLDecoder;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.mediasurface.CmsUserInfo;
 import com.globalsight.util.GeneralException;
+import com.globalsight.util.StringUtil;
 import com.globalsight.util.edit.EditUtil;
 import com.globalsight.util.modules.Modules;
 
@@ -310,6 +311,13 @@ class EntryPageControlFlowHelper implements ControlFlowHelper, WebAppConstants
 
         // Load the user parameters and store them in the session.
         HashMap params = loadUserParameters(p_userName);
+        
+        Company c = CompanyWrapper.getCompanyByName(user.getCompanyName());
+        if (!StringUtil.isEmpty(c.getSessionTime()) && c.getSessionTime().matches("\\d*"))
+        {
+            session.setMaxInactiveInterval(60 * Integer.parseInt(c.getSessionTime()));
+        }
+        
         session.setAttribute(WebAppConstants.USER_PARAMS, params);
 
         // Get the applet directory and store the session in it (uid

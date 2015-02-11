@@ -76,24 +76,25 @@ public class ReportUtil
 				.trim();
 	}
 
+    /**
+     * 
+     * 0, 1, ..., 51 -> "A", "B", ..., "Z", "AA", "AB", ..., "AZ"
+     * 
+     * @param i
+     * 
+     * @return
+     */
     public static String toChar(int i)
     {
-        int x = i + 1;
         String s = "";
-
-        int m = x % 26;
-        int n = x / 26;
-
-        while (n > 0)
+        
+        if (i >= 0 && i < 26)
         {
-            s += (char) (n + 64);
-            m = m % 26;
-            n = m / 26;
+            s = s + (char) ('A' + i);
         }
-
-        if (m > 0)
+        else if (i >= 26 && i < 52)
         {
-            s += (char) (m + 64);
+            s = "A" + (char) ('A' + i - 26);
         }
 
         return s;

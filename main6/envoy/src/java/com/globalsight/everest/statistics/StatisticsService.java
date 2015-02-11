@@ -22,6 +22,8 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +45,7 @@ import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.everest.tuv.LeverageGroup;
 import com.globalsight.everest.tuv.Tu;
 import com.globalsight.everest.tuv.Tuv;
+import com.globalsight.everest.util.comparator.TargetPageComparator;
 import com.globalsight.everest.workflowmanager.Workflow;
 import com.globalsight.everest.workflowmanager.WorkflowImpl;
 import com.globalsight.ling.tm.LeverageMatchLingManager;
@@ -125,18 +128,22 @@ public class StatisticsService
                 wordCount.setNoUseExactMatchWordCount(wordCount
                         .getSegmentTmWordCount()
                         + wordCount.getMTExtractMatchWordCount()
-                        + wordCount.getXliffExtractMatchWordCount());
+                        + wordCount.getXliffExtractMatchWordCount()
+                        + wordCount.getPoExactMatchWordCount());
                 wordCount.setNoUseInContextMatchWordCount(0);
                 wordCount = calculateInContextMatchWordCounts(wordCount,
                         splittedTuvs, matches, p_excludedTuTypes);
-                if(isDefaultContextMatch && wordCount.getNoUseExactMatchWordCount() > 0)
+                if (isDefaultContextMatch
+                        && wordCount.getNoUseExactMatchWordCount() > 0)
                 {
                     //Only consider the exact match word counts.
-                    wordCount.setContextMatchWordCount(wordCount.getNoUseExactMatchWordCount());
+                    wordCount.setContextMatchWordCount(wordCount
+                            .getNoUseExactMatchWordCount());
                 }
                 
                 targetPage.setWordCount(wordCount);
-                targetPage.setIsDefaultContextMatch(isDefaultContextMatch && wordCount.getNoUseExactMatchWordCount() > 0);
+                targetPage.setIsDefaultContextMatch(isDefaultContextMatch
+                        && wordCount.getNoUseExactMatchWordCount() > 0);
                 targetPages.add(targetPage);
             }
 
@@ -351,13 +358,17 @@ public class StatisticsService
                         segmentRepetition, matches, p_excludedTuTypes);
 
                 wordCount.setNoUseInContextMatchWordCount(0);
-                wordCount.setNoUseExactMatchWordCount(wordCount.getSegmentTmWordCount() 
-                        + wordCount.getMTExtractMatchWordCount());
+                wordCount.setNoUseExactMatchWordCount(wordCount
+                        .getSegmentTmWordCount()
+                        + wordCount.getMTExtractMatchWordCount()
+                        + wordCount.getXliffExtractMatchWordCount()
+                        + wordCount.getPoExactMatchWordCount());
 
                 // Update the In context match word count;
                 int inContextWordCount = getAllInContextMatchWordCountInAllTargetPages(wf
                         .getAllTargetPages());
-                int contextWordCount = getAllDefaultContextMatchWordCountInAllTargetPages(wf.getAllTargetPages());
+                int contextWordCount = getAllDefaultContextMatchWordCountInAllTargetPages(wf
+                        .getAllTargetPages());
                 // wordCount =
                 // calculateInContextMatchWordCounts(wordCount,splitSourceTuvs,matches);
                 wordCount.setInContextWordCount(inContextWordCount);
@@ -366,6 +377,7 @@ public class StatisticsService
                         wordCount.getSegmentTmWordCount()
                         + wordCount.getMTExtractMatchWordCount()
                         + wordCount.getXliffExtractMatchWordCount()
+                        + wordCount.getPoExactMatchWordCount()
                         - wordCount.getInContextWordCount());
 
                 wf.setInContextMatchWordCount(wordCount.getInContextWordCount());
@@ -389,6 +401,15 @@ public class StatisticsService
             }
 
             transaction.commit();
+
+            // Used to fix the GBS-2020, make the repetition from file level to
+            // workflow level
+            Iterator itWfRepetition = p_workflows.iterator();
+            while (itWfRepetition.hasNext())
+            {
+                wf = (Workflow) itWfRepetition.next();
+                calculateTargetPageRepetitionStatistics(wf, p_excludedTuTypes);
+            }
         }
         catch (Exception e)
         {
@@ -478,6 +499,7 @@ public class StatisticsService
         wordCount.setSegmentTmWordCount(wordCount.getSegmentTmWordCount() 
                 + wordCount.getMTExtractMatchWordCount()
                 + wordCount.getXliffExtractMatchWordCount()
+                + wordCount.getPoExactMatchWordCount()
                 - inContextMatchWordCount);
 
         return wordCount;
@@ -527,6 +549,7 @@ public class StatisticsService
         int repetitionWordCount = 0;
         int mtExactMatchWordCount = 0;
         int xliffMatchWordCount = 0;
+        int poMatchWordCount = 0;
 
         // go through all unique segments in p_sourceTuvs
         for (Iterator si = p_segmentRepetition.iterator(); si.hasNext();)
@@ -580,6 +603,9 @@ public class StatisticsService
                 case MatchTypeStatistics.SEGMENT_XLIFF_EXACT:
                     xliffMatchWordCount += wordCount;
                     break;
+                case MatchTypeStatistics.SEGMENT_PO_EXACT:
+                    poMatchWordCount += wordCount;
+                    break;
                 case MatchTypeStatistics.LOW_FUZZY:
                     lowFuzzyWordCount += wordCount;
                     break;
@@ -622,10 +648,13 @@ public class StatisticsService
         result.setRepetitionWordCount(repetitionWordCount);
         result.setMTExtractMatchWordCount(mtExactMatchWordCount);
         result.setXliffExtractMatchWordCount(xliffMatchWordCount);
-        result.setTotalWordCount(contextMatchWordCount + segmentTmWordCount 
+        result.setPoExactMatchWordCount(poMatchWordCount);
+
+        result.setTotalWordCount(contextMatchWordCount + segmentTmWordCount
                 + mtExactMatchWordCount + xliffMatchWordCount
-                + lowFuzzyWordCount + medFuzzyWordCount + medHiFuzzyWordCount
-                + hiFuzzyWordCount + unmatchedWordCount + repetitionWordCount);
+                + poMatchWordCount + lowFuzzyWordCount + medFuzzyWordCount
+                + medHiFuzzyWordCount + hiFuzzyWordCount + unmatchedWordCount
+                + repetitionWordCount);
 
         return result;
     }
@@ -792,5 +821,199 @@ public class StatisticsService
         }
 
         return result;
+    }
+
+    /**
+     * Calculates the repetition/no match word counts for every target page in
+     * workflow. The repetition displays in Detailed Word Counts of Activity
+     * also can be see in file list report
+     * 
+     * @param p_workflow
+     * @param p_excludedTuTypes
+     * @throws StatisticsException
+     */
+    static public void calculateTargetPageRepetitionStatistics(
+            Workflow p_workflow, Vector p_excludedTuTypes)
+            throws StatisticsException
+    {
+        Session session = null;
+        Transaction transaction = null;
+        try
+        {
+            session = HibernateUtil.getSession();
+            transaction = session.beginTransaction();
+
+            // This map is used for saving the unique segments for this workflow
+            Map m_uniqueSegments = new HashMap();
+            Map m_segmentsForSubRepetition = new HashMap();
+            // get the job's leverage match threshold
+            int levMatchThreshold = p_workflow.getJob()
+                    .getLeverageMatchThreshold();
+
+            // target page Order by target page id
+            List<TargetPage> targetPages = p_workflow.getAllTargetPages();
+            TargetPageComparator comp = new TargetPageComparator(
+                    TargetPageComparator.ID, targetPages.get(0).getSourcePage()
+                            .getGlobalSightLocale().getLocale());
+            Collections.sort(targetPages, comp);
+
+            Iterator<TargetPage> itTP = targetPages.iterator();
+            while (itTP.hasNext())
+            {
+                TargetPage tp = itTP.next();
+                if (tp.getPrimaryFileType() == PrimaryFile.EXTRACTED_FILE)
+                {
+                    SourcePage sp = tp.getSourcePage();
+
+                    tp = (TargetPage) session.get(TargetPage.class, tp.getId());
+                    ArrayList sTuvs = getSourceTuvs(sp);
+                    ArrayList splittedTuvs = splitSourceTuvs(sTuvs, sp
+                            .getGlobalSightLocale());
+                    // If the source file is WorldServer xliff file,MT
+                    // translations
+                    // should NOT impact the word-count statistics.
+                    boolean isWSXlfSourceFile = ServerProxy.getTuvManager()
+                            .isWorldServerXliffSourceFile(sp.getIdAsLong());
+                    LeverageMatchLingManager lmLingManager = getLeverageMatchLingManager();
+                    if (isWSXlfSourceFile)
+                    {
+                        lmLingManager.setIncludeMtMatches(false);
+                    }
+                    MatchTypeStatistics matches = lmLingManager
+                            .getMatchTypesForStatistics(sp.getIdAsLong(), tp
+                                    .getLocaleId(), levMatchThreshold);
+
+                    // Get the repetition word count for this target page
+                    calculateRepetitionCounts(splittedTuvs, matches,
+                            p_excludedTuTypes, m_uniqueSegments,
+                            m_segmentsForSubRepetition, tp);
+
+                    session.update(tp);
+                }
+            }
+            transaction.commit();
+        }
+        catch (Exception e)
+        {
+            if (transaction != null)
+            {
+                transaction.rollback();
+            }
+
+            String[] args = new String[1];
+            String jobName = p_workflow.getJob().getJobName();
+            args[0] = jobName;
+
+            throw new StatisticsException(
+                    StatisticsException.MSG_FAILED_TO_GENERATE_STATISTICS_WORKFLOW,
+                    args, e);
+        }
+    }
+
+    /**
+     * Calculate the repetition/no match word count for target page
+     * 
+     * @param sTuvs
+     * @param p_matches
+     * @param p_excludedTuTypes
+     * @param m_uniqueSegments
+     * @return
+     */
+    private static void calculateRepetitionCounts(ArrayList sTuvs,
+            MatchTypeStatistics p_matches, Vector p_excludedTuTypes,
+            Map m_uniqueSegments, Map m_segmentsForSubRepetition,
+            TargetPage targetPage)
+    {
+        // below 50%
+        int repetitionWordCount = 0;
+        int noMatchWordCount = 0;
+        // 50%--75%
+        int subRepetitionWordCount = 0;
+        int subNoMatchWordCount = 0;
+
+        // go through all segments
+
+        Iterator si = sTuvs.iterator();
+        while (si.hasNext())
+        {
+            SegmentTmTuv tuv = (SegmentTmTuv) si.next();
+            int wordCount = tuv.getWordCount();
+
+            // Don't count excluded items.
+            if (p_excludedTuTypes != null
+                    && p_excludedTuTypes.contains(tuv.getTu().getType()))
+            {
+                wordCount = 0;
+            }
+
+            Types types = p_matches.getTypes(tuv.getId(), ((SegmentTmTu) tuv
+                    .getTu()).getSubId());
+
+            int matchType = types == null ? MatchTypeStatistics.NO_MATCH : types
+                    .getStatisticsMatchType();
+
+            if (types != null && types.isSubLevMatch())
+            {
+                ArrayList identicalSegments = (ArrayList) m_segmentsForSubRepetition
+                        .get(tuv);
+                if (identicalSegments == null)
+                {
+                    identicalSegments = new ArrayList();
+                    m_segmentsForSubRepetition.put(tuv, identicalSegments);
+                    identicalSegments.add(tuv);
+                    subNoMatchWordCount += wordCount;
+                }
+                else
+                {
+                    subRepetitionWordCount += wordCount;
+                }
+            }
+            // increment the word count according to the match type
+            switch (matchType)
+            {
+                case MatchTypeStatistics.CONTEXT_EXACT:
+                    break;
+                case MatchTypeStatistics.SEGMENT_TM_EXACT:
+                    break;
+                case MatchTypeStatistics.SEGMENT_MT_EXACT:
+                    break;
+                case MatchTypeStatistics.SEGMENT_XLIFF_EXACT:
+                    break;
+                case MatchTypeStatistics.SEGMENT_PO_EXACT:
+                    break;
+                case MatchTypeStatistics.LOW_FUZZY:
+                    break;
+                case MatchTypeStatistics.MED_FUZZY:
+                    break;
+                case MatchTypeStatistics.MED_HI_FUZZY:
+                    break;
+                case MatchTypeStatistics.HI_FUZZY:
+                    break;
+                case LeverageMatchLingManager.NO_MATCH:
+                default:
+                    // no-match is counted only once and the rest are
+                    // repetitions
+
+                    ArrayList identicalSegments = (ArrayList) m_uniqueSegments
+                            .get(tuv);
+                    if (identicalSegments == null)
+                    {
+                        identicalSegments = new ArrayList();
+                        m_uniqueSegments.put(tuv, identicalSegments);
+                        identicalSegments.add(tuv);
+                        noMatchWordCount += wordCount;
+                    }
+                    else
+                    {
+                        repetitionWordCount += wordCount;
+                    }
+                    break;
+            }
+        }
+        targetPage.getWordCount().setRepetitionWordCount(repetitionWordCount);
+        targetPage.getWordCount().setUnmatchedWordCount(noMatchWordCount);
+        targetPage.getWordCount().setSubLevMatchWordCount(subNoMatchWordCount);
+        targetPage.getWordCount().setSubLevRepetitionWordCount(
+                subRepetitionWordCount);
     }
 }

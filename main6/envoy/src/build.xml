@@ -1,30 +1,30 @@
 
 <project name="CAP" default="build_all">
-  <target name="init">
-    <echo message="***** CAP build file *****"/>
-    <property name="cap.javaSrcBase" value="../../envoy/src/java"/>
-    <property name="cap.jspSrcBase" value="../../envoy/src/jsp"/>
-    <property name="cap.jspclassesDest" value="${globalsight_home}/globalsight-web.war/WEB-INF/jspclasses"/>
-    <property name="cap.serverclassesDest" value="${serverclassesDest}"/>
-    <property name="cap.jspDestDir" value="${globalsight_home}/envoy"/>
-    <property name="cap.jspIncludesSrcDir" value="${cap.javaSrcBase}/../includes"/>
-    <property name="cap.jspIncludesDestDir" value="${globalsight_home}/includes"/>
-    <property name="cap.imagesCommonSrcDir" value="${cap.javaSrcBase}/../images"/>
-    <property name="cap.imagesCommonDestDir" value="${globalsight_home}/images"/>
-    <property name="cap.libDir" value="${capclasses}/lib/envoy"/>
-    <property name="cap.cxeSrcDir" value="${basedir}/../../diplomat/dev/src/java"/>
-    <property name="cap.testSrcDir" value="../../envoy/test/src/java"/>
-    <property name="cap.graphicalWfJar" value="graphicalWf.jar"/>
-    <property name="cap.customerJar" value="customer.jar"/>
-    <property name="cap.antJar" value="${jbossServerDir}/server/default/deploy/jbossweb-tomcat50.sar/ant.jar"/>
-    <property name="cap.UiWorkflowClasses" value="com/globalsight/everest"/>
-    <property name="cap.UiWorkflowMisc" value="com/globalsight/util"/>
-    <property name="cap.UiWorkflowLing" value="com/globalsight/ling" />
-    <property name="cap.wfAppletImages" value="../../envoy/src/applet_images/images"/>
-    <property name="cap.Images" value="${cap.serverclassesDest}/images"/>
-    
-    <property name="client.classes.dir" value="clientClasses" />
-    <property name="cap.rmicClasses" value="
+	<target name="init">
+		<echo message="***** CAP build file *****" />
+		<property name="cap.javaSrcBase" value="../../envoy/src/java" />
+		<property name="cap.jspSrcBase" value="../../envoy/src/jsp" />
+		<property name="cap.jspclassesDest" value="${globalsight_home}/globalsight-web.war/WEB-INF/jspclasses" />
+		<property name="cap.serverclassesDest" value="${serverclassesDest}" />
+		<property name="cap.jspDestDir" value="${globalsight_home}/envoy" />
+		<property name="cap.jspIncludesSrcDir" value="${cap.javaSrcBase}/../includes" />
+		<property name="cap.jspIncludesDestDir" value="${globalsight_home}/includes" />
+		<property name="cap.imagesCommonSrcDir" value="${cap.javaSrcBase}/../images" />
+		<property name="cap.imagesCommonDestDir" value="${globalsight_home}/images" />
+		<property name="cap.libDir" value="${capclasses}/lib/envoy" />
+		<property name="cap.cxeSrcDir" value="${basedir}/../../diplomat/dev/src/java" />
+		<property name="cap.testSrcDir" value="../../envoy/test/src/java" />
+		<property name="cap.graphicalWfJar" value="graphicalWf.jar" />
+		<property name="cap.customerJar" value="customer.jar" />
+		<property name="cap.antJar" value="${jbossServerDir}/server/default/deploy/jbossweb-tomcat50.sar/ant.jar" />
+		<property name="cap.UiWorkflowClasses" value="com/globalsight/everest" />
+		<property name="cap.UiWorkflowMisc" value="com/globalsight/util" />
+		<property name="cap.UiWorkflowLing" value="com/globalsight/ling" />
+		<property name="cap.wfAppletImages" value="../../envoy/src/applet_images/images" />
+		<property name="cap.Images" value="${cap.serverclassesDest}/images" />
+
+		<property name="client.classes.dir" value="clientClasses" />
+		<property name="cap.rmicClasses" value="
         com.globalsight.config.SystemParameterPersistenceManagerWLRMIImpl
         com.globalsight.config.UserParameterPersistenceManagerWLRMIImpl
 	com.globalsight.everest.corpus.CorpusManagerWLRMIImpl
@@ -66,27 +66,27 @@
         com.globalsight.scheduling.EventSchedulerWLRMIImpl
         com.globalsight.terminology.termleverager.TermLeverageManagerWLImpl
 	com.globalsight.util.mail.MailerWLRMIImpl">
-    </property>
+		</property>
 
-    <property name="cxe.rmicClasses" value="
+		<property name="cxe.rmicClasses" value="
         com.globalsight.cxe.persistence.cms.teamsitedbmgr.TeamSiteDBManagerWLRMIImpl
         com.globalsight.cxe.persistence.databaseprofile.DatabaseProfilePersistenceManagerWLRMIImpl
         com.globalsight.cxe.persistence.databasecolumn.DatabaseColumnPersistenceManagerWLRMIImpl
         com.globalsight.cxe.persistence.previewurl.PreviewUrlPersistenceManagerWLRMIImpl
         com.globalsight.cxe.persistence.fileprofile.FileProfilePersistenceManagerWLRMIImpl
         com.globalsight.cxe.persistence.dbconnection.DBConnectionPersistenceManagerWLRMIImpl
-        com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFilePersistenceManagerWLRMIImpl"/>
+        com.globalsight.cxe.persistence.xmlrulefile.XmlRuleFilePersistenceManagerWLRMIImpl" />
 
-    <property name="tb.rmicClasses" value="
+		<property name="tb.rmicClasses" value="
     com.globalsight.terminology.ITermbaseManagerImpl 
     com.globalsight.terminology.ITermbaseImpl 
     com.globalsight.terminology.importer.ImportManager
     com.globalsight.terminology.exporter.ExportManager
     com.globalsight.terminology.scheduler.TermbaseScheduler
     com.globalsight.terminology.searchreplace.SearchReplaceManager
-    com.globalsight.terminology.userdata.UserdataManager "/>
+    com.globalsight.terminology.userdata.UserdataManager " />
 
-<!--
+		<!--
 Excluded from build while Gautam changes the progress bar.
 ${cap.jspSrcBase}/envoy/administration/projects/exportProgress.jsp
 ${cap.jspSrcBase}/envoy/administration/projects/importProgress.jsp
@@ -94,7 +94,7 @@ ${cap.jspSrcBase}/envoy/administration/projects/importTest.jsp
 ${cap.jspSrcBase}/envoy/administration/snippets/SnippetImportProgress.jsp
 -->
 
-    <property name="cap.jspFiles" value="
+		<property name="cap.jspFiles" value="
 ${cap.jspSrcBase}/envoy/about/about.jsp
 ${cap.jspSrcBase}/envoy/about/patches.jsp
 ${cap.jspSrcBase}/envoy/administration/activities/activityMain.jsp
@@ -244,14 +244,14 @@ ${cap.jspSrcBase}/envoy/tasks/taskDetail.jsp
 ${cap.jspSrcBase}/envoy/tasks/taskList.jsp
 ${cap.jspSrcBase}/envoy/wizards/finish.jsp
 ${cap.jspSrcBase}/envoy/wizards/start.jsp
-"/>
+" />
 
-<!--
+		<!--
 Excluded from build while Gautam changes the progress bar.
 ${cap.jspSrcBase}/envoy/terminology/maintenance/searching.jsp
 ${cap.jspSrcBase}/envoy/terminology/maintenance/replacing.jsp
 -->
-    <property name="tb.jspFiles" value="
+		<property name="tb.jspFiles" value="
 ${cap.jspSrcBase}/envoy/terminology/inputmodels/index.jsp
 ${cap.jspSrcBase}/envoy/terminology/maintenance/main.jsp
 ${cap.jspSrcBase}/envoy/terminology/maintenance/results.jsp
@@ -297,203 +297,246 @@ ${cap.jspSrcBase}/envoy/terminology/viewer/protocol.jsp
 ${cap.jspSrcBase}/envoy/terminology/viewer/search.jsp
 ${cap.jspSrcBase}/envoy/terminology/viewer/stylesheet.jsp
 ${cap.jspSrcBase}/envoy/terminology/viewer/viewer_resources_js.jsp
-"/>
-  </target>
-  <target name="prepare" depends="init">
-    <mkdir dir="${cap.serverclassesDest}"/>
-    <mkdir dir="${cap.serverclassesDest}/resources"/>
-    <mkdir dir="${capclasses}/globalsight.ear/globalsight-web.war/WEB-INF/jspclasses"/>
-    <copy tofile="${cap.serverclassesDest}/com/globalsight/resources/messages/LocaleResource.properties" file="${cap.javaSrcBase}/com/globalsight/resources/messages/LocaleResource_en_US.properties" />
-    <copy todir="${cap.serverclassesDest}/resources">
-      <fileset dir="${cap.javaSrcBase}/com/globalsight/everest/tm/util">
-        <include name="**/*.dtd"/>
-      </fileset>
-    </copy>
-    <copy todir="${cap.serverclassesDest}/resources">
-        <fileset dir="${cap.javaSrcBase}/com/globalsight/everest/edit/offline/ttx">
-            <include name="**/*.ini"/>
-        </fileset>
-    </copy>
-    <copy todir="${cap.serverclassesDest}/resources">
-        <fileset dir="${cap.javaSrcBase}/com/globalsight/terminology/importer">
-            <include name="**/*.dtd"/>
-        </fileset>
-    </copy>
-    <copy todir="${cap.serverclassesDest}">
-      <fileset dir="${cap.javaSrcBase}">
-        <include name="**/error_header.htm"/>
-      </fileset>
-    </copy>
-  </target>
-  <!-- Remove all the class files from the destination directories. -->
-  <target name="clean" depends="init">
-    <echo message="***** Deleting class and library files."/>
-    <delete dir="${capclasses}"/>
-    <delete file="${war_file}"/>
-  </target>
-  <target name="cleantb" depends="init">
-    <echo message="***** Deleting Termbase class and library files."/>
-    <delete dir="${cap.serverclassesDest}/com/globalsight/terminology"/>
-    <delete dir="${cap.serverclassesDest}/com/globalsight/everest/webapp/pagehandler/terminology"/>
-  </target>
-  <!--         Compile the UI code.         -->
-  <target name="compile_ui" depends="init">
-  <!--         Compile the servlet dependencies in the webapp code.         -->
-    <echo message="***** Building EnvoyServletException.java."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/EnvoyServletException.java"></javac>
-    <!--       Compile the webapp dependencies in the servlet code.         -->
-    <echo message="***** Building webapp dependencies."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/javabean/NavigationBean.java, com/globalsight/everest/webapp/webnavigation/LinkHelper.java"></javac>
-    <echo message="***** Building remaining javabean classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/javabean/**/*.java" excludes="com/globalsight/everest/webapp/javabean/NavigationBean.java"></javac>
-    <echo message="***** Building WebAppConstants.java"/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/WebAppConstants.java"></javac>
-    <echo message="***** Building remaining webnavigation classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/webnavigation/**/*.java" excludes="com/globalsight/everest/webapp/webnavigation/LinkHelper.java"></javac>
-    <echo message="***** Building the pagehandler helper classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/pagehandler/PageHandler.java, com/globalsight/everest/webapp/pagehandler/PageHandlerFactory.java, com/globalsight/everest/webapp/pagehandler/ControlFlowHelper.java"></javac><!--         Compile the servlet code.         -->
-    <echo message="***** Building the servlet dependencies."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/**/*.java" excludes="com/globalsight/everest/servlet/ControlServlet.java, com/globalsight/everest/servlet/CapExportServlet.java, com/globalsight/everest/servlet/L10nRequesterServlet.java"></javac>
-    <echo message="***** Building the remaining servlet classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/ControlServlet.java, com/globalsight/everest/servlet/CapExportServlet.java, com/globalsight/everest/servlet/L10nRequesterServlet.java"></javac><!--         Compile the webapp code.         -->
-    <echo message="***** Building remaining webapp classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/**/*.java" excludes="com/globalsight/everest/webapp/javabean/**/*.java, com/globalsight/everest/webapp/webnavigation/**/*.java, com/globalsight/everest/webapp/pagehandler/PageHandler.java, com/globalsight/everest/webapp/pagehandler/PageHandlerFactory.java, com/globalsight/everest/webapp/pagehandler/ControlFlowHelper.java"></javac>
-  </target>
-  <!--         Build the generic and utility classes.         -->
-  <target name="compile_foundation" depends="init">
-    <tstamp></tstamp>
-    <echo message="***** Building envoy foundation classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/foundation/**/*.java, com/globalsight/everest/projecthandler/Project.java, com/globalsight/everest/tm/Tm.java"></javac>
-    <echo message="***** Building log4j support classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/log/**/*.java"></javac> 
-    <echo message="***** Building utility classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/util/**/*.java" excludes="com/globalsight/util/database/**, com/globalsight/util/mail/**"></javac>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/util/**/*.java" excludes="com/globalsight/everest/util/logging/**, com/globalsight/everest/util/system/EnvoySystemListenerJDKR*.java"></javac>
-  </target>
+" />
+	</target>
+	<target name="prepare" depends="init">
+		<mkdir dir="${cap.serverclassesDest}" />
+		<mkdir dir="${cap.serverclassesDest}/resources" />
+		<mkdir dir="${cap.serverclassesDest}/properties" />
+		<mkdir dir="${capclasses}/globalsight.ear/globalsight-web.war/WEB-INF/jspclasses" />
+		<copy tofile="${cap.serverclassesDest}/com/globalsight/resources/messages/LocaleResource.properties" file="${cap.javaSrcBase}/com/globalsight/resources/messages/LocaleResource_en_US.properties" />
+		<copy todir="${cap.serverclassesDest}/resources">
+			<fileset dir="${cap.javaSrcBase}/com/globalsight/everest/tm/util">
+				<include name="**/*.dtd" />
+			</fileset>
+		</copy>
+		<copy todir="${cap.serverclassesDest}/resources">
+			<fileset dir="${cap.javaSrcBase}/com/globalsight/everest/edit/offline/ttx">
+				<include name="**/*.ini" />
+			</fileset>
+		</copy>
+		<copy todir="${cap.serverclassesDest}/resources">
+			<fileset dir="${cap.javaSrcBase}/com/globalsight/terminology/importer">
+				<include name="**/*.dtd" />
+			</fileset>
+		</copy>
+		<copy todir="${cap.serverclassesDest}">
+			<fileset dir="${cap.javaSrcBase}">
+				<include name="**/*.properties" />
+			</fileset>
+		</copy>
+		<copy todir="${cap.serverclassesDest}/properties">
+			<fileset dir="${cap.javaSrcBase}/com/globalsight/everest/edit/offline">
+				<include name="OfflineEditorConfig.properties" />
+			</fileset>
+		</copy>
+		<copy todir="${cap.serverclassesDest}">
+			<fileset dir="${cap.javaSrcBase}">
+				<include name="**/error_header.htm" />
+			</fileset>
+		</copy>
+	</target>
+	<!-- Remove all the class files from the destination directories. -->
+	<target name="clean" depends="init">
+		<echo message="***** Deleting class and library files." />
+		<delete dir="${capclasses}" />
+		<delete file="${war_file}" />
+	</target>
+	<target name="cleantb" depends="init">
+		<echo message="***** Deleting Termbase class and library files." />
+		<delete dir="${cap.serverclassesDest}/com/globalsight/terminology" />
+		<delete dir="${cap.serverclassesDest}/com/globalsight/everest/webapp/pagehandler/terminology" />
+	</target>
+	<!--         Compile the UI code.         -->
+	<target name="compile_ui" depends="init">
+		<!--         Compile the servlet dependencies in the webapp code.         -->
+		<echo message="***** Building EnvoyServletException.java." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/EnvoyServletException.java">
+		</javac>
+		<!--       Compile the webapp dependencies in the servlet code.         -->
+		<echo message="***** Building webapp dependencies." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/javabean/NavigationBean.java, com/globalsight/everest/webapp/webnavigation/LinkHelper.java">
+		</javac>
+		<echo message="***** Building remaining javabean classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/javabean/**/*.java" excludes="com/globalsight/everest/webapp/javabean/NavigationBean.java">
+		</javac>
+		<echo message="***** Building WebAppConstants.java" />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/WebAppConstants.java">
+		</javac>
+		<echo message="***** Building remaining webnavigation classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/webnavigation/**/*.java" excludes="com/globalsight/everest/webapp/webnavigation/LinkHelper.java">
+		</javac>
+		<echo message="***** Building the pagehandler helper classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/pagehandler/PageHandler.java, com/globalsight/everest/webapp/pagehandler/PageHandlerFactory.java, com/globalsight/everest/webapp/pagehandler/ControlFlowHelper.java">
+		</javac>
+		<!--         Compile the servlet code.         -->
+		<echo message="***** Building the servlet dependencies." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/**/*.java" excludes="com/globalsight/everest/servlet/ControlServlet.java, com/globalsight/everest/servlet/CapExportServlet.java, com/globalsight/everest/servlet/L10nRequesterServlet.java">
+		</javac>
+		<echo message="***** Building the remaining servlet classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/ControlServlet.java, com/globalsight/everest/servlet/CapExportServlet.java, com/globalsight/everest/servlet/L10nRequesterServlet.java">
+		</javac>
+		<!--         Compile the webapp code.         -->
+		<echo message="***** Building remaining webapp classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/**/*.java" excludes="com/globalsight/everest/webapp/javabean/**/*.java, com/globalsight/everest/webapp/webnavigation/**/*.java, com/globalsight/everest/webapp/pagehandler/PageHandler.java, com/globalsight/everest/webapp/pagehandler/PageHandlerFactory.java, com/globalsight/everest/webapp/pagehandler/ControlFlowHelper.java">
+		</javac>
+	</target>
+	<!--         Build the generic and utility classes.         -->
+	<target name="compile_foundation" depends="init">
+		<tstamp>
+		</tstamp>
+		<echo message="***** Building envoy foundation classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/foundation/**/*.java, com/globalsight/everest/projecthandler/Project.java, com/globalsight/everest/tm/Tm.java">
+		</javac>
+		<echo message="***** Building log4j support classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/log/**/*.java">
+		</javac>
+		<echo message="***** Building utility classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/util/**/*.java" excludes="com/globalsight/util/database/**, com/globalsight/util/mail/**">
+		</javac>
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/util/**/*.java" excludes="com/globalsight/everest/util/logging/**, com/globalsight/everest/util/system/EnvoySystemListenerJDKR*.java">
+		</javac>
+	</target>
 
-  <target name="compile_server" depends="prepare, compile_foundation">
-    <!--         Compile linguistics.         -->
-    <echo message="***** Building CAP linguistics." />
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" 
-           srcdir="${cap.javaSrcBase}" 
-           destdir="${cap.serverclassesDest}" 
-           includes="com/globalsight/ling/**/*.java, 
+	<target name="compile_server" depends="prepare, compile_foundation">
+		<!--         Compile linguistics.         -->
+		<echo message="***** Building CAP linguistics." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/ling/**/*.java, 
                      com/globalsight/everest/integration/ling/**/*.java" />
-    <!--         XXXX Compile new ling dependencies.         -->
-    <echo message="***** Building CAP locale."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/util/GlobalSightLocale.java"></javac>
-    <!--  Compile the basic pieces of the persistence service that do not -->
-    <!--  have dependancies on any entity classes. -->
-    <echo message="***** Building non-dependent persistence service classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/persistence/PersistenceService.java, com/globalsight/everest/persistence/PersistenceException.java"></javac><!--         XXXX Compile new CXE dependencies.         -->
-    <echo message="***** Building entity directory in CXE."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.cxeSrcDir}" destdir="${cap.serverclassesDest}" includes="com/globalsight/cxe/entity/**/*.java, com/globalsight/cxe/persistence/**/*.java"></javac>
-    <echo message="***** Building util directory in CXE."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.cxeSrcDir}/com/globalsight/cxe/util" destdir="${cap.serverclassesDest}" includes="**/*.java"></javac><!--         Compile the interfaces and ServerProxy.java.         -->
-    <echo message="***** Building project and project handler interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/projecthandler/Project.java, com/globalsight/everest/projecthandler/ProjectHandler.java, com/globalsight/everest/projecthandler/ProjectHandlerException.java, com/globalsight/everest/projecthandler/ProjectHandlerWLRemote.java"></javac>
-    <echo message="***** Building user manager interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/usermgr/UserManager.java, com/globalsight/everest/usermgr/UserManagerException.java, com/globalsight/everest/usermgr/UserManagerWLRemote.java"></javac>
-    <echo message="***** Building mail classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/util/mail/**/*.java"></javac>
-    <echo message="***** Building workflow classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/workflow/**/*.java"></javac>
-    <echo message="***** Building request handler interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/request/Request.java, com/globalsight/everest/request/RequestHandlerException.java, com/globalsight/everest/request/RequestHandler.java, com/globalsight/everest/request/RequestHandlerWLRemote.java"></javac>
-    <echo message="***** Building job handler interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/jobhandler/workflowhandler/Workflow.java, com/globalsight/everest/jobhandler/workflowhandler/WorkflowException.java, com/globalsight/everest/jobhandler/JobException.java, com/globalsight/everest/jobhandler/Job.java, com/globalsight/everest/jobhandler/JobHandler.java, com/globalsight/everest/jobhandler/jobmanagement/dispatch/DispatchException.java, com/globalsight/everest/jobhandler/JobHandlerWLRemote.java"></javac>
-    <echo message="***** Building security manager interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/securitymgr/SecurityManager.java, com/globalsight/everest/securitymgr/SecurityManagerException.java, com/globalsight/everest/securitymgr/SecurityManagerWLRemote.java"></javac>
-    <echo message="***** Building locale manager interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/localemgr/LocaleManager.java, com/globalsight/everest/localemgr/LocaleManagerException.java, com/globalsight/everest/localemgr/LocaleManagerWLRemote.java"></javac>
-    <echo message="***** Building job reporting manager interfaces."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/jobreportingmgr/JobReportingManager.java, com/globalsight/everest/jobreportingmgr/JobReportingManagerWLRemote.java"></javac>
-    <echo message="***** Building ServerProxy.java"/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/util/ServerProxy.java"></javac><!--         Compile the rest of the entity classes needed for the persistence service.         -->
-    <echo message="***** Building ProjectImpl.java"/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/projecthandler/ProjectImpl.java"></javac>
-    <echo message="***** Building request entity classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/request/EventFlowXmlParser.java, com/globalsight/everest/request/RequestExporter.java, com/globalsight/everest/request/AbstractRequest.java, com/globalsight/everest/request/L10nRequest.java, com/globalsight/everest/request/FixErrorRequest.java"></javac>
-    <echo message="***** Building job/workflow entity classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/jobhandler/JobUpdateHelper.java, com/globalsight/everest/jobhandler/workflowhandler/WorkflowUpdateHelper.java, com/globalsight/everest/jobhandler/workflowhandler/WorkflowImpl.java, com/globalsight/everest/jobhandler/workflowhandler/DateHelper.java, com/globalsight/everest/jobhandler/JobImpl.java, com/globalsight/everest/jobhandler/WFServerLookup.java, com/globalsight/everest/jobhandler/WFServerLookupImpl.java, com/globalsight/everest/jobhandler/workflowhandler/Task.java, com/globalsight/everest/jobhandler/workflowhandler/TaskImpl.java, com/globalsight/everest/jobhandler/workflowhandler/Comment.java, com/globalsight/everest/comment/CommentImpl.java"></javac>
-    <echo message="***** Building template format class."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/pageimport/TemplateFormat.java"></javac>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/request/CxeToCapRequest.java, com/globalsight/everest/request/RequestImpl.java, com/globalsight/everest/request/L10nRequestXmlParser.java, com/globalsight/everest/request/RequestFactory.java, com/globalsight/everest/request/RequestHandlerLocal.java"></javac><!--         Compile the rest of the persistence service.         -->
-    <echo message="***** Building remainder of persistence service."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/persistence/**/*.java" excludes="tools/**/*.java,com/globalsight/everest/persistence/PersistenceService.java, com/globalsight/everest/persistence/PersistenceException.java"></javac><!--         Compile all the rest of the server classes; all dependencies         --><!--         should have been taken care of.         -->
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/**/*.java" excludes="com/globalsight/util/database/**, com/globalsight/everest/util/logging/**, com/globalsight/everest/util/system/EnvoySystemListenerJDKR*.java, com/globalsight/everest/webapp/**, com/globalsight/everest/servlet/**"></javac>
-  </target><!--         Generate all the RMI stubs and skeletons.         -->
-<!--
+		<!--         XXXX Compile new ling dependencies.         -->
+		<echo message="***** Building CAP locale." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/util/GlobalSightLocale.java">
+		</javac>
+		<!--  Compile the basic pieces of the persistence service that do not -->
+		<!--  have dependancies on any entity classes. -->
+		<echo message="***** Building non-dependent persistence service classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/persistence/PersistenceService.java, com/globalsight/everest/persistence/PersistenceException.java">
+		</javac>
+		<!--         XXXX Compile new CXE dependencies.         -->
+		<echo message="***** Building entity directory in CXE." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.cxeSrcDir}" destdir="${cap.serverclassesDest}" includes="com/globalsight/cxe/entity/**/*.java, com/globalsight/cxe/persistence/**/*.java">
+		</javac>
+		<echo message="***** Building util directory in CXE." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.cxeSrcDir}/com/globalsight/cxe/util" destdir="${cap.serverclassesDest}" includes="**/*.java">
+		</javac>
+		<!--         Compile the interfaces and ServerProxy.java.         -->
+		<echo message="***** Building project and project handler interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/projecthandler/Project.java, com/globalsight/everest/projecthandler/ProjectHandler.java, com/globalsight/everest/projecthandler/ProjectHandlerException.java, com/globalsight/everest/projecthandler/ProjectHandlerWLRemote.java">
+		</javac>
+		<echo message="***** Building user manager interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/usermgr/UserManager.java, com/globalsight/everest/usermgr/UserManagerException.java, com/globalsight/everest/usermgr/UserManagerWLRemote.java">
+		</javac>
+		<echo message="***** Building mail classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/util/mail/**/*.java">
+		</javac>
+		<echo message="***** Building workflow classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/workflow/**/*.java">
+		</javac>
+		<echo message="***** Building request handler interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/request/Request.java, com/globalsight/everest/request/RequestHandlerException.java, com/globalsight/everest/request/RequestHandler.java, com/globalsight/everest/request/RequestHandlerWLRemote.java">
+		</javac>
+		<echo message="***** Building job handler interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/jobhandler/workflowhandler/Workflow.java, com/globalsight/everest/jobhandler/workflowhandler/WorkflowException.java, com/globalsight/everest/jobhandler/JobException.java, com/globalsight/everest/jobhandler/Job.java, com/globalsight/everest/jobhandler/JobHandler.java, com/globalsight/everest/jobhandler/jobmanagement/dispatch/DispatchException.java, com/globalsight/everest/jobhandler/JobHandlerWLRemote.java">
+		</javac>
+		<echo message="***** Building security manager interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/securitymgr/SecurityManager.java, com/globalsight/everest/securitymgr/SecurityManagerException.java, com/globalsight/everest/securitymgr/SecurityManagerWLRemote.java">
+		</javac>
+		<echo message="***** Building locale manager interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/localemgr/LocaleManager.java, com/globalsight/everest/localemgr/LocaleManagerException.java, com/globalsight/everest/localemgr/LocaleManagerWLRemote.java">
+		</javac>
+		<echo message="***** Building job reporting manager interfaces." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/jobreportingmgr/JobReportingManager.java, com/globalsight/everest/jobreportingmgr/JobReportingManagerWLRemote.java">
+		</javac>
+		<echo message="***** Building ServerProxy.java" />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/servlet/util/ServerProxy.java">
+		</javac>
+		<!--         Compile the rest of the entity classes needed for the persistence service.         -->
+		<echo message="***** Building ProjectImpl.java" />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/projecthandler/ProjectImpl.java">
+		</javac>
+		<echo message="***** Building request entity classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/request/EventFlowXmlParser.java, com/globalsight/everest/request/RequestExporter.java, com/globalsight/everest/request/AbstractRequest.java, com/globalsight/everest/request/L10nRequest.java, com/globalsight/everest/request/FixErrorRequest.java">
+		</javac>
+		<echo message="***** Building job/workflow entity classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/jobhandler/JobUpdateHelper.java, com/globalsight/everest/jobhandler/workflowhandler/WorkflowUpdateHelper.java, com/globalsight/everest/jobhandler/workflowhandler/WorkflowImpl.java, com/globalsight/everest/jobhandler/workflowhandler/DateHelper.java, com/globalsight/everest/jobhandler/JobImpl.java, com/globalsight/everest/jobhandler/WFServerLookup.java, com/globalsight/everest/jobhandler/WFServerLookupImpl.java, com/globalsight/everest/jobhandler/workflowhandler/Task.java, com/globalsight/everest/jobhandler/workflowhandler/TaskImpl.java, com/globalsight/everest/jobhandler/workflowhandler/Comment.java, com/globalsight/everest/comment/CommentImpl.java">
+		</javac>
+		<echo message="***** Building template format class." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/pageimport/TemplateFormat.java">
+		</javac>
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/request/CxeToCapRequest.java, com/globalsight/everest/request/RequestImpl.java, com/globalsight/everest/request/L10nRequestXmlParser.java, com/globalsight/everest/request/RequestFactory.java, com/globalsight/everest/request/RequestHandlerLocal.java">
+		</javac>
+		<!--         Compile the rest of the persistence service.         -->
+		<echo message="***** Building remainder of persistence service." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/persistence/**/*.java" excludes="tools/**/*.java,com/globalsight/everest/persistence/PersistenceService.java, com/globalsight/everest/persistence/PersistenceException.java">
+		</javac>
+		<!--         Compile all the rest of the server classes; all dependencies         -->
+		<!--         should have been taken care of.         -->
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/**/*.java" excludes="com/globalsight/util/database/**, com/globalsight/everest/util/logging/**, com/globalsight/everest/util/system/EnvoySystemListenerJDKR*.java, com/globalsight/everest/webapp/**, com/globalsight/everest/servlet/**">
+		</javac>
+	</target>
+	<!--         Generate all the RMI stubs and skeletons.         -->
+	<!--
   <target name="build_server" depends="compile_server, compile_test, rmic"></target>
 -->
-  <target name="build_server" depends="compile_server"></target>
+	<target name="build_server" depends="compile_server">
+	</target>
 
-  <target name="snippetserver" depends="init">
-    <echo message="***** Building Snippet Server Code (snippet/template)."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" 
-           destdir="${cap.serverclassesDest}" 
-           includes="com/globalsight/everest/snippet/**/*.java, 
+	<target name="snippetserver" depends="init">
+		<echo message="***** Building Snippet Server Code (snippet/template)." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/snippet/**/*.java, 
 	             com/globalsight/everest/page/**/*.java" />
-  </target>
+	</target>
 
-  <target name="snippetservlets" depends="init">
-    <echo message="***** Building Snippet Servlets."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" 
-           destdir="${cap.serverclassesDest}" 
-           includes="com/globalsight/everest/webapp/servlet/**/*.java" />
-  </target>
+	<target name="snippetservlets" depends="init">
+		<echo message="***** Building Snippet Servlets." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/servlet/**/*.java" />
+	</target>
 
-  <target name="snippets" depends="snippetserver, snippetservlets"/>
+	<target name="snippets" depends="snippetserver, snippetservlets" />
 
-  <target name="tb" depends="tbnojsp"/>
-  <target name="tbnojsp" depends="init, tbserver, tbui"/>
+	<target name="tb" depends="tbnojsp" />
+	<target name="tbnojsp" depends="init, tbserver, tbui" />
 
-  <target name="tbserver" depends="init">
-    <echo message="***** Building Terminology Server."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" 
-           destdir="${cap.serverclassesDest}" 
-           includes="com/globalsight/terminology/**/*.java" />
-  </target>
+	<target name="tbserver" depends="init">
+		<echo message="***** Building Terminology Server." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/terminology/**/*.java" />
+	</target>
 
-  <target name="tbui" depends="init, tbserver">
-    <echo message="***** Building Terminology UI."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" 
-           destdir="${cap.serverclassesDest}" 
-           includes="com/globalsight/everest/webapp/pagehandler/terminology/**/*.java" />
-  </target>
+	<target name="tbui" depends="init, tbserver">
+		<echo message="***** Building Terminology UI." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.javaSrcBase}" destdir="${cap.serverclassesDest}" includes="com/globalsight/everest/webapp/pagehandler/terminology/**/*.java" />
+	</target>
 
-  <target name="tbtest" depends="init, tbserver">
-    <echo message="***** Building Terminology test classes."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.testSrcDir}" 
-           destdir="${cap.serverclassesDest}" 
-           includes="com/globalsight/terminology/**/*.java" />
-  </target>
+	<target name="tbtest" depends="init, tbserver">
+		<echo message="***** Building Terminology test classes." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.testSrcDir}" destdir="${cap.serverclassesDest}" includes="com/globalsight/terminology/**/*.java" />
+	</target>
 
-  <target name="build_test" depends="compile_test"></target>
-  <target name="compile_test" depends="compile_server">
-    <echo message="***** Building test."/>
-    <javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.testSrcDir}" destdir="${cap.serverclassesDest}" includes="com/globalsight/**/*.java"></javac>
-  </target>
- 
-  <target name="copyWfImages" depends="compile_ui">
-    <echo message="***** Copying images needed for Graphical Workflow from ${cap.wfAppletImages} to ${cap.Images} folder"/>
-    <mkdir dir="${cap.Images}"/>
-    <copy todir="${cap.Images}">
-      <fileset dir="${cap.wfAppletImages}" 
-		includes="startNode.gif, 
+	<target name="build_test" depends="compile_test">
+	</target>
+	<target name="compile_test" depends="compile_server">
+		<echo message="***** Building test." />
+		<javac nowarn="${nowarn}" verbose="${javacverbose}" debug="on" target="${javactarget}" classpath="${classpath}" srcdir="${cap.testSrcDir}" destdir="${cap.serverclassesDest}" includes="com/globalsight/**/*.java">
+		</javac>
+	</target>
+
+	<target name="copyWfImages" depends="compile_ui">
+		<echo message="***** Copying images needed for Graphical Workflow from ${cap.wfAppletImages} to ${cap.Images} folder" />
+		<mkdir dir="${cap.Images}" />
+		<copy todir="${cap.Images}">
+			<fileset dir="${cap.wfAppletImages}" includes="startNode.gif, 
                           moveUpArrow.gif,
                           moveDownArrow.gif,
                           graphicalworkflow/*.gif,
-			  exitNode.gif"> 
-      </fileset>
-    </copy>
-  </target>
-  
-<target name="graphicalWfJar" depends="copyWfImages, compile_server, compile_ui">
-    <echo message="***** Building Graphical Workflow jar file *****"/>
-    <jar jarfile="${cap.graphicalWfJar}">
-      <fileset dir="${cap.serverclassesDest}" 
-       includes="${cap.UiWorkflowClasses}/costing/Rate*.class,
+			  exitNode.gif">
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="graphicalWfJar" depends="copyWfImages, compile_server, compile_ui">
+		<echo message="***** Building Graphical Workflow jar file *****" />
+		<jar jarfile="${cap.graphicalWfJar}">
+			<fileset dir="${cap.serverclassesDest}" includes="${cap.UiWorkflowClasses}/costing/Rate*.class,
                  ${cap.UiWorkflowClasses}/costing/AmountOfWork.class,
 		 ${cap.UiWorkflowClasses}/costing/IsoCurrency.class,
 		 ${cap.UiWorkflowClasses}/costing/Currency.class,
@@ -529,20 +572,19 @@ ${cap.jspSrcBase}/envoy/terminology/viewer/viewer_resources_js.jsp
 		 ${cap.UiWorkflowMisc}/collections/HashtableValueOrderWalker.class,
 		 images/exitNode.gif,
 		 images/graphicalworkflow/*.gif,
-		 images/startNode.gif"/>
-    </jar>
-  </target>
-  
-  <target name="customerJar" depends="copyWfImages, compile_server, compile_ui">
-    <copy todir=".">
-      <fileset dir="${commonJarLib}">
-        <include name="commons-httpclient-3.0-rc2.jar"/>
-      </fileset>
-    </copy>
-    <echo message="***** Building Customer jar file *****"/>
-    <jar jarfile="${cap.customerJar}">
-      <fileset dir="${cap.serverclassesDest}" 
-       includes="${cap.UiWorkflowClasses}/foundation/Timestamp.class,
+		 images/startNode.gif" />
+		</jar>
+	</target>
+
+	<target name="customerJar" depends="copyWfImages, compile_server, compile_ui">
+		<copy todir=".">
+			<fileset dir="${commonJarLib}">
+				<include name="commons-httpclient-3.0-rc2.jar" />
+			</fileset>
+		</copy>
+		<echo message="***** Building Customer jar file *****" />
+		<jar jarfile="${cap.customerJar}">
+			<fileset dir="${cap.serverclassesDest}" includes="${cap.UiWorkflowClasses}/foundation/Timestamp.class,
                  ${cap.UiWorkflowClasses}/servlet/ExceptionMessage.class,
                  ${cap.UiWorkflowClasses}/util/comparator/FileComparator.class,
                  ${cap.UiWorkflowClasses}/webapp/applet/common/*.class,
@@ -550,28 +592,26 @@ ${cap.jspSrcBase}/envoy/terminology/viewer/viewer_resources_js.jsp
 		 ${cap.UiWorkflowClasses}/webapp/applet/util/*.class,  
                  ${cap.UiWorkflowMisc}/zip/ZipIt.class,
                  images/moveUpArrow.gif,
-                 images/moveDownArrow.gif"
-       excludes="${cap.UiWorkflowClasses}/webapp/applet/util/WorkflowInstance*.class"
-		 />
-    </jar>
-  </target>
+                 images/moveDownArrow.gif" excludes="${cap.UiWorkflowClasses}/webapp/applet/util/WorkflowInstance*.class" />
+		</jar>
+	</target>
 
-  <target name="sign_jars" depends="customerJar">
-    <echo message="***** Signing jar files *****"/>
-    <signjar jar="${cap.customerJar}" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit"/>
-    <signjar jar="${cap.antJar}" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit"/>
-    <signjar jar="commons-httpclient-3.0-rc2.jar" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit"/>
-  </target>      
+	<target name="sign_jars" depends="customerJar">
+		<echo message="***** Signing jar files *****" />
+		<signjar jar="${cap.customerJar}" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" />
+		<signjar jar="${cap.antJar}" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" />
+		<signjar jar="commons-httpclient-3.0-rc2.jar" keystore="globalsight_ori.keystore" alias="globalsight" storepass="changeit" />
+	</target>
 
-  <target name="build_all" depends="build_server, compile_ui, build_test, graphicalWfJar, customerJar, sign_jars">
-    <echo message="***** Building CAP (With JSPs)"/>
-   </target> 
-<!--
+	<target name="build_all" depends="build_server, compile_ui, build_test, graphicalWfJar, customerJar, sign_jars">
+		<echo message="***** Building CAP (With JSPs)" />
+	</target>
+	<!--
   <target name="build_all_nojsp" depends="build_server, compile_ui, build_test, graphicalWfJar, customerJar, sign_jars">
 -->
-  <target name="build_all_nojsp" depends="build_server, compile_ui, graphicalWfJar, customerJar, sign_jars">
-    <echo message="***** Building CAP (No JSPs)"/>  
-  </target>
+	<target name="build_all_nojsp" depends="build_server, compile_ui, graphicalWfJar, customerJar, sign_jars">
+		<echo message="***** Building CAP (No JSPs)" />
+	</target>
 </project>
 
 

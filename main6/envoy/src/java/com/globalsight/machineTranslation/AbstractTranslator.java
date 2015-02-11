@@ -16,26 +16,22 @@
  */
 package com.globalsight.machineTranslation;
 
-import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
-import com.globalsight.everest.servlet.util.ServerProxy;
-import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.machineTranslation.MachineTranslationException;
-import com.globalsight.machineTranslation.MachineTranslator;
-
-import com.globalsight.util.edit.GxmlUtil;
-import com.globalsight.util.gxml.GxmlElement;
-import com.globalsight.util.gxml.TextNode;
-import com.globalsight.util.gxml.GxmlException;
-import com.globalsight.util.gxml.GxmlFragmentReader;
-import com.globalsight.util.gxml.GxmlFragmentReaderPool;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+
+import com.globalsight.everest.projecthandler.TranslationMemoryProfile;
+import com.globalsight.everest.servlet.util.ServerProxy;
+import com.globalsight.everest.webapp.pagehandler.administration.tmprofile.TMProfileConstants;
+import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.util.edit.GxmlUtil;
+import com.globalsight.util.gxml.GxmlElement;
+import com.globalsight.util.gxml.GxmlFragmentReader;
+import com.globalsight.util.gxml.GxmlFragmentReaderPool;
+import com.globalsight.util.gxml.TextNode;
 
 /**
  * An abstract base class that implements functionality common to all
@@ -112,7 +108,7 @@ public abstract class AbstractTranslator
                 CATEGORY.debug("original:\r\n" + gxmlRoot.toGxml());
             }
 
-            List items = gxmlRoot.getChildElements(GxmlElement.TEXT_NODE);
+            List items = gxmlRoot.getTextNodeWithoutInternal();
 
             CATEGORY.debug("items ="  + items.size());
 
@@ -361,28 +357,20 @@ public abstract class AbstractTranslator
     
     private String[] getSegmentInGxml(String segmentInGxml)
     {
-    	String[] segmentsFromGxml = null;
-        GxmlFragmentReader reader = GxmlFragmentReaderPool.instance().getGxmlFragmentReader();
+        // Retrieve all TextNode that need translate.
+        GxmlElement gxmlRoot = MTHelper.getGxmlElement(segmentInGxml);
+        List items = MTHelper.getImmediateAndSubImmediateTextNodes(gxmlRoot);
 
-        try {
-            GxmlElement gxmlRoot = reader.parseFragment(segmentInGxml);
-            List items = gxmlRoot.getChildElements(GxmlElement.TEXT_NODE);
-            
-            segmentsFromGxml = new String[items.size()];
-            int count = 0;
-            for (Iterator iter = items.iterator(); iter.hasNext(); )
-            {
-                TextNode textNode = (TextNode) iter.next();
-                String value = textNode.getTextNodeValue();//.trim();
-                segmentsFromGxml[count] = value;
-                count++;
-            }
-        } catch (GxmlException ex) {
-        	
-        } finally {
-            GxmlFragmentReaderPool.instance().freeGxmlFragmentReader(reader);
-        }
-        
+    	String[] segmentsFromGxml = null;
+    	segmentsFromGxml = new String[items.size()];
+    	int count = 0;
+    	for (Iterator iter = items.iterator(); iter.hasNext();)
+    	{
+    	    String textValue = ((TextNode) iter.next()).getTextValue();
+    	    segmentsFromGxml[count] = textValue;
+    	    count++;
+    	}
+
         return segmentsFromGxml;
     }
     
@@ -458,11 +446,10 @@ public abstract class AbstractTranslator
                 for (int m = 0; m < p_segments.length; m++)
                 {
                     String gxml = p_segments[m];
-                    GxmlFragmentReader reader = GxmlFragmentReaderPool
-                            .instance().getGxmlFragmentReader();
-                    GxmlElement gxmlRoot2 = reader.parseFragment(gxml);
-                    List items2 = gxmlRoot2
-                            .getChildElements(GxmlElement.TEXT_NODE);
+                    // Retrieve all TextNode that need translate.
+                    GxmlElement gxmlRoot = MTHelper.getGxmlElement(gxml);
+                    List items2 = 
+                        MTHelper.getImmediateAndSubImmediateTextNodes(gxmlRoot);
 
                     int count = 0;
                     for (Iterator iter = items2.iterator(); iter.hasNext();)
@@ -488,16 +475,15 @@ public abstract class AbstractTranslator
 
                             if (index == m && subIndex == count)
                             {
-                                textNode
-                                        .setTextBuffer(new StringBuffer(
-                                                translatedSegments[n] == null ? "" : translatedSegments[n]));
+                                textNode.setTextBuffer(new StringBuffer(
+                                        translatedSegments[n] == null ? "" : translatedSegments[n]));
                                 count++;
                                 break;
                             }
                         }
                     }
 
-                    String finalSegment = gxmlRoot2.toGxml();
+                    String finalSegment = gxmlRoot.toGxml();
                     results[m] = finalSegment;
                 }
             }

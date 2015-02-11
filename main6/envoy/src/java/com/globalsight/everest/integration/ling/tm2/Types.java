@@ -17,7 +17,10 @@
 
 package com.globalsight.everest.integration.ling.tm2;
 
+import com.globalsight.everest.tuv.TuImpl;
+import com.globalsight.everest.tuv.TuvImpl;
 import com.globalsight.ling.tm2.leverage.MatchState;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Container of match types of a leveraged target page.
@@ -66,18 +69,38 @@ public class Types
     }
 
     /**
-     * There are two kinds of format to show exact match, judge use which one.
+     * There are four kinds of format to show exact match, judge use which one.
      * It is also used to count in-context match.
      * 
-     * @return true if state is LEVERAGE_GROUP_EXACT_MATCH_LOCALIZED or
-     *         EXACT_MATCH_LOCALIZED
+     * @param p_tuvId
+     *            : for XLF format.
+     * @return true if state is PAGE_TM_EXACT_MATCH, SEGMENT_TM_EXACT_MATCH,
+     *         PO_EXACT_MATCH or XLIFF_EXACT_MATCH(for WS XLF "locked"
+     *         segments).
      */
-    public boolean isExactMatchLocalized()
+    public boolean isExactMatchLocalized(long p_tuvId)
     {
-        return (matchState.equals(MatchState.PAGE_TM_EXACT_MATCH) || matchState
-                .equals(MatchState.SEGMENT_TM_EXACT_MATCH));
+        // Judge if it is "XLIFF_EXACT_MATCH" and "isXliffLocked" first.
+        if (MatchState.XLIFF_EXACT_MATCH.equals(matchState))
+        {
+            TuvImpl tuv = HibernateUtil.get(TuvImpl.class, p_tuvId);
+            if (tuv != null)
+            {
+                TuImpl tu = (TuImpl) tuv.getTu();
+                if (tu != null)
+                {
+                    // If it is WorldServer XLIFF file,and current TU has
+                    // 'lock_status="locked' attribute, can count it as ICE.
+                    return tu.isXliffLocked();
+                }
+            }
+        }
+        
+        return (matchState.equals(MatchState.PAGE_TM_EXACT_MATCH)
+                || matchState.equals(MatchState.SEGMENT_TM_EXACT_MATCH) 
+                || matchState.equals(MatchState.PO_EXACT_MATCH));
     }
-
+    
     public MatchState getMatchState()
     {
         return matchState;

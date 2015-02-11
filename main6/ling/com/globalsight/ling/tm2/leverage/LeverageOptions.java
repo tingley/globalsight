@@ -103,7 +103,7 @@ public class LeverageOptions
     
     public boolean leverageOnlyExactMatches()
     {
-        return m_tmProfile.isLeverageExactMatch();
+        return m_tmProfile.getIsExactMatchLeveraging();
     }
     
     // TODO: rename this getTmIdsToLeverageFrom()

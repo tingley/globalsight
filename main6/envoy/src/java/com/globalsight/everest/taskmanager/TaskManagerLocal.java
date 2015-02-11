@@ -140,8 +140,8 @@ public class TaskManagerLocal implements TaskManager
      * @throws RemoteException,
      *             TaskException
      */
-	public void acceptTask(String p_sessionId, String p_userId, Task p_task,
-			boolean isSkipped) throws RemoteException, TaskException
+    public void acceptTask(String p_sessionId, String p_userId, Task p_task,
+            boolean isSkipped) throws RemoteException, TaskException
     {
         Task task = validateTaskForAcceptance(p_sessionId, p_userId, p_task);
         // this would be the base date in case of an exception
@@ -587,6 +587,8 @@ public class TaskManagerLocal implements TaskManager
     public void linkWorkflowTasksWithTaskInfos(Map p_wfTasks, List p_tasks)
             throws RemoteException, TaskException
     {
+        HashMap<String, String> pmIdName = new HashMap<String, String>();
+        
         Iterator iter = p_tasks.iterator();
         HashMap activities = new HashMap();
         // Link each WorkflowTaskInstance with its corresponding Task
@@ -627,8 +629,14 @@ public class TaskManagerLocal implements TaskManager
                 }
                 else
                 {
-                    String projName = getProjectManagerName(aTask
-                            .getProjectManagerId());
+                    String id = aTask.getProjectManagerId();
+                    String name = pmIdName.get(id);
+                    if (name == null)
+                    {
+                        name = getProjectManagerName(id);
+                        pmIdName.put(id, name);
+                    }
+                    String projName = name;
                     aTask.setProjectManagerName(projName);
                 }
             }
@@ -688,7 +696,7 @@ public class TaskManagerLocal implements TaskManager
             String sql = TaskDescriptorModifier.TASKS_BY_NAME_AND_JOB_ID_SQL;
             if (p_taskName != null && p_taskName.trim().length() > 0)
             {
-            	sql = sql + " AND t.NAME = :taskName";
+                sql = sql + " AND t.NAME = :taskName";
                 map.put(TaskDescriptorModifier.TASK_NAME_ARG, p_taskName);
             }
             
@@ -1615,35 +1623,35 @@ public class TaskManagerLocal implements TaskManager
 
         p_clonedTask.setAcceptor(p_userId);
         
-		// retrieve the overdue value from the jbpm task instance config xml.
-		JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
-		TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
-				.getTaskInstance(p_clonedTask.getId(), ctx);
-		String config = WorkflowJbpmUtil.getConfigure(taskInstance.getTask()
-				.getTaskNode());
-		WorkflowNodeParameter param = WorkflowNodeParameter
-				.createInstance(config);
-		long overdueToPM = param.getLongAttribute(
-				WorkflowConstants.FIELD_OVERDUE_PM_TIME,
-				WorkflowTaskInstance.NO_RATE);
-		long overdueToUser = param.getLongAttribute(
-				WorkflowConstants.FIELD_OVERDUE_USER_TIME,
-				WorkflowTaskInstance.NO_RATE);
-		ctx.close();
+        // retrieve the overdue value from the jbpm task instance config xml.
+        JbpmContext ctx = WorkflowConfiguration.getInstance().getJbpmContext();
+        TaskInstance taskInstance = WorkflowJbpmPersistenceHandler
+                .getTaskInstance(p_clonedTask.getId(), ctx);
+        String config = WorkflowJbpmUtil.getConfigure(taskInstance.getTask()
+                .getTaskNode());
+        WorkflowNodeParameter param = WorkflowNodeParameter
+                .createInstance(config);
+        long overdueToPM = param.getLongAttribute(
+                WorkflowConstants.FIELD_OVERDUE_PM_TIME,
+                WorkflowTaskInstance.NO_RATE);
+        long overdueToUser = param.getLongAttribute(
+                WorkflowConstants.FIELD_OVERDUE_USER_TIME,
+                WorkflowTaskInstance.NO_RATE);
+        ctx.close();
 
-		Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
-				p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
-				p_userId, p_session);
-		p_clonedTask.setAcceptedDate(p_baseDate);
-		p_clonedTask.setEstimatedCompletionDate(estimatedDate);
+        Date estimatedDate = createReservedTime(p_baseDate, p_clonedTask,
+                p_clonedTask.getTaskDuration(), ReservedTime.TYPE_ACTIVITY,
+                p_userId, p_session);
+        p_clonedTask.setAcceptedDate(p_baseDate);
+        p_clonedTask.setEstimatedCompletionDate(estimatedDate);
 
-		TaskInfo taskInfo = new TaskInfo(p_clonedTask.getId(), p_clonedTask
-				.getTaskName(), p_clonedTask.getState(), null, estimatedDate,
-				p_baseDate, null, p_clonedTask.getType());
-		taskInfo.setOverdueToPM(overdueToPM);
-		taskInfo.setOverdueToUser(overdueToUser);
+        TaskInfo taskInfo = new TaskInfo(p_clonedTask.getId(), p_clonedTask
+                .getTaskName(), p_clonedTask.getState(), null, estimatedDate,
+                p_baseDate, null, p_clonedTask.getType());
+        taskInfo.setOverdueToPM(overdueToPM);
+        taskInfo.setOverdueToUser(overdueToUser);
 
-		return taskInfo;
+        return taskInfo;
     }
 
     /*

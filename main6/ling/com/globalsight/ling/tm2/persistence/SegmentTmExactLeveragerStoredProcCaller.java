@@ -26,9 +26,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.globalsight.everest.persistence.StoredProcCallerProxy;
 import com.globalsight.everest.persistence.PersistenceException;
 import com.globalsight.everest.persistence.StoredProcCaller;
+import com.globalsight.everest.persistence.StoredProcCallerProxy;
+import com.globalsight.everest.tm.Tm;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.util.GlobalSightLocale;
@@ -252,8 +253,21 @@ class SegmentTmExactLeveragerStoredProcCaller implements
 				+ " AND tu.tm_id IN " + " (:tm_id_list) " + multi_ling_opt
 				+ " AND tu.id = tuv.tu_id ";
 
+        ArrayList tmIds = new ArrayList();
+        for (Object ob : p_tmsToLeverageFrom)
+        {
+            if (ob instanceof Tm)
+            {
+                Tm tm = (Tm) ob;
+                tmIds.add(tm.getId());
+            }
+            else
+            {
+                tmIds.add(ob);
+            }
+        }
 		String preparedSql = selectIdSql.replaceAll(":tm_id_list",
-				StoredProcCaller.convertCollectionToSql(p_tmsToLeverageFrom,
+				StoredProcCaller.convertCollectionToSql(tmIds,
 						null));
 		preparedStatement = m_connection.prepareStatement(preparedSql);
 

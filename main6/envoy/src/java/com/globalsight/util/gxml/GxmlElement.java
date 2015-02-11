@@ -377,6 +377,49 @@ public class GxmlElement
 
         return m_childElements;
     }
+    
+    public List getTextNodeWithoutInternal()
+    {
+        if (m_childElements == null)
+        {
+            return new ArrayList(0);
+        }
+        
+        List someChildElmts = new ArrayList(m_childElements.size());
+
+        boolean inInternal = false;
+        String bptI = "-1";
+        for (int i = 0; i < m_childElements.size(); i++)
+        {
+            
+            GxmlElement child = (GxmlElement)m_childElements.get(i);
+            if (!inInternal && BPT == child.getType())
+            {
+                inInternal = "yes".equals(child.getAttribute("internal"));
+                
+                if (inInternal)
+                {
+                    bptI = child.getAttribute("i");
+                }
+            }
+            
+            if (!inInternal && TEXT_NODE == child.getType())
+            {
+                someChildElmts.add(child);
+            }
+            
+            if (inInternal && EPT == child.getType())
+            {
+                String eptI = child.getAttribute("i");
+                if (bptI.equals(eptI))
+                {
+                    inInternal = false;
+                }
+            }
+        }
+
+        return someChildElmts;
+    }
 
     /**
      * To get a list of immediate child elements of specified types.

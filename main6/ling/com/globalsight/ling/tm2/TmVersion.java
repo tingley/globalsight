@@ -24,4 +24,13 @@ public enum TmVersion {
         }
         return UNKNOWN;
     }
+    public String toString() {
+        if (value == 2) {
+            return "TM2";
+        } else if (value == 3) {
+            return "TM3";
+        } else {
+            throw new IllegalStateException("weird TmVersion: " + value);
+        }
+    }
 }

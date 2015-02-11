@@ -413,9 +413,10 @@ public class VendorPOXlsReport extends XlsReports
                         + data.medHiFuzzyMatchWordCount
                         + data.hiFuzzyMatchWordCount;
                 data.trados95to99WordCount = data.hiFuzzyMatchWordCount;
-                data.trados75to94WordCount = data.medFuzzyMatchWordCount
-                        + data.medHiFuzzyMatchWordCount;
-                data.trados1to74WordCount = data.lowFuzzyMatchWordCount;
+                data.trados85to94WordCount = data.medHiFuzzyMatchWordCount;
+                data.trados75to84WordCount = data.medFuzzyMatchWordCount;
+                data.trados50to74WordCount = data.lowFuzzyMatchWordCount;
+                //no match word count, do not consider Threshold 
 
                 // add the lowest fuzzies and sublev match to nomatch
                 data.noMatchWordCount += w.getNoMatchWordCount()
@@ -460,12 +461,14 @@ public class VendorPOXlsReport extends XlsReports
                         + data.dellInContextMatchWordCount
                         + data.dellContextMatchWordCount;
                 data.tradosTotalWordCount = data.trados100WordCount
-                        + data.inContextMatchWordCount
+                        + data.tradosInContextMatchWordCount
                         + data.tradosContextMatchWordCount
                         + data.trados95to99WordCount
-                        + data.trados75to94WordCount
-                        + data.trados1to74WordCount + data.tradosRepsWordCount
-                        + data.tradosNoMatchWordCount;
+                        + data.trados85to94WordCount
+                        + data.trados75to84WordCount 
+                        + data.trados50to74WordCount
+                        + data.tradosNoMatchWordCount
+                        + data.tradosRepsWordCount;
 
                 Cost wfCost = ServerProxy.getCostingEngine().calculateCost(w,
                         pivotCurrency, p_recalculateFinishedWorkflow,
@@ -540,9 +543,9 @@ public class VendorPOXlsReport extends XlsReports
                                     data.hiFuzzyMatchWordCountCost);
                     // Trados breakdown for fuzzy
                     data.trados95to99WordCountCost = data.hiFuzzyMatchWordCountCost;
-                    data.trados75to94WordCountCost = data.medFuzzyMatchWordCountCost
-                            .add(data.medHiFuzzyMatchWordCountCost);
-                    data.trados1to74WordCountCost = data.lowFuzzyMatchWordCountCost;
+                    data.trados85to94WordCountCost = data.medHiFuzzyMatchWordCountCost;
+                    data.trados75to84WordCountCost = data.medFuzzyMatchWordCountCost;
+                    data.trados50to74WordCountCost = data.lowFuzzyMatchWordCountCost;
 
                     // new words, no match costs
                     data.noMatchWordCountCost = add(data.noMatchWordCountCost,
@@ -563,8 +566,9 @@ public class VendorPOXlsReport extends XlsReports
                             .add(data.tradosInContextWordCountCost).add(
                                     data.tradosContextWordCountCost).add(
                                     data.trados95to99WordCountCost).add(
-                                    data.trados75to94WordCountCost).add(
-                                    data.trados1to74WordCountCost).add(
+                                    data.trados85to94WordCountCost).add(
+                                    data.trados75to84WordCountCost).add(
+                                    data.trados50to74WordCountCost).add(
                                     data.tradosRepsWordCountCost).add(
                                     data.tradosNoMatchWordCountCost);
                 }
@@ -624,8 +628,9 @@ public class VendorPOXlsReport extends XlsReports
         public long tradosInContextMatchWordCount = 0;
         public long tradosContextMatchWordCount = 0;
         public long trados95to99WordCount = 0;
-        public long trados75to94WordCount = 0;
-        public long trados1to74WordCount = 0;
+        public long trados85to94WordCount = 0;
+        public long trados75to84WordCount = 0;
+        public long trados50to74WordCount = 0;
         public long tradosNoMatchWordCount = 0;
         public long tradosRepsWordCount = 0;
         public long tradosTotalWordCount = 0;
@@ -689,9 +694,11 @@ public class VendorPOXlsReport extends XlsReports
                 BIG_DECIMAL_ZERO_STRING);
         public BigDecimal trados95to99WordCountCost = new BigDecimal(
                 BIG_DECIMAL_ZERO_STRING);
-        public BigDecimal trados75to94WordCountCost = new BigDecimal(
+        public BigDecimal trados85to94WordCountCost = new BigDecimal(
                 BIG_DECIMAL_ZERO_STRING);
-        public BigDecimal trados1to74WordCountCost = new BigDecimal(
+        public BigDecimal trados75to84WordCountCost = new BigDecimal(
+                BIG_DECIMAL_ZERO_STRING);
+        public BigDecimal trados50to74WordCountCost = new BigDecimal(
                 BIG_DECIMAL_ZERO_STRING);
         public BigDecimal tradosRepsWordCountCost = new BigDecimal(
                 BIG_DECIMAL_ZERO_STRING);
@@ -963,17 +970,17 @@ public class VendorPOXlsReport extends XlsReports
                 .getString("jobinfo.tmmatches.invoice"), wordCountFormat));
         if (p_data.headers[0] != null && p_data.headers[1] != null)
         {
-            theSheet.mergeCells(c, 2, c + 5, 2);
+            theSheet.mergeCells(c, 2, c + 6, 2);
         }
         else
         {
             if (p_data.headers[0] != null || p_data.headers[1] != null)
             {
-                theSheet.mergeCells(c, 2, c + 4, 2);
+                theSheet.mergeCells(c, 2, c + 5, 2);
             }
             else
             {
-                theSheet.mergeCells(c, 2, c + 3, 2);
+                theSheet.mergeCells(c, 2, c + 4, 2);
             }
         }
         theSheet.addCell(new Label(c++, 3, bundle
@@ -999,7 +1006,7 @@ public class VendorPOXlsReport extends XlsReports
         theSheet.addCell(new Label(c++, 3, bundle
                 .getString("jobinfo.tmmatches.invoice.newwords"),
                 wordCountValueFormat));
-        theSheet.addCell(new Label(c, 2, bundle.getString("lb_total"),
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_total"),
                 wordCountValueRightFormat));
         theSheet.mergeCells(c, 2, c, 3);
     }
@@ -1144,6 +1151,18 @@ public class VendorPOXlsReport extends XlsReports
         theSheet.addCell(new Label(c++, 3, bundle
                 .getString("jobinfo.tradosmatches.invoice.per100matches"),
                 wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_85_94"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_84") + "*",
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
+                wordCountValueRightFormat));
+        theSheet
+                .addCell(new Label(c++, 3, bundle
+                        .getString("lb_repetition_word_cnt"),
+                        wordCountValueRightFormat));
         if (p_data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -1154,18 +1173,6 @@ public class VendorPOXlsReport extends XlsReports
             theSheet.addCell(new Label(c++, 3, bundle
                     .getString("lb_context_matches"), wordCountValueFormat));
         }
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_94"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_1_74") + "*",
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
-                wordCountValueRightFormat));
-        theSheet
-                .addCell(new Label(c++, 3, bundle
-                        .getString("lb_repetition_word_cnt"),
-                        wordCountValueRightFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_total"),
                 wordCountValueRightFormat));
 
@@ -1189,6 +1196,18 @@ public class VendorPOXlsReport extends XlsReports
         theSheet.addCell(new Label(c++, 3, bundle
                 .getString("jobinfo.tradosmatches.invoice.per100matches"),
                 wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_85_94"),
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_84") + "*",
+                wordCountValueFormat));
+        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
+                wordCountValueRightFormat));
+        theSheet
+                .addCell(new Label(c++, 3, bundle
+                        .getString("lb_repetition_word_cnt"),
+                        wordCountValueRightFormat));
         if (p_data.headers[0] != null)
         {
             theSheet.addCell(new Label(c++, 3, bundle
@@ -1199,18 +1218,6 @@ public class VendorPOXlsReport extends XlsReports
             theSheet.addCell(new Label(c++, 3, bundle
                     .getString("lb_context_match"), wordCountValueFormat));
         }
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_95_99"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_75_94"),
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_1_74") + "*",
-                wordCountValueFormat));
-        theSheet.addCell(new Label(c++, 3, bundle.getString("lb_no_match"),
-                wordCountValueRightFormat));
-        theSheet
-                .addCell(new Label(c++, 3, bundle
-                        .getString("lb_repetition_word_cnt"),
-                        wordCountValueRightFormat));
         theSheet.addCell(new Label(c++, 3, bundle.getString("lb_total"),
                 wordCountValueRightFormat));
     }
@@ -1700,6 +1707,24 @@ public class VendorPOXlsReport extends XlsReports
                         data.trados100WordCount, temp_normalFormat));
                 int numwidth = 10;
                 theSheet.setColumnView(col - 1, numwidth);
+                
+                theSheet.addCell(new Number(col++, row,
+                        data.trados95to99WordCount, temp_normalFormat));
+                theSheet.setColumnView(col - 1, numwidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        data.trados85to94WordCount, temp_normalFormat));
+                theSheet.setColumnView(col - 1, numwidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        data.trados75to84WordCount, temp_normalFormat));
+                theSheet.setColumnView(col - 1, numwidth);
+                theSheet.addCell(new Number(col++, row,
+                        data.tradosNoMatchWordCount, temp_normalFormat));
+                theSheet.setColumnView(col - 1, numwidth);
+                theSheet.addCell(new Number(col++, row,
+                        data.tradosRepsWordCount, temp_normalFormat));
+                theSheet.setColumnView(col - 1, numwidth);
                 if (p_data.headers[0] != null)
                 {
                     theSheet.addCell(new Number(col++, row,
@@ -1716,23 +1741,6 @@ public class VendorPOXlsReport extends XlsReports
                     theSheet.setColumnView(col - 1, numwidth);
                 }
                 theSheet.addCell(new Number(col++, row,
-                        data.trados95to99WordCount, temp_normalFormat));
-                theSheet.setColumnView(col - 1, numwidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        data.trados75to94WordCount, temp_normalFormat));
-                theSheet.setColumnView(col - 1, numwidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        data.trados1to74WordCount, temp_normalFormat));
-                theSheet.setColumnView(col - 1, numwidth);
-                theSheet.addCell(new Number(col++, row,
-                        data.tradosNoMatchWordCount, temp_normalFormat));
-                theSheet.setColumnView(col - 1, numwidth);
-                theSheet.addCell(new Number(col++, row,
-                        data.tradosRepsWordCount, temp_normalFormat));
-                theSheet.setColumnView(col - 1, numwidth);
-                theSheet.addCell(new Number(col++, row,
                         data.tradosTotalWordCount, temp_normalFormat));
                 theSheet.setColumnView(col - 1, numwidth);
 
@@ -1742,6 +1750,31 @@ public class VendorPOXlsReport extends XlsReports
                                 asDouble(data.trados100WordCountCost),
                                 temp_moneyFormat));
                 theSheet.setColumnView(col - 1, moneywidth);
+         
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados95to99WordCountCost),
+                        temp_moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados85to94WordCountCost),
+                        temp_moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.trados75to84WordCountCost),
+                        temp_moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.tradosNoMatchWordCountCost),
+                        temp_moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+
+                theSheet.addCell(new Number(col++, row,
+                        asDouble(data.tradosRepsWordCountCost),
+                        temp_moneyFormat));
+                theSheet.setColumnView(col - 1, moneywidth);
+                
                 if (p_data.headers[0] != null)
                 {
                     theSheet.addCell(new Number(col++, row,
@@ -1756,29 +1789,7 @@ public class VendorPOXlsReport extends XlsReports
                             temp_moneyFormat));
                     theSheet.setColumnView(col - 1, moneywidth);
                 }
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.trados95to99WordCountCost),
-                        temp_moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.trados75to94WordCountCost),
-                        temp_moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.trados1to74WordCountCost),
-                        temp_moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.tradosNoMatchWordCountCost),
-                        temp_moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
-
-                theSheet.addCell(new Number(col++, row,
-                        asDouble(data.tradosRepsWordCountCost),
-                        temp_moneyFormat));
-                theSheet.setColumnView(col - 1, moneywidth);
+                
                 theSheet.addCell(new Number(col++, row,
                         asDouble(data.tradosTotalWordCountCost),
                         temp_moneyFormat));

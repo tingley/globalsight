@@ -68,5 +68,6 @@ public interface IFormatNames
     public static final String FORMAT_PO = "po";
     public static final String FORMAT_XLIFF_NAME = "Xliff";
     public static final String FORMAT_TDA = "TDA";
+    public static final String FORMAT_MIF = "mif";
     public static final String FORMAT_IDML = "idml";
 }

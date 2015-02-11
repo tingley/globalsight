@@ -46,6 +46,7 @@
 .editorSegmentExact:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#CCFFCC; color:blue}
 .editorSegmentFuzzy {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#FFFFCC; color:blue}
 .editorSegmentFuzzy:visited {font-family:Arial Unicode MS, Arial, Helvetica, sans-serif; font-size:10pt; background-color:#FFFFCC; color:blue}
+.editorSegmentMT {font-family: Arial, Helvetica, sans-serif; font-size: 10pt;word-wrap: break-word;}
 
 .formFields {font-family:Arial Unicode MS, Arial, helvetica, sans-serif; font-size: 10pt}
 

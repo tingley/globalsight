@@ -33,10 +33,6 @@ import com.globalsight.cxe.message.CxeMessage;
 */
 public class FrameHelper extends DesktopAppHelper
 {
-    private static final String FORMAT5 = "frame5";
-    private static final String FORMAT6 = "frame6";
-    private static final String FORMAT7 = "frame7";
-
     private static final String PROPERTY_FILE =
         "/properties/frameAdapter.properties";
 
@@ -100,7 +96,7 @@ public class FrameHelper extends DesktopAppHelper
 
     /**
      * Looks up the known format type associated with the file profile
-     * to see if it is Frame5 or Frame6 or Frame7. This was the
+     * to see if it is Frame5 or Frame6 or Frame7 or Frame9. This was the
      * only way to do this as a patch without changing the
      * configuration in Active.
      */
@@ -124,32 +120,36 @@ public class FrameHelper extends DesktopAppHelper
 
             if (results.next())
             {
+                m_formatName = FRAME9;
+                
                 String knownFormatName = results.getString(1);
-                if (knownFormatName.equalsIgnoreCase(FORMAT5))
+                if (knownFormatName.equalsIgnoreCase(FRAME5))
                 {
-                    m_formatName = FORMAT5;
+                    m_formatName = FRAME5;
                 }
-                else if (knownFormatName.equalsIgnoreCase(FORMAT6))
+                else if (knownFormatName.equalsIgnoreCase(FRAME6))
                 {
-                    m_formatName = FORMAT6;
+                    m_formatName = FRAME6;
                 }
-                else
+                else if (knownFormatName.equalsIgnoreCase(FRAME7))
                 {
-                    m_formatName = FORMAT7;
+                    m_formatName = FRAME7;
+                }
+                else if (knownFormatName.equalsIgnoreCase(FRAME9))
+                {
+                    m_formatName = FRAME9;
                 }
             }
             else
             {
-                Logger l = Logger.getLogger();
-                l.println(Logger.ERROR,"Could not determine FrameMaker format because the file profile could not be queried. Using frame6");
-                m_formatName = FORMAT7;
+                m_logger.error("Could not determine FrameMaker format because the file profile could not be queried. Using frame9");
+                m_formatName = FRAME9;
             }
         }
         catch (Exception e)
         {
-            Logger l = Logger.getLogger();
-            m_formatName = FORMAT7;
-            l.printStackTrace(Logger.ERROR,"Could not determine FrameMaker format, using format" + m_formatName, e);
+            m_formatName = FRAME9;
+            m_logger.error("Could not determine FrameMaker format, using format" + m_formatName, e);
         }
         finally
         {

@@ -971,6 +971,10 @@ function doLoad()
     {
         window.top.CloseThis();
     }
+
+    // Invoke method on me_menu.jsp
+    parent.parent.parent.menu.updateFileNavigationArrow();
+    parent.parent.parent.menu.updatePageNavigationArrow();
 }
 
 // add javascript to synchronize scroll bars 
@@ -978,7 +982,7 @@ function doLoad()
 function update_tr(id) 
 {
 	var otherPane = parent.parent.source;
-	var pageToScroll = otherPane ? otherPane.content : null;	
+	var pageToScroll = otherPane ? otherPane.content : null;
     
     if(pageToScroll) 
     {

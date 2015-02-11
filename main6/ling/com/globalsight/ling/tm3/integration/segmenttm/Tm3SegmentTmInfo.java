@@ -1,7 +1,12 @@
 package com.globalsight.ling.tm3.integration.segmenttm;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FORMAT;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.FROM_WORLDSERVER;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.SID;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TRANSLATABLE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.TYPE;
+import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.UPDATED_BY_PROJECT;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -10,17 +15,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import com.globalsight.everest.projecthandler.ProjectTM;
 import com.globalsight.everest.tm.StatisticsInfo;
 import com.globalsight.everest.tm.Tm;
 import com.globalsight.everest.util.comparator.ComparatorByTmOrder;
@@ -33,35 +36,38 @@ import com.globalsight.ling.tm2.SegmentTmInfo;
 import com.globalsight.ling.tm2.SegmentTmTu;
 import com.globalsight.ling.tm2.SegmentTmTuv;
 import com.globalsight.ling.tm2.TmCoreManager;
-import com.globalsight.ling.tm2.TmCoreManagerLocal;
 import com.globalsight.ling.tm2.TmUtil;
-import com.globalsight.ling.tm2.TuQueryResult;
 import com.globalsight.ling.tm2.corpusinterface.TuvMappingHolder;
 import com.globalsight.ling.tm2.indexer.Reindexer;
-import com.globalsight.ling.tm2.indexer.TmSegmentIndexer;
 import com.globalsight.ling.tm2.leverage.LeverageDataCenter;
 import com.globalsight.ling.tm2.leverage.LeverageMatchResults;
 import com.globalsight.ling.tm2.leverage.LeverageMatches;
 import com.globalsight.ling.tm2.leverage.LeverageOptions;
-import com.globalsight.ling.tm2.leverage.LeveragedSegmentTu;
 import com.globalsight.ling.tm2.leverage.LeveragedTu;
-import com.globalsight.ling.tm2.leverage.MatchState;
 import com.globalsight.ling.tm2.lucene.LuceneIndexWriter;
 import com.globalsight.ling.tm2.lucene.LuceneSearcher;
-import com.globalsight.ling.tm2.persistence.SegmentTmPersistence;
 import com.globalsight.ling.tm2.population.UniqueSegmentRepositoryForCorpus;
 import com.globalsight.ling.tm2.segmenttm.TmConcordanceQuery.TMidTUid;
+import com.globalsight.ling.tm3.core.DefaultManager;
+import com.globalsight.ling.tm3.core.TM3Attribute;
+import com.globalsight.ling.tm3.core.TM3Attributes;
+import com.globalsight.ling.tm3.core.TM3Event;
+import com.globalsight.ling.tm3.core.TM3Exception;
+import com.globalsight.ling.tm3.core.TM3Handle;
+import com.globalsight.ling.tm3.core.TM3Locale;
+import com.globalsight.ling.tm3.core.TM3Manager;
+import com.globalsight.ling.tm3.core.TM3SaveMode;
+import com.globalsight.ling.tm3.core.TM3Saver;
+import com.globalsight.ling.tm3.core.TM3Tm;
+import com.globalsight.ling.tm3.core.TM3Tu;
+import com.globalsight.ling.tm3.core.TM3Tuv;
+import com.globalsight.ling.tm3.integration.GSDataFactory;
+import com.globalsight.ling.tm3.integration.GSTuvData;
+import com.globalsight.log.GlobalSightCategory;
+import com.globalsight.persistence.hibernate.HibernateUtil;
 import com.globalsight.util.GlobalSightLocale;
 import com.globalsight.util.progress.InterruptMonitor;
 import com.globalsight.util.progress.ProgressReporter;
-import com.globalsight.ling.tm3.core.*;
-import com.globalsight.ling.tm3.integration.*;
-
-import static com.globalsight.ling.tm3.core.TM3Attributes.entry;
-import static com.globalsight.ling.tm3.integration.segmenttm.SegmentTmAttribute.*;
-
-import com.globalsight.log.GlobalSightCategory;
-import com.globalsight.persistence.hibernate.HibernateUtil;
 
 /**
  * Segment TM adapter for TM3.  This code is somewhat ugly.   
@@ -668,38 +674,35 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
                 " segs, srcLocale=" + pSourceLocale + ", pMode=" + pMode + 
                 ", fromTmImport=" + pFromTmImport);
         long start = System.currentTimeMillis();
-
+        
         if (pSegmentsToSave.size() == 0) {
             return new TuvMappingHolder();
         }
         
         try {
-            tx = HibernateUtil.getTransaction();
+            tx = getTransaction();
             
             TM3Tm<GSTuvData> tm = getTM3Tm(pSession, pTm);
          
             UniqueSegmentRepositoryForCorpus usr = getUniqueRepository(pSourceLocale, pSegmentsToSave);
-
+            
             // Use the first TU's filename/username info for the even, on the
             // assumption that they are all the same.
             BaseTmTu firstTu = pSegmentsToSave.iterator().next();
             BaseTmTuv firstTuv = firstTu.getFirstTuv(pSourceLocale);
-            TM3Event sourceTuvEvent = null;
-            TargetEventProducer targetEvents = null;
+            EventProducer sourceEvents = null;
+            EventProducer targetEvents = null;
             if (pFromTmImport) {
-                sourceTuvEvent = addImportEvent(tm, firstTuv.getCreationUser(), firstTu.getSourceTmName());
-                final TM3Event targetEvent = sourceTuvEvent;
-                targetEvents = new TargetEventProducer() {
-                    @Override
-                    public TM3Event getEventForTargetTuv(BaseTmTuv tuv) {
-                        return targetEvent;
-                    }
-                };
+                sourceEvents = new MultiUserEventProducer(tm, 
+                        EventType.TM_IMPORT, firstTu.getSourceTmName());
+                targetEvents = sourceEvents;
             }
             else {
                 // Completed translations being saved.  Events here are more complex
                 // because we have a source creator and one or more target creators.
-                sourceTuvEvent = addSaveEvent(tm, firstTuv.getCreationUser(), firstTuv.getUpdatedProject());
+                TM3Event sourceTuvEvent = addSaveEvent(tm, 
+                        firstTuv.getCreationUser(), firstTuv.getUpdatedProject());
+                sourceEvents = new SingleEventProducer(sourceTuvEvent);
                 targetEvents = new MultiUserEventProducer(tm, sourceTuvEvent); 
             }
             
@@ -724,14 +727,15 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
                 // NB SegmentTmTu's idea of source tuv is the first tuv with
                 // the source locale
                 BaseTmTuv srcTuv = srcTu.getSourceTuv();
-                TM3Saver.Tu tuToSave = saver.tu(
-                    new GSTuvData(srcTuv), pSourceLocale, sourceTuvEvent);
+                TM3Saver<GSTuvData>.Tu tuToSave = saver.tu(
+                    new GSTuvData(srcTuv), pSourceLocale, 
+                    sourceEvents.getEventForTuv(srcTuv));
                 for (BaseTmTuv tuv: srcTu.getTuvs()) {
                     if (tuv.equals(srcTuv)) {
                         continue;
                     }
                     tuToSave.target(new GSTuvData(tuv), tuv.getLocale(), 
-                            targetEvents.getEventForTargetTuv(tuv));
+                            targetEvents.getEventForTuv(tuv));
                 }
                 
                 tuToSave.attr(translatableAttr, srcTu.isTranslatable());
@@ -748,13 +752,16 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
                 if (srcTuv.getUpdatedProject() != null) {
                     tuToSave.attr(projectAttr, srcTuv.getUpdatedProject());
                 }
-                TM3Tu<GSTuvData> saved = saver.save(convertSaveMode(pMode)).get(0);
-                for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv)) {
-                    // Note that this uses the PROJECT TM ID, not the tm3 tm id.
-                    holder.addMapping(pSourceLocale, stuv.getId(), stuv.getTu().getId(),
-                                      pTm.getId(), saved.getId(), saved.getSourceTuv().getId());
+                List<TM3Tu<GSTuvData>> savedTus = saver.save(convertSaveMode(pMode));
+                if (savedTus.size() > 0) {
+                    TM3Tu<GSTuvData> saved = saver.save(convertSaveMode(pMode)).get(0);
+                    for (BaseTmTuv stuv : usr.getIdenticalSegment(srcTuv)) {
+                        // Note that this uses the PROJECT TM ID, not the tm3 tm id.
+                        holder.addMapping(pSourceLocale, stuv.getId(), stuv.getTu().getId(),
+                                          pTm.getId(), saved.getId(), saved.getSourceTuv().getId());
+                    }
+                    newTus.add(saved);
                 }
-                newTus.add(saved);
             }
             tx.commit();
             
@@ -877,7 +884,6 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
         try {
             UniqueSegmentRepositoryForCorpus jobDataToSave
                 = new UniqueSegmentRepositoryForCorpus(pSourceLocale);
-    
             for (BaseTmTu tu : pSegmentsToSave) {
                 // separate subflows out of the main text and save them as
                 // independent segments
@@ -1045,21 +1051,40 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
         }
     }
     
-    interface TargetEventProducer {
-        TM3Event getEventForTargetTuv(BaseTmTuv tuv);
+    interface EventProducer {
+        TM3Event getEventForTuv(BaseTmTuv tuv);
+    }
+    
+    class SingleEventProducer implements EventProducer {
+        private TM3Event event;
+        SingleEventProducer(TM3Event event) {
+            this.event = event;
+        }
+        @Override
+        public TM3Event getEventForTuv(BaseTmTuv tuv) {
+            return event;
+        }
     }
 
-    class MultiUserEventProducer implements TargetEventProducer {
+    class MultiUserEventProducer implements EventProducer {
         private Map<String, TM3Event> map = new HashMap<String, TM3Event>();
         private TM3Tm<GSTuvData> tm;
+        private int eventType;
         private String attr;
+        MultiUserEventProducer(TM3Tm<GSTuvData> tm, EventType eventType, String attr) {
+            this.tm = tm;
+            this.eventType = eventType.getValue();
+            this.attr = attr;
+        }
+        // For segment save events only
         MultiUserEventProducer(TM3Tm<GSTuvData> tm, TM3Event sourceEvent) {
             this.tm = tm;
             this.attr = sourceEvent.getArgument();
+            this.eventType = EventType.SEGMENT_SAVE.getValue();
             map.put(sourceEvent.getUsername(), sourceEvent);
         }
         @Override
-        public TM3Event getEventForTargetTuv(BaseTmTuv tuv) {
+        public TM3Event getEventForTuv(BaseTmTuv tuv) {
             String user = tuv.getModifyUser();
             if (user == null) {
                 user = tuv.getCreationUser();
@@ -1067,10 +1092,14 @@ public class Tm3SegmentTmInfo implements SegmentTmInfo {
             if (map.containsKey(user)) {
                 return map.get(user);
             }
-            TM3Event event = addSaveEvent(tm, user, attr);
+            TM3Event event = tm.addEvent(eventType, user, attr);
             map.put(user, event);
             return event;
         }
     }
 
+    // Split this out so test classes can override it
+    protected Transaction getTransaction() {
+        return HibernateUtil.getTransaction();
+    }
 }

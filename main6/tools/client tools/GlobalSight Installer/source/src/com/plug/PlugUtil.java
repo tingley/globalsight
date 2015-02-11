@@ -51,7 +51,13 @@ public class PlugUtil
     		return UpgradeUtil.newInstance().getPath();
     	}
     }
-	public static void copyPropertiesToCompany(List<String> names)
+    
+    public static void copyPropertiesToCompany(List<String> names)
+	{
+    	copyPropertiesToCompany(names, false);
+	}
+    
+	public static void copyPropertiesToCompany(List<String> names, boolean ignoreError)
 	{
 		String root = getPath() + PROPERTIES_PATH;
         String copyRoot = ServerUtil.getPath() + PROPERTIES_PATH;
@@ -81,9 +87,12 @@ public class PlugUtil
             }
             catch (Exception e)
             {
-                log.error(e);
-                UI ui = UIFactory.getUI();
-                ui.confirmContinue("Failed to copy " + name);
+            	if (!ignoreError)
+            	{
+                    log.error(e);
+                    UI ui = UIFactory.getUI();
+                    ui.confirmContinue("Failed to copy " + name);
+            	}
             }
             
             for (String company : companys)
@@ -94,9 +103,12 @@ public class PlugUtil
                 }
                 catch (Exception e)
                 {
-                    log.error(e);
-                    UI ui = UIFactory.getUI();
-                    ui.confirmContinue("Failed to copy " + name + " for company " + company);
+                	if (!ignoreError)
+                	{
+                        log.error(e);
+                        UI ui = UIFactory.getUI();
+                        ui.confirmContinue("Failed to copy " + name + " for company " + company);
+                	}
                 }
             }
         }

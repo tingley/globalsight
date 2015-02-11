@@ -53,7 +53,7 @@
     String exportedURL = exported.getPageURL()+ DEFAULT_PARAM;
     String modifyURL = modify.getPageURL();
     String detailsURL = jobDetails.getPageURL();
-    String downloadURL = download.getPageURL();
+    String downloadURL = download.getPageURL() + "&from=localized";
     String title= bundle.getString("lb_my_jobs") + " - " + bundle.getString("lb_localized");
     String lbPending= bundle.getString("lb_pending");
     String lbReady= bundle.getString("lb_ready");
@@ -73,6 +73,8 @@
     }
     
     String helperText = bundle.getString("helper_text_job_completed");
+    
+    /*
     int myJobsDaysRetrieved = 0;
     try
     {
@@ -92,6 +94,7 @@
     {
         // assume 0
     }
+    */
 %>
 <HTML>
 <HEAD>

@@ -1,0 +1,3 @@
+C:\FMConv\src\fmconverter\GlobalSight.Common\bin\Release\GlobalSight.Common.dll
+C:\FMConv\src\fmconverter\GlobalSight.Common\obj\Release\ResolveAssemblyReference.cache
+C:\FMConv\src\fmconverter\GlobalSight.Common\obj\Release\GlobalSight.Common.dll

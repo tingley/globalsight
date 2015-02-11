@@ -2,6 +2,8 @@ package com.globalsight.cxe.entity.filterconfiguration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -9,6 +11,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.globalsight.ling.docproc.extractor.javaprop.JPTmxEncoder;
 import com.globalsight.log.GlobalSightCategory;
 
 @XmlRootElement
@@ -35,9 +38,65 @@ public class PropertiesInternalText
     {
         index.clear();
         index.add(1);
+        
+        return handleString (s, index);
+    }
+    
+    private String handleString(String s, List<Integer> index)
+    {
+        if (s.length() == 0)
+            return s;
+        
+        String first = null;
+        String internalText = null;
+        String end = null;
+        
         for (InternalItem item : items)
         {
-            s = item.handleString(s, index);
+            if (!item.getIsSelected())
+                continue;
+            
+            if (!item.getIsRegex())
+            {
+                JPTmxEncoder tmx = new JPTmxEncoder();
+                internalText = tmx.encode(item.getContent());
+                int i = s.indexOf(internalText);
+                if (i > -1)
+                {
+                    first = s.substring(0, i);
+                    end = s.substring(i + internalText.length());
+                    break;
+                }
+            }
+            else
+            {
+                try
+                {
+                    Pattern p = Pattern.compile(item.getContent());
+                    Matcher m = p.matcher(s);
+                    if (m.find())
+                    {
+                        internalText = m.group();
+                        int i = s.indexOf(internalText);
+                        first = s.substring(0, i);
+                        end = s.substring(i + internalText.length());
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    s_logger.error(e);
+                }
+            }
+        }
+        
+        if (first != null)
+        {
+            int n = index.remove(0);
+            index.add(n + 1);
+            s = handleString(first, index) + "<bpt internal=\"yes\" i=\"" + n
+                    + "\"></bpt>" + internalText + "<ept i=\"" + n
+                    + "\"></ept>" + handleString(end, index);
         }
         
         return s;

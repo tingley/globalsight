@@ -69,9 +69,11 @@ public class ProjectWorkflowData
 
     public long trados95to99WordCount = 0;
 
-    public long trados75to94WordCount = 0;
+    public long trados85to94WordCount = 0;
 
-    public long trados1to74WordCount = 0;
+    public long trados75to84WordCount = 0;
+    
+    public long trados50to74WordCount = 0;
 
     public long tradosNoMatchWordCount = 0;
 
@@ -167,10 +169,13 @@ public class ProjectWorkflowData
     public BigDecimal trados95to99WordCountCost = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
 
-    public BigDecimal trados75to94WordCountCost = new BigDecimal(
+    public BigDecimal trados85to94WordCountCost = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
 
-    public BigDecimal trados1to74WordCountCost = new BigDecimal(
+    public BigDecimal trados75to84WordCountCost = new BigDecimal(
+            BIG_DECIMAL_ZERO_STRING);
+    
+    public BigDecimal trados50to74WordCountCost = new BigDecimal(
             BIG_DECIMAL_ZERO_STRING);
 
     public BigDecimal tradosRepsWordCountCost = new BigDecimal(

@@ -16,8 +16,6 @@
  */
 package com.globalsight.machineTranslation;
 
-import com.globalsight.machineTranslation.MachineTranslationException;
-
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -47,6 +45,8 @@ public interface MachineTranslator
     
     public static final String MSMT_ENDPOINT = "msMtEndpoint";
     public static final String MSMT_APPID = "msMtAppID";
+    public static final String MSMT_CATEGORY = "msMtCategory";
+    public static final String MSMT_CONTENT_TYPE = "text/plain";
     public static final String MSMT_URLFLAG = "msMtUrlFlag";
     
     public static final String AO_URL = "aoMtUrl";

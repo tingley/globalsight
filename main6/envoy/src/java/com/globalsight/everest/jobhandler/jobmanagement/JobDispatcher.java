@@ -489,17 +489,18 @@ public class JobDispatcher
                 Cost cost = ServerProxy.getCostingEngine().calculateCost(p_job,
                         oCurrency, true, Cost.EXPENSE);
                 
-                float PMCost = p_job.getL10nProfile().getProject().getPMCost();
-                PercentageSurcharge percentageSurcharge = new PercentageSurcharge(PMCost);
-                percentageSurcharge.setName("PM Cost");
-                cost = ServerProxy.getCostingEngine().addSurcharge(cost.getId(), percentageSurcharge, Cost.EXPENSE);
-
-                if (sc
-                        .getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED))
+                if (sc.getBooleanParameter(SystemConfigParamNames.REVENUE_ENABLED))
                 {
                     // Calculate Revenues
                     cost = ServerProxy.getCostingEngine().calculateCost(p_job,
                             oCurrency, true, Cost.REVENUE);
+
+                    float PMCost = p_job.getL10nProfile().getProject().getPMCost();
+                    PercentageSurcharge percentageSurcharge = 
+                        new PercentageSurcharge(PMCost);
+                    percentageSurcharge.setName("PM Cost");
+                    cost = ServerProxy.getCostingEngine().addSurcharge(
+                            cost.getId(), percentageSurcharge, Cost.REVENUE);
 
                     // For "Additional functionality quotation" issue
                     calculateAdditionalSurCharges(cost, p_job, oCurrency);

@@ -65,7 +65,7 @@ function isEmptyString(theString) {
 }
 
 function isSelectionMade(theSelectField) {
-   if (theSelectField.options[theSelectField.selectedIndex].value == "-1") return false;
+   if (theSelectField.selectedIndex == -1 || theSelectField.options[theSelectField.selectedIndex].value == "-1") return false;
    else return true;
 }
 

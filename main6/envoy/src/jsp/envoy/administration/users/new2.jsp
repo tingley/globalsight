@@ -193,6 +193,22 @@ function checkAccess(formSent, addPanel)
          break;
       }
    }
+   if (activityChecked && !isSelectionMade(formSent.selectSourceLocale))
+   {
+       alert("<%= jsmsgSourceLocale %>");
+       return false;
+   }
+   if (activityChecked && !isSelectionMade(formSent.selectTargetLocale))
+   {
+       alert("<%= jsmsgTargetLocale %>");
+       return false;
+   }
+   if (!activityChecked && addPanel)
+   {
+      alert("<%= jsmsgActivities %>");
+      return false;
+   }
+   
 <% if (!isRoleOptional && promptIsActive) { %>
    if ((!activityChecked || !isSelectionMade(formSent.selectSourceLocale)) &&
         <%=roleAdded%> == null)

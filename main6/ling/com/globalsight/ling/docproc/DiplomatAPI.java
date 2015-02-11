@@ -37,6 +37,8 @@ import com.globalsight.cxe.entity.filterconfiguration.HtmlFilter;
 import com.globalsight.cxe.entity.filterconfiguration.JSPFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XMLRuleFilter;
 import com.globalsight.cxe.entity.filterconfiguration.XmlFilterConfigParser;
+import com.globalsight.cxe.entity.knownformattype.KnownFormatType;
+import com.globalsight.cxe.message.CxeMessage;
 import com.globalsight.everest.servlet.util.ServerProxy;
 import com.globalsight.ling.common.CodesetMapper;
 import com.globalsight.ling.common.LocaleCreater;
@@ -417,7 +419,7 @@ public class DiplomatAPI implements IFormatNames
     private String m_bullets_MsOffice = null;
 
     private String jsFilterRegex = null;
-
+    private CxeMessage cxeMessage = null;
     private String fileProfileId;
     private long filterId = 0;
     
@@ -451,6 +453,16 @@ public class DiplomatAPI implements IFormatNames
     public void setFilterId(long filterId)
     {
         this.filterId = filterId;
+    }
+    
+    public CxeMessage getCxeMessage()
+    {
+        return cxeMessage;
+    }
+
+    public void setCxeMessage(CxeMessage cxeMessage)
+    {
+        this.cxeMessage = cxeMessage;
     }
 
     /**
@@ -1142,6 +1154,7 @@ public class DiplomatAPI implements IFormatNames
             // Wed Jun 04 21:02:29 2003 CvdL new step to wrap nbsp and fix
             // the "x" attributes.
             DiplomatPostProcessor pp = new DiplomatPostProcessor();
+            pp.setFormatName(formatName);
             pp.postProcess(m_output);
             m_output = pp.getOutput();
             gxml = pp.getDiplomatXml();
@@ -1328,20 +1341,36 @@ public class DiplomatAPI implements IFormatNames
         //if this job is using "html_filter" as secondary filter,when exported,need convert to entity.
         boolean isUseSecondaryFilter = false;
         boolean convertHtmlEntry = false;
-        try {
-                FileProfileImpl fp = 
-                    (FileProfileImpl) ServerProxy.getFileProfilePersistenceManager()
-                            .getFileProfileById(Long.parseLong(this.fileProfileId), false);
-                long secondFilterId = fp.getSecondFilterId();
-                String secondFilterName = fp.getSecondFilterTableName();
-                if (secondFilterId > 0 && "html_filter".equals(secondFilterName)) {
-                    isUseSecondaryFilter = true;
-                    HtmlFilter htmlFilter = FilterHelper.getHtmlFilter(secondFilterId);
-                    convertHtmlEntry = htmlFilter.isConvertHtmlEntry();
-                }
+        try
+        {
+            FileProfileImpl fp = (FileProfileImpl) ServerProxy
+                    .getFileProfilePersistenceManager().getFileProfileById(
+                            Long.parseLong(this.fileProfileId), false);
+            long secondFilterId = fp.getSecondFilterId();
+            String secondFilterName = fp.getSecondFilterTableName();
+            if (secondFilterId > 0 && "html_filter".equals(secondFilterName))
+            {
+                isUseSecondaryFilter = true;
+                HtmlFilter htmlFilter = 
+                    FilterHelper.getHtmlFilter(secondFilterId);
+                convertHtmlEntry = htmlFilter.isConvertHtmlEntry();
+            }
+
+            KnownFormatType kft = ServerProxy
+                    .getFileProfilePersistenceManager().getKnownFormatTypeById(
+                            fp.getKnownFormatTypeId(), false);
+            String format = kft.getFormatType();
+
+            // PO need not "Convert HTML Entity For Export".
+            if (FORMAT_PO.equals(format))
+            {
+                convertHtmlEntry = false;
+            }
         } catch (Exception e) {}
+        
         merger.setIsUseSecondaryFilter(isUseSecondaryFilter);
         merger.setConvertHtmlEntryFromSecondFilter(convertHtmlEntry);
+        merger.setCxeMessage(cxeMessage);
         merger.merge();
 
         // Convert PUA characters back to original C0 control codes

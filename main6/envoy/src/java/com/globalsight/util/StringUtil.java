@@ -208,4 +208,28 @@ public class StringUtil
 
         return df.format(tmpF);
     }
+    
+    /**
+     * Compares 2 string, ignoring white space considerations.
+     */
+    public static boolean equalsIgnoreSpace(String p_str1, String p_str2)
+    {
+        if (p_str1 == null || p_str2 == null)
+            return false;
+
+        String[] arr1 = p_str1.split("\\s");
+        String[] arr2 = p_str2.split("\\s");
+        StringBuffer sb1 = new StringBuffer();
+        StringBuffer sb2 = new StringBuffer();
+        for (String temp : arr1)
+        {
+            sb1.append(temp);
+        }
+        for (String temp : arr2)
+        {
+            sb2.append(temp);
+        }
+
+        return sb1.toString().equalsIgnoreCase(sb2.toString());
+    }
 }

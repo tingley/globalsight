@@ -18,8 +18,12 @@ package com.globalsight.everest.webapp.pagehandler.edit.online;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -34,6 +38,7 @@ import org.apache.xalan.xslt.XSLTProcessorFactory;
 import org.apache.xalan.xslt.XSLTResultTarget;
 
 import com.globalsight.cxe.entity.fileprofile.FileProfile;
+import com.globalsight.cxe.message.CxeMessageType;
 import com.globalsight.everest.jobhandler.Job;
 import com.globalsight.everest.page.SourcePage;
 import com.globalsight.everest.page.pageexport.ExportHelper;
@@ -45,6 +50,7 @@ import com.globalsight.everest.webapp.pagehandler.PageHandler;
 import com.globalsight.everest.webapp.webnavigation.WebPageDescriptor;
 import com.globalsight.log.GlobalSightCategory;
 import com.globalsight.util.AmbFileStoragePathUtils;
+import com.globalsight.util.FileUtil;
 
 public class PreviewXMLPageHandler extends PageHandler
 {
@@ -97,6 +103,45 @@ public class PreviewXMLPageHandler extends PageHandler
         					EnvoyServletException.MSG_FAILED_TO_PREVIEW_XML,
         						"The source XML file is missing.");
         			}
+        			
+        			String codeset = fp.getCodeSet();
+        			if (codeset == null || codeset.trim().equals(""))
+        			{
+        			    codeset = "UTF-8";
+        			}
+        			
+        			byte[] data = FileUtil.readFile(xmlFile, (int) xmlFile.length());
+        			String guessEncoding= FileUtil.guessEncoding(xmlFile);
+        			String xmldata = null;
+        			
+        			if (guessEncoding != null)
+                    {
+                        if (FileUtil.UTF8.equals(guessEncoding))
+                        {
+                            byte[] newdata = new byte[data.length - 3];
+                            newdata = Arrays.copyOfRange(data, 3, data.length);
+                            data = newdata;
+                        }
+                        else if (FileUtil.UTF16BE.equals(guessEncoding)
+                                || FileUtil.UTF16LE.equals(guessEncoding))
+                        {
+                            byte[] newdata = new byte[data.length - 2];
+                            newdata = Arrays.copyOfRange(data, 2, data.length);
+                            data = newdata;
+                        }
+                        
+                        xmldata = new String(data, guessEncoding);
+                    }
+        			else
+        			{
+        			    xmldata = new String(data, codeset);
+        			}
+        			
+        			//String xmldata = FileUtil.readFile(xmlFile, codeset);
+        			File newxmlFile = File.createTempFile("~GS", ".xml");
+        	        FileUtil.writeFile(newxmlFile, xmldata, "UTF-8");
+        	        
+        	        xmlFile = newxmlFile;
         		}
         		else if (action.equals("previewTar"))
         		{
@@ -110,7 +155,7 @@ public class PreviewXMLPageHandler extends PageHandler
         		FileInputStream xmlInputStream = null;
         		FileInputStream xslInputStream = null;
         		StringWriter sw = null;
-            
+        		
         		try
         		{
         			XSLTProcessor processor = XSLTProcessorFactory.getProcessor(new XercesLiaison());
@@ -118,13 +163,17 @@ public class PreviewXMLPageHandler extends PageHandler
         			sw = new StringWriter();
         			xmlInputStream = new FileInputStream(xmlFile.getAbsolutePath());
         			xslInputStream = new FileInputStream(xslFile.getAbsolutePath());
+        			InputStreamReader xmlReader = new InputStreamReader(xmlInputStream, "UTF-8");
+        			XSLTResultTarget xslResult = new XSLTResultTarget(sw);
                 
         			processor.process(
-						new XSLTInputSource(xmlInputStream),
+						new XSLTInputSource(xmlReader),
 						new XSLTInputSource(xslInputStream),
-						new XSLTResultTarget(sw));
-            	
-        			p_response.getWriter().write(sw.getBuffer().toString());
+						xslResult);
+        			
+        			String html = sw.getBuffer().toString();
+        			p_response.setCharacterEncoding("UTF-8");
+        			p_response.getWriter().write(html);
         		}
         		catch (Exception e)
         		{
@@ -206,7 +255,7 @@ public class PreviewXMLPageHandler extends PageHandler
     	try 
     	{
 	    	ExportHelper helper = new ExportHelper();
-	    	targetFile = helper.getTargetXmlPage(targetPageId);
+	    	targetFile = helper.getTargetXmlPage(targetPageId, CxeMessageType.XML_IMPORTED_EVENT);
     	}
     	catch(Exception e)
     	{

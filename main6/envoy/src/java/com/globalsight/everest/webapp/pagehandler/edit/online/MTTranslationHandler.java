@@ -67,8 +67,8 @@ public class MTTranslationHandler extends PageActionHandler
         try
         {
             // Get translation from MT engine
-            Map mtTranslation = MTHelper.getMtTranslationForSegEditor(
-                    sessionMgr, state);
+            Map mtTranslation = 
+                MTHelper.getMtTranslationForSegEditor(sessionMgr, state);
 
             // MT result
             boolean show_in_editor = false;
@@ -77,13 +77,16 @@ public class MTTranslationHandler extends PageActionHandler
             String engine_name = "";
             if (mtTranslation != null)
             {
-                String strShowInEditor = (String) mtTranslation.get(MTHelper.SHOW_IN_EDITOR);
-                if (strShowInEditor != null && "true".equalsIgnoreCase(strShowInEditor))
+                String strShowInEditor = 
+                    (String) mtTranslation.get(MTHelper.SHOW_IN_EDITOR);
+                if (strShowInEditor != null
+                        && "true".equalsIgnoreCase(strShowInEditor))
                 {
                     show_in_editor = true;
                 }
 
-                translatedString = (String) mtTranslation.get(MTHelper.MT_TRANSLATION);
+                translatedString = 
+                    (String) mtTranslation.get(MTHelper.MT_TRANSLATION);
                 
                 if (translatedString != null)
                 {
@@ -101,6 +104,7 @@ public class MTTranslationHandler extends PageActionHandler
                 }
             }
 
+            // DO NOT format these codes !!!
             StringBuffer result = new StringBuffer();
             if (show_in_editor)
             {

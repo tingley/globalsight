@@ -20,6 +20,7 @@
             com.globalsight.util.GeneralException,
             com.globalsight.cxe.entity.xmldtd.XmlDtdImpl,
             com.globalsight.util.AmbFileStoragePathUtils,
+            com.globalsight.everest.company.CompanyThreadLocal,
             java.util.*,
             com.globalsight.cxe.entity.filterconfiguration.Filter,
             com.globalsight.everest.foundation.L10nProfile,
@@ -194,6 +195,7 @@ var guideNode = "fileProfiles";
 var helpFile = "<%=bundle.getString("help_file_profiles_basic_info")%>";
 var xmlHttp = XmlHttp.create();
 var toUploadXsl = false;
+var companyId = "<%=CompanyThreadLocal.getInstance().getValue()%>";
 
 function confirmFile(fieldName)
 {
@@ -768,7 +770,9 @@ function thisFormatMustUseUTF8(format)
         format == "Excel2007" ||
         format == "PDF" || 
         format == "OpenOffice document" || 
-        format == "Office2010 document")
+        format == "Office2010 document" ||
+        format == "MIF 9" ||
+        format == "FrameMaker9")
     {
         return true;
     }
@@ -1064,7 +1068,7 @@ function isXslFile(path)
 
 function viewXsl(filePath)
 {
-  document.getElementById('idXslLink').href="/globalsight/envoy/administration/fileprofile/viewXslFile.jsp?filePath=" + filePath;
+  document.getElementById('idXslLink').href="/globalsight/envoy/administration/fileprofile/viewXslFile.jsp?companyId="+ companyId + "&filePath=" + filePath;
   document.getElementById('idXslLink').target="_blank";
 }
 

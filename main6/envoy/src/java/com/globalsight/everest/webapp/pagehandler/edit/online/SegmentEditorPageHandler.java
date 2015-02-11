@@ -303,6 +303,19 @@ public class SegmentEditorPageHandler
                 segmentViewMap.put(newKey, segmentView);
                 sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP, segmentViewMap);
             }
+            else
+            {
+                // If segmentView has existed in cache,reset its TM matches to
+                // include page_tm data.
+                segmentView = state.getEditorManager().addSegmentMatches(
+                        segmentView, state, tuId, tuvId, subId, sourceLocaleId,
+                        targetLocaleId, b_releverage);
+
+                // Put this segmentView into SEGMENT_VIEW_MAP in session.
+                segmentViewMap.put(newKey, segmentView);
+                sessionMgr.setAttribute(WebAppConstants.SEGMENT_VIEW_MAP, segmentViewMap);
+            }
+            
             EditorHelper.setEditorType(state, segmentView);
             // Set this segmentView in session for UI usage.
             sessionMgr.setAttribute(WebAppConstants.SEGMENTVIEW, segmentView);

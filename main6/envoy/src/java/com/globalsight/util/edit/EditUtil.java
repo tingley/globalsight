@@ -793,6 +793,11 @@ public final class EditUtil
         {
             return true;
         }
+        
+        if (filename.endsWith("fm") && "mif".equals(p_state.getPageFormat()))
+        {
+            return true;
+        }
 
         return false;
     }

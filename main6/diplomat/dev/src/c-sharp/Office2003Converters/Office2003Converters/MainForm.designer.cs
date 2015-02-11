@@ -90,7 +90,7 @@
             this.label1.Font = new System.Drawing.Font("Times New Roman", 15F, System.Drawing.FontStyle.Bold);
             this.label1.Location = new System.Drawing.Point(114, 20);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(274, 25);
+            this.label1.Size = new System.Drawing.Size(243, 23);
             this.label1.TabIndex = 9;
             this.label1.Text = "MS Office 2003 Converters";
             // 
@@ -100,7 +100,7 @@
             this.label2.Font = new System.Drawing.Font("Times New Roman", 11F);
             this.label2.Location = new System.Drawing.Point(25, 94);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(150, 18);
+            this.label2.Size = new System.Drawing.Size(136, 17);
             this.label2.TabIndex = 10;
             this.label2.Text = "Word 2003 Converter";
             // 
@@ -168,7 +168,7 @@
             this.label3.Font = new System.Drawing.Font("Times New Roman", 11F);
             this.label3.Location = new System.Drawing.Point(27, 141);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(149, 18);
+            this.label3.Size = new System.Drawing.Size(136, 17);
             this.label3.TabIndex = 16;
             this.label3.Text = "Excel 2003 Converter";
             // 
@@ -178,7 +178,7 @@
             this.label4.Font = new System.Drawing.Font("Times New Roman", 11F);
             this.label4.Location = new System.Drawing.Point(25, 188);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(190, 18);
+            this.label4.Size = new System.Drawing.Size(172, 17);
             this.label4.TabIndex = 17;
             this.label4.Text = "PowerPoint 2003 Converter";
             // 
@@ -224,7 +224,7 @@
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(477, 341);
             this.Controls.Add(this.label5);
@@ -249,7 +249,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MS Office 2003 Converters - Version: 8.0";
+            this.Text = "MS Office 2003 Converters - Version: 8.1";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();

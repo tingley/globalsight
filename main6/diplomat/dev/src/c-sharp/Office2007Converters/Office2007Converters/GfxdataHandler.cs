@@ -18,6 +18,12 @@ namespace GlobalSight.Office2007Converters
         private string gfxStart = "gfxdata=\"";
         private string gfxEnd = "\"";
 
+        // ole object
+        private string ole_start = "<o:OLEObject";
+        private string ole_end = "</o:OLEObject>";
+        private string ole_shapeid_start = "ShapeID=\"";
+        private string ole_shapeid_end = "\"";
+
         /// <summary>
         /// Currently, just handle Pptx
         /// </summary>
@@ -125,16 +131,29 @@ namespace GlobalSight.Office2007Converters
                 index_end = filecontent.IndexOf(gfxEnd, index_start_0);
             }
 
-            File.WriteAllText(fullname, filecontent);
+            File.WriteAllText(fullname, filecontent, Encoding.UTF8);
         }
 
         private void HandleHtmConvertBack(FileInfo htmFile)
         {
             string fullname = htmFile.FullName;
             string filecontent = File.ReadAllText(fullname, Encoding.UTF8);
+            int oriLength = filecontent.Length;
+            int nowLength = oriLength;
+
+            if (filecontent.Contains(ole_end))
+            {
+                filecontent = HandleOLEObject(filecontent);
+                nowLength = filecontent.Length;
+            }
 
             if (!filecontent.Contains(phPrefix))
             {
+                if (nowLength != oriLength)
+                {
+                    File.WriteAllText(fullname, filecontent, Encoding.UTF8);
+                }
+
                 return;
             }
 
@@ -152,7 +171,47 @@ namespace GlobalSight.Office2007Converters
                 gfxfile = fullname + "." + phname;
             }
 
-            File.WriteAllText(fullname, filecontent);
+            File.WriteAllText(fullname, filecontent, Encoding.UTF8);
+        }
+
+        private string HandleOLEObject(string filecontent)
+        {
+            if (!filecontent.Contains(ole_end))
+            {
+                return filecontent;
+            }
+
+            int index_from = 0;
+            int index_ole_start = filecontent.IndexOf(ole_start, index_from);
+            int index_ole_end = filecontent.IndexOf(ole_end, index_ole_start);
+
+            while (index_ole_start > 0 && index_ole_end > 0)
+            {
+                string ole_data = filecontent.Substring(index_ole_start, index_ole_end - index_ole_start);
+                string shapeId = GetStringBetween(ole_data, 0, ole_shapeid_start, ole_shapeid_end);
+
+                string shapeIdAtt = "id=\"" + shapeId + "\"";
+                int shapeIdCount = CountString(filecontent, shapeIdAtt);
+
+                if (shapeIdCount == 0)
+                {
+                    int length = ole_data.Length + ole_end.Length;
+                    filecontent = filecontent.Remove(index_ole_start, length);
+                }
+                else
+                {
+                    index_from = index_ole_end;
+                }
+
+                index_ole_start = filecontent.IndexOf(ole_start, index_from);
+
+                if (index_ole_start != -1)
+                {
+                    index_ole_end = filecontent.IndexOf(ole_end, index_ole_start);
+                }
+            }
+
+            return filecontent;
         }
 
         private List<FileInfo> GetPptSlideHtm()
@@ -204,6 +263,39 @@ namespace GlobalSight.Office2007Converters
             {
                 m_log.Log("[Debug from GfxdataHandler] " + msg);
             }
+        }
+
+        private string GetStringBetween(string text, int startIndex, string start, string end)
+        {
+            int index_start = text.IndexOf(start, startIndex);
+            int index_start_0 = index_start + start.Length;
+            int index_end = text.IndexOf(end, index_start_0);
+
+            if (index_start != -1 && index_end != -1)
+            {
+                string data = text.Substring(index_start_0, index_end - index_start_0);
+                return data;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private int CountString(string text, string subText)
+        {
+            int count = 0;
+            int index = text.IndexOf(subText);
+
+            while (index != -1)
+            {
+                count++;
+
+                index = text.IndexOf(subText, index + subText.Length);
+            }
+
+
+            return count;
         }
     }
 

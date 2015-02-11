@@ -291,6 +291,8 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
             // must have root sub
             if (!subidList.contains(rootSubId))
             {
+                allLms.removeAll(lmWithSameSrcTuv);
+                lmWithSameSrcTuv.clear();
                 continue;
             }
 
@@ -357,7 +359,13 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                     }
                     catch (Exception e)
                     {
-                        c_logger.error(e);
+                        /*
+                         * Change error info into warning info,
+                         * only main segment and subflows are both
+                         * exact match can we get a normal matchedGxml.
+                         * If either of them fails, we throw a warning.
+                         */
+                        c_logger.warn(e);
                     }
 
                     if (matchedGxml != null && rootLm != null)
@@ -514,17 +522,17 @@ public class LeverageMatchLingManagerLocal implements LeverageMatchLingManager
                 p_levMatchThreshold);
 
         // set the match type with the found leverage matches
-        leverageMatches = leveragematchesMap.values();
-        List<Long> list = new ArrayList<Long>();
-        for (Iterator it = leverageMatches.iterator(); it.hasNext();)
+        Collection leverageMatches2 = leveragematchesMap.values();
+        List<String> list = new ArrayList<String>();
+        for (Iterator it = leverageMatches2.iterator(); it.hasNext();)
         {
-
             LeverageMatch match = (LeverageMatch) it.next();
-            
-            if (!list.contains(match.getOriginalSourceTuvId()))
+            String key = MatchTypeStatistics.makeKey(match
+                    .getOriginalSourceTuvId(), match.getSubId());
+            if (!list.contains(key))
             {
                 result.addMatchType(match);
-                list.add(match.getOriginalSourceTuvId());
+                list.add(key);
             }
         }
 
